@@ -27,7 +27,7 @@ contract('TreeType', (accounts) => {
         });
 
     });
-    
+
     it('should return tree type', () => {
         let id = 0;
         let name = 'balut';

@@ -1,0 +1,31 @@
+{
+  "name": "treejer-contracts",
+  "version": "1.0.0",
+  "description": "Treejer Smart Contracts",
+  "main": "package.json",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "OpenZeppelin/openzeppelin-contracts#feature-erc1155",
+    "truffle": "^5.1.6"
+  },
+  "devDependencies": {
+    "bluebird": "^3.7.2",
+    "chai": "^4.2.0",
+    "lodash": "^4.17.15",
+    "truffle-assertions": "^0.9.2",
+    "truffle-test-utils": "^0.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Treejer",
+    "SmartContract",
+    "Token",
+    "ERC1155"
+  ],
+  "author": "amir@treejer.com",
+  "license": "MIT"
+}

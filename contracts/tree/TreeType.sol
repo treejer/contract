@@ -1,5 +1,5 @@
-//pragma solidity >=0.4.21 <0.7.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.4.21 <0.7.0;
+//pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/contracts/math/SafeMath.sol";
@@ -20,7 +20,6 @@ contract TreeType {
 
     Type[] public types;
 
-
     //@todo permission must check
     function create(string calldata _name, string calldata _scientificName, string calldata _O2Formula) external
     {
@@ -28,11 +27,11 @@ contract TreeType {
         emit NewType(id, _name, _scientificName, _O2Formula);
     }
 
-    function getTreeType(uint _treeId) external view returns(Type memory) {
-        return types[_treeId];
+    function get(uint _treeId) external view returns(string memory, string memory, string memory){
+        return (types[_treeId].name, types[_treeId].scientificName, types[_treeId].O2Formula);
     }
 
-    function getAllTreeTypes() external view returns(Type[] memory) {
-        return types;
+    function count() external view returns(uint) {
+        return types.length;
     }
 }

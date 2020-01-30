@@ -23,58 +23,59 @@ contract('TreeType', (accounts) => {
         let tx = await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
 
         truffleAssert.eventEmitted(tx, 'NewType', (ev) => {
-            return ev.typeId == '0' && ev.name === name && ev.O2Formula === o2formula;
+            return ev.typeId == 0 && ev.name === name && ev.O2Formula === o2formula;
         });
 
     });
 
-    it('should return tree type', () => {
+    it('should return tree type', async () => {
+
         let id = 0;
         let name = 'balut';
         let scientificName = 'blt';
         let o2formula = 'hajm*ertefa';
 
-        let tx = treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
+        await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
 
-
-        console.log(treeTypeInstance.getTreeType.call(id));
-
-        return treeTypeInstance.getTreeType(id)
+        return await treeTypeInstance.get(id)
             .then((treeType) => {
-
-
-                console.log(treeType);
-
                 assert.equal(
-                    treeType.typeId,
-                    id,
-                    "Tree with id: " + treeType.typeId + " returned"
+                    treeType[0],
+                    name,
+                    "Tree with id: " + id + " returned"
                 );
+            }).catch((error) => {
+                console.log(error);
             });
     });
 
-    // it("should return tree type", async () => {
-    //     let id = 0;
-    //     let name = 'balut';
-    //     let scientificName = 'blt';
-    //     let o2formula = 'hajm*ertefa';
-    //
-    //
-    //     await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount})
-    //         .then(async () => {
-    //             let treeType = await treeTypeInstance.get(id);
-    //
-    //
-    //             // await debug( treeType);
-    //
-    //             // console.log(treeType);
-    //
-    //             assert.equal(
-    //                 treeType.typeId,
-    //                 id,
-    //                 "Tree with id: "+ treeType.typeId + " returned"
-    //             );
-    //         });
-    // });
+
+    it('should return count of tree types', async () => {
+
+        let id = 0;
+        let name = 'balut';
+        let scientificName = 'blt';
+        let o2formula = 'hajm*ertefa';
+
+
+        let id1 = 1;
+        let name1 = 'konar';
+        let scientificName1 = 'knr';
+        let o2formula1 = 'hajm*ertefa';
+
+        await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
+        await treeTypeInstance.create(name1, scientificName1, o2formula1, {from: ownerAccount});
+
+        return await treeTypeInstance.count()
+            .then((count) => {
+                assert.equal(
+                    2,
+                    count,
+                    "Tree types count is: " + count
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
+    });
 
 });

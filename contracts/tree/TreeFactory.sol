@@ -1,13 +1,15 @@
 pragma solidity >=0.4.21 <0.7.0;
+pragma experimental ABIEncoderV2;
+//import "openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
 
-import "@openzeppelin/contracts/contracts/token/ERC1155/ERC1155.sol";
+contract TreeFactory {
 
-contract TreeFactory is ERC1155 {
+    event NewTreeAdded(uint id, string name, string latitude, string longitude, uint price, string status);
 
     struct Tree {
         string name;
-        uint latitude;
-        uint longitude;
+        string latitude;
+        string longitude;
         string plantedDate;
         string birthDate;
         uint8 height;
@@ -30,6 +32,35 @@ contract TreeFactory is ERC1155 {
     mapping(address => uint) conserverTreeCount;
     mapping(address => uint) verifierTreeCount;
     mapping(uint => uint) typeTreeCount;
+
+    //    //@todo permission must check
+    //    function create(string calldata _typeId, string calldata _name, string calldata _latitude,
+    //        string calldata _longitude, string calldata _plantedDate, string calldata _birthDate, string calldata _height,
+    //        string calldata _diameter, string calldata _price, string calldata _status) external
+    //    {
+    //        //        uint id = types.push(Type(_name, _scientificName, _O2Formula)) - 1;
+    //        //        emit NewType(id, _name, _scientificName, _O2Formula);
+    //    }
+
+    //@todo permission must check
+    function add(uint8 _typeId, string[] calldata _stringParams, uint8[] calldata _uintParams) external
+    {
+        uint price = uint(0);
+        string memory status = 'added';
+
+        uint id = trees.push(Tree(_stringParams[0], _stringParams[1], _stringParams[2], _stringParams[3], _stringParams[4], _uintParams[0], _uintParams[1], price, status)) - 1;
+
+        treeToType[id] = _typeId;
+        typeTreeCount[_typeId]++;
+
+        treeToOwner[id] = msg.sender;
+        ownerTreeCount[msg.sender]++;
+
+        emit NewTreeAdded(id, _stringParams[0], _stringParams[1], _stringParams[2], price, status);
+    }
+
+
+
 
     //
     //

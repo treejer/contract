@@ -78,7 +78,7 @@ contract('TreeSale', (accounts) => {
             .catch(error => {
                 assert.include(
                     error.message,
-                    'Only owner of tree can add tree to sales list',
+                    'Only owner of tree authorized',
                     'add to list should throw an exception.'
                 )
             });

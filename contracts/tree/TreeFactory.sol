@@ -1,8 +1,12 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
+
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
 
-contract TreeFactory {
+import "./AccessRestriction.sol";
+
+
+contract TreeFactory is AccessRestriction {
     event NewTreeAdded(
         uint256 id,
         string name,
@@ -43,6 +47,9 @@ contract TreeFactory {
     //        //        uint id = types.push(Type(_name, _scientificName, _O2Formula)) - 1;
     //        //        emit NewType(id, _name, _scientificName, _O2Formula);
     //    }
+
+
+
 
     //@todo permission must check
     function add(

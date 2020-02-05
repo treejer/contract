@@ -13,12 +13,10 @@ contract TreeSale is TreeFactory {
 
     SalesList[] public salesLists;
 
-    function addToSalesList(uint256 _treeId, uint256 _price) external {
-        require(
-            msg.sender == treeToOwner[_treeId],
-            "Only owner of tree can add tree to sales list!"
-        );
-
+    function addToSalesList(uint256 _treeId, uint256 _price)
+        external
+        onlyOwner(treeToOwner[_treeId])
+    {
         uint256 id = salesLists.push(SalesList(_treeId, _price)) - 1;
 
         emit TreeAddedToSalesList(id, _treeId, _price);

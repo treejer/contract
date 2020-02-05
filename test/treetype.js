@@ -23,7 +23,7 @@ contract('TreeType', (accounts) => {
         let tx = await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
 
         truffleAssert.eventEmitted(tx, 'NewType', (ev) => {
-            return ev.typeId.words[0] === 0 && ev.name === name && ev.O2Formula === o2formula;
+            return ev.typeId.toString() === '0' && ev.name === name && ev.O2Formula === o2formula;
         });
 
     });

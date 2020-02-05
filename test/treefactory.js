@@ -6,19 +6,19 @@ const truffleAssert = require('truffle-assertions');
 contract('TreeFactory', (accounts) => {
     let treeInstance;
     const ownerAccount = accounts[0];
+    const deployerAccount = accounts[1];
 
     beforeEach(async () => {
-        treeInstance = await TreeFactory.new({from: ownerAccount});
+        treeInstance = await TreeFactory.new({ from: deployerAccount });
     });
 
     afterEach(async () => {
-        // await treetype.kill({ from: ownerAccount });
+        // await treeInstance.kill({ from: ownerAccount });
     });
 
-    it("should add tree", async () => {
-
+    function addTree(name = null) {
         let typeId = 0;
-        let name = 'firstTree';
+        name = name !== null ? name : 'firstTree';
         let latitude = '38.0962';
         let longitude = '46.2738';
         let plantedDate = '2020/02/20';
@@ -26,7 +26,7 @@ contract('TreeFactory', (accounts) => {
         let height = '1';
         let diameter = '1';
 
-        let tx = await treeInstance.add(
+        return treeInstance.add(
             typeId,
             [
                 name,
@@ -39,12 +39,51 @@ contract('TreeFactory', (accounts) => {
                 height,
                 diameter,
             ],
-            {from: ownerAccount});
+            { from: ownerAccount });
+    }
 
+
+    it("should add tree", async () => {
+        let name = 'firstTree';
+
+        let tx = await addTree(name);
         truffleAssert.eventEmitted(tx, 'NewTreeAdded', (ev) => {
-            return ev.id.words[0] === 0 && ev.name === name;
+            return ev.id.toString() === '0' && ev.name === name;
         });
 
     });
+
+    it("should return owner tree count", async () => {
+
+        addTree();
+        addTree();
+
+        return await treeInstance.ownerTreesCount({ from: ownerAccount })
+            .then(count => {
+                assert.equal(
+                    2,
+                    count.toString(),
+                    "Owner tree counts are: " + count.toString()
+                );
+            });
+    });
+
+
+    it("should return tree owner", async () => {
+
+        addTree();
+
+        return await treeInstance.treeOwner(0, { from: ownerAccount })
+            .then(ownerAddress => {
+                assert.equal(
+                    ownerAccount,
+                    ownerAddress,
+                    "Tree owner is: " + ownerAddress
+                );
+            });
+    });
+
+
+
 
 });

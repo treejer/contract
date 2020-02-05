@@ -86,5 +86,32 @@ contract('TreeSale', (accounts) => {
     });
 
 
+    it('should return count of tree sales list', async () => {
+        addTree('firstTree');
+        addTree('secondTree');
+
+        await treeSaleInstance.addToSalesList(
+            0,
+            Units.convert('0.01', 'eth', 'wei'),
+            { from: ownerAccount });
+
+        await treeSaleInstance.addToSalesList(
+            1,
+            Units.convert('0.02', 'eth', 'wei'),
+            { from: ownerAccount });
+
+        return await treeSaleInstance.salesListCount()
+            .then((count) => {                
+                assert.equal(
+                    2,
+                    count,
+                    "Tree sales list count is: " + count
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
+    });
+
+
 
 });

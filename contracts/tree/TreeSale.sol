@@ -21,4 +21,8 @@ contract TreeSale is TreeFactory {
 
         emit TreeAddedToSalesList(id, _treeId, _price);
     }
+
+    function salesListCount() external view returns(uint) {
+        return salesLists.length;
+    }
 }

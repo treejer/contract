@@ -33,16 +33,26 @@ contract TreeSale is TreeFactory {
         return salesArray;
     }
 
-    function removeFromSalesList(uint256 _treeId) external {
-        require(_treeId <= salesLists.length, "Tree id not exists!");
+    function removeFromSalesList(uint256 _saleId) external {
+        require(_saleId <= salesLists.length, "Sale id not exists!");
 
-        for (uint256 i = _treeId; i < salesLists.length - 1; i++) {
+        for (uint256 i = _saleId; i < salesLists.length - 1; i++) {
             salesLists[i] = salesLists[i + 1];
         }
 
         salesLists.length--;
 
-        emit TreeRemovedFromSalesList(_treeId);
+        emit TreeRemovedFromSalesList(_saleId);
+    }
+
+    function getSaleData(uint256 _saleId)
+        external
+        view
+        returns (uint256 id, uint256 price)
+    {
+        require(_saleId <= salesLists.length, "Sale id not exists!");
+
+        return (salesLists[_saleId].treeId, salesLists[_saleId].price);
     }
 
 }

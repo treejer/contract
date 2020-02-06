@@ -101,7 +101,7 @@ contract('TreeSale', (accounts) => {
             { from: ownerAccount });
 
         return await treeSaleInstance.salesListCount()
-            .then((count) => {                
+            .then((count) => {
                 assert.equal(
                     2,
                     count,
@@ -134,8 +134,8 @@ contract('TreeSale', (accounts) => {
             { from: ownerAccount });
 
         return await treeSaleInstance.allSalesList()
-            .then((list) => {                        
-                
+            .then((list) => {
+
                 assert.equal(
                     0,
                     list[0].toString(),
@@ -179,13 +179,44 @@ contract('TreeSale', (accounts) => {
             Units.convert('0.03', 'eth', 'wei'),
             { from: ownerAccount });
 
-            
+
         let tx = await treeSaleInstance.removeFromSalesList(1);
 
         truffleAssert.eventEmitted(tx, 'TreeRemovedFromSalesList', (ev) => {
             return ev.treeId.toString() === '1';
         });
-            
+
+    });
+
+    it('should return list of tree sales', async () => {
+        addTree('firstTree');
+
+        let price = Units.convert('0.01', 'eth', 'wei');
+        let treeId = 0;
+
+
+        await treeSaleInstance.addToSalesList(
+            treeId,
+            price,
+            { from: ownerAccount });
+
+        return await treeSaleInstance.getSaleData(0)
+            .then((saleData) => {
+
+                assert.equal(
+                    treeId,
+                    saleData[0].toString(),
+                    "First tree id is: " + saleData[0].toString()
+                );
+
+                assert.equal(
+                    price,
+                    saleData[1].toString(),
+                    "First tree sale price is: " + saleData[1].toString()
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
     });
 
 

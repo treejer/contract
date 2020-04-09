@@ -33,7 +33,7 @@ contract TreeSale is TreeFactory {
         return salesArray;
     }
 
-    function removeFromSalesList(uint256 _saleId) external {
+    function removeFromSalesList(uint256 _saleId) public {
         require(_saleId <= salesLists.length, "Sale id not exists!");
 
         for (uint256 i = _saleId; i < salesLists.length - 1; i++) {

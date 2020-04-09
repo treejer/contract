@@ -22,11 +22,10 @@ contract TreeFactory is AccessRestriction {
         string birthDate;
         uint8 height;
         uint8 diameter;
+        uint256 balance;
     }
 
     Tree[] public trees;
-
-    //    mapping (uint => mapping(uint8 => address)) public treeToRelation;
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => address) public treeToOwner;
@@ -38,16 +37,6 @@ contract TreeFactory is AccessRestriction {
     mapping(address => uint256) conserverTreeCount;
     mapping(address => uint256) verifierTreeCount;
     mapping(uint256 => uint256) typeTreeCount;
-
-    //    //@todo permission must check
-    //    function create(string calldata _typeId, string calldata _name, string calldata _latitude,
-    //        string calldata _longitude, string calldata _plantedDate, string calldata _birthDate, string calldata _height,
-    //        string calldata _diameter, string calldata _price, string calldata _status) external
-    //    {
-    //        //        uint id = types.push(Type(_name, _scientificName, _O2Formula)) - 1;
-    //        //        emit NewType(id, _name, _scientificName, _O2Formula);
-    //    }
-
 
 
 
@@ -65,7 +54,8 @@ contract TreeFactory is AccessRestriction {
                 _stringParams[3],
                 _stringParams[4],
                 _uintParams[0],
-                _uintParams[1]
+                _uintParams[1],
+                0
             )
         ) -
             1;
@@ -91,96 +81,5 @@ contract TreeFactory is AccessRestriction {
     function treeOwner(uint256 _treeId) public view returns (address) {
         return treeToOwner[_treeId];
     }
-
-    //
-    //
-    //    mapping (uint256 => TreeDoc) Trees;
-    //
-    //    function mintTree(
-    //    uint256 treeId,
-    //    address clientId,
-    //    string memory createdDate,
-    //    string memory lastUpdate,
-    //    string memory procedure,
-    //    string memory status,
-    //    string memory planter,
-    //    string memory conserver,
-    //    string memory ranger) public onlyOwner returns (uint256) {
-    //      TreeDoc storage _tree = Trees[treeId];
-    //      _tree.clientId = clientId;
-    //      _tree.createdDate = createdDate;
-    //      _tree.lastUpdate = lastUpdate;
-    //      _tree.procedure = procedure;
-    //      _tree.status = status;
-    //      _tree.planter = planter;
-    //      _tree.conserver = conserver;
-    //      _tree.ranger = ranger;
-    //
-    //      _mint(clientId, treeId);
-    //    }
-    //
-    //    function setTreeType(
-    //      uint256 treeId,
-    //      string memory typeName,
-    //      string memory scientificName,
-    //      uint256 price,
-    //      string memory geolocation,
-    //      string memory region,
-    //      string memory drive,
-    //      uint256 age,
-    //      uint256 O2RatePerDay) public onlyOwner {
-    //        TreeDoc storage _tree = Trees[treeId];
-    //        _tree.treeType.typeName = typeName;
-    //        _tree.treeType.scientificName = scientificName;
-    //        _tree.treeType.price = price;
-    //        _tree.treeType.geolocation = geolocation;
-    //        _tree.treeType.region = region;
-    //        _tree.treeType.drive = drive;
-    //        _tree.treeType.age = age;
-    //        _tree.treeType.O2RatePerDay = O2RatePerDay;
-    //      }
-    //
-    //    function getType(uint256 treeId) public view returns (
-    //      string memory typeName,
-    //      string memory scientificName,
-    //      uint256 price,
-    //      string memory geolocation,
-    //      string memory region,
-    //      string memory drive,
-    //      uint256 age,
-    //      uint256 O2RatePerDay) {
-    //        TreeType memory _tree = Trees[treeId].treeType;
-    //        return (
-    //          _tree.typeName,
-    //          _tree.scientificName,
-    //          _tree.price,
-    //          _tree.geolocation,
-    //          _tree.region,
-    //          _tree.drive,
-    //          _tree.age,
-    //          _tree.O2RatePerDay);
-    //    }
-    //
-    //    function getTreeDoc(uint256 treeId) public view returns (
-    //      address clientId,
-    //      string memory createdDate,
-    //      string memory lastUpdate,
-    //      string memory procedure,
-    //      string memory status,
-    //      string memory planter,
-    //      string memory conserver,
-    //      string memory ranger) {
-    //        TreeDoc memory _tree = Trees[treeId];
-    //        return (
-    //          _tree.clientId,
-    //          _tree.createdDate,
-    //          _tree.lastUpdate,
-    //          _tree.procedure,
-    //          _tree.status,
-    //          _tree.planter,
-    //          _tree.conserver,
-    //          _tree.ranger
-    //        );
-    //    }
 
 }

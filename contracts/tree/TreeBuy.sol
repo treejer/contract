@@ -16,14 +16,14 @@ contract TreeBuy is TreeSale {
             msg.value >= salesLists[_saleId].price,
             "Price less than tree price"
         );
-
+        
         address previosOwner = treeToOwner[salesLists[_saleId].treeId];
         ownerTreeCount[previosOwner]--;
 
         treeToOwner[salesLists[_saleId].treeId] = msg.sender;
         ownerTreeCount[msg.sender]++;
 
-        // @todo remove from sales list
+        trees[salesLists[_saleId].treeId].balance = msg.value;
 
         emit TreeBought(
             _saleId,
@@ -32,6 +32,7 @@ contract TreeBuy is TreeSale {
             msg.sender
         );
 
+        removeFromSalesList(_saleId);
     }
 
 }

@@ -21,6 +21,7 @@ contract('TreeSale', (accounts) => {
 
     function addTree(name = null) {
         let typeId = 0;
+        let gbId = 0;
         name = name !== null ? name : 'firstTree';
         let latitude = '38.0962';
         let longitude = '46.2738';
@@ -31,6 +32,7 @@ contract('TreeSale', (accounts) => {
 
         return treeSaleInstance.add(
             typeId,
+            gbId,
             [
                 name,
                 latitude,
@@ -112,52 +114,6 @@ contract('TreeSale', (accounts) => {
             });
     });
 
-
-    it('should return list of tree sales', async () => {
-        addTree('firstTree');
-        addTree('secondTree');
-        addTree('thirdTree');
-
-        await treeSaleInstance.addToSalesList(
-            0,
-            Units.convert('0.01', 'eth', 'wei'),
-            { from: ownerAccount });
-
-        await treeSaleInstance.addToSalesList(
-            1,
-            Units.convert('0.02', 'eth', 'wei'),
-            { from: ownerAccount });
-
-        await treeSaleInstance.addToSalesList(
-            2,
-            Units.convert('0.03', 'eth', 'wei'),
-            { from: ownerAccount });
-
-        return await treeSaleInstance.allSalesList()
-            .then((list) => {
-
-                assert.equal(
-                    0,
-                    list[0].toString(),
-                    "First tree id is: " + list[0].toString()
-                );
-
-                assert.equal(
-                    1,
-                    list[1].toString(),
-                    "Second tree id is: " + list[1].toString()
-                );
-
-                assert.equal(
-                    2,
-                    list[2].toString(),
-                    "Third tree id is: " + list[2].toString()
-                );
-
-            }).catch((error) => {
-                console.log(error);
-            });
-    });
 
     it('should remove tree from sales list', async () => {
         addTree('firstTree');

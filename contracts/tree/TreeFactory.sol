@@ -2,6 +2,7 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
 
 import "./AccessRestriction.sol";
 
@@ -28,6 +29,7 @@ contract TreeFactory is AccessRestriction {
     Tree[] public trees;
 
     mapping(uint256 => uint8) public treeToType;
+    mapping(uint256 => uint256) public treeToGB;
     mapping(uint256 => address) public treeToOwner;
     mapping(uint256 => address) public treeToPlanter;
     mapping(uint256 => address) public treeToConserver;
@@ -37,12 +39,15 @@ contract TreeFactory is AccessRestriction {
     mapping(address => uint256) conserverTreeCount;
     mapping(address => uint256) verifierTreeCount;
     mapping(uint256 => uint256) typeTreeCount;
+    mapping(uint256 => uint256) gbTreeCount;
+
 
 
 
     //@todo permission must check
     function add(
         uint8 _typeId,
+        uint256 _gbId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
     ) external {
@@ -62,6 +67,9 @@ contract TreeFactory is AccessRestriction {
 
         treeToType[id] = _typeId;
         typeTreeCount[_typeId]++;
+
+        treeToGB[id] = _gbId;
+        gbTreeCount[_gbId]++;
 
         treeToOwner[id] = msg.sender;
         ownerTreeCount[msg.sender]++;

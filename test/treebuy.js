@@ -21,6 +21,7 @@ contract('TreeBuy', (accounts) => {
 
     function addTree(name = null) {
         let typeId = 0;
+        let gbId = 0;
         name = name !== null ? name : 'firstTree';
         let latitude = '38.0962';
         let longitude = '46.2738';
@@ -31,6 +32,7 @@ contract('TreeBuy', (accounts) => {
 
         let tx = instance.add(
             typeId,
+            gbId,
             [
                 name,
                 latitude,

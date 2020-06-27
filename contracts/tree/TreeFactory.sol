@@ -5,9 +5,10 @@ import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
 
 import "./AccessRestriction.sol";
+import "./TreeType.sol";
 
 
-contract TreeFactory is AccessRestriction {
+contract TreeFactory is TreeType, AccessRestriction {
     event NewTreeAdded(
         uint256 id,
         string name,
@@ -21,6 +22,7 @@ contract TreeFactory is AccessRestriction {
         string longitude;
         string plantedDate;
         string birthDate;
+        uint fundedDate;
         uint8 height;
         uint8 diameter;
         uint256 balance;
@@ -58,6 +60,7 @@ contract TreeFactory is AccessRestriction {
                 _stringParams[2],
                 _stringParams[3],
                 _stringParams[4],
+                0,
                 _uintParams[0],
                 _uintParams[1],
                 0
@@ -81,7 +84,6 @@ contract TreeFactory is AccessRestriction {
             _stringParams[2]
         );
     }
-
     function ownerTreesCount() public view returns (uint256) {
         return ownerTreeCount[msg.sender];
     }

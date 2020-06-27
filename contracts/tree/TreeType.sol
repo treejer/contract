@@ -12,13 +12,15 @@ contract TreeType {
         uint256 typeId,
         string name,
         string scientificName,
-        string O2Formula
+        string O2Formula,
+        uint256 price
     );
 
     struct Type {
         string name;
         string scientificName;
         string O2Formula;
+        uint256 price;
     }
 
     Type[] public types;
@@ -27,21 +29,23 @@ contract TreeType {
     function create(
         string calldata _name,
         string calldata _scientificName,
-        string calldata _O2Formula
+        string calldata _O2Formula,
+        uint _price
     ) external {
-        uint256 id = types.push(Type(_name, _scientificName, _O2Formula)) - 1;
-        emit NewType(id, _name, _scientificName, _O2Formula);
+        uint256 id = types.push(Type(_name, _scientificName, _O2Formula, _price)) - 1;
+        emit NewType(id, _name, _scientificName, _O2Formula, _price);
     }
 
     function get(uint256 _typeId)
         external
         view
-        returns (string memory, string memory, string memory)
+        returns (string memory, string memory, string memory, uint256)
     {
         return (
             types[_typeId].name,
             types[_typeId].scientificName,
-            types[_typeId].O2Formula
+            types[_typeId].O2Formula,
+            types[_typeId].price
         );
     }
 

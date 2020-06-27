@@ -1,10 +1,10 @@
-const TreeBuy = artifacts.require("TreeBuy");
+const Fund = artifacts.require("Fund");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 
 
-contract('TreeBuy', (accounts) => {
+contract('Fund', (accounts) => {
     let instance;
 
     const deployerAccount = accounts[0];
@@ -12,7 +12,7 @@ contract('TreeBuy', (accounts) => {
     const secondAccount = accounts[2];
 
     beforeEach(async () => {
-        instance = await TreeBuy.new({ from: deployerAccount });
+        instance = await Fund.new({ from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -72,6 +72,23 @@ contract('TreeBuy', (accounts) => {
 
         truffleAssert.eventEmitted(tx, 'TreeBought', (ev) => {
             return ev.saleId.toString() === '0' && ev.treeId.toString() === '0' && ev.price.toString() === price.toString() && ev.newOwner.toString() === secondAccount.toString();
+        });
+
+    });
+
+
+    it("should fund a tree", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        let tx = await instance.fund(price,
+            count,
+            { from: secondAccount, value: price });
+
+        truffleAssert.eventEmitted(tx, 'TreeFunded', (ev) => {
+            return ev.treeId.toString() === '0' && ev.balance.toString() === balance.toString();
         });
 
     });

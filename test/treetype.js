@@ -1,6 +1,7 @@
 const TreeType = artifacts.require("TreeType");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
+const Units = require('ethereumjs-units');
 
 
 contract('TreeType', (accounts) => {
@@ -19,8 +20,10 @@ contract('TreeType', (accounts) => {
         let name = 'balut';
         let scientificName = 'blt';
         let o2formula = 'hajm*ertefa';
+        let price = Units.convert('0.01', 'eth', 'wei');
 
-        let tx = await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
+
+        let tx = await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
 
         truffleAssert.eventEmitted(tx, 'NewType', (ev) => {
             return ev.typeId.toString() === '0' && ev.name === name && ev.O2Formula === o2formula;
@@ -34,8 +37,9 @@ contract('TreeType', (accounts) => {
         let name = 'balut';
         let scientificName = 'blt';
         let o2formula = 'hajm*ertefa';
+        let price = Units.convert('0.01', 'eth', 'wei');
 
-        await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
+        await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
 
         return await treeTypeInstance.get(id)
             .then((treeType) => {
@@ -56,15 +60,19 @@ contract('TreeType', (accounts) => {
         let name = 'balut';
         let scientificName = 'blt';
         let o2formula = 'hajm*ertefa';
+                let price = Units.convert('0.01', 'eth', 'wei');
+
 
 
         let id1 = 1;
         let name1 = 'konar';
         let scientificName1 = 'knr';
         let o2formula1 = 'hajm*ertefa';
+                let price1 = Units.convert('0.02', 'eth', 'wei');
 
-        await treeTypeInstance.create(name, scientificName, o2formula, {from: ownerAccount});
-        await treeTypeInstance.create(name1, scientificName1, o2formula1, {from: ownerAccount});
+
+        await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
+        await treeTypeInstance.create(name1, scientificName1, o2formula1, price1, {from: ownerAccount});
 
         return await treeTypeInstance.count()
             .then((count) => {

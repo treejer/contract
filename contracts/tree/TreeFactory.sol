@@ -20,8 +20,8 @@ contract TreeFactory is TreeType, AccessRestriction {
         string name;
         string latitude;
         string longitude;
-        string plantedDate;
-        string birthDate;
+        uint256 plantedDate;
+        uint256 birthDate;
         uint fundedDate;
         uint8 height;
         uint8 diameter;
@@ -36,6 +36,7 @@ contract TreeFactory is TreeType, AccessRestriction {
     mapping(uint256 => address) public treeToPlanter;
     mapping(uint256 => address) public treeToConserver;
     mapping(uint256 => address) public treeToVerifier;
+    mapping(address => uint256[]) public ownerTrees;
     mapping(address => uint256) ownerTreeCount;
     mapping(address => uint256) planterTreeCount;
     mapping(address => uint256) conserverTreeCount;
@@ -58,8 +59,8 @@ contract TreeFactory is TreeType, AccessRestriction {
                 _stringParams[0],
                 _stringParams[1],
                 _stringParams[2],
-                _stringParams[3],
-                _stringParams[4],
+                now,
+                now,
                 0,
                 _uintParams[0],
                 _uintParams[1],
@@ -76,6 +77,7 @@ contract TreeFactory is TreeType, AccessRestriction {
 
         treeToOwner[id] = msg.sender;
         ownerTreeCount[msg.sender]++;
+        ownerTrees[msg.sender].push(id);
 
         emit NewTreeAdded(
             id,

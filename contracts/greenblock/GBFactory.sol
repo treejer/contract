@@ -1,9 +1,6 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
-
-
 contract GBFactory {
 
     event NewGBAdded(

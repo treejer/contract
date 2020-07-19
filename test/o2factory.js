@@ -103,8 +103,119 @@ contract('O2Factory', (accounts) => {
         o2Instance.acceptUpdate(0, { from: ownerAccount });
     }
 
+    async function addTree2Update(name = null) {
+        let typeId = 0;
+        let gbId = 0;
+        name = name !== null ? name : 'firstTree';
+        let latitude = '38.0962';
+        let longitude = '46.2738';
+        let plantedDate = '2020/02/20';
+        let birthDate = '2020/02/20';
+        let height = '1';
+        let diameter = '1';
 
-    it("should add o2", async () => {
+
+        addType();
+
+        o2Instance.add(
+            typeId,
+            gbId,
+            [
+                name,
+                latitude,
+                longitude,
+                plantedDate,
+                birthDate
+            ],
+            [
+                height,
+                diameter,
+            ],
+            { from: ownerAccount });
+
+        await sleep(1000);
+
+
+        o2Instance.post(0, 'imageHash', { from: ownerAccount });
+        o2Instance.acceptUpdate(0, { from: ownerAccount });
+
+        await sleep(1000);
+
+        o2Instance.post(0, 'imageHash', { from: ownerAccount });
+        o2Instance.acceptUpdate(1, { from: ownerAccount });
+
+    }
+
+
+    async function add2Tree2Update(name = null) {
+        let typeId = 0;
+        let gbId = 0;
+        name = name !== null ? name : 'firstTree';
+        let latitude = '38.0962';
+        let longitude = '46.2738';
+        let plantedDate = '2020/02/20';
+        let birthDate = '2020/02/20';
+        let height = '1';
+        let diameter = '1';
+
+
+        addType();
+
+        o2Instance.add(
+            typeId,
+            gbId,
+            [
+                name,
+                latitude,
+                longitude,
+                plantedDate,
+                birthDate
+            ],
+            [
+                height,
+                diameter,
+            ],
+            { from: planter1Account });
+
+
+        o2Instance.add(
+            typeId,
+            gbId,
+            [
+                name,
+                latitude,
+                longitude,
+                plantedDate,
+                birthDate
+            ],
+            [
+                height,
+                diameter,
+            ],
+            { from: planter1Account });
+
+        await sleep(1000);
+
+
+        o2Instance.post(0, 'imageHash', { from: planter1Account });
+        o2Instance.acceptUpdate(0, { from: planter1Account });
+
+        o2Instance.post(1, 'image2Hash2', { from: planter1Account });
+        o2Instance.acceptUpdate(1, { from: planter1Account });
+
+        await sleep(1000);
+
+        o2Instance.post(0, 'image2Hash', { from: planter1Account });
+        o2Instance.acceptUpdate(2, { from: planter1Account });
+
+
+        o2Instance.post(1, 'image2Hash23', { from: planter1Account });
+        o2Instance.acceptUpdate(3, { from: planter1Account });
+
+    }
+
+
+    it("should mint o2", async () => {
         let title = 'firstGB';
         let titleTree = 'firstTree';
 
@@ -114,13 +225,61 @@ contract('O2Factory', (accounts) => {
         let tx = await o2Instance.mint({ from: ownerAccount });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === ownerAccount;
+            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '100';
         });
-        
-        // truffleAssert.eventEmitted(tx, 'NewGBAdded', (ev) => {
-        //     return ev.id.toString() === '0' && ev.title === title;
-        // });
+    });
 
+    it("should not mint o2", async () => {
+        let title = 'firstGB';
+        let titleTree = 'firstTree';
+
+        await addGB(title);
+        await addTree(titleTree);
+
+        await o2Instance.mint({ from: ownerAccount });
+
+
+        await o2Instance.mint({ from: ownerAccount })
+            .then(assert.fail)
+            .catch(error => {
+                console.log(error.message);
+
+                assert.include(
+                    error.message,
+                    'MintableO2 is zero',
+                    'second mint should throw an exception.'
+                )
+            });
+    });
+
+
+    it("should mint o2 twice", async () => {
+        let title = 'secondGB';
+        let titleTree = 'secondTree';
+
+        await addGB(title);
+        await addTree2Update(titleTree);
+
+        let tx = await o2Instance.mint({ from: ownerAccount });
+
+        truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
+            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '200';
+        });
+    });
+
+
+    it("should mint o2 with 2 tree and 2 update", async () => {
+        let title = 'secondGB';
+        let titleTree = 'secondTree';
+
+        await addGB(title);
+        await add2Tree2Update(titleTree);
+
+        let tx = await o2Instance.mint({ from: planter1Account });
+
+        truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '400';
+        });
     });
 
     

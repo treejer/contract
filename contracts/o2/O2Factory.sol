@@ -13,83 +13,60 @@ contract O2Factory is UpdateFactory, ERC20, ERC20Detailed, ERC20Mintable {
     }
 
     event O2Minted(address owner, uint256 totalO2);
-
-
-        event ConsoleLog(uint256 updateDate);
-
-
-    mapping(uint256 => uint256) treeLastmintedO2Update;
+    
+    event ConsoleLog(uint256 updateDate);
 
     //@todo permission must check
     function mint() external {
-        // get sender trees
-
-
-
 
         require(ownerTreeCount[msg.sender] > 0, "Owner tree count is zero");
-
-
 
         uint256 mintableO2 = 0;
         // calculate mintable o2
         for (uint256 i = 0; i < ownerTreeCount[msg.sender]; i++) {
 
             uint256 treeId = ownerTrees[msg.sender][i];
-            uint256 totalDays = 0;
+            uint256 totalSeconds = 0;
 
             if (treeUpdates[treeId].length == 0) {
                 continue;
             }
-            
-            if ( treeLastmintedO2Update[treeId] != 0 &&  treeLastmintedO2Update[treeId] == treeUpdates[treeId][treeUpdates[treeId].length - 1]) {
+
+            if(updates[treeUpdates[treeId][treeUpdates[treeId].length - 1]].minted == true) {
                 continue;
             }
 
-            uint256 treeLastmintedO2UpdateLocal = 0;
+            
             for (uint256 j = treeUpdates[treeId].length; j > 0; j--) {
-
-                
-
-                if (treeLastmintedO2Update[treeId] != 0 && treeLastmintedO2Update[treeId] == treeUpdates[treeId][j - 1]) {
-                    continue;
-                }
-                
 
                 if (updates[treeUpdates[treeId][j - 1]].status != 1) {
                     continue;
                 }
 
+                if(updates[treeUpdates[treeId][j - 1]].minted == true) {
+                    continue;
+                }
                 
-
-                // more than one update -> for n & n-1 difference
                 if (j > 1) {
-                    if(updates[treeUpdates[treeId][j - 2]].updateDate <= 0) {
-                        continue;
-                    }
-
+                    
                     if (updates[treeUpdates[treeId][j - 2]].status != 1) {
                         continue;
                     }
 
-                    totalDays = totalDays + updates[treeUpdates[treeId][j - 1]].updateDate - updates[treeUpdates[treeId][ j - 2]].updateDate;
+                    totalSeconds = totalSeconds + updates[treeUpdates[treeId][j - 1]].updateDate - updates[treeUpdates[treeId][j - 2]].updateDate;
                 } else {
-                    totalDays = totalDays + updates[treeUpdates[treeId][j - 1]].updateDate - trees[treeId].plantedDate;
+                    totalSeconds = totalSeconds + updates[treeUpdates[treeId][j - 1]].updateDate - trees[treeId].plantedDate;
                 }
 
-                if (j > treeLastmintedO2UpdateLocal) {
-                    treeLastmintedO2UpdateLocal = j - 1;
-                }
-
-                mintableO2 = mintableO2 + types[treeToType[treeId]].O2Formula * totalDays;
+                updates[treeUpdates[treeId][j - 1]].minted = true;
 
             }
 
-            if (totalDays > 0) {
-                treeLastmintedO2Update[treeId] = treeLastmintedO2UpdateLocal;
-            }
+            mintableO2 = mintableO2 + types[treeToType[treeId]].O2Formula * totalSeconds;
         }
 
+                //            emit ConsoleLog(mintableO2);
+                // return;
 
         // min them all
         require(mintableO2 > 0, "MintableO2 is zero");

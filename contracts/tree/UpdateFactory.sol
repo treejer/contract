@@ -13,6 +13,7 @@ contract UpdateFactory is TreeFactory {
         string imageHash;
         uint updateDate;
         uint8 status;
+        bool minted;
     }
 
     Update[] public updates;
@@ -23,7 +24,7 @@ contract UpdateFactory is TreeFactory {
     // must one pending update after delete or accpet can post other update
     // update difference must check     
     function post(uint256 _treeId, string calldata _imageHash) external {
-       uint256 id = updates.push(Update(_treeId, _imageHash, now, 0)) - 1;
+       uint256 id = updates.push(Update(_treeId, _imageHash, now, 0, false)) - 1;
        treeUpdates[_treeId].push(id);
 
        emit UpdateAdded(id, _treeId, _imageHash);

@@ -1,3 +1,5 @@
+const TreeFactory = artifacts.require("TreeFactory");
+const TreeSale = artifacts.require("TreeSale");
 const Fund = artifacts.require("Fund");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
@@ -5,6 +7,8 @@ const Units = require('ethereumjs-units');
 
 
 contract('Fund', (accounts) => {
+    let treeInstance;
+    let treeSaleInstance;
     let instance;
 
     const deployerAccount = accounts[0];
@@ -12,7 +16,9 @@ contract('Fund', (accounts) => {
     const secondAccount = accounts[2];
 
     beforeEach(async () => {
-        instance = await Fund.new({ from: deployerAccount });
+        treeInstance = await TreeFactory.new({ from: deployerAccount });
+        treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
+        instance = await Fund.new(treeInstance.address, treeSaleInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -30,7 +36,7 @@ contract('Fund', (accounts) => {
         let height = '1';
         let diameter = '1';
 
-        let tx = instance.add(
+        let tx = treeInstance.add(
             typeId,
             gbId,
             [
@@ -53,7 +59,7 @@ contract('Fund', (accounts) => {
         // });
 
         let price = Units.convert('0.01', 'eth', 'wei');
-        return instance.addToSalesList(
+        return treeSaleInstance.addToSalesList(
             0,
             price,
             { from: ownerAccount });
@@ -61,20 +67,20 @@ contract('Fund', (accounts) => {
         // return treeId
     }
 
-    it("should buy a tree", async () => {
+    // it("should buy a tree", async () => {
 
-        addTree('firstTree');
-        let price = Units.convert('0.01', 'eth', 'wei');
+    //     addTree('firstTree');
+    //     let price = Units.convert('0.01', 'eth', 'wei');
 
 
-        let tx = await instance.buy(0,
-            { from: secondAccount, value: price });
+    //     let tx = await instance.buy(0,
+    //         { from: secondAccount, value: price });
 
-        truffleAssert.eventEmitted(tx, 'TreeBought', (ev) => {
-            return ev.saleId.toString() === '0' && ev.treeId.toString() === '0' && ev.price.toString() === price.toString() && ev.newOwner.toString() === secondAccount.toString();
-        });
+    //     truffleAssert.eventEmitted(tx, 'TreeBought', (ev) => {
+    //         return ev.saleId.toString() === '0' && ev.treeId.toString() === '0' && ev.price.toString() === price.toString() && ev.newOwner.toString() === secondAccount.toString();
+    //     });
 
-    });
+    // });
 
 
     it("should fund a tree", async () => {
@@ -83,8 +89,7 @@ contract('Fund', (accounts) => {
         let count = 2;
         let balance = price / count;
 
-        let tx = await instance.fund(price,
-            count,
+        let tx = await instance.fund(count,
             { from: secondAccount, value: price });
 
         truffleAssert.eventEmitted(tx, 'TreeFunded', (ev) => {

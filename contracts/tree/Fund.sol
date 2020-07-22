@@ -4,8 +4,9 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./TreeSale.sol";
+import "./TreeFactory.sol";
 
-contract Fund is TreeSale {
+contract Fund {
     event TreeBought(
         uint256 saleId,
         uint256 treeId,
@@ -20,38 +21,19 @@ contract Fund is TreeSale {
         uint256 balance
     );
 
-    uint public lastFundedTreeIndex;  
+    uint public lastFundedTreeIndex;
 
-    function buy(uint256 _saleId) external payable {
-        require(
-            msg.value >= salesLists[_saleId].price,
-            "Price less than tree price"
-        );
-        
-        address previosOwner = treeToOwner[salesLists[_saleId].treeId];
-        ownerTreeCount[previosOwner]--;
+    TreeFactory public treeFactory;
+    TreeSale public treeSale;
 
-        treeToOwner[salesLists[_saleId].treeId] = msg.sender;
-        ownerTreeCount[msg.sender]++;
 
-        trees[salesLists[_saleId].treeId].balance = msg.value;
-
-        //distribute fund
-        // (bool sent, bytes memory data) = _to.call.value(msg.value)("");
-        // require(sent, "Failed to send Ether");
-
-        emit TreeBought(
-            _saleId,
-            salesLists[_saleId].treeId,
-            salesLists[_saleId].price,
-            msg.sender
-        );
-
-        removeFromSalesList(_saleId);
+    constructor(TreeFactory _treeFactoryAddress, TreeSale _treeSaleAddress) public {
+        treeFactory = _treeFactoryAddress;
+        treeSale = _treeSaleAddress;
     }
 
 
-    function fund(uint8 _typeId, uint _count) external payable {
+    function fund(uint _count) external payable {
 
         // require(types[_typeId].price > 0);
         
@@ -68,29 +50,9 @@ contract Fund is TreeSale {
 
             // if check for exist tree
 
-
             // else
-            trees.push(
-            Tree(
-                _name,
-                '',
-                '',
-                0,
-                0,
-                now,
-                0,
-                0,
-                balance
-                )
-            );
-            uint256 id = trees.length - 1;
+            uint256 id = treeFactory.simpleFund(msg.sender, balance);
             
-            treeToType[id] = _typeId;
-            typeTreeCount[_typeId]++;
-
-            treeToOwner[id] = msg.sender;
-            ownerTreeCount[msg.sender]++;
-
             emit TreeFunded(
                 id,
                 _name,

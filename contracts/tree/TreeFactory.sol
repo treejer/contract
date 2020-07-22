@@ -88,6 +88,32 @@ contract TreeFactory is AccessRestriction {
         );
     }
 
+    function simpleFund(
+        address _account,
+        uint256 _balance
+    ) public returns(uint256 id) {
+        string memory name = string('types name trees.length');
+
+
+        trees.push(
+            Tree(
+                name,
+                '',
+                '',
+                0,
+                0,
+                now,
+                0,
+                0,
+                _balance
+            )
+        );
+        id = trees.length - 1;
+
+        treeToOwner[id] = _account;
+        ownerTrees[_account].push(id);
+    }
+
     function ownerTreesCount(address _account) public view returns (uint256) {
         return ownerTrees[_account].length;
     }

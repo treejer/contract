@@ -6,7 +6,6 @@ pragma experimental ABIEncoderV2;
 import "./TreeFactory.sol";
 
 contract TreeSale is TreeFactory {
-
     event TreeAddedToSalesList(uint256 id, uint256 treeId, uint256 price);
 
     event TreeRemovedFromSalesList(uint256 treeId);
@@ -19,9 +18,16 @@ contract TreeSale is TreeFactory {
     SalesList[] public salesLists;
     uint256[] public salesArray;
 
+    TreeFactory public treeFactory;
+
+
+    constructor(TreeFactory _treeFactoryAddress) public {
+        treeFactory = _treeFactoryAddress;
+    }
+
     function addToSalesList(uint256 _treeId, uint256 _price)
         external
-        onlyOwner(treeToOwner[_treeId])
+        onlyOwner(treeFactory.treeOwner(_treeId))
     {
         salesLists.push(SalesList(_treeId, _price));
         uint256 id = salesLists.length - 1;
@@ -58,4 +64,23 @@ contract TreeSale is TreeFactory {
         return (salesLists[_saleId].treeId, salesLists[_saleId].price);
     }
 
+    function getPrice(uint256 _saleId)
+        external
+        view
+        returns (uint256)
+    {
+        require(_saleId <= salesLists.length, "Sale id not exists!");
+
+        return salesLists[_saleId].price;
+    }
+
+    function getTreeId(uint256 _saleId)
+        external
+        view
+        returns (uint256)
+    {
+        require(_saleId <= salesLists.length, "Sale id not exists!");
+
+        return salesLists[_saleId].treeId;
+    }
 }

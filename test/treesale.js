@@ -1,3 +1,4 @@
+const TreeFactory = artifacts.require("TreeFactory");
 const TreeSale = artifacts.require("TreeSale");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
@@ -6,13 +7,15 @@ const Units = require('ethereumjs-units');
 
 contract('TreeSale', (accounts) => {
     let treeSaleInstance;
+    let treeInstance;
 
     const deployerAccount = accounts[0];
     const ownerAccount = accounts[1];
     const secondAccount = accounts[2];
 
     beforeEach(async () => {
-        treeSaleInstance = await TreeSale.new({ from: deployerAccount });
+        treeInstance = await TreeFactory.new({ from: deployerAccount });
+        treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -30,7 +33,7 @@ contract('TreeSale', (accounts) => {
         let height = '1';
         let diameter = '1';
 
-        return treeSaleInstance.add(
+        return treeInstance.add(
             typeId,
             gbId,
             [

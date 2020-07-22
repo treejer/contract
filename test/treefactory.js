@@ -60,7 +60,7 @@ contract('TreeFactory', (accounts) => {
         addTree();
         addTree();
 
-        return await treeInstance.ownerTreesCount({ from: ownerAccount })
+        return await treeInstance.ownerTreesCount(ownerAccount, { from: ownerAccount })
             .then(count => {
                 assert.equal(
                     2,

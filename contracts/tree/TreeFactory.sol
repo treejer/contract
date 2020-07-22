@@ -88,11 +88,23 @@ contract TreeFactory is AccessRestriction {
         );
     }
 
-    function ownerTreesCount() public view returns (uint256) {
-        return ownerTreeCount[msg.sender];
+    function ownerTreesCount(address _account) public view returns (uint256) {
+        return ownerTrees[_account].length;
     }
 
     function treeOwner(uint256 _treeId) public view returns (address) {
         return treeToOwner[_treeId];
+    }
+
+    function getOwnerTrees(address _account) public view returns (uint256[] memory) {
+        return ownerTrees[_account];
+    }
+
+    function getTypeId(uint256 _treeId) public view returns (uint256) {
+        return treeToType[_treeId];
+    }
+
+    function getPlantedDate(uint256 _id) public view returns (uint256) {
+        return trees[_id].plantedDate;
     }
 }

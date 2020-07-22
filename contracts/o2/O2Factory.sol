@@ -5,69 +5,92 @@ pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
 
-contract O2Factory is UpdateFactory, ERC20 {
+contract O2Factory is ERC20 {
+    TreeType public treeType;
+    TreeFactory public treeFactory;
+    UpdateFactory public updateFactory;
 
-
-    TreeType public treeTypeLocal;
-
-    constructor(TreeType _address) public ERC20("Oxygen", "O2") {
-        treeTypeLocal = _address;
+    constructor(
+        TreeType _typeAddress,
+        TreeFactory _treeFactoryAddress,
+        UpdateFactory _updateFactoryAddress
+    ) public ERC20("Oxygen", "O2") {
+        treeType = _typeAddress;
+        treeFactory = _treeFactoryAddress;
+        updateFactory = _updateFactoryAddress;
         _mint(msg.sender, 0);
     }
 
     event O2Minted(address owner, uint256 totalO2);
-    
+
     event ConsoleLog(uint256 updateDate);
+    event ConsoleLogB(bool updateDate);
 
     //@todo permission must check
     function mint() external {
-
-        require(ownerTreeCount[msg.sender] > 0, "Owner tree count is zero");
+        require(
+            treeFactory.getOwnerTrees(msg.sender).length > 0,
+            "Owner tree count is zero"
+        );
 
         uint256 mintableO2 = 0;
 
-        for (uint256 i = 0; i < ownerTreeCount[msg.sender]; i++) {
-
-            uint256 treeId = ownerTrees[msg.sender][i];
+        for (
+            uint256 i = 0;
+            i < treeFactory.getOwnerTrees(msg.sender).length;
+            i++
+        ) {
+            uint256 treeId = treeFactory.getOwnerTrees(msg.sender)[i];
+            uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
             uint256 totalSeconds = 0;
 
-            if (treeUpdates[treeId].length == 0) {
+            if (treeUpdates.length == 0) {
                 continue;
             }
 
-            if(updates[treeUpdates[treeId][treeUpdates[treeId].length - 1]].minted == true) {
+            if (updateFactory.isTreeLastUpdateMinted(treeId) == true) {
                 continue;
             }
-            
-            for (uint256 j = treeUpdates[treeId].length; j > 0; j--) {
 
-                if (updates[treeUpdates[treeId][j - 1]].status != 1) {
+            for (uint256 j = treeUpdates.length; j > 0; j--) {
+                uint256 jUpdateId = treeUpdates[j - 1];
+
+                if (updateFactory.getStatus(jUpdateId) != 1) {
                     continue;
                 }
 
-                if(updates[treeUpdates[treeId][j - 1]].minted == true) {
+                if (updateFactory.isMinted(jUpdateId) == true) {
                     continue;
                 }
-                
+
                 if (j > 1) {
-                    
-                    if (updates[treeUpdates[treeId][j - 2]].status != 1) {
+                    uint256 jMinusUpdateId = treeUpdates[j - 2];
+
+                    if (updateFactory.getStatus(jMinusUpdateId) != 1) {
                         continue;
                     }
 
-                    totalSeconds = totalSeconds + updates[treeUpdates[treeId][j - 1]].updateDate - updates[treeUpdates[treeId][j - 2]].updateDate;
+                    totalSeconds =
+                        totalSeconds +
+                        updateFactory.getUpdateDate(jUpdateId) -
+                        updateFactory.getUpdateDate(jMinusUpdateId);
                 } else {
-                    totalSeconds = totalSeconds + updates[treeUpdates[treeId][j - 1]].updateDate - trees[treeId].plantedDate;
+                    totalSeconds =
+                        totalSeconds +
+                        updateFactory.getUpdateDate(jUpdateId) -
+                        treeFactory.getPlantedDate(treeId);
                 }
 
-                updates[treeUpdates[treeId][j - 1]].minted = true;
-
+                updateFactory.setMinted(jUpdateId, true);
             }
 
-            uint256 o2Formula = treeTypeLocal.getO2Formula(treeToType[treeId]);
+            uint256 o2Formula = treeType.getO2Formula(
+                treeFactory.getTypeId(treeId)
+            );
 
             mintableO2 = mintableO2 + o2Formula * totalSeconds;
         }

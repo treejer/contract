@@ -36,4 +36,43 @@ contract UpdateFactory is TreeFactory {
         updates[_updateId].status = 1;
         emit UpdateAccepted(_updateId);
     }
+
+    function getTreeUpdates(uint _treeId) public view returns (uint256[] memory) {
+        return treeUpdates[_treeId];
+    }
+
+    function getUpdateDate(uint256 _id) public view returns (uint256) {
+        return updates[_id].updateDate;
+    }
+
+    function getTreeId(uint256 _id) public view returns (uint256) {
+        return updates[_id].treeId;
+    }
+
+    function getImageHash(uint256 _id) public view returns (string memory) {
+        return updates[_id].imageHash;
+    }
+
+    function getStatus(uint256 _id) public view returns (uint8) {
+        return updates[_id].status;
+    }
+
+    function isMinted(uint256 _id) public view returns (bool) {
+        return updates[_id].minted;
+    }
+
+    function isTreeLastUpdateMinted(uint256 _treeId) public view returns (bool) {
+        return updates[treeUpdates[_treeId][treeUpdates[_treeId].length - 1]].minted;
+    }
+
+    function setMinted(uint256 _id, bool _minted) public {
+        updates[_id].minted = _minted;
+    }
+
+
+    // function getUpdate(uint _id) public view returns (uint256[] memory) {
+    //     return treeUpdates[_id];
+    // }
+
+
 }

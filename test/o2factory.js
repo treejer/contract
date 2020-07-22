@@ -1,6 +1,8 @@
 const O2Factory = artifacts.require("O2Factory");
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
+const TreeFactory = artifacts.require("TreeFactory");
+const UpdateFactory = artifacts.require("UpdateFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -10,6 +12,8 @@ const Units = require('ethereumjs-units');
 contract('O2Factory', (accounts) => {
     let o2Instance;
     let gbInstance;
+    let treeInstance;
+    let updateInstance;
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
     const ambassadorAccount = accounts[2];
@@ -22,7 +26,9 @@ contract('O2Factory', (accounts) => {
     beforeEach(async () => {
         treeTypeInstance = await TreeType.new({ from: deployerAccount });
         gbInstance = await GBFactory.new({ from: deployerAccount });
-        o2Instance = await O2Factory.new(treeTypeInstance.address, { from: deployerAccount });
+        treeInstance = await TreeFactory.new({ from: deployerAccount });
+        updateInstance = await UpdateFactory.new({ from: deployerAccount });
+        o2Instance = await O2Factory.new(treeTypeInstance.address, treeInstance.address, updateInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -37,10 +43,10 @@ contract('O2Factory', (accounts) => {
     function addGB(title = null) {
         title = title !== null ? title : 'firstO2';
         let coordinates = [
-          {lat: 25.774, lng: -80.190},
-          {lat: 18.466, lng: -66.118},
-          {lat: 32.321, lng: -64.757},
-          {lat: 25.774, lng: -80.190}
+            { lat: 25.774, lng: -80.190 },
+            { lat: 18.466, lng: -66.118 },
+            { lat: 32.321, lng: -64.757 },
+            { lat: 25.774, lng: -80.190 }
         ];
 
 
@@ -82,7 +88,7 @@ contract('O2Factory', (accounts) => {
 
         addType();
 
-        o2Instance.add(
+        treeInstance.add(
             typeId,
             gbId,
             [
@@ -101,8 +107,8 @@ contract('O2Factory', (accounts) => {
         await sleep(1000);
 
 
-        o2Instance.post(0, 'imageHash', { from: ownerAccount });
-        o2Instance.acceptUpdate(0, { from: ownerAccount });
+        updateInstance.post(0, 'imageHash', { from: ownerAccount });
+        updateInstance.acceptUpdate(0, { from: ownerAccount });
     }
 
     async function addTree2Update(name = null) {
@@ -119,7 +125,7 @@ contract('O2Factory', (accounts) => {
 
         addType();
 
-        o2Instance.add(
+        treeInstance.add(
             typeId,
             gbId,
             [
@@ -138,13 +144,13 @@ contract('O2Factory', (accounts) => {
         await sleep(1000);
 
 
-        o2Instance.post(0, 'imageHash', { from: ownerAccount });
-        o2Instance.acceptUpdate(0, { from: ownerAccount });
+        updateInstance.post(0, 'imageHash', { from: ownerAccount });
+        updateInstance.acceptUpdate(0, { from: ownerAccount });
 
         await sleep(1000);
 
-        o2Instance.post(0, 'imageHash', { from: ownerAccount });
-        o2Instance.acceptUpdate(1, { from: ownerAccount });
+        updateInstance.post(0, 'imageHash', { from: ownerAccount });
+        updateInstance.acceptUpdate(1, { from: ownerAccount });
 
     }
 
@@ -163,7 +169,7 @@ contract('O2Factory', (accounts) => {
 
         addType();
 
-        o2Instance.add(
+        treeInstance.add(
             typeId,
             gbId,
             [
@@ -180,7 +186,7 @@ contract('O2Factory', (accounts) => {
             { from: planter1Account });
 
 
-        o2Instance.add(
+        treeInstance.add(
             typeId,
             gbId,
             [
@@ -199,20 +205,20 @@ contract('O2Factory', (accounts) => {
         await sleep(1000);
 
 
-        o2Instance.post(0, 'imageHash', { from: planter1Account });
-        o2Instance.acceptUpdate(0, { from: planter1Account });
+        updateInstance.post(0, 'imageHash', { from: planter1Account });
+        updateInstance.acceptUpdate(0, { from: planter1Account });
 
-        o2Instance.post(1, 'image2Hash2', { from: planter1Account });
-        o2Instance.acceptUpdate(1, { from: planter1Account });
+        updateInstance.post(1, 'image2Hash2', { from: planter1Account });
+        updateInstance.acceptUpdate(1, { from: planter1Account });
 
         await sleep(1000);
 
-        o2Instance.post(0, 'image2Hash', { from: planter1Account });
-        o2Instance.acceptUpdate(2, { from: planter1Account });
+        updateInstance.post(0, 'image2Hash', { from: planter1Account });
+        updateInstance.acceptUpdate(2, { from: planter1Account });
 
 
-        o2Instance.post(1, 'image2Hash23', { from: planter1Account });
-        o2Instance.acceptUpdate(3, { from: planter1Account });
+        updateInstance.post(1, 'image2Hash23', { from: planter1Account });
+        updateInstance.acceptUpdate(3, { from: planter1Account });
 
     }
 
@@ -306,56 +312,5 @@ contract('O2Factory', (accounts) => {
                 console.log(error);
             });
     });
-
-    
-    // it("should return ambassodar o2 count", async () => {
-
-    //     addGB();
-    //     addGB('second db 2');
-
-    //     return await o2Instance.getAmbassadorO2Count({ from: ambassadorAccount })
-    //         .then(count => {
-    //             assert.equal(
-    //                 2,
-    //                 count.toString(),
-    //                 "Ambassodar o2 counts are: " + count.toString()
-    //             );
-    //         });
-    // });
-
-
-    // it("should return o2 ambassador", async () => {
-
-    //     addGB();
-
-    //     return await o2Instance.getO2Ambassador(0, { from: ambassadorAccount })
-    //         .then(ambassadorAddress => {
-    //             assert.equal(
-    //                 ambassadorAccount,
-    //                 ambassadorAddress,
-    //                 "O2 ambassador is: " + ambassadorAddress
-    //             );
-    //         });
-    // });
-
-    // it('should return greenblock', async () => {
-    //     let title = 'firsO2';
-    //     let id = 0;   
-    //     addGB(title);
-
-    //     return await o2Instance.getO2(id)
-    //         .then((greenBlock) => {
-    //             assert.equal(
-    //                 greenBlock[0],
-    //                 title,
-    //                 "O2 with id: " + id + " returned"
-    //             );
-    //         }).catch((error) => {
-    //             console.log(error);
-    //         });
-    // });
-
-
-
 
 });

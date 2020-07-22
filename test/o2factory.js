@@ -1,5 +1,6 @@
 const O2Factory = artifacts.require("O2Factory");
 const GBFactory = artifacts.require("GBFactory");
+const TreeType = artifacts.require("TreeType");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -19,8 +20,9 @@ contract('O2Factory', (accounts) => {
     const planter5Account = accounts[7];
 
     beforeEach(async () => {
-        o2Instance = await O2Factory.new({ from: deployerAccount });
+        treeTypeInstance = await TreeType.new({ from: deployerAccount });
         gbInstance = await GBFactory.new({ from: deployerAccount });
+        o2Instance = await O2Factory.new(treeTypeInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -63,7 +65,7 @@ contract('O2Factory', (accounts) => {
         let price = Units.convert('0.01', 'eth', 'wei');
 
 
-        o2Instance.create(name, scientificName, o2formula, price, { from: ownerAccount });
+        treeTypeInstance.create(name, scientificName, o2formula, price, { from: ownerAccount });
     }
 
     async function addTree(name = null) {
@@ -280,6 +282,29 @@ contract('O2Factory', (accounts) => {
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
             return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '400';
         });
+    });
+
+
+    it('should return balance of planter', async () => {
+
+        let title = 'firstGB';
+        let titleTree = 'firstTree';
+
+        await addGB(title);
+        await addTree(titleTree);
+
+        await o2Instance.mint({ from: ownerAccount });
+
+        return await o2Instance.balanceOf(ownerAccount, { from: ownerAccount })
+            .then((balance) => {
+                assert.equal(
+                    '100',
+                    balance,
+                    "Balance of planter: " + balance
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
     });
 
     

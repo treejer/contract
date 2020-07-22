@@ -1,14 +1,12 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 contract GBFactory {
+    event NewGBAdded(uint256 id, string title);
 
-    event NewGBAdded(
-        uint256 id,
-        string title
-    );
-
-    //@todo must change coordinates 
+    //@todo must change coordinates
     struct GB {
         string title;
         string coordinates;
@@ -26,19 +24,12 @@ contract GBFactory {
     //@todo permission must check
     function add(
         string calldata _title,
-        string calldata  _coordinates,
+        string calldata _coordinates,
         address _ambassador,
         address[] calldata _planters
     ) external {
-        
-        uint256 id = greenBlocks.push(
-            GB(
-                _title,
-                _coordinates,
-                0
-            )
-        ) -
-            1;
+        greenBlocks.push(GB(_title, _coordinates, 0));
+        uint256 id = greenBlocks.length - 1;
 
         // require(id == uint256(uint256(id)));
 
@@ -48,15 +39,10 @@ contract GBFactory {
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
-        
-    
+
         //_transfer();
 
-        emit NewGBAdded(
-            id,
-            _title
-        );
-        
+        emit NewGBAdded(id, _title);
     }
 
     function getAmbassadorGBCount() public view returns (uint256) {
@@ -67,11 +53,15 @@ contract GBFactory {
         return gbToAmbassador[_gbId];
     }
 
-    function getGB(uint256 _gbId) public view returns (
-        string memory,
-        string memory,
-        uint256
-    ) {
+    function getGB(uint256 _gbId)
+        public
+        view
+        returns (
+            string memory,
+            string memory,
+            uint256
+        )
+    {
         return (
             greenBlocks[_gbId].title,
             greenBlocks[_gbId].coordinates,
@@ -81,7 +71,6 @@ contract GBFactory {
 
     //@todo premission must check only ambassedor or planters or admin
     // function updateGB(uint256 _gbId) public external {
-        
-    // } 
 
+    // }
 }

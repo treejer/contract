@@ -1,14 +1,17 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 import "./AccessRestriction.sol";
 import "./TreeType.sol";
 
+contract TreeFactory is AccessRestriction {
+    // constructor() ERC721Full("Tree", "TREE") public {
+    // }
 
-contract TreeFactory is TreeType, AccessRestriction {
     event NewTreeAdded(
         uint256 id,
         string name,
@@ -22,7 +25,7 @@ contract TreeFactory is TreeType, AccessRestriction {
         string longitude;
         uint256 plantedDate;
         uint256 birthDate;
-        uint fundedDate;
+        uint256 fundedDate;
         uint8 height;
         uint8 diameter;
         uint256 balance;
@@ -44,9 +47,6 @@ contract TreeFactory is TreeType, AccessRestriction {
     mapping(uint256 => uint256) typeTreeCount;
     mapping(uint256 => uint256) gbTreeCount;
 
-
-
-
     //@todo permission must check
     function add(
         uint8 _typeId,
@@ -54,7 +54,7 @@ contract TreeFactory is TreeType, AccessRestriction {
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
     ) external {
-        uint256 id = trees.push(
+        trees.push(
             Tree(
                 _stringParams[0],
                 _stringParams[1],
@@ -66,10 +66,9 @@ contract TreeFactory is TreeType, AccessRestriction {
                 _uintParams[1],
                 0
             )
-        ) -
-            1;
+        );
+        uint256 id = trees.length - 1;
 
-        treeToType[id] = _typeId;
         typeTreeCount[_typeId]++;
 
         treeToGB[id] = _gbId;
@@ -79,6 +78,8 @@ contract TreeFactory is TreeType, AccessRestriction {
         ownerTreeCount[msg.sender]++;
         ownerTrees[msg.sender].push(id);
 
+        // _mint(msg.sender, id);
+
         emit NewTreeAdded(
             id,
             _stringParams[0],
@@ -86,6 +87,7 @@ contract TreeFactory is TreeType, AccessRestriction {
             _stringParams[2]
         );
     }
+
     function ownerTreesCount() public view returns (uint256) {
         return ownerTreeCount[msg.sender];
     }
@@ -93,5 +95,4 @@ contract TreeFactory is TreeType, AccessRestriction {
     function treeOwner(uint256 _treeId) public view returns (address) {
         return treeToOwner[_treeId];
     }
-
 }

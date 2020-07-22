@@ -1,10 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./TreeFactory.sol";
 
 contract TreeSale is TreeFactory {
+
     event TreeAddedToSalesList(uint256 id, uint256 treeId, uint256 price);
+
     event TreeRemovedFromSalesList(uint256 treeId);
 
     struct SalesList {
@@ -19,7 +23,8 @@ contract TreeSale is TreeFactory {
         external
         onlyOwner(treeToOwner[_treeId])
     {
-        uint256 id = salesLists.push(SalesList(_treeId, _price)) - 1;
+        salesLists.push(SalesList(_treeId, _price));
+        uint256 id = salesLists.length - 1;
         salesArray.push(id);
 
         emit TreeAddedToSalesList(id, _treeId, _price);
@@ -39,8 +44,6 @@ contract TreeSale is TreeFactory {
         for (uint256 i = _saleId; i < salesLists.length - 1; i++) {
             salesLists[i] = salesLists[i + 1];
         }
-
-        salesLists.length--;
 
         emit TreeRemovedFromSalesList(_saleId);
     }

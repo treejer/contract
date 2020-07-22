@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
@@ -68,7 +70,7 @@ contract Fund is TreeSale {
 
 
             // else
-            uint256 id = trees.push(
+            trees.push(
             Tree(
                 _name,
                 '',
@@ -80,7 +82,8 @@ contract Fund is TreeSale {
                 0,
                 balance
                 )
-            ) - 1;
+            );
+            uint256 id = trees.length - 1;
             
             treeToType[id] = _typeId;
             typeTreeCount[_typeId]++;

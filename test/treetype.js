@@ -54,6 +54,29 @@ contract('TreeType', (accounts) => {
     });
 
 
+    it('should return o2Formula ', async () => {
+
+        let id = 0;
+        let name = 'balut';
+        let scientificName = 'blt';
+        let o2formula = 100;
+        let price = Units.convert('0.01', 'eth', 'wei');
+
+        await treeTypeInstance.create(name, scientificName, o2formula, price, { from: ownerAccount });
+
+        return await treeTypeInstance.getO2Formula(id)
+            .then((treeTypeO2formula) => {
+                assert.equal(
+                    treeTypeO2formula,
+                    o2formula,
+                    "Tree o2formula : " + treeTypeO2formula + " returned"
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
+    });
+
+
     it('should return count of tree types', async () => {
 
         let id = 0;

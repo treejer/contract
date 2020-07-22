@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/utils/Address.sol";
-import "../../node_modules/openzeppelin-solidity/contracts/token/ERC1155/ERC1155.sol";
+import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
+import "../../node_modules/@openzeppelin/contracts/utils/Address.sol";
 
 contract TreeType {
     using SafeMath for uint256;
@@ -32,7 +33,9 @@ contract TreeType {
         uint _O2Formula,
         uint _price
     ) external {
-        uint256 id = types.push(Type(_name, _scientificName, _O2Formula, _price)) - 1;
+        types.push(Type(_name, _scientificName, _O2Formula, _price));
+        uint256 id = types.length - 1;
+        
         emit NewType(id, _name, _scientificName, _O2Formula, _price);
     }
 
@@ -47,6 +50,10 @@ contract TreeType {
             types[_typeId].O2Formula,
             types[_typeId].price
         );
+    }
+
+    function getO2Formula(uint256 _typeId) public view returns(uint256) {
+        return types[_typeId].O2Formula;
     }
 
     function count() external view returns (uint256) {

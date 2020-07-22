@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "./TreeFactory.sol";
 
-contract UpdateFactory is TreeFactory {
+contract UpdateFactory {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
     event UpdateAccepted(uint256 updateId);
 

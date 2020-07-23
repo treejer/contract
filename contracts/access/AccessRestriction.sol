@@ -45,6 +45,10 @@ contract AccessRestriction is AccessControl, Pausable {
         _pause();
     }
 
+    function unpause() external onlyAdmin {
+        _unpause();
+    }
+
 
 
 }

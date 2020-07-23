@@ -3,7 +3,10 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-contract GBFactory {
+import "../access/AccessRestriction.sol";
+
+
+contract GBFactory is AccessRestriction {
     event NewGBAdded(uint256 id, string title);
 
     //@todo must change coordinates
@@ -27,7 +30,7 @@ contract GBFactory {
         string calldata _coordinates,
         address _ambassador,
         address[] calldata _planters
-    ) external {
+    ) external planterOrAmbassador {
         greenBlocks.push(GB(_title, _coordinates, 0));
         uint256 id = greenBlocks.length - 1;
 

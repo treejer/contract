@@ -4,8 +4,9 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "./TreeFactory.sol";
+import "../access/AccessRestriction.sol";
 
-contract TreeSale is TreeFactory {
+contract TreeSale is AccessRestriction {
     event TreeAddedToSalesList(uint256 id, uint256 treeId, uint256 price);
 
     event TreeRemovedFromSalesList(uint256 treeId);
@@ -27,7 +28,7 @@ contract TreeSale is TreeFactory {
 
     function addToSalesList(uint256 _treeId, uint256 _price)
         external
-        onlyOwner(treeFactory.treeOwner(_treeId))
+        onlyOwnerOfTree(treeFactory.treeOwner(_treeId))
     {
         salesLists.push(SalesList(_treeId, _price));
         uint256 id = salesLists.length - 1;

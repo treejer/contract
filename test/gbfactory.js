@@ -3,6 +3,8 @@ const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 
 
+const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
+
 contract('GBFactory', (accounts) => {
     let gbInstance;
     const ownerAccount = accounts[0];
@@ -22,6 +24,10 @@ contract('GBFactory', (accounts) => {
         // await gbInstance.kill({ from: ownerAccount });
     });
 
+    function addAmbassador() {
+        gbInstance.grantRole(AMBASSADOR_ROLE, ambassadorAccount,{ from: deployerAccount });
+    }
+
     function addGB(title = null) {
         title = title !== null ? title : 'firstGB';
         let coordinates = [
@@ -31,7 +37,8 @@ contract('GBFactory', (accounts) => {
           {lat: 25.774, lng: -80.190}
         ];
 
-
+        addAmbassador();
+        
         return gbInstance.add(
             title,
             JSON.stringify(coordinates),

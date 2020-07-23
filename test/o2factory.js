@@ -6,6 +6,7 @@ const UpdateFactory = artifacts.require("UpdateFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
+const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
 
 
 
@@ -40,6 +41,10 @@ contract('O2Factory', (accounts) => {
     }
 
 
+    function addAmbassador() {
+        gbInstance.grantRole(AMBASSADOR_ROLE, ambassadorAccount, { from: deployerAccount });
+    }
+
     function addGB(title = null) {
         title = title !== null ? title : 'firstO2';
         let coordinates = [
@@ -49,7 +54,7 @@ contract('O2Factory', (accounts) => {
             { lat: 25.774, lng: -80.190 }
         ];
 
-
+        addAmbassador();
         return gbInstance.add(
             title,
             JSON.stringify(coordinates),

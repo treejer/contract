@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-import "./AccessRestriction.sol";
+import "../access/AccessRestriction.sol";
 import "./TreeType.sol";
 
 contract TreeFactory is ERC721, AccessRestriction {

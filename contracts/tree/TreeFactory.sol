@@ -8,9 +8,9 @@ import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./AccessRestriction.sol";
 import "./TreeType.sol";
 
-contract TreeFactory is AccessRestriction {
-    // constructor() ERC721Full("Tree", "TREE") public {
-    // }
+contract TreeFactory is ERC721, AccessRestriction {
+    constructor() ERC721("Tree", "TREE") public {
+    }
 
     event NewTreeAdded(
         uint256 id,
@@ -35,12 +35,10 @@ contract TreeFactory is AccessRestriction {
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => uint256) public treeToGB;
-    mapping(uint256 => address) public treeToOwner;
     mapping(uint256 => address) public treeToPlanter;
     mapping(uint256 => address) public treeToConserver;
     mapping(uint256 => address) public treeToVerifier;
     mapping(address => uint256[]) public ownerTrees;
-    mapping(address => uint256) ownerTreeCount;
     mapping(address => uint256) planterTreeCount;
     mapping(address => uint256) conserverTreeCount;
     mapping(address => uint256) verifierTreeCount;
@@ -74,11 +72,9 @@ contract TreeFactory is AccessRestriction {
         treeToGB[id] = _gbId;
         gbTreeCount[_gbId]++;
 
-        treeToOwner[id] = msg.sender;
-        ownerTreeCount[msg.sender]++;
         ownerTrees[msg.sender].push(id);
 
-        // _mint(msg.sender, id);
+        _mint(msg.sender, id);
 
         emit NewTreeAdded(
             id,
@@ -110,16 +106,18 @@ contract TreeFactory is AccessRestriction {
         );
         id = trees.length - 1;
 
-        treeToOwner[id] = _account;
         ownerTrees[_account].push(id);
+
+        _mint(msg.sender, id);
+
     }
 
     function ownerTreesCount(address _account) public view returns (uint256) {
-        return ownerTrees[_account].length;
+        return balanceOf(_account);
     }
 
     function treeOwner(uint256 _treeId) public view returns (address) {
-        return treeToOwner[_treeId];
+        return ownerOf(_treeId);
     }
 
     function getOwnerTrees(address _account) public view returns (uint256[] memory) {

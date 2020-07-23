@@ -4,6 +4,7 @@ const truffleAssert = require('truffle-assertions');
 
 
 const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
+const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 contract('GBFactory', (accounts) => {
     let gbInstance;
@@ -15,6 +16,7 @@ contract('GBFactory', (accounts) => {
     const planter3Account = accounts[5];
     const planter4Account = accounts[6];
     const planter5Account = accounts[7];
+    const adminAccount = accounts[8];
 
     beforeEach(async () => {
         gbInstance = await GBFactory.new({ from: deployerAccount });
@@ -26,6 +28,8 @@ contract('GBFactory', (accounts) => {
 
     function addAmbassador() {
         gbInstance.grantRole(AMBASSADOR_ROLE, ambassadorAccount,{ from: deployerAccount });
+
+
     }
 
     function addGB(title = null) {
@@ -110,6 +114,87 @@ contract('GBFactory', (accounts) => {
             }).catch((error) => {
                 console.log(error);
             });
+    });
+
+
+    it("should not create gb when paused", async () => {
+        let title = 'firstGB';
+        let titleTree = 'firstTree';
+
+        gbInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
+        gbInstance.pause({ from: adminAccount });
+
+        title = 'firstGB';
+        let coordinates = [
+            { lat: 25.774, lng: -80.190 },
+            { lat: 18.466, lng: -66.118 },
+            { lat: 32.321, lng: -64.757 },
+            { lat: 25.774, lng: -80.190 }
+        ];
+
+        addAmbassador();
+
+        await gbInstance.add(
+            title,
+            JSON.stringify(coordinates),
+            ambassadorAccount,
+            [
+                planter1Account,
+                planter2Account,
+                planter3Account,
+                planter4Account,
+                planter5Account
+            ],
+            { from: ambassadorAccount })
+            .then(assert.fail)
+            .catch(error => {
+                console.log(error.message);
+
+                assert.include(
+                    error.message,
+                    'Pausable: paused.',
+                    'add gb when paused shoud retrun exception'
+                )
+            });
+            
+    });
+
+    it("should not create gb when not hasRole", async () => {
+
+
+        let title = 'firstGB';
+        let coordinates = [
+            { lat: 25.774, lng: -80.190 },
+            { lat: 18.466, lng: -66.118 },
+            { lat: 32.321, lng: -64.757 },
+            { lat: 25.774, lng: -80.190 }
+        ];
+
+        addAmbassador();
+
+        await gbInstance.add(
+            title,
+            JSON.stringify(coordinates),
+            ambassadorAccount,
+            [
+                planter1Account,
+                planter2Account,
+                planter3Account,
+                planter4Account,
+                planter5Account
+            ],
+            { from: planter4Account })
+            .then(assert.fail)
+            .catch(error => {
+                console.log(error.message);
+
+                assert.include(
+                    error.message,
+                    'Caller is not a planter or ambassador.',
+                    'add gb when paused shoud retrun exception'
+                )
+            });
+
     });
 
 

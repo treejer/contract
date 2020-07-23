@@ -30,7 +30,7 @@ contract GBFactory is AccessRestriction {
         string calldata _coordinates,
         address _ambassador,
         address[] calldata _planters
-    ) external planterOrAmbassador {
+    ) external planterOrAmbassador whenNotPaused {
         greenBlocks.push(GB(_title, _coordinates, 0));
         uint256 id = greenBlocks.length - 1;
 

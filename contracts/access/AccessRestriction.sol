@@ -34,7 +34,16 @@ contract AccessRestriction is AccessControl, Pausable {
         _;
     }
 
+    modifier onlyAdmin()
+    {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+                "Caller is not admin");
+        _;
+    }
 
+    function pause() external onlyAdmin {
+        _pause();
+    }
 
 
 

@@ -41,7 +41,7 @@ contract Fund {
         uint balance = msg.value / _count;
 
         //@todo check for treePrice
-        // if(types[_typeId].price >= )
+        require(balance >= treeFactory.getPrice(), "Balance is not sufficient");
 
         
         for (uint8 i = 0; i < _count; i++) {

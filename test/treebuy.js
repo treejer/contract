@@ -14,6 +14,11 @@ contract('Fund', (accounts) => {
     const deployerAccount = accounts[0];
     const ownerAccount = accounts[1];
     const secondAccount = accounts[2];
+    const adminAccount = accounts[3];
+
+
+    const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 
     beforeEach(async () => {
         treeInstance = await TreeFactory.new({ from: deployerAccount });
@@ -88,6 +93,12 @@ contract('Fund', (accounts) => {
         let price = Units.convert('0.02', 'eth', 'wei');
         let count = 2;
         let balance = price / count;
+
+        treeInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+
 
         let tx = await instance.fund(count,
             { from: secondAccount, value: price });

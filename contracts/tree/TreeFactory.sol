@@ -12,6 +12,8 @@ contract TreeFactory is ERC721, AccessRestriction {
     constructor() ERC721("Tree", "TREE") public {
     }
 
+    event PriceChanged(uint256 price);
+
     event NewTreeAdded(
         uint256 id,
         string name,
@@ -32,6 +34,8 @@ contract TreeFactory is ERC721, AccessRestriction {
     }
 
     Tree[] public trees;
+
+    uint256 public price;
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => uint256) public treeToGB;
@@ -130,5 +134,14 @@ contract TreeFactory is ERC721, AccessRestriction {
 
     function getPlantedDate(uint256 _id) public view returns (uint256) {
         return trees[_id].plantedDate;
+    }
+
+    function setPrice(uint256 _price) external onlyAdmin {
+        price = _price;
+        emit PriceChanged(_price);
+    }
+
+    function getPrice() external view returns(uint256) {
+        return price;
     }
 }

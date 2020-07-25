@@ -1,12 +1,17 @@
 const TreeFactory = artifacts.require("TreeFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
+const Units = require('ethereumjs-units');
+
+
+const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 
 contract('TreeFactory', (accounts) => {
     let treeInstance;
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
+    const adminAccount = accounts[5];
 
     beforeEach(async () => {
         treeInstance = await TreeFactory.new({ from: deployerAccount });
@@ -85,7 +90,46 @@ contract('TreeFactory', (accounts) => {
             });
     });
 
+    it("should update tree price", async () => {
 
+        treeInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
+
+
+        let name = 'firstTree';
+
+        await addTree(name);
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let tx = await treeInstance.setPrice(price, { from: adminAccount })
+
+        truffleAssert.eventEmitted(tx, 'PriceChanged', (ev) => {
+            return ev.price.toString() === price;
+        });
+
+    });
+
+    it("should return tree price", async () => {
+
+        treeInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
+
+
+        let name = 'firstTree';
+
+        await addTree(name);
+
+        let price = Units.convert('0.03', 'eth', 'wei');
+        let tx = await treeInstance.setPrice(price, { from: adminAccount })
+
+
+        return await treeInstance.getPrice({ from: ownerAccount })
+            .then(treePrice => {
+                assert.equal(
+                    treePrice,
+                    price,
+                    "Price: " + treePrice
+                );
+            });
+    });
 
 
 });

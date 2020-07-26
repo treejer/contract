@@ -112,7 +112,7 @@ contract TreeFactory is ERC721, AccessRestriction {
 
         ownerTrees[_account].push(id);
 
-        _mint(msg.sender, id);
+        _mint(_account, id);
 
     }
 

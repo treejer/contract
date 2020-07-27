@@ -16,7 +16,7 @@ contract TreeFactory is ERC721, AccessRestriction {
 
     event PriceChanged(uint256 price);
 
-    event NewTreeAdded(
+    event TreePlanted(
         uint256 id,
         string name,
         string latitude,
@@ -43,6 +43,10 @@ contract TreeFactory is ERC721, AccessRestriction {
     uint256 notFundedTreesLastIndex;
     uint256 notFundedTreesUsedIndex;
 
+    mapping(uint => uint) public notPlantedTrees;
+    uint256 notPlantedTreesLastIndex;
+    uint256 notPlantedTreesUsedIndex;
+
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => uint256) public treeToGB;
@@ -63,34 +67,53 @@ contract TreeFactory is ERC721, AccessRestriction {
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
     ) external onlyPlanter {
-        trees.push(
-            Tree(
-                _stringParams[0],
-                _stringParams[1],
-                _stringParams[2],
-                now,
-                now,
-                0,
-                _uintParams[0],
-                _uintParams[1],
-                0
-            )
-        );
-        uint256 id = trees.length - 1;
+
+        uint256 id = 0;
+
+        if(this.notPlantedTreesExists() == true) {
+            id = notPlantedTrees[notPlantedTreesUsedIndex];
+            notPlantedTreesUsedIndex++;
+
+            trees[id].name = _stringParams[0];
+            trees[id].latitude = _stringParams[1];
+            trees[id].longitude = _stringParams[2];
+            trees[id].plantedDate = now;
+            trees[id].birthDate = now;
+            trees[id].height = _uintParams[0];
+            trees[id].diameter = _uintParams[1];
+
+            delete notPlantedTrees[notPlantedTreesUsedIndex - 1];
+
+        } else {
+
+
+            trees.push(
+                Tree(
+                    _stringParams[0],
+                    _stringParams[1],
+                    _stringParams[2],
+                    now,
+                    now,
+                    0,
+                    _uintParams[0],
+                    _uintParams[1],
+                    0
+                )
+            );
+            id = trees.length - 1;
+
+            notFundedTrees[notFundedTreesLastIndex] = id;
+            notFundedTreesLastIndex++;
+            ownerTrees[msg.sender].push(id);
+            _mint(msg.sender, id);
+        }
 
         typeTreeCount[_typeId]++;
 
         treeToGB[id] = _gbId;
         gbTreeCount[_gbId]++;
 
-        ownerTrees[msg.sender].push(id);
-
-        notFundedTrees[notFundedTreesLastIndex] = id;
-        notFundedTreesLastIndex++;
-
-        _mint(msg.sender, id);
-
-        emit NewTreeAdded(
+        emit TreePlanted(
             id,
             _stringParams[0],
             _stringParams[1],
@@ -122,6 +145,9 @@ contract TreeFactory is ERC721, AccessRestriction {
 
         ownerTrees[_account].push(id);
 
+        notPlantedTrees[notPlantedTreesLastIndex] = id;
+        notPlantedTreesLastIndex++;
+
         _mint(_account, id);
 
         return id;
@@ -140,6 +166,9 @@ contract TreeFactory is ERC721, AccessRestriction {
 
         _transfer(ownerOf(treeId), _account, treeId);
 
+        ownerTrees[_account].push(treeId);
+
+
         delete notFundedTrees[notFundedTreesUsedIndex - 1];
 
         return treeId;
@@ -147,6 +176,10 @@ contract TreeFactory is ERC721, AccessRestriction {
 
     function notFundedTreesExists() public view returns(bool) {
         return notFundedTreesLastIndex > notFundedTreesUsedIndex;
+    }
+
+    function notPlantedTreesExists() public view returns(bool) {
+        return notPlantedTreesLastIndex > notPlantedTreesUsedIndex;
     }
 
     function ownerTreesCount(address _account) public view returns (uint256) {

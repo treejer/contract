@@ -1,4 +1,6 @@
 const TreeFactory = artifacts.require("TreeFactory");
+const TreeSale = artifacts.require("TreeSale");
+const Fund = artifacts.require("Fund");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -7,13 +9,19 @@ const Common = require('./common');
 
 contract('TreeFactory', (accounts) => {
     let treeInstance;
+    let treeSaleInstance;
+    let fundInstance;
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
+    const secondAccount = accounts[2];
+    const planterAccount  = accounts[3];
     const adminAccount = accounts[5];
+
 
     beforeEach(async () => {
         treeInstance = await TreeFactory.new({ from: deployerAccount });
-    });
+        treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
+        fundInstance = await Fund.new(treeInstance.address, treeSaleInstance.address, { from: deployerAccount });    });
 
     afterEach(async () => {
         // await treeInstance.kill({ from: ownerAccount });
@@ -26,8 +34,26 @@ contract('TreeFactory', (accounts) => {
         await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
         let tx = await Common.addTree(treeInstance, ownerAccount, name);
 
-        truffleAssert.eventEmitted(tx, 'NewTreeAdded', (ev) => {
+        truffleAssert.eventEmitted(tx, 'TreePlanted', (ev) => {
             return ev.id.toString() === '0' && ev.name === name;
+        });
+
+    });
+
+    it("should plant from funded trees", async () => {
+
+        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        await treeInstance.setPrice(price, { from: adminAccount });
+
+        await fundInstance.fund(2, { from: secondAccount, value: price * 2 });
+
+        await Common.addPlanter(treeInstance, planterAccount, deployerAccount);
+        let tx = await Common.addTree(treeInstance, planterAccount);
+
+        truffleAssert.eventEmitted(tx, 'TreePlanted', (ev) => {
+            return ev.id.toString() === '0';
         });
 
     });
@@ -93,6 +119,8 @@ contract('TreeFactory', (accounts) => {
                 );
             });
     });
+
+    
 
 
 });

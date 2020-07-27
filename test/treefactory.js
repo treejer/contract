@@ -2,9 +2,7 @@ const TreeFactory = artifacts.require("TreeFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
-
-
-const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
+const Common = require('./common');
 
 
 contract('TreeFactory', (accounts) => {
@@ -21,39 +19,13 @@ contract('TreeFactory', (accounts) => {
         // await treeInstance.kill({ from: ownerAccount });
     });
 
-    function addTree(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
-
-        return treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: ownerAccount });
-    }
-
-
     it("should add tree", async () => {
         let name = 'firstTree';
 
-        let tx = await addTree(name);
+
+        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        let tx = await Common.addTree(treeInstance, ownerAccount, name);
+
         truffleAssert.eventEmitted(tx, 'NewTreeAdded', (ev) => {
             return ev.id.toString() === '0' && ev.name === name;
         });
@@ -62,8 +34,9 @@ contract('TreeFactory', (accounts) => {
 
     it("should return owner tree count", async () => {
 
-        addTree();
-        addTree();
+        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        await Common.addTree(treeInstance, ownerAccount);
+        await Common.addTree(treeInstance, ownerAccount);
 
         return await treeInstance.ownerTreesCount(ownerAccount, { from: ownerAccount })
             .then(count => {
@@ -78,7 +51,8 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree owner", async () => {
 
-        addTree();
+        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        await Common.addTree(treeInstance, ownerAccount);
 
         return await treeInstance.treeOwner(0, { from: ownerAccount })
             .then(ownerAddress => {
@@ -92,12 +66,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should update tree price", async () => {
 
-        treeInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
-
-
-        let name = 'firstTree';
-
-        await addTree(name);
+        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
 
         let price = Units.convert('0.02', 'eth', 'wei');
         let tx = await treeInstance.setPrice(price, { from: adminAccount })
@@ -110,16 +79,10 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree price", async () => {
 
-        treeInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
-
-
-        let name = 'firstTree';
-
-        await addTree(name);
+        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
 
         let price = Units.convert('0.03', 'eth', 'wei');
-        let tx = await treeInstance.setPrice(price, { from: adminAccount })
-
+        await treeInstance.setPrice(price, { from: adminAccount })
 
         return await treeInstance.getPrice({ from: ownerAccount })
             .then(treePrice => {

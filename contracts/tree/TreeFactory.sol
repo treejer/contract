@@ -55,7 +55,7 @@ contract TreeFactory is ERC721, AccessRestriction {
         uint256 _gbId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
-    ) external {
+    ) external planterOrAmbassador {
         trees.push(
             Tree(
                 _stringParams[0],
@@ -115,6 +115,10 @@ contract TreeFactory is ERC721, AccessRestriction {
         _mint(_account, id);
 
     }
+
+    // function plantFundedTrees() external planterOrAmbassador {
+        
+    // }
 
     function ownerTreesCount(address _account) public view returns (uint256) {
         return balanceOf(_account);

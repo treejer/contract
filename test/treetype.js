@@ -2,6 +2,8 @@ const TreeType = artifacts.require("TreeType");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
+const Common = require('./common');
+
 
 
 contract('TreeType', (accounts) => {
@@ -18,12 +20,9 @@ contract('TreeType', (accounts) => {
 
     it("should create tree type", async () => {
         let name = 'balut';
-        let scientificName = 'blt';
         let o2formula = 100;
-        let price = Units.convert('0.01', 'eth', 'wei');
 
-
-        let tx = await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
+        let tx = await Common.addType(treeTypeInstance, ownerAccount, name);
 
         truffleAssert.eventEmitted(tx, 'NewType', (ev) => {
             return ev.typeId.toString() === '0' && ev.name === name && ev.O2Formula.toString() === o2formula.toString();
@@ -35,11 +34,8 @@ contract('TreeType', (accounts) => {
 
         let id = 0;
         let name = 'balut';
-        let scientificName = 'blt';
-        let o2formula = 100;
-        let price = Units.convert('0.01', 'eth', 'wei');
 
-        await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
+        await Common.addType(treeTypeInstance, ownerAccount, name);
 
         return await treeTypeInstance.get(id)
             .then((treeType) => {
@@ -58,11 +54,9 @@ contract('TreeType', (accounts) => {
 
         let id = 0;
         let name = 'balut';
-        let scientificName = 'blt';
         let o2formula = 100;
-        let price = Units.convert('0.01', 'eth', 'wei');
 
-        await treeTypeInstance.create(name, scientificName, o2formula, price, { from: ownerAccount });
+        await Common.addType(treeTypeInstance, ownerAccount, name);
 
         return await treeTypeInstance.getO2Formula(id)
             .then((treeTypeO2formula) => {
@@ -79,23 +73,12 @@ contract('TreeType', (accounts) => {
 
     it('should return count of tree types', async () => {
 
-        let id = 0;
         let name = 'balut';
-        let scientificName = 'blt';
-        let o2formula = 100;
-                let price = Units.convert('0.01', 'eth', 'wei');
-
-
-
-        let id1 = 1;
         let name1 = 'konar';
-        let scientificName1 = 'knr';
-        let o2formula1 = 100;
-                let price1 = Units.convert('0.02', 'eth', 'wei');
 
 
-        await treeTypeInstance.create(name, scientificName, o2formula, price, {from: ownerAccount});
-        await treeTypeInstance.create(name1, scientificName1, o2formula1, price1, {from: ownerAccount});
+        await Common.addType(treeTypeInstance, ownerAccount, name);
+        await Common.addType(treeTypeInstance, ownerAccount, name1);
 
         return await treeTypeInstance.count()
             .then((count) => {

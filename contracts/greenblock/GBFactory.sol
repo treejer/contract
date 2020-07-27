@@ -8,12 +8,15 @@ import "../access/AccessRestriction.sol";
 
 contract GBFactory is AccessRestriction {
     event NewGBAdded(uint256 id, string title);
+    event GBActivated(uint256 id);
+
+    enum GBStatus { Pending, Active }
 
     //@todo must change coordinates
     struct GB {
         string title;
         string coordinates;
-        uint256 status;
+        GBStatus status;
     }
 
     GB[] public greenBlocks;
@@ -31,7 +34,9 @@ contract GBFactory is AccessRestriction {
         address _ambassador,
         address[] calldata _planters
     ) external planterOrAmbassador whenNotPaused {
-        greenBlocks.push(GB(_title, _coordinates, 0));
+
+
+        greenBlocks.push(GB(_title, _coordinates, GBStatus.Pending));
         uint256 id = greenBlocks.length - 1;
 
         // require(id == uint256(uint256(id)));
@@ -62,7 +67,7 @@ contract GBFactory is AccessRestriction {
         returns (
             string memory,
             string memory,
-            uint256
+            GBStatus
         )
     {
         return (
@@ -70,6 +75,14 @@ contract GBFactory is AccessRestriction {
             greenBlocks[_gbId].coordinates,
             greenBlocks[_gbId].status
         );
+    }
+
+    function activate(uint256 _gbId) external onlyAdmin {
+        require(greenBlocks[_gbId].status != GBStatus.Active, "GB already active!");
+
+        greenBlocks[_gbId].status = GBStatus.Active;
+
+        emit GBActivated(_gbId);
     }
 
     //@todo premission must check only ambassedor or planters or admin

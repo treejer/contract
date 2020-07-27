@@ -3,6 +3,8 @@ const TreeFactory = artifacts.require("TreeFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
+const Common = require("./common");
+
 
 
 contract('UpdateFactory', (accounts) => {
@@ -22,37 +24,10 @@ contract('UpdateFactory', (accounts) => {
         // await treeInstance.kill({ from: ownerAccount });
     });
 
-    function addTree(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
-
-        return treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: ownerAccount });
-    }
-
     it("should add updates", async () => {
 
-        addTree('firstTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+
         let treeId = 0;
         let imageHash = '0x14dsahjdauhdiw012564';
 
@@ -67,7 +42,8 @@ contract('UpdateFactory', (accounts) => {
 
     it("should accept update", async () => {
 
-        addTree('firstTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+
         let treeId = 0;
         let imageHash = '0x14dsahjdauhdiw012564';
 

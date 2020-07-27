@@ -1,10 +1,7 @@
 const GBFactory = artifacts.require("GBFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
-
-
-const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
-const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
+const Common = require("./common");
 
 contract('GBFactory', (accounts) => {
     let gbInstance;
@@ -18,6 +15,14 @@ contract('GBFactory', (accounts) => {
     const planter5Account = accounts[7];
     const adminAccount = accounts[8];
 
+    const plantersArray = [
+        planter1Account,
+        planter2Account,
+        planter3Account,
+        planter4Account,
+        planter5Account
+    ];
+
     beforeEach(async () => {
         gbInstance = await GBFactory.new({ from: deployerAccount });
     });
@@ -26,43 +31,13 @@ contract('GBFactory', (accounts) => {
         // await gbInstance.kill({ from: ownerAccount });
     });
 
-    function addAmbassador() {
-        gbInstance.grantRole(AMBASSADOR_ROLE, ambassadorAccount,{ from: deployerAccount });
-
-
-    }
-
-    function addGB(title = null) {
-        title = title !== null ? title : 'firstGB';
-        let coordinates = [
-          {lat: 25.774, lng: -80.190},
-          {lat: 18.466, lng: -66.118},
-          {lat: 32.321, lng: -64.757},
-          {lat: 25.774, lng: -80.190}
-        ];
-
-        addAmbassador();
-        
-        return gbInstance.add(
-            title,
-            JSON.stringify(coordinates),
-            ambassadorAccount,
-            [
-                planter1Account,
-                planter2Account,
-                planter3Account,
-                planter4Account,
-                planter5Account
-            ],
-            { from: ambassadorAccount });
-    }
-
-
     it("should add gb", async () => {
-        let title = 'firstGB';
 
-        let tx = await addGB(title);
-        
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+
+        let title = 'firstGB';
+        let tx = await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
+
         truffleAssert.eventEmitted(tx, 'NewGBAdded', (ev) => {
             return ev.id.toString() === '0' && ev.title === title;
         });
@@ -71,8 +46,9 @@ contract('GBFactory', (accounts) => {
 
     it("should return ambassodar gb count", async () => {
 
-        addGB();
-        addGB('second db 2');
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title2');
 
         return await gbInstance.getAmbassadorGBCount({ from: ambassadorAccount })
             .then(count => {
@@ -87,7 +63,8 @@ contract('GBFactory', (accounts) => {
 
     it("should return gb ambassador", async () => {
 
-        addGB();
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
 
         return await gbInstance.getGBAmbassador(0, { from: ambassadorAccount })
             .then(ambassadorAddress => {
@@ -101,8 +78,10 @@ contract('GBFactory', (accounts) => {
 
     it('should return greenblock', async () => {
         let title = 'firsGB';
-        let id = 0;   
-        addGB(title);
+        let id = 0;
+
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
         return await gbInstance.getGB(id)
             .then((greenBlock) => {
@@ -116,36 +95,33 @@ contract('GBFactory', (accounts) => {
             });
     });
 
+    it('should activate greenblock', async () => {
+        let title = 'firsGB';
+        let id = 0;
+
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
+
+        Common.addAdmin(gbInstance, adminAccount, deployerAccount);
+
+        let tx = await gbInstance.activate(id, { from: adminAccount });
+
+        truffleAssert.eventEmitted(tx, 'GBActivated', (ev) => {
+            return ev.id.toString() === id.toString();
+        });
+    });
+
 
     it("should not create gb when paused", async () => {
         let title = 'firstGB';
         let titleTree = 'firstTree';
 
-        gbInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, { from: deployerAccount });
+        Common.addAdmin(gbInstance, adminAccount, deployerAccount);
         gbInstance.pause({ from: adminAccount });
 
-        title = 'firstGB';
-        let coordinates = [
-            { lat: 25.774, lng: -80.190 },
-            { lat: 18.466, lng: -66.118 },
-            { lat: 32.321, lng: -64.757 },
-            { lat: 25.774, lng: -80.190 }
-        ];
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
 
-        addAmbassador();
-
-        await gbInstance.add(
-            title,
-            JSON.stringify(coordinates),
-            ambassadorAccount,
-            [
-                planter1Account,
-                planter2Account,
-                planter3Account,
-                planter4Account,
-                planter5Account
-            ],
-            { from: ambassadorAccount })
+        await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title)
             .then(assert.fail)
             .catch(error => {
                 console.log(error.message);
@@ -156,34 +132,17 @@ contract('GBFactory', (accounts) => {
                     'add gb when paused shoud retrun exception'
                 )
             });
-            
+
     });
 
     it("should not create gb when not hasRole", async () => {
 
 
         let title = 'firstGB';
-        let coordinates = [
-            { lat: 25.774, lng: -80.190 },
-            { lat: 18.466, lng: -66.118 },
-            { lat: 32.321, lng: -64.757 },
-            { lat: 25.774, lng: -80.190 }
-        ];
 
-        addAmbassador();
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
 
-        await gbInstance.add(
-            title,
-            JSON.stringify(coordinates),
-            ambassadorAccount,
-            [
-                planter1Account,
-                planter2Account,
-                planter3Account,
-                planter4Account,
-                planter5Account
-            ],
-            { from: planter4Account })
+        await await Common.addGB(gbInstance, planter1Account, plantersArray, title)
             .then(assert.fail)
             .catch(error => {
                 console.log(error.message);

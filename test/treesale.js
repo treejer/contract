@@ -3,6 +3,7 @@ const TreeSale = artifacts.require("TreeSale");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
+const Common = require("./common");
 
 
 contract('TreeSale', (accounts) => {
@@ -22,41 +23,12 @@ contract('TreeSale', (accounts) => {
         // await treeInstance.kill({ from: ownerAccount });
     });
 
-    function addTree(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
-
-        return treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: ownerAccount });
-    }
-
     it("should add to tree sales list", async () => {
 
-        addTree('firstTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+
         let treeId = 0;
-
         let price = Units.convert('0.01', 'eth', 'wei');
-
         let tx = await treeSaleInstance.addToSalesList(
             treeId,
             price,
@@ -70,7 +42,7 @@ contract('TreeSale', (accounts) => {
 
     it("should not add to tree sales list, because it is not owner of tree", async () => {
 
-        addTree('firstTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
         let treeId = 0;
 
         let price = Units.convert('0.01', 'eth', 'wei');
@@ -92,8 +64,8 @@ contract('TreeSale', (accounts) => {
 
 
     it('should return count of tree sales list', async () => {
-        addTree('firstTree');
-        addTree('secondTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addTree(treeInstance, ownerAccount, 'secondTree');
 
         await treeSaleInstance.addToSalesList(
             0,
@@ -119,9 +91,9 @@ contract('TreeSale', (accounts) => {
 
 
     it('should remove tree from sales list', async () => {
-        addTree('firstTree');
-        addTree('secondTree');
-        addTree('thirdTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addTree(treeInstance, ownerAccount, 'secondTree');
+        Common.addTree(treeInstance, ownerAccount, 'thirdTree');
 
         await treeSaleInstance.addToSalesList(
             0,
@@ -148,7 +120,7 @@ contract('TreeSale', (accounts) => {
     });
 
     it('should return list of tree sales', async () => {
-        addTree('firstTree');
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
 
         let price = Units.convert('0.01', 'eth', 'wei');
         let treeId = 0;

@@ -6,8 +6,7 @@ const UpdateFactory = artifacts.require("UpdateFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
-const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
-
+const Common = require("./common");
 
 
 contract('O2Factory', (accounts) => {
@@ -23,6 +22,7 @@ contract('O2Factory', (accounts) => {
     const planter3Account = accounts[5];
     const planter4Account = accounts[6];
     const planter5Account = accounts[7];
+    const adminAccount = accounts[7];
 
     beforeEach(async () => {
         treeTypeInstance = await TreeType.new({ from: deployerAccount });
@@ -40,199 +40,54 @@ contract('O2Factory', (accounts) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-
-    function addAmbassador() {
-        gbInstance.grantRole(AMBASSADOR_ROLE, ambassadorAccount, { from: deployerAccount });
-    }
-
-    function addGB(title = null) {
-        title = title !== null ? title : 'firstO2';
-        let coordinates = [
-            { lat: 25.774, lng: -80.190 },
-            { lat: 18.466, lng: -66.118 },
-            { lat: 32.321, lng: -64.757 },
-            { lat: 25.774, lng: -80.190 }
-        ];
-
-        addAmbassador();
-        return gbInstance.add(
-            title,
-            JSON.stringify(coordinates),
-            ambassadorAccount,
-            [
-                planter1Account,
-                planter2Account,
-                planter3Account,
-                planter4Account,
-                planter5Account
-            ],
-            { from: ambassadorAccount });
-    }
-
-    function addType(name = null) {
-        name = name !== null ? name : 'balut';
-        let scientificName = 'blt';
-        let o2formula = 100;
-        let price = Units.convert('0.01', 'eth', 'wei');
-
-
-        treeTypeInstance.create(name, scientificName, o2formula, price, { from: ownerAccount });
-    }
-
     async function addTree(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
+        Common.addType(treeTypeInstance, adminAccount);
 
-
-        addType();
-
-        treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: ownerAccount });
-
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
         await sleep(1000);
-
-
-        updateInstance.post(0, 'imageHash', { from: ownerAccount });
-        updateInstance.acceptUpdate(0, { from: ownerAccount });
+        Common.addUpdate(updateInstance, ownerAccount);
+        Common.acceptUpdate(updateInstance, adminAccount);
     }
 
     async function addTree2Update(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
+        Common.addType(treeTypeInstance, adminAccount);
 
-
-        addType();
-
-        treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: ownerAccount });
-
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
         await sleep(1000);
-
-
-        updateInstance.post(0, 'imageHash', { from: ownerAccount });
-        updateInstance.acceptUpdate(0, { from: ownerAccount });
-
+        Common.addUpdate(updateInstance, ownerAccount);
+        Common.acceptUpdate(updateInstance, adminAccount);
         await sleep(1000);
-
-        updateInstance.post(0, 'imageHash', { from: ownerAccount });
-        updateInstance.acceptUpdate(1, { from: ownerAccount });
-
+        Common.addUpdate(updateInstance, ownerAccount);
+        Common.acceptUpdate(updateInstance, adminAccount, 1);
     }
 
 
     async function add2Tree2Update(name = null) {
-        let typeId = 0;
-        let gbId = 0;
-        name = name !== null ? name : 'firstTree';
-        let latitude = '38.0962';
-        let longitude = '46.2738';
-        let plantedDate = '2020/02/20';
-        let birthDate = '2020/02/20';
-        let height = '1';
-        let diameter = '1';
+        Common.addType(treeTypeInstance, adminAccount);
 
-
-        addType();
-
-        treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: planter1Account });
-
-
-        treeInstance.add(
-            typeId,
-            gbId,
-            [
-                name,
-                latitude,
-                longitude,
-                plantedDate,
-                birthDate
-            ],
-            [
-                height,
-                diameter,
-            ],
-            { from: planter1Account });
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addTree(treeInstance, ownerAccount);
 
         await sleep(1000);
+        Common.addUpdate(updateInstance, ownerAccount, 0);
+        Common.addUpdate(updateInstance, ownerAccount, 1);
 
-
-        updateInstance.post(0, 'imageHash', { from: planter1Account });
-        updateInstance.acceptUpdate(0, { from: planter1Account });
-
-        updateInstance.post(1, 'image2Hash2', { from: planter1Account });
-        updateInstance.acceptUpdate(1, { from: planter1Account });
+        Common.acceptUpdate(updateInstance, adminAccount, 0);
+        Common.acceptUpdate(updateInstance, adminAccount, 1);
 
         await sleep(1000);
+        Common.addUpdate(updateInstance, ownerAccount, 0);
+        Common.addUpdate(updateInstance, ownerAccount, 1);
 
-        updateInstance.post(0, 'image2Hash', { from: planter1Account });
-        updateInstance.acceptUpdate(2, { from: planter1Account });
-
-
-        updateInstance.post(1, 'image2Hash23', { from: planter1Account });
-        updateInstance.acceptUpdate(3, { from: planter1Account });
+        Common.acceptUpdate(updateInstance, adminAccount, 2);
+        Common.acceptUpdate(updateInstance, adminAccount, 3);
 
     }
 
 
     it("should mint o2", async () => {
-        let title = 'firstGB';
         let titleTree = 'firstTree';
 
-        await addGB(title);
         await addTree(titleTree);
 
         let tx = await o2Instance.mint({ from: ownerAccount });
@@ -242,11 +97,9 @@ contract('O2Factory', (accounts) => {
         });
     });
 
-    it("should not mint o2", async () => {
-        let title = 'firstGB';
+    it("should not mint o2 second time", async () => {
         let titleTree = 'firstTree';
 
-        await addGB(title);
         await addTree(titleTree);
 
         await o2Instance.mint({ from: ownerAccount });
@@ -267,10 +120,8 @@ contract('O2Factory', (accounts) => {
 
 
     it("should mint o2 twice", async () => {
-        let title = 'secondGB';
         let titleTree = 'secondTree';
 
-        await addGB(title);
         await addTree2Update(titleTree);
 
         let tx = await o2Instance.mint({ from: ownerAccount });
@@ -282,26 +133,21 @@ contract('O2Factory', (accounts) => {
 
 
     it("should mint o2 with 2 tree and 2 update", async () => {
-        let title = 'secondGB';
         let titleTree = 'secondTree';
 
-        await addGB(title);
         await add2Tree2Update(titleTree);
 
-        let tx = await o2Instance.mint({ from: planter1Account });
+        let tx = await o2Instance.mint({ from: ownerAccount });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '400';
+            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '400';
         });
     });
 
 
     it('should return balance of planter', async () => {
 
-        let title = 'firstGB';
         let titleTree = 'firstTree';
-
-        await addGB(title);
         await addTree(titleTree);
 
         await o2Instance.mint({ from: ownerAccount });

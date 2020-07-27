@@ -27,9 +27,6 @@ contract O2Factory is ERC20 {
 
     event O2Minted(address owner, uint256 totalO2);
 
-    event ConsoleLog(uint256 updateDate);
-    event ConsoleLogB(bool updateDate);
-
     //@todo permission must check
     function mint() external {
         require(

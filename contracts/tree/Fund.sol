@@ -20,8 +20,6 @@ contract Fund {
         uint256 balance
     );
 
-    event C(bool id);
-
     uint public lastFundedTreeIndex;
 
     TreeFactory public treeFactory;
@@ -36,9 +34,6 @@ contract Fund {
 
     function fund(uint _count) external payable {
 
-        // require(types[_typeId].price > 0);
-        
-
         uint balance = msg.value / _count;
 
         //@todo check for treePrice
@@ -49,9 +44,7 @@ contract Fund {
             
             uint256 id = 0;
 
-            emit C(treeFactory.isThereNotFundedTrees());
-            // if check for exist tree
-            if(treeFactory.isThereNotFundedTrees() == true) {
+            if(treeFactory.notFundedTreesExists() == true) {
                 id = treeFactory.fundPlantedTress(msg.sender, balance);
             } else {
                 id = treeFactory.simpleFund(msg.sender, balance);

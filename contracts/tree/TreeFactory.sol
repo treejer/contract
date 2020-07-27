@@ -38,6 +38,7 @@ contract TreeFactory is ERC721, AccessRestriction {
     Tree[] public trees;
 
     uint256 public price;
+
     mapping(uint => uint) public notFundedTrees;
     uint256 notFundedTreesLastIndex;
     uint256 notFundedTreesUsedIndex;
@@ -129,7 +130,7 @@ contract TreeFactory is ERC721, AccessRestriction {
 
     function fundPlantedTress(address _account, uint256 _balance) public returns(uint256) {
 
-        require(this.isThereNotFundedTrees(), "There is not funded trees");
+        require(this.notFundedTreesExists(), "There is not funded trees");
 
         uint treeId = notFundedTrees[notFundedTreesUsedIndex];
         notFundedTreesUsedIndex++;
@@ -144,8 +145,8 @@ contract TreeFactory is ERC721, AccessRestriction {
         return treeId;
     }
 
-    function isThereNotFundedTrees() public view returns(bool) {
-        return notFundedTreesUsedIndex != notFundedTreesLastIndex;
+    function notFundedTreesExists() public view returns(bool) {
+        return notFundedTreesLastIndex > notFundedTreesUsedIndex;
     }
 
     function ownerTreesCount(address _account) public view returns (uint256) {

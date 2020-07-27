@@ -43,6 +43,27 @@ contract('Fund', (accounts) => {
 
     // });
 
+    it("should fund a tree from planted trees", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+        Common.addTreeWithPlanter(treeInstance, ownerAccount, adminAccount);
+
+        let tx = await instance.fund(count,
+            { from: secondAccount, value: price });
+
+        truffleAssert.eventEmitted(tx, 'TreeFunded', (ev) => {
+            return ev.treeId.toString() === '0' && ev.balance.toString() === balance.toString();
+        });
+
+    });
+
 
     it("should fund a tree", async () => {
 

@@ -17,9 +17,10 @@ contract Fund {
 
     event TreeFunded(
         uint256 treeId,
-        string name,
         uint256 balance
     );
+
+    event C(bool id);
 
     uint public lastFundedTreeIndex;
 
@@ -45,20 +46,18 @@ contract Fund {
 
         
         for (uint8 i = 0; i < _count; i++) {
-
-            string memory _name = string('types name trees.length');
-
-            // if check for exist tree
-
-            // else
-            uint256 id = treeFactory.simpleFund(msg.sender, balance);
             
-            emit TreeFunded(
-                id,
-                _name,
-                balance
-            );
+            uint256 id = 0;
 
+            emit C(treeFactory.isThereNotFundedTrees());
+            // if check for exist tree
+            if(treeFactory.isThereNotFundedTrees() == true) {
+                id = treeFactory.fundPlantedTress(msg.sender, balance);
+            } else {
+                id = treeFactory.simpleFund(msg.sender, balance);
+            }
+            
+            emit TreeFunded(id, balance);
         }
         
         //distribute fund

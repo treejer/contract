@@ -8,7 +8,9 @@ import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../access/AccessRestriction.sol";
 import "./TreeType.sol";
 
+
 contract TreeFactory is ERC721, AccessRestriction {
+
     constructor() ERC721("Tree", "TREE") public {
     }
 
@@ -36,6 +38,10 @@ contract TreeFactory is ERC721, AccessRestriction {
     Tree[] public trees;
 
     uint256 public price;
+    mapping(uint => uint) public notFundedTrees;
+    uint256 notFundedTreesLastIndex;
+    uint256 notFundedTreesUsedIndex;
+
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => uint256) public treeToGB;
@@ -78,6 +84,9 @@ contract TreeFactory is ERC721, AccessRestriction {
 
         ownerTrees[msg.sender].push(id);
 
+        notFundedTrees[notFundedTreesLastIndex] = id;
+        notFundedTreesLastIndex++;
+
         _mint(msg.sender, id);
 
         emit NewTreeAdded(
@@ -91,7 +100,7 @@ contract TreeFactory is ERC721, AccessRestriction {
     function simpleFund(
         address _account,
         uint256 _balance
-    ) public returns(uint256 id) {
+    ) public returns(uint256) {
         string memory name = string('types name trees.length');
 
 
@@ -108,17 +117,36 @@ contract TreeFactory is ERC721, AccessRestriction {
                 _balance
             )
         );
-        id = trees.length - 1;
+        uint256 id = trees.length - 1;
 
         ownerTrees[_account].push(id);
 
         _mint(_account, id);
 
+        return id;
+
     }
 
-    // function plantFundedTrees() external planterOrAmbassador {
-        
-    // }
+    function fundPlantedTress(address _account, uint256 _balance) public returns(uint256) {
+
+        require(this.isThereNotFundedTrees(), "There is not funded trees");
+
+        uint treeId = notFundedTrees[notFundedTreesUsedIndex];
+        notFundedTreesUsedIndex++;
+
+        trees[treeId].balance = _balance;
+        trees[treeId].fundedDate = now;
+
+        _transfer(ownerOf(treeId), _account, treeId);
+
+        delete notFundedTrees[notFundedTreesUsedIndex - 1];
+
+        return treeId;
+    }
+
+    function isThereNotFundedTrees() public view returns(bool) {
+        return notFundedTreesUsedIndex != notFundedTreesLastIndex;
+    }
 
     function ownerTreesCount(address _account) public view returns (uint256) {
         return balanceOf(_account);

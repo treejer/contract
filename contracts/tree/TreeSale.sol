@@ -52,6 +52,8 @@ contract TreeSale is AccessRestriction {
             salesLists[i] = salesLists[i + 1];
         }
 
+        delete salesLists[salesLists.length - 1];
+
         emit TreeRemovedFromSalesList(_saleId);
     }
 

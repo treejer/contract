@@ -53,7 +53,6 @@ contract TreeFactory is ERC721, AccessRestriction {
     mapping(uint256 => address) public treeToPlanter;
     mapping(uint256 => address) public treeToConserver;
     mapping(uint256 => address) public treeToVerifier;
-    mapping(address => uint256[]) public ownerTrees;
     mapping(address => uint256) planterTreeCount;
     mapping(address => uint256) conserverTreeCount;
     mapping(address => uint256) verifierTreeCount;
@@ -66,7 +65,7 @@ contract TreeFactory is ERC721, AccessRestriction {
         uint256 _gbId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
-    ) external onlyPlanter {
+    ) external onlyPlanter whenNotPaused {
 
         uint256 id = 0;
 
@@ -104,7 +103,6 @@ contract TreeFactory is ERC721, AccessRestriction {
 
             notFundedTrees[notFundedTreesLastIndex] = id;
             notFundedTreesLastIndex++;
-            ownerTrees[msg.sender].push(id);
             _mint(msg.sender, id);
         }
 
@@ -143,7 +141,6 @@ contract TreeFactory is ERC721, AccessRestriction {
         );
         uint256 id = trees.length - 1;
 
-        ownerTrees[_account].push(id);
 
         notPlantedTrees[notPlantedTreesLastIndex] = id;
         notPlantedTreesLastIndex++;
@@ -165,9 +162,6 @@ contract TreeFactory is ERC721, AccessRestriction {
         trees[treeId].fundedDate = now;
 
         _transfer(ownerOf(treeId), _account, treeId);
-
-        ownerTrees[_account].push(treeId);
-
 
         delete notFundedTrees[notFundedTreesUsedIndex - 1];
 
@@ -191,7 +185,21 @@ contract TreeFactory is ERC721, AccessRestriction {
     }
 
     function getOwnerTrees(address _account) public view returns (uint256[] memory) {
-        return ownerTrees[_account];
+
+        uint256 tokenCount = balanceOf(_account);
+
+        if (tokenCount == 0) {
+            // Return an empty array
+            return new uint256[](0);
+        }
+
+        uint256[] memory result = new uint256[](tokenCount);
+
+        for (uint256 index = 0; index < tokenCount; index++) {
+            result[index] = tokenOfOwnerByIndex(_account, index);
+        }
+
+        return result;
     }
 
     function getTypeId(uint256 _treeId) public view returns (uint256) {

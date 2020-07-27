@@ -28,9 +28,12 @@ contract O2Factory is ERC20 {
     event O2Minted(address owner, uint256 totalO2);
 
     //@todo permission must check
-    function mint() external {
+    function mint() external  {
+
+        uint256 ownerTreesCount = treeFactory.ownerTreesCount(msg.sender);
+
         require(
-            treeFactory.getOwnerTrees(msg.sender).length > 0,
+            ownerTreesCount > 0,
             "Owner tree count is zero"
         );
 
@@ -38,10 +41,10 @@ contract O2Factory is ERC20 {
 
         for (
             uint256 i = 0;
-            i < treeFactory.getOwnerTrees(msg.sender).length;
+            i < ownerTreesCount;
             i++
         ) {
-            uint256 treeId = treeFactory.getOwnerTrees(msg.sender)[i];
+            uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
             uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
             uint256 totalSeconds = 0;
 

@@ -74,6 +74,33 @@ contract('TreeFactory', (accounts) => {
             });
     });
 
+    it("should return owner trees", async () => {
+
+        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addTree(treeInstance, ownerAccount);
+
+        await Common.addPlanter(treeInstance, secondAccount, deployerAccount);
+        await Common.addTree(treeInstance, secondAccount);
+
+        await Common.addTree(treeInstance, ownerAccount);
+
+        return await treeInstance.getOwnerTrees(ownerAccount, { from: ownerAccount })
+            .then(ownerTrees => {
+                
+                assert.equal(
+                    ownerTrees[0],
+                    0,
+                    "First tree id must 0" 
+                );
+
+                assert.equal(
+                    ownerTrees[1],
+                    2,
+                    "second tree id must 2"
+                );
+            });
+    });
+
 
     it("should return tree owner", async () => {
 

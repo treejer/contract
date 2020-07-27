@@ -111,6 +111,22 @@ contract('GBFactory', (accounts) => {
         });
     });
 
+    it('should join GB', async () => {
+        let title = 'firsGB';
+        let id = 0;
+
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(gbInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
+
+        Common.addPlanter(gbInstance, planter2Account, deployerAccount);
+        let tx = await gbInstance.joinGB(id, planter2Account, { from: planter2Account });
+
+        truffleAssert.eventEmitted(tx, 'PlanterJoinedGB', (ev) => {
+            return ev.id.toString() === id.toString() && ev.planter === planter2Account;
+        });
+    });
+
 
     it("should not create gb when paused", async () => {
         let title = 'firstGB';

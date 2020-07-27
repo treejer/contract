@@ -34,6 +34,13 @@ contract AccessRestriction is AccessControl, Pausable {
         _;
     }
 
+    modifier onlyPlanter()
+    {
+        require(hasRole(PLANTER_ROLE, msg.sender),
+                "Caller is not a planter");
+        _;
+    }
+
     modifier onlyAdmin()
     {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender),

@@ -9,6 +9,7 @@ import "../access/AccessRestriction.sol";
 contract GBFactory is AccessRestriction {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
+    event PlanterJoinedGB(uint256 id, address planter);
 
     enum GBStatus { Pending, Active }
 
@@ -20,6 +21,7 @@ contract GBFactory is AccessRestriction {
     }
 
     GB[] public greenBlocks;
+    uint8 maxGBPlantersCount = 5;
 
     mapping(uint256 => address[]) public gbToVerifiers;
     mapping(uint256 => address[]) public gbToPlanters;
@@ -35,20 +37,17 @@ contract GBFactory is AccessRestriction {
         address[] calldata _planters
     ) external planterOrAmbassador whenNotPaused {
 
-
         greenBlocks.push(GB(_title, _coordinates, GBStatus.Pending));
         uint256 id = greenBlocks.length - 1;
 
-        // require(id == uint256(uint256(id)));
-
         for (uint8 i = 0; i < _planters.length; i++) {
-            gbToPlanters[id].push(_planters[i]);
+            if(hasRole(PLANTER_ROLE, _planters[i])) {
+                gbToPlanters[id].push(_planters[i]);
+            }
         }
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
-
-        //_transfer();
 
         emit NewGBAdded(id, _title);
     }
@@ -83,6 +82,14 @@ contract GBFactory is AccessRestriction {
         greenBlocks[_gbId].status = GBStatus.Active;
 
         emit GBActivated(_gbId);
+    }
+
+    function joinGB(uint256 _gbId, address planter) external onlyPlanter {
+        require(gbToPlanters[_gbId].length < maxGBPlantersCount, "Planter of this GB is reached maximum");
+
+        gbToPlanters[_gbId].push(planter);
+
+        emit PlanterJoinedGB(_gbId, planter);
     }
 
     //@todo premission must check only ambassedor or planters or admin

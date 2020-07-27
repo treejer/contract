@@ -55,7 +55,7 @@ contract TreeFactory is ERC721, AccessRestriction {
         uint256 _gbId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
-    ) external planterOrAmbassador {
+    ) external onlyPlanter {
         trees.push(
             Tree(
                 _stringParams[0],

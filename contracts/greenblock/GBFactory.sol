@@ -84,7 +84,7 @@ contract GBFactory is AccessRestriction {
         emit GBActivated(_gbId);
     }
 
-    function joinGB(uint256 _gbId, address planter) external onlyPlanter {
+    function joinGB(uint256 _gbId, address planter) external whenNotPaused onlyPlanter {
         require(gbToPlanters[_gbId].length < maxGBPlantersCount, "Planter of this GB is reached maximum");
 
         gbToPlanters[_gbId].push(planter);

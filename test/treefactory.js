@@ -23,7 +23,7 @@ contract('TreeFactory', (accounts) => {
         let name = 'firstTree';
 
 
-        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
         let tx = await Common.addTree(treeInstance, ownerAccount, name);
 
         truffleAssert.eventEmitted(tx, 'NewTreeAdded', (ev) => {
@@ -34,7 +34,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should return owner tree count", async () => {
 
-        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
@@ -51,7 +51,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree owner", async () => {
 
-        await Common.addAmbassador(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
         return await treeInstance.treeOwner(0, { from: ownerAccount })

@@ -147,7 +147,26 @@ contract('TreeFactory', (accounts) => {
             });
     });
 
-    
+    it("should return tree data", async () => {
+
+        let name = "testTree";
+
+        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addTree(treeInstance, ownerAccount, name);
+
+        return await treeInstance.getTree(0, { from: ownerAccount })
+            .then(tree => {
+                assert.equal(
+                    tree[9],
+                    ownerAccount
+                );
+
+                assert.equal(
+                    tree[0],
+                    name
+                );
+            });
+    });
 
 
 });

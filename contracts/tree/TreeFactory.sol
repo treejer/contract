@@ -218,4 +218,28 @@ contract TreeFactory is ERC721, AccessRestriction {
     function getPrice() external view returns(uint256) {
         return price;
     }
+
+    function getTree(uint256 _treeId) external view returns(
+        string memory name,
+        string memory latitude,
+        string memory longitude,
+        uint256 plantedDate,
+        uint256 birthDate,
+        uint256 fundedDate,
+        uint8 height,
+        uint8 diameter,
+        uint256 balance,
+        address owner
+    ) {
+        name = trees[_treeId].name;
+        latitude = trees[_treeId].latitude;
+        longitude = trees[_treeId].longitude;
+        plantedDate = trees[_treeId].plantedDate;
+        birthDate = trees[_treeId].birthDate;
+        fundedDate = trees[_treeId].fundedDate;
+        height = trees[_treeId].height;
+        diameter = trees[_treeId].diameter;
+        balance = trees[_treeId].balance;
+        owner = ownerOf(_treeId);
+    }
 }

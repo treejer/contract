@@ -26,7 +26,9 @@ contract('UpdateFactory', (accounts) => {
 
     it("should add updates", async () => {
 
-        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addTree(treeInstance, ownerAccount);
 
         let treeId = 0;
         let imageHash = '0x14dsahjdauhdiw012564';
@@ -42,7 +44,9 @@ contract('UpdateFactory', (accounts) => {
 
     it("should accept update", async () => {
 
-        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addTree(treeInstance, ownerAccount);
 
         let treeId = 0;
         let imageHash = '0x14dsahjdauhdiw012564';
@@ -50,7 +54,7 @@ contract('UpdateFactory', (accounts) => {
         let tx = await updateInstance.post(treeId, imageHash, { from: ownerAccount });
 
 
-        let tx1 = await updateInstance.acceptUpdate(0, { from: ownerAccount });
+        let tx1 = await updateInstance.acceptUpdate(0, { from: deployerAccount });
 
 
         truffleAssert.eventEmitted(tx1, 'UpdateAccepted', (ev) => {

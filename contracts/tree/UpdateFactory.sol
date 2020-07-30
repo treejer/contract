@@ -3,9 +3,10 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
+import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
 
-contract UpdateFactory {
+contract UpdateFactory is AccessRestriction  {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
     event UpdateAccepted(uint256 updateId);
 
@@ -23,7 +24,7 @@ contract UpdateFactory {
     //@todo permission check
     // must one pending update after delete or accpet can post other update
     // update difference must check
-    function post(uint256 _treeId, string calldata _imageHash) external {
+    function post(uint256 _treeId, string calldata _imageHash) external onlyPlanter {
         updates.push(Update(_treeId, _imageHash, now, 0, false));
         uint256 id = updates.length - 1;
 
@@ -32,7 +33,7 @@ contract UpdateFactory {
         emit UpdateAdded(id, _treeId, _imageHash);
     }
 
-    function acceptUpdate(uint256 _updateId) external {
+    function acceptUpdate(uint256 _updateId) external onlyAdmin {
         updates[_updateId].status = 1;
         emit UpdateAccepted(_updateId);
     }

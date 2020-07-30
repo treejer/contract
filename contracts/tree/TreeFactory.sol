@@ -231,6 +231,8 @@ contract TreeFactory is ERC721, AccessRestriction {
         uint256 balance,
         address owner
     ) {
+        require(_exists(_treeId), "ERC721: nonexistent token");
+
         name = trees[_treeId].name;
         latitude = trees[_treeId].latitude;
         longitude = trees[_treeId].longitude;

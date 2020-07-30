@@ -45,20 +45,24 @@ contract('O2Factory', (accounts) => {
 
         Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
         await sleep(1000);
+        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
         Common.addUpdate(updateInstance, ownerAccount);
-        Common.acceptUpdate(updateInstance, adminAccount);
+        Common.acceptUpdate(updateInstance, deployerAccount);
     }
 
     async function addTree2Update(name = null) {
         Common.addType(treeTypeInstance, adminAccount);
 
         Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+
+        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
+
         await sleep(1000);
         Common.addUpdate(updateInstance, ownerAccount);
-        Common.acceptUpdate(updateInstance, adminAccount);
+        Common.acceptUpdate(updateInstance, deployerAccount);
         await sleep(1000);
         Common.addUpdate(updateInstance, ownerAccount);
-        Common.acceptUpdate(updateInstance, adminAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 1);
     }
 
 
@@ -68,19 +72,21 @@ contract('O2Factory', (accounts) => {
         Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
         Common.addTree(treeInstance, ownerAccount);
 
-        await sleep(1000);
-        Common.addUpdate(updateInstance, ownerAccount, 0);
-        Common.addUpdate(updateInstance, ownerAccount, 1);
-
-        Common.acceptUpdate(updateInstance, adminAccount, 0);
-        Common.acceptUpdate(updateInstance, adminAccount, 1);
+        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
 
         await sleep(1000);
         Common.addUpdate(updateInstance, ownerAccount, 0);
         Common.addUpdate(updateInstance, ownerAccount, 1);
 
-        Common.acceptUpdate(updateInstance, adminAccount, 2);
-        Common.acceptUpdate(updateInstance, adminAccount, 3);
+        Common.acceptUpdate(updateInstance, deployerAccount, 0);
+        Common.acceptUpdate(updateInstance, deployerAccount, 1);
+
+        await sleep(1000);
+        Common.addUpdate(updateInstance, ownerAccount, 0);
+        Common.addUpdate(updateInstance, ownerAccount, 1);
+
+        Common.acceptUpdate(updateInstance, deployerAccount, 2);
+        Common.acceptUpdate(updateInstance, deployerAccount, 3);
 
     }
 

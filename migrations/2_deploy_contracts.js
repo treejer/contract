@@ -6,6 +6,7 @@ var UpdateFactory = artifacts.require("UpdateFactory.sol");
 var O2Factory = artifacts.require("O2Factory.sol");
 var TreeSale = artifacts.require("TreeSale.sol");
 var Fund = artifacts.require("Fund.sol");
+var O1Factory = artifacts.require("O1Factory.sol");
 
 module.exports = async function(deployer) {
 
@@ -33,5 +34,7 @@ module.exports = async function(deployer) {
     .then(() => { treeSaleAddress = TreeSale.address; }); 
 
   await deployer.deploy(Fund, treeAddress, treeSaleAddress); 
+
+  await deployer.deploy(O1Factory, treeAddress);
 
 };

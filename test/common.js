@@ -63,6 +63,12 @@ Common.addTree = function (instance, account, name = null) {
         { from: account });
 }
 
+Common.fundTree = (instance, ownerAccount, count) => {
+    let price = Units.convert('0.01', 'eth', 'wei');
+
+    instance.fund(count, { from: ownerAccount, value: (price * count) });
+}
+
 Common.addUpdate = (instance, ownerAccount, treeId = 0) => {
     instance.post(treeId, 'imageHash', { from: ownerAccount })
 }

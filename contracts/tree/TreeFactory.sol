@@ -210,6 +210,10 @@ contract TreeFactory is ERC721, AccessRestriction {
         return trees[_id].plantedDate;
     }
 
+    function getFundedDate(uint256 _id) public view returns (uint256) {
+        return trees[_id].fundedDate;
+    }
+
     function setPrice(uint256 _price) external onlyAdmin {
         price = _price;
         emit PriceChanged(_price);

@@ -20,4 +20,4 @@ dist
 .idea
 .vscode
 
-.secret
+.env

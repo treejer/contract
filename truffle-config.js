@@ -17,12 +17,11 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
-
+require('dotenv').config();
 const HDWalletProvider = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 
-const fs = require('fs');
-const privateKeys = [fs.readFileSync(".secret").toString().trim()];
+const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
 
 module.exports = {
   /**
@@ -61,7 +60,7 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
-      provider: () => new HDWalletProvider(privateKeys, `https://ropsten.infura.io/v3/4cde0eb827494bc1b6125c02b9f8f315`),
+      provider: () => new HDWalletProvider(privateKeys, `https://ropsten.infura.io/v3/${process.env.ROPSTEN_PROJECT_ID}`),
       network_id: 3,       // Ropsten's id
       gas: 5500000,        // Ropsten has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)

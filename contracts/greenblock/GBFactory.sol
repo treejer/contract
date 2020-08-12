@@ -13,6 +13,10 @@ contract GBFactory is AccessRestriction {
 
     enum GBStatus { Pending, Active }
 
+    // @dev Sanity check that allows us to ensure that we are pointing to the
+    //  right auction in our setGBAddress() call.
+    bool public isGBFactory = true;
+
     //@todo must change coordinates
     struct GB {
         string title;
@@ -21,7 +25,7 @@ contract GBFactory is AccessRestriction {
     }
 
     GB[] public greenBlocks;
-    uint8 maxGBPlantersCount = 5;
+    uint8 constant maxGBPlantersCount = 5;
 
     mapping(uint256 => address[]) public gbToVerifiers;
     mapping(uint256 => address[]) public gbToPlanters;
@@ -90,6 +94,10 @@ contract GBFactory is AccessRestriction {
         gbToPlanters[_gbId].push(planter);
 
         emit PlanterJoinedGB(_gbId, planter);
+    }
+
+    function totalGB() external view returns(uint256) {
+        return greenBlocks.length;
     }
 
     //@todo premission must check only ambassedor or planters or admin

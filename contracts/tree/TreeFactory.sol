@@ -168,6 +168,10 @@ contract TreeFactory is ERC721, AccessRestriction {
         return treeId;
     }
 
+    function getLastNotFundedTreeId() public view returns(uint256) {
+        return notFundedTrees[notFundedTreesUsedIndex];
+    }
+
     function notFundedTreesExists() public view returns(bool) {
         return notFundedTreesLastIndex > notFundedTreesUsedIndex;
     }
@@ -247,5 +251,9 @@ contract TreeFactory is ERC721, AccessRestriction {
         diameter = trees[_treeId].diameter;
         balance = trees[_treeId].balance;
         owner = ownerOf(_treeId);
+    }
+
+    function getTreeGB(uint256 _treeId) external view returns(uint256) {
+        return treeToGB[_treeId];
     }
 }

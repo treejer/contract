@@ -161,5 +161,41 @@ contract('Fund', (accounts) => {
 
     });
 
+    it("should withdraw treejer fund", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+
+        let tx = await instance.fund(count,
+            { from: secondAccount, value: price });
+
+
+        let beforeWithdraw = await web3.eth.getBalance(adminAccount);
+
+        await instance.withdrawBalance(0, adminAccount,
+            { from: deployerAccount});
+
+        return await web3.eth.getBalance(adminAccount)
+            .then((balanceEther) => {
+
+                assert.equal(
+                    balanceEther,
+                    (parseInt(beforeWithdraw) + parseInt(balance.toString() * 25 / 100 * 2)).toString(),
+                    "Ether balance: " + balanceEther + " returned"
+                );
+
+            }).catch((error) => {
+                console.log(error);
+            });
+
+    });
+    
+
 
 });

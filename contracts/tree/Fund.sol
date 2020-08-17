@@ -5,24 +5,23 @@ pragma experimental ABIEncoderV2;
 
 import "./TreeSale.sol";
 import "./TreeFactory.sol";
+import "./UpdateFactory.sol";
 import "../greenblock/GBFactory.sol";
 import "../access/AccessRestriction.sol";
 
-contract Fund is AccessRestriction {
-    event TreeBought(
-        uint256 saleId,
-        uint256 treeId,
-        uint256 price,
-        address newOwner
-    );
+contract Fund is TreeFactory {
+    
+    event TreeFunded(uint256 treeId, uint256 planterBalance, uint256 ambassadorBalance, uint256 totalFund, address owner);
+    event PlanterBalanceWithdrawn(address planter, uint amount);
 
-    event TreeFunded(uint256 treeId, uint256 balance, address owner);
+    event Debug(uint256 data);
 
     uint256 public lastFundedTreeIndex;
 
-    TreeFactory public treeFactory;
+    // TreeFactory public treeFactory;
     TreeSale public treeSale;
     GBFactory public gbFactory;
+    UpdateFactory public updateFactory;
 
     uint256 constant treejerPercentage = 25;
     uint256 constant planterPercentage = 40;
@@ -38,12 +37,14 @@ contract Fund is AccessRestriction {
     uint8 constant rescueFundIndex = 4;
     uint8 constant researchFundIndex = 5;
 
+    // i common year 31536000 seconds * 3 year 
+    uint256 constant treeBalanceWithdrawnSeconds = 94608000;
+
     uint256[6] public balances;
 
-    constructor(TreeFactory _treeFactoryAddress, TreeSale _treeSaleAddress)
+    constructor(TreeSale _treeSaleAddress)
         public
     {
-        treeFactory = _treeFactoryAddress;
         treeSale = _treeSaleAddress;
     }
 
@@ -56,42 +57,55 @@ contract Fund is AccessRestriction {
         gbFactory = candidateContract;
     }
 
+    function setUpdateFactoryAddress(address _address) external onlyAdmin {
+        UpdateFactory candidateContract = UpdateFactory(_address);
+
+        require(candidateContract.isUpdateFactory());
+
+        // Set the new contract address
+        updateFactory = candidateContract;
+    }
+
     function fund(uint256 _count) external payable {
         uint256 balance = msg.value / _count;
 
         //@todo check for treePrice
-        require(balance >= treeFactory.getPrice(), "Balance is not sufficient");
+        require(balance >= price, "Balance is not sufficient");
 
         for (uint8 i = 0; i < _count; i++) {
             uint256 id = 0;
-            uint256 treeBalance = _calculateBalance(planterPercentage, balance);
+            uint256 planterBalance = _calculateBalance(planterPercentage, balance);
+            uint256 ambassadorBalance = 0;
             bool hasAmbasador = false;
 
-            if (treeFactory.notFundedTreesExists() == true) {
-                id = treeFactory.getLastNotFundedTreeId();
-                uint256 gbId = treeFactory.getTreeGB(id);
+            if (notFundedTreesExists() == true) {
+                id = getLastNotFundedTreeId();
+                uint256 gbId = this.getTreeGB(id);
                 address gbAmbassador = gbFactory.getGBAmbassador(gbId);
 
                 if (gbAmbassador != address(0)) {
                     hasAmbasador = true;
-                    treeBalance =
-                        treeBalance +
-                        _calculateBalance(ambassadorPercentage, balance);
+                    ambassadorBalance =_calculateBalance(ambassadorPercentage, balance);
                 }
 
-                id = treeFactory.fundPlantedTress(msg.sender, treeBalance);
+                id = fundPlantedTress(msg.sender, planterBalance, _calculateBalancePerSecond(planterBalance),
+                ambassadorBalance, _calculateBalancePerSecond(ambassadorBalance));
+
             } else {
-                id = treeFactory.simpleFund(msg.sender, treeBalance);
+                id = simpleFund(msg.sender, planterBalance, _calculateBalancePerSecond(planterBalance), 0, 0);
             }
 
             _updateBalances(balance, hasAmbasador);
 
-            emit TreeFunded(id, treeBalance, msg.sender);
+            emit TreeFunded(id, planterBalance, ambassadorBalance, balance, msg.sender);
         }
+    }
 
-        //distribute fund
-        // (bool sent, bytes memory data) = _to.call.value(msg.value)("");
-        // require(sent, "Failed to send Ether");
+    function _calculateBalancePerSecond(uint256 _balance) private pure returns(uint256) {
+        if(_balance == 0) {
+            return 0;
+        }
+        return _balance / treeBalanceWithdrawnSeconds;
     }
 
     function _calculateBalance(uint256 _percentage, uint256 _balance)
@@ -144,8 +158,100 @@ contract Fund is AccessRestriction {
 
         require(balances[_index] > 0, "Balance is zero!");
 
-        bool res = _to.send(balances[_index]);
+        res = _to.send(balances[_index]);
+
+        balances[_index] = 0;
 
         require(res, "Sending failed");
+    }
+
+    function withdrawPlanterBalance() external onlyPlanter returns (bool res) {
+        
+        uint256 planterTreesCount = this.getPlanterTreesCount(msg.sender);
+        // emit Debug(planterTreesCount);
+        // return true;
+        require(
+            planterTreesCount > 0,
+            "Planter tree count is zero"
+        );
+
+        uint256 withdrawableBalance = 0;
+        uint256[] memory treeIds = this.getPlanterTrees(msg.sender);
+
+        for (
+            uint256 i = 0;
+            i < planterTreesCount;
+            i++
+        ) {
+            uint256 treeId = treeIds[i];
+            
+            uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
+            uint256 totalSeconds = 0;
+
+            if(treeToPlanterRemainingBalance[treeId] <= 0) {
+                continue;
+            }
+
+            if (treeUpdates.length == 0) {
+                continue;
+            }
+
+            if (updateFactory.isTreeLastUpdatePlanterBalanceWithdrawn(treeId) == true) {
+                continue;
+            }
+
+            for (uint256 j = treeUpdates.length; j > 0; j--) {
+                uint256 jUpdateId = treeUpdates[j - 1];
+
+                if (updateFactory.getStatus(jUpdateId) != 1) {
+                    continue;
+                }
+
+                if (updateFactory.isPlanterBalanceWithdrawn(jUpdateId) == true) {
+                    continue;
+                }
+
+                if (j > 1) {
+                    uint256 jMinusUpdateId = treeUpdates[j - 2];
+
+                    if (updateFactory.getStatus(jMinusUpdateId) != 1) {
+                        continue;
+                    }
+
+                    //@todo am i check for j-2 withdrawn?
+
+                    totalSeconds =
+                        totalSeconds +
+                        updateFactory.getUpdateDate(jUpdateId) -
+                        updateFactory.getUpdateDate(jMinusUpdateId);
+                } else {
+                    totalSeconds =
+                        totalSeconds +
+                        updateFactory.getUpdateDate(jUpdateId) -
+                        getPlantedDate(treeId);
+                }
+
+                updateFactory.setPlanterBalanceWithdrawn(jUpdateId);
+            }
+
+            if(totalSeconds > 0) {
+                withdrawableBalance = withdrawableBalance + (treeToPlanterBalancePerSecond[treeId] * totalSeconds);
+                treeToPlanterRemainingBalance[treeId] = treeToPlanterRemainingBalance[treeId] - (treeToPlanterBalancePerSecond[treeId] * totalSeconds);
+
+            }
+
+        }
+
+        require(withdrawableBalance > 0, "withdrawableBalance is zero");
+
+        res = msg.sender.send(withdrawableBalance);
+
+        require(res, "Sending failed");
+
+        //decrease balances for planter
+        balances[1] = balances[1] - withdrawableBalance;
+
+
+        emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
     }
 }

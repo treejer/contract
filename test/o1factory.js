@@ -32,8 +32,8 @@ contract('O1Factory', (accounts) => {
     beforeEach(async () => {
         treeInstance = await TreeFactory.new({ from: deployerAccount });
         treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
-        fundInstance = await Fund.new(treeInstance.address, treeSaleInstance.address, { from: deployerAccount });
-        o1Instance = await O1Factory.new(treeInstance.address, { from: deployerAccount });
+        fundInstance = await Fund.new(treeSaleInstance.address, { from: deployerAccount });
+        o1Instance = await O1Factory.new(fundInstance.address, { from: deployerAccount });
 
     });
 

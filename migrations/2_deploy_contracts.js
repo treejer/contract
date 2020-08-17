@@ -33,7 +33,7 @@ module.exports = async function(deployer) {
   await deployer.deploy(TreeSale, treeAddress)
     .then(() => { treeSaleAddress = TreeSale.address; }); 
 
-  await deployer.deploy(Fund, treeAddress, treeSaleAddress); 
+  await deployer.deploy(Fund, treeSaleAddress); 
 
   await deployer.deploy(O1Factory, treeAddress);
 

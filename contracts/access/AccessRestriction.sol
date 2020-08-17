@@ -14,9 +14,15 @@ contract AccessRestriction is AccessControl, Pausable {
     bytes32 public constant AMBASSADOR_ROLE = keccak256("AMBASSADOR_ROLE");
 
     constructor() public {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(PLANTER_ROLE, msg.sender);
-        _setupRole(AMBASSADOR_ROLE, msg.sender);
+        if(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) == false) {
+            _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        }
+        if(hasRole(PLANTER_ROLE, msg.sender) == false) {
+            _setupRole(PLANTER_ROLE, msg.sender);
+        }
+        if(hasRole(AMBASSADOR_ROLE, msg.sender) == false) {
+            _setupRole(AMBASSADOR_ROLE, msg.sender);
+        }
     }
 
 
@@ -38,6 +44,13 @@ contract AccessRestriction is AccessControl, Pausable {
     {
         require(hasRole(PLANTER_ROLE, msg.sender),
                 "Caller is not a planter");
+        _;
+    }
+
+    modifier onlyAmbassador()
+    {
+        require(hasRole(AMBASSADOR_ROLE, msg.sender),
+                "Caller is not a ambassador");
         _;
     }
 

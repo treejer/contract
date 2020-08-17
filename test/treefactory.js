@@ -21,7 +21,7 @@ contract('TreeFactory', (accounts) => {
     beforeEach(async () => {
         treeInstance = await TreeFactory.new({ from: deployerAccount });
         treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
-        fundInstance = await Fund.new(treeInstance.address, treeSaleInstance.address, { from: deployerAccount });    });
+        fundInstance = await Fund.new(treeSaleInstance.address, { from: deployerAccount });    });
 
     afterEach(async () => {
         // await treeInstance.kill({ from: ownerAccount });
@@ -157,7 +157,7 @@ contract('TreeFactory', (accounts) => {
         return await treeInstance.getTree(0, { from: ownerAccount })
             .then(tree => {
                 assert.equal(
-                    tree[9],
+                    tree[8],
                     ownerAccount
                 );
 

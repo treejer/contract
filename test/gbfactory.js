@@ -50,7 +50,7 @@ contract('GBFactory', (accounts) => {
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title2');
 
-        return await gbInstance.getAmbassadorGBCount({ from: ambassadorAccount })
+        return await gbInstance.getAmbassadorGBCount(ambassadorAccount, { from: ambassadorAccount })
             .then(count => {
                 assert.equal(
                     2,

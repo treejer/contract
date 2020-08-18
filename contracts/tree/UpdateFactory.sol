@@ -90,6 +90,18 @@ contract UpdateFactory is AccessRestriction  {
     function setPlanterBalanceWithdrawn(uint256 _id) public {
         updateToPlanterBalanceWithdrawn[_id] = true;
     }
+
+    function isTreeLastUpdateAmbassadorBalanceWithdrawn(uint256 _treeId) public view returns (bool) {
+        return updateToAmbassadorBalanceWithdrawn[treeUpdates[_treeId][treeUpdates[_treeId].length - 1]];
+    }
+
+    function isAmbassadorBalanceWithdrawn(uint256 _id) public view returns (bool) {
+        return updateToAmbassadorBalanceWithdrawn[_id];
+    }
+
+    function setAmbassadorBalanceWithdrawn(uint256 _id) public {
+        updateToAmbassadorBalanceWithdrawn[_id] = true;
+    }
     
     // function getUpdate(uint _id) public view returns (uint256[] memory) {
     //     return treeUpdates[_id];

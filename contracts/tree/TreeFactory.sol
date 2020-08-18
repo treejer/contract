@@ -47,6 +47,7 @@ contract TreeFactory is ERC721, AccessRestriction {
     mapping(address => uint256[]) public planterTrees;
     mapping(uint256 => uint256) public typeTreeCount;
     mapping(uint256 => uint256) public gbTreeCount;
+    mapping(uint256 => uint256[]) public gbTrees;
 
     mapping(uint256 => uint256) public treeToPlanterRemainingBalance;
     mapping(uint256 => uint256) public treeToPlanterBalancePerSecond;
@@ -94,9 +95,10 @@ contract TreeFactory is ERC721, AccessRestriction {
         }
 
         typeTreeCount[_typeId]++;
-        
+
         treeToGB[id] = _gbId;
         gbTreeCount[_gbId]++;
+        gbTrees[_gbId].push(id);
 
         treeToPlanter[id] = msg.sender;
         planterTreeCount[msg.sender]++;
@@ -266,4 +268,14 @@ contract TreeFactory is ERC721, AccessRestriction {
     function getPlanterTrees(address _planter) external view returns(uint256[] memory) {
         return planterTrees[_planter];
     }
+
+    function getGBTrees(uint256 _gbId) external view returns(uint256[] memory) {
+        return gbTrees[_gbId];
+    }
+
+    function getGBTreesCount(uint256 _gbId) external view returns(uint256) {
+        return gbTreeCount[_gbId];
+    }
+
+    
 }

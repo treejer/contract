@@ -27,10 +27,10 @@ contract GBFactory is AccessRestriction {
     GB[] public greenBlocks;
     uint8 constant maxGBPlantersCount = 5;
 
-    mapping(uint256 => address[]) public gbToVerifiers;
     mapping(uint256 => address[]) public gbToPlanters;
     mapping(uint256 => address) public gbToAmbassador;
     mapping(address => uint256) ambassadorGBCount;
+    mapping(address => uint256[]) ambassadorGBs;
     mapping(address => uint256) verifiersGBCount;
 
     //@todo permission must check
@@ -52,16 +52,21 @@ contract GBFactory is AccessRestriction {
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
+        ambassadorGBs[_ambassador].push(id);
 
         emit NewGBAdded(id, _title);
     }
 
-    function getAmbassadorGBCount() public view returns (uint256) {
-        return ambassadorGBCount[msg.sender];
+    function getAmbassadorGBCount(address _ambassador) external view returns (uint256) {
+        return ambassadorGBCount[_ambassador];
     }
 
-    function getGBAmbassador(uint256 _gbId) public view returns (address) {
+    function getGBAmbassador(uint256 _gbId) external view returns (address) {
         return gbToAmbassador[_gbId];
+    }
+
+    function getAmbassadorGBs(address _ambassador) external view returns(uint256[] memory) {
+        return ambassadorGBs[_ambassador];
     }
 
     function getGB(uint256 _gbId)

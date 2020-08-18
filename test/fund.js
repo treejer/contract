@@ -239,6 +239,58 @@ contract('Fund', (accounts) => {
         });
     
     });
+
+    it("should withdraw ambassador fund", async () => {
+
+        let price = Units.convert('0.03', 'eth', 'wei');
+        let count = 3;
+        let balance = price / count;
+
+        Common.addAdmin(instance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await instance.setPrice(treePrice, { from: adminAccount })
+
+        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, [planterAccount], 'GB GB');
+
+        Common.addAmbassador(instance, ambassadorAccount, deployerAccount);
+
+        Common.addPlanter(instance, planterAccount, deployerAccount);
+
+        Common.addTree(instance, planterAccount, 'first');
+        
+        //with two update
+        Common.addTree(instance, planterAccount, 'second');
+        
+        // without update
+        Common.addTree(instance, planterAccount, 'three');
+
+        await Common.sleep(1000);
+
+        Common.addPlanter(updateInstance, planterAccount, deployerAccount);
+
+        Common.addUpdate(updateInstance, planterAccount, 0);
+        Common.acceptUpdate(updateInstance, deployerAccount, 0);
+
+        Common.addUpdate(updateInstance, planterAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 1);
+
+        await Common.sleep(1000);
+
+        Common.addUpdate(updateInstance, planterAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 2);
+
+
+        await instance.fund(count,
+            { from: secondAccount, value: price });
+
+        let tx = await instance.withdrawAmbassadorBalance({ from: ambassadorAccount });
+
+        truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
+            return ev.amount.toString() === '15854895' && ev.ambassador === ambassadorAccount;
+        });
+
+    });
     
 
 

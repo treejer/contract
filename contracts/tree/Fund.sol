@@ -13,6 +13,7 @@ contract Fund is TreeFactory {
     
     event TreeFunded(uint256 treeId, uint256 planterBalance, uint256 ambassadorBalance, uint256 totalFund, address owner);
     event PlanterBalanceWithdrawn(address planter, uint amount);
+    event AmbassadorBalanceWithdrawn(address ambassador, uint amount);
 
     event Debug(uint256 data);
 
@@ -168,8 +169,7 @@ contract Fund is TreeFactory {
     function withdrawPlanterBalance() external onlyPlanter returns (bool res) {
         
         uint256 planterTreesCount = this.getPlanterTreesCount(msg.sender);
-        // emit Debug(planterTreesCount);
-        // return true;
+
         require(
             planterTreesCount > 0,
             "Planter tree count is zero"
@@ -253,5 +253,98 @@ contract Fund is TreeFactory {
 
 
         emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
+    }
+
+    function withdrawAmbassadorBalance() external onlyAmbassador returns (bool res) {
+        
+        uint256 ambassadorGBCount = gbFactory.getAmbassadorGBCount(msg.sender);
+
+        require(ambassadorGBCount > 0, "Ambassador gb count is zero");
+        
+        uint256[] memory gbIds = gbFactory.getAmbassadorGBs(msg.sender);
+
+        uint256 withdrawableBalance = 0;
+
+        for (uint256 k = 0; k < ambassadorGBCount; k++) {
+
+            uint256 _gbId = gbIds[k];
+
+            uint256 gbTreesCount = this.getGBTreesCount(_gbId);
+
+            if(gbTreesCount == 0) {
+                continue;
+            }
+
+            uint256[] memory treeIds = this.getGBTrees(_gbId);
+        
+            for (uint256 i = 0; i < gbTreesCount; i++) {
+
+                uint256 treeId = treeIds[i];
+
+                uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
+                uint256 totalSeconds = 0;
+
+                if(treeToAmbassadorRemainingBalance[treeId] <= 0) {
+                    continue;
+                }
+
+                if (treeUpdates.length == 0) {
+                    continue;
+                }
+
+                if (updateFactory.isTreeLastUpdateAmbassadorBalanceWithdrawn(treeId) == true) {
+                    continue;
+                }
+
+                for (uint256 j = treeUpdates.length; j > 0; j--) {
+                    uint256 jUpdateId = treeUpdates[j - 1];
+
+                    if (updateFactory.getStatus(jUpdateId) != 1) {
+                        continue;
+                    }
+
+                    if (updateFactory.isAmbassadorBalanceWithdrawn(jUpdateId) == true) {
+                        continue;
+                    }
+
+                    if (j > 1) {
+                        uint256 jMinusUpdateId = treeUpdates[j - 2];
+
+                        if (updateFactory.getStatus(jMinusUpdateId) != 1) {
+                            continue;
+                        }
+
+                        totalSeconds =
+                            totalSeconds +
+                            updateFactory.getUpdateDate(jUpdateId) -
+                            updateFactory.getUpdateDate(jMinusUpdateId);
+                    } else {
+                        totalSeconds =
+                            totalSeconds +
+                            updateFactory.getUpdateDate(jUpdateId) -
+                            getPlantedDate(treeId);
+                    }
+
+                    updateFactory.setAmbassadorBalanceWithdrawn(jUpdateId);
+                }
+
+                if(totalSeconds > 0) {
+                    withdrawableBalance = withdrawableBalance + (treeToAmbassadorBalancePerSecond[treeId] * totalSeconds);
+                    treeToAmbassadorRemainingBalance[treeId] -= (treeToAmbassadorBalancePerSecond[treeId] * totalSeconds);
+                }
+
+            }
+        }
+
+        require(withdrawableBalance > 0, "withdrawableBalance is zero");
+
+        res = msg.sender.send(withdrawableBalance);
+
+        require(res, "Sending failed");
+
+        //decrease balances for planter
+        balances[2] = balances[2] - withdrawableBalance;
+
+        emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
     }
 }

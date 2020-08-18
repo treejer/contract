@@ -150,7 +150,6 @@ contract Fund is TreeFactory {
     function withdrawBalance(uint8 _index, address payable _to)
         external
         onlyAdmin
-        returns (bool res)
     {
         require(
             _index != 1 && _index != 2,
@@ -159,14 +158,14 @@ contract Fund is TreeFactory {
 
         require(balances[_index] > 0, "Balance is zero!");
 
-        res = _to.send(balances[_index]);
+        uint256 withdrawbleBalance = balances[_index];
 
         balances[_index] = 0;
 
-        require(res, "Sending failed");
+        _to.transfer(withdrawbleBalance);
     }
 
-    function withdrawPlanterBalance() external onlyPlanter returns (bool res) {
+    function withdrawPlanterBalance() external onlyPlanter {
         
         uint256 planterTreesCount = this.getPlanterTreesCount(msg.sender);
 
@@ -218,8 +217,6 @@ contract Fund is TreeFactory {
                         continue;
                     }
 
-                    //@todo am i check for j-2 withdrawn?
-
                     totalSeconds =
                         totalSeconds +
                         updateFactory.getUpdateDate(jUpdateId) -
@@ -244,18 +241,14 @@ contract Fund is TreeFactory {
 
         require(withdrawableBalance > 0, "withdrawableBalance is zero");
 
-        res = msg.sender.send(withdrawableBalance);
-
-        require(res, "Sending failed");
-
-        //decrease balances for planter
         balances[1] = balances[1] - withdrawableBalance;
 
+        msg.sender.transfer(withdrawableBalance);
 
         emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
     }
 
-    function withdrawAmbassadorBalance() external onlyAmbassador returns (bool res) {
+    function withdrawAmbassadorBalance() external onlyAmbassador {
         
         uint256 ambassadorGBCount = gbFactory.getAmbassadorGBCount(msg.sender);
 
@@ -338,12 +331,9 @@ contract Fund is TreeFactory {
 
         require(withdrawableBalance > 0, "withdrawableBalance is zero");
 
-        res = msg.sender.send(withdrawableBalance);
-
-        require(res, "Sending failed");
-
-        //decrease balances for planter
         balances[2] = balances[2] - withdrawableBalance;
+
+        msg.sender.transfer(withdrawableBalance);
 
         emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
     }

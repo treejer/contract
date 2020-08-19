@@ -1,7 +1,5 @@
+const AccessRestriction = artifacts.require("AccessRestriction");
 const O1Factory = artifacts.require("O1Factory");
-const Fund = artifacts.require("Fund");
-const TreeSale = artifacts.require("TreeSale");
-
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
 const TreeFactory = artifacts.require("TreeFactory");
@@ -13,12 +11,12 @@ const Common = require("./common");
 
 
 contract('O1Factory', (accounts) => {
+    let arInstance;
     let o1Instance;
-    let fundInstance;
     let gbInstance;
     let treeInstance;
     let updateInstance;
-    let treeSaleInstance;
+
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
     const ambassadorAccount = accounts[2];
@@ -30,31 +28,33 @@ contract('O1Factory', (accounts) => {
     const adminAccount = accounts[7];
 
     beforeEach(async () => {
-        treeInstance = await TreeFactory.new({ from: deployerAccount });
-        treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
-        fundInstance = await Fund.new(treeSaleInstance.address, { from: deployerAccount });
-        o1Instance = await O1Factory.new(fundInstance.address, { from: deployerAccount });
+        arInstance = await AccessRestriction.new({ from: deployerAccount });
+        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
+        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
+        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
 
+        await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
+        await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+
+        o1Instance = await O1Factory.new(arInstance.address, { from: deployerAccount });
+
+        o1Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
         // await o1Instance.kill({ from: ownerAccount });
     });
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async function fundTree() {
         await o1Instance.setO1GeneratedPerSecond(1, { from: deployerAccount });
-        await Common.fundTree(fundInstance, ownerAccount, 2);
+        await Common.fundTree(treeInstance, ownerAccount, 2);
     }
 
     it("should mint o1", async () => {
 
         fundTree();
 
-        await sleep(1000);
+        await Common.sleep(1000);
 
         let tx = await o1Instance.mint({ from: ownerAccount })
 
@@ -64,14 +64,12 @@ contract('O1Factory', (accounts) => {
 
     });
 
-  
-
 
     it('should return balance of owner', async () => {
 
         fundTree();
 
-        await sleep(1000);
+        await Common.sleep(1000);
 
         await o1Instance.mint({ from: ownerAccount })
 

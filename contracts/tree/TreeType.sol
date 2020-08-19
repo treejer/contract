@@ -4,6 +4,7 @@ pragma solidity >=0.4.21 <0.7.0;
 
 import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
 import "../../node_modules/@openzeppelin/contracts/utils/Address.sol";
+import "../access/AccessRestriction.sol";
 
 contract TreeType {
     using SafeMath for uint256;
@@ -24,7 +25,19 @@ contract TreeType {
         uint256 price;
     }
 
+    bool public isTreeType = true;
+
+
     Type[] public types;
+
+    AccessRestriction public accessRestriction;
+
+    constructor(address _accessRestrictionAddress) public
+    {
+        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
+    }
 
     //@todo permission must check
     function create(
@@ -33,6 +46,9 @@ contract TreeType {
         uint _O2Formula,
         uint _price
     ) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+
         types.push(Type(_name, _scientificName, _O2Formula, _price));
         uint256 id = types.length - 1;
         

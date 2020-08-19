@@ -81,11 +81,6 @@ Common.acceptUpdate = async (instance, adminAccount, updateId = 0) => {
     await instance.acceptUpdate(updateId, { from: adminAccount });
 }
 
-Common.addTreeWithPlanter = async (instance, account, adminAccount) => {
-    await Common.addPlanter(instance, account, adminAccount);
-    await Common.addTree(instance, account);
-}
-
 Common.addAmbassador = async (instance, account, adminAccount) => {
     await instance.grantRole(AMBASSADOR_ROLE, account, { from: adminAccount });
 }

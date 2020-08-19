@@ -5,27 +5,53 @@ pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
 
 contract O2Factory is ERC20 {
+
+    event O2Minted(address owner, uint256 totalO2);
+
     TreeType public treeType;
     TreeFactory public treeFactory;
     UpdateFactory public updateFactory;
+    AccessRestriction public accessRestriction;
 
-    constructor(
-        TreeType _typeAddress,
-        TreeFactory _treeFactoryAddress,
-        UpdateFactory _updateFactoryAddress
-    ) public ERC20("Oxygen", "O2") {
-        treeType = _typeAddress;
-        treeFactory = _treeFactoryAddress;
-        updateFactory = _updateFactoryAddress;
-        _mint(msg.sender, 0);
+
+    constructor(address _accessRestrictionAddress) public ERC20("Oxygen", "O2")
+    {
+        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
     }
 
-    event O2Minted(address owner, uint256 totalO2);
+    function setTreeTypeAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        TreeType candidateContract = TreeType(_address);
+        require(candidateContract.isTreeType());
+        treeType = candidateContract;
+    }
+
+    function setTreeFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        TreeFactory candidateContract = TreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
+    }
+
+
+    function setUpdateFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        UpdateFactory candidateContract = UpdateFactory(_address);
+        require(candidateContract.isUpdateFactory());
+        updateFactory = candidateContract;
+    }
+
 
     //@todo permission must check
     function mint() external  {

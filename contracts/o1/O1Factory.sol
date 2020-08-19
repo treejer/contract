@@ -5,34 +5,42 @@ pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "../tree/TreeFactory.sol";
 import "../access/AccessRestriction.sol";
+import "../tree/TreeFactory.sol";
 
 
-contract O1Factory is ERC20, AccessRestriction {
+contract O1Factory is ERC20 {
 
     event O1Minted(address owner, uint256 totalO1);
     event O1GeneratedPerSecondChanged(uint256 o1GeneratedPerSecond);
     event ConsoleLog(uint date);
 
     TreeFactory public treeFactory;
-
+    AccessRestriction public accessRestriction;
 
     uint256 public o1GeneratedPerSecond;
 
     mapping(uint256 => uint256) public treesLastMintedDate;
 
+    constructor(address _accessRestrictionAddress) public ERC20("OxygenBeta", "O1")
+    {
+        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
+    }
 
-    constructor(
-        TreeFactory _treeFactoryAddress
-    ) public ERC20("OxygenBeta", "O1") {
-        treeFactory = _treeFactoryAddress;
-        // _mint(msg.sender, 0);
+    function setTreeFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        TreeFactory candidateContract = TreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
     }
 
 
+    function setO1GeneratedPerSecond(uint256 _o1GeneratedPerSecond) external {
+        accessRestriction.ifAdmin(msg.sender);
 
-    function setO1GeneratedPerSecond(uint256 _o1GeneratedPerSecond) external onlyAdmin {
         o1GeneratedPerSecond = _o1GeneratedPerSecond;
 
         emit O1GeneratedPerSecondChanged(_o1GeneratedPerSecond);

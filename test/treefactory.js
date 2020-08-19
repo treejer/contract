@@ -1,6 +1,7 @@
+const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeFactory = artifacts.require("TreeFactory");
-const TreeSale = artifacts.require("TreeSale");
-const Fund = artifacts.require("Fund");
+const GBFactory = artifacts.require("GBFactory");
+const UpdateFactory = artifacts.require("UpdateFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -8,20 +9,29 @@ const Common = require('./common');
 
 
 contract('TreeFactory', (accounts) => {
+    let arInstance;
     let treeInstance;
-    let treeSaleInstance;
-    let fundInstance;
+    let gbInstance;
+    let updateInstance;
+
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
     const secondAccount = accounts[2];
     const planterAccount  = accounts[3];
     const adminAccount = accounts[5];
+    const ambassadorAccount = accounts[6];
+    const admin2Account = accounts[7];
 
 
     beforeEach(async () => {
-        treeInstance = await TreeFactory.new({ from: deployerAccount });
-        treeSaleInstance = await TreeSale.new(treeInstance.address, { from: deployerAccount });
-        fundInstance = await Fund.new(treeSaleInstance.address, { from: deployerAccount });    });
+        arInstance = await AccessRestriction.new({ from: deployerAccount });
+        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });    
+        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
+        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
+
+        await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
+        await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+    });
 
     afterEach(async () => {
         // await treeInstance.kill({ from: ownerAccount });
@@ -31,7 +41,7 @@ contract('TreeFactory', (accounts) => {
         let name = 'firstTree';
 
 
-        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         let tx = await Common.addTree(treeInstance, ownerAccount, name);
 
         truffleAssert.eventEmitted(tx, 'TreePlanted', (ev) => {
@@ -42,14 +52,14 @@ contract('TreeFactory', (accounts) => {
 
     it("should plant from funded trees", async () => {
 
-        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
 
         let price = Units.convert('0.02', 'eth', 'wei');
         await treeInstance.setPrice(price, { from: adminAccount });
 
-        await fundInstance.fund(2, { from: secondAccount, value: price * 2 });
+        await treeInstance.fund(2, { from: secondAccount, value: price * 2 });
 
-        await Common.addPlanter(treeInstance, planterAccount, deployerAccount);
+        await Common.addPlanter(arInstance, planterAccount, deployerAccount);
         let tx = await Common.addTree(treeInstance, planterAccount);
 
         truffleAssert.eventEmitted(tx, 'TreePlanted', (ev) => {
@@ -60,7 +70,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should return owner tree count", async () => {
 
-        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
@@ -76,10 +86,10 @@ contract('TreeFactory', (accounts) => {
 
     it("should return owner trees", async () => {
 
-        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
-        await Common.addPlanter(treeInstance, secondAccount, deployerAccount);
+        await Common.addPlanter(arInstance, secondAccount, deployerAccount);
         await Common.addTree(treeInstance, secondAccount);
 
         await Common.addTree(treeInstance, ownerAccount);
@@ -104,7 +114,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree owner", async () => {
 
-        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
         return await treeInstance.treeOwner(0, { from: ownerAccount })
@@ -119,7 +129,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should update tree price", async () => {
 
-        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
 
         let price = Units.convert('0.02', 'eth', 'wei');
         let tx = await treeInstance.setPrice(price, { from: adminAccount })
@@ -132,7 +142,7 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree price", async () => {
 
-        Common.addAdmin(treeInstance, adminAccount, deployerAccount);
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
 
         let price = Units.convert('0.03', 'eth', 'wei');
         await treeInstance.setPrice(price, { from: adminAccount })
@@ -151,7 +161,7 @@ contract('TreeFactory', (accounts) => {
 
         let name = "testTree";
 
-        await Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount, name);
 
         return await treeInstance.getTree(0, { from: ownerAccount })
@@ -167,6 +177,237 @@ contract('TreeFactory', (accounts) => {
                 );
             });
     });
+
+    it("should fund a tree from planted trees", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        await Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+        await Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        await Common.addPlanter(arInstance, planterAccount, deployerAccount);
+
+        await Common.addGB(gbInstance, ambassadorAccount, [planterAccount], 'firstGb');
+
+        await Common.addTree(treeInstance, planterAccount);
+
+        let tx = await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+        truffleAssert.eventEmitted(tx, 'TreeFunded', (ev) => {
+
+            if (ev.treeId.toString() === '0') {
+                return ev.treeId.toString() === '0' && ev.planterBalance.toString() === (balance.toString() * 45 / 100).toString();
+            } else {
+                return ev.treeId.toString() === '1' && ev.planterBalance.toString() === (balance.toString() * 40 / 100).toString();
+            }
+        });
+
+    });
+
+
+    it("should fund a tree", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+
+        let tx = await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+        truffleAssert.eventEmitted(tx, 'TreeFunded', (ev) => {
+            return ev.treeId.toString() === '0' && ev.planterBalance.toString() === (balance.toString() * 40 / 100).toString();
+        });
+
+    });
+
+
+    it("should update balance of wallets", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+        let tx = await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+        return await treeInstance.getBalances()
+            .then((balances) => {
+                assert.equal(
+                    balances[0],
+                    (balance.toString() * 25 / 100 * 2).toString(),
+                    "Balance " + balances[0] + " returned"
+                );
+
+                assert.equal(
+                    balances[1],
+                    (balance.toString() * 40 / 100 * 2).toString(),
+                    "Balance " + balances[1] + " returned"
+                );
+
+                assert.equal(
+                    balances[2],
+                    0,
+                    "Balance " + balances[2] + " returned"
+                );
+
+                assert.equal(
+                    balances[3],
+                    (balance.toString() * 15 / 100 * 2).toString(),
+                    "Balance " + balances[3] + " returned"
+                );
+
+                assert.equal(
+                    balances[4],
+                    (balance.toString() * 10 / 100 * 2).toString(),
+                    "Balance " + balances[4] + " returned"
+                );
+
+                assert.equal(
+                    balances[5],
+                    (balance.toString() * 5 / 100 * 2).toString(),
+                    "Balance " + balances[5] + " returned"
+                );
+                
+            }).catch((error) => {
+                console.log(error);
+            });
+
+    });
+
+    it("should withdraw treejer fund", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+
+        let tx = await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+
+        let beforeWithdraw = await web3.eth.getBalance(admin2Account);
+
+        await treeInstance.withdrawBalance(0, admin2Account,
+            { from: deployerAccount });
+
+        return await web3.eth.getBalance(admin2Account)
+            .then((balanceEther) => {
+
+                assert.equal(
+                    balanceEther,
+                    (parseInt(beforeWithdraw) + parseInt(balance.toString() * 25 / 100 * 2)).toString(),
+                    "Ether balance: " + balanceEther + " returned"
+                );
+
+            }).catch((error) => {
+                console.log(error);
+            });
+
+    });
+
+
+    it("should withdraw planter fund", async () => {
+
+        let price = Units.convert('0.02', 'eth', 'wei');
+        let count = 2;
+        let balance = price / count;
+
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+
+        Common.addPlanter(arInstance, planterAccount, deployerAccount);
+
+        Common.addTree(treeInstance, planterAccount, 'first');
+        Common.addTree(treeInstance, planterAccount, 'second');
+
+        await Common.sleep(1000);
+
+        Common.addUpdate(updateInstance, planterAccount, 0);
+        Common.acceptUpdate(updateInstance, deployerAccount, 0);
+
+        Common.addUpdate(updateInstance, planterAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 1);
+
+        await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+
+        let tx = await treeInstance.withdrawPlanterBalance({ from: planterAccount });
+
+        truffleAssert.eventEmitted(tx, 'PlanterBalanceWithdrawn', (ev) => {
+            return ev.amount.toString() === '84559444' && ev.planter === planterAccount;
+        });
+
+    });
+
+    it("should withdraw ambassador fund", async () => {
+
+        let price = Units.convert('0.03', 'eth', 'wei');
+        let count = 3;
+        let balance = price / count;
+
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        let treePrice = Units.convert('0.01', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: adminAccount })
+
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(arInstance, planterAccount, deployerAccount);
+
+        Common.addGB(gbInstance, ambassadorAccount, [planterAccount], 'GB GB');
+
+        Common.addTree(treeInstance, planterAccount, 'first');
+
+        //with two update
+        Common.addTree(treeInstance, planterAccount, 'second');
+
+        // without update
+        Common.addTree(treeInstance, planterAccount, 'three');
+
+        await Common.sleep(1000);
+
+        Common.addUpdate(updateInstance, planterAccount, 0);
+        Common.acceptUpdate(updateInstance, deployerAccount, 0);
+
+        Common.addUpdate(updateInstance, planterAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 1);
+
+        await Common.sleep(1000);
+
+        Common.addUpdate(updateInstance, planterAccount, 1);
+        Common.acceptUpdate(updateInstance, deployerAccount, 2);
+
+
+        await treeInstance.fund(count,
+            { from: secondAccount, value: price });
+
+        let tx = await treeInstance.withdrawAmbassadorBalance({ from: ambassadorAccount });
+
+        truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
+            return ev.amount.toString() === '15854895' && ev.ambassador === ambassadorAccount;
+        });
+
+    });
+
 
 
 });

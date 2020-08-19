@@ -1,3 +1,4 @@
+const AccessRestriction = artifacts.require("AccessRestriction");
 const UpdateFactory = artifacts.require("UpdateFactory");
 const TreeFactory = artifacts.require("TreeFactory");
 const assert = require("chai").assert;
@@ -8,6 +9,7 @@ const Common = require("./common");
 
 
 contract('UpdateFactory', (accounts) => {
+    let arInstance;
     let updateInstance;
     let treeInstance;
 
@@ -15,8 +17,9 @@ contract('UpdateFactory', (accounts) => {
     const ownerAccount = accounts[1];
 
     beforeEach(async () => {
-        updateInstance = await UpdateFactory.new({ from: deployerAccount });
-        treeInstance = await TreeFactory.new({ from: deployerAccount });
+        arInstance = await AccessRestriction.new({ from: deployerAccount });
+        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
+        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
 
     });
 
@@ -26,8 +29,7 @@ contract('UpdateFactory', (accounts) => {
 
     it("should add updates", async () => {
 
-        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
-        Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         Common.addTree(treeInstance, ownerAccount);
 
         let treeId = 0;
@@ -44,8 +46,7 @@ contract('UpdateFactory', (accounts) => {
 
     it("should accept update", async () => {
 
-        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
-        Common.addPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         Common.addTree(treeInstance, ownerAccount);
 
         let treeId = 0;

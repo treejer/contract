@@ -1,9 +1,11 @@
+const AccessRestriction = artifacts.require("AccessRestriction");
 const GBFactory = artifacts.require("GBFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Common = require("./common");
 
 contract('GBFactory', (accounts) => {
+    let arInstance;
     let gbInstance;
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
@@ -24,7 +26,8 @@ contract('GBFactory', (accounts) => {
     ];
 
     beforeEach(async () => {
-        gbInstance = await GBFactory.new({ from: deployerAccount });
+        arInstance = await AccessRestriction.new({ from: deployerAccount });
+        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
@@ -33,7 +36,7 @@ contract('GBFactory', (accounts) => {
 
     it("should add gb", async () => {
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
 
         let title = 'firstGB';
         let tx = await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
@@ -46,7 +49,7 @@ contract('GBFactory', (accounts) => {
 
     it("should return ambassodar gb count", async () => {
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title2');
 
@@ -63,7 +66,7 @@ contract('GBFactory', (accounts) => {
 
     it("should return gb ambassador", async () => {
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
 
         return await gbInstance.getGBAmbassador(0, { from: ambassadorAccount })
@@ -80,7 +83,7 @@ contract('GBFactory', (accounts) => {
         let title = 'firsGB';
         let id = 0;
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
         return await gbInstance.getGB(id)
@@ -99,10 +102,10 @@ contract('GBFactory', (accounts) => {
         let title = 'firsGB';
         let id = 0;
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
-        Common.addAdmin(gbInstance, adminAccount, deployerAccount);
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
 
         let tx = await gbInstance.activate(id, { from: adminAccount });
 
@@ -115,11 +118,11 @@ contract('GBFactory', (accounts) => {
         let title = 'firsGB';
         let id = 0;
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
-        Common.addPlanter(gbInstance, planter1Account, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
-        Common.addPlanter(gbInstance, planter2Account, deployerAccount);
+        Common.addPlanter(arInstance, planter2Account, deployerAccount);
         let tx = await gbInstance.joinGB(id, planter2Account, { from: planter2Account });
 
         truffleAssert.eventEmitted(tx, 'PlanterJoinedGB', (ev) => {
@@ -132,10 +135,10 @@ contract('GBFactory', (accounts) => {
         let title = 'firstGB';
         let titleTree = 'firstTree';
 
-        Common.addAdmin(gbInstance, adminAccount, deployerAccount);
-        gbInstance.pause({ from: adminAccount });
+        Common.addAdmin(arInstance, adminAccount, deployerAccount);
+        arInstance.pause({ from: adminAccount });
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
 
         await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title)
             .then(assert.fail)
@@ -156,7 +159,7 @@ contract('GBFactory', (accounts) => {
 
         let title = 'firstGB';
 
-        Common.addAmbassador(gbInstance, ambassadorAccount, deployerAccount);
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
 
         await await Common.addGB(gbInstance, planter1Account, plantersArray, title)
             .then(assert.fail)

@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../access/AccessRestriction.sol";
 
 
-contract GBFactory is AccessRestriction {
+contract GBFactory {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
@@ -33,19 +33,30 @@ contract GBFactory is AccessRestriction {
     mapping(address => uint256[]) ambassadorGBs;
     mapping(address => uint256) verifiersGBCount;
 
-    //@todo permission must check
+    AccessRestriction public accessRestriction;
+
+    constructor(address _accessRestrictionAddress) public
+    {
+        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
+    }
+
     function add(
         string calldata _title,
         string calldata _coordinates,
         address _ambassador,
         address[] calldata _planters
-    ) external planterOrAmbassador whenNotPaused {
+    ) external {
+
+        accessRestriction.ifNotPaused();
+        accessRestriction.ifPlanterOrAmbassador(msg.sender);
 
         greenBlocks.push(GB(_title, _coordinates, GBStatus.Pending));
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
-            if(hasRole(PLANTER_ROLE, _planters[i])) {
+            if(accessRestriction.isPlanter(_planters[i])) {
                 gbToPlanters[id].push(_planters[i]);
             }
         }
@@ -85,7 +96,10 @@ contract GBFactory is AccessRestriction {
         );
     }
 
-    function activate(uint256 _gbId) external onlyAdmin {
+    function activate(uint256 _gbId) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+
         require(greenBlocks[_gbId].status != GBStatus.Active, "GB already active!");
 
         greenBlocks[_gbId].status = GBStatus.Active;
@@ -93,7 +107,10 @@ contract GBFactory is AccessRestriction {
         emit GBActivated(_gbId);
     }
 
-    function joinGB(uint256 _gbId, address planter) external whenNotPaused onlyPlanter {
+    function joinGB(uint256 _gbId, address planter) external {
+        accessRestriction.ifNotPaused();
+        accessRestriction.ifPlanter(msg.sender);
+
         require(gbToPlanters[_gbId].length < maxGBPlantersCount, "Planter of this GB is reached maximum");
 
         gbToPlanters[_gbId].push(planter);

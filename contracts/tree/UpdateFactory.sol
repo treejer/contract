@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
 
-contract UpdateFactory is AccessRestriction  {
+contract UpdateFactory {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
     event UpdateAccepted(uint256 updateId);
 
@@ -19,7 +19,7 @@ contract UpdateFactory is AccessRestriction  {
     }
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
-    //  right auction in our setUpdateFactoryAddress() call.
+    //  right contract in our setUpdateFactoryAddress() call.
     bool public isUpdateFactory = true;
 
     Update[] public updates;
@@ -28,11 +28,22 @@ contract UpdateFactory is AccessRestriction  {
     mapping(uint256 => bool) public updateToPlanterBalanceWithdrawn;
     mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
 
+    AccessRestriction public accessRestriction;
+
+    constructor(address _accessRestrictionAddress) public
+    {
+        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
+    }
+
     //@todo permission check
     // must one pending update after delete or accpet can post other update
     // update difference must check
     // only planter of the tree can send update
-    function post(uint256 _treeId, string calldata _imageHash) external onlyPlanter {
+    function post(uint256 _treeId, string calldata _imageHash) external {
+        accessRestriction.ifPlanter(msg.sender);
+
         updates.push(Update(_treeId, _imageHash, now, 0, false));
         uint256 id = updates.length - 1;
 
@@ -41,7 +52,9 @@ contract UpdateFactory is AccessRestriction  {
         emit UpdateAdded(id, _treeId, _imageHash);
     }
 
-    function acceptUpdate(uint256 _updateId) external onlyAdmin {
+    function acceptUpdate(uint256 _updateId) external {
+        accessRestriction.ifAdmin(msg.sender);
+
         updates[_updateId].status = 1;
         emit UpdateAccepted(_updateId);
     }

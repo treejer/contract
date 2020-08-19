@@ -1,3 +1,5 @@
+const AccessRestriction = artifacts.require("AccessRestriction");
+
 const O2Factory = artifacts.require("O2Factory");
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
@@ -10,6 +12,8 @@ const Common = require("./common");
 
 
 contract('O2Factory', (accounts) => {
+    let arInstance;
+
     let o2Instance;
     let gbInstance;
     let treeInstance;
@@ -25,65 +29,66 @@ contract('O2Factory', (accounts) => {
     const adminAccount = accounts[7];
 
     beforeEach(async () => {
-        treeTypeInstance = await TreeType.new({ from: deployerAccount });
-        gbInstance = await GBFactory.new({ from: deployerAccount });
-        treeInstance = await TreeFactory.new({ from: deployerAccount });
-        updateInstance = await UpdateFactory.new({ from: deployerAccount });
-        o2Instance = await O2Factory.new(treeTypeInstance.address, treeInstance.address, updateInstance.address, { from: deployerAccount });
+        arInstance = await AccessRestriction.new({ from: deployerAccount });
+
+        treeTypeInstance = await TreeType.new(arInstance.address, { from: deployerAccount });
+        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
+        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
+        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
+        o2Instance = await O2Factory.new(arInstance.address, { from: deployerAccount });
+
+        await o2Instance.setTreeTypeAddress(treeTypeInstance.address, { from: deployerAccount });
+        await o2Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+        await o2Instance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
         // await o2Instance.kill({ from: ownerAccount });
     });
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async function addTree(name = null) {
-        Common.addType(treeTypeInstance, adminAccount);
+        Common.addType(treeTypeInstance, deployerAccount);
 
-        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
-        await sleep(1000);
-        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
-        Common.addUpdate(updateInstance, ownerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addTree(treeInstance, planter1Account);
+        await Common.sleep(1000);
+        
+        Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount);
     }
 
     async function addTree2Update(name = null) {
-        Common.addType(treeTypeInstance, adminAccount);
+        Common.addType(treeTypeInstance, deployerAccount);
 
-        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addTree(treeInstance, planter1Account);
 
-        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
-
-        await sleep(1000);
-        Common.addUpdate(updateInstance, ownerAccount);
+        await Common.sleep(1000);
+        Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount);
-        await sleep(1000);
-        Common.addUpdate(updateInstance, ownerAccount);
+        await Common.sleep(1000);
+        Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
     }
 
 
     async function add2Tree2Update(name = null) {
-        Common.addType(treeTypeInstance, adminAccount);
+        Common.addType(treeTypeInstance, deployerAccount);
 
-        Common.addTreeWithPlanter(treeInstance, ownerAccount, deployerAccount);
-        Common.addTree(treeInstance, ownerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addTree(treeInstance, planter1Account);
+        Common.addTree(treeInstance, planter1Account);
 
-        Common.addPlanter(updateInstance, ownerAccount, deployerAccount);
-
-        await sleep(1000);
-        Common.addUpdate(updateInstance, ownerAccount, 0);
-        Common.addUpdate(updateInstance, ownerAccount, 1);
+        await Common.sleep(1000);
+        Common.addUpdate(updateInstance, planter1Account, 0);
+        Common.addUpdate(updateInstance, planter1Account, 1);
 
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
 
-        await sleep(1000);
-        Common.addUpdate(updateInstance, ownerAccount, 0);
-        Common.addUpdate(updateInstance, ownerAccount, 1);
+        await Common.sleep(1000);
+        Common.addUpdate(updateInstance, planter1Account, 0);
+        Common.addUpdate(updateInstance, planter1Account, 1);
 
         Common.acceptUpdate(updateInstance, deployerAccount, 2);
         Common.acceptUpdate(updateInstance, deployerAccount, 3);
@@ -96,10 +101,10 @@ contract('O2Factory', (accounts) => {
 
         await addTree(titleTree);
 
-        let tx = await o2Instance.mint({ from: ownerAccount });
+        let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '100';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '100';
         });
     });
 
@@ -108,10 +113,10 @@ contract('O2Factory', (accounts) => {
 
         await addTree(titleTree);
 
-        await o2Instance.mint({ from: ownerAccount });
+        await o2Instance.mint({ from: planter1Account });
 
 
-        await o2Instance.mint({ from: ownerAccount })
+        await o2Instance.mint({ from: planter1Account })
             .then(assert.fail)
             .catch(error => {
                 console.log(error.message);
@@ -130,10 +135,10 @@ contract('O2Factory', (accounts) => {
 
         await addTree2Update(titleTree);
 
-        let tx = await o2Instance.mint({ from: ownerAccount });
+        let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '200';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '200';
         });
     });
 
@@ -143,10 +148,10 @@ contract('O2Factory', (accounts) => {
 
         await add2Tree2Update(titleTree);
 
-        let tx = await o2Instance.mint({ from: ownerAccount });
+        let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === ownerAccount && ev.totalO2.toString() === '400';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '400';
         });
     });
 
@@ -156,9 +161,9 @@ contract('O2Factory', (accounts) => {
         let titleTree = 'firstTree';
         await addTree(titleTree);
 
-        await o2Instance.mint({ from: ownerAccount });
+        await o2Instance.mint({ from: planter1Account });
 
-        return await o2Instance.balanceOf(ownerAccount, { from: ownerAccount })
+        return await o2Instance.balanceOf(planter1Account, { from: planter1Account })
             .then((balance) => {
                 assert.equal(
                     '100',

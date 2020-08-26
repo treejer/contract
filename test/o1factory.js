@@ -8,6 +8,8 @@ const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const Common = require("./common");
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+
 
 
 contract('O1Factory', (accounts) => {
@@ -28,15 +30,16 @@ contract('O1Factory', (accounts) => {
     const adminAccount = accounts[7];
 
     beforeEach(async () => {
-        arInstance = await AccessRestriction.new({ from: deployerAccount });
-        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
-        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
-        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
+    
+        arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
+        updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
 
-        o1Instance = await O1Factory.new(arInstance.address, { from: deployerAccount });
+        o1Instance = await deployProxy(O1Factory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
         o1Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
     });

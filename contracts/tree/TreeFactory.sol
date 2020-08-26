@@ -3,14 +3,14 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
 
 import "../access/AccessRestriction.sol";
 import "../greenblock/GBFactory.sol";
 import "./TreeType.sol";
 import "./UpdateFactory.sol";
 
-contract TreeFactory is ERC721 {
+contract TreeFactory is ERC721UpgradeSafe {
 
     event PriceChanged(uint256 price);
     event TreePlanted(uint256 id,string name,string latitude,string longitude);
@@ -18,7 +18,7 @@ contract TreeFactory is ERC721 {
     event PlanterBalanceWithdrawn(address planter, uint amount);
     event AmbassadorBalanceWithdrawn(address ambassador, uint amount);
 
-    bool public isTreeFactory = true;
+    bool public isTreeFactory;
 
     struct Tree {
         string name;
@@ -71,7 +71,7 @@ contract TreeFactory is ERC721 {
     uint8 constant rescueFundIndex = 4;
     uint8 constant researchFundIndex = 5;
 
-    // i common year 31536000 seconds * 3 year 
+    // 1 common year 31536000 seconds * 3 year 
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
 
     uint256[6] public balances;
@@ -80,10 +80,18 @@ contract TreeFactory is ERC721 {
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
 
-    constructor(address _accessRestrictionAddress) ERC721("Tree", "TREE") public {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isTreeFactory = true;
+
+        ERC721UpgradeSafe.__ERC721_init(
+            "Tree",
+            "TREE"
+        );
+
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
     }
 
     function setGBAddress(address _address) external {

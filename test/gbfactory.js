@@ -3,12 +3,14 @@ const GBFactory = artifacts.require("GBFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Common = require("./common");
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+
 
 contract('GBFactory', (accounts) => {
     let arInstance;
     let gbInstance;
-    const ownerAccount = accounts[0];
-    const deployerAccount = accounts[1];
+    const deployerAccount = accounts[0];
+    const ownerAccount = accounts[1];
     const ambassadorAccount = accounts[2];
     const planter1Account = accounts[3];
     const planter2Account = accounts[4];
@@ -26,8 +28,9 @@ contract('GBFactory', (accounts) => {
     ];
 
     beforeEach(async () => {
-        arInstance = await AccessRestriction.new({ from: deployerAccount });
-        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
+        arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
+        gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
     });
 
     afterEach(async () => {

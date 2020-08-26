@@ -5,8 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 
-contract UpdateFactory {
+
+contract UpdateFactory is Initializable {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
     event UpdateAccepted(uint256 updateId);
 
@@ -20,7 +22,7 @@ contract UpdateFactory {
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right contract in our setUpdateFactoryAddress() call.
-    bool public isUpdateFactory = true;
+    bool public isUpdateFactory;
 
     Update[] public updates;
     mapping(uint256 => uint256[]) public treeUpdates;
@@ -30,8 +32,8 @@ contract UpdateFactory {
 
     AccessRestriction public accessRestriction;
 
-    constructor(address _accessRestrictionAddress) public
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isUpdateFactory = true;
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;

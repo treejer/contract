@@ -3,14 +3,14 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 
 import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
 
-contract O2Factory is ERC20 {
+contract O2Factory is ERC20UpgradeSafe {
 
     event O2Minted(address owner, uint256 totalO2);
 
@@ -19,12 +19,15 @@ contract O2Factory is ERC20 {
     UpdateFactory public updateFactory;
     AccessRestriction public accessRestriction;
 
-
-    constructor(address _accessRestrictionAddress) public ERC20("Oxygen", "O2")
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
+        ERC20UpgradeSafe.__ERC20_init(
+            "Oxygen",
+            "O2"
+        );
     }
 
     function setTreeTypeAddress(address _address) external {

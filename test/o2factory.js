@@ -1,5 +1,4 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
-
 const O2Factory = artifacts.require("O2Factory");
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
@@ -9,6 +8,7 @@ const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const Common = require("./common");
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
 
 contract('O2Factory', (accounts) => {
@@ -29,13 +29,13 @@ contract('O2Factory', (accounts) => {
     const adminAccount = accounts[7];
 
     beforeEach(async () => {
-        arInstance = await AccessRestriction.new({ from: deployerAccount });
 
-        treeTypeInstance = await TreeType.new(arInstance.address, { from: deployerAccount });
-        gbInstance = await GBFactory.new(arInstance.address, { from: deployerAccount });
-        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
-        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
-        o2Instance = await O2Factory.new(arInstance.address, { from: deployerAccount });
+        arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
+        updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeTypeInstance = await deployProxy(TreeType, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        o2Instance = await deployProxy(O2Factory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
         await o2Instance.setTreeTypeAddress(treeTypeInstance.address, { from: deployerAccount });
         await o2Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });

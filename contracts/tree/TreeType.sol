@@ -2,11 +2,13 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts/utils/Address.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "../access/AccessRestriction.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 
-contract TreeType {
+
+contract TreeType is Initializable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -25,15 +27,14 @@ contract TreeType {
         uint256 price;
     }
 
-    bool public isTreeType = true;
-
+    bool public isTreeType;
 
     Type[] public types;
 
     AccessRestriction public accessRestriction;
 
-    constructor(address _accessRestrictionAddress) public
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isTreeType = true;
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;

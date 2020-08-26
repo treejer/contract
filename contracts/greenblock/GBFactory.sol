@@ -4,9 +4,10 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../access/AccessRestriction.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 
 
-contract GBFactory {
+contract GBFactory is Initializable {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
@@ -15,7 +16,7 @@ contract GBFactory {
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right auction in our setGBAddress() call.
-    bool public isGBFactory = true;
+    bool public isGBFactory;
 
     //@todo must change coordinates
     struct GB {
@@ -35,8 +36,8 @@ contract GBFactory {
 
     AccessRestriction public accessRestriction;
 
-    constructor(address _accessRestrictionAddress) public
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isGBFactory = true;
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;

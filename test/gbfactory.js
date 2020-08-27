@@ -66,6 +66,40 @@ contract('GBFactory', (accounts) => {
             });
     });
 
+    it("should return planter gb", async () => {
+
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, [planter2Account], 'title');
+        Common.addGB(gbInstance, ambassadorAccount, [planter1Account], 'title');
+
+        return await gbInstance.planterGB(planter1Account, { from: ambassadorAccount })
+            .then(gbId => {
+                assert.equal(
+                    1,
+                    gbId,
+                    "planter gb is: " + gbId.toString()
+                );
+            });
+    });
+
+    it("should return gb", async () => {
+
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
+
+        return await gbInstance.greenBlocks(0, { from: ambassadorAccount })
+            .then(greenBlock => {
+                assert.equal(
+                    'title',
+                    greenBlock[0],
+                    "greenBlock title is: " + greenBlock[0]
+                );
+            });
+    });
+
+
 
     it("should return gb ambassador", async () => {
 

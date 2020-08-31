@@ -73,9 +73,9 @@ contract O1Factory is ERC20UpgradeSafe {
             }
 
             if(treesLastMintedDate[treeId] > 0) {
-                totalSeconds = totalSeconds + (now - treesLastMintedDate[treeId]);
+                totalSeconds = totalSeconds + (block.timestamp - treesLastMintedDate[treeId]);
             } else {
-                totalSeconds = totalSeconds + (now - treeFundedDate);
+                totalSeconds = totalSeconds + (block.timestamp - treeFundedDate);
             }
         }
 
@@ -112,12 +112,12 @@ contract O1Factory is ERC20UpgradeSafe {
             }
 
             if(treesLastMintedDate[treeId] > 0) {
-                totalSeconds = totalSeconds + (now - treesLastMintedDate[treeId]);
+                totalSeconds = totalSeconds + (block.timestamp - treesLastMintedDate[treeId]);
             } else {
-                totalSeconds = totalSeconds + (now - treeFactory.getFundedDate(treeId));
+                totalSeconds = totalSeconds + (block.timestamp - treeFactory.getFundedDate(treeId));
             }
 
-            treesLastMintedDate[treeId] = now;
+            treesLastMintedDate[treeId] = block.timestamp;
         }
 
         require(totalSeconds > 0, "Total Seconds are zero");

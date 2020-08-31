@@ -4,6 +4,7 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 
 import "../access/AccessRestriction.sol";
 import "../greenblock/GBFactory.sol";
@@ -11,6 +12,9 @@ import "./TreeType.sol";
 import "./UpdateFactory.sol";
 
 contract TreeFactory is ERC721UpgradeSafe {
+
+    using Address for address;
+
 
     event PriceChanged(uint256 price);
     event TreePlanted(uint256 id,string name,string latitude,string longitude);
@@ -131,8 +135,8 @@ contract TreeFactory is ERC721UpgradeSafe {
             trees[id].name = _stringParams[0];
             trees[id].latitude = _stringParams[1];
             trees[id].longitude = _stringParams[2];
-            trees[id].plantedDate = now;
-            trees[id].birthDate = now;
+            trees[id].plantedDate = block.timestamp;
+            trees[id].birthDate = block.timestamp;
             trees[id].height = _uintParams[0];
             trees[id].diameter = _uintParams[1];
 
@@ -142,7 +146,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
             trees.push(
                 Tree(_stringParams[0],_stringParams[1],_stringParams[2],
-                    now,now,
+                    block.timestamp,block.timestamp,
                     0,_uintParams[0],_uintParams[1]
                 )
             );
@@ -179,7 +183,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
 
         trees.push(
-            Tree(name,'','',0,0,now,0,0)
+            Tree(name,'','',0,0,block.timestamp,0,0)
         );
         uint256 id = trees.length - 1;
 
@@ -214,7 +218,7 @@ contract TreeFactory is ERC721UpgradeSafe {
         uint treeId = notFundedTrees[notFundedTreesUsedIndex];
         notFundedTreesUsedIndex++;
 
-        trees[treeId].fundedDate = now;
+        trees[treeId].fundedDate = block.timestamp;
 
         if(_planterBalance > 0 ) {
             treeToPlanterRemainingBalance[treeId] = _planterBalance;
@@ -432,11 +436,11 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         require(balances[_index] > 0, "Balance is zero!");
 
-        uint256 withdrawbleBalance = balances[_index];
+        uint256 withdrawableBalance = balances[_index];
 
         balances[_index] = 0;
 
-        _to.transfer(withdrawbleBalance);
+        Address.sendValue(_to, withdrawableBalance);
     }
 
     function withdrawPlanterBalance() external {
@@ -520,7 +524,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         balances[1] = balances[1] - withdrawableBalance;
 
-        msg.sender.transfer(withdrawableBalance);
+        Address.sendValue(msg.sender, withdrawableBalance);
 
         emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
     }
@@ -612,7 +616,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         balances[2] = balances[2] - withdrawableBalance;
 
-        msg.sender.transfer(withdrawableBalance);
+        Address.sendValue(msg.sender, withdrawableBalance);
 
         emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
     }

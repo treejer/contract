@@ -46,7 +46,7 @@ contract UpdateFactory is Initializable {
     function post(uint256 _treeId, string calldata _imageHash) external {
         accessRestriction.ifPlanter(msg.sender);
 
-        updates.push(Update(_treeId, _imageHash, now, 0, false));
+        updates.push(Update(_treeId, _imageHash, block.timestamp, 0, false));
         uint256 id = updates.length - 1;
 
         treeUpdates[_treeId].push(id);

@@ -40,6 +40,8 @@ contract('O2Factory', (accounts) => {
         await o2Instance.setTreeTypeAddress(treeTypeInstance.address, { from: deployerAccount });
         await o2Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
         await o2Instance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+
     });
 
     afterEach(async () => {

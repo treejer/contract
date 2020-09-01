@@ -32,6 +32,8 @@ contract('TreeFactory', (accounts) => {
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+
     });
 
     afterEach(async () => {

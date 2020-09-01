@@ -3,10 +3,11 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../access/AccessRestriction.sol";
-import "./TreeFactory.sol";
+
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 
+import "../access/AccessRestriction.sol";
+import "./TreeFactory.sol";
 
 contract UpdateFactory is Initializable {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
@@ -31,6 +32,8 @@ contract UpdateFactory is Initializable {
     mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
 
     AccessRestriction public accessRestriction;
+    TreeFactory public treeFactory;
+
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isUpdateFactory = true;
@@ -39,12 +42,27 @@ contract UpdateFactory is Initializable {
         accessRestriction = candidateContract;
     }
 
+    function setTreeFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        TreeFactory candidateContract = TreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
+    }
+
     //@todo permission check
-    // must one pending update after delete or accpet can post other update
     // update difference must check
-    // only planter of the tree can send update
     function post(uint256 _treeId, string calldata _imageHash) external {
+        
+        accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
+
+        require(treeFactory.treeToPlanter(_treeId) == msg.sender, "Only Planter of tree can send update");
+
+        if(treeUpdates[_treeId].length > 0) {
+            require(updates[treeUpdates[_treeId][treeUpdates[_treeId].length - 1]].status == 1,
+            "Last update not accepeted, please wait until it accpeted and after that send new update"); 
+        }
 
         updates.push(Update(_treeId, _imageHash, block.timestamp, 0, false));
         uint256 id = updates.length - 1;

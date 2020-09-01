@@ -41,12 +41,15 @@ module.exports = async function (deployer, network, accounts) {
 
     });
 
+  UpdateFactory.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeAddress);
+  });  
+
   await deployProxy(O1Factory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })
     .then(() => {
       O1Factory.deployed().then(async (instance) => {
         await instance.setTreeFactoryAddress(treeAddress);
       });
-
     });
 
 

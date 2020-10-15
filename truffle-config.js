@@ -18,10 +18,15 @@
  *
  */
 require('dotenv').config();
-const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+const wrapProvider = require('arb-ethers-web3-bridge').wrapProvider;
 // const infuraKey = "fj4jll3k.....";
 
 const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
+
+const arbPrivateKeys = [process.env.ARB_DEPLOYER_PRIVAE_KEY];
+const arbProviderUrl = process.env.ARB_PROVIDER_URL;
+
 
 module.exports = {
   /**
@@ -74,6 +79,18 @@ module.exports = {
       // network_id: 2111,   // This network is yours, in the cloud.
       // production: true    // Treats this network as if it was a public net. (default: false)
     // }
+
+    arbitrum: {
+      provider: () => {
+        // return wrapped provider:
+        return wrapProvider(
+          new HDWalletProvider(arbPrivateKeys, arbProviderUrl)
+        )
+      },
+      network_id: '*',
+      gasPrice: 0,
+      chainId: 215728282823301
+    }
   },
 
   // Set default mocha options here, use special reporters etc.

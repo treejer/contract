@@ -275,10 +275,6 @@ contract TreeFactory is ERC721UpgradeSafe {
         return result;
     }
 
-    function getTypeId(uint256 _treeId) public view returns (uint256) {
-        return treeToType[_treeId];
-    }
-
     function getPlantedDate(uint256 _id) public view returns (uint256) {
         return trees[_id].plantedDate;
     }

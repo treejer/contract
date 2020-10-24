@@ -118,7 +118,7 @@ contract O2Factory is ERC20UpgradeSafe {
             }
 
             uint256 o2Formula = treeType.getO2Formula(
-                treeFactory.getTypeId(treeId)
+                treeFactory.treeToType(treeId)
             );
 
             mintableO2 = mintableO2 + o2Formula * totalSeconds;

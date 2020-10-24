@@ -67,7 +67,8 @@ contract O1Factory is ERC20UpgradeSafe {
             i++
         ) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(_owner, i);
-            uint256 treeFundedDate = treeFactory.getFundedDate(treeId);
+
+            (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(treeId);
             if(treeFundedDate == 0) {
                 continue;
             }
@@ -106,7 +107,7 @@ contract O1Factory is ERC20UpgradeSafe {
             i++
         ) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
-            uint256 treeFundedDate = treeFactory.getFundedDate(treeId);
+            (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(treeId);
             if(treeFundedDate == 0) {
                 continue;
             }
@@ -114,7 +115,7 @@ contract O1Factory is ERC20UpgradeSafe {
             if(treesLastMintedDate[treeId] > 0) {
                 totalSeconds = totalSeconds + (block.timestamp - treesLastMintedDate[treeId]);
             } else {
-                totalSeconds = totalSeconds + (block.timestamp - treeFactory.getFundedDate(treeId));
+                totalSeconds = totalSeconds + (block.timestamp - treeFundedDate);
             }
 
             treesLastMintedDate[treeId] = block.timestamp;

@@ -275,69 +275,12 @@ contract TreeFactory is ERC721UpgradeSafe {
         return result;
     }
 
-    function getPlantedDate(uint256 _id) public view returns (uint256) {
-        return trees[_id].plantedDate;
-    }
-
-    function getFundedDate(uint256 _id) public view returns (uint256) {
-        return trees[_id].fundedDate;
-    }
-
     function setPrice(uint256 _price) external {
         accessRestriction.ifAdmin(msg.sender);
 
         price = _price;
         emit PriceChanged(_price);
     }
-
-    function getPrice() external view returns(uint256) {
-        return price;
-    }
-
-    function getTree(uint256 _treeId) external view returns(
-        string memory name,
-        string memory latitude,
-        string memory longitude,
-        uint256 plantedDate,
-        uint256 birthDate,
-        uint256 fundedDate,
-        uint8 height,
-        uint8 diameter,
-        address owner
-    ) {
-        require(_exists(_treeId), "ERC721: nonexistent token");
-
-        name = trees[_treeId].name;
-        latitude = trees[_treeId].latitude;
-        longitude = trees[_treeId].longitude;
-        plantedDate = trees[_treeId].plantedDate;
-        birthDate = trees[_treeId].birthDate;
-        fundedDate = trees[_treeId].fundedDate;
-        height = trees[_treeId].height;
-        diameter = trees[_treeId].diameter;
-        owner = ownerOf(_treeId);
-    }
-
-    function getTreeGB(uint256 _treeId) external view returns(uint256) {
-        return treeToGB[_treeId];
-    }
-
-    function getPlanterTreesCount(address _planter) external view returns(uint256) {
-        return planterTreeCount[_planter];
-    }
-
-    function getPlanterTrees(address _planter) external view returns(uint256[] memory) {
-        return planterTrees[_planter];
-    }
-
-    function getGBTrees(uint256 _gbId) external view returns(uint256[] memory) {
-        return gbTrees[_gbId];
-    }
-
-    function getGBTreesCount(uint256 _gbId) external view returns(uint256) {
-        return gbTreeCount[_gbId];
-    }
-
     
 
     function fund(uint256 _count) external payable {
@@ -354,7 +297,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
             if (notFundedTreesExists() == true) {
                 id = getLastNotFundedTreeId();
-                uint256 gbId = this.getTreeGB(id);
+                uint256 gbId = treeToGB[id];
                 address gbAmbassador = gbFactory.getGBAmbassador(gbId);
 
                 if (gbAmbassador != address(0)) {
@@ -443,8 +386,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         accessRestriction.ifPlanter(msg.sender);
 
-        
-        uint256 planterTreesCount = this.getPlanterTreesCount(msg.sender);
+        uint256 planterTreesCount = planterTreeCount[msg.sender];
 
         require(
             planterTreesCount > 0,
@@ -452,7 +394,7 @@ contract TreeFactory is ERC721UpgradeSafe {
         );
 
         uint256 withdrawableBalance = 0;
-        uint256[] memory treeIds = this.getPlanterTrees(msg.sender);
+        uint256[] memory treeIds = planterTrees[msg.sender];
 
         for (
             uint256 i = 0;
@@ -502,7 +444,7 @@ contract TreeFactory is ERC721UpgradeSafe {
                     totalSeconds =
                         totalSeconds +
                         updateFactory.getUpdateDate(jUpdateId) -
-                        getPlantedDate(treeId);
+                        trees[treeId].plantedDate;
                 }
 
                 updateFactory.setPlanterBalanceWithdrawn(jUpdateId);
@@ -541,13 +483,13 @@ contract TreeFactory is ERC721UpgradeSafe {
 
             uint256 _gbId = gbIds[k];
 
-            uint256 gbTreesCount = this.getGBTreesCount(_gbId);
+            uint256 gbTreesCount = gbTreeCount[_gbId];
 
             if(gbTreesCount == 0) {
                 continue;
             }
 
-            uint256[] memory treeIds = this.getGBTrees(_gbId);
+            uint256[] memory treeIds = gbTrees[_gbId];
         
             for (uint256 i = 0; i < gbTreesCount; i++) {
 
@@ -594,7 +536,7 @@ contract TreeFactory is ERC721UpgradeSafe {
                         totalSeconds =
                             totalSeconds +
                             updateFactory.getUpdateDate(jUpdateId) -
-                            getPlantedDate(treeId);
+                            trees[treeId].plantedDate;
                     }
 
                     updateFactory.setAmbassadorBalanceWithdrawn(jUpdateId);

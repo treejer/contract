@@ -108,10 +108,12 @@ contract O2Factory is ERC20UpgradeSafe {
                         updateFactory.getUpdateDate(jUpdateId) -
                         updateFactory.getUpdateDate(jMinusUpdateId);
                 } else {
+                    (,,,uint256 plantedDate,,,,) = treeFactory.trees(treeId);
+
                     totalSeconds =
                         totalSeconds +
                         updateFactory.getUpdateDate(jUpdateId) -
-                        treeFactory.getPlantedDate(treeId);
+                        plantedDate;
                 }
 
                 updateFactory.setMinted(jUpdateId, true);

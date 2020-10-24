@@ -150,7 +150,7 @@ contract('TreeFactory', (accounts) => {
         let price = Units.convert('0.03', 'eth', 'wei');
         await treeInstance.setPrice(price, { from: adminAccount })
 
-        return await treeInstance.getPrice({ from: ownerAccount })
+        return await treeInstance.price({ from: ownerAccount })
             .then(treePrice => {
                 assert.equal(
                     treePrice,
@@ -167,13 +167,8 @@ contract('TreeFactory', (accounts) => {
         await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount, name);
 
-        return await treeInstance.getTree(0, { from: ownerAccount })
+        return await treeInstance.trees(0, { from: ownerAccount })
             .then(tree => {
-                assert.equal(
-                    tree[8],
-                    ownerAccount
-                );
-
                 assert.equal(
                     tree[0],
                     name

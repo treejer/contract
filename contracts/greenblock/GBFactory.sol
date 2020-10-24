@@ -44,7 +44,7 @@ contract GBFactory is Initializable {
         accessRestriction = candidateContract;
     }
 
-    function add(
+    function create(
         string calldata _title,
         string calldata _coordinates,
         address _ambassador,

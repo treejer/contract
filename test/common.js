@@ -30,7 +30,7 @@ Common.addGB = async (instance, ambassadorAccount, planters, title = null) => {
         { lat: 25.774, lng: -80.190 }
     ];
 
-    return await instance.add(
+    return await instance.create(
         title,
         JSON.stringify(coordinates),
         ambassadorAccount,
@@ -50,7 +50,7 @@ Common.addTree = async (instance, account, name = null) => {
     let height = '1';
     let diameter = '1';
 
-    return await instance.add(
+    return await instance.plant(
         typeId,
         gbId,
         [

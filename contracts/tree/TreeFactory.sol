@@ -115,7 +115,7 @@ contract TreeFactory is ERC721UpgradeSafe {
     }
 
     //@todo permission must check
-    function add(
+    function plant(
         uint8 _typeId,
         uint256 _gbId,
         string[] calldata _stringParams,

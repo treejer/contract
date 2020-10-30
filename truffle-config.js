@@ -73,6 +73,15 @@ module.exports = {
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
 
+    rinkeby: {
+      provider: () => new HDWalletProvider(privateKeys, `https://rinkeby.infura.io/v3/${process.env.ROPSTEN_PROJECT_ID}`),
+      network_id: 4,
+      gas: 6700000,
+      gasPrice: 10000000000,       
+      timeoutBlocks: 300,
+      skipDryRun: true
+    },
+
     // Useful for private networks
     // private: {
       // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),

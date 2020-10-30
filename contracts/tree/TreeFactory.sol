@@ -54,6 +54,7 @@ contract TreeFactory is ERC721UpgradeSafe {
     mapping(uint256 => uint256) public typeTreeCount;
     mapping(uint256 => uint256) public gbTreeCount;
     mapping(uint256 => uint256[]) public gbTrees;
+    mapping(uint256 => uint256[]) public typeTrees;
 
     mapping(uint256 => uint256) public treeToPlanterRemainingBalance;
     mapping(uint256 => uint256) public treeToPlanterBalancePerSecond;
@@ -126,6 +127,10 @@ contract TreeFactory is ERC721UpgradeSafe {
         accessRestriction.ifPlanter(msg.sender);
 
 
+        // require tree type exists
+        //gb exists and planter in gb
+
+
         uint256 id = 0;
 
         if(notPlantedTreesExists() == true) {
@@ -157,11 +162,13 @@ contract TreeFactory is ERC721UpgradeSafe {
             _mint(msg.sender, id);
         }
 
-        typeTreeCount[_typeId]++;
-
         treeToGB[id] = _gbId;
         gbTreeCount[_gbId]++;
         gbTrees[_gbId].push(id);
+
+        treeToType[id] = _typeId;
+        typeTreeCount[_typeId]++;
+        typeTrees[_typeId].push(id);
 
         treeToPlanter[id] = msg.sender;
         planterTreeCount[msg.sender]++;

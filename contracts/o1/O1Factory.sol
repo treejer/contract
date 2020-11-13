@@ -13,7 +13,6 @@ contract O1Factory is ERC20UpgradeSafe {
 
     event O1Minted(address owner, uint256 totalO1);
     event O1GeneratedPerSecondChanged(uint256 o1GeneratedPerSecond);
-    event ConsoleLog(uint date);
 
     TreeFactory public treeFactory;
     AccessRestriction public accessRestriction;

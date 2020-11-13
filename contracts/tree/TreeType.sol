@@ -6,9 +6,10 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "../access/AccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
 
-contract TreeType is Initializable {
+contract TreeType is Initializable, ContextUpgradeSafe {
     using SafeMath for uint256;
     using Address for address;
 

@@ -7,6 +7,8 @@ var TreeFactory = artifacts.require("TreeFactory.sol");
 var UpdateFactory = artifacts.require("UpdateFactory.sol");
 var O2Factory = artifacts.require("O2Factory.sol");
 var O1Factory = artifacts.require("O1Factory.sol");
+var ForestFactory = artifacts.require("ForestFactory.sol");
+var O1Factory = artifacts.require("O1Factory.sol");
 
 
 module.exports = async function (deployer, network, accounts) {
@@ -62,7 +64,8 @@ module.exports = async function (deployer, network, accounts) {
       });
     });
 
-
+  await deployProxy(ForestFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })
+    .then(() => { forestFactoryAddress = ForestFactory.address; });
 
 
 };

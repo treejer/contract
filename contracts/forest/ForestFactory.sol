@@ -12,10 +12,9 @@ import "./PublicForest.sol";
 
 contract ForestFactory is Initializable, ContextUpgradeSafe {
 
-    event PublicForestCreated(address forestAddress, string name);
+    event PublicForestCreated(address forestAddress);
 
     address[] public forests;
-
 
     TreeFactory public treeFactory;
     AccessRestriction public accessRestriction;
@@ -36,15 +35,15 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
         treeFactory = candidateContract;
     }
 
-    function createPublicForest(string calldata _name) external {
+    function createPublicForest() external {
         accessRestriction.ifAdmin(msg.sender);
 
         PublicForest newForest = new PublicForest();
-        newForest.initialize(address(treeFactory), _name);
+        newForest.initialize(address(treeFactory));
 
         forests.push(address(newForest));
 
-        emit PublicForestCreated(address(newForest), _name);
+        emit PublicForestCreated(address(newForest));
     }
 
 }

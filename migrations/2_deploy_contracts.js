@@ -65,7 +65,11 @@ module.exports = async function (deployer, network, accounts) {
     });
 
   await deployProxy(ForestFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })
-    .then(() => { forestFactoryAddress = ForestFactory.address; });
+    .then(() => {
+      ForestFactory.deployed().then(async (instance) => {
+        await instance.setTreeFactoryAddress(treeAddress);
+      });
+    });  
 
 
 };

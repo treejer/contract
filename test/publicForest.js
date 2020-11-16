@@ -1,10 +1,11 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const ForestFactory = artifacts.require("ForestFactory");
 const TreeFactory = artifacts.require("TreeFactory");
-// const PublicForest = artifacts.require("PublicForest");
+const PublicForest = artifacts.require("PublicForest");
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const Common = require("./common");
 
 
 
@@ -23,12 +24,12 @@ contract('PublicForest', (accounts) => {
         treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         forestInstance = await deployProxy(ForestFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
         // publicForestInstance = await deployProxy(PublicForest, [treeInstance.address, 'Treejer'], { initializer: 'initialize', from: deployerAccount });
+        await forestInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
 
 
         let treePrice = Units.convert('0.02', 'eth', 'wei');
         await treeInstance.setPrice(treePrice, { from: deployerAccount });
 
-        await forestInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
 
 
     });
@@ -37,44 +38,37 @@ contract('PublicForest', (accounts) => {
         // await o1Instance.kill({ from: ownerAccount });
     });
 
-    it("should fund public forest ", async () => {
+    it("should donate and fund public forest ", async () => {
 
-        let name = 'BTC Forest';
-
-        let tx = await forestInstance.createPublicForest(name, { from: deployerAccount })
+        let tx = await forestInstance.createPublicForest({ from: deployerAccount })
 
         let pAddress = '';
 
-        console.log(tx);
-
         truffleAssert.eventEmitted(tx, 'PublicForestCreated', (ev) => {
-            
-            // console.log(ev.forestAddress.toString());
             pAddress = ev.forestAddress.toString();
-
-            console.log(pAddress);
-
-            return ev.name.toString() === name.toString();
+            return pAddress != null;
         });
 
+        let value = Units.convert('0.04', 'eth', 'wei');
 
-        let value = Units.convert('0.01', 'eth', 'wei');
+        publicForestInstance = await PublicForest.at(pAddress);
 
-        console.log({ from: ownerAccount, to: pAddress, value: value });
+        let txa = await publicForestInstance.donate({ from: deployerAccount, value: value });
 
+        // truffleAssert.eventEmitted(txa, 'ContributionReceived', (ev) => {
 
-        let txHash = await web3.eth.sendTransaction({ from: ownerAccount, to: pAddress, value: value });
-
-        console.log(txHash);
-
-
-        // truffleAssert.eventEmitted(txHash, 'ContributionReceived', (ev) => {
-
-        //     console.log(ev);
-        //     // return ev.from.toString() === name.toString() && ev.value.toString() === value.toString();
+        //     console.log(ev.from.toString(), ownerAccount, ev.value.toString(), value.toString());
+        //     return ev.from.toString() === ownerAccount && ev.value.toString() === value.toString();
         // });
 
+        truffleAssert.eventEmitted(txa, 'TreesAddedToForest', (ev) => {
+            return ev.count.toString() === '2';
+        });
+
     });
+
+
+    
 
 
 });

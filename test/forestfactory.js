@@ -36,15 +36,10 @@ contract('ForestFactory', (accounts) => {
 
     it("should create public forest", async () => {
 
-        let name = 'BTC Forest';
-
-        let tx = await forestInstance.createPublicForest(name, { from: deployerAccount })
+        let tx = await forestInstance.createPublicForest({ from: deployerAccount })
 
         truffleAssert.eventEmitted(tx, 'PublicForestCreated', (ev) => {
-            
-            // console.log(ev.forestAddress.toString());
-
-            return ev.name.toString() === name.toString();
+            return ev.forestAddress.toString() !== null;
         });
 
     });

@@ -13,55 +13,44 @@ contract PublicForest is Initializable, ContextUpgradeSafe {
 
     event ContributionReceived(address from, uint256 value);
     event TreesAddedToForest(uint256 count);
-    event Log(uint256 b);
-
-    string name;
-    struct Contributor {
-        address who;
-    }
-    Contributor[] public contributors;
-    mapping(address => uint256) public contributorFund;
 
     // exteranl contracts
     TreeFactory public treeFactory;
 
-    function initialize(address _treeFactoryAddress, string calldata _name)
+    function initialize(address _treeFactoryAddress)
         public
         initializer
     {
         TreeFactory candidateContract = TreeFactory(_treeFactoryAddress);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
-
-        name = _name;
     }
 
-    function totalContributors() external view returns (uint256) {
-        return contributors.length;
+    receive() external payable { 
+        emit ContributionReceived(msg.sender, msg.value);
     }
 
-    fallback() external payable {
+    function donate() external payable { 
         //do something
         require(msg.value > 0, "Contribution must bigger than zero");
 
-        contributors.push(Contributor(msg.sender));
-        contributorFund[msg.sender] = contributorFund[msg.sender] + msg.value;
-
         emit ContributionReceived(msg.sender, msg.value);
 
+        this.fundTree();
+    }
+
+    function fundTree() external {
         // get balance of contract
-        // uint256 balance = address(this).balance.add(msg.value);
         uint256 balance = address(this).balance;
 
-        uint treePrice = 20000000000000000;
+        uint256 treePrice = treeFactory.price();
 
         // if it reach the treePrice fund a tree
         if (balance >= treePrice) {
             uint256 count = balance.div(treePrice);
 
             if (count > 0) {
-                // treeFactory.fund.value(count.mul(treeFactory.price()))(count);
-                treeFactory.fund{value: count.mul(treeFactory.price())}(count);
+                treeFactory.fund{value: count.mul(treePrice)}(count);
                 // treeFactory.fund{value: 42, gas: 23}(count);
 
                 emit TreesAddedToForest(count);

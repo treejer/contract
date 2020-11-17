@@ -88,6 +88,29 @@ contract('O1Factory', (accounts) => {
             });
     });
 
+
+    it('should return tree generated O1', async () => {
+
+        fundTree();
+
+        await Common.sleep(2000);
+
+        await Common.fundTree(treeInstance, ownerAccount, 1);
+
+
+        return await o1Instance.calculateTreeGeneratedO1(0, { from: ownerAccount })
+            .then((o1Generated) => {
+                assert.equal(
+                    '2',
+                    o1Generated,
+                    "Tree generated O1: " + o1Generated
+                );
+            }).catch((error) => {
+                console.log(error);
+            });
+    });
+
+
     //@todo shpoud check for last minign date
 
 

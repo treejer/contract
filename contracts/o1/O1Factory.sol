@@ -86,6 +86,16 @@ contract O1Factory is ERC20UpgradeSafe {
         return (o1GeneratedPerSecond * totalSeconds);
     }
 
+    function calculateTreeGeneratedO1(uint _treeId) external view returns(uint256) {
+        
+        (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(_treeId);
+
+        if(treeFundedDate == 0) {
+            return 0;
+        }
+
+        return o1GeneratedPerSecond * (block.timestamp - treeFundedDate);
+    }
     
 
     //@todo permission must check

@@ -35,7 +35,6 @@ contract('PublicForest', (accounts) => {
     });
 
     afterEach(async () => {
-        // await o1Instance.kill({ from: ownerAccount });
     });
 
     it("should donate and fund public forest ", async () => {

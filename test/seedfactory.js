@@ -1,5 +1,5 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
-const O1Factory = artifacts.require("O1Factory");
+const SeedFactory = artifacts.require("SeedFactory");
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
 const TreeFactory = artifacts.require("TreeFactory");
@@ -12,9 +12,9 @@ const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
 
 
-contract('O1Factory', (accounts) => {
+contract('SeedFactory', (accounts) => {
     let arInstance;
-    let o1Instance;
+    let seedInstance;
     let gbInstance;
     let treeInstance;
     let updateInstance;
@@ -39,30 +39,30 @@ contract('O1Factory', (accounts) => {
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
 
-        o1Instance = await deployProxy(O1Factory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
+        seedInstance = await deployProxy(SeedFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
-        o1Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+        seedInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
     });
 
     afterEach(async () => {
-        // await o1Instance.kill({ from: ownerAccount });
+        // await seedInstance.kill({ from: ownerAccount });
     });
 
     async function fundTree() {
-        await o1Instance.setO1GeneratedPerSecond(1, { from: deployerAccount });
+        await seedInstance.setSeedGeneratedPerSecond(1, { from: deployerAccount });
         await Common.fundTree(treeInstance, ownerAccount, 2);
     }
 
-    it("should mint o1", async () => {
+    it("should mint seed", async () => {
 
         fundTree();
 
         await Common.sleep(1000);
 
-        let tx = await o1Instance.mint({ from: ownerAccount })
+        let tx = await seedInstance.mint({ from: ownerAccount })
 
-        truffleAssert.eventEmitted(tx, 'O1Minted', (ev) => {
-            return ev.owner.toString() === ownerAccount && ev.totalO1.toString() === '2';
+        truffleAssert.eventEmitted(tx, 'SeedMinted', (ev) => {
+            return ev.owner.toString() === ownerAccount && ev.totalSeed.toString() === '2';
         });
 
     });
@@ -74,9 +74,9 @@ contract('O1Factory', (accounts) => {
 
         await Common.sleep(1000);
 
-        await o1Instance.mint({ from: ownerAccount })
+        await seedInstance.mint({ from: ownerAccount })
 
-        return await o1Instance.balanceOf(ownerAccount, { from: ownerAccount })
+        return await seedInstance.balanceOf(ownerAccount, { from: ownerAccount })
             .then((balance) => {
                 assert.equal(
                     '2',
@@ -89,7 +89,7 @@ contract('O1Factory', (accounts) => {
     });
 
 
-    it('should return tree generated O1', async () => {
+    it('should return tree generated Seed', async () => {
 
         fundTree();
 
@@ -98,12 +98,12 @@ contract('O1Factory', (accounts) => {
         await Common.fundTree(treeInstance, ownerAccount, 1);
 
 
-        return await o1Instance.calculateTreeGeneratedO1(0, { from: ownerAccount })
-            .then((o1Generated) => {
+        return await seedInstance.calculateTreeGeneratedSeed(0, { from: ownerAccount })
+            .then((seedGenerated) => {
                 assert.equal(
                     '2',
-                    o1Generated,
-                    "Tree generated O1: " + o1Generated
+                    seedGenerated,
+                    "Tree generated Seed: " + seedGenerated
                 );
             }).catch((error) => {
                 console.log(error);

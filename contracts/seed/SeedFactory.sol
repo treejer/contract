@@ -9,15 +9,15 @@ import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 
 
-contract O1Factory is ERC20UpgradeSafe {
+contract SeedFactory is ERC20UpgradeSafe {
 
-    event O1Minted(address owner, uint256 totalO1);
-    event O1GeneratedPerSecondChanged(uint256 o1GeneratedPerSecond);
+    event SeedMinted(address owner, uint256 totalSeed);
+    event SeedGeneratedPerSecondChanged(uint256 seedGeneratedPerSecond);
 
     TreeFactory public treeFactory;
     AccessRestriction public accessRestriction;
 
-    uint256 public o1GeneratedPerSecond;
+    uint256 public seedGeneratedPerSecond;
 
     mapping(uint256 => uint256) public treesLastMintedDate;
 
@@ -28,8 +28,8 @@ contract O1Factory is ERC20UpgradeSafe {
         accessRestriction = candidateContract;
 
         ERC20UpgradeSafe.__ERC20_init(
-            "OxygenBeta",
-            "O1"
+            "Seed",
+            "SEED"
         );
     }
 
@@ -43,15 +43,15 @@ contract O1Factory is ERC20UpgradeSafe {
     }
 
 
-    function setO1GeneratedPerSecond(uint256 _o1GeneratedPerSecond) external {
+    function setSeedGeneratedPerSecond(uint256 _seedGeneratedPerSecond) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        o1GeneratedPerSecond = _o1GeneratedPerSecond;
+        seedGeneratedPerSecond = _seedGeneratedPerSecond;
 
-        emit O1GeneratedPerSecondChanged(_o1GeneratedPerSecond);
+        emit SeedGeneratedPerSecondChanged(_seedGeneratedPerSecond);
     }
 
-    function calculateMintableO1(address _owner) external view returns(uint256)
+    function calculateMintableSeed(address _owner) external view returns(uint256)
     {
         uint256 ownerTreesCount = treeFactory.ownerTreesCount(_owner);
 
@@ -83,10 +83,10 @@ contract O1Factory is ERC20UpgradeSafe {
             return 0;
         }
 
-        return (o1GeneratedPerSecond * totalSeconds);
+        return (seedGeneratedPerSecond * totalSeconds);
     }
 
-    function calculateTreeGeneratedO1(uint _treeId) external view returns(uint256) {
+    function calculateTreeGeneratedSeed(uint _treeId) external view returns(uint256) {
         
         (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(_treeId);
 
@@ -94,7 +94,7 @@ contract O1Factory is ERC20UpgradeSafe {
             return 0;
         }
 
-        return o1GeneratedPerSecond * (block.timestamp - treeFundedDate);
+        return seedGeneratedPerSecond * (block.timestamp - treeFundedDate);
     }
     
 
@@ -133,13 +133,13 @@ contract O1Factory is ERC20UpgradeSafe {
         require(totalSeconds > 0, "Total Seconds are zero");
 
 
-        // uint256 mintableO1 = o1GeneratedPerSecond * totalSeconds * (10 ** 18);
-        uint256 mintableO1 = o1GeneratedPerSecond * totalSeconds;
+        // uint256 mintableSeed = seedGeneratedPerSecond * totalSeconds * (10 ** 18);
+        uint256 mintableSeed = seedGeneratedPerSecond * totalSeconds;
 
-        require(mintableO1 > 0, "MintableO1 is zero");
+        require(mintableSeed > 0, "MintableSeed is zero");
 
-        _mint(msg.sender, mintableO1);
+        _mint(msg.sender, mintableSeed);
 
-        emit O1Minted(msg.sender, mintableO1);
+        emit SeedMinted(msg.sender, mintableSeed);
     }
 }

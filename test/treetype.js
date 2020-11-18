@@ -4,6 +4,7 @@ const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const Common = require('./common');
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
 
 
@@ -15,8 +16,8 @@ contract('TreeType', (accounts) => {
     const ownerAccount = accounts[1];
 
     beforeEach(async () => {
-        arInstance = await AccessRestriction.new({ from: deployerAccount });
-        treeTypeInstance = await TreeType.new(arInstance.address, { from: deployerAccount});
+        arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
+        treeTypeInstance = await deployProxy(TreeType, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
     });
 
     afterEach(async () => {

@@ -3,31 +3,36 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 
 import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 
 
-contract O1Factory is ERC20 {
+contract SeedFactory is ERC20UpgradeSafe {
 
-    event O1Minted(address owner, uint256 totalO1);
-    event O1GeneratedPerSecondChanged(uint256 o1GeneratedPerSecond);
-    event ConsoleLog(uint date);
+    event SeedMinted(address owner, uint256 totalSeed);
+    event SeedGeneratedPerSecondChanged(uint256 seedGeneratedPerSecond);
 
     TreeFactory public treeFactory;
     AccessRestriction public accessRestriction;
 
-    uint256 public o1GeneratedPerSecond;
+    uint256 public seedGeneratedPerSecond;
 
     mapping(uint256 => uint256) public treesLastMintedDate;
 
-    constructor(address _accessRestrictionAddress) public ERC20("OxygenBeta", "O1")
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
+        ERC20UpgradeSafe.__ERC20_init(
+            "Seed",
+            "SEED"
+        );
     }
+
 
     function setTreeFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
@@ -38,15 +43,15 @@ contract O1Factory is ERC20 {
     }
 
 
-    function setO1GeneratedPerSecond(uint256 _o1GeneratedPerSecond) external {
+    function setSeedGeneratedPerSecond(uint256 _seedGeneratedPerSecond) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        o1GeneratedPerSecond = _o1GeneratedPerSecond;
+        seedGeneratedPerSecond = _seedGeneratedPerSecond;
 
-        emit O1GeneratedPerSecondChanged(_o1GeneratedPerSecond);
+        emit SeedGeneratedPerSecondChanged(_seedGeneratedPerSecond);
     }
 
-    function calculateMintableO1(address _owner) external view returns(uint256)
+    function calculateMintableSeed(address _owner) external view returns(uint256)
     {
         uint256 ownerTreesCount = treeFactory.ownerTreesCount(_owner);
 
@@ -61,15 +66,16 @@ contract O1Factory is ERC20 {
             i++
         ) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(_owner, i);
-            uint256 treeFundedDate = treeFactory.getFundedDate(treeId);
+
+            (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(treeId);
             if(treeFundedDate == 0) {
                 continue;
             }
 
             if(treesLastMintedDate[treeId] > 0) {
-                totalSeconds = totalSeconds + (now - treesLastMintedDate[treeId]);
+                totalSeconds = totalSeconds + (block.timestamp - treesLastMintedDate[treeId]);
             } else {
-                totalSeconds = totalSeconds + (now - treeFundedDate);
+                totalSeconds = totalSeconds + (block.timestamp - treeFundedDate);
             }
         }
 
@@ -77,9 +83,19 @@ contract O1Factory is ERC20 {
             return 0;
         }
 
-        return (o1GeneratedPerSecond * totalSeconds);
+        return (seedGeneratedPerSecond * totalSeconds);
     }
 
+    function calculateTreeGeneratedSeed(uint _treeId) external view returns(uint256) {
+        
+        (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(_treeId);
+
+        if(treeFundedDate == 0) {
+            return 0;
+        }
+
+        return seedGeneratedPerSecond * (block.timestamp - treeFundedDate);
+    }
     
 
     //@todo permission must check
@@ -100,30 +116,30 @@ contract O1Factory is ERC20 {
             i++
         ) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
-            uint256 treeFundedDate = treeFactory.getFundedDate(treeId);
+            (,,,,,uint256 treeFundedDate,,) = treeFactory.trees(treeId);
             if(treeFundedDate == 0) {
                 continue;
             }
 
             if(treesLastMintedDate[treeId] > 0) {
-                totalSeconds = totalSeconds + (now - treesLastMintedDate[treeId]);
+                totalSeconds = totalSeconds + (block.timestamp - treesLastMintedDate[treeId]);
             } else {
-                totalSeconds = totalSeconds + (now - treeFactory.getFundedDate(treeId));
+                totalSeconds = totalSeconds + (block.timestamp - treeFundedDate);
             }
 
-            treesLastMintedDate[treeId] = now;
+            treesLastMintedDate[treeId] = block.timestamp;
         }
 
         require(totalSeconds > 0, "Total Seconds are zero");
 
 
-        // uint256 mintableO1 = o1GeneratedPerSecond * totalSeconds * (10 ** 18);
-        uint256 mintableO1 = o1GeneratedPerSecond * totalSeconds;
+        // uint256 mintableSeed = seedGeneratedPerSecond * totalSeconds * (10 ** 18);
+        uint256 mintableSeed = seedGeneratedPerSecond * totalSeconds;
 
-        require(mintableO1 > 0, "MintableO1 is zero");
+        require(mintableSeed > 0, "MintableSeed is zero");
 
-        _mint(msg.sender, mintableO1);
+        _mint(msg.sender, mintableSeed);
 
-        emit O1Minted(msg.sender, mintableO1);
+        emit SeedMinted(msg.sender, mintableSeed);
     }
 }

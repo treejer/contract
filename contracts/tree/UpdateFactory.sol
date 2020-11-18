@@ -3,10 +3,13 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
+
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+
 import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
 
-contract UpdateFactory {
+contract UpdateFactory is Initializable {
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
     event UpdateAccepted(uint256 updateId);
 
@@ -20,7 +23,7 @@ contract UpdateFactory {
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right contract in our setUpdateFactoryAddress() call.
-    bool public isUpdateFactory = true;
+    bool public isUpdateFactory;
 
     Update[] public updates;
     mapping(uint256 => uint256[]) public treeUpdates;
@@ -29,22 +32,39 @@ contract UpdateFactory {
     mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
 
     AccessRestriction public accessRestriction;
+    TreeFactory public treeFactory;
 
-    constructor(address _accessRestrictionAddress) public
-    {
+
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isUpdateFactory = true;
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
 
+    function setTreeFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        TreeFactory candidateContract = TreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
+    }
+
     //@todo permission check
-    // must one pending update after delete or accpet can post other update
     // update difference must check
-    // only planter of the tree can send update
     function post(uint256 _treeId, string calldata _imageHash) external {
+        
+        accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
 
-        updates.push(Update(_treeId, _imageHash, now, 0, false));
+        require(treeFactory.treeToPlanter(_treeId) == msg.sender, "Only Planter of tree can send update");
+
+        if(treeUpdates[_treeId].length > 0) {
+            require(updates[treeUpdates[_treeId][treeUpdates[_treeId].length - 1]].status == 1,
+            "Last update not accepeted, please wait until it accpeted and after that send new update"); 
+        }
+
+        updates.push(Update(_treeId, _imageHash, block.timestamp, 0, false));
         uint256 id = updates.length - 1;
 
         treeUpdates[_treeId].push(id);

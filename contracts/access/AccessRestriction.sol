@@ -2,33 +2,37 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
-import "../../node_modules/@openzeppelin/contracts/utils/Pausable.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/access/AccessControl.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
 
 
-contract AccessRestriction is AccessControl, Pausable {
-
-    address public owner = msg.sender;
+contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
 
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant AMBASSADOR_ROLE = keccak256("AMBASSADOR_ROLE");
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right contract in our setUpdateFactoryAddress() call.
-    bool public isAccessRestriction = true;
+    bool public isAccessRestriction;
 
-    constructor() public {
-        if(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) == false) {
-            _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+    function initialize(address _deployer) public initializer {  
+
+        AccessControlUpgradeSafe.__AccessControl_init();
+        PausableUpgradeSafe.__Pausable_init();
+
+        isAccessRestriction = true;
+
+        if(hasRole(DEFAULT_ADMIN_ROLE, _deployer) == false) {
+            _setupRole(DEFAULT_ADMIN_ROLE, _deployer);
         }
-        if(hasRole(PLANTER_ROLE, msg.sender) == false) {
-            _setupRole(PLANTER_ROLE, msg.sender);
+        if(hasRole(PLANTER_ROLE, _deployer) == false) {
+            _setupRole(PLANTER_ROLE, _deployer);
         }
-        if(hasRole(AMBASSADOR_ROLE, msg.sender) == false) {
-            _setupRole(AMBASSADOR_ROLE, msg.sender);
+        if(hasRole(AMBASSADOR_ROLE, _deployer) == false) {
+            _setupRole(AMBASSADOR_ROLE, _deployer);
         }
     }
-
 
     modifier onlyOwnerOfTree(address _account)
     {

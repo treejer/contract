@@ -3,14 +3,18 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 
 import "../access/AccessRestriction.sol";
 import "../greenblock/GBFactory.sol";
 import "./TreeType.sol";
 import "./UpdateFactory.sol";
 
-contract TreeFactory is ERC721 {
+contract TreeFactory is ERC721UpgradeSafe {
+
+    using Address for address;
+
 
     event PriceChanged(uint256 price);
     event TreePlanted(uint256 id,string name,string latitude,string longitude);
@@ -18,7 +22,7 @@ contract TreeFactory is ERC721 {
     event PlanterBalanceWithdrawn(address planter, uint amount);
     event AmbassadorBalanceWithdrawn(address ambassador, uint amount);
 
-    bool public isTreeFactory = true;
+    bool public isTreeFactory;
 
     struct Tree {
         string name;
@@ -50,6 +54,7 @@ contract TreeFactory is ERC721 {
     mapping(uint256 => uint256) public typeTreeCount;
     mapping(uint256 => uint256) public gbTreeCount;
     mapping(uint256 => uint256[]) public gbTrees;
+    mapping(uint256 => uint256[]) public typeTrees;
 
     mapping(uint256 => uint256) public treeToPlanterRemainingBalance;
     mapping(uint256 => uint256) public treeToPlanterBalancePerSecond;
@@ -71,7 +76,7 @@ contract TreeFactory is ERC721 {
     uint8 constant rescueFundIndex = 4;
     uint8 constant researchFundIndex = 5;
 
-    // i common year 31536000 seconds * 3 year 
+    // 1 common year 31536000 seconds * 3 year 
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
 
     uint256[6] public balances;
@@ -80,10 +85,18 @@ contract TreeFactory is ERC721 {
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
 
-    constructor(address _accessRestrictionAddress) ERC721("Tree", "TREE") public {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isTreeFactory = true;
+
+        ERC721UpgradeSafe.__ERC721_init(
+            "Tree",
+            "TREE"
+        );
+
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
     }
 
     function setGBAddress(address _address) external {
@@ -103,7 +116,7 @@ contract TreeFactory is ERC721 {
     }
 
     //@todo permission must check
-    function add(
+    function plant(
         uint8 _typeId,
         uint256 _gbId,
         string[] calldata _stringParams,
@@ -112,6 +125,10 @@ contract TreeFactory is ERC721 {
 
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
+
+
+        // require tree type exists
+        //gb exists and planter in gb
 
 
         uint256 id = 0;
@@ -123,8 +140,8 @@ contract TreeFactory is ERC721 {
             trees[id].name = _stringParams[0];
             trees[id].latitude = _stringParams[1];
             trees[id].longitude = _stringParams[2];
-            trees[id].plantedDate = now;
-            trees[id].birthDate = now;
+            trees[id].plantedDate = block.timestamp;
+            trees[id].birthDate = block.timestamp;
             trees[id].height = _uintParams[0];
             trees[id].diameter = _uintParams[1];
 
@@ -134,7 +151,7 @@ contract TreeFactory is ERC721 {
 
             trees.push(
                 Tree(_stringParams[0],_stringParams[1],_stringParams[2],
-                    now,now,
+                    block.timestamp,block.timestamp,
                     0,_uintParams[0],_uintParams[1]
                 )
             );
@@ -145,11 +162,13 @@ contract TreeFactory is ERC721 {
             _mint(msg.sender, id);
         }
 
-        typeTreeCount[_typeId]++;
-
         treeToGB[id] = _gbId;
         gbTreeCount[_gbId]++;
         gbTrees[_gbId].push(id);
+
+        treeToType[id] = _typeId;
+        typeTreeCount[_typeId]++;
+        typeTrees[_typeId].push(id);
 
         treeToPlanter[id] = msg.sender;
         planterTreeCount[msg.sender]++;
@@ -171,7 +190,7 @@ contract TreeFactory is ERC721 {
 
 
         trees.push(
-            Tree(name,'','',0,0,now,0,0)
+            Tree(name,'','',0,0,block.timestamp,0,0)
         );
         uint256 id = trees.length - 1;
 
@@ -206,7 +225,7 @@ contract TreeFactory is ERC721 {
         uint treeId = notFundedTrees[notFundedTreesUsedIndex];
         notFundedTreesUsedIndex++;
 
-        trees[treeId].fundedDate = now;
+        trees[treeId].fundedDate = block.timestamp;
 
         if(_planterBalance > 0 ) {
             treeToPlanterRemainingBalance[treeId] = _planterBalance;
@@ -263,73 +282,12 @@ contract TreeFactory is ERC721 {
         return result;
     }
 
-    function getTypeId(uint256 _treeId) public view returns (uint256) {
-        return treeToType[_treeId];
-    }
-
-    function getPlantedDate(uint256 _id) public view returns (uint256) {
-        return trees[_id].plantedDate;
-    }
-
-    function getFundedDate(uint256 _id) public view returns (uint256) {
-        return trees[_id].fundedDate;
-    }
-
     function setPrice(uint256 _price) external {
         accessRestriction.ifAdmin(msg.sender);
 
         price = _price;
         emit PriceChanged(_price);
     }
-
-    function getPrice() external view returns(uint256) {
-        return price;
-    }
-
-    function getTree(uint256 _treeId) external view returns(
-        string memory name,
-        string memory latitude,
-        string memory longitude,
-        uint256 plantedDate,
-        uint256 birthDate,
-        uint256 fundedDate,
-        uint8 height,
-        uint8 diameter,
-        address owner
-    ) {
-        require(_exists(_treeId), "ERC721: nonexistent token");
-
-        name = trees[_treeId].name;
-        latitude = trees[_treeId].latitude;
-        longitude = trees[_treeId].longitude;
-        plantedDate = trees[_treeId].plantedDate;
-        birthDate = trees[_treeId].birthDate;
-        fundedDate = trees[_treeId].fundedDate;
-        height = trees[_treeId].height;
-        diameter = trees[_treeId].diameter;
-        owner = ownerOf(_treeId);
-    }
-
-    function getTreeGB(uint256 _treeId) external view returns(uint256) {
-        return treeToGB[_treeId];
-    }
-
-    function getPlanterTreesCount(address _planter) external view returns(uint256) {
-        return planterTreeCount[_planter];
-    }
-
-    function getPlanterTrees(address _planter) external view returns(uint256[] memory) {
-        return planterTrees[_planter];
-    }
-
-    function getGBTrees(uint256 _gbId) external view returns(uint256[] memory) {
-        return gbTrees[_gbId];
-    }
-
-    function getGBTreesCount(uint256 _gbId) external view returns(uint256) {
-        return gbTreeCount[_gbId];
-    }
-
     
 
     function fund(uint256 _count) external payable {
@@ -346,7 +304,7 @@ contract TreeFactory is ERC721 {
 
             if (notFundedTreesExists() == true) {
                 id = getLastNotFundedTreeId();
-                uint256 gbId = this.getTreeGB(id);
+                uint256 gbId = treeToGB[id];
                 address gbAmbassador = gbFactory.getGBAmbassador(gbId);
 
                 if (gbAmbassador != address(0)) {
@@ -424,19 +382,18 @@ contract TreeFactory is ERC721 {
 
         require(balances[_index] > 0, "Balance is zero!");
 
-        uint256 withdrawbleBalance = balances[_index];
+        uint256 withdrawableBalance = balances[_index];
 
         balances[_index] = 0;
 
-        _to.transfer(withdrawbleBalance);
+        Address.sendValue(_to, withdrawableBalance);
     }
 
     function withdrawPlanterBalance() external {
 
         accessRestriction.ifPlanter(msg.sender);
 
-        
-        uint256 planterTreesCount = this.getPlanterTreesCount(msg.sender);
+        uint256 planterTreesCount = planterTreeCount[msg.sender];
 
         require(
             planterTreesCount > 0,
@@ -444,7 +401,7 @@ contract TreeFactory is ERC721 {
         );
 
         uint256 withdrawableBalance = 0;
-        uint256[] memory treeIds = this.getPlanterTrees(msg.sender);
+        uint256[] memory treeIds = planterTrees[msg.sender];
 
         for (
             uint256 i = 0;
@@ -494,7 +451,7 @@ contract TreeFactory is ERC721 {
                     totalSeconds =
                         totalSeconds +
                         updateFactory.getUpdateDate(jUpdateId) -
-                        getPlantedDate(treeId);
+                        trees[treeId].plantedDate;
                 }
 
                 updateFactory.setPlanterBalanceWithdrawn(jUpdateId);
@@ -512,7 +469,7 @@ contract TreeFactory is ERC721 {
 
         balances[1] = balances[1] - withdrawableBalance;
 
-        msg.sender.transfer(withdrawableBalance);
+        Address.sendValue(msg.sender, withdrawableBalance);
 
         emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
     }
@@ -533,13 +490,13 @@ contract TreeFactory is ERC721 {
 
             uint256 _gbId = gbIds[k];
 
-            uint256 gbTreesCount = this.getGBTreesCount(_gbId);
+            uint256 gbTreesCount = gbTreeCount[_gbId];
 
             if(gbTreesCount == 0) {
                 continue;
             }
 
-            uint256[] memory treeIds = this.getGBTrees(_gbId);
+            uint256[] memory treeIds = gbTrees[_gbId];
         
             for (uint256 i = 0; i < gbTreesCount; i++) {
 
@@ -586,7 +543,7 @@ contract TreeFactory is ERC721 {
                         totalSeconds =
                             totalSeconds +
                             updateFactory.getUpdateDate(jUpdateId) -
-                            getPlantedDate(treeId);
+                            trees[treeId].plantedDate;
                     }
 
                     updateFactory.setAmbassadorBalanceWithdrawn(jUpdateId);
@@ -604,7 +561,7 @@ contract TreeFactory is ERC721 {
 
         balances[2] = balances[2] - withdrawableBalance;
 
-        msg.sender.transfer(withdrawableBalance);
+        Address.sendValue(msg.sender, withdrawableBalance);
 
         emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
     }

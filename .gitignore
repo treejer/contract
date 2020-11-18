@@ -2,9 +2,10 @@
 logs
 *.log
 
-# Directories used by tools like mocha & istanbul
+# Directories used by tools like mocha & istanbul & openzeplinn
 coverage
 shippable
+.openzeppelin/
 
 # Dependency directory
 node_modules

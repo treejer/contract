@@ -6,6 +6,7 @@ const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const Common = require("./common");
 
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
 
 contract('UpdateFactory', (accounts) => {
@@ -17,9 +18,12 @@ contract('UpdateFactory', (accounts) => {
     const ownerAccount = accounts[1];
 
     beforeEach(async () => {
-        arInstance = await AccessRestriction.new({ from: deployerAccount });
-        updateInstance = await UpdateFactory.new(arInstance.address, { from: deployerAccount });
-        treeInstance = await TreeFactory.new(arInstance.address, { from: deployerAccount });
+
+        arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
+        updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
+        await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
 
     });
 

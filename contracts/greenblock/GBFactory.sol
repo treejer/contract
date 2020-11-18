@@ -4,9 +4,10 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../access/AccessRestriction.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 
 
-contract GBFactory {
+contract GBFactory is Initializable {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
@@ -15,7 +16,7 @@ contract GBFactory {
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right auction in our setGBAddress() call.
-    bool public isGBFactory = true;
+    bool public isGBFactory;
 
     //@todo must change coordinates
     struct GB {
@@ -28,21 +29,22 @@ contract GBFactory {
     uint8 constant maxGBPlantersCount = 5;
 
     mapping(uint256 => address[]) public gbToPlanters;
+    mapping(address => uint256) public planterGB;
+    
     mapping(uint256 => address) public gbToAmbassador;
     mapping(address => uint256) ambassadorGBCount;
     mapping(address => uint256[]) ambassadorGBs;
-    mapping(address => uint256) verifiersGBCount;
 
     AccessRestriction public accessRestriction;
 
-    constructor(address _accessRestrictionAddress) public
-    {
+    function initialize(address _accessRestrictionAddress) public initializer {
+        isGBFactory = true;
         AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
 
-    function add(
+    function create(
         string calldata _title,
         string calldata _coordinates,
         address _ambassador,
@@ -58,13 +60,15 @@ contract GBFactory {
         for (uint8 i = 0; i < _planters.length; i++) {
             if(accessRestriction.isPlanter(_planters[i])) {
                 gbToPlanters[id].push(_planters[i]);
+                planterGB[_planters[i]] = id;
+
             }
         }
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
         ambassadorGBs[_ambassador].push(id);
-
+        
         emit NewGBAdded(id, _title);
     }
 

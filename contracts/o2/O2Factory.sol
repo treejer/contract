@@ -4,6 +4,7 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
@@ -11,6 +12,7 @@ import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
 
 contract O2Factory is ERC20UpgradeSafe {
+    using SafeMath for uint256;
 
     event O2Minted(address owner, uint256 totalO2);
 
@@ -20,14 +22,13 @@ contract O2Factory is ERC20UpgradeSafe {
     AccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        AccessRestriction candidateContract = AccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 
-        ERC20UpgradeSafe.__ERC20_init(
-            "Oxygen",
-            "O2"
-        );
+        ERC20UpgradeSafe.__ERC20_init("Oxygen", "O2");
     }
 
     function setTreeTypeAddress(address _address) external {
@@ -46,7 +47,6 @@ contract O2Factory is ERC20UpgradeSafe {
         treeFactory = candidateContract;
     }
 
-
     function setUpdateFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
@@ -55,24 +55,14 @@ contract O2Factory is ERC20UpgradeSafe {
         updateFactory = candidateContract;
     }
 
-
-    //@todo permission must check
-    function mint() external  {
-
+    function mint() external {
         uint256 ownerTreesCount = treeFactory.ownerTreesCount(msg.sender);
 
-        require(
-            ownerTreesCount > 0,
-            "Owner tree count is zero"
-        );
+        require(ownerTreesCount > 0, "Owner tree count is zero");
 
         uint256 mintableO2 = 0;
 
-        for (
-            uint256 i = 0;
-            i < ownerTreesCount;
-            i++
-        ) {
+        for (uint256 i = 0; i < ownerTreesCount; i++) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
             uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
             uint256 totalSeconds = 0;
@@ -86,7 +76,7 @@ contract O2Factory is ERC20UpgradeSafe {
             }
 
             for (uint256 j = treeUpdates.length; j > 0; j--) {
-                uint256 jUpdateId = treeUpdates[j - 1];
+                uint256 jUpdateId = treeUpdates[j.sub(1)];
 
                 if (updateFactory.getStatus(jUpdateId) != 1) {
                     continue;
@@ -97,23 +87,25 @@ contract O2Factory is ERC20UpgradeSafe {
                 }
 
                 if (j > 1) {
-                    uint256 jMinusUpdateId = treeUpdates[j - 2];
+                    uint256 jMinusUpdateId = treeUpdates[j.sub(2)];
 
                     if (updateFactory.getStatus(jMinusUpdateId) != 1) {
                         continue;
                     }
 
-                    totalSeconds =
-                        totalSeconds +
-                        updateFactory.getUpdateDate(jUpdateId) -
-                        updateFactory.getUpdateDate(jMinusUpdateId);
+                    totalSeconds = totalSeconds.add(
+                        updateFactory.getUpdateDate(jUpdateId).sub(
+                            updateFactory.getUpdateDate(jMinusUpdateId)
+                        )
+                    );
                 } else {
-                    (,,,uint256 plantedDate,,,,) = treeFactory.trees(treeId);
+                    (, , , uint256 plantedDate, , , , ) = treeFactory.trees(
+                        treeId
+                    );
 
-                    totalSeconds =
-                        totalSeconds +
-                        updateFactory.getUpdateDate(jUpdateId) -
-                        plantedDate;
+                    totalSeconds = totalSeconds.add(
+                        updateFactory.getUpdateDate(jUpdateId).sub(plantedDate)
+                    );
                 }
 
                 updateFactory.setMinted(jUpdateId, true);
@@ -123,7 +115,7 @@ contract O2Factory is ERC20UpgradeSafe {
                 treeFactory.treeToType(treeId)
             );
 
-            mintableO2 = mintableO2 + o2Formula * totalSeconds;
+            mintableO2 = mintableO2.add(o2Formula.mul(totalSeconds));
         }
 
         require(mintableO2 > 0, "MintableO2 is zero");

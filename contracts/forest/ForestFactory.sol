@@ -9,9 +9,7 @@ import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "./PublicForest.sol";
 
-
 contract ForestFactory is Initializable, ContextUpgradeSafe {
-
     event PublicForestCreated(address forestAddress);
 
     address[] public forests;
@@ -20,11 +18,11 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
     AccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        
-        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        AccessRestriction candidateContract = AccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
-
     }
 
     function setTreeFactoryAddress(address _address) external {
@@ -45,5 +43,4 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
 
         emit PublicForestCreated(address(newForest));
     }
-
 }

@@ -5,9 +5,10 @@ pragma experimental ABIEncoderV2;
 
 import "../access/AccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
 
-contract GBFactory is Initializable {
+contract GBFactory is Initializable, ContextUpgradeSafe {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);

@@ -62,7 +62,6 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
             if(accessRestriction.isPlanter(_planters[i])) {
                 gbToPlanters[id].push(_planters[i]);
                 planterGB[_planters[i]] = id;
-
             }
         }
 
@@ -71,6 +70,10 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         ambassadorGBs[_ambassador].push(id);
         
         emit NewGBAdded(id, _title);
+    }
+
+    function getGBPlantersCount(uint _gbId) external view returns (uint256) {
+        return gbToPlanters[_gbId].length;
     }
 
     function getAmbassadorGBCount(address _ambassador) external view returns (uint256) {

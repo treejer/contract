@@ -9,12 +9,13 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 
 import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
+import "../greenblock/GBFactory.sol";
 
 contract UpdateFactory is Initializable, ContextUpgradeSafe {
     using SafeMath for uint256;
 
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
-    event UpdateAccepted(uint256 updateId);
+    event UpdateAccepted(uint256 updateId, address byWho);
 
     struct Update {
         uint256 treeId;
@@ -36,6 +37,7 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
 
     AccessRestriction public accessRestriction;
     TreeFactory public treeFactory;
+    GBFactory public gbFactory;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isUpdateFactory = true;
@@ -52,6 +54,14 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
         TreeFactory candidateContract = TreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
+    }
+
+    function setGBFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        GBFactory candidateContract = GBFactory(_address);
+        require(candidateContract.isGBFactory());
+        gbFactory = candidateContract;
     }
 
     // update difference must check
@@ -83,10 +93,55 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
     }
 
     function acceptUpdate(uint256 _updateId) external {
-        accessRestriction.ifAdmin(msg.sender);
+        require(
+            accessRestriction.isAdmin(msg.sender) ||
+                accessRestriction.isAmbassador(msg.sender) ||
+                accessRestriction.isPlanter(msg.sender),
+            "Admin or ambassador or planter can accept updates!"
+        );
+
+        require(
+            updates[_updateId].status == 0,
+            "update status must be pending!"
+        );
+
+        if (accessRestriction.isAdmin(msg.sender) != true) {
+            uint256 treeId = updates[_updateId].treeId;
+
+            require(
+                treeFactory.treeToPlanter(treeId) != msg.sender,
+                "Planter of tree can't accept update"
+            );
+
+            uint256 gbId = treeFactory.treeToGB(treeId);
+
+            if (accessRestriction.isAmbassador(msg.sender)) {
+                require(
+                    gbFactory.gbToAmbassador(gbId) == msg.sender,
+                    "only ambassador of that greenBlock can accept update!"
+                );
+            } else {
+                bool isInGB = false;
+
+                for (
+                    uint index = 0;
+                    index < gbFactory.getGBPlantersCount(gbId);
+                    index++
+                ) {
+                    if (gbFactory.gbToPlanters(gbId, index) == msg.sender) {
+                        isInGB = true;
+                    }
+                }
+
+                require(
+                    isInGB == true,
+                    "only one of planters of that greenBlock can accept update!"
+                );
+            }
+        }
 
         updates[_updateId].status = 1;
-        emit UpdateAccepted(_updateId);
+        emit UpdateAccepted(_updateId, msg.sender);
     }
 
     function getTreeUpdates(uint256 _treeId)
@@ -128,7 +183,6 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
     }
 
     function setMinted(uint256 _id, bool _minted) external {
-        
         // todo must fix this
         // require(
         //     treeFactory.ownerOf(_id) == msg.sender,

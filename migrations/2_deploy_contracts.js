@@ -45,6 +45,7 @@ module.exports = async function (deployer, network, accounts) {
 
   UpdateFactory.deployed().then(async (instance) => {
     await instance.setTreeFactoryAddress(treeAddress);
+    await instance.setGBFactoryAddress(gbAddress);
   });  
 
   await deployProxy(SeedFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })

@@ -93,6 +93,10 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
         require(hasRole(DEFAULT_ADMIN_ROLE, _address), "Caller is not admin");
     }
 
+    function isAdmin(address _address) public view returns(bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, _address);
+    }
+
     function ifNotPaused() public view {
         require(!paused(), "Pausable: paused");
     }

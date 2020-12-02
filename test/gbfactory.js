@@ -160,7 +160,7 @@ contract('GBFactory', (accounts) => {
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
         Common.addPlanter(arInstance, planter2Account, deployerAccount);
-        let tx = await gbInstance.joinGB(id, planter2Account, { from: planter2Account });
+        let tx = await gbInstance.joinGB(id, { from: planter2Account });
 
         truffleAssert.eventEmitted(tx, 'PlanterJoinedGB', (ev) => {
             return ev.id.toString() === id.toString() && ev.planter === planter2Account;

@@ -115,15 +115,15 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         emit GBActivated(_gbId);
     }
 
-    function joinGB(uint256 _gbId, address planter) external {
+    function joinGB(uint256 _gbId) external {
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
 
         require(gbToPlanters[_gbId].length < maxGBPlantersCount, "Planter of this GB is reached maximum");
 
-        gbToPlanters[_gbId].push(planter);
+        gbToPlanters[_gbId].push(msg.sender);
 
-        emit PlanterJoinedGB(_gbId, planter);
+        emit PlanterJoinedGB(_gbId, msg.sender);
     }
 
     function totalGB() external view returns(uint256) {

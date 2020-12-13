@@ -73,24 +73,23 @@ contract TreeFactory is ERC721UpgradeSafe {
     mapping(uint256 => uint256) public treeToAmbassadorRemainingBalance;
     mapping(uint256 => uint256) public treeToAmbassadorBalancePerSecond;
 
-    uint256 constant treejerPercentage = 25;
-    uint256 constant planterPercentage = 40;
-    uint256 constant ambassadorPercentage = 5;
-    uint256 constant localDevelopmentFundPercentage = 15;
-    uint256 constant rescueFundPercentage = 10;
-    uint256 constant researchFundPercentage = 5;
+    // 100 percentages basis points = 1 percentage
+    uint256 public treejerPercentage;
+    uint256 public plantersPercentage;
+    uint256 public ambassadorsPercentage;
+    uint256 public localDevelopmentFundPercentage;
+    uint256 public rescueFundPercentage;
+    uint256 public researchFundPercentage;
 
-    uint8 constant treejerIndex = 0;
-    uint8 constant planterIndex = 1;
-    uint8 constant ambassadorIndex = 2;
-    uint8 constant localDevelopmentFundIndex = 3;
-    uint8 constant rescueFundIndex = 4;
-    uint8 constant researchFundIndex = 5;
+    uint256 public treejerFund;
+    uint256 public plantersFund;
+    uint256 public ambassadorsFund;
+    uint256 public localDevelopmentFund;
+    uint256 public rescueFund;
+    uint256 public researchFund;
 
     // 1 common year 31536000 seconds * 3 year
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
-
-    uint256[6] public balances;
 
     AccessRestriction public accessRestriction;
     GBFactory public gbFactory;
@@ -101,11 +100,18 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         ERC721UpgradeSafe.__ERC721_init("Tree", "TREE");
 
-        AccessRestriction candidateContract = AccessRestriction(
-            _accessRestrictionAddress
-        );
+        AccessRestriction candidateContract =
+            AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
+        //set default percentages
+        treejerPercentage = 2500;
+        plantersPercentage = 4000;
+        ambassadorsPercentage = 500;
+        localDevelopmentFundPercentage = 1500;
+        rescueFundPercentage = 1000;
+        researchFundPercentage = 500;
     }
 
     function setGBAddress(address _address) external {
@@ -242,7 +248,9 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         if (_ambassadorBalance > 0) {
             treeToAmbassadorRemainingBalance[treeId] = _ambassadorBalance;
-            treeToAmbassadorBalancePerSecond[treeId] = _ambassadorBalancePerSecond;
+            treeToAmbassadorBalancePerSecond[
+                treeId
+            ] = _ambassadorBalancePerSecond;
         }
 
         _transfer(ownerOf(treeId), _account, treeId);
@@ -303,15 +311,12 @@ contract TreeFactory is ERC721UpgradeSafe {
     function fund(uint256 _count) external payable {
         uint256 balance = msg.value.div(_count);
 
-        //@todo check for treePrice
         require(balance >= price, "Balance is not sufficient");
 
         for (uint8 i = 0; i < _count; i++) {
             uint256 id = 0;
-            uint256 planterBalance = _calculateBalance(
-                planterPercentage,
-                balance
-            );
+            uint256 planterBalance =
+                _calculateShare(plantersPercentage, balance);
             uint256 ambassadorBalance = 0;
             bool hasAmbasador = false;
 
@@ -322,8 +327,8 @@ contract TreeFactory is ERC721UpgradeSafe {
 
                 if (gbAmbassador != address(0)) {
                     hasAmbasador = true;
-                    ambassadorBalance = _calculateBalance(
-                        ambassadorPercentage,
+                    ambassadorBalance = _calculateShare(
+                        ambassadorsPercentage,
                         balance
                     );
                 }
@@ -331,15 +336,15 @@ contract TreeFactory is ERC721UpgradeSafe {
                 id = fundPlantedTress(
                     msg.sender,
                     planterBalance,
-                    _calculateBalancePerSecond(planterBalance),
+                    _calculateSharePerSecond(planterBalance),
                     ambassadorBalance,
-                    _calculateBalancePerSecond(ambassadorBalance)
+                    _calculateSharePerSecond(ambassadorBalance)
                 );
             } else {
                 id = simpleFund(
                     msg.sender,
                     planterBalance,
-                    _calculateBalancePerSecond(planterBalance),
+                    _calculateSharePerSecond(planterBalance),
                     0,
                     0
                 );
@@ -357,70 +362,121 @@ contract TreeFactory is ERC721UpgradeSafe {
         }
     }
 
-    function _calculateBalancePerSecond(uint256 _balance)
+    function _calculateSharePerSecond(uint256 _amount)
         private
         pure
         returns (uint256)
     {
-        if (_balance == 0) {
+        if (_amount == 0) {
             return 0;
         }
-        return _balance.div(treeBalanceWithdrawnSeconds);
+
+        return _amount.div(treeBalanceWithdrawnSeconds);
     }
 
-    function _calculateBalance(uint256 _percentage, uint256 _balance)
+    function _calculateShare(uint256 _percentage, uint256 _amount)
         private
         pure
         returns (uint256)
     {
-        return (_balance.mul(_percentage)).div(100);
+        if (_percentage == 0 || _amount == 0) {
+            return 0;
+        }
+
+        require((_amount.div(10000)).mul(10000) == _amount, "Too small");
+
+        return (_amount.mul(_percentage)).div(10000);
     }
 
     function _updateBalances(uint256 _balance, bool _hasAmbasador) private {
-        uint256 localDevelopmentFundBalance = _calculateBalance(
-            localDevelopmentFundPercentage,
-            _balance
-        );
-        uint256 ambassadorBalance = _calculateBalance(
-            ambassadorPercentage,
-            _balance
-        );
-        if (_hasAmbasador == false) {
-            ambassadorBalance = 0;
+        uint256 ambassadorBalance = 0;
+
+        uint256 localDevelopmentFundBalance =
+            _calculateShare(localDevelopmentFundPercentage, _balance);
+
+        if (_hasAmbasador == true) {
+            ambassadorBalance = _calculateShare(
+                ambassadorsPercentage,
+                _balance
+            );
+        } else {
             localDevelopmentFundBalance = localDevelopmentFundBalance.add(
                 ambassadorBalance
             );
         }
 
-        balances = [
-            balances[0].add(_calculateBalance(treejerPercentage, _balance)),
-            balances[1].add(_calculateBalance(planterPercentage, _balance)),
-            balances[2].add(ambassadorBalance),
-            balances[3].add(localDevelopmentFundBalance),
-            balances[4].add(_calculateBalance(rescueFundPercentage, _balance)),
-            balances[5].add(_calculateBalance(researchFundPercentage, _balance))
-        ];
+        treejerFund = treejerFund.add(
+            _calculateShare(treejerPercentage, _balance)
+        );
+        plantersFund = plantersFund.add(
+            _calculateShare(plantersPercentage, _balance)
+        );
+        ambassadorsFund = ambassadorsFund.add(ambassadorBalance);
+        localDevelopmentFund = localDevelopmentFund.add(
+            localDevelopmentFundBalance
+        );
+        rescueFund = rescueFund.add(
+            _calculateShare(rescueFundPercentage, _balance)
+        );
+        researchFund = researchFund.add(
+            _calculateShare(researchFundPercentage, _balance)
+        );
     }
 
-    function getBalances() external view returns (uint256[6] memory) {
-        return balances;
+    function withdrawTreejerFund(address payable _to, uint256 _amount)
+        external
+    {
+        accessRestriction.ifAdmin(msg.sender);
+
+        require(treejerFund > 0, "treejerFund balance is zero!");
+        require(_amount <= treejerFund, "Not more treejerFund!");
+
+        treejerFund = treejerFund.sub(_amount);
+
+        Address.sendValue(_to, _amount);
     }
 
-    function withdrawBalance(uint8 _index, address payable _to) external {
+    function withdrawLocalDevelopmentFund(address payable _to, uint256 _amount)
+        external
+    {
         accessRestriction.ifAdmin(msg.sender);
 
         require(
-            _index != 1 && _index != 2,
-            "These indexes are autamtic and by request of planter and ambassador!"
+            localDevelopmentFund > 0,
+            "localDevelopmentFund balance is zero!"
+        );
+        require(
+            _amount <= localDevelopmentFund,
+            "Not more localDevelopmentFund!"
         );
 
-        require(balances[_index] > 0, "Balance is zero!");
+        localDevelopmentFund = localDevelopmentFund.sub(_amount);
 
-        uint256 withdrawableBalance = balances[_index];
+        Address.sendValue(_to, _amount);
+    }
 
-        balances[_index] = 0;
+    function withdrawRescueFund(address payable _to, uint256 _amount) external {
+        accessRestriction.ifAdmin(msg.sender);
 
-        Address.sendValue(_to, withdrawableBalance);
+        require(rescueFund > 0, "rescueFund balance is zero!");
+        require(_amount <= rescueFund, "Not more rescueFund!");
+
+        rescueFund = rescueFund.sub(_amount);
+
+        Address.sendValue(_to, _amount);
+    }
+
+    function withdrawResearchFund(address payable _to, uint256 _amount)
+        external
+    {
+        accessRestriction.ifAdmin(msg.sender);
+
+        require(researchFund > 0, "researchFund balance is zero!");
+        require(_amount <= researchFund, "Not more researchFund!");
+
+        researchFund = researchFund.sub(_amount);
+
+        Address.sendValue(_to, _amount);
     }
 
     function withdrawPlanterBalance() external {
@@ -455,7 +511,7 @@ contract TreeFactory is ERC721UpgradeSafe {
             }
 
             for (uint256 j = treeUpdates.length; j > 0; j--) {
-                uint256 jUpdateId = treeUpdates[j.sub(1)];
+                uint256 jUpdateId = treeUpdates[j - 1];
 
                 if (updateFactory.getStatus(jUpdateId) != 1) {
                     continue;
@@ -468,7 +524,7 @@ contract TreeFactory is ERC721UpgradeSafe {
                 }
 
                 if (j > 1) {
-                    uint256 jMinusUpdateId = treeUpdates[j.sub(2)];
+                    uint256 jMinusUpdateId = treeUpdates[j - 2];
 
                     if (updateFactory.getStatus(jMinusUpdateId) != 1) {
                         continue;
@@ -494,8 +550,9 @@ contract TreeFactory is ERC721UpgradeSafe {
                 withdrawableBalance = withdrawableBalance.add(
                     treeToPlanterBalancePerSecond[treeId].mul(totalSeconds)
                 );
-                treeToPlanterRemainingBalance[treeId] = treeToPlanterRemainingBalance[treeId]
-                    .sub(
+                treeToPlanterRemainingBalance[
+                    treeId
+                ] = treeToPlanterRemainingBalance[treeId].sub(
                     treeToPlanterBalancePerSecond[treeId].mul(totalSeconds)
                 );
             }
@@ -503,7 +560,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         require(withdrawableBalance > 0, "withdrawableBalance is zero");
 
-        balances[1] = balances[1].sub(withdrawableBalance);
+        plantersFund = plantersFund.sub(withdrawableBalance);
 
         Address.sendValue(msg.sender, withdrawableBalance);
 
@@ -535,9 +592,8 @@ contract TreeFactory is ERC721UpgradeSafe {
             for (uint256 i = 0; i < gbTreesCount; i++) {
                 uint256 treeId = treeIds[i];
 
-                uint256[] memory treeUpdates = updateFactory.getTreeUpdates(
-                    treeId
-                );
+                uint256[] memory treeUpdates =
+                    updateFactory.getTreeUpdates(treeId);
                 uint256 totalSeconds = 0;
 
                 if (treeToAmbassadorRemainingBalance[treeId] <= 0) {
@@ -557,7 +613,7 @@ contract TreeFactory is ERC721UpgradeSafe {
                 }
 
                 for (uint256 j = treeUpdates.length; j > 0; j--) {
-                    uint256 jUpdateId = treeUpdates[j.sub(1)];
+                    uint256 jUpdateId = treeUpdates[j - 1];
 
                     if (updateFactory.getStatus(jUpdateId) != 1) {
                         continue;
@@ -571,7 +627,7 @@ contract TreeFactory is ERC721UpgradeSafe {
                     }
 
                     if (j > 1) {
-                        uint256 jMinusUpdateId = treeUpdates[j.sub(2)];
+                        uint256 jMinusUpdateId = treeUpdates[j - 2];
 
                         if (updateFactory.getStatus(jMinusUpdateId) != 1) {
                             continue;
@@ -599,8 +655,9 @@ contract TreeFactory is ERC721UpgradeSafe {
                             totalSeconds
                         )
                     );
-                    treeToAmbassadorRemainingBalance[treeId] = treeToAmbassadorRemainingBalance[treeId]
-                        .sub(
+                    treeToAmbassadorRemainingBalance[
+                        treeId
+                    ] = treeToAmbassadorRemainingBalance[treeId].sub(
                         treeToAmbassadorBalancePerSecond[treeId].mul(
                             totalSeconds
                         )
@@ -611,7 +668,7 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         require(withdrawableBalance > 0, "withdrawableBalance is zero");
 
-        balances[2] = balances[2].sub(withdrawableBalance);
+        ambassadorsFund = ambassadorsFund.sub(withdrawableBalance);
 
         Address.sendValue(msg.sender, withdrawableBalance);
 

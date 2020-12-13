@@ -32,6 +32,10 @@ contract TreeFactory is ERC721UpgradeSafe {
     );
     event PlanterBalanceWithdrawn(address planter, uint256 amount);
     event AmbassadorBalanceWithdrawn(address ambassador, uint256 amount);
+    event TreejerFundWithdrawn(address to, uint256 amount, address by);
+    event LocalDevelopmentFundWithdrawn(address to, uint256 amount, address by);
+    event RescueFundWithdrawn(address to, uint256 amount, address by);
+    event ResearchFundWithdrawn(address to, uint256 amount, address by);
 
     bool public isTreeFactory;
 
@@ -91,6 +95,7 @@ contract TreeFactory is ERC721UpgradeSafe {
     // 1 common year 31536000 seconds * 3 year
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
 
+    //related contrects
     AccessRestriction public accessRestriction;
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
@@ -434,6 +439,8 @@ contract TreeFactory is ERC721UpgradeSafe {
         treejerFund = treejerFund.sub(_amount);
 
         Address.sendValue(_to, _amount);
+
+        emit TreejerFundWithdrawn(_to, _amount, msg.sender);
     }
 
     function withdrawLocalDevelopmentFund(address payable _to, uint256 _amount)
@@ -453,6 +460,8 @@ contract TreeFactory is ERC721UpgradeSafe {
         localDevelopmentFund = localDevelopmentFund.sub(_amount);
 
         Address.sendValue(_to, _amount);
+
+        emit LocalDevelopmentFundWithdrawn(_to, _amount, msg.sender);
     }
 
     function withdrawRescueFund(address payable _to, uint256 _amount) external {
@@ -464,6 +473,8 @@ contract TreeFactory is ERC721UpgradeSafe {
         rescueFund = rescueFund.sub(_amount);
 
         Address.sendValue(_to, _amount);
+
+        emit RescueFundWithdrawn(_to, _amount, msg.sender);
     }
 
     function withdrawResearchFund(address payable _to, uint256 _amount)
@@ -477,6 +488,8 @@ contract TreeFactory is ERC721UpgradeSafe {
         researchFund = researchFund.sub(_amount);
 
         Address.sendValue(_to, _amount);
+
+        emit ResearchFundWithdrawn(_to, _amount, msg.sender);
     }
 
     function withdrawPlanterBalance() external {

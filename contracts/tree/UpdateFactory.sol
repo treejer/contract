@@ -41,9 +41,8 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isUpdateFactory = true;
-        AccessRestriction candidateContract = AccessRestriction(
-            _accessRestrictionAddress
-        );
+        AccessRestriction candidateContract =
+            AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -76,11 +75,11 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
 
         if (treeUpdates[_treeId].length > 0) {
             require(
-                updates[treeUpdates[_treeId][treeUpdates[_treeId].length.sub(
-                    1
-                )]]
+                updates[
+                    treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)]
+                ]
                     .status == 1,
-                "Last update not accepeted, please wait until it accpeted and after that send new update"
+                "Last update not accepted, please wait until it accepted and after that send new update"
             );
         }
 
@@ -95,8 +94,7 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
     function acceptUpdate(uint256 _updateId) external {
         require(
             accessRestriction.isAdmin(msg.sender) ||
-                accessRestriction.isAmbassador(msg.sender) ||
-                accessRestriction.isPlanter(msg.sender),
+                accessRestriction.isPlanterOrAmbassador(msg.sender),
             "Admin or ambassador or planter can accept updates!"
         );
 
@@ -124,7 +122,7 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
                 bool isInGB = false;
 
                 for (
-                    uint index = 0;
+                    uint256 index = 0;
                     index < gbFactory.getGBPlantersCount(gbId);
                     index++
                 ) {
@@ -197,8 +195,9 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
         returns (bool)
     {
         return
-            updateToPlanterBalanceWithdrawn[treeUpdates[_treeId][treeUpdates[_treeId]
-                .length - 1]];
+            updateToPlanterBalanceWithdrawn[
+                treeUpdates[_treeId][treeUpdates[_treeId].length - 1]
+            ];
     }
 
     function isPlanterBalanceWithdrawn(uint256 _id) public view returns (bool) {
@@ -215,9 +214,9 @@ contract UpdateFactory is Initializable, ContextUpgradeSafe {
         returns (bool)
     {
         return
-            updateToAmbassadorBalanceWithdrawn[treeUpdates[_treeId][treeUpdates[_treeId]
-                .length
-                .sub(1)]];
+            updateToAmbassadorBalanceWithdrawn[
+                treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)]
+            ];
     }
 
     function isAmbassadorBalanceWithdrawn(uint256 _id)

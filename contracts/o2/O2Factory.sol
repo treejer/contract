@@ -99,7 +99,7 @@ contract O2Factory is ERC20UpgradeSafe {
                         )
                     );
                 } else {
-                    (, , , uint256 plantedDate, , , , ) = treeFactory.trees(
+                    (, , uint256 plantedDate, , , , ) = treeFactory.trees(
                         treeId
                     );
 

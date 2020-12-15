@@ -28,19 +28,27 @@ contract('O2Factory', (accounts) => {
     const planter5Account = accounts[7];
     const adminAccount = accounts[7];
 
+    // const zeroAddress = '0x0000000000000000000000000000000000000000';
+
     beforeEach(async () => {
 
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         treeTypeInstance = await deployProxy(TreeType, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         o2Instance = await deployProxy(O2Factory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
+
+        await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
+        await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+
         await o2Instance.setTreeTypeAddress(treeTypeInstance.address, { from: deployerAccount });
         await o2Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
         await o2Instance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+
         await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+        await updateInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
 
     });
 
@@ -48,10 +56,13 @@ contract('O2Factory', (accounts) => {
         // await o2Instance.kill({ from: ownerAccount });
     });
 
-    async function addTree(name = null) {
+    async function addTree() {
         Common.addType(treeTypeInstance, deployerAccount);
 
         Common.addPlanter(arInstance, planter1Account, deployerAccount);
+
+        Common.addGB(gbInstance, planter1Account, [planter1Account], 'title');
+
         Common.addTree(treeInstance, planter1Account);
         await Common.sleep(1000);
         
@@ -59,10 +70,13 @@ contract('O2Factory', (accounts) => {
         Common.acceptUpdate(updateInstance, deployerAccount);
     }
 
-    async function addTree2Update(name = null) {
+    async function addTree2Update() {
         Common.addType(treeTypeInstance, deployerAccount);
 
         Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, planter1Account, [planter1Account]);
+
+
         Common.addTree(treeInstance, planter1Account);
 
         await Common.sleep(1000);
@@ -74,10 +88,12 @@ contract('O2Factory', (accounts) => {
     }
 
 
-    async function add2Tree2Update(name = null) {
+    async function add2Tree2Update() {
         Common.addType(treeTypeInstance, deployerAccount);
 
         Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, planter1Account, [planter1Account]);
+
         Common.addTree(treeInstance, planter1Account);
         Common.addTree(treeInstance, planter1Account);
 
@@ -99,9 +115,8 @@ contract('O2Factory', (accounts) => {
 
 
     it("should mint o2", async () => {
-        let titleTree = 'firstTree';
 
-        await addTree(titleTree);
+        await addTree();
 
         let tx = await o2Instance.mint({ from: planter1Account });
 
@@ -111,12 +126,11 @@ contract('O2Factory', (accounts) => {
     });
 
     it("should not mint o2 second time", async () => {
-        let titleTree = 'firstTree';
 
-        await addTree(titleTree);
+        await addTree();
+
 
         await o2Instance.mint({ from: planter1Account });
-
 
         await o2Instance.mint({ from: planter1Account })
             .then(assert.fail)
@@ -133,9 +147,8 @@ contract('O2Factory', (accounts) => {
 
 
     it("should mint o2 twice", async () => {
-        let titleTree = 'secondTree';
 
-        await addTree2Update(titleTree);
+        await addTree2Update( );
 
         let tx = await o2Instance.mint({ from: planter1Account });
 
@@ -146,9 +159,8 @@ contract('O2Factory', (accounts) => {
 
 
     it("should mint o2 with 2 tree and 2 update", async () => {
-        let titleTree = 'secondTree';
 
-        await add2Tree2Update(titleTree);
+        await add2Tree2Update();
 
         let tx = await o2Instance.mint({ from: planter1Account });
 
@@ -160,8 +172,7 @@ contract('O2Factory', (accounts) => {
 
     it('should return balance of planter', async () => {
 
-        let titleTree = 'firstTree';
-        await addTree(titleTree);
+        await addTree();
 
         await o2Instance.mint({ from: planter1Account });
 

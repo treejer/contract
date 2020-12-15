@@ -38,27 +38,20 @@ Common.addGB = async (instance, ambassadorAccount, planters, title = null) => {
         { from: ambassadorAccount });
 }
 
-Common.addTree = async (instance, account, name = null) => {
+Common.addTree = async (instance, account) => {
 
     let typeId = 0;
-    let gbId = 0;
-    name = name !== null ? name : 'firstTree';
     let latitude = '38.0962';
     let longitude = '46.2738';
-    let plantedDate = '2020/02/20';
-    let birthDate = '2020/02/20';
     let height = '1';
     let diameter = '1';
 
     return await instance.plant(
         typeId,
-        gbId,
         [
-            name,
+            '',
             latitude,
-            longitude,
-            plantedDate,
-            birthDate
+            longitude
         ],
         [
             height,

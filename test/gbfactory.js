@@ -45,7 +45,7 @@ contract('GBFactory', (accounts) => {
         let tx = await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
         truffleAssert.eventEmitted(tx, 'NewGBAdded', (ev) => {
-            return ev.id.toString() === '0' && ev.title === title;
+            return ev.id.toString() === '1' && ev.title === title;
         });
 
     });
@@ -76,7 +76,7 @@ contract('GBFactory', (accounts) => {
         return await gbInstance.planterGB(planter1Account, { from: ambassadorAccount })
             .then(gbId => {
                 assert.equal(
-                    1,
+                    2,
                     gbId,
                     "planter gb is: " + gbId.toString()
                 );
@@ -89,7 +89,7 @@ contract('GBFactory', (accounts) => {
         Common.addPlanter(arInstance, planter1Account, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
 
-        return await gbInstance.greenBlocks(0, { from: ambassadorAccount })
+        return await gbInstance.greenBlocks(1, { from: ambassadorAccount })
             .then(greenBlock => {
                 assert.equal(
                     'title',
@@ -106,7 +106,7 @@ contract('GBFactory', (accounts) => {
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
 
-        return await gbInstance.getGBAmbassador(0, { from: ambassadorAccount })
+        return await gbInstance.getGBAmbassador(1, { from: ambassadorAccount })
             .then(ambassadorAddress => {
                 assert.equal(
                     ambassadorAccount,
@@ -118,7 +118,7 @@ contract('GBFactory', (accounts) => {
 
     it('should return greenblock', async () => {
         let title = 'firsGB';
-        let id = 0;
+        let id = 1;
 
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
@@ -137,7 +137,7 @@ contract('GBFactory', (accounts) => {
 
     it('should activate greenblock', async () => {
         let title = 'firsGB';
-        let id = 0;
+        let id = 1;
 
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
@@ -153,7 +153,7 @@ contract('GBFactory', (accounts) => {
 
     it('should join GB', async () => {
         let title = 'firsGB';
-        let id = 0;
+        let id = 1;
 
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addPlanter(arInstance, planter1Account, deployerAccount);

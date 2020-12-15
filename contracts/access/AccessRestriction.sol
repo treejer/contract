@@ -70,11 +70,17 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
     }
 
     function ifPlanterOrAmbassador(address _address) public view {
-        require(hasRole(PLANTER_ROLE, _address) || hasRole(AMBASSADOR_ROLE, _address), "Caller is not a planter or ambassador");
+        require(isPlanterOrAmbassador(_address), "Caller is not a planter or ambassador");
+    }
+
+
+    function isPlanterOrAmbassador(address _address) public view returns(bool) {
+        return ( isPlanter(_address) || isAmbassador(_address) );
     }
     
+    
     function ifPlanter(address _address) public view {
-        require(hasRole(PLANTER_ROLE, _address), "Caller is not a planter");
+        require(isPlanter(_address), "Caller is not a planter");
     }
 
     function isPlanter(address _address) public view returns(bool) {
@@ -82,7 +88,7 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
     }
 
     function ifAmbassador(address _address) public view {
-        require(hasRole(AMBASSADOR_ROLE, _address), "Caller is not a ambassador");
+        require(isAmbassador(_address), "Caller is not a ambassador");
     }
 
     function isAmbassador(address _address) public view returns(bool) {
@@ -90,7 +96,7 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
     }
 
     function ifAdmin(address _address) public view {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _address), "Caller is not admin");
+        require(isAdmin(_address), "Caller is not admin");
     }
 
     function isAdmin(address _address) public view returns(bool) {
@@ -104,6 +110,7 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
     function ifPaused() public view {
         require(paused(), "Pausable: not paused");
     }
+    
 
     function pause() external onlyAdmin {
         _pause();

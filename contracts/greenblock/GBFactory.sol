@@ -7,13 +7,12 @@ import "../access/AccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
-
 contract GBFactory is Initializable, ContextUpgradeSafe {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
 
-    enum GBStatus { Pending, Active }
+    enum GBStatus {Pending, Active}
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right auction in our setGBAddress() call.
@@ -31,7 +30,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
 
     mapping(uint256 => address[]) public gbToPlanters;
     mapping(address => uint256) public planterGB;
-    
+
     mapping(uint256 => address) public gbToAmbassador;
     mapping(address => uint256) ambassadorGBCount;
     mapping(address => uint256[]) ambassadorGBs;
@@ -40,9 +39,13 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isGBFactory = true;
-        AccessRestriction candidateContract = AccessRestriction(_accessRestrictionAddress);
+        AccessRestriction candidateContract =
+            AccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+
+        //create a green block, so we can check for zero green block means not assigned
+        greenBlocks.push(GB("WORLD", "ALL", GBStatus.Active));
     }
 
     function create(
@@ -51,7 +54,6 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         address _ambassador,
         address[] calldata _planters
     ) external {
-
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanterOrAmbassador(msg.sender);
 
@@ -59,7 +61,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
-            if(accessRestriction.isPlanter(_planters[i])) {
+            if (accessRestriction.isPlanter(_planters[i])) {
                 gbToPlanters[id].push(_planters[i]);
                 planterGB[_planters[i]] = id;
             }
@@ -68,15 +70,19 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
         ambassadorGBs[_ambassador].push(id);
-        
+
         emit NewGBAdded(id, _title);
     }
 
-    function getGBPlantersCount(uint _gbId) external view returns (uint256) {
+    function getGBPlantersCount(uint256 _gbId) external view returns (uint256) {
         return gbToPlanters[_gbId].length;
     }
 
-    function getAmbassadorGBCount(address _ambassador) external view returns (uint256) {
+    function getAmbassadorGBCount(address _ambassador)
+        external
+        view
+        returns (uint256)
+    {
         return ambassadorGBCount[_ambassador];
     }
 
@@ -84,7 +90,11 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         return gbToAmbassador[_gbId];
     }
 
-    function getAmbassadorGBs(address _ambassador) external view returns(uint256[] memory) {
+    function getAmbassadorGBs(address _ambassador)
+        external
+        view
+        returns (uint256[] memory)
+    {
         return ambassadorGBs[_ambassador];
     }
 
@@ -107,8 +117,10 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
     function activate(uint256 _gbId) external {
         accessRestriction.ifAdmin(msg.sender);
 
-
-        require(greenBlocks[_gbId].status != GBStatus.Active, "GB already active!");
+        require(
+            greenBlocks[_gbId].status != GBStatus.Active,
+            "GB already active!"
+        );
 
         greenBlocks[_gbId].status = GBStatus.Active;
 
@@ -119,14 +131,18 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
 
-        require(gbToPlanters[_gbId].length < maxGBPlantersCount, "Planter of this GB is reached maximum");
+        require(
+            gbToPlanters[_gbId].length < maxGBPlantersCount,
+            "Planter of this GB is reached maximum"
+        );
+        require(_gbId > 0, "You can't join for zero gb");
 
         gbToPlanters[_gbId].push(msg.sender);
 
         emit PlanterJoinedGB(_gbId, msg.sender);
     }
 
-    function totalGB() external view returns(uint256) {
+    function totalGB() external view returns (uint256) {
         return greenBlocks.length;
     }
 

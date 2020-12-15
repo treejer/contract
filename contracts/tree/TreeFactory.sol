@@ -19,9 +19,9 @@ contract TreeFactory is ERC721UpgradeSafe {
     event PriceChanged(uint256 price);
     event TreePlanted(
         uint256 id,
-        string name,
         string latitude,
-        string longitude
+        string longitude,
+        uint256 plantedDate
     );
     event TreeFunded(
         uint256 treeId,
@@ -40,7 +40,6 @@ contract TreeFactory is ERC721UpgradeSafe {
     bool public isTreeFactory;
 
     struct Tree {
-        string name;
         string latitude;
         string longitude;
         uint256 plantedDate;
@@ -100,10 +99,14 @@ contract TreeFactory is ERC721UpgradeSafe {
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
 
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(
+        address _accessRestrictionAddress,
+        string calldata _baseURI
+    ) public initializer {
         isTreeFactory = true;
 
-        ERC721UpgradeSafe.__ERC721_init("Tree", "TREE");
+        __ERC721_init("Tree", "TREE");
+        _setBaseURI(_baseURI);
 
         AccessRestriction candidateContract =
             AccessRestriction(_accessRestrictionAddress);
@@ -135,9 +138,14 @@ contract TreeFactory is ERC721UpgradeSafe {
         updateFactory = candidateContract;
     }
 
+    function setBaseURI(string memory _baseURI) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        _setBaseURI(_baseURI);
+    }
+
     function plant(
         uint8 _typeId,
-        uint256 _gbId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
     ) external {
@@ -145,7 +153,8 @@ contract TreeFactory is ERC721UpgradeSafe {
         accessRestriction.ifPlanter(msg.sender);
 
         // require tree type exists
-        //gb exists and planter in gb
+
+        uint256 gbId = gbFactory.planterGB(msg.sender);
 
         uint256 id = 0;
 
@@ -153,7 +162,6 @@ contract TreeFactory is ERC721UpgradeSafe {
             id = notPlantedTrees[notPlantedTreesUsedIndex];
             notPlantedTreesUsedIndex++;
 
-            trees[id].name = _stringParams[0];
             trees[id].latitude = _stringParams[1];
             trees[id].longitude = _stringParams[2];
             trees[id].plantedDate = block.timestamp;
@@ -165,7 +173,6 @@ contract TreeFactory is ERC721UpgradeSafe {
         } else {
             trees.push(
                 Tree(
-                    _stringParams[0],
                     _stringParams[1],
                     _stringParams[2],
                     block.timestamp,
@@ -182,9 +189,14 @@ contract TreeFactory is ERC721UpgradeSafe {
             _mint(msg.sender, id);
         }
 
-        treeToGB[id] = _gbId;
-        gbTreeCount[_gbId]++;
-        gbTrees[_gbId].push(id);
+        bytes memory uriStringByte = bytes(_stringParams[0]);
+        if (uriStringByte.length > 0) {
+            _setTokenURI(id, _stringParams[0]);
+        }
+
+        treeToGB[id] = gbId;
+        gbTreeCount[gbId]++;
+        gbTrees[gbId].push(id);
 
         treeToType[id] = _typeId;
         typeTreeCount[_typeId]++;
@@ -196,10 +208,20 @@ contract TreeFactory is ERC721UpgradeSafe {
 
         emit TreePlanted(
             id,
-            _stringParams[0],
             _stringParams[1],
-            _stringParams[2]
+            _stringParams[2],
+            block.timestamp
         );
+    }
+
+    function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
+        require(
+            accessRestriction.isPlanterOrAmbassador(msg.sender) ||
+                ownerOf(_tokenId) == msg.sender,
+            "Caller must be planter or ambassador or owner of tree!"
+        );
+
+        _setTokenURI(_tokenId, _tokenURI);
     }
 
     function simpleFund(
@@ -209,9 +231,7 @@ contract TreeFactory is ERC721UpgradeSafe {
         uint256 _ambassadorBalance,
         uint256 _ambassadorBalancePerSecond
     ) internal returns (uint256) {
-        string memory name = string("types name trees.length");
-
-        trees.push(Tree(name, "", "", 0, 0, block.timestamp, 0, 0));
+        trees.push(Tree("", "", 0, 0, block.timestamp, 0, 0));
         uint256 id = trees.length.sub(1);
 
         notPlantedTrees[notPlantedTreesLastIndex] = id;

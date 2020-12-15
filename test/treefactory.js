@@ -26,12 +26,12 @@ contract('TreeFactory', (accounts) => {
     const withdrawRescueFundAccount = accounts[5];
     const withdrawResearchFundAccount = accounts[8];
 
-
+    const zeroAddress = '0x0000000000000000000000000000000000000000';
 
     beforeEach(async () => {
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
@@ -45,14 +45,13 @@ contract('TreeFactory', (accounts) => {
     });
 
     it("should add tree", async () => {
-        let name = 'firstTree';
-
 
         await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
-        let tx = await Common.addTree(treeInstance, ownerAccount, name);
+
+        let tx = await Common.addTree(treeInstance, ownerAccount);
 
         truffleAssert.eventEmitted(tx, 'TreePlanted', (ev) => {
-            return ev.id.toString() === '0' && ev.name === name;
+            return ev.id.toString() === '0'
         });
 
     });
@@ -166,16 +165,15 @@ contract('TreeFactory', (accounts) => {
 
     it("should return tree data", async () => {
 
-        let name = "testTree";
 
         await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
-        await Common.addTree(treeInstance, ownerAccount, name);
+        await Common.addTree(treeInstance, ownerAccount);
 
         return await treeInstance.trees(0, { from: ownerAccount })
             .then(tree => {
-                assert.equal(
+                assert.notEqual(
                     tree[0],
-                    name
+                    'not longitude'
                 );
             });
     });

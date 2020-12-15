@@ -65,7 +65,7 @@ contract SeedFactory is ERC20UpgradeSafe {
         for (uint256 i = 0; i < ownerTreesCount; i++) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(_owner, i);
 
-            (, , , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
+            (, , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
             if (treeFundedDate == 0) {
                 continue;
             }
@@ -93,7 +93,7 @@ contract SeedFactory is ERC20UpgradeSafe {
         view
         returns (uint256)
     {
-        (, , , , , uint256 treeFundedDate, , ) = treeFactory.trees(_treeId);
+        (, , , , uint256 treeFundedDate, , ) = treeFactory.trees(_treeId);
 
         if (treeFundedDate == 0) {
             return 0;
@@ -111,7 +111,7 @@ contract SeedFactory is ERC20UpgradeSafe {
 
         for (uint256 i = 0; i < ownerTreesCount; i++) {
             uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
-            (, , , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
+            (, , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
             if (treeFundedDate == 0) {
                 continue;
             }

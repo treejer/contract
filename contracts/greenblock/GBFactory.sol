@@ -137,7 +137,10 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         );
         require(_gbId > 0, "You can't join for zero gb");
 
+        require(planterGB[msg.sender] == 0, "Joined before!");
+         
         gbToPlanters[_gbId].push(msg.sender);
+        planterGB[msg.sender] = _gbId;
 
         emit PlanterJoinedGB(_gbId, msg.sender);
     }

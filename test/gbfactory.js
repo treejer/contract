@@ -212,7 +212,51 @@ contract('GBFactory', (accounts) => {
 
     });
 
+    it("should not join GB again to gb!", async () => {
 
+
+        let title = 'firstGB';
+
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+
+        await await Common.addGB(gbInstance, planter1Account, plantersArray, title)
+            .then(assert.fail)
+            .catch(error => {
+                console.log(error.message);
+
+                assert.include(
+                    error.message,
+                    'Caller is not a planter or ambassador.',
+                    'add gb when paused shoud retrun exception'
+                )
+            });
+
+    });
+
+
+    it('should join GB', async () => {
+        let title = 'firsGB';
+        let id = 1;
+
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        Common.addPlanter(arInstance, planter1Account, deployerAccount);
+        Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
+
+        Common.addPlanter(arInstance, planter2Account, deployerAccount);
+        let tx = await gbInstance.joinGB(id, { from: planter2Account });
+
+        await gbInstance.joinGB(id, { from: planter2Account })
+            .then(assert.fail)
+            .catch(error => {
+                console.log(error.message);
+
+                assert.include(
+                    error.message,
+                    'Joined before',
+                    'joining again must throw exception'
+                )
+            });
+    });
 
 
 });

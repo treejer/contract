@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/ITree.sol";
 import "./ISeed.sol";
@@ -21,14 +21,14 @@ contract SeedFactory is Initializable {
     ITree public treeToken;
 
     TreeFactory public treeFactory;
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     uint256 public seedGeneratedPerSecond;
 
     mapping(uint256 => uint256) public treesLastMintedDate;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        AccessRestriction candidateContract = AccessRestriction(
+        IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());

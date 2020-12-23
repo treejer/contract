@@ -7,7 +7,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../greenblock/GBFactory.sol";
 import "./TreeType.sol";
 import "./UpdateFactory.sol";
@@ -96,7 +96,7 @@ contract TreeFactory is Initializable {
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
 
     //related contrects
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
     ITree public treeToken;
@@ -106,8 +106,8 @@ contract TreeFactory is Initializable {
     ) public initializer {
         isTreeFactory = true;
 
-        AccessRestriction candidateContract =
-            AccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 

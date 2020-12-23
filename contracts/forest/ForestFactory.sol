@@ -5,7 +5,7 @@ pragma solidity >=0.4.21 <0.7.0;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "./PublicForest.sol";
 
@@ -15,10 +15,10 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
     address[] public forests;
 
     TreeFactory public treeFactory;
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        AccessRestriction candidateContract = AccessRestriction(
+        IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());

@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "./TreeFactory.sol";
 import "../greenblock/GBFactory.sol";
 
@@ -34,14 +34,14 @@ contract UpdateFactory is Initializable {
     mapping(uint256 => bool) public updateToPlanterBalanceWithdrawn;
     mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
 
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
     TreeFactory public treeFactory;
     GBFactory public gbFactory;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isUpdateFactory = true;
-        AccessRestriction candidateContract =
-            AccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }

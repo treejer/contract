@@ -4,12 +4,12 @@ pragma solidity >=0.4.21 <0.7.0;
 
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 
 contract Tree is ERC721UpgradeSafe {
 
     bool public isTree;
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
 
     function initialize(
@@ -21,8 +21,8 @@ contract Tree is ERC721UpgradeSafe {
         __ERC721_init("Tree", "TREE");
         _setBaseURI(_baseURI);
 
-        AccessRestriction candidateContract =
-            AccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 

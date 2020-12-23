@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
@@ -23,10 +23,10 @@ contract O2Factory is Initializable {
     TreeType public treeType;
     TreeFactory public treeFactory;
     UpdateFactory public updateFactory;
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        AccessRestriction candidateContract = AccessRestriction(
+        IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());

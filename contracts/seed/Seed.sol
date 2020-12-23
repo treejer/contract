@@ -6,17 +6,17 @@ pragma experimental ABIEncoderV2;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 
 contract Seed is ERC20UpgradeSafe {
     bool public isSeed;
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isSeed = true;
-        AccessRestriction candidateContract =
-            AccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 

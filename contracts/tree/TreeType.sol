@@ -2,7 +2,7 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
@@ -26,11 +26,11 @@ contract TreeType is Initializable {
 
     Type[] public types;
 
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isTreeType = true;
-        AccessRestriction candidateContract = AccessRestriction(
+        IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());

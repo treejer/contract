@@ -3,7 +3,7 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../access/AccessRestriction.sol";
+import "../access/IAccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
@@ -35,12 +35,12 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
     mapping(address => uint256) ambassadorGBCount;
     mapping(address => uint256[]) ambassadorGBs;
 
-    AccessRestriction public accessRestriction;
+    IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isGBFactory = true;
-        AccessRestriction candidateContract =
-            AccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 

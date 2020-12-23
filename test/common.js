@@ -6,6 +6,10 @@ const DEFAULT_ADMIN_ROLE = '0x00000000000000000000000000000000000000000000000000
 const AMBASSADOR_ROLE = web3.utils.soliditySha3('AMBASSADOR_ROLE');
 const PLANTER_ROLE = web3.utils.soliditySha3('PLANTER_ROLE');
 
+const SEED_FACTORY_ROLE = web3.utils.soliditySha3('SEED_FACTORY_ROLE');
+const TREE_FACTORY_ROLE = web3.utils.soliditySha3('TREE_FACTORY_ROLE');
+const O2_FACTORY_ROLE = web3.utils.soliditySha3('O2_FACTORY_ROLE');
+
 Common.sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -85,5 +89,19 @@ Common.addPlanter = async (instance, account, adminAccount) => {
 Common.addAdmin = async (instance, account, adminAccount) => {
     await instance.grantRole(DEFAULT_ADMIN_ROLE, account, { from: adminAccount });
 }
+
+
+Common.addSeedFactoryRole = async (instance, address, adminAccount) => {
+    await instance.grantRole(SEED_FACTORY_ROLE, address, { from: adminAccount });
+}
+
+Common.addTreeFactoryRole = async (instance, address, adminAccount) => {
+    await instance.grantRole(TREE_FACTORY_ROLE, address, { from: adminAccount });
+}
+
+Common.addO2FactoryRole = async (instance, address, adminAccount) => {
+    await instance.grantRole(O2_FACTORY_ROLE, address, { from: adminAccount });
+}
+
 
 module.exports = Common

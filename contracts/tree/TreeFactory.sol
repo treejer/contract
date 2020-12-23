@@ -3,7 +3,7 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
@@ -11,8 +11,9 @@ import "../access/AccessRestriction.sol";
 import "../greenblock/GBFactory.sol";
 import "./TreeType.sol";
 import "./UpdateFactory.sol";
+import "./ITree.sol";
 
-contract TreeFactory is ERC721UpgradeSafe {
+contract TreeFactory is Initializable {
     using Address for address;
     using SafeMath for uint256;
 
@@ -98,15 +99,12 @@ contract TreeFactory is ERC721UpgradeSafe {
     AccessRestriction public accessRestriction;
     GBFactory public gbFactory;
     UpdateFactory public updateFactory;
+    ITree public treeToken;
 
     function initialize(
-        address _accessRestrictionAddress,
-        string calldata _baseURI
+        address _accessRestrictionAddress
     ) public initializer {
         isTreeFactory = true;
-
-        __ERC721_init("Tree", "TREE");
-        _setBaseURI(_baseURI);
 
         AccessRestriction candidateContract =
             AccessRestriction(_accessRestrictionAddress);
@@ -138,10 +136,12 @@ contract TreeFactory is ERC721UpgradeSafe {
         updateFactory = candidateContract;
     }
 
-    function setBaseURI(string memory _baseURI) external {
+    function setTreeTokenAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        _setBaseURI(_baseURI);
+        ITree candidateContract = ITree(_address);
+        require(candidateContract.isTree());
+        treeToken = candidateContract;
     }
 
     function plant(
@@ -186,12 +186,12 @@ contract TreeFactory is ERC721UpgradeSafe {
 
             notFundedTrees[notFundedTreesLastIndex] = id;
             notFundedTreesLastIndex++;
-            _mint(msg.sender, id);
+            treeToken.safeMint(msg.sender, id);
         }
 
         bytes memory uriStringByte = bytes(_stringParams[0]);
         if (uriStringByte.length > 0) {
-            _setTokenURI(id, _stringParams[0]);
+            treeToken.setTokenURI(id, _stringParams[0]);
         }
 
         treeToGB[id] = gbId;
@@ -214,15 +214,7 @@ contract TreeFactory is ERC721UpgradeSafe {
         );
     }
 
-    function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
-        require(
-            accessRestriction.isPlanterOrAmbassador(msg.sender) ||
-                ownerOf(_tokenId) == msg.sender,
-            "Caller must be planter or ambassador or owner of tree!"
-        );
-
-        _setTokenURI(_tokenId, _tokenURI);
-    }
+    
 
     function simpleFund(
         address _account,
@@ -247,7 +239,7 @@ contract TreeFactory is ERC721UpgradeSafe {
             treeToAmbassadorBalancePerSecond[id] = _ambassadorBalancePerSecond;
         }
 
-        _mint(_account, id);
+        treeToken.safeMint(_account, id);
 
         return id;
     }
@@ -278,7 +270,9 @@ contract TreeFactory is ERC721UpgradeSafe {
             ] = _ambassadorBalancePerSecond;
         }
 
-        _transfer(ownerOf(treeId), _account, treeId);
+
+        treeToken.safeTransferExtra(treeToken.ownerOf(treeId), _account, treeId);
+
 
         delete notFundedTrees[notFundedTreesUsedIndex.sub(1)];
 
@@ -297,34 +291,7 @@ contract TreeFactory is ERC721UpgradeSafe {
         return notPlantedTreesLastIndex > notPlantedTreesUsedIndex;
     }
 
-    function ownerTreesCount(address _account) public view returns (uint256) {
-        return balanceOf(_account);
-    }
-
-    function treeOwner(uint256 _treeId) public view returns (address) {
-        return ownerOf(_treeId);
-    }
-
-    function getOwnerTrees(address _account)
-        public
-        view
-        returns (uint256[] memory)
-    {
-        uint256 tokenCount = balanceOf(_account);
-
-        if (tokenCount == 0) {
-            // Return an empty array
-            return new uint256[](0);
-        }
-
-        uint256[] memory result = new uint256[](tokenCount);
-
-        for (uint256 index = 0; index < tokenCount; index++) {
-            result[index] = tokenOfOwnerByIndex(_account, index);
-        }
-
-        return result;
-    }
+    
 
     function setPrice(uint256 _price) external {
         accessRestriction.ifAdmin(msg.sender);

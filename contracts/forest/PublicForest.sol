@@ -5,10 +5,11 @@ pragma solidity >=0.4.21 <0.7.0;
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721Holder.sol";
 
 import "../tree/TreeFactory.sol";
 
-contract PublicForest is Initializable, ContextUpgradeSafe {
+contract PublicForest is Initializable, ContextUpgradeSafe, ERC721HolderUpgradeSafe {
     using SafeMath for uint256;
 
     event ContributionReceived(address from, uint256 value);
@@ -57,4 +58,6 @@ contract PublicForest is Initializable, ContextUpgradeSafe {
             }
         }
     }
+
+
 }

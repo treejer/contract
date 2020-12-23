@@ -4,6 +4,8 @@ const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
 const TreeFactory = artifacts.require("TreeFactory");
 const UpdateFactory = artifacts.require("UpdateFactory");
+const Tree = artifacts.require("Tree");
+const Seed = artifacts.require("Seed");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -18,6 +20,8 @@ contract('SeedFactory', (accounts) => {
     let gbInstance;
     let treeInstance;
     let updateInstance;
+    let treeTokenInstance;
+    let seedTokenInstance;
 
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
@@ -33,15 +37,28 @@ contract('SeedFactory', (accounts) => {
     
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
+        treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        seedTokenInstance = await deployProxy(Seed, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+
+
 
         seedInstance = await deployProxy(SeedFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
-        seedInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+        await seedInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+        await seedInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+        await seedInstance.setSeedTokenAddress(seedTokenInstance.address, { from: deployerAccount });
+
+
+        await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
+        await Common.addSeedFactoryRole(arInstance, seedInstance.address, deployerAccount);
     });
 
     afterEach(async () => {
@@ -76,7 +93,7 @@ contract('SeedFactory', (accounts) => {
 
         await seedInstance.mint({ from: ownerAccount })
 
-        return await seedInstance.balanceOf(ownerAccount, { from: ownerAccount })
+        return await seedTokenInstance.balanceOf(ownerAccount, { from: ownerAccount })
             .then((balance) => {
                 assert.equal(
                     '2',

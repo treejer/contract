@@ -1,6 +1,8 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const ForestFactory = artifacts.require("ForestFactory");
 const TreeFactory = artifacts.require("TreeFactory");
+const Tree = artifacts.require("Tree");
+
 const PublicForest = artifacts.require("PublicForest");
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -13,6 +15,7 @@ contract('PublicForest', (accounts) => {
     let arInstance;
     let forestInstance;
     let treeInstance;
+    let treeTokenInstance;
     // let publicForestInstance;
 
     const ownerAccount = accounts[0];
@@ -21,16 +24,20 @@ contract('PublicForest', (accounts) => {
     beforeEach(async () => {
     
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         forestInstance = await deployProxy(ForestFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
         // publicForestInstance = await deployProxy(PublicForest, [treeInstance.address, 'Treejer'], { initializer: 'initialize', from: deployerAccount });
+        treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
         await forestInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
 
 
         let treePrice = Units.convert('0.02', 'eth', 'wei');
         await treeInstance.setPrice(treePrice, { from: deployerAccount });
 
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
 
+        await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
 
     });
 

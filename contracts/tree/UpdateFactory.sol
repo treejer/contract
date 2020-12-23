@@ -4,14 +4,13 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/AccessRestriction.sol";
 import "./TreeFactory.sol";
 import "../greenblock/GBFactory.sol";
 
-contract UpdateFactory is Initializable, ContextUpgradeSafe {
+contract UpdateFactory is Initializable {
     using SafeMath for uint256;
 
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);

@@ -3,6 +3,8 @@ const O2Factory = artifacts.require("O2Factory");
 const GBFactory = artifacts.require("GBFactory");
 const TreeType = artifacts.require("TreeType");
 const TreeFactory = artifacts.require("TreeFactory");
+const Tree = artifacts.require("Tree");
+const O2 = artifacts.require("O2");
 const UpdateFactory = artifacts.require("UpdateFactory");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
@@ -18,6 +20,8 @@ contract('O2Factory', (accounts) => {
     let gbInstance;
     let treeInstance;
     let updateInstance;
+    let treeTokenInstance;
+    let o2TokenInstance;
     const ownerAccount = accounts[0];
     const deployerAccount = accounts[1];
     const ambassadorAccount = accounts[2];
@@ -34,21 +38,33 @@ contract('O2Factory', (accounts) => {
 
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         treeTypeInstance = await deployProxy(TreeType, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         o2Instance = await deployProxy(O2Factory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
 
 
+        treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        o2TokenInstance = await deployProxy(O2, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+
+
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
 
         await o2Instance.setTreeTypeAddress(treeTypeInstance.address, { from: deployerAccount });
         await o2Instance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
         await o2Instance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
 
+        await o2Instance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+        await o2Instance.setO2TokenAddress(o2TokenInstance.address, { from: deployerAccount });
+
         await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
         await updateInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
+
+        await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
+        await Common.addO2FactoryRole(arInstance, o2Instance.address, deployerAccount);
+
 
     });
 
@@ -176,7 +192,7 @@ contract('O2Factory', (accounts) => {
 
         await o2Instance.mint({ from: planter1Account });
 
-        return await o2Instance.balanceOf(planter1Account, { from: planter1Account })
+        return await o2TokenInstance.balanceOf(planter1Account, { from: planter1Account })
             .then((balance) => {
                 assert.equal(
                     '100',

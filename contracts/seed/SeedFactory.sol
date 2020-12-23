@@ -3,17 +3,22 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
+import "../tree/ITree.sol";
+import "./ISeed.sol";
 
-contract SeedFactory is ERC20UpgradeSafe {
+contract SeedFactory is Initializable {
     using SafeMath for uint256;
 
     event SeedMinted(address owner, uint256 totalSeed);
     event SeedGeneratedPerSecondChanged(uint256 seedGeneratedPerSecond);
+
+    ISeed public seedToken;
+    ITree public treeToken;
 
     TreeFactory public treeFactory;
     AccessRestriction public accessRestriction;
@@ -28,8 +33,22 @@ contract SeedFactory is ERC20UpgradeSafe {
         );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
+    }
 
-        ERC20UpgradeSafe.__ERC20_init("Seed", "SEED");
+    function setSeedTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        ISeed candidateContract = ISeed(_address);
+        require(candidateContract.isSeed());
+        seedToken = candidateContract;
+    }
+
+    function setTreeTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        ITree candidateContract = ITree(_address);
+        require(candidateContract.isTree());
+        treeToken = candidateContract;
     }
 
     function setTreeFactoryAddress(address _address) external {
@@ -55,7 +74,7 @@ contract SeedFactory is ERC20UpgradeSafe {
         view
         returns (uint256)
     {
-        uint256 ownerTreesCount = treeFactory.ownerTreesCount(_owner);
+        uint256 ownerTreesCount = treeToken.balanceOf(_owner);
 
         if (ownerTreesCount == 0) {
             return 0;
@@ -63,7 +82,7 @@ contract SeedFactory is ERC20UpgradeSafe {
         uint256 totalSeconds = 0;
 
         for (uint256 i = 0; i < ownerTreesCount; i++) {
-            uint256 treeId = treeFactory.tokenOfOwnerByIndex(_owner, i);
+            uint256 treeId = treeToken.tokenOfOwnerByIndex(_owner, i);
 
             (, , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
             if (treeFundedDate == 0) {
@@ -103,14 +122,14 @@ contract SeedFactory is ERC20UpgradeSafe {
     }
 
     function mint() external {
-        uint256 ownerTreesCount = treeFactory.ownerTreesCount(msg.sender);
+        uint256 ownerTreesCount = treeToken.balanceOf(msg.sender);
 
         require(ownerTreesCount > 0, "Owner tree count is zero");
 
         uint256 totalSeconds = 0;
 
         for (uint256 i = 0; i < ownerTreesCount; i++) {
-            uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
+            uint256 treeId = treeToken.tokenOfOwnerByIndex(msg.sender, i);
             (, , , , uint256 treeFundedDate, , ) = treeFactory.trees(treeId);
             if (treeFundedDate == 0) {
                 continue;
@@ -135,7 +154,7 @@ contract SeedFactory is ERC20UpgradeSafe {
 
         require(mintableSeed > 0, "MintableSeed is zero");
 
-        _mint(msg.sender, mintableSeed);
+        seedToken.mint(msg.sender, mintableSeed);
 
         emit SeedMinted(msg.sender, mintableSeed);
     }

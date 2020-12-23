@@ -2,6 +2,7 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeFactory = artifacts.require("TreeFactory");
 const GBFactory = artifacts.require("GBFactory");
 const UpdateFactory = artifacts.require("UpdateFactory");
+const Tree = artifacts.require("Tree");
 const assert = require("chai").assert;
 const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
@@ -12,6 +13,7 @@ const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 contract('TreeFactory', (accounts) => {
     let arInstance;
     let treeInstance;
+    let treeTokenInstance;
     let gbInstance;
     let updateInstance;
 
@@ -31,12 +33,19 @@ contract('TreeFactory', (accounts) => {
     beforeEach(async () => {
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+
         await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
+
+        await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
+
+        
 
     });
 
@@ -68,6 +77,8 @@ contract('TreeFactory', (accounts) => {
 
     });
 
+
+
     it("should plant from funded trees", async () => {
 
         Common.addAdmin(arInstance, adminAccount, deployerAccount);
@@ -92,7 +103,7 @@ contract('TreeFactory', (accounts) => {
         await Common.addTree(treeInstance, ownerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
-        return await treeInstance.ownerTreesCount(ownerAccount, { from: ownerAccount })
+        return await treeTokenInstance.balanceOf(ownerAccount, { from: ownerAccount })
             .then(count => {
                 assert.equal(
                     2,
@@ -102,32 +113,32 @@ contract('TreeFactory', (accounts) => {
             });
     });
 
-    it("should return owner trees", async () => {
+    // it("should return owner trees", async () => {
 
-        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
-        await Common.addTree(treeInstance, ownerAccount);
+    //     await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
+    //     await Common.addTree(treeInstance, ownerAccount);
 
-        await Common.addPlanter(arInstance, secondAccount, deployerAccount);
-        await Common.addTree(treeInstance, secondAccount);
+    //     await Common.addPlanter(arInstance, secondAccount, deployerAccount);
+    //     await Common.addTree(treeInstance, secondAccount);
 
-        await Common.addTree(treeInstance, ownerAccount);
+    //     await Common.addTree(treeInstance, ownerAccount);
 
-        return await treeInstance.getOwnerTrees(ownerAccount, { from: ownerAccount })
-            .then(ownerTrees => {
+    //     return await treeInstance.getOwnerTrees(ownerAccount, { from: ownerAccount })
+    //         .then(ownerTrees => {
 
-                assert.equal(
-                    ownerTrees[0],
-                    0,
-                    "First tree id must 0" 
-                );
+    //             assert.equal(
+    //                 ownerTrees[0],
+    //                 0,
+    //                 "First tree id must 0" 
+    //             );
 
-                assert.equal(
-                    ownerTrees[1],
-                    2,
-                    "second tree id must 2"
-                );
-            });
-    });
+    //             assert.equal(
+    //                 ownerTrees[1],
+    //                 2,
+    //                 "second tree id must 2"
+    //             );
+    //         });
+    // });
 
 
     it("should return tree owner", async () => {
@@ -135,7 +146,7 @@ contract('TreeFactory', (accounts) => {
         await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
         await Common.addTree(treeInstance, ownerAccount);
 
-        return await treeInstance.treeOwner(0, { from: ownerAccount })
+        return await treeTokenInstance.ownerOf(0, { from: ownerAccount })
             .then(ownerAddress => {
                 assert.equal(
                     ownerAccount,
@@ -514,7 +525,6 @@ contract('TreeFactory', (accounts) => {
             });
 
         });
-
 
 
 });

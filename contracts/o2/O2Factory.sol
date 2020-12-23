@@ -3,19 +3,23 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/AccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
 import "../tree/TreeType.sol";
+import "./IO2.sol";
+import "../tree/ITree.sol";
 
-contract O2Factory is ERC20UpgradeSafe {
+contract O2Factory is Initializable {
     using SafeMath for uint256;
 
     event O2Minted(address owner, uint256 totalO2);
-
+    
+    ITree public treeToken;
+    IO2 public o2Token;
     TreeType public treeType;
     TreeFactory public treeFactory;
     UpdateFactory public updateFactory;
@@ -27,9 +31,24 @@ contract O2Factory is ERC20UpgradeSafe {
         );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
-
-        ERC20UpgradeSafe.__ERC20_init("Oxygen", "O2");
     }
+
+    function setTreeTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        ITree candidateContract = ITree(_address);
+        require(candidateContract.isTree());
+        treeToken = candidateContract;
+    }
+
+    function setO2TokenAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        IO2 candidateContract = IO2(_address);
+        require(candidateContract.isO2());
+        o2Token = candidateContract;
+    }
+
 
     function setTreeTypeAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
@@ -56,14 +75,14 @@ contract O2Factory is ERC20UpgradeSafe {
     }
 
     function mint() external {
-        uint256 ownerTreesCount = treeFactory.ownerTreesCount(msg.sender);
+        uint256 ownerTreesCount = treeToken.balanceOf(msg.sender);
 
         require(ownerTreesCount > 0, "Owner tree count is zero");
 
         uint256 mintableO2 = 0;
 
         for (uint256 i = 0; i < ownerTreesCount; i++) {
-            uint256 treeId = treeFactory.tokenOfOwnerByIndex(msg.sender, i);
+            uint256 treeId = treeToken.tokenOfOwnerByIndex(msg.sender, i);
             uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
             uint256 totalSeconds = 0;
 
@@ -120,7 +139,7 @@ contract O2Factory is ERC20UpgradeSafe {
 
         require(mintableO2 > 0, "MintableO2 is zero");
 
-        _mint(msg.sender, mintableO2);
+        o2Token.mint(msg.sender, mintableO2);
 
         emit O2Minted(msg.sender, mintableO2);
     }

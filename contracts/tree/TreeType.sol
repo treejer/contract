@@ -4,10 +4,9 @@ pragma solidity >=0.4.21 <0.7.0;
 
 import "../access/AccessRestriction.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
-contract TreeType is Initializable, ContextUpgradeSafe {
+contract TreeType is Initializable {
     event NewType(
         uint256 typeId,
         string name,

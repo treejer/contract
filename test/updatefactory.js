@@ -1,5 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const UpdateFactory = artifacts.require("UpdateFactory");
+const Tree = artifacts.require("Tree");
 const TreeFactory = artifacts.require("TreeFactory");
 const GBFactory = artifacts.require("GBFactory");
 const assert = require("chai").assert;
@@ -15,6 +16,7 @@ contract('UpdateFactory', (accounts) => {
     let updateInstance;
     let treeInstance;
     let gbInstance;
+    let treeTokenInstance;
 
     const deployerAccount = accounts[0];
     const ownerAccount = accounts[1];
@@ -28,14 +30,19 @@ contract('UpdateFactory', (accounts) => {
 
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-        treeInstance = await deployProxy(TreeFactory, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
 
         await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
         
         await updateInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
         await updateInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
+
+
+        await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
 
     });
 

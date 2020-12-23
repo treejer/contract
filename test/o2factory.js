@@ -48,7 +48,7 @@ contract('O2Factory', (accounts) => {
         o2TokenInstance = await deployProxy(O2, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
 
 
-        await treeInstance.setGBAddress(gbInstance.address, { from: deployerAccount });
+        await treeInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
         await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
 

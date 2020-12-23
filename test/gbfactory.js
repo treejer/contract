@@ -56,7 +56,7 @@ contract('GBFactory', (accounts) => {
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title2');
 
-        return await gbInstance.getAmbassadorGBCount(ambassadorAccount, { from: ambassadorAccount })
+        return await gbInstance.ambassadorGBCount(ambassadorAccount, { from: ambassadorAccount })
             .then(count => {
                 assert.equal(
                     2,
@@ -106,7 +106,7 @@ contract('GBFactory', (accounts) => {
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, 'title');
 
-        return await gbInstance.getGBAmbassador(1, { from: ambassadorAccount })
+        return await gbInstance.gbToAmbassador(1, { from: ambassadorAccount })
             .then(ambassadorAddress => {
                 assert.equal(
                     ambassadorAccount,
@@ -123,7 +123,7 @@ contract('GBFactory', (accounts) => {
         Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
         Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
 
-        return await gbInstance.getGB(id)
+        return await gbInstance.greenBlocks(id)
             .then((greenBlock) => {
                 assert.equal(
                     greenBlock[0],

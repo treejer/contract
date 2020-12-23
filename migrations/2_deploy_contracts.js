@@ -52,7 +52,7 @@ module.exports = async function (deployer, network, accounts) {
     .then(() => {
       treeFactoryAddress = TreeFactory.address;
       TreeFactory.deployed().then(async (instance) => {
-        await instance.setGBAddress(gbAddress);
+        await instance.setGBFactoryAddress(gbAddress);
         await instance.setTreeTokenAddress(treeAddress);
         await instance.setUpdateFactoryAddress(updateAddress);
       });

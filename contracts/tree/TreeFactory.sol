@@ -8,7 +8,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ut
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../greenblock/GBFactory.sol";
+import "../greenblock/IGBFactory.sol";
 import "./TreeType.sol";
 import "./UpdateFactory.sol";
 import "./ITree.sol";
@@ -97,7 +97,7 @@ contract TreeFactory is Initializable {
 
     //related contrects
     IAccessRestriction public accessRestriction;
-    GBFactory public gbFactory;
+    IGBFactory public gbFactory;
     UpdateFactory public updateFactory;
     ITree public treeToken;
 
@@ -120,10 +120,10 @@ contract TreeFactory is Initializable {
         researchFundPercentage = 500;
     }
 
-    function setGBAddress(address _address) external {
+    function setGBFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        GBFactory candidateContract = GBFactory(_address);
+        IGBFactory candidateContract = IGBFactory(_address);
         require(candidateContract.isGBFactory());
         gbFactory = candidateContract;
     }
@@ -315,7 +315,7 @@ contract TreeFactory is Initializable {
             if (notFundedTreesExists() == true) {
                 id = getLastNotFundedTreeId();
                 uint256 gbId = treeToGB[id];
-                address gbAmbassador = gbFactory.getGBAmbassador(gbId);
+                address gbAmbassador = gbFactory.gbToAmbassador(gbId);
 
                 if (gbAmbassador != address(0)) {
                     hasAmbasador = true;
@@ -570,7 +570,7 @@ contract TreeFactory is Initializable {
     function withdrawAmbassadorBalance() external {
         accessRestriction.ifAmbassador(msg.sender);
 
-        uint256 ambassadorGBCount = gbFactory.getAmbassadorGBCount(msg.sender);
+        uint256 ambassadorGBCount = gbFactory.ambassadorGBCount(msg.sender);
 
         require(ambassadorGBCount > 0, "Ambassador gb count is zero");
 

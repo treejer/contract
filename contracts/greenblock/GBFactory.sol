@@ -12,17 +12,13 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
 
-    enum GBStatus {Pending, Active}
-
-    // @dev Sanity check that allows us to ensure that we are pointing to the
-    //  right auction in our setGBAddress() call.
     bool public isGBFactory;
 
     //@todo must change coordinates
     struct GB {
         string title;
         string coordinates;
-        GBStatus status;
+        bool status;
     }
 
     GB[] public greenBlocks;
@@ -32,8 +28,8 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
     mapping(address => uint256) public planterGB;
 
     mapping(uint256 => address) public gbToAmbassador;
-    mapping(address => uint256) ambassadorGBCount;
-    mapping(address => uint256[]) ambassadorGBs;
+    mapping(address => uint256) public ambassadorGBCount;
+    mapping(address => uint256[]) public ambassadorGBs;
 
     IAccessRestriction public accessRestriction;
 
@@ -45,7 +41,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         accessRestriction = candidateContract;
 
         //create a green block, so we can check for zero green block means not assigned
-        greenBlocks.push(GB("WORLD", "ALL", GBStatus.Active));
+        greenBlocks.push(GB("WORLD", "ALL", true));
     }
 
     function create(
@@ -57,7 +53,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanterOrAmbassador(msg.sender);
 
-        greenBlocks.push(GB(_title, _coordinates, GBStatus.Pending));
+        greenBlocks.push(GB(_title, _coordinates, false));
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
@@ -78,18 +74,6 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         return gbToPlanters[_gbId].length;
     }
 
-    function getAmbassadorGBCount(address _ambassador)
-        external
-        view
-        returns (uint256)
-    {
-        return ambassadorGBCount[_ambassador];
-    }
-
-    function getGBAmbassador(uint256 _gbId) external view returns (address) {
-        return gbToAmbassador[_gbId];
-    }
-
     function getAmbassadorGBs(address _ambassador)
         external
         view
@@ -98,31 +82,15 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         return ambassadorGBs[_ambassador];
     }
 
-    function getGB(uint256 _gbId)
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            GBStatus
-        )
-    {
-        return (
-            greenBlocks[_gbId].title,
-            greenBlocks[_gbId].coordinates,
-            greenBlocks[_gbId].status
-        );
-    }
-
     function activate(uint256 _gbId) external {
         accessRestriction.ifAdmin(msg.sender);
 
         require(
-            greenBlocks[_gbId].status != GBStatus.Active,
+            greenBlocks[_gbId].status != true,
             "GB already active!"
         );
 
-        greenBlocks[_gbId].status = GBStatus.Active;
+        greenBlocks[_gbId].status = true;
 
         emit GBActivated(_gbId);
     }
@@ -138,7 +106,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         require(_gbId > 0, "You can't join for zero gb");
 
         require(planterGB[msg.sender] == 0, "Joined before!");
-         
+
         gbToPlanters[_gbId].push(msg.sender);
         planterGB[msg.sender] = _gbId;
 

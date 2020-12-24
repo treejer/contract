@@ -52,7 +52,7 @@ contract('TreeFactory', (accounts) => {
     afterEach(async () => {
         // await treeInstance.kill({ from: ownerAccount });
     });
-/*
+
     it("get the size of the contract", function () {
         return TreeFactory.deployed().then(function (instance) {
             var bytecode = instance.constructor._json.bytecode;
@@ -539,7 +539,7 @@ contract('TreeFactory', (accounts) => {
             "1000",
             { from: adminAccount });
 
-    
+
         await treeInstance.treejerPercentage()
             .then((newPercentage) => {
                 assert.equal(
@@ -581,10 +581,10 @@ contract('TreeFactory', (accounts) => {
             { from: secondAccount, value: price });
 
 
-        
 
 
-        return await treeInstance.getPlanterWithdrawableBalance(planterAccount, { from: planterAccount })
+
+        await treeInstance.getPlanterWithdrawableBalance(planterAccount, { from: planterAccount })
             .then((balanceEther) => {
 
                 assert.equal(
@@ -597,16 +597,33 @@ contract('TreeFactory', (accounts) => {
                 console.log(error);
             });
 
+        let tx = await treeInstance.withdrawPlanterBalance({ from: planterAccount });
 
+        truffleAssert.eventEmitted(tx, 'PlanterBalanceWithdrawn', (ev) => {
+            return ev.amount.toString() === '84559444' && ev.planter === planterAccount;
+        });
+
+        await treeInstance.getPlanterWithdrawableBalance(planterAccount, { from: planterAccount })
+            .then((balanceEther) => {
+
+                assert.equal(
+                    balanceEther.toString(),
+                    '0',
+                    "PlanterWithdrawableBalance balance: " + balanceEther.toString() + " returned"
+                );
+
+            }).catch((error) => {
+                console.log(error);
+            });
 
     });
 
 
-            Common.addPlanter(arInstance, withdrawLocalDevelopmentFundAccount, deployerAccount);
-
-        
 
     it("should return withdrawable 0 for non planter", async () => {
+
+        Common.addPlanter(arInstance, withdrawLocalDevelopmentFundAccount, deployerAccount);
+
         return await treeInstance.getPlanterWithdrawableBalance(withdrawLocalDevelopmentFundAccount, { from: planterAccount })
             .then((balance) => {
 
@@ -620,7 +637,7 @@ contract('TreeFactory', (accounts) => {
                 console.log(error);
             });
     });
-*/
+
 
     it("should return ambassador fund", async () => {
 
@@ -700,6 +717,6 @@ contract('TreeFactory', (accounts) => {
 
     });
 
-    
+
 
 });

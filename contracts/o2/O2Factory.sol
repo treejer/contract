@@ -8,7 +8,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 
 import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
-import "../tree/UpdateFactory.sol";
+import "../tree/IUpdateFactory.sol";
 import "../tree/ITreeType.sol";
 import "./IO2.sol";
 import "../tree/ITree.sol";
@@ -22,8 +22,10 @@ contract O2Factory is Initializable {
     IO2 public o2Token;
     ITreeType public treeType;
     TreeFactory public treeFactory;
-    UpdateFactory public updateFactory;
+    IUpdateFactory public updateFactory;
     IAccessRestriction public accessRestriction;
+
+    mapping(uint256 => bool) public updateMinted;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
@@ -67,7 +69,7 @@ contract O2Factory is Initializable {
     function setUpdateFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        UpdateFactory candidateContract = UpdateFactory(_address);
+        IUpdateFactory candidateContract = IUpdateFactory(_address);
         require(candidateContract.isUpdateFactory());
         updateFactory = candidateContract;
     }
@@ -88,43 +90,49 @@ contract O2Factory is Initializable {
                 continue;
             }
 
-            if (updateFactory.isTreeLastUpdateMinted(treeId) == true) {
+            if (
+                updateMinted[updateFactory.getTreeLastUpdateId(treeId)] == true
+            ) {
                 continue;
             }
 
             for (uint256 j = treeUpdates.length; j > 0; j--) {
                 uint256 jUpdateId = treeUpdates[j.sub(1)];
 
-                if (updateFactory.getStatus(jUpdateId) != 1) {
+                (, , uint256 jUpdateDate, bool jUpdateStatus) =
+                    updateFactory.updates(jUpdateId);
+
+                if (jUpdateStatus != true) {
                     continue;
                 }
 
-                if (updateFactory.isMinted(jUpdateId) == true) {
+                if (updateMinted[jUpdateId] == true) {
                     continue;
                 }
 
                 if (j > 1) {
                     uint256 jMinusUpdateId = treeUpdates[j.sub(2)];
 
-                    if (updateFactory.getStatus(jMinusUpdateId) != 1) {
+                    (, , uint256 jMUpdateDate, bool jMUpdateStatus) =
+                        updateFactory.updates(jMinusUpdateId);
+
+                    if (jMUpdateStatus != true) {
                         continue;
                     }
 
                     totalSeconds = totalSeconds.add(
-                        updateFactory.getUpdateDate(jUpdateId).sub(
-                            updateFactory.getUpdateDate(jMinusUpdateId)
-                        )
+                        jUpdateDate.sub(jMUpdateDate)
                     );
                 } else {
                     (, , uint256 plantedDate, , , , ) =
                         treeFactory.trees(treeId);
 
                     totalSeconds = totalSeconds.add(
-                        updateFactory.getUpdateDate(jUpdateId).sub(plantedDate)
+                        jUpdateDate.sub(plantedDate)
                     );
                 }
 
-                updateFactory.setMinted(jUpdateId, true);
+                updateMinted[jUpdateId] = true;
             }
 
             (, , uint256 o2Formula, ) =

@@ -20,8 +20,7 @@ contract UpdateFactory is Initializable {
         uint256 treeId;
         string imageHash;
         uint256 updateDate;
-        uint8 status;
-        bool minted;
+        bool status;
     }
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
@@ -30,9 +29,6 @@ contract UpdateFactory is Initializable {
 
     Update[] public updates;
     mapping(uint256 => uint256[]) public treeUpdates;
-
-    mapping(uint256 => bool) public updateToPlanterBalanceWithdrawn;
-    mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
 
     IAccessRestriction public accessRestriction;
     TreeFactory public treeFactory;
@@ -77,12 +73,12 @@ contract UpdateFactory is Initializable {
                 updates[
                     treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)]
                 ]
-                    .status == 1,
+                    .status == true,
                 "Last update not accepted, please wait until it accepted and after that send new update"
             );
         }
 
-        updates.push(Update(_treeId, _imageHash, block.timestamp, 0, false));
+        updates.push(Update(_treeId, _imageHash, block.timestamp, false));
         uint256 id = updates.length.sub(1);
 
         treeUpdates[_treeId].push(id);
@@ -98,7 +94,7 @@ contract UpdateFactory is Initializable {
         );
 
         require(
-            updates[_updateId].status == 0,
+            updates[_updateId].status == false,
             "update status must be pending!"
         );
 
@@ -137,7 +133,7 @@ contract UpdateFactory is Initializable {
             }
         }
 
-        updates[_updateId].status = 1;
+        updates[_updateId].status = true;
         emit UpdateAccepted(_updateId, msg.sender);
     }
 
@@ -149,84 +145,11 @@ contract UpdateFactory is Initializable {
         return treeUpdates[_treeId];
     }
 
-    function getUpdateDate(uint256 _id) public view returns (uint256) {
-        return updates[_id].updateDate;
-    }
-
-    function getTreeId(uint256 _id) public view returns (uint256) {
-        return updates[_id].treeId;
-    }
-
-    function getImageHash(uint256 _id) public view returns (string memory) {
-        return updates[_id].imageHash;
-    }
-
-    function getStatus(uint256 _id) public view returns (uint8) {
-        return updates[_id].status;
-    }
-
-    function isMinted(uint256 _id) public view returns (bool) {
-        return updates[_id].minted;
-    }
-
-    function isTreeLastUpdateMinted(uint256 _treeId)
+    function getTreeLastUpdateId(uint256 _treeId)
         public
         view
-        returns (bool)
+        returns (uint256)
     {
-        return
-            updates[treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)]]
-                .minted;
-    }
-
-    function setMinted(uint256 _id, bool _minted) external {
-        // todo must fix this
-        // require(
-        //     treeFactory.ownerOf(_id) == msg.sender,
-        //     "Only owner of tree can change the minted"
-        // );
-        updates[_id].minted = _minted;
-    }
-
-    function isTreeLastUpdatePlanterBalanceWithdrawn(uint256 _treeId)
-        public
-        view
-        returns (bool)
-    {
-        return
-            updateToPlanterBalanceWithdrawn[
-                treeUpdates[_treeId][treeUpdates[_treeId].length - 1]
-            ];
-    }
-
-    function isPlanterBalanceWithdrawn(uint256 _id) public view returns (bool) {
-        return updateToPlanterBalanceWithdrawn[_id];
-    }
-
-    function setPlanterBalanceWithdrawn(uint256 _id) public {
-        updateToPlanterBalanceWithdrawn[_id] = true;
-    }
-
-    function isTreeLastUpdateAmbassadorBalanceWithdrawn(uint256 _treeId)
-        public
-        view
-        returns (bool)
-    {
-        return
-            updateToAmbassadorBalanceWithdrawn[
-                treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)]
-            ];
-    }
-
-    function isAmbassadorBalanceWithdrawn(uint256 _id)
-        public
-        view
-        returns (bool)
-    {
-        return updateToAmbassadorBalanceWithdrawn[_id];
-    }
-
-    function setAmbassadorBalanceWithdrawn(uint256 _id) public {
-        updateToAmbassadorBalanceWithdrawn[_id] = true;
+        return treeUpdates[_treeId][treeUpdates[_treeId].length.sub(1)];
     }
 }

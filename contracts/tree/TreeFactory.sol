@@ -9,7 +9,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 
 import "../access/IAccessRestriction.sol";
 import "../greenblock/IGBFactory.sol";
-import "./UpdateFactory.sol";
+import "./IUpdateFactory.sol";
 import "./ITree.sol";
 
 contract TreeFactory is Initializable {
@@ -91,13 +91,16 @@ contract TreeFactory is Initializable {
     uint256 public rescueFund;
     uint256 public researchFund;
 
+    mapping(uint256 => bool) public updateToPlanterBalanceWithdrawn;
+    mapping(uint256 => bool) public updateToAmbassadorBalanceWithdrawn;
+
     // 1 common year 31536000 seconds * 3 year
     uint256 constant treeBalanceWithdrawnSeconds = 94608000;
 
     //related contrects
     IAccessRestriction public accessRestriction;
     IGBFactory public gbFactory;
-    UpdateFactory public updateFactory;
+    IUpdateFactory public updateFactory;
     ITree public treeToken;
 
     function initialize(address _accessRestrictionAddress) public initializer {
@@ -128,7 +131,7 @@ contract TreeFactory is Initializable {
     function setUpdateFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        UpdateFactory candidateContract = UpdateFactory(_address);
+        IUpdateFactory candidateContract = IUpdateFactory(_address);
         require(candidateContract.isUpdateFactory());
         updateFactory = candidateContract;
     }
@@ -497,8 +500,9 @@ contract TreeFactory is Initializable {
             }
 
             if (
-                updateFactory.isTreeLastUpdatePlanterBalanceWithdrawn(treeId) ==
-                true
+                updateToPlanterBalanceWithdrawn[
+                    updateFactory.getTreeLastUpdateId(treeId)
+                ] == true
             ) {
                 continue;
             }
@@ -506,37 +510,37 @@ contract TreeFactory is Initializable {
             for (uint256 j = treeUpdates.length; j > 0; j--) {
                 uint256 jUpdateId = treeUpdates[j - 1];
 
-                if (updateFactory.getStatus(jUpdateId) != 1) {
+                (, , uint256 jUpdateDate, bool jUpdateStatus) =
+                    updateFactory.updates(jUpdateId);
+
+                if (jUpdateStatus != true) {
                     continue;
                 }
 
-                if (
-                    updateFactory.isPlanterBalanceWithdrawn(jUpdateId) == true
-                ) {
+                if (updateToPlanterBalanceWithdrawn[jUpdateId] == true) {
                     continue;
                 }
 
                 if (j > 1) {
                     uint256 jMinusUpdateId = treeUpdates[j - 2];
 
-                    if (updateFactory.getStatus(jMinusUpdateId) != 1) {
+                    (, , uint256 jMUpdateDate, bool jMUpdateStatus) =
+                        updateFactory.updates(jMinusUpdateId);
+
+                    if (jMUpdateStatus != true) {
                         continue;
                     }
 
                     totalSeconds = totalSeconds.add(
-                        updateFactory.getUpdateDate(jUpdateId).sub(
-                            updateFactory.getUpdateDate(jMinusUpdateId)
-                        )
+                        jUpdateDate.sub(jMUpdateDate)
                     );
                 } else {
                     totalSeconds = totalSeconds.add(
-                        updateFactory.getUpdateDate(jUpdateId).sub(
-                            trees[treeId].plantedDate
-                        )
+                        jUpdateDate.sub(trees[treeId].plantedDate)
                     );
                 }
 
-                updateFactory.setPlanterBalanceWithdrawn(jUpdateId);
+                updateToPlanterBalanceWithdrawn[jUpdateId] = true;
             }
 
             if (totalSeconds > 0) {
@@ -598,9 +602,9 @@ contract TreeFactory is Initializable {
                 }
 
                 if (
-                    updateFactory.isTreeLastUpdateAmbassadorBalanceWithdrawn(
-                        treeId
-                    ) == true
+                    updateToAmbassadorBalanceWithdrawn[
+                        updateFactory.getTreeLastUpdateId(treeId)
+                    ] == true
                 ) {
                     continue;
                 }
@@ -608,38 +612,36 @@ contract TreeFactory is Initializable {
                 for (uint256 j = treeUpdates.length; j > 0; j--) {
                     uint256 jUpdateId = treeUpdates[j - 1];
 
-                    if (updateFactory.getStatus(jUpdateId) != 1) {
+                    (, , uint256 jUpdateDate, bool jUpdateStatus) =
+                        updateFactory.updates(jUpdateId);
+
+                    if (jUpdateStatus != true) {
                         continue;
                     }
 
-                    if (
-                        updateFactory.isAmbassadorBalanceWithdrawn(jUpdateId) ==
-                        true
-                    ) {
+                    if (updateToAmbassadorBalanceWithdrawn[jUpdateId] == true) {
                         continue;
                     }
 
                     if (j > 1) {
                         uint256 jMinusUpdateId = treeUpdates[j - 2];
+                        (, , uint256 jMUpdateDate, bool jMUpdateStatus) =
+                            updateFactory.updates(jMinusUpdateId);
 
-                        if (updateFactory.getStatus(jMinusUpdateId) != 1) {
+                        if (jMUpdateStatus != true) {
                             continue;
                         }
 
                         totalSeconds = totalSeconds.add(
-                            updateFactory.getUpdateDate(jUpdateId).sub(
-                                updateFactory.getUpdateDate(jMinusUpdateId)
-                            )
+                            jUpdateDate.sub(jMUpdateDate)
                         );
                     } else {
                         totalSeconds = totalSeconds.add(
-                            updateFactory.getUpdateDate(jUpdateId).sub(
-                                trees[treeId].plantedDate
-                            )
+                            jUpdateDate.sub(trees[treeId].plantedDate)
                         );
                     }
 
-                    updateFactory.setAmbassadorBalanceWithdrawn(jUpdateId);
+                    updateToAmbassadorBalanceWithdrawn[jUpdateId] = true;
                 }
 
                 if (totalSeconds > 0) {

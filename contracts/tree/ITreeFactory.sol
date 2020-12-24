@@ -165,7 +165,17 @@ interface ITreeFactory {
 
     function fund(uint256 _count) external payable;
 
+    function getPlanterWithdrawableBalance(address _account)
+        external
+        view
+        returns (uint256);
+
     function withdrawPlanterBalance() external;
+
+    function getAmbassadorWithdrawableBalance(address _account)
+        external
+        view
+        returns (uint256);
 
     function withdrawAmbassadorBalance() external;
 

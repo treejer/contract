@@ -690,4 +690,183 @@ contract TreeFactory is Initializable {
         rescueFundPercentage = _rescueFundPercentage;
         researchFundPercentage = _researchFundPercentage;
     }
+
+    function getPlanterWithdrawableBalance(address _account)
+        external
+        view
+        returns (uint256)
+    {
+        accessRestriction.ifPlanter(_account);
+
+        uint256 planterTreesCount = planterTreeCount[_account];
+
+        if (planterTreesCount == 0) {
+            return 0;
+        }
+
+        uint256 withdrawableBalance = 0;
+        uint256[] memory treeIds = planterTrees[_account];
+
+        for (uint256 i = 0; i < planterTreesCount; i++) {
+            uint256 treeId = treeIds[i];
+
+            uint256[] memory treeUpdates = updateFactory.getTreeUpdates(treeId);
+            uint256 totalSeconds = 0;
+
+            if (treeToPlanterRemainingBalance[treeId] <= 0) {
+                continue;
+            }
+
+            if (treeUpdates.length == 0) {
+                continue;
+            }
+
+            if (
+                updateToPlanterBalanceWithdrawn[
+                    updateFactory.getTreeLastUpdateId(treeId)
+                ] == true
+            ) {
+                continue;
+            }
+
+            for (uint256 j = treeUpdates.length; j > 0; j--) {
+                uint256 jUpdateId = treeUpdates[j - 1];
+
+                (, , uint256 jUpdateDate, bool jUpdateStatus) =
+                    updateFactory.updates(jUpdateId);
+
+                if (jUpdateStatus != true) {
+                    continue;
+                }
+
+                if (updateToPlanterBalanceWithdrawn[jUpdateId] == true) {
+                    continue;
+                }
+
+                if (j > 1) {
+                    uint256 jMinusUpdateId = treeUpdates[j - 2];
+
+                    (, , uint256 jMUpdateDate, bool jMUpdateStatus) =
+                        updateFactory.updates(jMinusUpdateId);
+
+                    if (jMUpdateStatus != true) {
+                        continue;
+                    }
+
+                    totalSeconds = totalSeconds.add(
+                        jUpdateDate.sub(jMUpdateDate)
+                    );
+                } else {
+                    totalSeconds = totalSeconds.add(
+                        jUpdateDate.sub(trees[treeId].plantedDate)
+                    );
+                }
+            }
+
+            if (totalSeconds > 0) {
+                withdrawableBalance = withdrawableBalance.add(
+                    treeToPlanterBalancePerSecond[treeId].mul(totalSeconds)
+                );
+            }
+        }
+
+        return withdrawableBalance;
+    }
+
+    function getAmbassadorWithdrawableBalance(address _account)
+        external
+        view
+        returns (uint256)
+    {
+        accessRestriction.ifAmbassador(_account);
+
+        uint256 ambassadorGBCount = gbFactory.ambassadorGBCount(_account);
+
+        if (ambassadorGBCount == 0) {
+            return 0;
+        }
+
+        uint256[] memory gbIds = gbFactory.getAmbassadorGBs(_account);
+
+        uint256 withdrawableBalance = 0;
+
+        for (uint256 k = 0; k < ambassadorGBCount; k++) {
+            uint256 _gbId = gbIds[k];
+
+            uint256 gbTreesCount = gbTreeCount[_gbId];
+
+            if (gbTreesCount == 0) {
+                continue;
+            }
+
+            uint256[] memory treeIds = gbTrees[_gbId];
+
+            for (uint256 i = 0; i < gbTreesCount; i++) {
+                uint256 treeId = treeIds[i];
+
+                uint256[] memory treeUpdates =
+                    updateFactory.getTreeUpdates(treeId);
+                uint256 totalSeconds = 0;
+
+                if (treeToAmbassadorRemainingBalance[treeId] <= 0) {
+                    continue;
+                }
+
+                if (treeUpdates.length == 0) {
+                    continue;
+                }
+
+                if (
+                    updateToAmbassadorBalanceWithdrawn[
+                        updateFactory.getTreeLastUpdateId(treeId)
+                    ] == true
+                ) {
+                    continue;
+                }
+
+                for (uint256 j = treeUpdates.length; j > 0; j--) {
+                    uint256 jUpdateId = treeUpdates[j - 1];
+
+                    (, , uint256 jUpdateDate, bool jUpdateStatus) =
+                        updateFactory.updates(jUpdateId);
+
+                    if (jUpdateStatus != true) {
+                        continue;
+                    }
+
+                    if (updateToAmbassadorBalanceWithdrawn[jUpdateId] == true) {
+                        continue;
+                    }
+
+                    if (j > 1) {
+                        uint256 jMinusUpdateId = treeUpdates[j - 2];
+                        (, , uint256 jMUpdateDate, bool jMUpdateStatus) =
+                            updateFactory.updates(jMinusUpdateId);
+
+                        if (jMUpdateStatus != true) {
+                            continue;
+                        }
+
+                        totalSeconds = totalSeconds.add(
+                            jUpdateDate.sub(jMUpdateDate)
+                        );
+                    } else {
+                        totalSeconds = totalSeconds.add(
+                            jUpdateDate.sub(trees[treeId].plantedDate)
+                        );
+                    }
+                }
+
+                if (totalSeconds > 0) {
+                    withdrawableBalance = withdrawableBalance.add(
+                        treeToAmbassadorBalancePerSecond[treeId].mul(
+                            totalSeconds
+                        )
+                    );
+                }
+            }
+        }
+
+        return withdrawableBalance;
+    }
 }

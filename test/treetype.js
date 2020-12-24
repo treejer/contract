@@ -43,7 +43,7 @@ contract('TreeType', (accounts) => {
 
         await Common.addType(treeTypeInstance, deployerAccount, name);
 
-        return await treeTypeInstance.get(id)
+        return await treeTypeInstance.types(id)
             .then((treeType) => {
                 assert.equal(
                     treeType[0],
@@ -64,12 +64,12 @@ contract('TreeType', (accounts) => {
 
         await Common.addType(treeTypeInstance, deployerAccount, name);
 
-        return await treeTypeInstance.getO2Formula(id)
-            .then((treeTypeO2formula) => {
+        return await treeTypeInstance.types(id)
+            .then((treeType) => {
                 assert.equal(
-                    treeTypeO2formula,
+                    treeType[2],
                     o2formula,
-                    "Tree o2formula : " + treeTypeO2formula + " returned"
+                    "Tree o2formula : " + treeType[2] + " returned"
                 );
             }).catch((error) => {
                 console.log(error);
@@ -86,7 +86,7 @@ contract('TreeType', (accounts) => {
         await Common.addType(treeTypeInstance, deployerAccount, name);
         await Common.addType(treeTypeInstance, deployerAccount, name1);
 
-        return await treeTypeInstance.count()
+        return await treeTypeInstance.total()
             .then((count) => {
                 assert.equal(
                     2,

@@ -9,7 +9,6 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 
 import "../access/IAccessRestriction.sol";
 import "../greenblock/IGBFactory.sol";
-import "./TreeType.sol";
 import "./UpdateFactory.sol";
 import "./ITree.sol";
 
@@ -101,9 +100,7 @@ contract TreeFactory is Initializable {
     UpdateFactory public updateFactory;
     ITree public treeToken;
 
-    function initialize(
-        address _accessRestrictionAddress
-    ) public initializer {
+    function initialize(address _accessRestrictionAddress) public initializer {
         isTreeFactory = true;
 
         IAccessRestriction candidateContract =
@@ -151,8 +148,6 @@ contract TreeFactory is Initializable {
     ) external {
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanter(msg.sender);
-
-        // require tree type exists
 
         uint256 gbId = gbFactory.planterGB(msg.sender);
 
@@ -214,8 +209,6 @@ contract TreeFactory is Initializable {
         );
     }
 
-    
-
     function simpleFund(
         address _account,
         uint256 _planterBalance,
@@ -270,9 +263,11 @@ contract TreeFactory is Initializable {
             ] = _ambassadorBalancePerSecond;
         }
 
-
-        treeToken.safeTransferExtra(treeToken.ownerOf(treeId), _account, treeId);
-
+        treeToken.safeTransferExtra(
+            treeToken.ownerOf(treeId),
+            _account,
+            treeId
+        );
 
         delete notFundedTrees[notFundedTreesUsedIndex.sub(1)];
 
@@ -290,8 +285,6 @@ contract TreeFactory is Initializable {
     function notPlantedTreesExists() public view returns (bool) {
         return notPlantedTreesLastIndex > notPlantedTreesUsedIndex;
     }
-
-    
 
     function setPrice(uint256 _price) external {
         accessRestriction.ifAdmin(msg.sender);

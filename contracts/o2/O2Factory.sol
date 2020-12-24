@@ -9,7 +9,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/ma
 import "../access/IAccessRestriction.sol";
 import "../tree/TreeFactory.sol";
 import "../tree/UpdateFactory.sol";
-import "../tree/TreeType.sol";
+import "../tree/ITreeType.sol";
 import "./IO2.sol";
 import "../tree/ITree.sol";
 
@@ -17,18 +17,17 @@ contract O2Factory is Initializable {
     using SafeMath for uint256;
 
     event O2Minted(address owner, uint256 totalO2);
-    
+
     ITree public treeToken;
     IO2 public o2Token;
-    TreeType public treeType;
+    ITreeType public treeType;
     TreeFactory public treeFactory;
     UpdateFactory public updateFactory;
     IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -49,11 +48,10 @@ contract O2Factory is Initializable {
         o2Token = candidateContract;
     }
 
-
     function setTreeTypeAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        TreeType candidateContract = TreeType(_address);
+        ITreeType candidateContract = ITreeType(_address);
         require(candidateContract.isTreeType());
         treeType = candidateContract;
     }
@@ -118,9 +116,8 @@ contract O2Factory is Initializable {
                         )
                     );
                 } else {
-                    (, , uint256 plantedDate, , , , ) = treeFactory.trees(
-                        treeId
-                    );
+                    (, , uint256 plantedDate, , , , ) =
+                        treeFactory.trees(treeId);
 
                     totalSeconds = totalSeconds.add(
                         updateFactory.getUpdateDate(jUpdateId).sub(plantedDate)
@@ -130,9 +127,8 @@ contract O2Factory is Initializable {
                 updateFactory.setMinted(jUpdateId, true);
             }
 
-            uint256 o2Formula = treeType.getO2Formula(
-                treeFactory.treeToType(treeId)
-            );
+            (, , uint256 o2Formula, ) =
+                treeType.types(treeFactory.treeToType(treeId));
 
             mintableO2 = mintableO2.add(o2Formula.mul(totalSeconds));
         }

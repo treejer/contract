@@ -30,14 +30,12 @@ contract TreeType is Initializable {
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isTreeType = true;
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
 
-    //@todo permission must check
     function create(
         string calldata _name,
         string calldata _scientificName,
@@ -52,29 +50,7 @@ contract TreeType is Initializable {
         emit NewType(id, _name, _scientificName, _O2Formula, _price);
     }
 
-    function get(uint256 _typeId)
-        external
-        view
-        returns (
-            string memory,
-            string memory,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            types[_typeId].name,
-            types[_typeId].scientificName,
-            types[_typeId].O2Formula,
-            types[_typeId].price
-        );
-    }
-
-    function getO2Formula(uint256 _typeId) public view returns (uint256) {
-        return types[_typeId].O2Formula;
-    }
-
-    function count() external view returns (uint256) {
+    function total() external view returns (uint256) {
         return types.length;
     }
 }

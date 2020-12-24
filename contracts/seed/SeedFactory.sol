@@ -7,7 +7,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../tree/TreeFactory.sol";
+import "../tree/ITreeFactory.sol";
 import "../tree/ITree.sol";
 import "./ISeed.sol";
 
@@ -20,7 +20,7 @@ contract SeedFactory is Initializable {
     ISeed public seedToken;
     ITree public treeToken;
 
-    TreeFactory public treeFactory;
+    ITreeFactory public treeFactory;
     IAccessRestriction public accessRestriction;
 
     uint256 public seedGeneratedPerSecond;
@@ -28,9 +28,8 @@ contract SeedFactory is Initializable {
     mapping(uint256 => uint256) public treesLastMintedDate;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -54,7 +53,7 @@ contract SeedFactory is Initializable {
     function setTreeFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        TreeFactory candidateContract = TreeFactory(_address);
+        ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }

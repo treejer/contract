@@ -7,7 +7,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/IAccessRestriction.sol";
-import "./TreeFactory.sol";
+import "./ITreeFactory.sol";
 import "../greenblock/IGBFactory.sol";
 
 contract UpdateFactory is Initializable {
@@ -31,7 +31,7 @@ contract UpdateFactory is Initializable {
     mapping(uint256 => uint256[]) public treeUpdates;
 
     IAccessRestriction public accessRestriction;
-    TreeFactory public treeFactory;
+    ITreeFactory public treeFactory;
     IGBFactory public gbFactory;
 
     function initialize(address _accessRestrictionAddress) public initializer {
@@ -45,7 +45,7 @@ contract UpdateFactory is Initializable {
     function setTreeFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        TreeFactory candidateContract = TreeFactory(_address);
+        ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }

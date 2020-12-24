@@ -7,7 +7,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../tree/TreeFactory.sol";
+import "../tree/ITreeFactory.sol";
 import "../tree/IUpdateFactory.sol";
 import "../tree/ITreeType.sol";
 import "./IO2.sol";
@@ -21,7 +21,7 @@ contract O2Factory is Initializable {
     ITree public treeToken;
     IO2 public o2Token;
     ITreeType public treeType;
-    TreeFactory public treeFactory;
+    ITreeFactory public treeFactory;
     IUpdateFactory public updateFactory;
     IAccessRestriction public accessRestriction;
 
@@ -61,7 +61,7 @@ contract O2Factory is Initializable {
     function setTreeFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        TreeFactory candidateContract = TreeFactory(_address);
+        ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }

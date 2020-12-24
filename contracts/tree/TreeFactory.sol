@@ -53,12 +53,12 @@ contract TreeFactory is Initializable {
     uint256 public price;
 
     mapping(uint256 => uint256) public notFundedTrees;
-    uint256 notFundedTreesLastIndex;
-    uint256 notFundedTreesUsedIndex;
+    uint256 public notFundedTreesLastIndex;
+    uint256 public notFundedTreesUsedIndex;
 
     mapping(uint256 => uint256) public notPlantedTrees;
-    uint256 notPlantedTreesLastIndex;
-    uint256 notPlantedTreesUsedIndex;
+    uint256 public notPlantedTreesLastIndex;
+    uint256 public notPlantedTreesUsedIndex;
 
     mapping(uint256 => uint8) public treeToType;
     mapping(uint256 => uint256) public treeToGB;
@@ -156,7 +156,7 @@ contract TreeFactory is Initializable {
 
         uint256 id = 0;
 
-        if (notPlantedTreesExists() == true) {
+        if (notPlantedTreesLastIndex > notPlantedTreesUsedIndex) {
             id = notPlantedTrees[notPlantedTreesUsedIndex];
             notPlantedTreesUsedIndex++;
 
@@ -247,7 +247,10 @@ contract TreeFactory is Initializable {
         uint256 _ambassadorBalance,
         uint256 _ambassadorBalancePerSecond
     ) internal returns (uint256) {
-        require(notFundedTreesExists(), "There is not funded trees");
+        require(
+            notFundedTreesLastIndex > notFundedTreesUsedIndex,
+            "There is not funded trees"
+        );
 
         uint256 treeId = notFundedTrees[notFundedTreesUsedIndex];
         notFundedTreesUsedIndex++;
@@ -277,18 +280,6 @@ contract TreeFactory is Initializable {
         return treeId;
     }
 
-    function getLastNotFundedTreeId() public view returns (uint256) {
-        return notFundedTrees[notFundedTreesUsedIndex];
-    }
-
-    function notFundedTreesExists() public view returns (bool) {
-        return notFundedTreesLastIndex > notFundedTreesUsedIndex;
-    }
-
-    function notPlantedTreesExists() public view returns (bool) {
-        return notPlantedTreesLastIndex > notPlantedTreesUsedIndex;
-    }
-
     function setPrice(uint256 _price) external {
         accessRestriction.ifAdmin(msg.sender);
 
@@ -308,8 +299,9 @@ contract TreeFactory is Initializable {
             uint256 ambassadorBalance = 0;
             bool hasAmbasador = false;
 
-            if (notFundedTreesExists() == true) {
-                id = getLastNotFundedTreeId();
+            //check for
+            if (notFundedTreesLastIndex > notFundedTreesUsedIndex) {
+                id = notFundedTrees[notFundedTreesUsedIndex];
                 uint256 gbId = treeToGB[id];
                 address gbAmbassador = gbFactory.gbToAmbassador(gbId);
 

@@ -7,31 +7,32 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721Holder.sol";
 
-import "../tree/TreeFactory.sol";
+import "../tree/ITreeFactory.sol";
 
-contract PublicForest is Initializable, ContextUpgradeSafe, ERC721HolderUpgradeSafe {
+contract PublicForest is
+    Initializable,
+    ContextUpgradeSafe,
+    ERC721HolderUpgradeSafe
+{
     using SafeMath for uint256;
 
     event ContributionReceived(address from, uint256 value);
     event TreesAddedToForest(uint256 count);
 
     // exteranl contracts
-    TreeFactory public treeFactory;
+    ITreeFactory public treeFactory;
 
-    function initialize(address _treeFactoryAddress)
-        public
-        initializer
-    {
-        TreeFactory candidateContract = TreeFactory(_treeFactoryAddress);
+    function initialize(address _treeFactoryAddress) public initializer {
+        ITreeFactory candidateContract = ITreeFactory(_treeFactoryAddress);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }
 
-    receive() external payable { 
+    receive() external payable {
         emit ContributionReceived(msg.sender, msg.value);
     }
 
-    function donate() external payable { 
+    function donate() external payable {
         //do something
         require(msg.value > 0, "Contribution must bigger than zero");
 
@@ -58,6 +59,4 @@ contract PublicForest is Initializable, ContextUpgradeSafe, ERC721HolderUpgradeS
             }
         }
     }
-
-
 }

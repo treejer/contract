@@ -6,7 +6,7 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/In
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../tree/TreeFactory.sol";
+import "../tree/ITreeFactory.sol";
 import "./PublicForest.sol";
 
 contract ForestFactory is Initializable, ContextUpgradeSafe {
@@ -14,13 +14,12 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
 
     address[] public forests;
 
-    TreeFactory public treeFactory;
+    ITreeFactory public treeFactory;
     IAccessRestriction public accessRestriction;
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
+        IAccessRestriction candidateContract =
+            IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -28,7 +27,7 @@ contract ForestFactory is Initializable, ContextUpgradeSafe {
     function setTreeFactoryAddress(address _address) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        TreeFactory candidateContract = TreeFactory(_address);
+        ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }

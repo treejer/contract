@@ -7,7 +7,6 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/to
 import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../tree/TreeFactory.sol";
 
 contract Seed is ERC20UpgradeSafe {
     bool public isSeed;

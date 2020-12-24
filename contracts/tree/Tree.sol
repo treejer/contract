@@ -7,10 +7,8 @@ import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/to
 import "../access/IAccessRestriction.sol";
 
 contract Tree is ERC721UpgradeSafe {
-
     bool public isTree;
     IAccessRestriction public accessRestriction;
-
 
     function initialize(
         address _accessRestrictionAddress,
@@ -25,7 +23,6 @@ contract Tree is ERC721UpgradeSafe {
             IAccessRestriction(_accessRestrictionAddress);
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
-
     }
 
     function setBaseURI(string memory _baseURI) external {
@@ -37,7 +34,7 @@ contract Tree is ERC721UpgradeSafe {
     function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
         require(
             accessRestriction.isPlanterOrAmbassador(msg.sender) ||
-                ownerOf(_tokenId) == msg.sender || 
+                ownerOf(_tokenId) == msg.sender ||
                 accessRestriction.isTreeFactory(msg.sender),
             "Caller must be planter or ambassador or owner of tree OR TreeFactory!"
         );
@@ -53,7 +50,6 @@ contract Tree is ERC721UpgradeSafe {
         uint256 tokenCount = balanceOf(_account);
 
         if (tokenCount == 0) {
-            // Return an empty array
             return new uint256[](0);
         }
 
@@ -66,16 +62,17 @@ contract Tree is ERC721UpgradeSafe {
         return result;
     }
 
-    function safeTransferExtra(address _from, address _to, uint256 _tokenId) external {
-
+    function safeTransferExtra(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external {
         accessRestriction.ifTreeFactory(msg.sender);
         _safeTransfer(_from, _to, _tokenId, "");
     }
 
     function safeMint(address _to, uint256 _tokenId) external {
-
         accessRestriction.ifTreeFactory(msg.sender);
         _safeMint(_to, _tokenId);
     }
-
 }

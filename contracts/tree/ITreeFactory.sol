@@ -157,21 +157,27 @@ interface ITreeFactory {
         view
         returns (bool isWithdrawn);
 
-    function setGBFactoryAddress(address _address) external;
-
-    function setUpdateFactoryAddress(address _address) external;
-
-    function setTreeTokenAddress(address _address) external;
-
     function plant(
         uint8 _typeId,
         string[] calldata _stringParams,
         uint8[] calldata _uintParams
     ) external;
 
-    function setPrice(uint256 _price) external;
-
     function fund(uint256 _count) external payable;
+
+    function withdrawPlanterBalance() external;
+
+    function withdrawAmbassadorBalance() external;
+
+    //admin commands
+
+    function setGBFactoryAddress(address _address) external;
+
+    function setUpdateFactoryAddress(address _address) external;
+
+    function setTreeTokenAddress(address _address) external;
+
+    function setPrice(uint256 _price) external;
 
     function withdrawTreejerFund(address payable _to, uint256 _amount) external;
 
@@ -183,7 +189,12 @@ interface ITreeFactory {
     function withdrawResearchFund(address payable _to, uint256 _amount)
         external;
 
-    function withdrawPlanterBalance() external;
-
-    function withdrawAmbassadorBalance() external;
+    function setAllPercentages(
+        uint16 _treejerPercentage,
+        uint16 _plantersPercentage,
+        uint16 _ambassadorsPercentage,
+        uint16 _localDevelopmentFundPercentage,
+        uint16 _rescueFundPercentage,
+        uint16 _researchFundPercentage
+    ) external;
 }

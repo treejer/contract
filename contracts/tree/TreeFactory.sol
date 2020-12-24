@@ -15,6 +15,7 @@ import "./ITree.sol";
 contract TreeFactory is Initializable {
     using Address for address;
     using SafeMath for uint256;
+    using SafeMath for uint16;
 
     event PriceChanged(uint256 price);
     event TreePlanted(
@@ -77,12 +78,12 @@ contract TreeFactory is Initializable {
     mapping(uint256 => uint256) public treeToAmbassadorBalancePerSecond;
 
     // 100 percentages basis points = 1 percentage
-    uint256 public treejerPercentage;
-    uint256 public plantersPercentage;
-    uint256 public ambassadorsPercentage;
-    uint256 public localDevelopmentFundPercentage;
-    uint256 public rescueFundPercentage;
-    uint256 public researchFundPercentage;
+    uint16 public treejerPercentage;
+    uint16 public plantersPercentage;
+    uint16 public ambassadorsPercentage;
+    uint16 public localDevelopmentFundPercentage;
+    uint16 public rescueFundPercentage;
+    uint16 public researchFundPercentage;
 
     uint256 public treejerFund;
     uint256 public plantersFund;
@@ -660,5 +661,33 @@ contract TreeFactory is Initializable {
         Address.sendValue(msg.sender, withdrawableBalance);
 
         emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
+    }
+
+    function setAllPercentages(
+        uint16 _treejerPercentage,
+        uint16 _plantersPercentage,
+        uint16 _ambassadorsPercentage,
+        uint16 _localDevelopmentFundPercentage,
+        uint16 _rescueFundPercentage,
+        uint16 _researchFundPercentage
+    ) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        require(
+            _treejerPercentage
+                .add(_plantersPercentage)
+                .add(_ambassadorsPercentage)
+                .add(_localDevelopmentFundPercentage)
+                .add(_rescueFundPercentage)
+                .add(_researchFundPercentage) == 10000,
+            "Percentages sum must equal to 10000"
+        );
+
+        treejerPercentage = _treejerPercentage;
+        plantersPercentage = _plantersPercentage;
+        ambassadorsPercentage = _ambassadorsPercentage;
+        localDevelopmentFundPercentage = _localDevelopmentFundPercentage;
+        rescueFundPercentage = _rescueFundPercentage;
+        researchFundPercentage = _researchFundPercentage;
     }
 }

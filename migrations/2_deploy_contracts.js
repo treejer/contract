@@ -30,6 +30,7 @@ module.exports = async function (deployer, network, accounts) {
   let seedAddress;
   let seedFactoryAddress;
   let o2FactoryAddress;
+  let forestFactory;
 
   console.log("Deploying on network '" + network + "' by account '" + accounts[0] + "'");
 
@@ -101,6 +102,7 @@ module.exports = async function (deployer, network, accounts) {
 
   await deployProxy(ForestFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })
     .then(() => {
+      forestFactory = ForestFactory.address;
       ForestFactory.deployed().then(async (instance) => {
         await instance.setTreeFactoryAddress(treeFactoryAddress);
       });
@@ -114,6 +116,19 @@ module.exports = async function (deployer, network, accounts) {
     await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
   });
 
-
   console.log("Deployed");
+
+  console.log(`CONTRACT_AR_ADDRESS=${accessRestrictionAddress}
+CONTRACT_GBFACTORY_ADDRESS=${gbAddress}
+CONTRACT_TRRETYPE_ADDRESS=${treeTypeAddress}
+CONTRACT_UPDATEFACTORY_ADDRESS=${updateAddress}
+CONTRACT_TREEFACTORY_ADDRESS=${treeFactoryAddress}
+CONTRACT_SEEDFACTORY_ADDRESS=${seedFactoryAddress}
+CONTRACT_O2FACTORY_ADDRESS=${o2FactoryAddress}
+CONTRACT_TREE_ADDRESS=${treeAddress}
+CONTRACT_SEED_ADDRESS=${seedAddress}
+CONTRACT_O2_ADDRESS=${o2Address}
+CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}`);
+
+
 };

@@ -25,24 +25,6 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
         if (hasRole(DEFAULT_ADMIN_ROLE, _deployer) == false) {
             _setupRole(DEFAULT_ADMIN_ROLE, _deployer);
         }
-        if (hasRole(PLANTER_ROLE, _deployer) == false) {
-            _setupRole(PLANTER_ROLE, _deployer);
-        }
-        if (hasRole(AMBASSADOR_ROLE, _deployer) == false) {
-            _setupRole(AMBASSADOR_ROLE, _deployer);
-        }
-
-        // if(hasRole(TREE_FACTORY_ROLE, _deployer) == false) {
-        //     _setupRole(TREE_FACTORY_ROLE, _deployer);
-        // }
-
-        // if(hasRole(SEED_FACTORY_ROLE, _deployer) == false) {
-        //     _setupRole(SEED_FACTORY_ROLE, _deployer);
-        // }
-
-        // if(hasRole(O2_FACTORY_ROLE, _deployer) == false) {
-        //     _setupRole(O2_FACTORY_ROLE, _deployer);
-        // }
     }
 
     modifier onlyAdmin() {

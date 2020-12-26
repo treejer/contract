@@ -17,7 +17,6 @@ const SEED_FACTORY_ROLE = web3.utils.soliditySha3('SEED_FACTORY_ROLE');
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3('TREE_FACTORY_ROLE');
 const O2_FACTORY_ROLE = web3.utils.soliditySha3('O2_FACTORY_ROLE');
 
-
 module.exports = async function (deployer, network, accounts) {
 
   let accessRestrictionAddress;
@@ -100,6 +99,15 @@ module.exports = async function (deployer, network, accounts) {
       });
     });
 
+  AccessRestriction.deployed().then(async (instance) => {
+    await instance.grantRole(SEED_FACTORY_ROLE, seedFactoryAddress);
+    console.log('SEED_FACTORY_ROLE' + seedFactoryAddress);
+    await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
+    console.log('TREE_FACTORY_ROLE' + treeFactoryAddress);
+    await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
+    console.log('O2_FACTORY_ROLE' + o2FactoryAddress);
+  });
+
   await deployProxy(ForestFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize' })
     .then(() => {
       forestFactory = ForestFactory.address;
@@ -108,13 +116,6 @@ module.exports = async function (deployer, network, accounts) {
       });
     });
 
-
-
-  AccessRestriction.deployed().then(async (instance) => {
-    await instance.grantRole(SEED_FACTORY_ROLE, seedFactoryAddress);
-    await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
-    await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
-  });
 
   console.log("Deployed");
 

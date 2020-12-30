@@ -57,11 +57,13 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
-            if (accessRestriction.isPlanter(_planters[i])) {
+            if (accessRestriction.isPlanter(_planters[i]) && planterGB[msg.sender] == 0) {
                 gbToPlanters[id].push(_planters[i]);
                 planterGB[_planters[i]] = id;
             }
         }
+        
+        require(_ambassador != address(0) || gbToPlanters[id].length > 0, "No ambassador no planter!");
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;

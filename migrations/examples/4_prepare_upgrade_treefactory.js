@@ -11,7 +11,7 @@
 //     // upgrade direct
 //     await upgradeProxy(treeFactory.address, TreeFactoryV2, { deployer, unsafeAllowCustomTypes:true });
 
-//     // prepare upgrade with nosis
+//     // prepare upgrade with gnosis
 //     await prepareUpgrade(treeFactory.address, TreeFactoryV2, { deployer, unsafeAllowCustomTypes: true });
 
 // };

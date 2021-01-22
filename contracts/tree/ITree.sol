@@ -2,12 +2,12 @@
 
 pragma solidity ^0.6.9;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 
 /**
  * @dev Required interface of an ERC721 compliant contract.
  */
-interface ITree is IERC721 {
+interface ITree is IERC721Upgradeable {
     function isTree() external view returns (bool);
 
     //only TreeFactory

@@ -3,19 +3,20 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../greenblock/IGBFactory.sol";
 import "./IUpdateFactory.sol";
 import "./ITree.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract TreeFactory is Initializable {
-    using Address for address;
-    using SafeMath for uint256;
-    using SafeMath for uint16;
+contract TreeFactory is Initializable, RelayRecipient {
+    using AddressUpgradeable for address;
+    using SafeMathUpgradeable for uint256;
+    using SafeMathUpgradeable for uint16;
 
     event PriceChanged(uint256 price);
     event TreePlanted(
@@ -121,8 +122,14 @@ contract TreeFactory is Initializable {
         researchFundPercentage = 500;
     }
 
+    function setTrustedForwarder(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+
+        trustedForwarder = _address;
+    }
+
     function setGBFactoryAddress(address _address) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         IGBFactory candidateContract = IGBFactory(_address);
         require(candidateContract.isGBFactory());
@@ -130,7 +137,7 @@ contract TreeFactory is Initializable {
     }
 
     function setUpdateFactoryAddress(address _address) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         IUpdateFactory candidateContract = IUpdateFactory(_address);
         require(candidateContract.isUpdateFactory());
@@ -138,7 +145,7 @@ contract TreeFactory is Initializable {
     }
 
     function setTreeTokenAddress(address _address) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         ITree candidateContract = ITree(_address);
         require(candidateContract.isTree());
@@ -151,9 +158,9 @@ contract TreeFactory is Initializable {
         uint8[] calldata _uintParams
     ) external {
         accessRestriction.ifNotPaused();
-        accessRestriction.ifPlanter(msg.sender);
+        accessRestriction.ifPlanter(_msgSender());
 
-        uint256 gbId = gbFactory.planterGB(msg.sender);
+        uint256 gbId = gbFactory.planterGB(_msgSender());
 
         uint256 id = 0;
 
@@ -185,7 +192,7 @@ contract TreeFactory is Initializable {
 
             notFundedTrees[notFundedTreesLastIndex] = id;
             notFundedTreesLastIndex++;
-            treeToken.safeMint(msg.sender, id);
+            treeToken.safeMint(_msgSender(), id);
         }
 
         bytes memory uriStringByte = bytes(_stringParams[0]);
@@ -201,9 +208,9 @@ contract TreeFactory is Initializable {
         typeTreeCount[_typeId]++;
         typeTrees[_typeId].push(id);
 
-        treeToPlanter[id] = msg.sender;
-        planterTreeCount[msg.sender]++;
-        planterTrees[msg.sender].push(id);
+        treeToPlanter[id] = _msgSender();
+        planterTreeCount[_msgSender()]++;
+        planterTrees[_msgSender()].push(id);
 
         emit TreePlanted(
             id,
@@ -282,7 +289,7 @@ contract TreeFactory is Initializable {
     }
 
     function setPrice(uint256 _price) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         price = _price;
         emit PriceChanged(_price);
@@ -315,7 +322,7 @@ contract TreeFactory is Initializable {
                 }
 
                 id = fundPlantedTress(
-                    msg.sender,
+                    _msgSender(),
                     planterBalance,
                     _calculateSharePerSecond(planterBalance),
                     ambassadorBalance,
@@ -323,7 +330,7 @@ contract TreeFactory is Initializable {
                 );
             } else {
                 id = simpleFund(
-                    msg.sender,
+                    _msgSender(),
                     planterBalance,
                     _calculateSharePerSecond(planterBalance),
                     0,
@@ -338,7 +345,7 @@ contract TreeFactory is Initializable {
                 planterBalance,
                 ambassadorBalance,
                 balance,
-                msg.sender
+                _msgSender()
             );
         }
     }
@@ -407,22 +414,22 @@ contract TreeFactory is Initializable {
     function withdrawTreejerFund(address payable _to, uint256 _amount)
         external
     {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         require(treejerFund > 0, "treejerFund balance is zero!");
         require(_amount <= treejerFund, "Not more treejerFund!");
 
         treejerFund = treejerFund.sub(_amount);
 
-        Address.sendValue(_to, _amount);
+        AddressUpgradeable.sendValue(_to, _amount);
 
-        emit TreejerFundWithdrawn(_to, _amount, msg.sender);
+        emit TreejerFundWithdrawn(_to, _amount, _msgSender());
     }
 
     function withdrawLocalDevelopmentFund(address payable _to, uint256 _amount)
         external
     {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         require(
             localDevelopmentFund > 0,
@@ -435,48 +442,48 @@ contract TreeFactory is Initializable {
 
         localDevelopmentFund = localDevelopmentFund.sub(_amount);
 
-        Address.sendValue(_to, _amount);
+        AddressUpgradeable.sendValue(_to, _amount);
 
-        emit LocalDevelopmentFundWithdrawn(_to, _amount, msg.sender);
+        emit LocalDevelopmentFundWithdrawn(_to, _amount, _msgSender());
     }
 
     function withdrawRescueFund(address payable _to, uint256 _amount) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         require(rescueFund > 0, "rescueFund balance is zero!");
         require(_amount <= rescueFund, "Not more rescueFund!");
 
         rescueFund = rescueFund.sub(_amount);
 
-        Address.sendValue(_to, _amount);
+        AddressUpgradeable.sendValue(_to, _amount);
 
-        emit RescueFundWithdrawn(_to, _amount, msg.sender);
+        emit RescueFundWithdrawn(_to, _amount, _msgSender());
     }
 
     function withdrawResearchFund(address payable _to, uint256 _amount)
         external
     {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         require(researchFund > 0, "researchFund balance is zero!");
         require(_amount <= researchFund, "Not more researchFund!");
 
         researchFund = researchFund.sub(_amount);
 
-        Address.sendValue(_to, _amount);
+        AddressUpgradeable.sendValue(_to, _amount);
 
-        emit ResearchFundWithdrawn(_to, _amount, msg.sender);
+        emit ResearchFundWithdrawn(_to, _amount, _msgSender());
     }
 
     function withdrawPlanterBalance() external {
-        accessRestriction.ifPlanter(msg.sender);
+        accessRestriction.ifPlanter(_msgSender());
 
-        uint256 planterTreesCount = planterTreeCount[msg.sender];
+        uint256 planterTreesCount = planterTreeCount[_msgSender()];
 
         require(planterTreesCount > 0, "Planter tree count is zero");
 
         uint256 withdrawableBalance = 0;
-        uint256[] memory treeIds = planterTrees[msg.sender];
+        uint256[] memory treeIds = planterTrees[_msgSender()];
 
         for (uint256 i = 0; i < planterTreesCount; i++) {
             uint256 treeId = treeIds[i];
@@ -552,19 +559,19 @@ contract TreeFactory is Initializable {
 
         plantersFund = plantersFund.sub(withdrawableBalance);
 
-        Address.sendValue(msg.sender, withdrawableBalance);
+        AddressUpgradeable.sendValue(_msgSender(), withdrawableBalance);
 
-        emit PlanterBalanceWithdrawn(msg.sender, withdrawableBalance);
+        emit PlanterBalanceWithdrawn(_msgSender(), withdrawableBalance);
     }
 
     function withdrawAmbassadorBalance() external {
-        accessRestriction.ifAmbassador(msg.sender);
+        accessRestriction.ifAmbassador(_msgSender());
 
-        uint256 ambassadorGBCount = gbFactory.ambassadorGBCount(msg.sender);
+        uint256 ambassadorGBCount = gbFactory.ambassadorGBCount(_msgSender());
 
         require(ambassadorGBCount > 0, "Ambassador gb count is zero");
 
-        uint256[] memory gbIds = gbFactory.getAmbassadorGBs(msg.sender);
+        uint256[] memory gbIds = gbFactory.getAmbassadorGBs(_msgSender());
 
         uint256 withdrawableBalance = 0;
 
@@ -658,9 +665,9 @@ contract TreeFactory is Initializable {
 
         ambassadorsFund = ambassadorsFund.sub(withdrawableBalance);
 
-        Address.sendValue(msg.sender, withdrawableBalance);
+        AddressUpgradeable.sendValue(_msgSender(), withdrawableBalance);
 
-        emit AmbassadorBalanceWithdrawn(msg.sender, withdrawableBalance);
+        emit AmbassadorBalanceWithdrawn(_msgSender(), withdrawableBalance);
     }
 
     function setAllPercentages(
@@ -671,7 +678,7 @@ contract TreeFactory is Initializable {
         uint16 _rescueFundPercentage,
         uint16 _researchFundPercentage
     ) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         require(
             _treejerPercentage

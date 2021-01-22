@@ -3,8 +3,8 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
@@ -14,7 +14,7 @@ import "./IO2.sol";
 import "../tree/ITree.sol";
 
 contract O2Factory is Initializable {
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
 
     event O2Minted(address owner, uint256 totalO2);
 

@@ -2,9 +2,9 @@
 
 pragma solidity ^0.6.9;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-interface ISeed is IERC20 {
+interface ISeed is IERC20Upgradeable {
 
     function isSeed() external view returns(bool);
 

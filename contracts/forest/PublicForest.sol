@@ -2,19 +2,14 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721Holder.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721HolderUpgradeable.sol";
 
 import "../tree/ITreeFactory.sol";
 
-contract PublicForest is
-    Initializable,
-    ContextUpgradeSafe,
-    ERC721HolderUpgradeSafe
-{
-    using SafeMath for uint256;
+contract PublicForest is Initializable, ERC721HolderUpgradeable {
+    using SafeMathUpgradeable for uint256;
 
     event ContributionReceived(address from, uint256 value);
     event TreesAddedToForest(uint256 count);

@@ -3,11 +3,12 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../access/IAccessRestriction.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
-contract GBFactory is Initializable, ContextUpgradeSafe {
+import "../gsn/RelayRecipient.sol";
+import "../access/IAccessRestriction.sol";
+
+contract GBFactory is Initializable, RelayRecipient {
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
@@ -44,6 +45,12 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         greenBlocks.push(GB("WORLD", "ALL", true));
     }
 
+    function setTrustedForwarder(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+
+        trustedForwarder = _address;
+    }
+
     function create(
         string calldata _title,
         string calldata _coordinates,
@@ -51,19 +58,25 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         address[] calldata _planters
     ) external {
         accessRestriction.ifNotPaused();
-        accessRestriction.ifPlanterOrAmbassador(msg.sender);
+        accessRestriction.ifPlanterOrAmbassador(_msgSender());
 
         greenBlocks.push(GB(_title, _coordinates, false));
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
-            if (accessRestriction.isPlanter(_planters[i]) && planterGB[msg.sender] == 0) {
+            if (
+                accessRestriction.isPlanter(_planters[i]) &&
+                planterGB[_msgSender()] == 0
+            ) {
                 gbToPlanters[id].push(_planters[i]);
                 planterGB[_planters[i]] = id;
             }
         }
-        
-        require(_ambassador != address(0) || gbToPlanters[id].length > 0, "No ambassador no planter!");
+
+        require(
+            _ambassador != address(0) || gbToPlanters[id].length > 0,
+            "No ambassador no planter!"
+        );
 
         gbToAmbassador[id] = _ambassador;
         ambassadorGBCount[_ambassador]++;
@@ -85,12 +98,9 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
     }
 
     function activate(uint256 _gbId) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
-        require(
-            greenBlocks[_gbId].status != true,
-            "GB already active!"
-        );
+        require(greenBlocks[_gbId].status != true, "GB already active!");
 
         greenBlocks[_gbId].status = true;
 
@@ -99,7 +109,7 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
 
     function joinGB(uint256 _gbId) external {
         accessRestriction.ifNotPaused();
-        accessRestriction.ifPlanter(msg.sender);
+        accessRestriction.ifPlanter(_msgSender());
 
         require(
             gbToPlanters[_gbId].length < maxGBPlantersCount,
@@ -107,12 +117,12 @@ contract GBFactory is Initializable, ContextUpgradeSafe {
         );
         require(_gbId > 0, "You can't join for zero gb");
 
-        require(planterGB[msg.sender] == 0, "Joined before!");
+        require(planterGB[_msgSender()] == 0, "Joined before!");
 
-        gbToPlanters[_gbId].push(msg.sender);
-        planterGB[msg.sender] = _gbId;
+        gbToPlanters[_gbId].push(_msgSender());
+        planterGB[_msgSender()] = _gbId;
 
-        emit PlanterJoinedGB(_gbId, msg.sender);
+        emit PlanterJoinedGB(_gbId, _msgSender());
     }
 
     function totalGB() external view returns (uint256) {

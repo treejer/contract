@@ -5,6 +5,11 @@ const truffleAssert = require('truffle-assertions');
 const Common = require("./common");
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/gsn")
+const { GsnTestEnvironment } = require('@opengsn/gsn/dist/GsnTestEnvironment')
+const ethers = require('ethers')
 
 contract('GBFactory', (accounts) => {
     let arInstance;
@@ -47,6 +52,71 @@ contract('GBFactory', (accounts) => {
         truffleAssert.eventEmitted(tx, 'NewGBAdded', (ev) => {
             return ev.id.toString() === '1' && ev.title === title;
         });
+
+    });
+
+
+    it("should add gb with gsn", async () => {
+
+        let env = await GsnTestEnvironment.startGsn('localhost')
+        const { forwarderAddress, relayHubAddress, paymasterAddress } = env.contractsDeployment
+
+        await gbInstance.setTrustedForwarder(forwarderAddress, { from: deployerAccount });
+
+        let paymaster = await WhitelistPaymaster.new(arInstance.address);
+        await paymaster.setWhitelistTarget(gbInstance.address, { from: deployerAccount });
+        await paymaster.setRelayHub(relayHubAddress);
+        await paymaster.setTrustedForwarder(forwarderAddress);
+
+        web3.eth.sendTransaction({
+            from: accounts[0],
+            to: paymaster.address,
+            value: web3.utils.toWei('1')
+        });
+
+        origProvider = web3.currentProvider
+        conf = { paymasterAddress: paymaster.address }
+        gsnProvider = await Gsn.RelayProvider.newProvider({ provider: origProvider, config: conf }).init()
+
+        provider = new ethers.providers.Web3Provider(gsnProvider)
+
+        const newAmbassador = gsnProvider.newAccount()
+        const newPlanter = gsnProvider.newAccount()
+
+
+        let signer = provider.getSigner(newAmbassador.address, newAmbassador.privateKey)
+        let contract = await new ethers.Contract(gbInstance.address, gbInstance.abi, signer)
+
+        await Common.addAmbassador(arInstance, newAmbassador.address, deployerAccount);
+        await Common.addPlanter(arInstance, newPlanter.address, deployerAccount);
+
+        //for increasing gb index
+        Common.addAmbassador(arInstance, ambassadorAccount, deployerAccount);
+        let title = 'firstGB';
+        let tx = await Common.addGB(gbInstance, ambassadorAccount, plantersArray, title);
+
+
+        title2 =  'secondGB';
+        let coordinates = [
+            { lat: 25.774, lng: -80.190 },
+            { lat: 18.466, lng: -66.118 },
+            { lat: 32.321, lng: -64.757 },
+            { lat: 25.774, lng: -80.190 }
+        ];
+
+        let transaction = await contract.create(
+            title2,
+            JSON.stringify(coordinates),
+            newAmbassador.address,
+            [newPlanter.address],
+            { from: newAmbassador.address });
+
+        let result = await truffleAssert.createTransactionResult(gbInstance, transaction.hash);
+
+        truffleAssert.eventEmitted(result, 'NewGBAdded', (ev) => {
+            return ev.id.toString() === '2' && ev.title === title2;
+        });
+
 
     });
 

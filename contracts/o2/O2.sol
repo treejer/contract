@@ -3,12 +3,11 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 
-contract O2 is ERC20UpgradeSafe {
+contract O2 is ERC20Upgradeable {
     bool public isO2;
     IAccessRestriction public accessRestriction;
 
@@ -19,7 +18,7 @@ contract O2 is ERC20UpgradeSafe {
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 
-        ERC20UpgradeSafe.__ERC20_init("Oxygen", "O2");
+        ERC20Upgradeable.__ERC20_init("Oxygen", "O2");
     }
 
     function mint(address _to, uint256 _amount) external {

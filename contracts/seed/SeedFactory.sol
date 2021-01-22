@@ -3,8 +3,8 @@
 pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
@@ -12,7 +12,7 @@ import "../tree/ITree.sol";
 import "./ISeed.sol";
 
 contract SeedFactory is Initializable {
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
 
     event SeedMinted(address owner, uint256 totalSeed);
     event SeedGeneratedPerSecondChanged(uint256 seedGeneratedPerSecond);

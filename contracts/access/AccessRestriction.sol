@@ -2,10 +2,10 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/access/AccessControl.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
+contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant AMBASSADOR_ROLE = keccak256("AMBASSADOR_ROLE");
     bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
@@ -17,8 +17,8 @@ contract AccessRestriction is AccessControlUpgradeSafe, PausableUpgradeSafe {
     bool public isAccessRestriction;
 
     function initialize(address _deployer) public initializer {
-        AccessControlUpgradeSafe.__AccessControl_init();
-        PausableUpgradeSafe.__Pausable_init();
+        AccessControlUpgradeable.__AccessControl_init();
+        PausableUpgradeable.__Pausable_init();
 
         isAccessRestriction = true;
 

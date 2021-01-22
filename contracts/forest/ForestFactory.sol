@@ -2,14 +2,13 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "./PublicForest.sol";
 
-contract ForestFactory is Initializable, ContextUpgradeSafe {
+contract ForestFactory is Initializable {
     event PublicForestCreated(address forestAddress);
 
     address[] public forests;

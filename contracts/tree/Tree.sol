@@ -2,11 +2,11 @@
 
 pragma solidity >=0.4.21 <0.7.0;
 
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 
-contract Tree is ERC721UpgradeSafe {
+contract Tree is ERC721Upgradeable {
     bool public isTree;
     IAccessRestriction public accessRestriction;
 

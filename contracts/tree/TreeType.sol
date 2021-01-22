@@ -3,8 +3,7 @@
 pragma solidity >=0.4.21 <0.7.0;
 
 import "../access/IAccessRestriction.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "../../node_modules/@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 contract TreeType is Initializable {
     event NewType(

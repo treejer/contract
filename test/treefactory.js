@@ -9,6 +9,11 @@ const Units = require('ethereumjs-units');
 const Common = require('./common');
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/gsn")
+const { GsnTestEnvironment } = require('@opengsn/gsn/dist/GsnTestEnvironment')
+const ethers = require('ethers')
 
 contract('TreeFactory', (accounts) => {
     let arInstance;
@@ -76,6 +81,63 @@ contract('TreeFactory', (accounts) => {
         });
 
     });
+
+
+    it("should add tree with gsn", async () => {
+
+        let env = await GsnTestEnvironment.startGsn('localhost')
+        const { forwarderAddress, relayHubAddress, paymasterAddress } = env.contractsDeployment
+
+        await treeInstance.setTrustedForwarder(forwarderAddress, { from: deployerAccount });
+
+        let paymaster = await WhitelistPaymaster.new(arInstance.address);
+        await paymaster.setWhitelistTarget(treeInstance.address, { from: deployerAccount });
+        await paymaster.setRelayHub(relayHubAddress);
+        await paymaster.setTrustedForwarder(forwarderAddress);
+
+        web3.eth.sendTransaction({
+            from: accounts[0],
+            to: paymaster.address,
+            value: web3.utils.toWei('1')
+        });
+
+        origProvider = web3.currentProvider
+        conf = { paymasterAddress: paymaster.address }
+        gsnProvider = await Gsn.RelayProvider.newProvider({ provider: origProvider, config: conf }).init()
+
+        provider = new ethers.providers.Web3Provider(gsnProvider)
+
+        const newPlanter = gsnProvider.newAccount()
+
+        let signer = provider.getSigner(newPlanter.address, newPlanter.privateKey)
+        let contract = await new ethers.Contract(treeInstance.address, treeInstance.abi, signer)
+
+        await Common.addPlanter(arInstance, newPlanter.address, deployerAccount);
+
+        //for increasing tree index
+        await Common.addPlanter(arInstance, ownerAccount, deployerAccount);
+        let tx = await Common.addTree(treeInstance, ownerAccount);
+
+
+        const transaction = await contract.plant(0,
+            [
+                '',
+                '38.0962',
+                '46.2738'
+            ],
+            [
+                '1',
+                '1',
+            ]);
+
+        let result = await truffleAssert.createTransactionResult(treeInstance, transaction.hash);
+
+        truffleAssert.eventEmitted(result, 'TreePlanted', (ev) => {
+            return ev.id.toString() === '1'
+        });
+
+    });
+
 
 
 

@@ -193,5 +193,9 @@ CONTRACT_O2_ADDRESS=${o2Address}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 
+  console.log("Fund Paymaster");
+  web3.eth.sendTransaction({ from: accounts[0], to: paymasterAddress, value: web3.utils.toWei('1') })
+
+
 
 };

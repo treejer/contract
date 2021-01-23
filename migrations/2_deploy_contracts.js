@@ -15,10 +15,6 @@ var ForestFactory = artifacts.require("ForestFactory.sol");
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
-var TrustedForwarder = artifacts.require("TrustedForwarder.sol");
-// var LocalRelayHub = artifacts.require("LocalRelayHub.sol");
-
-
 
 const SEED_FACTORY_ROLE = web3.utils.soliditySha3('SEED_FACTORY_ROLE');
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3('TREE_FACTORY_ROLE');
@@ -28,11 +24,10 @@ module.exports = async function (deployer, network, accounts) {
 
   const isLocal = (network === 'development');
 
-
   let accessRestrictionAddress;
   let treeTypeAddress;
   let treeFactoryAddress;
-  let updateAddress;
+  let updateFactoryAddress;
   let gbFactoryAddress;
   let o2Address;
   let treeAddress;
@@ -48,18 +43,15 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Deploying on network '" + network + "' by account '" + accounts[0] + "'");
 
-  if (isLocal) {
-    console.log("Deploying TrustedForwarder...");
-    await deployer.deploy(TrustedForwarder).then(() => {
-      trustedForwarder = TrustedForwarder.address;
-    });
-    relayHub = process.env.GSN_RELAY_HUB;
-
+  if(isLocal) {
+    trustedForwarder = require('../build/gsn/Forwarder.json').address
+    relayHub = require('../build/gsn/RelayHub.json').address
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;
   }
-  console.log('Using forwarder: ', trustedForwarder)
+  
+  console.log('Using forwarder: ' + trustedForwarder + ' RelyHub: ' + relayHub);
 
   console.log("Deploying AccessRestriction...");
   await deployProxy(AccessRestriction, [accounts[0]], { deployer, initializer: 'initialize', unsafeAllowCustomTypes: true })
@@ -95,7 +87,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Deploying UpdateFactory...");
   await deployProxy(UpdateFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize', unsafeAllowCustomTypes: true })
-    .then(() => { updateAddress = UpdateFactory.address; });
+    .then(() => { updateFactoryAddress = UpdateFactory.address; });
 
   console.log("Deploying TreeFactory...");
   await deployProxy(TreeFactory, [accessRestrictionAddress], { deployer, initializer: 'initialize', unsafeAllowCustomTypes: true })
@@ -104,7 +96,7 @@ module.exports = async function (deployer, network, accounts) {
       TreeFactory.deployed().then(async (instance) => {
         await instance.setGBFactoryAddress(gbFactoryAddress);
         await instance.setTreeTokenAddress(treeAddress);
-        await instance.setUpdateFactoryAddress(updateAddress);
+        await instance.setUpdateFactoryAddress(updateFactoryAddress);
 
         await instance.setTrustedForwarder(trustedForwarder);
       });
@@ -115,6 +107,7 @@ module.exports = async function (deployer, network, accounts) {
   await UpdateFactory.deployed().then(async (instance) => {
     await instance.setTreeFactoryAddress(treeFactoryAddress);
     await instance.setGBFactoryAddress(gbFactoryAddress);
+    await instance.setTrustedForwarder(trustedForwarder);
   });
 
   console.log("Deploying SeedFactory...");
@@ -137,7 +130,7 @@ module.exports = async function (deployer, network, accounts) {
       O2Factory.deployed().then(async (instance) => {
         await instance.setTreeTypeAddress(treeTypeAddress);
         await instance.setTreeFactoryAddress(treeFactoryAddress);
-        await instance.setUpdateFactoryAddress(updateAddress);
+        await instance.setUpdateFactoryAddress(updateFactoryAddress);
 
         await instance.setO2TokenAddress(o2Address);
         await instance.setTreeTokenAddress(treeAddress);
@@ -163,27 +156,30 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Deploying WhitelistPaymaster...");
   await deployer.deploy(WhitelistPaymaster, accessRestrictionAddress).then(() => {
     paymasterAddress = WhitelistPaymaster.address;
-    WhitelistPaymaster.deployed().then(async (instance) => {
+  });
 
-      await instance.setWhitelistTarget(treeFactoryAddress);
-      await instance.setWhitelistTarget(gbFactoryAddress);
+  console.log("Running WhitelistPaymaster...");
 
-      if (!isLocal) {
-        await instance.setRelayHub(relayHub);
+  await WhitelistPaymaster.deployed().then(async (instance) => {
 
-      }
-      await instance.setTrustedForwarder(trustedForwarder);
+    await instance.setWhitelistTarget(treeFactoryAddress);
+    await instance.setWhitelistTarget(gbFactoryAddress);
+    await instance.setWhitelistTarget(updateFactoryAddress);
 
-    });
+    await instance.setRelayHub(relayHub);
+    await instance.setTrustedForwarder(trustedForwarder);
 
   });
+
+  console.log("Fund Paymaster");
+  await web3.eth.sendTransaction({ from: accounts[0], to: paymasterAddress, value: web3.utils.toWei('1') })
 
   console.log("Deployed");
 
   console.log(`CONTRACT_AR_ADDRESS=${accessRestrictionAddress}
 CONTRACT_GBFACTORY_ADDRESS=${gbFactoryAddress}
 CONTRACT_TRRETYPE_ADDRESS=${treeTypeAddress}
-CONTRACT_UPDATEFACTORY_ADDRESS=${updateAddress}
+CONTRACT_UPDATEFACTORY_ADDRESS=${updateFactoryAddress}
 CONTRACT_TREEFACTORY_ADDRESS=${treeFactoryAddress}
 CONTRACT_SEEDFACTORY_ADDRESS=${seedFactoryAddress}
 CONTRACT_O2FACTORY_ADDRESS=${o2FactoryAddress}
@@ -192,10 +188,5 @@ CONTRACT_SEED_ADDRESS=${seedAddress}
 CONTRACT_O2_ADDRESS=${o2Address}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
-
-  console.log("Fund Paymaster");
-  web3.eth.sendTransaction({ from: accounts[0], to: paymasterAddress, value: web3.utils.toWei('1') })
-
-
 
 };

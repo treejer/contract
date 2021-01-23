@@ -9,8 +9,9 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./ITreeFactory.sol";
 import "../greenblock/IGBFactory.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract UpdateFactory is Initializable {
+contract UpdateFactory is Initializable, RelayRecipient {
     using SafeMathUpgradeable for uint256;
 
     event UpdateAdded(uint256 updateId, uint256 treeId, string imageHash);
@@ -43,7 +44,7 @@ contract UpdateFactory is Initializable {
     }
 
     function setTreeFactoryAddress(address _address) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
@@ -51,20 +52,26 @@ contract UpdateFactory is Initializable {
     }
 
     function setGBFactoryAddress(address _address) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         IGBFactory candidateContract = IGBFactory(_address);
         require(candidateContract.isGBFactory());
         gbFactory = candidateContract;
     }
 
+    function setTrustedForwarder(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+
+        trustedForwarder = _address;
+    }
+
     // update difference must check
     function post(uint256 _treeId, string calldata _imageHash) external {
         accessRestriction.ifNotPaused();
-        accessRestriction.ifPlanter(msg.sender);
+        accessRestriction.ifPlanter(_msgSender());
 
         require(
-            treeFactory.treeToPlanter(_treeId) == msg.sender,
+            treeFactory.treeToPlanter(_treeId) == _msgSender(),
             "Only Planter of tree can send update"
         );
 
@@ -88,8 +95,8 @@ contract UpdateFactory is Initializable {
 
     function acceptUpdate(uint256 _updateId) external {
         require(
-            accessRestriction.isAdmin(msg.sender) ||
-                accessRestriction.isPlanterOrAmbassador(msg.sender),
+            accessRestriction.isAdmin(_msgSender()) ||
+                accessRestriction.isPlanterOrAmbassador(_msgSender()),
             "Admin or ambassador or planter can accept updates!"
         );
 
@@ -98,19 +105,19 @@ contract UpdateFactory is Initializable {
             "update status must be pending!"
         );
 
-        if (accessRestriction.isAdmin(msg.sender) != true) {
+        if (accessRestriction.isAdmin(_msgSender()) != true) {
             uint256 treeId = updates[_updateId].treeId;
 
             require(
-                treeFactory.treeToPlanter(treeId) != msg.sender,
+                treeFactory.treeToPlanter(treeId) != _msgSender(),
                 "Planter of tree can't accept update"
             );
 
             uint256 gbId = treeFactory.treeToGB(treeId);
 
-            if (accessRestriction.isAmbassador(msg.sender)) {
+            if (accessRestriction.isAmbassador(_msgSender())) {
                 require(
-                    gbFactory.gbToAmbassador(gbId) == msg.sender,
+                    gbFactory.gbToAmbassador(gbId) == _msgSender(),
                     "only ambassador of that greenBlock can accept update!"
                 );
             } else {
@@ -121,7 +128,7 @@ contract UpdateFactory is Initializable {
                     index < gbFactory.getGBPlantersCount(gbId);
                     index++
                 ) {
-                    if (gbFactory.gbToPlanters(gbId, index) == msg.sender) {
+                    if (gbFactory.gbToPlanters(gbId, index) == _msgSender()) {
                         isInGB = true;
                     }
                 }
@@ -134,7 +141,7 @@ contract UpdateFactory is Initializable {
         }
 
         updates[_updateId].status = true;
-        emit UpdateAccepted(_updateId, msg.sender);
+        emit UpdateAccepted(_updateId, _msgSender());
     }
 
     function getTreeUpdates(uint256 _treeId)

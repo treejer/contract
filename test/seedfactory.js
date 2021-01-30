@@ -11,6 +11,7 @@ const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const Common = require("./common");
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const Dai = artifacts.require("Dai");
 
 
 
@@ -34,7 +35,7 @@ contract('SeedFactory', (accounts) => {
     const adminAccount = accounts[7];
 
     beforeEach(async () => {
-    
+
         arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
         updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
@@ -42,11 +43,13 @@ contract('SeedFactory', (accounts) => {
 
         treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
         seedTokenInstance = await deployProxy(Seed, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        daiContract = await Dai.new(Units.convert('1000000', 'eth', 'wei'), { from: deployerAccount });
 
 
         await treeInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
         await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
         await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+        await treeInstance.setDaiTokenAddress(daiContract.address, { from: deployerAccount });
 
 
 
@@ -67,6 +70,8 @@ contract('SeedFactory', (accounts) => {
 
     async function fundTree() {
         await seedInstance.setSeedGeneratedPerSecond(1, { from: deployerAccount });
+        await Common.approveAndTransfer(daiContract, ownerAccount, treeInstance.address, deployerAccount, '1000')
+
         await Common.fundTree(treeInstance, ownerAccount, 2);
     }
 
@@ -119,8 +124,8 @@ contract('SeedFactory', (accounts) => {
             .then((seedGenerated) => {
                 assert.equal(
                     '2',
-                    seedGenerated,
-                    "Tree generated Seed: " + seedGenerated
+                    seedGenerated.toString(),
+                    "Tree generated Seed: " + seedGenerated.toString()
                 );
             }).catch((error) => {
                 console.log(error);

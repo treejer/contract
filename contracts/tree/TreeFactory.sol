@@ -4,8 +4,8 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../greenblock/IGBFactory.sol";
@@ -14,7 +14,6 @@ import "./ITree.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract TreeFactory is Initializable, RelayRecipient {
-    using AddressUpgradeable for address;
     using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint16;
 
@@ -104,6 +103,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     IGBFactory public gbFactory;
     IUpdateFactory public updateFactory;
     ITree public treeToken;
+    IERC20 public daiToken;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         isTreeFactory = true;
@@ -150,6 +150,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         ITree candidateContract = ITree(_address);
         require(candidateContract.isTree());
         treeToken = candidateContract;
+    }
+
+    function setDaiTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+        IERC20 candidateContract = IERC20(_address);
+        daiToken = candidateContract;
     }
 
     function plant(
@@ -296,16 +302,24 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     function fund(uint256 _count) external payable {
-        uint256 balance = msg.value.div(_count);
+        require(_count > 0, "count must bigger than 0");
 
-        require(balance >= price, "Balance is not sufficient");
+        uint256 totalPrice = price.mul(_count);
+
+        require(
+            daiToken.balanceOf(_msgSender()) >= totalPrice,
+            "Balance is not sufficient"
+        );
+
+        bool success =
+            daiToken.transferFrom(_msgSender(), address(this), totalPrice);
+        require(success, "Transfer From sender failed");
 
         for (uint8 i = 0; i < _count; i++) {
             uint256 id = 0;
-            uint256 planterBalance =
-                _calculateShare(plantersPercentage, balance);
+            uint256 planterBalance = _calculateShare(plantersPercentage, price);
             uint256 ambassadorBalance = 0;
-            bool hasAmbasador = false;
+            bool hasAmbassador = false;
 
             //check for
             if (notFundedTreesLastIndex > notFundedTreesUsedIndex) {
@@ -314,10 +328,10 @@ contract TreeFactory is Initializable, RelayRecipient {
                 address gbAmbassador = gbFactory.gbToAmbassador(gbId);
 
                 if (gbAmbassador != address(0)) {
-                    hasAmbasador = true;
+                    hasAmbassador = true;
                     ambassadorBalance = _calculateShare(
                         ambassadorsPercentage,
-                        balance
+                        price
                     );
                 }
 
@@ -338,13 +352,13 @@ contract TreeFactory is Initializable, RelayRecipient {
                 );
             }
 
-            _updateBalances(balance, hasAmbasador);
+            _updateBalances(price, hasAmbassador);
 
             emit TreeFunded(
                 id,
                 planterBalance,
                 ambassadorBalance,
-                balance,
+                price,
                 _msgSender()
             );
         }
@@ -376,20 +390,20 @@ contract TreeFactory is Initializable, RelayRecipient {
         return (_amount.mul(_percentage)).div(10000);
     }
 
-    function _updateBalances(uint256 _balance, bool _hasAmbasador) private {
+    function _updateBalances(uint256 _balance, bool _hasAmbassador) private {
         uint256 ambassadorBalance = 0;
 
         uint256 localDevelopmentFundBalance =
             _calculateShare(localDevelopmentFundPercentage, _balance);
 
-        if (_hasAmbasador == true) {
+        if (_hasAmbassador == true) {
             ambassadorBalance = _calculateShare(
                 ambassadorsPercentage,
                 _balance
             );
         } else {
             localDevelopmentFundBalance = localDevelopmentFundBalance.add(
-                ambassadorBalance
+                _calculateShare(ambassadorsPercentage, _balance)
             );
         }
 
@@ -421,7 +435,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         treejerFund = treejerFund.sub(_amount);
 
-        AddressUpgradeable.sendValue(_to, _amount);
+        bool success = daiToken.transfer(_to, _amount);
+        require(success, "withdraw failed");
 
         emit TreejerFundWithdrawn(_to, _amount, _msgSender());
     }
@@ -442,7 +457,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         localDevelopmentFund = localDevelopmentFund.sub(_amount);
 
-        AddressUpgradeable.sendValue(_to, _amount);
+        bool success = daiToken.transfer(_to, _amount);
+        require(success, "withdraw failed");
 
         emit LocalDevelopmentFundWithdrawn(_to, _amount, _msgSender());
     }
@@ -455,7 +471,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         rescueFund = rescueFund.sub(_amount);
 
-        AddressUpgradeable.sendValue(_to, _amount);
+        bool success = daiToken.transfer(_to, _amount);
+        require(success, "withdraw failed");
 
         emit RescueFundWithdrawn(_to, _amount, _msgSender());
     }
@@ -470,7 +487,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         researchFund = researchFund.sub(_amount);
 
-        AddressUpgradeable.sendValue(_to, _amount);
+        bool success = daiToken.transfer(_to, _amount);
+        require(success, "withdraw failed");
 
         emit ResearchFundWithdrawn(_to, _amount, _msgSender());
     }
@@ -559,7 +577,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         plantersFund = plantersFund.sub(withdrawableBalance);
 
-        AddressUpgradeable.sendValue(_msgSender(), withdrawableBalance);
+        bool success = daiToken.transfer(_msgSender(), withdrawableBalance);
+        require(success, "withdraw failed");
 
         emit PlanterBalanceWithdrawn(_msgSender(), withdrawableBalance);
     }
@@ -665,7 +684,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         ambassadorsFund = ambassadorsFund.sub(withdrawableBalance);
 
-        AddressUpgradeable.sendValue(_msgSender(), withdrawableBalance);
+        bool success = daiToken.transfer(_msgSender(), withdrawableBalance);
+        require(success, "withdraw failed");
 
         emit AmbassadorBalanceWithdrawn(_msgSender(), withdrawableBalance);
     }

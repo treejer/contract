@@ -15,6 +15,7 @@ contract ForestFactory is Initializable {
 
     ITreeFactory public treeFactory;
     IAccessRestriction public accessRestriction;
+    address public daiTokenAddress;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
@@ -31,11 +32,16 @@ contract ForestFactory is Initializable {
         treeFactory = candidateContract;
     }
 
+    function setDaiTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(msg.sender);
+        daiTokenAddress = _address;
+    }
+
     function createPublicForest() external {
         accessRestriction.ifAdmin(msg.sender);
 
         PublicForest newForest = new PublicForest();
-        newForest.initialize(address(treeFactory));
+        newForest.initialize(address(treeFactory), daiTokenAddress);
 
         forests.push(address(newForest));
 

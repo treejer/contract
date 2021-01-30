@@ -12,6 +12,8 @@ var O2Factory = artifacts.require("O2Factory.sol");
 var Seed = artifacts.require("Seed.sol");
 var SeedFactory = artifacts.require("SeedFactory.sol");
 var ForestFactory = artifacts.require("ForestFactory.sol");
+var Dai = artifacts.require("Dai.sol");
+
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -35,6 +37,7 @@ module.exports = async function (deployer, network, accounts) {
   let seedFactoryAddress;
   let o2FactoryAddress;
   let forestFactory;
+  let daiTokenAddress;
 
   //gsn
   let trustedForwarder;
@@ -43,14 +46,20 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Deploying on network '" + network + "' by account '" + accounts[0] + "'");
 
-  if(isLocal) {
+  if (isLocal) {
     trustedForwarder = require('../build/gsn/Forwarder.json').address
     relayHub = require('../build/gsn/RelayHub.json').address
+    console.log("Deploying Dai...");
+    await deployer.deploy(Dai, web3.utils.toWei('1000000')).then(() => {
+      daiTokenAddress = Dai.address;
+    });
+
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;
+    daiTokenAddress = process.env.DAI_ADDRESS;
   }
-  
+
   console.log('Using forwarder: ' + trustedForwarder + ' RelyHub: ' + relayHub);
 
   console.log("Deploying AccessRestriction...");
@@ -97,6 +106,8 @@ module.exports = async function (deployer, network, accounts) {
         await instance.setGBFactoryAddress(gbFactoryAddress);
         await instance.setTreeTokenAddress(treeAddress);
         await instance.setUpdateFactoryAddress(updateFactoryAddress);
+        await instance.setDaiTokenAddress(daiTokenAddress);
+
 
         await instance.setTrustedForwarder(trustedForwarder);
       });
@@ -150,6 +161,7 @@ module.exports = async function (deployer, network, accounts) {
       forestFactory = ForestFactory.address;
       ForestFactory.deployed().then(async (instance) => {
         await instance.setTreeFactoryAddress(treeFactoryAddress);
+        await instance.setDaiTokenAddress(daiTokenAddress);
       });
     });
 
@@ -172,7 +184,11 @@ module.exports = async function (deployer, network, accounts) {
   });
 
   console.log("Fund Paymaster");
-  await web3.eth.sendTransaction({ from: accounts[0], to: paymasterAddress, value: web3.utils.toWei('1') })
+  if (!isLocal) {
+    await web3.eth.sendTransaction({ from: accounts[0], to: paymasterAddress, value: web3.utils.toWei('1') })
+  }
+
+
 
   console.log("Deployed");
 

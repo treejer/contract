@@ -8,6 +8,7 @@ const truffleAssert = require('truffle-assertions');
 const Units = require('ethereumjs-units');
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const Common = require("./common");
+const Dai = artifacts.require("Dai");
 
 
 
@@ -28,14 +29,17 @@ contract('PublicForest', (accounts) => {
         forestInstance = await deployProxy(ForestFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
         // publicForestInstance = await deployProxy(PublicForest, [treeInstance.address, 'Treejer'], { initializer: 'initialize', from: deployerAccount });
         treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+        daiContract = await Dai.new(Units.convert('1000000', 'eth', 'wei'), { from: deployerAccount });
+
+
+
+        let treePrice = Units.convert('7', 'eth', 'wei');
+        await treeInstance.setPrice(treePrice, { from: deployerAccount });
+        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+        await treeInstance.setDaiTokenAddress(daiContract.address, { from: deployerAccount });
 
         await forestInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
-
-
-        let treePrice = Units.convert('0.02', 'eth', 'wei');
-        await treeInstance.setPrice(treePrice, { from: deployerAccount });
-
-        await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
+        await forestInstance.setDaiTokenAddress(daiContract.address, { from: deployerAccount });
 
         await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
 
@@ -55,11 +59,13 @@ contract('PublicForest', (accounts) => {
             return pAddress != null;
         });
 
-        let value = Units.convert('0.04', 'eth', 'wei');
 
         publicForestInstance = await PublicForest.at(pAddress);
 
-        let txa = await publicForestInstance.donate({ from: deployerAccount, value: value });
+        await Common.approveAndTransfer(daiContract, ownerAccount, pAddress, deployerAccount, '1000')
+
+        let txa = await publicForestInstance.donate(Units.convert('14', 'eth', 'wei'),
+        { from: ownerAccount, value: 0 });
 
         // truffleAssert.eventEmitted(txa, 'ContributionReceived', (ev) => {
 

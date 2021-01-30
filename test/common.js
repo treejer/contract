@@ -24,6 +24,18 @@ Common.addType = async (instance, account, name = null) => {
 }
 
 
+
+Common.approveAndTransfer = async (instance, account, spender, from, amount = '1000') => {
+
+    await instance
+        .transfer(account, Units.convert(amount, 'eth', 'wei'),
+            { from: from })
+
+    await instance.approve(spender, Units.convert('999999999999999999999', 'eth', 'wei'), { from: account })
+   
+}
+
+
 Common.addGB = async (instance, ambassadorAccount, planters, title = null) => {
 
     title = title !== null ? title : 'firstGB';
@@ -65,9 +77,8 @@ Common.addTree = async (instance, account) => {
 }
 
 Common.fundTree = async (instance, ownerAccount, count) => {
-    let price = Units.convert('0.01', 'eth', 'wei');
 
-    await instance.fund(count, { from: ownerAccount, value: (price * count) });
+    await instance.fund(count, { from: ownerAccount, value: 0 });
 }
 
 Common.addUpdate = async (instance, ownerAccount, treeId = 0) => {

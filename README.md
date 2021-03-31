@@ -9,21 +9,13 @@ In-depth documentation on Treejer protocol is available at [Treejer Docs](http:/
 Visit [Treejer Blog](http://blog.treejer.com) for more details into the treejer and how it works. 
 
 ## Local Development
-The following assumes the use of `node@>=13.7.0`.
+The following assumes the use of `node@>=13`.
 
 ### Install Dependencies
 `npm install`
 
-### Run Ganache
-`npm run ganache`
-
-### Run GSN
-`npm run gsn`
-
-### Compile and test
-`truffle compile`
-
-`truffle test`
+### Test
+`npm test`
 
 ### Deploy on local ganache
 `truffle deploy`

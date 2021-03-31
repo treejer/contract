@@ -35,9 +35,6 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
-
-  plugins: ["solidity-coverage"],
-
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
@@ -120,10 +117,12 @@ module.exports = {
       skipDryRun: true
     },
   },
-
-  // Set default mocha options here, use special reporters etc.
+  plugins: ["solidity-coverage"],
   mocha: {
-    // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    reporterOptions: {
+      excludeContracts: ['Migrations']
+    }
   },
 
   // Configure your compilers

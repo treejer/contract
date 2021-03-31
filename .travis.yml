@@ -1,11 +1,15 @@
+sudo: required
 language: node_js
 node_js:
-  - 14
-
-cache: npm
-
+  - "13.7"
+cache:
+  directories:
+  - node_modules
+install:
+  - npm install -g truffle
+  - npm install -g ganache-cli
+  - npm install
 before_script:
   - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
 script:
-  - npm test
+  - npm run test

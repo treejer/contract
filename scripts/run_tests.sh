@@ -29,7 +29,7 @@ gsn_running() {
 }
 
 start_ganache() {
-  ganache-cli ganache-cli --networkId 1337 --chainId 1337 --gasLimit 0x1fffffffffffff --gasPrice 0x1  --port "$ganache_port" --accounts 70 > /dev/null &
+  ganache-cli ganache-cli --networkId 1337 --chainId 1337 --port "$ganache_port" --accounts 20 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."
@@ -59,12 +59,13 @@ if ganache_running; then
 else
   echo "Starting our own ganache instance"
   start_ganache
-
+  sleep 5
   if gsn_running; then
     echo "Using existing gsn instance"
   else
     echo "Starting our own gsn instance"
     start_gsn
+    sleep 5
   fi
 fi
 

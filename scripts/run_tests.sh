@@ -39,6 +39,8 @@ start_ganache() {
   done
 
   echo "Ganache launched!"
+
+  sleep 5 # to make sure ganache-cli is up and running before compiling
 }
 
 start_gsn() {

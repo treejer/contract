@@ -29,10 +29,12 @@ gsn_running() {
 }
 
 start_ganache() {
-  npx ganache-cli --networkId 1337 --chainId 1337 --gasLimit 0x1fffffffffffff --gasPrice 0x1  --port "$ganache_port" --accounts 70 > /dev/null &
+  npx ganache-cli --networkId 1337 --chainId 1337 --port "$ganache_port" --accounts 10 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."
+
+  sleep 5
 
   while ! ganache_running; do
     sleep 0.1 # wait for 1/10 of the second before check again
@@ -48,6 +50,8 @@ start_gsn() {
   gsn_pid=$!
 
   echo "Waiting for gsn to launch ..."
+
+  sleep 5
 
   while ! gsn_running; do
     sleep 0.9 # wait for 1/10 of the second before check again

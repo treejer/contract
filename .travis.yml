@@ -1,29 +1,11 @@
-dist: xenial
-sudo: required
 language: node_js
 node_js:
-  - "13.7.0"
- 
+  - 10
+
 cache: npm
 
-matrix:
-  include:
-    - os: linux
-      dist: xenial
-      before_install:
-      - sudo add-apt-repository ppa:ethereum/ethereum -y
-      - sudo apt-get update
-      - sudo apt-get install build-essential -y
-      - sudo apt-get install gcc g++ libssl-dev libudev-dev pkg-config
-      - curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-      - sudo apt-get install -y nodejs
-      - rm -rf node_modules
- 
-install:
-  - bash ./scripts/travis-install.sh
-
 before_script:
-  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p  
- 
+  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
 script:
-  - bash ./scripts/run_tests.sh
+  - npm test

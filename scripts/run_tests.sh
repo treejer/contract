@@ -59,13 +59,13 @@ if ganache_running; then
 else
   echo "Starting our own ganache instance"
   start_ganache
-fi
 
-if gsn_running; then
-  echo "Using existing gsn instance"
-else
-  echo "Starting our own gsn instance"
-  start_gsn
+  if gsn_running; then
+    echo "Using existing gsn instance"
+  else
+    echo "Starting our own gsn instance"
+    start_gsn
+  fi
 fi
 
 npx truffle version

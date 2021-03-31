@@ -4,6 +4,8 @@ language: node_js
 node_js:
   - "13.7.0"
  
+cache: npm
+
 matrix:
   include:
     - os: linux
@@ -19,6 +21,9 @@ matrix:
  
 install:
   - bash ./scripts/travis-install.sh
+
+before_script:
+  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p  
  
 script:
   - bash ./scripts/run_tests.sh

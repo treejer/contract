@@ -24,9 +24,6 @@ const wrapProvider = require('arb-ethers-web3-bridge').wrapProvider;
 
 const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
 
-const arbPrivateKeys = [process.env.ARB_DEPLOYER_PRIVAE_KEY];
-const arbProviderUrl = process.env.ARB_PROVIDER_URL;
-
 
 module.exports = {
   /**
@@ -38,6 +35,8 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
+
+  plugins: ["solidity-coverage"],
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -65,7 +64,7 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
-      provider: () => new HDWalletProvider(privateKeys, `https://ropsten.infura.io/v3/${process.env.ROPSTEN_PROJECT_ID}`),
+      provider: () => new HDWalletProvider(privateKeys, `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
       network_id: 3,       // Ropsten's id
       gas: 5500000,        // Ropsten has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
@@ -74,12 +73,18 @@ module.exports = {
     },
 
     rinkeby: {
-      provider: () => new HDWalletProvider(privateKeys, `https://rinkeby.infura.io/v3/${process.env.ROPSTEN_PROJECT_ID}`),
+      provider: () => new HDWalletProvider(privateKeys, `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
       network_id: 4,
       gas: 6700000,
       gasPrice: 10000000000,
       timeoutBlocks: 300,
       skipDryRun: true
+    },
+    goerli: {
+      provider: () => new HDWalletProvider(privateKeys, `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
+      network_id: '5', // eslint-disable-line camelcase
+      gas: 4465030,
+      gasPrice: 10000000000,
     },
 
     // Useful for private networks
@@ -93,13 +98,27 @@ module.exports = {
       provider: () => {
         // return wrapped provider:
         return wrapProvider(
-          new HDWalletProvider(arbPrivateKeys, arbProviderUrl)
+          new HDWalletProvider(privateKeys, process.env.ARB_PROVIDER_URL)
         )
       },
       network_id: '*',
       gasPrice: 0,
       chainId: 215728282823301
-    }
+    },
+    matic: {
+      provider: () => new HDWalletProvider(privateKeys, `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`),
+      network_id: 137,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    mumbai: {
+      provider: () => new HDWalletProvider(privateKeys, `https://rpc-mumbai.maticvigil.com/${process.env.MATICVIGIL_PROJECT_ID}`),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
   },
 
   // Set default mocha options here, use special reporters etc.

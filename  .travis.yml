@@ -1,3 +1,15 @@
+language: node_js
+node_js:
+  - 13
+
+cache: npm
+
+before_script:
+  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+script:
+  - npm test
+
 version: 2
 
 aliases:

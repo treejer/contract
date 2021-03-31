@@ -29,7 +29,7 @@ gsn_running() {
 }
 
 start_ganache() {
-  npx ganache-cli --gasLimit 0x1fffffffffffff --gasPrice 0x1 --port "$ganache_port" --accounts 70 > /dev/null &
+  npx ganache-cli --networkId 1337 --chainId 1337 --gasLimit 0x1fffffffffffff --gasPrice 0x1  --port "$ganache_port" --accounts 70 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."

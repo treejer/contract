@@ -1,19 +1,25 @@
-sudo: required
+dist: xenial
 language: node_js
 node_js:
-  - "13.7"
-cache:
-  directories:
-  - node_modules
+  - "13.7.0"
+
+cache: npm
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      before_install:
+      - sudo apt-get update
+      - sudo apt-get install build-essential -y
+      - sudo apt-get install gcc g++ libssl-dev libudev-dev pkg-config
+      - rm -rf node_modules
+
 install:
-  - npm install -g truffle
-  - npm install -g ganache-cli
-  - npm install
+  - bash ./scripts/travis-install.sh
+
 before_script:
-  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+  - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p  
+
 script:
-  - ganache-cli --networkId 1337 --chainId 1337
-  - sleep 10
-  - node_modules/.bin/gsn start
-  - sleep 10
-  - truffle test
+  - bash ./scripts/run_tests.sh 

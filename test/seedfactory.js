@@ -77,6 +77,8 @@ contract('SeedFactory', (accounts) => {
 
     it("should mint seed", async () => {
 
+        await Common.sleep(2000);
+
         fundTree();
 
         await Common.sleep(1000);

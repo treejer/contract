@@ -9,4 +9,4 @@ before_script:
 script:
   - sleep 1
   - node_modules/.bin/gsn start
-  - truffle test
+  - npm test

@@ -42,7 +42,7 @@ start_ganache() {
 }
 
 start_gsn() {
-  node_modules/.bin/gsn start > /dev/null &
+  node_modules/.bin/gsn start
   gsn_pid=$!
 
   echo "Waiting for gsn to launch ..."

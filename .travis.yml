@@ -6,9 +6,11 @@ node_js:
 before_script:
   - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 script:
-  - echo "Starting Ganache"
-  - ganache-cli ganache-cli --networkId 1337 --chainId 1337 --port 8545 --accounts 20  > /dev/null &
-  - echo "Starting GSN" 
-  - node_modules/.bin/gsn start > /dev/null &
-  - echo "Tests are Started" 
+  - echo 'Starting Ganache'
+  - ganache-cli ganache-cli --networkId 1337 --chainId 1337 --port 8545 --accounts 20
+  - sleep 1
+  - echo 'Starting GSN' 
+  - node_modules/.bin/gsn start
+  - sleep 1
+  - echo 'Tests are Started' 
   - truffle test

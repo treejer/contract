@@ -551,8 +551,6 @@ contract('TreeFactory', (accounts) => {
 
     it("should withdraw ambassador fund", async () => {
 
-        await Common.sleep(1000);
-
 
         let treePrice = Units.convert('7', 'eth', 'wei');
         let count = 3;
@@ -565,7 +563,6 @@ contract('TreeFactory', (accounts) => {
 
         Common.addGB(gbInstance, ambassadorAccount, [planterAccount], 'GB GB');
 
-        await Common.sleep(1000);
 
         Common.addTree(treeInstance, planterAccount, 'first');
 
@@ -575,7 +572,7 @@ contract('TreeFactory', (accounts) => {
         // without update
         Common.addTree(treeInstance, planterAccount, 'three');
 
-        await Common.sleep(1000);
+        await Common.sleep(5000);
 
         Common.addUpdate(updateInstance, planterAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
@@ -583,7 +580,7 @@ contract('TreeFactory', (accounts) => {
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
 
-        await Common.sleep(1000);
+        await Common.sleep(5000);
 
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 2);
@@ -598,7 +595,7 @@ contract('TreeFactory', (accounts) => {
 
         truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
             //7398951462
-            return ev.amount.toString() === '11098427193' && ev.ambassador === ambassadorAccount;
+            return ev.amount.toString() === '110984271930' && ev.ambassador === ambassadorAccount;
         });
 
     });

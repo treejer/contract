@@ -544,7 +544,7 @@ contract('TreeFactory', (accounts) => {
         let tx = await treeInstance.withdrawPlanterBalance({ from: planterAccount });
 
         truffleAssert.eventEmitted(tx, 'PlanterBalanceWithdrawn', (ev) => {
-            return ev.amount.toString() === '295958058510' && ev.planter === planterAccount;
+            return (ev.amount.toString() === '295958058510' || ev.amount.toString() === '266362252659') && ev.planter === planterAccount;
         });
 
     });
@@ -595,7 +595,7 @@ contract('TreeFactory', (accounts) => {
 
         truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
 
-            return (ev.amount.toString() === '55492135965' || ev.amount.toString() === '48093184503') && ev.ambassador === ambassadorAccount;
+            return (ev.amount.toString() === '55492135965' || ev.amount.toString() === '48093184503' || ev.amount.toString() === '51792660234') && ev.ambassador === ambassadorAccount;
         });
 
     });

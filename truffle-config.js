@@ -117,12 +117,12 @@ module.exports = {
       skipDryRun: true
     },
   },
-  plugins: ["solidity-coverage"],
+  // plugins: ["solidity-coverage"],
   mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions: {
-      excludeContracts: ['Migrations']
-    }
+    // reporter: 'eth-gas-reporter',
+    // reporterOptions: {
+    //   excludeContracts: ['Migrations']
+    // }
   },
 
   // Configure your compilers

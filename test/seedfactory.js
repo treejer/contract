@@ -94,6 +94,8 @@ contract('SeedFactory', (accounts) => {
 
     it('should return balance of owner', async () => {
 
+        await Common.sleep(2000);
+
         fundTree();
 
         await Common.sleep(1000);

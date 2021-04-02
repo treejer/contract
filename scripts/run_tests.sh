@@ -71,5 +71,5 @@ else
 fi
 
 npx truffle version
-# npx truffle test "$@"
-npx truffle test test/seedfactory.js
+npx truffle test "$@"
+# npx truffle test test/seedfactory.js

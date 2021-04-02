@@ -551,6 +551,9 @@ contract('TreeFactory', (accounts) => {
 
     it("should withdraw ambassador fund", async () => {
 
+        await Common.sleep(1000);
+
+
         let treePrice = Units.convert('7', 'eth', 'wei');
         let count = 3;
 
@@ -561,6 +564,8 @@ contract('TreeFactory', (accounts) => {
         Common.addPlanter(arInstance, planterAccount, deployerAccount);
 
         Common.addGB(gbInstance, ambassadorAccount, [planterAccount], 'GB GB');
+
+        await Common.sleep(1000);
 
         Common.addTree(treeInstance, planterAccount, 'first');
 

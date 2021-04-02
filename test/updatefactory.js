@@ -164,7 +164,11 @@ contract('UpdateFactory', (accounts) => {
         Common.addPlanter(arInstance, otherPlanterAccount, deployerAccount);
         Common.addAmbassador(arInstance, ambAccount, deployerAccount);
 
+        await Common.sleep(1000);
+
         Common.addGB(gbInstance, ambAccount, [planterAccount, otherPlanterAccount], 'title - test')
+        
+        await Common.sleep(1000);
 
         Common.addTree(treeInstance, planterAccount);
 
@@ -173,6 +177,8 @@ contract('UpdateFactory', (accounts) => {
 
         let tx = await updateInstance.post(treeId, imageHash, { from: planterAccount });
 
+
+        await Common.sleep(1000);
 
         let tx1 = await updateInstance.acceptUpdate(0, { from: otherPlanterAccount });
 

@@ -79,12 +79,12 @@ contract('SeedFactory', (accounts) => {
 
         fundTree();
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         let tx = await seedInstance.mint({ from: ownerAccount })
 
         truffleAssert.eventEmitted(tx, 'SeedMinted', (ev) => {
-            return ev.owner.toString() === ownerAccount && ev.totalSeed.toString() === '10';
+            return ev.owner.toString() === ownerAccount && '2' >= ev.totalSeed.toString() <= '4';
         });
 
     });
@@ -95,14 +95,14 @@ contract('SeedFactory', (accounts) => {
 
         fundTree();
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         await seedInstance.mint({ from: ownerAccount })
 
         return await seedTokenInstance.balanceOf(ownerAccount, { from: ownerAccount })
             .then((balance) => {
                 assert.equal(
-                    '10',
+                    '4',
                     balance,
                     "Balance of owner: " + balance
                 );
@@ -116,7 +116,7 @@ contract('SeedFactory', (accounts) => {
 
         fundTree();
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         await Common.fundTree(treeInstance, ownerAccount, 1);
 
@@ -124,7 +124,7 @@ contract('SeedFactory', (accounts) => {
         return await seedInstance.calculateTreeGeneratedSeed(0, { from: ownerAccount })
             .then((seedGenerated) => {
                 assert.equal(
-                    '5',
+                    '2',
                     seedGenerated.toString(),
                     "Tree generated Seed: " + seedGenerated.toString()
                 );

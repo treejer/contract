@@ -526,7 +526,7 @@ contract('TreeFactory', (accounts) => {
         Common.addTree(treeInstance, planterAccount, 'first');
         Common.addTree(treeInstance, planterAccount, 'second');
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
@@ -544,7 +544,7 @@ contract('TreeFactory', (accounts) => {
         let tx = await treeInstance.withdrawPlanterBalance({ from: planterAccount });
 
         truffleAssert.eventEmitted(tx, 'PlanterBalanceWithdrawn', (ev) => {
-            return (ev.amount.toString() === '295958058510' || ev.amount.toString() === '266362252659') && ev.planter === planterAccount;
+            return '88787417552' >= ev.amount.toString() <= '88787417553'  && ev.planter === planterAccount;
         });
 
     });
@@ -572,7 +572,7 @@ contract('TreeFactory', (accounts) => {
         // without update
         Common.addTree(treeInstance, planterAccount, 'three');
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
@@ -580,7 +580,7 @@ contract('TreeFactory', (accounts) => {
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 2);
@@ -595,7 +595,7 @@ contract('TreeFactory', (accounts) => {
 
         truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
 
-            return (ev.amount.toString() === '55492135965' || ev.amount.toString() === '48093184503' || ev.amount.toString() === '51792660234') && ev.ambassador === ambassadorAccount;
+            return '14797902923'>= ev.amount.toString() <= '14797902924'  && ev.ambassador === ambassadorAccount;
         });
 
     });
@@ -641,7 +641,7 @@ contract('TreeFactory', (accounts) => {
         Common.addTree(treeInstance, planterAccount, 'first');
         Common.addTree(treeInstance, planterAccount, 'second');
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
@@ -660,7 +660,7 @@ contract('TreeFactory', (accounts) => {
 
                 assert.equal(
                     balance.toString(),
-                    '295958058510',
+                    '118383223404',
                     "PlanterWithdrawableBalance balance: " + balance.toString() + " returned"
                 );
 
@@ -671,7 +671,7 @@ contract('TreeFactory', (accounts) => {
         let tx = await treeInstance.withdrawPlanterBalance({ from: planterAccount });
 
         truffleAssert.eventEmitted(tx, 'PlanterBalanceWithdrawn', (ev) => {
-            return ev.amount.toString() === '295958058510' && ev.planter === planterAccount;
+            return ev.amount.toString() === '118383223404' && ev.planter === planterAccount;
         });
 
         await treeInstance.getPlanterWithdrawableBalance(planterAccount, { from: planterAccount })
@@ -731,7 +731,7 @@ contract('TreeFactory', (accounts) => {
         // without update
         Common.addTree(treeInstance, planterAccount, 'three');
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
@@ -739,7 +739,7 @@ contract('TreeFactory', (accounts) => {
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
 
-        await Common.sleep(5000);
+        await Common.sleep(2000);
 
         Common.addUpdate(updateInstance, planterAccount, 1);
         Common.acceptUpdate(updateInstance, deployerAccount, 2);
@@ -756,7 +756,8 @@ contract('TreeFactory', (accounts) => {
 
                 assert.equal(
                     balance.toString(),
-                    '55492135965',
+                    '14797902924',// '22196854386',
+
                     "AmbassadorWithdrawableBalance balance: " + balance.toString() + " returned"
                 );
 
@@ -768,7 +769,7 @@ contract('TreeFactory', (accounts) => {
         let tx = await treeInstance.withdrawAmbassadorBalance({ from: ambassadorAccount });
 
         truffleAssert.eventEmitted(tx, 'AmbassadorBalanceWithdrawn', (ev) => {
-            return ev.amount.toString() === '55492135965' && ev.ambassador === ambassadorAccount;
+            return ev.amount.toString() === '14797902924' && ev.ambassador === ambassadorAccount;
         });
 
         //must return zero because withdrawn

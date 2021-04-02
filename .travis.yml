@@ -7,8 +7,6 @@ before_script:
   - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
   - ganache-cli ganache-cli --networkId 1337 --chainId 1337 --port 8545 --accounts 20 > /dev/null &
   - sleep 5
-  
+
 script:
-  - sleep 5
-  - node_modules/.bin/gsn start
   - npm test

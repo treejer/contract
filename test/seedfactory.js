@@ -77,8 +77,6 @@ contract('SeedFactory', (accounts) => {
 
     it("should mint seed", async () => {
 
-        await Common.sleep(1000);
-
         fundTree();
 
         await Common.sleep(5000);
@@ -94,7 +92,6 @@ contract('SeedFactory', (accounts) => {
 
     it('should return balance of owner', async () => {
 
-        await Common.sleep(1000);
 
         fundTree();
 
@@ -119,7 +116,7 @@ contract('SeedFactory', (accounts) => {
 
         fundTree();
 
-        await Common.sleep(2000);
+        await Common.sleep(5000);
 
         await Common.fundTree(treeInstance, ownerAccount, 1);
 
@@ -127,7 +124,7 @@ contract('SeedFactory', (accounts) => {
         return await seedInstance.calculateTreeGeneratedSeed(0, { from: ownerAccount })
             .then((seedGenerated) => {
                 assert.equal(
-                    '2',
+                    '5',
                     seedGenerated.toString(),
                     "Tree generated Seed: " + seedGenerated.toString()
                 );

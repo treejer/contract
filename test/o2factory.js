@@ -80,7 +80,7 @@ contract('O2Factory', (accounts) => {
         Common.addGB(gbInstance, planter1Account, [planter1Account], 'title');
 
         Common.addTree(treeInstance, planter1Account);
-        await Common.sleep(1000);
+        await Common.sleep(5000);
         
         Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount);
@@ -95,10 +95,10 @@ contract('O2Factory', (accounts) => {
 
         Common.addTree(treeInstance, planter1Account);
 
-        await Common.sleep(1000);
+        await Common.sleep(5000);
         Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount);
-        await Common.sleep(1000);
+        await Common.sleep(5000);
         Common.addUpdate(updateInstance, planter1Account);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
     }
@@ -113,14 +113,14 @@ contract('O2Factory', (accounts) => {
         Common.addTree(treeInstance, planter1Account);
         Common.addTree(treeInstance, planter1Account);
 
-        await Common.sleep(1000);
+        await Common.sleep(5000);
         Common.addUpdate(updateInstance, planter1Account, 0);
         Common.addUpdate(updateInstance, planter1Account, 1);
 
         Common.acceptUpdate(updateInstance, deployerAccount, 0);
         Common.acceptUpdate(updateInstance, deployerAccount, 1);
 
-        await Common.sleep(1000);
+        await Common.sleep(5000);
         Common.addUpdate(updateInstance, planter1Account, 0);
         Common.addUpdate(updateInstance, planter1Account, 1);
 
@@ -137,7 +137,7 @@ contract('O2Factory', (accounts) => {
         let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '100';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '500';
         });
     });
 
@@ -169,7 +169,7 @@ contract('O2Factory', (accounts) => {
         let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '200';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '1000';
         });
     });
 
@@ -181,7 +181,7 @@ contract('O2Factory', (accounts) => {
         let tx = await o2Instance.mint({ from: planter1Account });
 
         truffleAssert.eventEmitted(tx, 'O2Minted', (ev) => {
-            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '400';
+            return ev.owner.toString() === planter1Account && ev.totalO2.toString() === '2000';
         });
     });
 
@@ -195,7 +195,7 @@ contract('O2Factory', (accounts) => {
         return await o2TokenInstance.balanceOf(planter1Account, { from: planter1Account })
             .then((balance) => {
                 assert.equal(
-                    '100',
+                    '500',
                     balance,
                     "Balance of planter: " + balance
                 );

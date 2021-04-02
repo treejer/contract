@@ -1,7 +1,7 @@
 # Treejer Protocol Smart Contracts
 ![Background Image](./assets/treejerStory.png)
 [![Twitter Follow](https://img.shields.io/twitter/follow/TreejerTalks?label=Follow)](https://twitter.com/TreejerTalks)
-[![Build Status](https://travis-ci.com/treejer/contract.svg?branch=githubActions-Coveralls)](https://travis-ci.com/treejer/contract)
+[![Build Status](https://travis-ci.com/treejer/contract.svg?branch=develop)](https://travis-ci.com/treejer/contract)
 
 Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum. 
 

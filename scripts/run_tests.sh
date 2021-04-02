@@ -11,6 +11,11 @@ cleanup() {
   if [ -n "$ganache_pid" ] && ps -p $ganache_pid > /dev/null; then
     kill -9 $ganache_pid
   fi
+
+  # Kill the ganache instance that we started (if we started one and if it's still running).
+  if [ -n "$gsn_pid" ] && ps -p $gsn_pid > /dev/null; then
+    kill -9 $gsn_pid
+  fi
 }
 
 ganache_port=8545
@@ -37,7 +42,15 @@ start_ganache() {
 }
 
 start_gsn() {
-  node_modules/.bin/gsn start
+  node_modules/.bin/gsn start > /dev/null &
+  gsn_pid=$!
+
+  echo "Waiting for gsn to launch ..."
+  sleep 5
+  while ! gsn_running; do
+    sleep 5 # wait for 1/10 of the second before check again
+  done
+
   echo "GSN started!"
 }
 
@@ -49,14 +62,13 @@ else
   sleep 5
 fi
 
- if gsn_running; then
+
+if gsn_running; then
   echo "Using existing gsn instance"
 else
   echo "Starting our own gsn instance"
   start_gsn
-  sleep 10
 fi
-
 
 npx truffle version
 npx truffle test "$@"

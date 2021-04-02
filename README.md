@@ -14,6 +14,9 @@ The following assumes the use of `node@>=13`.
 ### Install Dependencies
 `npm install`
 
+### Start Ganache
+`npm ganache`
+
 ### Test
 `npm test`
 

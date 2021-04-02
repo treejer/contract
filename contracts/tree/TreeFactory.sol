@@ -691,31 +691,26 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     function setAllPercentages(
-        uint16 _treejerPercentage,
-        uint16 _plantersPercentage,
-        uint16 _ambassadorsPercentage,
-        uint16 _localDevelopmentFundPercentage,
-        uint16 _rescueFundPercentage,
-        uint16 _researchFundPercentage
+        uint16[] calldata _percentages
     ) external {
         accessRestriction.ifAdmin(_msgSender());
 
         require(
-            _treejerPercentage
-                .add(_plantersPercentage)
-                .add(_ambassadorsPercentage)
-                .add(_localDevelopmentFundPercentage)
-                .add(_rescueFundPercentage)
-                .add(_researchFundPercentage) == 10000,
+            _percentages[0]
+                .add(_percentages[1])
+                .add(_percentages[2])
+                .add(_percentages[3])
+                .add(_percentages[4])
+                .add(_percentages[5]) == 10000,
             "Percentages sum must equal to 10000"
         );
 
-        treejerPercentage = _treejerPercentage;
-        plantersPercentage = _plantersPercentage;
-        ambassadorsPercentage = _ambassadorsPercentage;
-        localDevelopmentFundPercentage = _localDevelopmentFundPercentage;
-        rescueFundPercentage = _rescueFundPercentage;
-        researchFundPercentage = _researchFundPercentage;
+        treejerPercentage = _percentages[0];
+        plantersPercentage = _percentages[1];
+        ambassadorsPercentage = _percentages[2];
+        localDevelopmentFundPercentage = _percentages[3];
+        rescueFundPercentage = _percentages[4];
+        researchFundPercentage = _percentages[5];
     }
 
     function getPlanterWithdrawableBalance(address _account)

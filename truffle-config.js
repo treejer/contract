@@ -117,7 +117,7 @@ module.exports = {
       skipDryRun: true
     },
   },
-  // plugins: ["solidity-coverage"],
+  plugins: ["solidity-coverage"],
   mocha: {
     // reporter: 'eth-gas-reporter',
     // reporterOptions: {

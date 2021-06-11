@@ -57,7 +57,7 @@ contract TreeAuction is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
-        uint256 treeStatus = 5; //:TODO aliad010 fix here when genisis tree done
+        uint256 treeStatus = 5; //TODO: aliad010 fix here when genisis tree done
         require(treeStatus < 10, "the tree is on other provide");
 
         auctios[auctionId.current()] = Auction(
@@ -78,7 +78,7 @@ contract TreeAuction is Initializable {
             msg.value >=
                 _memAauction.bidInterval.toUint64() + _memAauction.highestBid
         );
-        bool ok = true;
+        bool ok = true; //TODO: aliad010
         require(ok);
         address payable olderBidder = _memAauction.bider;
         uint64 oldBid = _memAauction.highestBid;
@@ -88,54 +88,54 @@ contract TreeAuction is Initializable {
         _withdraw(_auctionId, oldBid, olderBidder);
     }
 
-
-function _withdraw(uint256 _auctionId, uint64 oldbid, address payable oldbidder) private {
-    uint32 size; 
-    assembly { 
-    size := extcodesize(oldbidder)
+    function _withdraw(
+        uint256 _auctionId,
+        uint64 oldbid,
+        address payable oldbidder
+    ) private {
+        uint32 size;
+        assembly {
+            size := extcodesize(oldbidder)
+        }
+        if (size > 0) {
+            pendingWithdraw[oldbidder] += oldbid;
+        } else if (!oldbidder.send(oldbid.toUint256())) {
+            pendingWithdraw[oldbidder] += oldbid;
+        }
     }
-    if(size>0)
-    {
-      pendingWithdraw[oldbidder] += oldbid;
-    }else if (!oldbidder.send(oldbid.toUint256())) {
-      pendingWithdraw[oldbidder] += oldbid;    
+
+    function manualWithdraw() external returns (bool) {
+        uint64 amount = pendingWithdraw[msg.sender];
+
+        if (amount > 0) {
+            pendingWithdraw[msg.sender] = 0;
+
+            if (!msg.sender.send(amount.toUint256())) {
+                pendingWithdraw[msg.sender] = amount;
+                return false;
+            }
+        }
+        return true;
     }
 
-} 
+    function auctionEnd(uint256 _auctionId) external {
+        accessRestriction.ifAdmin(msg.sender);
 
-function manualWithdraw() external returns (bool) {
-  uint64 amount = pendingWithdraw[msg.sender];
+        Auction storage localAuction = auctios[_auctionId];
 
-  if (amount > 0) {
-      pendingWithdraw[msg.sender] = 0;
+        require(now >= localAuction.endDate, "Auction not yet ended.");
+        require(
+            keccak256(abi.encodePacked((localAuction.status))) ==
+                keccak256(abi.encodePacked((bytes32("end")))),
+            "auctionEnd has already been called."
+        );
+        require(localAuction.bider != address(0), "No refer to auction");
 
-      if (!msg.sender.send(amount.toUint256())) {
-          pendingWithdraw[msg.sender] = amount;
-          return false;
-      }
-  }
-  return true;
-}
+        // genesisTree.updateOwner(localAuction.treeId,localAuction.bider);
+        // genesisTreeFund.update(localAuction.treeId,localAuction.highestBid);
 
-function auctionEnd(uint256 _auctionId) external {
+        localAuction.status = bytes32("end");
 
-  accessRestriction.ifAdmin(msg.sender);
-
-
-  Auction storage localAuction = auctios[_auctionId];
-
-  require(now >= localAuction.endDate, "Auction not yet ended.");
-  require(keccak256(abi.encodePacked((localAuction.status))) == keccak256(abi.encodePacked((bytes32("end")))), "auctionEnd has already been called.");
-  require(localAuction.bider != address(0),"No refer to auction");
-
-  // genesisTree.updateOwner(localAuction.treeId,localAuction.bider);
-  // genesisTreeFund.update(localAuction.treeId,localAuction.highestBid);
-
-  localAuction.status = bytes32("end");
-
-  treasuryAddress.transfer(localAuction.highestBid);
-
-}
-
-
+        treasuryAddress.transfer(localAuction.highestBid);
+    }
 }

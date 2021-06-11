@@ -7,8 +7,5 @@ import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
 contract RelayRecipient is BaseRelayRecipient {
     function versionRecipient() external view override returns (string memory) {
         return "2.0.0";
-
-
-
     }
 }

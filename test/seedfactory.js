@@ -7,134 +7,176 @@ const UpdateFactory = artifacts.require("UpdateFactory");
 const Tree = artifacts.require("Tree");
 const Seed = artifacts.require("Seed");
 const assert = require("chai").assert;
-const truffleAssert = require('truffle-assertions');
-const Units = require('ethereumjs-units');
+const truffleAssert = require("truffle-assertions");
+const Units = require("ethereumjs-units");
 const Common = require("./common");
-const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const Dai = artifacts.require("Dai");
 
+contract("SeedFactory", (accounts) => {
+  let arInstance;
+  let seedInstance;
+  let gbInstance;
+  let treeInstance;
+  let updateInstance;
+  let treeTokenInstance;
+  let seedTokenInstance;
 
+  const ownerAccount = accounts[0];
+  const deployerAccount = accounts[1];
+  const ambassadorAccount = accounts[2];
+  const planter1Account = accounts[3];
+  const planter2Account = accounts[4];
+  const planter3Account = accounts[5];
+  const planter4Account = accounts[6];
+  const planter5Account = accounts[7];
+  const adminAccount = accounts[7];
 
-contract('SeedFactory', (accounts) => {
-    // let arInstance;
-    // let seedInstance;
-    // let gbInstance;
-    // let treeInstance;
-    // let updateInstance;
-    // let treeTokenInstance;
-    // let seedTokenInstance;
+  beforeEach(async () => {
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
+      unsafeAllowCustomTypes: true,
+      from: deployerAccount,
+    });
+    updateInstance = await deployProxy(UpdateFactory, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    treeInstance = await deployProxy(TreeFactory, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    gbInstance = await deployProxy(GBFactory, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
 
-    // const ownerAccount = accounts[0];
-    // const deployerAccount = accounts[1];
-    // const ambassadorAccount = accounts[2];
-    // const planter1Account = accounts[3];
-    // const planter2Account = accounts[4];
-    // const planter3Account = accounts[5];
-    // const planter4Account = accounts[6];
-    // const planter5Account = accounts[7];
-    // const adminAccount = accounts[7];
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    seedTokenInstance = await deployProxy(Seed, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    daiContract = await Dai.new(Units.convert("1000000", "eth", "wei"), {
+      from: deployerAccount,
+    });
 
-    // beforeEach(async () => {
+    await treeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+    await treeInstance.setUpdateFactoryAddress(updateInstance.address, {
+      from: deployerAccount,
+    });
+    await treeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await treeInstance.setDaiTokenAddress(daiContract.address, {
+      from: deployerAccount,
+    });
 
-    //     arInstance = await deployProxy(AccessRestriction, [deployerAccount], { initializer: 'initialize', unsafeAllowCustomTypes: true, from: deployerAccount });
-    //     updateInstance = await deployProxy(UpdateFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-    //     treeInstance = await deployProxy(TreeFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-    //     gbInstance = await deployProxy(GBFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
+    seedInstance = await deployProxy(SeedFactory, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+    });
 
-    //     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ''], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-    //     seedTokenInstance = await deployProxy(Seed, [arInstance.address], { initializer: 'initialize', from: deployerAccount, unsafeAllowCustomTypes: true });
-    //     daiContract = await Dai.new(Units.convert('1000000', 'eth', 'wei'), { from: deployerAccount });
+    await seedInstance.setTreeFactoryAddress(treeInstance.address, {
+      from: deployerAccount,
+    });
+    await seedInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await seedInstance.setSeedTokenAddress(seedTokenInstance.address, {
+      from: deployerAccount,
+    });
 
+    await Common.addTreeFactoryRole(
+      arInstance,
+      treeInstance.address,
+      deployerAccount
+    );
+    await Common.addSeedFactoryRole(
+      arInstance,
+      seedInstance.address,
+      deployerAccount
+    );
+  });
 
-    //     await treeInstance.setGBFactoryAddress(gbInstance.address, { from: deployerAccount });
-    //     await treeInstance.setUpdateFactoryAddress(updateInstance.address, { from: deployerAccount });
-    //     await treeInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
-    //     await treeInstance.setDaiTokenAddress(daiContract.address, { from: deployerAccount });
+  afterEach(async () => {
+    // await seedInstance.kill({ from: ownerAccount });
+  });
 
+  async function fundTree() {
+    await seedInstance.setSeedGeneratedPerSecond(1, { from: deployerAccount });
+    await Common.approveAndTransfer(
+      daiContract,
+      ownerAccount,
+      treeInstance.address,
+      deployerAccount,
+      "1000"
+    );
 
+    await Common.fundTree(treeInstance, ownerAccount, 2);
+  }
 
-    //     seedInstance = await deployProxy(SeedFactory, [arInstance.address], { initializer: 'initialize', from: deployerAccount });
+  it("should mint seed", async () => {
+    fundTree();
 
-    //     await seedInstance.setTreeFactoryAddress(treeInstance.address, { from: deployerAccount });
-    //     await seedInstance.setTreeTokenAddress(treeTokenInstance.address, { from: deployerAccount });
-    //     await seedInstance.setSeedTokenAddress(seedTokenInstance.address, { from: deployerAccount });
+    await Common.sleep(2000);
 
+    let tx = await seedInstance.mint({ from: ownerAccount });
 
-    //     await Common.addTreeFactoryRole(arInstance, treeInstance.address, deployerAccount);
-    //     await Common.addSeedFactoryRole(arInstance, seedInstance.address, deployerAccount);
-    // });
+    truffleAssert.eventEmitted(tx, "SeedMinted", (ev) => {
+      return (
+        ev.owner.toString() === ownerAccount &&
+        "2" >= ev.totalSeed.toString() <= "4"
+      );
+    });
+  });
 
-    // afterEach(async () => {
-    //     // await seedInstance.kill({ from: ownerAccount });
-    // });
+  it("should return balance of owner", async () => {
+    fundTree();
 
-    // async function fundTree() {
-    //     await seedInstance.setSeedGeneratedPerSecond(1, { from: deployerAccount });
-    //     await Common.approveAndTransfer(daiContract, ownerAccount, treeInstance.address, deployerAccount, '1000')
+    await Common.sleep(2000);
 
-    //     await Common.fundTree(treeInstance, ownerAccount, 2);
-    // }
+    await seedInstance.mint({ from: ownerAccount });
 
-    // it("should mint seed", async () => {
+    return await seedTokenInstance
+      .balanceOf(ownerAccount, { from: ownerAccount })
+      .then((balance) => {
+        assert.equal("4", balance, "Balance of owner: " + balance);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  });
 
-    //     fundTree();
+  it("should return tree generated Seed", async () => {
+    fundTree();
 
-    //     await Common.sleep(2000);
+    await Common.sleep(2000);
 
-    //     let tx = await seedInstance.mint({ from: ownerAccount })
+    await Common.fundTree(treeInstance, ownerAccount, 1);
 
-    //     truffleAssert.eventEmitted(tx, 'SeedMinted', (ev) => {
-    //         return ev.owner.toString() === ownerAccount && '2' >= ev.totalSeed.toString() <= '4';
-    //     });
+    return await seedInstance
+      .calculateTreeGeneratedSeed(0, { from: ownerAccount })
+      .then((seedGenerated) => {
+        assert.equal(
+          "2",
+          seedGenerated.toString(),
+          "Tree generated Seed: " + seedGenerated.toString()
+        );
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  });
 
-    // });
-
-
-    // it('should return balance of owner', async () => {
-
-
-    //     fundTree();
-
-    //     await Common.sleep(2000);
-
-    //     await seedInstance.mint({ from: ownerAccount })
-
-    //     return await seedTokenInstance.balanceOf(ownerAccount, { from: ownerAccount })
-    //         .then((balance) => {
-    //             assert.equal(
-    //                 '4',
-    //                 balance,
-    //                 "Balance of owner: " + balance
-    //             );
-    //         }).catch((error) => {
-    //             console.log(error);
-    //         });
-    // });
-
-
-    // it('should return tree generated Seed', async () => {
-
-    //     fundTree();
-
-    //     await Common.sleep(2000);
-
-    //     await Common.fundTree(treeInstance, ownerAccount, 1);
-
-
-    //     return await seedInstance.calculateTreeGeneratedSeed(0, { from: ownerAccount })
-    //         .then((seedGenerated) => {
-    //             assert.equal(
-    //                 '2',
-    //                 seedGenerated.toString(),
-    //                 "Tree generated Seed: " + seedGenerated.toString()
-    //             );
-    //         }).catch((error) => {
-    //             console.log(error);
-    //         });
-    // });
-
-
-    //@todo shpoud check for last minign date
-
-
+  //@todo shpoud check for last minign date
 });

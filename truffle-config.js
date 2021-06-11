@@ -17,13 +17,12 @@
  * phrase from a file you've .gitignored so it doesn't accidentally become public.
  *
  */
-require('dotenv').config();
-const HDWalletProvider = require('@truffle/hdwallet-provider');
-const wrapProvider = require('arb-ethers-web3-bridge').wrapProvider;
+require("dotenv").config();
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const wrapProvider = require("arb-ethers-web3-bridge").wrapProvider;
 // const infuraKey = "fj4jll3k.....";
 
 const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
-
 
 module.exports = {
   /**
@@ -43,9 +42,9 @@ module.exports = {
     // options below to some value.
     //
     development: {
-      host: "127.0.0.1",     // Localhost (default: none)
-      port: 8545,            // Standard Ethereum port (default: none)
-      network_id: "*",       // Any network (default: none)
+      host: "127.0.0.1", // Localhost (default: none)
+      port: 8545, // Standard Ethereum port (default: none)
+      network_id: "*", // Any network (default: none)
     },
 
     // Another network with more advanced options...
@@ -61,25 +60,37 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
-      provider: () => new HDWalletProvider(privateKeys, `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
-      network_id: 3,       // Ropsten's id
-      gas: 5500000,        // Ropsten has a lower block limit than mainnet
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+        ),
+      network_id: 3, // Ropsten's id
+      gas: 5500000, // Ropsten has a lower block limit than mainnet
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
     },
 
     rinkeby: {
-      provider: () => new HDWalletProvider(privateKeys, `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+        ),
       network_id: 4,
       gas: 6700000,
       gasPrice: 10000000000,
       timeoutBlocks: 300,
-      skipDryRun: true
+      skipDryRun: true,
     },
     goerli: {
-      provider: () => new HDWalletProvider(privateKeys, `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
-      network_id: '5', // eslint-disable-line camelcase
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+        ),
+      network_id: "5", // eslint-disable-line camelcase
       gas: 4465030,
       gasPrice: 10000000000,
     },
@@ -96,25 +107,33 @@ module.exports = {
         // return wrapped provider:
         return wrapProvider(
           new HDWalletProvider(privateKeys, process.env.ARB_PROVIDER_URL)
-        )
+        );
       },
-      network_id: '*',
+      network_id: "*",
       gasPrice: 0,
-      chainId: 215728282823301
+      chainId: 215728282823301,
     },
     matic: {
-      provider: () => new HDWalletProvider(privateKeys, `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`),
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`
+        ),
       network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
     },
     mumbai: {
-      provider: () => new HDWalletProvider(privateKeys, `https://rpc-mumbai.maticvigil.com/${process.env.MATICVIGIL_PROJECT_ID}`),
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `https://rpc-mumbai.maticvigil.com/${process.env.MATICVIGIL_PROJECT_ID}`
+        ),
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
     },
   },
   plugins: ["solidity-coverage"],
@@ -128,15 +147,16 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.6.10",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.6.10", // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
-      settings: {          // See the solidity docs for advice about optimization and evmVersion
+      settings: {
+        // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 200
-        }
+          runs: 200,
+        },
         //  evmVersion: "byzantium"
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};

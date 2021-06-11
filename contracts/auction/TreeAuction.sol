@@ -2,25 +2,22 @@
 
 pragma solidity ^0.6.9;
 
-contract Auction {
+contract TreeAuction {
     address payable treasuryAddress;
-    struct auction {
+    struct Auction {
       uint256 auctionId; 
       uint256 treeId; 
       address bider; 
+      
       bytes32 status;
       uint64 startDate; 
       uint64 endDate; 
-      uint64 initialPrice;
       uint64 highestBid; 
-      uint64 bidInterval; 
+      uint32 initialPrice;
+      uint32 bidInterval; 
 }
 
-
-
-
-
-
-
+mapping(address=>Auction) auctios;
+mapping(address=>uint64) pendingWithdraw;
 
 }

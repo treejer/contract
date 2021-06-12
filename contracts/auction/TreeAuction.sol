@@ -8,16 +8,14 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 
 contract TreeAuction is Initializable {
-    
     event HighestBidIncreased(address bidder, uint256 amount);
     event AuctionEnded(address winner, uint256 amount);
-    
+
     address payable treasuryAddress;
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private auctionId;
-    
-    
+
     struct Auction {
         uint256 treeId;
         address payable bider;
@@ -29,7 +27,6 @@ contract TreeAuction is Initializable {
         uint256 bidInterval;
     }
 
-    
     mapping(uint256 => Auction) auctios;
     mapping(address => uint256) pendingWithdraw;
 
@@ -44,31 +41,29 @@ contract TreeAuction is Initializable {
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
-    
+
     function setTreasuryAddress(address payable _treasuryAddress) external {
         accessRestriction.ifAdmin(msg.sender);
-        treasuryAddress = _treasuryAddress;    
+        treasuryAddress = _treasuryAddress;
     }
-    
+
     function setGenesisTreeAddress(address _address) external {
         // accessRestriction.ifAdmin(msg.sender);
         // IGenesisTree candidateContract = IGenesisTree(_address);
         // require(candidateContract.isGenesisTree());
         // genesisTree = candidateContract;
     }
-    
+
     function setGenesisTreeFundAddress(address _address) external {
         // accessRestriction.ifAdmin(msg.sender);
         // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
         // require(candidateContract.isGenesisTreeFund());
         // genesisTreeFund = candidateContract;
     }
-    
 
     function createBid(
         uint256 _treeId,
         address payable _bider,
-        bytes32 _status,
         uint64 _startDate,
         uint64 _endDate,
         uint256 _highestBid,
@@ -84,7 +79,7 @@ contract TreeAuction is Initializable {
         auctios[auctionId.current()] = Auction(
             _treeId,
             _bider,
-            _status,
+            bytes32("started"),
             _startDate,
             _endDate,
             _highestBid,
@@ -96,9 +91,15 @@ contract TreeAuction is Initializable {
     function bid(uint256 _auctionId) external payable {
         Auction storage _memAauction = auctios[_auctionId];
         require(
-            msg.value >=
-                _memAauction.bidInterval + _memAauction.highestBid
+            msg.value >= _memAauction.initialPrice,
+            "must be more than initail value"
         );
+        require(
+            msg.value >= _memAauction.bidInterval + _memAauction.highestBid
+        );
+        require(now <= _memAauction.endDate, "Auction already ended.");
+        require(now > _memAauction.startDate, "Auction not started.");
+
         bool ok = true; //TODO: aliad010
         require(ok);
         address payable olderBidder = _memAauction.bider;
@@ -109,10 +110,7 @@ contract TreeAuction is Initializable {
         _withdraw(oldBid, olderBidder);
     }
 
-    function _withdraw(
-        uint256 oldbid,
-        address payable oldbidder
-    ) private {
+    function _withdraw(uint256 oldbid, address payable oldbidder) private {
         uint32 size;
         assembly {
             size := extcodesize(oldbidder)

@@ -105,7 +105,7 @@ contract TreeAuction is Initializable, RelayRecipient {
             bytes32("started"),
             _startDate,
             _endDate,
-            0,
+            _intialPrice,
             _bidInterval
         );
     }

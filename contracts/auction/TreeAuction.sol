@@ -10,7 +10,12 @@ import "../access/IAccessRestriction.sol";
 
 contract TreeAuction is Initializable {
     event HighestBidIncreased(address bidder, uint256 amount);
-    event AuctionEnded(address winner, uint256 amount);
+    event AuctionEnded(
+        uint256 aucionId,
+        uint256 treeId,
+        address winner,
+        uint256 amount
+    );
     event AuctionEndTimeIncreased(
         uint256 auctionId,
         uint256 newAuctionEndTime,
@@ -181,6 +186,13 @@ contract TreeAuction is Initializable {
 
         localAuction.status = bytes32("end");
 
-        require(treasuryAddress.send(localAuction.highestBid));
+        emit AuctionEnded(
+            _auctionId,
+            localAuction.treeId,
+            localAuction.bider,
+            localAuction.highestBid
+        );
+
+        treasuryAddress.transfer(localAuction.highestBid);
     }
 }

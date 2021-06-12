@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract TreeAuction is Initializable {
+contract TreeAuction is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint64;
@@ -29,7 +30,6 @@ contract TreeAuction is Initializable {
         uint64 startDate;
         uint64 endDate;
         uint256 highestBid;
-        uint256 initialPrice;
         uint256 bidInterval;
     }
 
@@ -101,7 +101,6 @@ contract TreeAuction is Initializable {
             _startDate,
             _endDate,
             0,
-            _intialPrice,
             _bidInterval
         );
     }
@@ -109,14 +108,11 @@ contract TreeAuction is Initializable {
     function bid(uint256 _auctionId) external payable {
         Auction storage _memAauction = auctios[_auctionId];
         require(
-            msg.value >= _memAauction.initialPrice,
-            "must be more than initail value"
+            msg.value >= _memAauction.highestBid.add(_memAauction.bidInterval),
+            "invalid amount"
         );
-        require(
-            msg.value >= _memAauction.highestBid.add(_memAauction.bidInterval)
-        );
-        require(now <= _memAauction.endDate, "Auction already ended.");
-        require(now >= _memAauction.startDate, "Auction not started.");
+        require(now <= _memAauction.endDate, "auction already ended.");
+        require(now >= _memAauction.startDate, "auction not started.");
 
         address payable oldBidder = _memAauction.bider;
         uint256 oldBid = _memAauction.highestBid;

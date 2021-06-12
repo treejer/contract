@@ -81,6 +81,11 @@ contract TreeAuction is Initializable, RelayRecipient {
         // genesisTreeFund = candidateContract;
     }
 
+    function setTrustedForwarder(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+        trustedForwarder = _address;
+    }
+
     function createAuction(
         uint256 _treeId,
         uint64 _startDate,

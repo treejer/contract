@@ -63,19 +63,19 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function setTreasuryAddress(address payable _treasuryAddress) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         treasuryAddress = _treasuryAddress;
     }
 
     function setGenesisTreeAddress(address _address) external {
-        // accessRestriction.ifAdmin(msg.sender);
+        // accessRestriction.ifAdmin(_msgSender());
         // IGenesisTree candidateContract = IGenesisTree(_address);
         // require(candidateContract.isGenesisTree());
         // genesisTree = candidateContract;
     }
 
     function setGenesisTreeFundAddress(address _address) external {
-        // accessRestriction.ifAdmin(msg.sender);
+        // accessRestriction.ifAdmin(_msgSender());
         // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
         // require(candidateContract.isGenesisTreeFund());
         // genesisTreeFund = candidateContract;
@@ -88,7 +88,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
         uint256 treeStatus = 5; //TODO: aliad010 fix here when genisis tree done
@@ -117,11 +117,11 @@ contract TreeAuction is Initializable, RelayRecipient {
         address payable oldBidder = _memAauction.bider;
         uint256 oldBid = _memAauction.highestBid;
         _memAauction.highestBid = msg.value;
-        _memAauction.bider = msg.sender;
+        _memAauction.bider = _msgSender();
         emit HighestBidIncreased(
             _auctionId,
             _memAauction.treeId,
-            msg.sender,
+            _msgSender(),
             msg.value
         );
         _increaseAuctionEndTime(_auctionId);
@@ -143,7 +143,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         emit AuctionEndTimeIncreased(
             _auctionId,
             auctios[_auctionId].endDate,
-            msg.sender
+            _msgSender()
         );
     }
 
@@ -164,13 +164,13 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function manualWithdraw() external returns (bool) {
-        uint256 amount = pendingWithdraw[msg.sender];
+        uint256 amount = pendingWithdraw[_msgSender()];
 
         if (amount > 0) {
-            pendingWithdraw[msg.sender] = 0;
+            pendingWithdraw[_msgSender()] = 0;
 
-            if (!msg.sender.send(amount)) {
-                pendingWithdraw[msg.sender] = amount;
+            if (!_msgSender().send(amount)) {
+                pendingWithdraw[_msgSender()] = amount;
                 return false;
             }
         }
@@ -178,7 +178,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function auctionEnd(uint256 _auctionId) external {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
 
         Auction storage auction = auctios[_auctionId];
 

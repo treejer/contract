@@ -5,37 +5,38 @@ pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 
 contract TreeAuction is Initializable {
+    
     event HighestBidIncreased(address bidder, uint256 amount);
     event AuctionEnded(address winner, uint256 amount);
+    
     address payable treasuryAddress;
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeCastUpgradeable for uint32;
-    using SafeCastUpgradeable for uint256;
-    using SafeCastUpgradeable for uint64;
 
     CountersUpgradeable.Counter private auctionId;
+    
+    
     struct Auction {
         uint256 treeId;
         address payable bider;
         bytes32 status;
         uint64 startDate;
         uint64 endDate;
-        uint64 highestBid;
-        uint32 initialPrice;
-        uint32 bidInterval;
+        uint256 highestBid;
+        uint256 initialPrice;
+        uint256 bidInterval;
     }
 
-    //
+    
     mapping(uint256 => Auction) auctios;
-    mapping(address => uint64) pendingWithdraw;
+    mapping(address => uint256) pendingWithdraw;
 
     IAccessRestriction public accessRestriction;
 
     // IGenesisTree public genesisTree;
+    // IGenesisTreeFund public genesisTreeFund;
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
@@ -43,6 +44,26 @@ contract TreeAuction is Initializable {
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
+    
+    function setTreasuryAddress(address payable _treasuryAddress) external {
+        accessRestriction.ifAdmin(msg.sender);
+        treasuryAddress = _treasuryAddress;    
+    }
+    
+    function setGenesisTreeAddress(address _address) external {
+        // accessRestriction.ifAdmin(msg.sender);
+        // IGenesisTree candidateContract = IGenesisTree(_address);
+        // require(candidateContract.isGenesisTree());
+        // genesisTree = candidateContract;
+    }
+    
+    function setGenesisTreeFundAddress(address _address) external {
+        // accessRestriction.ifAdmin(msg.sender);
+        // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
+        // require(candidateContract.isGenesisTreeFund());
+        // genesisTreeFund = candidateContract;
+    }
+    
 
     function createBid(
         uint256 _treeId,
@@ -50,9 +71,9 @@ contract TreeAuction is Initializable {
         bytes32 _status,
         uint64 _startDate,
         uint64 _endDate,
-        uint64 _highestBid,
-        uint32 _intialPrice,
-        uint32 _bidInterval
+        uint256 _highestBid,
+        uint256 _intialPrice,
+        uint256 _bidInterval
     ) external {
         accessRestriction.ifAdmin(msg.sender);
         auctionId.increment();
@@ -76,21 +97,20 @@ contract TreeAuction is Initializable {
         Auction storage _memAauction = auctios[_auctionId];
         require(
             msg.value >=
-                _memAauction.bidInterval.toUint64() + _memAauction.highestBid
+                _memAauction.bidInterval + _memAauction.highestBid
         );
         bool ok = true; //TODO: aliad010
         require(ok);
         address payable olderBidder = _memAauction.bider;
-        uint64 oldBid = _memAauction.highestBid;
-        _memAauction.highestBid = msg.value.toUint64();
+        uint256 oldBid = _memAauction.highestBid;
+        _memAauction.highestBid = msg.value;
         _memAauction.bider = msg.sender;
         emit HighestBidIncreased(msg.sender, msg.value);
-        _withdraw(_auctionId, oldBid, olderBidder);
+        _withdraw(oldBid, olderBidder);
     }
 
     function _withdraw(
-        uint256 _auctionId,
-        uint64 oldbid,
+        uint256 oldbid,
         address payable oldbidder
     ) private {
         uint32 size;
@@ -99,18 +119,18 @@ contract TreeAuction is Initializable {
         }
         if (size > 0) {
             pendingWithdraw[oldbidder] += oldbid;
-        } else if (!oldbidder.send(oldbid.toUint256())) {
+        } else if (!oldbidder.send(oldbid)) {
             pendingWithdraw[oldbidder] += oldbid;
         }
     }
 
     function manualWithdraw() external returns (bool) {
-        uint64 amount = pendingWithdraw[msg.sender];
+        uint256 amount = pendingWithdraw[msg.sender];
 
         if (amount > 0) {
             pendingWithdraw[msg.sender] = 0;
 
-            if (!msg.sender.send(amount.toUint256())) {
+            if (!msg.sender.send(amount)) {
                 pendingWithdraw[msg.sender] = amount;
                 return false;
             }
@@ -136,6 +156,6 @@ contract TreeAuction is Initializable {
 
         localAuction.status = bytes32("end");
 
-        treasuryAddress.transfer(localAuction.highestBid);
+        require(treasuryAddress.send(localAuction.highestBid));
     }
 }

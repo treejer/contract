@@ -75,7 +75,7 @@ contract TreeAuction is Initializable {
         // genesisTreeFund = candidateContract;
     }
 
-    function createBid(
+    function createAuction(
         uint256 _treeId,
         address payable _bider,
         uint64 _startDate,
@@ -148,9 +148,9 @@ contract TreeAuction is Initializable {
             size := extcodesize(oldbidder)
         }
         if (size > 0) {
-            pendingWithdraw[oldbidder] += oldbid;
+            pendingWithdraw[oldbidder] = pendingWithdraw[oldbidder].add(oldbid);
         } else if (!oldbidder.send(oldbid)) {
-            pendingWithdraw[oldbidder] += oldbid;
+            pendingWithdraw[oldbidder] = pendingWithdraw[oldbidder].add(oldbid);
         }
     }
 

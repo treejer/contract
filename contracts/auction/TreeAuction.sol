@@ -5,14 +5,23 @@ pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 
 contract TreeAuction is Initializable {
     event HighestBidIncreased(address bidder, uint256 amount);
     event AuctionEnded(address winner, uint256 amount);
+    event AuctionEndTimeIncreased(
+        uint256 auctionId,
+        uint256 newAuctionEndTime,
+        address bidder
+    );
 
     address payable treasuryAddress;
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeMathUpgradeable for uint256;
+    using SafeMathUpgradeable for uint64;
+    using SafeCastUpgradeable for uint256;
 
     CountersUpgradeable.Counter private auctionId;
 
@@ -95,19 +104,37 @@ contract TreeAuction is Initializable {
             "must be more than initail value"
         );
         require(
-            msg.value >= _memAauction.bidInterval + _memAauction.highestBid
+            msg.value >= _memAauction.bidInterval.add(_memAauction.highestBid)
         );
         require(now <= _memAauction.endDate, "Auction already ended.");
         require(now > _memAauction.startDate, "Auction not started.");
 
-        bool ok = true; //TODO: aliad010
-        require(ok);
         address payable olderBidder = _memAauction.bider;
         uint256 oldBid = _memAauction.highestBid;
         _memAauction.highestBid = msg.value;
         _memAauction.bider = msg.sender;
         emit HighestBidIncreased(msg.sender, msg.value);
+        increaseAuctionEndTime(_auctionId);
         _withdraw(oldBid, olderBidder);
+    }
+
+    function increaseAuctionEndTime(uint256 _auctionId) internal {
+        // if latest bid is less than 10 minutes to the end of auctionEndTime:
+        // we will increase auctionEndTime 600 seconds
+        if (auctios[_auctionId].endDate.sub(block.timestamp).toUint64() > 600) {
+            return;
+        }
+
+        auctios[_auctionId].endDate = auctios[_auctionId]
+            .endDate
+            .add(600)
+            .toUint64();
+
+        emit AuctionEndTimeIncreased(
+            _auctionId,
+            auctios[_auctionId].endDate,
+            msg.sender
+        );
     }
 
     function _withdraw(uint256 oldbid, address payable oldbidder) private {

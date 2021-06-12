@@ -69,7 +69,6 @@ contract TreeAuction is Initializable {
     function createBid(
         uint256 _treeId,
         address payable _bider,
-        bytes32 _status,
         uint64 _startDate,
         uint64 _endDate,
         uint256 _highestBid,
@@ -85,7 +84,7 @@ contract TreeAuction is Initializable {
         auctios[auctionId.current()] = Auction(
             _treeId,
             _bider,
-            _status,
+            bytes32("started"),
             _startDate,
             _endDate,
             _highestBid,
@@ -97,8 +96,15 @@ contract TreeAuction is Initializable {
     function bid(uint256 _auctionId) external payable {
         Auction storage _memAauction = auctios[_auctionId];
         require(
+            msg.value >= _memAauction.initialPrice,
+            "must be more than initail value"
+        );
+        require(
             msg.value >= _memAauction.bidInterval + _memAauction.highestBid
         );
+        require(now <= _memAauction.endDate, "Auction already ended.");
+        require(now > _memAauction.startDate, "Auction not started.");
+
         bool ok = true; //TODO: aliad010
         require(ok);
         address payable olderBidder = _memAauction.bider;

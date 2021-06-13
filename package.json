@@ -13,6 +13,7 @@
     "@openzeppelin/contracts-upgradeable": "^3.3.0",
     "@truffle/hdwallet-provider": "^1.2.5",
     "arb-ethers-web3-bridge": "^0.7.3",
+    "chai-as-promised": "^7.1.1",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
     "truffle": "^5.2.6"

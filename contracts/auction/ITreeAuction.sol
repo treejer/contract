@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.9;
 
-interface IAuction {
+interface ITreeAuction {
     function isTreeAuction() external view returns (bool);
 
     function setTreasuryAddress(address payable _treasuryAddress) external;

@@ -64,11 +64,12 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Using forwarder: " + trustedForwarder + " RelyHub: " + relayHub);
 
   console.log("Deploying AccessRestriction...");
+
   await deployProxy(AccessRestriction, [accounts[0]], {
     deployer,
     initializer: "initialize",
     unsafeAllowCustomTypes: true,
-  }).then(() => {
+  }).then((err) => {
     accessRestrictionAddress = AccessRestriction.address;
   });
 

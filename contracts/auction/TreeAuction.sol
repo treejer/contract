@@ -33,8 +33,9 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 bidInterval;
     }
 
-    mapping(uint256 => Auction) auctios;
-    mapping(address => uint256) pendingWithdraw;
+    mapping(uint256 => Auction) public auctions;
+    // Auction[] public auctions;
+    mapping(address => uint256) public pendingWithdraw;
 
     event HighestBidIncreased(
         uint256 auctionId,
@@ -96,10 +97,10 @@ contract TreeAuction is Initializable, RelayRecipient {
         accessRestriction.ifAdmin(_msgSender());
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
-        uint256 treeStatus = 5; //TODO: aliad010 fix here when genisis tree done
+        uint256 treeStatus = _treeId; //TODO: aliad010 fix here when genisis tree done
         require(treeStatus < 10, "the tree is on other provide");
 
-        auctios[auctionId.current()] = Auction(
+        auctions[auctionId.current()] = Auction(
             _treeId,
             address(0),
             bytes32("started"),
@@ -111,21 +112,22 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function bid(uint256 _auctionId) external payable {
-        Auction storage _memAauction = auctios[_auctionId];
+        Auction storage _storageAauction = auctions[_auctionId];
         require(
-            msg.value >= _memAauction.highestBid.add(_memAauction.bidInterval),
+            msg.value >=
+                _storageAauction.highestBid.add(_storageAauction.bidInterval),
             "invalid amount"
         );
-        require(now <= _memAauction.endDate, "auction already ended.");
-        require(now >= _memAauction.startDate, "auction not started.");
+        require(now <= _storageAauction.endDate, "auction already ended.");
+        require(now >= _storageAauction.startDate, "auction not started.");
 
-        address payable oldBidder = _memAauction.bider;
-        uint256 oldBid = _memAauction.highestBid;
-        _memAauction.highestBid = msg.value;
-        _memAauction.bider = _msgSender();
+        address payable oldBidder = _storageAauction.bider;
+        uint256 oldBid = _storageAauction.highestBid;
+        _storageAauction.highestBid = msg.value;
+        _storageAauction.bider = _msgSender();
         emit HighestBidIncreased(
             _auctionId,
-            _memAauction.treeId,
+            _storageAauction.treeId,
             _msgSender(),
             msg.value
         );
@@ -136,35 +138,37 @@ contract TreeAuction is Initializable, RelayRecipient {
     function _increaseAuctionEndTime(uint256 _auctionId) internal {
         // if latest bid is less than 10 minutes to the end of auctionEndTime:
         // we will increase auctionEndTime 600 seconds
-        if (auctios[_auctionId].endDate.sub(block.timestamp).toUint64() > 600) {
+        if (auctions[_auctionId].endDate.sub(now).toUint64() > 600) {
             return;
         }
 
-        auctios[_auctionId].endDate = auctios[_auctionId]
+        auctions[_auctionId].endDate = auctions[_auctionId]
             .endDate
-            .add(600)
+            .add(3)
             .toUint64();
 
         emit AuctionEndTimeIncreased(
             _auctionId,
-            auctios[_auctionId].endDate,
+            auctions[_auctionId].endDate,
             _msgSender()
         );
     }
 
     function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
-        uint32 size;
-        assembly {
-            size := extcodesize(_oldBidder)
-        }
-        if (size > 0) {
-            pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                _oldBid
-            );
-        } else if (!_oldBidder.send(_oldBid)) {
-            pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                _oldBid
-            );
+        if (_oldBidder != address(0)) {
+            uint32 size;
+            assembly {
+                size := extcodesize(_oldBidder)
+            }
+            if (size > 0) {
+                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
+                    _oldBid
+                );
+            } else if (!_oldBidder.send(_oldBid)) {
+                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
+                    _oldBid
+                );
+            }
         }
     }
 
@@ -185,7 +189,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     function auctionEnd(uint256 _auctionId) external {
         accessRestriction.ifAdmin(_msgSender());
 
-        Auction storage auction = auctios[_auctionId];
+        Auction storage auction = auctions[_auctionId];
 
         require(now >= auction.endDate, "Auction not yet ended.");
         require(

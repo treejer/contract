@@ -10,8 +10,9 @@ contract("TreeAuction", (accounts) => {
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
-  const userAccount = accounts[2];
+  const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
+  const userAccount3 = accounts[4];
 
   beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
@@ -31,7 +32,7 @@ contract("TreeAuction", (accounts) => {
     let tx = await treeAuctionInstance.setTrustedForwarder(accounts[4], {
       from: deployerAccount,
     });
-    await treeAuctionInstance.setTrustedForwarder(userAccount, {
+    await treeAuctionInstance.setTrustedForwarder(userAccount1, {
       from: userAccount2,
     }).should.be.rejected;
   });
@@ -39,7 +40,7 @@ contract("TreeAuction", (accounts) => {
     let tx = await treeAuctionInstance.setTreasuryAddress(accounts[4], {
       from: deployerAccount,
     });
-    await treeAuctionInstance.setTreasuryAddress(userAccount, {
+    await treeAuctionInstance.setTreasuryAddress(userAccount1, {
       from: userAccount2,
     }).should.be.rejected;
   });
@@ -68,7 +69,7 @@ contract("TreeAuction", (accounts) => {
       parseInt(new Date().getTime() / 1000) + 60 * 60, //end time
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: userAccount }
+      { from: userAccount1 }
     ).should.be.rejected;
   });
   it("check auction data insert conrrectly", async () => {
@@ -206,14 +207,14 @@ contract("TreeAuction", (accounts) => {
     );
     let tx = await treeAuctionInstance.bid(1, {
       value: web3.utils.toWei("1.15"),
-      from: userAccount,
+      from: userAccount1,
     });
 
     truffleAssert.eventEmitted(tx, "HighestBidIncreased", (ev) => {
       console.log("lv", ev);
       return (
         Number(ev.auctionId.toString()) == 1 &&
-        ev.bidder == userAccount &&
+        ev.bidder == userAccount1 &&
         Number(ev.amount.toString()) == web3.utils.toWei("1.15") &&
         Number(ev.treeId.toString()) == treeId
       );
@@ -232,13 +233,13 @@ contract("TreeAuction", (accounts) => {
     );
     let tx = await treeAuctionInstance.bid(1, {
       value: web3.utils.toWei("1.15"),
-      from: userAccount,
+      from: userAccount1,
     });
 
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId.toString()) == 1 &&
-        ev.bidder == userAccount &&
+        ev.bidder == userAccount1 &&
         Number(ev.newAuctionEndTime.toString()) == end + 3
       );
     });
@@ -261,10 +262,10 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     }).should.be.rejected; //end time dont reach
     await treeAuctionInstance.auctionEnd(1, {
-      from: userAccount,
+      from: userAccount1,
     }).should.be.rejected; //admin must call this dont reach
     await treeAuctionInstance.bid(1, {
-      from: userAccount,
+      from: userAccount1,
       value: highestBid,
     }); //admin must call this dont reach
     console.log("wainting 10 seconds...");
@@ -276,7 +277,7 @@ contract("TreeAuction", (accounts) => {
     //   return (
     //     Number(ev.auctionId.toString()) == 1 &&
     //     Number(ev.treeId.toString()) == treeId &&
-    //     ev.winner == userAccount &&
+    //     ev.winner == userAccount1 &&
     //     Number(ev.amount.toString()) == highestBid
     //   );
     // });
@@ -303,121 +304,121 @@ contract("TreeAuction", (accounts) => {
     //   parseInt(new Date().getTime() / 1000) + 3, //end time
     //   web3.utils.toWei("1"),
     //   web3.utils.toWei("0.1"),
-    //   { from: userAccount }
+    //   { from: userAccount1 }
     // );
     // console.log("waiting 5 seconds...");
     // await new Promise((resolve) => setTimeout(resolve, 5 * 1000)); //wait till auction end time reach
     // let endAuction3 = await treeAuctionInstance.auctionEnd(3, {
-    //   from: userAccount,
+    //   from: userAccount1,
     // }).should.be.rejected;
   });
 
-  //TODO: mahdi  code pain ro uncomment kon
+  it("should automatic withdraw successfully", async () => {
+    let now = parseInt(new Date().getTime() / 1000);
+    let auctionId = 1;
 
-  // it("should automatic withdraw successfully", async () => {
-  //   let now = parseInt(new Date().getTime() / 1000);
-  //   let auctionId = 1;
+    //create auction
+    await treeAuctionInstance.createAuction(
+      0,
+      now,
+      now + 120,
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether"),
+      { from: deployerAccount }
+    );
 
-  //   //create auction
-  //   await treeAuctionInstance.createAuction(
-  //     0,
-  //     now,
-  //     now + 120,
-  //     web3.utils.toWei("1", "Ether"),
-  //     web3.utils.toWei(".5", "Ether")
-  //   );
+    //userAccount1 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount1,
+      value: web3.utils.toWei("1.5", "Ether"),
+    });
 
-  //   //refer1Account take part in auction
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer1Account,
-  //     value: web3.utils.toWei("1.5", "Ether"),
-  //   });
+    //check contract balance
+    assert.equal(
+      await web3.eth.getBalance(treeAuctionInstance.address),
+      web3.utils.toWei("1.5", "Ether"),
+      "1.Contract balance is not true"
+    );
 
-  //   //check contract balance
-  //   assert.equal(
-  //     await web3.eth.getBalance(treeAuctionInstance.address),
-  //     web3.utils.toWei("1.5", "Ether"),
-  //     "1.Contract balance is not true"
-  //   );
+    let refer1AccountBalanceAfterBid = await web3.eth.getBalance(userAccount1);
 
-  //   let refer1AccountBalanceAfterBid = await web3.eth.getBalance(refer1Account);
+    //userAccount2 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount2,
+      value: web3.utils.toWei("1.5", "Ether"),
+    }).should.be.rejected;
 
-  //   //refer2Account take part in auction
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer2Account,
-  //     value: web3.utils.toWei("1.5", "Ether"),
-  //   }).should.be.rejected;
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount2,
+      value: web3.utils.toWei("2", "Ether"),
+    });
 
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer2Account,
-  //     value: web3.utils.toWei("2", "Ether"),
-  //   });
+    //check contract balance
+    assert.equal(
+      await web3.eth.getBalance(treeAuctionInstance.address),
+      web3.utils.toWei("2", "Ether"),
+      "2.Contract balance is not true"
+    );
 
-  //   //check contract balance
-  //   assert.equal(
-  //     await web3.eth.getBalance(treeAuctionInstance.address),
-  //     web3.utils.toWei("2", "Ether"),
-  //     "2.Contract balance is not true"
-  //   );
+    //check userAccount1 refunded
+    assert.equal(
+      await web3.eth.getBalance(userAccount1),
+      Number(refer1AccountBalanceAfterBid) +
+        Number(web3.utils.toWei("1.5", "Ether")),
+      "Redirect automatic withdraw is not true"
+    );
+  });
 
-  //   //check refer1Account refunded
-  //   assert.equal(
-  //     await web3.eth.getBalance(refer1Account),
-  //     Number(refer1AccountBalanceAfterBid) +
-  //       Number(web3.utils.toWei("1.5", "Ether")),
-  //     "Redirect automatic withdraw is not true"
-  //   );
-  // });
+  it("Should contract balance is true", async () => {
+    let now = parseInt(new Date().getTime() / 1000);
+    let auctionId = 1;
 
-  // it("Should contract balance is true", async () => {
-  //   let now = parseInt(new Date().getTime() / 1000);
-  //   let auctionId = 1;
+    await treeAuctionInstance.createAuction(
+      0,
+      now,
+      now + 120,
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether"),
+      { from: deployerAccount }
+    );
 
-  //   await treeAuctionInstance.createAuction(
-  //     0,
-  //     now,
-  //     now + 120,
-  //     web3.utils.toWei("1", "Ether"),
-  //     web3.utils.toWei(".5", "Ether")
-  //   );
+    //userAccount1 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount1,
+      value: web3.utils.toWei("1.5", "Ether"),
+    });
 
-  //   //refer1Account take part in auction
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer1Account,
-  //     value: web3.utils.toWei("1.5", "Ether"),
-  //   });
+    //check contract balance
+    assert.equal(
+      await web3.eth.getBalance(treeAuctionInstance.address),
+      web3.utils.toWei("1.5", "Ether"),
+      "1.Contract balance is not true"
+    );
 
-  //   //check contract balance
-  //   assert.equal(
-  //     await web3.eth.getBalance(treeAuctionInstance.address),
-  //     web3.utils.toWei("1.5", "Ether"),
-  //     "1.Contract balance is not true"
-  //   );
+    //userAccount2 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount2,
+      value: web3.utils.toWei("2", "Ether"),
+    });
 
-  //   //refer2Account take part in auction
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer2Account,
-  //     value: web3.utils.toWei("2", "Ether"),
-  //   });
+    //check contract balance
+    assert.equal(
+      await web3.eth.getBalance(treeAuctionInstance.address),
+      web3.utils.toWei("2", "Ether"),
+      "2.Contract balance is not true"
+    );
 
-  //   //check contract balance
-  //   assert.equal(
-  //     await web3.eth.getBalance(treeAuctionInstance.address),
-  //     web3.utils.toWei("2", "Ether"),
-  //     "2.Contract balance is not true"
-  //   );
+    //userAccount3 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount3,
+      value: web3.utils.toWei("4", "Ether"),
+    });
 
-  //   //refer3Account take part in auction
-  //   await treeAuctionInstance.bid(auctionId, {
-  //     from: refer3Account,
-  //     value: web3.utils.toWei("4", "Ether"),
-  //   });
-
-  //   //check contract balance
-  //   assert.equal(
-  //     await web3.eth.getBalance(treeAuctionInstance.address),
-  //     web3.utils.toWei("4", "Ether"),
-  //     "3.Contract balance is not true"
-  //   );
-  // });
+    //check contract balance
+    assert.equal(
+      await web3.eth.getBalance(treeAuctionInstance.address),
+      web3.utils.toWei("4", "Ether"),
+      "3.Contract balance is not true"
+    );
+  });
 });

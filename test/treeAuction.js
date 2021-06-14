@@ -283,33 +283,19 @@ contract("TreeAuction", (accounts) => {
 
     // await treeAuctionInstance.auctionEnd(1, { from: deployerAccount }).should.be
     //   .rejected;
-    // let tx2 = await treeAuctionInstance.createAuction(
-    //   2,
-    //   parseInt(new Date().getTime() / 1000), //start time
-    //   parseInt(new Date().getTime() / 1000) + 60 * 60, //end time
-    //   web3.utils.toWei("1"),
-    //   web3.utils.toWei("0.1"),
-    //   { from: deployerAccount }
-    // );
-
-    // let endAuction2 = await treeAuctionInstance.auctionEnd(2, {
-    //   from: deployerAccount,
-    // }).should.be.rejected;
-
-    // //only admin can call this method so it should be rejected
-    // let tx3 = await treeAuctionInstance.createAuction(
-    //   3,
-    //   parseInt(new Date().getTime() / 1000), //start time
-    //   parseInt(new Date().getTime() / 1000) + 3, //end time
-    //   web3.utils.toWei("1"),
-    //   web3.utils.toWei("0.1"),
-    //   { from: userAccount1 }
-    // );
-    // console.log("waiting 5 seconds...");
-    // await new Promise((resolve) => setTimeout(resolve, 5 * 1000)); //wait till auction end time reach
-    // let endAuction3 = await treeAuctionInstance.auctionEnd(3, {
-    //   from: userAccount1,
-    // }).should.be.rejected;
+    let tx2 = await treeAuctionInstance.createAuction(
+      2,
+      parseInt(new Date().getTime() / 1000), //start time
+      parseInt(new Date().getTime() / 1000) + 3, //end time
+      web3.utils.toWei("1"),
+      web3.utils.toWei("0.1"),
+      { from: deployerAccount }
+    );
+    console.log("waiting 5 seconds...");
+    await new Promise((resolve) => setTimeout(resolve, 5 * 1000)); //wait till auction end time reach
+    let endAuction2 = await treeAuctionInstance.auctionEnd(2, {
+      from: deployerAccount,
+    }).should.be.rejected; //no bidder
   });
 
   it("should automatic withdraw successfully", async () => {

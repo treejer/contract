@@ -323,6 +323,7 @@ contract("TreeAuction", (accounts) => {
       now,
       now + 120,
       web3.utils.toWei("1", "Ether"),
+<<<<<<< HEAD
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
     );
@@ -330,6 +331,14 @@ contract("TreeAuction", (accounts) => {
     //userAccount1 take part in auction
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount1,
+=======
+      web3.utils.toWei(".5", "Ether")
+    );
+
+    //refer1Account take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: refer1Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("1.5", "Ether"),
     });
 
@@ -340,16 +349,28 @@ contract("TreeAuction", (accounts) => {
       "1.Contract balance is not true"
     );
 
+<<<<<<< HEAD
     let refer1AccountBalanceAfterBid = await web3.eth.getBalance(userAccount1);
 
     //userAccount2 take part in auction
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount2,
+=======
+    let refer1AccountBalanceAfterBid = await web3.eth.getBalance(refer1Account);
+
+    //refer2Account take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: refer2Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("1.5", "Ether"),
     }).should.be.rejected;
 
     await treeAuctionInstance.bid(auctionId, {
+<<<<<<< HEAD
       from: userAccount2,
+=======
+      from: refer2Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("2", "Ether"),
     });
 
@@ -360,9 +381,15 @@ contract("TreeAuction", (accounts) => {
       "2.Contract balance is not true"
     );
 
+<<<<<<< HEAD
     //check userAccount1 refunded
     assert.equal(
       await web3.eth.getBalance(userAccount1),
+=======
+    //check refer1Account refunded
+    assert.equal(
+      await web3.eth.getBalance(refer1Account),
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       Number(refer1AccountBalanceAfterBid) +
         Number(web3.utils.toWei("1.5", "Ether")),
       "Redirect automatic withdraw is not true"
@@ -376,6 +403,7 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.createAuction(
       0,
       now,
+<<<<<<< HEAD
       now + 120,
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
@@ -385,6 +413,16 @@ contract("TreeAuction", (accounts) => {
     //userAccount1 take part in auction
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount1,
+=======
+      now + 10,
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether")
+    );
+
+    //refer1Account take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: refer1Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("1.5", "Ether"),
     });
 
@@ -395,9 +433,15 @@ contract("TreeAuction", (accounts) => {
       "1.Contract balance is not true"
     );
 
+<<<<<<< HEAD
     //userAccount2 take part in auction
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount2,
+=======
+    //refer2Account take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: refer2Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("2", "Ether"),
     });
 
@@ -408,9 +452,15 @@ contract("TreeAuction", (accounts) => {
       "2.Contract balance is not true"
     );
 
+<<<<<<< HEAD
     //userAccount3 take part in auction
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount3,
+=======
+    //refer3Account take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: refer3Account,
+>>>>>>> d142c0970aaf5fc75d6a1232931696caf9eb1603
       value: web3.utils.toWei("4", "Ether"),
     });
 

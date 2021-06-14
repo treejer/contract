@@ -154,6 +154,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         );
     }
 
+    //TODO: mahdi I think we should not check
     function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
         if (_oldBidder != address(0)) {
             uint32 size;

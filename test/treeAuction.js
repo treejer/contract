@@ -1,5 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeAuction = artifacts.require("TreeAuction");
+const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
@@ -87,7 +88,6 @@ contract("TreeAuction", (accounts) => {
       { from: deployerAccount }
     );
     let result = await treeAuctionInstance.auctions.call(1);
-    console.log("result", Number(result.highestBid.toString()));
 
     assert.equal(result.treeId.toNumber(), 1);
     assert.equal(Number(result.highestBid.toString()), initialValue);
@@ -211,7 +211,6 @@ contract("TreeAuction", (accounts) => {
     });
 
     truffleAssert.eventEmitted(tx, "HighestBidIncreased", (ev) => {
-      console.log("lv", ev);
       return (
         Number(ev.auctionId.toString()) == 1 &&
         ev.bidder == userAccount1 &&
@@ -268,7 +267,7 @@ contract("TreeAuction", (accounts) => {
       from: userAccount1,
       value: highestBid,
     }); //admin must call this dont reach
-    console.log("wainting 10 seconds...");
+    console.log("waiting 10 seconds...");
     await new Promise((resolve) => setTimeout(resolve, 10 * 1000)); //wait till auction end time reach
     let successEnd = await treeAuctionInstance.auctionEnd(1, {
       from: deployerAccount,

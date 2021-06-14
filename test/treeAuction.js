@@ -266,20 +266,20 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.bid(1, {
       from: userAccount1,
       value: highestBid,
-    }); //admin must call this dont reach
+    });
     console.log("waiting 10 seconds...");
     await new Promise((resolve) => setTimeout(resolve, 10 * 1000)); //wait till auction end time reach
     let successEnd = await treeAuctionInstance.auctionEnd(1, {
       from: deployerAccount,
     });
-    // truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
-    //   return (
-    //     Number(ev.auctionId.toString()) == 1 &&
-    //     Number(ev.treeId.toString()) == treeId &&
-    //     ev.winner == userAccount1 &&
-    //     Number(ev.amount.toString()) == highestBid
-    //   );
-    // });
+    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+      return (
+        Number(ev.auctionId.toString()) == 1 &&
+        Number(ev.treeId.toString()) == treeId &&
+        ev.winner == userAccount1 &&
+        Number(ev.amount.toString()) == highestBid
+      );
+    });
 
     // await treeAuctionInstance.auctionEnd(1, { from: deployerAccount }).should.be
     //   .rejected;

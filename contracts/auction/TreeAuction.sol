@@ -44,7 +44,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 amount
     );
     event AuctionEnded(
-        uint256 aucionId,
+        uint256 auctionId,
         uint256 treeId,
         address winner,
         uint256 amount

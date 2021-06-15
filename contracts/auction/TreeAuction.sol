@@ -144,7 +144,7 @@ contract TreeAuction is Initializable, RelayRecipient {
 
         auctions[_auctionId].endDate = auctions[_auctionId]
             .endDate
-            .add(3)
+            .add(600)
             .toUint64();
 
         emit AuctionEndTimeIncreased(

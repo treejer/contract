@@ -2,6 +2,24 @@
 pragma solidity ^0.6.9;
 
 interface ITreeAuction {
+    event HighestBidIncreased(
+        uint256 auctionId,
+        uint256 treeId,
+        address bidder,
+        uint256 amount
+    );
+    event AuctionEnded(
+        uint256 auctionId,
+        uint256 treeId,
+        address winner,
+        uint256 amount
+    );
+    event AuctionEndTimeIncreased(
+        uint256 auctionId,
+        uint256 newAuctionEndTime,
+        address bidder
+    );
+
     function isTreeAuction() external view returns (bool);
 
     function setTreasuryAddress(address payable _treasuryAddress) external;

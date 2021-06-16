@@ -7,9 +7,8 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-import "../gsn/RelayRecipient.sol";
 
-contract TreeAuction is Initializable, RelayRecipient {
+contract TreeAuction is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint64;
@@ -64,27 +63,22 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function setTreasuryAddress(address payable _treasuryAddress) external {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         treasuryAddress = _treasuryAddress;
     }
 
     function setGenesisTreeAddress(address _address) external {
-        // accessRestriction.ifAdmin(_msgSender());
+        // accessRestriction.ifAdmin(msg.sender);
         // IGenesisTree candidateContract = IGenesisTree(_address);
         // require(candidateContract.isGenesisTree());
         // genesisTree = candidateContract;
     }
 
     function setGenesisTreeFundAddress(address _address) external {
-        // accessRestriction.ifAdmin(_msgSender());
+        // accessRestriction.ifAdmin(msg.sender);
         // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
         // require(candidateContract.isGenesisTreeFund());
         // genesisTreeFund = candidateContract;
-    }
-
-    function setTrustedForwarder(address _address) external {
-        accessRestriction.ifAdmin(_msgSender());
-        trustedForwarder = _address;
     }
 
     function createAuction(
@@ -94,7 +88,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
         uint256 treeStatus = _treeId; //TODO: aliad010 fix here when genisis tree done
@@ -124,11 +118,11 @@ contract TreeAuction is Initializable, RelayRecipient {
         address payable oldBidder = _storageAauction.bider;
         uint256 oldBid = _storageAauction.highestBid;
         _storageAauction.highestBid = msg.value;
-        _storageAauction.bider = _msgSender();
+        _storageAauction.bider = msg.sender;
         emit HighestBidIncreased(
             _auctionId,
             _storageAauction.treeId,
-            _msgSender(),
+            msg.sender,
             msg.value
         );
         _increaseAuctionEndTime(_auctionId);
@@ -150,7 +144,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         emit AuctionEndTimeIncreased(
             _auctionId,
             auctions[_auctionId].endDate,
-            _msgSender()
+            msg.sender
         );
     }
 
@@ -174,13 +168,13 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function manualWithdraw() external returns (bool) {
-        uint256 amount = pendingWithdraw[_msgSender()];
+        uint256 amount = pendingWithdraw[msg.sender];
 
         if (amount > 0) {
-            pendingWithdraw[_msgSender()] = 0;
+            pendingWithdraw[msg.sender] = 0;
 
-            if (!_msgSender().send(amount)) {
-                pendingWithdraw[_msgSender()] = amount;
+            if (!msg.sender.send(amount)) {
+                pendingWithdraw[msg.sender] = amount;
                 return false;
             }
         }
@@ -188,7 +182,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     function auctionEnd(uint256 _auctionId) external {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
 
         Auction storage auction = auctions[_auctionId];
 

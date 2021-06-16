@@ -163,9 +163,7 @@ module.exports = async function (deployer, network, accounts) {
   }).then(() => {
     treeAuctionAddress = TreeAuction.address;
 
-    TreeAuction.deployed().then(async (instance) => {
-      await instance.setTrustedForwarder(trustedForwarder);
-    });
+    TreeAuction.deployed().then(async (instance) => {});
   });
 
   console.log("Deploying SeedFactory...");
@@ -231,7 +229,6 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setWhitelistTarget(treeFactoryAddress);
     await instance.setWhitelistTarget(gbFactoryAddress);
     await instance.setWhitelistTarget(updateFactoryAddress);
-    await instance.setWhitelistTarget(treeAuctionAddress);
 
     await instance.setRelayHub(relayHub);
     await instance.setTrustedForwarder(trustedForwarder);

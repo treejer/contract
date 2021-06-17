@@ -98,9 +98,9 @@ contract TreeAuction is Initializable {
         uint256 _bidInterval
     ) external ifNotPaused onlyAdmin {
         auctionId.increment();
-        // uint256 treeStatus = genesisTree.setStatus(treeId);
-        uint256 treeStatus = _treeId; //TODO: aliad010 fix here when genisis tree done
-        require(treeStatus < 10, "the tree is on other provide");
+        // uint256 provideStatus = genesisTree.setStatus(treeId);
+        uint256 provideStatus = 0; //TODO: aliad010 fix here when genisis tree done
+        require(provideStatus == 0, "the tree is on other provide");
 
         auctions[auctionId.current()] = Auction(
             _treeId,
@@ -154,7 +154,6 @@ contract TreeAuction is Initializable {
         }
     }
 
-    //TODO: mahdi I think we should not check
     function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
         if (_oldBidder != address(0)) {
             uint32 size;

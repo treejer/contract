@@ -37,13 +37,14 @@ contract GenesisTree is Initializable {
         accessRestriction = candidateContract;
     }
 
-    function addTree() external {
+    modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
+        _;
     }
 
-    function asignTreeToPlanter() external {
-        accessRestriction.ifAdmin(msg.sender);
-    }
+    function addTree() external onlyAdmin {}
+
+    function asignTreeToPlanter() external onlyAdmin {}
 
     function plantTree() external {}
 

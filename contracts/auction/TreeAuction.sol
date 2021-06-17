@@ -108,22 +108,22 @@ contract TreeAuction is Initializable {
 
     function bid(uint256 _auctionId) external payable {
         accessRestriction.ifNotPaused();
-        Auction storage _storageAauction = auctions[_auctionId];
+        Auction storage _storageAuction = auctions[_auctionId];
+        require(now <= _storageAuction.endDate, "auction already ended");
+        require(now >= _storageAuction.startDate, "auction not started");
         require(
             msg.value >=
-                _storageAauction.highestBid.add(_storageAauction.bidInterval),
+                _storageAuction.highestBid.add(_storageAuction.bidInterval),
             "invalid amount"
         );
-        require(now <= _storageAauction.endDate, "auction already ended");
-        require(now >= _storageAauction.startDate, "auction not started");
 
-        address payable oldBidder = _storageAauction.bider;
-        uint256 oldBid = _storageAauction.highestBid;
-        _storageAauction.highestBid = msg.value;
-        _storageAauction.bider = msg.sender;
+        address payable oldBidder = _storageAuction.bider;
+        uint256 oldBid = _storageAuction.highestBid;
+        _storageAuction.highestBid = msg.value;
+        _storageAuction.bider = msg.sender;
         emit HighestBidIncreased(
             _auctionId,
-            _storageAauction.treeId,
+            _storageAuction.treeId,
             msg.sender,
             msg.value
         );

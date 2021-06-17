@@ -62,7 +62,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             0,
             0,
             0,
-            0,
+            1,
             0,
             0,
             0,
@@ -71,11 +71,49 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
     }
 
-    function asignTreeToPlanter() external onlyAdmin {}
+    function asignTreeToPlanter(
+        uint256 _treeId,
+        uint256 _gb,
+        address payable _planterId,
+        uint8 _gbType
+    ) external onlyAdmin {
+        require(bytes(genTrees[_treeId].treeSpecs).length > 0, "invalid tree");
+        require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
+        //TODO:aliad010 check green block if
 
-    function plantTree() external {}
+        genTrees[_treeId].gbId = _gb;
+        genTrees[_treeId].planterId = _planterId;
+        genTrees[_treeId].gbType = _gbType;
+    }
 
-    function verifyPlant() external {}
+    function plantTree(
+        uint256 _treeId,
+        string memory _treeSpecs,
+        uint64 _birthDate,
+        uint16 _countryCode
+    ) external {
+        //TODO:aliad010 check who to call
+        require(genTrees[_treeId].treeStatus == 1, "invalid status");
+        // updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs,block.timestamp,1);TODO:  aliad010 cast
+        genTrees[_treeId].countryCode = _countryCode;
+        genTrees[_treeId].birthDate = _birthDate;
+    }
+
+    function verifyPlant(uint256 _treeId, uint256 isVerified) external {
+        require(
+            genTrees[_treeId].treeStatus == 1 &&
+                updateGenTrees[_treeId].updateStatus == 1,
+            "invalid status"
+        );
+        if (isVerified == 1) {
+            genTrees[_treeId].treeSpecs = updateGenTrees[_treeId].updateSpecs;
+            genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
+            genTrees[_treeId].treeStatus = 2;
+            updateGenTrees[_treeId].updateStatus = 3;
+        } else {
+            updateGenTrees[_treeId].updateStatus = 2;
+        }
+    }
 
     function updateTree(uint256 treeId, string memory treeSpecs) external {
         require(

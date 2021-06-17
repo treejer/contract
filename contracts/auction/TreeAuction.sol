@@ -137,7 +137,7 @@ contract TreeAuction is Initializable {
         _withdraw(oldBid, oldBidder);
     }
 
-    function _increaseAuctionEndTime(uint256 _auctionId) internal {
+    function _increaseAuctionEndTime(uint256 _auctionId) private {
         // if latest bid is less than 10 minutes to the end of auctionEndTime:
         // we will increase auctionEndTime 600 seconds
         if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {

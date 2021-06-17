@@ -7,10 +7,17 @@ const TimeEnumes = {
   years: "years",
 };
 
-const ErrorMsg = {
+const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
 };
+
+const TreeAuctionErrorMsg = {
+  manualWithdrawUserBalance: "User balance is not enough",
+  bidMsgValueCheck: "invalid amount",
+};
+
 module.exports = {
   TimeEnumes,
-  ErrorMsg,
+  CommonErrorMsg,
+  TreeAuctionErrorMsg,
 };

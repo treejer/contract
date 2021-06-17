@@ -5,7 +5,7 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const { TimeEnumes, ErrorMsg } = require("./enumes");
+const { TimeEnumes, CommonErrorMsg, TreeAuctionErrorMsg } = require("./enumes");
 
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
@@ -354,7 +354,7 @@ contract("TreeAuction", (accounts) => {
     }).should.be.rejected; //no bidder
   });
 
-  it("should automatic withdraw successfully", async () => {
+  it("Should automatic withdraw successfully", async () => {
     let auctionId = 1;
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
@@ -385,10 +385,12 @@ contract("TreeAuction", (accounts) => {
     let refer1AccountBalanceAfterBid = await web3.eth.getBalance(userAccount1);
 
     //userAccount2 take part in auction
-    await treeAuctionInstance.bid(auctionId, {
-      from: userAccount2,
-      value: web3.utils.toWei("1.5", "Ether"),
-    }).should.be.rejected;
+    await treeAuctionInstance
+      .bid(auctionId, {
+        from: userAccount2,
+        value: web3.utils.toWei("1.5", "Ether"),
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.bidMsgValueCheck);
 
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount2,
@@ -411,7 +413,7 @@ contract("TreeAuction", (accounts) => {
     );
   });
 
-  it("Should contract balance is true", async () => {
+  it("Check contract balance when user call bid function and Balance should be ok", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
 
@@ -467,9 +469,11 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("Should manualWithdraw is reject because user balance is not enough", async () => {
-    await treeAuctionInstance.manualWithdraw({
-      from: userAccount1,
-    }).should.be.rejected;
+    await treeAuctionInstance
+      .manualWithdraw({
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.manualWithdrawUserBalance);
   });
 
   it("Should manualWithdraw function is reject because pause is true", async () => {
@@ -480,7 +484,7 @@ contract("TreeAuction", (accounts) => {
       .manualWithdraw({
         from: userAccount1,
       })
-      .should.be.rejectedWith(ErrorMsg.PAUSE);
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
 
   it("Should bid function is reject because function is pause", async () => {
@@ -514,7 +518,7 @@ contract("TreeAuction", (accounts) => {
         from: userAccount2,
         value: web3.utils.toWei("2", "Ether"),
       })
-      .should.be.rejectedWith(ErrorMsg.PAUSE);
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
 
   it("Should auctionEnd function is reject because function is pause", async () => {
@@ -545,6 +549,6 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance
       .auctionEnd(auctionId, { from: deployerAccount })
-      .should.be.rejectedWith(ErrorMsg.PAUSE);
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
 });

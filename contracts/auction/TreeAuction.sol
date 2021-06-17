@@ -134,20 +134,18 @@ contract TreeAuction is Initializable {
     function _increaseAuctionEndTime(uint256 _auctionId) internal {
         // if latest bid is less than 10 minutes to the end of auctionEndTime:
         // we will increase auctionEndTime 600 seconds
-        if (auctions[_auctionId].endDate.sub(now).toUint64() > 600) {
-            return;
+        if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
+            auctions[_auctionId].endDate = auctions[_auctionId]
+                .endDate
+                .add(600)
+                .toUint64();
+
+            emit AuctionEndTimeIncreased(
+                _auctionId,
+                auctions[_auctionId].endDate,
+                msg.sender
+            );
         }
-
-        auctions[_auctionId].endDate = auctions[_auctionId]
-            .endDate
-            .add(600)
-            .toUint64();
-
-        emit AuctionEndTimeIncreased(
-            _auctionId,
-            auctions[_auctionId].endDate,
-            msg.sender
-        );
     }
 
     //TODO: mahdi I think we should not check
@@ -195,7 +193,7 @@ contract TreeAuction is Initializable {
         require(
             keccak256(abi.encodePacked((auction.status))) !=
                 keccak256(abi.encodePacked((bytes32("end")))),
-            "auctionEnd has already been called"
+            "endAuction has already been called"
         );
         require(auction.bider != address(0), "No refer to auction");
 

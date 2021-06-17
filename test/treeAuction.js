@@ -573,4 +573,35 @@ contract("TreeAuction", (accounts) => {
       )
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
+
+  it("Should endAuction function is reject because function is pause", async () => {
+    let auctionId = 1;
+
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await treeAuctionInstance.createAuction(
+      auctionId,
+      Number(startTime.toString()),
+      Number(endTime.toString()),
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether"),
+      { from: deployerAccount }
+    );
+
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount2,
+      value: web3.utils.toWei("2", "Ether"),
+    });
+
+    await Common.travelTime(TimeEnumes.hours, 2);
+
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance
+      .endAuction(auctionId, { from: deployerAccount })
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+  });
 });

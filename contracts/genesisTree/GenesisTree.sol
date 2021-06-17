@@ -1,4 +1,4 @@
-// // SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -42,7 +42,30 @@ contract GenesisTree is Initializable {
         _;
     }
 
-    function addTree() external onlyAdmin {}
+    function addTree(uint256 _treeId, string memory _treeDescription)
+        external
+        onlyAdmin
+    {
+        require(
+            bytes(genTrees[_treeId].treeSpecs).length == 0,
+            "duplicate tree"
+        );
+        require(bytes(_treeDescription).length > 0, "invalid ipfs hash");
+        genTrees[_treeId] = GenTree(
+            address(0),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            _treeDescription
+        );
+    }
 
     function asignTreeToPlanter() external onlyAdmin {}
 

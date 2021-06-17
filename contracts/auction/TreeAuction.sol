@@ -33,7 +33,6 @@ contract TreeAuction is Initializable {
     }
 
     mapping(uint256 => Auction) public auctions;
-    // Auction[] public auctions;
     mapping(address => uint256) public pendingWithdraw;
 
     event HighestBidIncreased(
@@ -54,6 +53,16 @@ contract TreeAuction is Initializable {
         address bidder
     );
 
+    modifier onlyAdmin() {
+        accessRestriction.ifAdmin(msg.sender);
+        _;
+    }
+
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
             IAccessRestriction(_accessRestrictionAddress);
@@ -62,20 +71,20 @@ contract TreeAuction is Initializable {
         accessRestriction = candidateContract;
     }
 
-    function setTreasuryAddress(address payable _treasuryAddress) external {
-        accessRestriction.ifAdmin(msg.sender);
+    function setTreasuryAddress(address payable _treasuryAddress)
+        external
+        onlyAdmin
+    {
         treasuryAddress = _treasuryAddress;
     }
 
-    function setGenesisTreeAddress(address _address) external {
-        // accessRestriction.ifAdmin(msg.sender);
+    function setGenesisTreeAddress(address _address) external onlyAdmin {
         // IGenesisTree candidateContract = IGenesisTree(_address);
         // require(candidateContract.isGenesisTree());
         // genesisTree = candidateContract;
     }
 
-    function setGenesisTreeFundAddress(address _address) external {
-        // accessRestriction.ifAdmin(msg.sender);
+    function setGenesisTreeFundAddress(address _address) external onlyAdmin {
         // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
         // require(candidateContract.isGenesisTreeFund());
         // genesisTreeFund = candidateContract;
@@ -87,9 +96,7 @@ contract TreeAuction is Initializable {
         uint64 _endDate,
         uint256 _intialPrice,
         uint256 _bidInterval
-    ) external {
-        accessRestriction.ifNotPaused();
-        accessRestriction.ifAdmin(msg.sender);
+    ) external ifNotPaused onlyAdmin {
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
         uint256 treeStatus = _treeId; //TODO: aliad010 fix here when genisis tree done
@@ -106,8 +113,7 @@ contract TreeAuction is Initializable {
         );
     }
 
-    function bid(uint256 _auctionId) external payable {
-        accessRestriction.ifNotPaused();
+    function bid(uint256 _auctionId) external payable ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
         require(now <= _storageAuction.endDate, "auction already ended");
         require(now >= _storageAuction.startDate, "auction not started");
@@ -167,8 +173,7 @@ contract TreeAuction is Initializable {
         }
     }
 
-    function manualWithdraw() external returns (bool) {
-        accessRestriction.ifNotPaused();
+    function manualWithdraw() external ifNotPaused returns (bool) {
         uint256 amount = pendingWithdraw[msg.sender];
 
         require(amount > 0, "User balance is not enough");
@@ -183,19 +188,18 @@ contract TreeAuction is Initializable {
         return true;
     }
 
-    function endAuction(uint256 _auctionId) external {
-        accessRestriction.ifNotPaused();
-
+    function endAuction(uint256 _auctionId) external ifNotPaused {
         Auction storage auction = auctions[_auctionId];
 
         require(now >= auction.endDate, "Auction not yet ended");
+
         require(
             keccak256(abi.encodePacked((auction.status))) !=
-                keccak256(abi.encodePacked((bytes32("end")))),
+                keccak256(abi.encodePacked((bytes32("ended")))),
             "endAuction has already been called"
         );
 
-        auction.status = bytes32("end");
+        auction.status = bytes32("ended");
 
         if (auction.bider != address(0)) {
             // genesisTree.updateOwner(auction.treeId,auction.bider);
@@ -210,7 +214,7 @@ contract TreeAuction is Initializable {
 
             treasuryAddress.transfer(auction.highestBid);
         } else {
-            //TODO: genesisTree.updateProvideStatus(auction.treeId);
+            //genesisTree.updateProvideStatus(auction.treeId);
         }
     }
 }

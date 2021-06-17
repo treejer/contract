@@ -52,6 +52,7 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
   });
+
   it("auction call by admin access or fail otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -78,6 +79,7 @@ contract("TreeAuction", (accounts) => {
       )
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
+
   it("check auction data insert conrrectly", async () => {
     let treeId = 1;
     let initialValue = web3.utils.toWei("1");
@@ -105,9 +107,11 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.endDate.toString()), Number(endTime.toString()));
     assert.equal(web3.utils.hexToUtf8(result.status), "started");
   });
+
   it("auction have valid tree status", async () => {
     //TODO: aliad010 when tree status done check here
   });
+
   it("bid auction and check highest bid set change correctly", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -132,6 +136,7 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("0.15")
     );
   });
+
   it("must offer suitable value for auction or rejected otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -181,6 +186,7 @@ contract("TreeAuction", (accounts) => {
       600
     );
   });
+
   it("bid before start of aution must be failed", async () => {
     startTime = await Common.timeInitial(TimeEnumes.minutes, 5);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -199,6 +205,7 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
   });
+
   it("bid after end of auction must be failed", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -277,6 +284,7 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
+
   it("should end auction and fail in invalid situations", async () => {
     await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
       from: deployerAccount,
@@ -315,6 +323,7 @@ contract("TreeAuction", (accounts) => {
         TreeAuctionErrorMsg.END_AUCTION_WHEN_IT_HAS_BEEN_ENDED
       ); //auction already ended and must be rejected
   });
+
   it("check emit end auction event", async () => {
     await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
       from: deployerAccount,
@@ -349,6 +358,7 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
+
   it("end auction when there is no bidder", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 60);

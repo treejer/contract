@@ -1,14 +1,18 @@
 // // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.9;
+import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract GenesisTree is Initializable {
+contract GenesisTree is Initializable, RelayRecipient {
     bool public isGenesisTree;
     IAccessRestriction public accessRestriction;
+    using SafeCastUpgradeable for uint256;
+
     struct GenTree {
-        address planterId;
+        address payable planterId;
         uint256 gbId;
         uint256 treeType;
         uint8 gbType;
@@ -38,7 +42,7 @@ contract GenesisTree is Initializable {
     }
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
@@ -50,7 +54,24 @@ contract GenesisTree is Initializable {
 
     function verifyPlant() external {}
 
-    function updateTree() external {}
+    function updateTree(uint256 treeId, string memory treeSpecs) external {
+        require(
+            genTrees[treeId].planterId == _msgSender(),
+            "Only Planter of tree can send update"
+        );
+
+        require(genTrees[treeId].treeStatus > 1, "tree not planted");
+
+        require(
+            now >= genTrees[treeId].lastUpdate + 2592000,
+            "update time not reach"
+        );
+
+        //TODO: Set updateTree
+        updateGenTrees[treeId].updateSpecs = treeSpecs;
+        updateGenTrees[treeId].updateDate = now.toUint64();
+        updateGenTrees[treeId].updateStatus = 1;
+    }
 
     function verifyUpdate() external {}
 

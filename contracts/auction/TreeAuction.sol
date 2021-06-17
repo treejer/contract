@@ -185,7 +185,6 @@ contract TreeAuction is Initializable {
 
     function endAuction(uint256 _auctionId) external {
         accessRestriction.ifNotPaused();
-        accessRestriction.ifAdmin(msg.sender);
 
         Auction storage auction = auctions[_auctionId];
 
@@ -195,20 +194,23 @@ contract TreeAuction is Initializable {
                 keccak256(abi.encodePacked((bytes32("end")))),
             "endAuction has already been called"
         );
-        require(auction.bider != address(0), "No refer to auction");
-
-        // genesisTree.updateOwner(auction.treeId,auction.bider);
-        // genesisTreeFund.update(auction.treeId,auction.highestBid);
 
         auction.status = bytes32("end");
 
-        emit AuctionEnded(
-            _auctionId,
-            auction.treeId,
-            auction.bider,
-            auction.highestBid
-        );
+        if (auction.bider != address(0)) {
+            // genesisTree.updateOwner(auction.treeId,auction.bider);
+            // genesisTreeFund.update(auction.treeId,auction.highestBid);
 
-        treasuryAddress.transfer(auction.highestBid);
+            emit AuctionEnded(
+                _auctionId,
+                auction.treeId,
+                auction.bider,
+                auction.highestBid
+            );
+
+            treasuryAddress.transfer(auction.highestBid);
+        } else {
+            //TODO: genesisTree.updateProvideStatus(auction.treeId);
+        }
     }
 }

@@ -88,6 +88,7 @@ contract TreeAuction is Initializable {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external {
+        accessRestriction.ifNotPaused();
         accessRestriction.ifAdmin(msg.sender);
         auctionId.increment();
         // uint256 treeStatus = genesisTree.setStatus(treeId);
@@ -184,7 +185,7 @@ contract TreeAuction is Initializable {
         return true;
     }
 
-    function auctionEnd(uint256 _auctionId) external {
+    function endAuction(uint256 _auctionId) external {
         accessRestriction.ifNotPaused();
         accessRestriction.ifAdmin(msg.sender);
 

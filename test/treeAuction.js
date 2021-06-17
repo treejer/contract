@@ -5,7 +5,8 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const enumes = require("./enumes");
+const { TimeEnumes, ErrorMsg } = require("./enumes");
+
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
   let arInstance;
@@ -40,6 +41,7 @@ contract("TreeAuction", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+
   it("should set tresury address with admin access or fail otherwise", async () => {
     let tx = await treeAuctionInstance.setTreasuryAddress(accounts[4], {
       from: deployerAccount,
@@ -49,8 +51,8 @@ contract("TreeAuction", (accounts) => {
     }).should.be.rejected; //must be faild because ots not deployer account
   });
   it("auction call by admin access or fail otherwise", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
     let tx = await treeAuctionInstance.createAuction(
       1,
       Number(startTime.toString()),
@@ -59,8 +61,8 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
     );
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     //only admin can call this method so it should be rejected
     await treeAuctionInstance.createAuction(
@@ -76,8 +78,8 @@ contract("TreeAuction", (accounts) => {
     let treeId = 1;
     let initialValue = web3.utils.toWei("1");
     let bidInterval = web3.utils.toWei("0.1");
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     let tx = await treeAuctionInstance.createAuction(
       treeId,
@@ -103,8 +105,8 @@ contract("TreeAuction", (accounts) => {
     //TODO: aliad010 when tree status done check here
   });
   it("bid auction and check highest bid set change correctly", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     await treeAuctionInstance.createAuction(
       1,
@@ -127,8 +129,8 @@ contract("TreeAuction", (accounts) => {
     );
   });
   it("must offer suitable value for auction or rejected otherwise", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
     await treeAuctionInstance.createAuction(
       1,
       Number(startTime.toString()),
@@ -148,8 +150,8 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("should increase end time of auction beacuse bid less than 600 secconds left to end of auction", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 300);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 300);
 
     let tx = await treeAuctionInstance.createAuction(
       1,
@@ -174,8 +176,8 @@ contract("TreeAuction", (accounts) => {
     );
   });
   it("bid before start of aution must be failed", async () => {
-    startTime = await Common.timeInitial(enumes.minutes, 5);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.minutes, 5);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
     await treeAuctionInstance.createAuction(
       1,
       Number(startTime.toString()),
@@ -190,8 +192,8 @@ contract("TreeAuction", (accounts) => {
     }).should.be.rejected;
   });
   it("bid after end of auction must be failed", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     let tx = await treeAuctionInstance.createAuction(
       1,
@@ -204,7 +206,7 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.bid(1, {
       value: web3.utils.toWei("1.15"),
     });
-    await Common.travelTime(enumes.hours, 2);
+    await Common.travelTime(TimeEnumes.hours, 2);
     await treeAuctionInstance.bid(1, {
       value: web3.utils.toWei("1.5"),
     }).should.be.rejected;
@@ -212,8 +214,8 @@ contract("TreeAuction", (accounts) => {
 
   it("should emit highest bid event", async () => {
     let treeId = 1;
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.hours, 1);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
     await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime.toString()),
@@ -236,11 +238,12 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
+
   it("should emit end time event", async () => {
     let treeId = 1;
 
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 60);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
 
     await treeAuctionInstance.createAuction(
       treeId,
@@ -269,8 +272,8 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 60);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
     const highestBid = web3.utils.toWei("1.15");
     await treeAuctionInstance.createAuction(
       treeId,
@@ -290,7 +293,7 @@ contract("TreeAuction", (accounts) => {
       from: userAccount1,
       value: highestBid,
     });
-    await Common.travelTime(enumes.seconds, 670);
+    await Common.travelTime(TimeEnumes.seconds, 670);
     let successEnd = await treeAuctionInstance.auctionEnd(1, {
       from: deployerAccount,
     }); //succesfully end the auction
@@ -304,8 +307,8 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 60);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
     const highestBid = web3.utils.toWei("1.15");
     await treeAuctionInstance.createAuction(
       treeId,
@@ -319,7 +322,7 @@ contract("TreeAuction", (accounts) => {
       from: userAccount1,
       value: highestBid,
     });
-    await Common.travelTime(enumes.seconds, 670);
+    await Common.travelTime(TimeEnumes.seconds, 670);
     let successEnd = await treeAuctionInstance.auctionEnd(1, {
       from: deployerAccount,
     }); //succesfully end the auction
@@ -334,8 +337,8 @@ contract("TreeAuction", (accounts) => {
     });
   });
   it("end auction when there is no bidder must fail", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 60);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
     let tx = await treeAuctionInstance.createAuction(
       2,
       Number(startTime.toString()),
@@ -345,7 +348,7 @@ contract("TreeAuction", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.travelTime(enumes.seconds, 70);
+    await Common.travelTime(TimeEnumes.seconds, 70);
     let endAuction2 = await treeAuctionInstance.auctionEnd(2, {
       from: deployerAccount,
     }).should.be.rejected; //no bidder
@@ -353,8 +356,8 @@ contract("TreeAuction", (accounts) => {
 
   it("should automatic withdraw successfully", async () => {
     let auctionId = 1;
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 120);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
 
     //create auction
     await treeAuctionInstance.createAuction(
@@ -409,8 +412,8 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("Should contract balance is true", async () => {
-    startTime = await Common.timeInitial(enumes.seconds, 0);
-    endTime = await Common.timeInitial(enumes.seconds, 120);
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
 
     let auctionId = 1;
 
@@ -461,5 +464,87 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("4", "Ether"),
       "3.Contract balance is not true"
     );
+  });
+
+  it("Should manualWithdraw is reject because user balance is not enough", async () => {
+    await treeAuctionInstance.manualWithdraw({
+      from: userAccount1,
+    }).should.be.rejected;
+  });
+
+  it("Should manualWithdraw function is reject because pause is true", async () => {
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+    await treeAuctionInstance
+      .manualWithdraw({
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(ErrorMsg.PAUSE);
+  });
+
+  it("Should bid function is reject because function is pause", async () => {
+    let auctionId = 1;
+
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await treeAuctionInstance.createAuction(
+      0,
+      Number(startTime.toString()),
+      Number(endTime.toString()),
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether"),
+      { from: deployerAccount }
+    );
+
+    //userAccount1 take part in auction
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount1,
+      value: web3.utils.toWei("1.5", "Ether"),
+    });
+
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+
+    //userAccount2 take part in auction but function is pause
+    await treeAuctionInstance
+      .bid(auctionId, {
+        from: userAccount2,
+        value: web3.utils.toWei("2", "Ether"),
+      })
+      .should.be.rejectedWith(ErrorMsg.PAUSE);
+  });
+
+  it("Should auctionEnd function is reject because function is pause", async () => {
+    let auctionId = 1;
+
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await treeAuctionInstance.createAuction(
+      0,
+      Number(startTime.toString()),
+      Number(endTime.toString()),
+      web3.utils.toWei("1", "Ether"),
+      web3.utils.toWei(".5", "Ether"),
+      { from: deployerAccount }
+    );
+
+    await treeAuctionInstance.bid(auctionId, {
+      from: userAccount2,
+      value: web3.utils.toWei("2", "Ether"),
+    });
+
+    await Common.travelTime(TimeEnumes.hours, 2);
+
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance
+      .auctionEnd(auctionId, { from: deployerAccount })
+      .should.be.rejectedWith(ErrorMsg.PAUSE);
   });
 });

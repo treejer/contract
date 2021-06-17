@@ -106,6 +106,7 @@ contract TreeAuction is Initializable {
     }
 
     function bid(uint256 _auctionId) external payable {
+        accessRestriction.ifNotPaused();
         Auction storage _storageAauction = auctions[_auctionId];
         require(
             msg.value >=
@@ -168,29 +169,32 @@ contract TreeAuction is Initializable {
     }
 
     function manualWithdraw() external returns (bool) {
+        accessRestriction.ifNotPaused();
         uint256 amount = pendingWithdraw[msg.sender];
 
-        if (amount > 0) {
-            pendingWithdraw[msg.sender] = 0;
+        require(amount > 0, "User balance is not enough");
 
-            if (!msg.sender.send(amount)) {
-                pendingWithdraw[msg.sender] = amount;
-                return false;
-            }
+        pendingWithdraw[msg.sender] = 0;
+
+        if (!msg.sender.send(amount)) {
+            pendingWithdraw[msg.sender] = amount;
+            return false;
         }
+
         return true;
     }
 
     function auctionEnd(uint256 _auctionId) external {
+        accessRestriction.ifNotPaused();
         accessRestriction.ifAdmin(msg.sender);
 
         Auction storage auction = auctions[_auctionId];
 
-        require(now >= auction.endDate, "Auction not yet ended.");
+        require(now >= auction.endDate, "Auction not yet ended");
         require(
             keccak256(abi.encodePacked((auction.status))) !=
                 keccak256(abi.encodePacked((bytes32("end")))),
-            "auctionEnd has already been called."
+            "auctionEnd has already been called"
         );
         require(auction.bider != address(0), "No refer to auction");
 

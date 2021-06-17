@@ -71,6 +71,5 @@ else
 fi
 
 npx truffle version
-npx truffle migrate
-# npx truffle test "$@"
+npx truffle test "$@"
 # npx truffle test test/seedfactory.js

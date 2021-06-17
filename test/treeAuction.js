@@ -46,9 +46,11 @@ contract("TreeAuction", (accounts) => {
     let tx = await treeAuctionInstance.setTreasuryAddress(accounts[4], {
       from: deployerAccount,
     });
-    await treeAuctionInstance.setTreasuryAddress(userAccount1, {
-      from: userAccount2,
-    }).should.be.rejected; //must be faild because ots not deployer account
+    await treeAuctionInstance
+      .setTreasuryAddress(userAccount1, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
   });
   it("auction call by admin access or fail otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -65,14 +67,16 @@ contract("TreeAuction", (accounts) => {
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     //only admin can call this method so it should be rejected
-    await treeAuctionInstance.createAuction(
-      2,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: userAccount1 }
-    ).should.be.rejected;
+    await treeAuctionInstance
+      .createAuction(
+        2,
+        Number(startTime.toString()),
+        Number(endTime.toString()),
+        web3.utils.toWei("1"),
+        web3.utils.toWei("0.1"),
+        { from: userAccount1 }
+      )
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
   it("check auction data insert conrrectly", async () => {
     let treeId = 1;
@@ -144,9 +148,11 @@ contract("TreeAuction", (accounts) => {
       value: web3.utils.toWei("1.15"),
     });
 
-    await treeAuctionInstance.bid(1, {
-      value: web3.utils.toWei("0.01"),
-    }).should.be.rejected;
+    await treeAuctionInstance
+      .bid(1, {
+        value: web3.utils.toWei("0.01"),
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
   });
 
   it("should increase end time of auction beacuse bid less than 600 secconds left to end of auction", async () => {
@@ -187,9 +193,11 @@ contract("TreeAuction", (accounts) => {
       { from: deployerAccount }
     );
 
-    await treeAuctionInstance.bid(1, {
-      value: web3.utils.toWei("1.15"),
-    }).should.be.rejected;
+    await treeAuctionInstance
+      .bid(1, {
+        value: web3.utils.toWei("1.15"),
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
   });
   it("bid after end of auction must be failed", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -207,9 +215,11 @@ contract("TreeAuction", (accounts) => {
       value: web3.utils.toWei("1.15"),
     });
     await Common.travelTime(TimeEnumes.hours, 2);
-    await treeAuctionInstance.bid(1, {
-      value: web3.utils.toWei("1.5"),
-    }).should.be.rejected;
+    await treeAuctionInstance
+      .bid(1, {
+        value: web3.utils.toWei("1.5"),
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.BID_AFTER_END);
   });
 
   it("should emit highest bid event", async () => {
@@ -283,12 +293,16 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
     );
-    await treeAuctionInstance.endAuction(1, {
-      from: deployerAccount,
-    }).should.be.rejected; //end time dont reach and must be rejected
-    await treeAuctionInstance.endAuction(1, {
-      from: userAccount1,
-    }).should.be.rejected; //admin must call this method and must be rejected
+    await treeAuctionInstance
+      .endAuction(1, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
+    await treeAuctionInstance
+      .endAuction(1, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //admin must call this method and must be rejected
     await treeAuctionInstance.bid(1, {
       from: userAccount1,
       value: highestBid,
@@ -298,9 +312,13 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     }); //succesfully end the auction
 
-    let failEnd = await treeAuctionInstance.endAuction(1, {
-      from: deployerAccount,
-    }).should.be.rejected; //auction already ended and must be rejected
+    let failEnd = await treeAuctionInstance
+      .endAuction(1, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(
+        TreeAuctionErrorMsg.END_AUCTION_WHEN_IT_HAS_BEEN_ENDED
+      ); //auction already ended and must be rejected
   });
   it("check emit end auction event", async () => {
     await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
@@ -349,9 +367,11 @@ contract("TreeAuction", (accounts) => {
     );
 
     await Common.travelTime(TimeEnumes.seconds, 70);
-    let endAuction2 = await treeAuctionInstance.endAuction(2, {
-      from: deployerAccount,
-    }).should.be.rejected; //no bidder
+    let endAuction2 = await treeAuctionInstance
+      .endAuction(2, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_WITH_NO_REFER); //no bidder
   });
 
   it("Should automatic withdraw successfully", async () => {
@@ -390,7 +410,7 @@ contract("TreeAuction", (accounts) => {
         from: userAccount2,
         value: web3.utils.toWei("1.5", "Ether"),
       })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.bidMsgValueCheck);
+      .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
     await treeAuctionInstance.bid(auctionId, {
       from: userAccount2,

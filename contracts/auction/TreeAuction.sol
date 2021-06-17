@@ -114,8 +114,8 @@ contract TreeAuction is Initializable {
                 _storageAauction.highestBid.add(_storageAauction.bidInterval),
             "invalid amount"
         );
-        require(now <= _storageAauction.endDate, "auction already ended.");
-        require(now >= _storageAauction.startDate, "auction not started.");
+        require(now <= _storageAauction.endDate, "auction already ended");
+        require(now >= _storageAauction.startDate, "auction not started");
 
         address payable oldBidder = _storageAauction.bider;
         uint256 oldBid = _storageAauction.highestBid;

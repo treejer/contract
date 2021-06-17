@@ -298,11 +298,6 @@ contract("TreeAuction", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
-    await treeAuctionInstance
-      .endAuction(1, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //admin must call this method and must be rejected
     await treeAuctionInstance.bid(1, {
       from: userAccount1,
       value: highestBid,
@@ -342,7 +337,7 @@ contract("TreeAuction", (accounts) => {
     });
     await Common.travelTime(TimeEnumes.seconds, 670);
     let successEnd = await treeAuctionInstance.endAuction(1, {
-      from: deployerAccount,
+      from: userAccount1,
     }); //succesfully end the auction
 
     truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
@@ -354,7 +349,7 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
-  it("end auction when there is no bidder must fail", async () => {
+  it("end auction when there is no bidder", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
     let tx = await treeAuctionInstance.createAuction(
@@ -367,11 +362,11 @@ contract("TreeAuction", (accounts) => {
     );
 
     await Common.travelTime(TimeEnumes.seconds, 70);
-    let endAuction2 = await treeAuctionInstance
-      .endAuction(2, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_WITH_NO_REFER); //no bidder
+    let endAuction = await treeAuctionInstance.endAuction(1, {
+      from: deployerAccount,
+    });
+    let result = await treeAuctionInstance.auctions.call(1);
+    assert.equal(web3.utils.hexToUtf8(result.status), "ended");
   });
 
   it("Should automatic withdraw successfully", async () => {
@@ -493,7 +488,7 @@ contract("TreeAuction", (accounts) => {
       .manualWithdraw({
         from: userAccount1,
       })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.manualWithdrawUserBalance);
+      .should.be.rejectedWith(TreeAuctionErrorMsg.MANUAL_WITHDRAW_USER_BALANCE);
   });
 
   it("Should manualWithdraw function is reject because pause is true", async () => {

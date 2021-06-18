@@ -147,31 +147,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     ) external validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "invalid status");
         if (genTrees[_treeId].planterId == address(0)) {
-            accessRestriction.ifPlanterOrAmbassador(_msgSender());
-            uint256 tempGbId = genTrees[_treeId].gbId;
-            if (accessRestriction.isAmbassador(_msgSender())) {
-                require(
-                    gbFactory.gbToAmbassador(tempGbId) == _msgSender(),
-                    "ambassador of gb can verify"
-                );
-            } else {
-                bool isInGb = false;
-                for (
-                    uint256 index = 0;
-                    index < gbFactory.getGBPlantersCount(tempGbId);
-                    index++
-                ) {
-                    if (
-                        gbFactory.gbToPlanters(tempGbId, index) == _msgSender()
-                    ) {
-                        isInGb = true;
-                    }
-                }
-                require(
-                    isInGb,
-                    "only one of planters of that greenBlock can accept update!"
-                );
-            }
+            require(_checkPlanter(_treeId, _msgSender()), "invalid access");
         } else {
             require(
                 genTrees[_treeId].planterId == _msgSender(),
@@ -189,45 +165,21 @@ contract GenesisTree is Initializable, RelayRecipient {
         validTree(_treeId)
     {
         require(
-            accessRestriction.isAdmin(_msgSender()) ||
-                accessRestriction.isPlanter(_msgSender()),
-            "invalid access"
-        );
-        require(
             genTrees[_treeId].treeStatus == 1 &&
                 updateGenTrees[_treeId].updateStatus == 1,
             "invalid status"
         );
-        if (accessRestriction.isAdmin(_msgSender()) != true) {
-            require(
-                genTrees[_treeId].planterId != _msgSender(),
-                "planter cant verify his tree"
-            );
-            uint256 tempGbId = genTrees[_treeId].gbId;
-            if (accessRestriction.isAmbassador(_msgSender())) {
-                require(
-                    gbFactory.gbToAmbassador(tempGbId) == _msgSender(),
-                    "ambassador of gb can verify"
-                );
-            } else {
-                bool isInGb = false;
-                for (
-                    uint256 index = 0;
-                    index < gbFactory.getGBPlantersCount(tempGbId);
-                    index++
-                ) {
-                    if (
-                        gbFactory.gbToPlanters(tempGbId, index) == _msgSender()
-                    ) {
-                        isInGb = true;
-                    }
-                }
-                require(
-                    isInGb == true,
-                    "only one of planters of that greenBlock can accept update!"
-                );
-            }
-        }
+        require(
+            genTrees[_treeId].planterId != _msgSender(),
+            "Planter of tree can't accept update"
+        );
+
+        require(
+            accessRestriction.isAdmin(_msgSender()) ||
+                _checkPlanter(_treeId, _msgSender()),
+            "invalid access"
+        );
+
         if (isVerified == 1) {
             genTrees[_treeId].treeSpecs = updateGenTrees[_treeId].updateSpecs;
             genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;

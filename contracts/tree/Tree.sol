@@ -75,4 +75,8 @@ contract Tree is ERC721Upgradeable {
         accessRestriction.ifTreeFactory(msg.sender);
         _safeMint(_to, _tokenId);
     }
+
+    function exists(uint256 tokenId) external view returns (bool) {
+        return _exists(tokenId);
+    }
 }

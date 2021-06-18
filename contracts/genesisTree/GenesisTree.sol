@@ -159,7 +159,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].birthDate = _birthDate;
     }
 
-    function verifyPlant(uint256 _treeId, uint256 isVerified)
+    function verifyPlant(uint256 _treeId, bool _isVerified)
         external
         validTree(_treeId)
     {
@@ -179,7 +179,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             "invalid access"
         );
 
-        if (isVerified == 1) {
+        if (_isVerified) {
             genTrees[_treeId].treeSpecs = updateGenTrees[_treeId].updateSpecs;
             genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
             genTrees[_treeId].treeStatus = 2;

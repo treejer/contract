@@ -2,6 +2,7 @@
 
 pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
@@ -15,13 +16,14 @@ contract GenesisTree is Initializable, RelayRecipient {
     IGBFactory public gbFactory;
 
     using SafeCastUpgradeable for uint256;
+    using SafeMathUpgradeable for uint64;
+    using SafeMathUpgradeable for uint16;
 
     struct GenTree {
-        address payable planterId;
+        address planterId;
         uint256 gbId;
         uint256 treeType;
         uint8 gbType;
-        uint8 ownershipStatus;
         uint8 provideStatus;
         bool isExist;
         uint16 treeStatus;
@@ -43,6 +45,20 @@ contract GenesisTree is Initializable, RelayRecipient {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
+
+    modifier onlyAuction() {
+        accessRestriction.ifAuction(_msgSender());
+        _;
+    }
+
+    modifier onlyTreePlanter(uint256 treeId) {
+        require(
+            genTrees[treeId].planterId == _msgSender(),
+            "Only Planter of tree can send update"
+        );
+        _;
+    }
+
     modifier validTree(uint256 _treeId) {
         require(genTrees[_treeId].isExist, "invalid tree");
         _;
@@ -79,7 +95,6 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         genTrees[_treeId] = GenTree(
             address(0),
-            0,
             0,
             0,
             0,
@@ -220,82 +235,50 @@ contract GenesisTree is Initializable, RelayRecipient {
         }
     }
 
-    function updateTree(uint256 treeId, string memory treeSpecs) external {
-        require(
-            genTrees[treeId].planterId == _msgSender(),
-            "Only Planter of tree can send update"
-        );
-
-        require(genTrees[treeId].treeStatus > 1, "tree not planted");
+    function updateTree(uint256 treeId, string memory treeSpecs)
+        external
+        onlyTreePlanter(treeId)
+    {
+        require(genTrees[treeId].treeStatus > 1, "Tree not planted");
 
         require(
-            now >= genTrees[treeId].lastUpdate + 2592000,
-            "update time not reach"
+            now >= genTrees[treeId].lastUpdate.add(2592000),
+            "Update time not reach"
         );
 
-        //TODO: Set updateTree
-        updateGenTrees[treeId].updateSpecs = treeSpecs;
-        updateGenTrees[treeId].updateDate = now.toUint64();
-        updateGenTrees[treeId].updateStatus = 1;
+        UpdateGenTree storage updateGenTree = updateGenTrees[treeId];
+
+        updateGenTree.updateSpecs = treeSpecs;
+        updateGenTree.updateDate = now.toUint64();
+        updateGenTree.updateStatus = 1;
     }
 
-    //
     function verifyUpdate(uint256 treeId, uint256 isVerified) external {
         require(
+            genTrees[treeId].planterId != _msgSender(),
+            "Planter of tree can't accept update"
+        );
+
+        require(
+            updateGenTrees[treeId].updateStatus == 1,
+            "update status must be pending!"
+        );
+
+        require(genTrees[treeId].treeStatus > 1, "Tree status must be Planted");
+
+        require(
             accessRestriction.isAdmin(_msgSender()) ||
-                accessRestriction.isPlanterOrAmbassador(_msgSender()),
+                _checkPlanter(treeId, _msgSender()),
             "Admin or ambassador or planter can accept updates!"
         );
-
-        require(
-            updateGenTrees[treeId].updateStatus == 1,
-            "update status must be pending!"
-        );
-
-        require(
-            updateGenTrees[treeId].updateStatus == 1,
-            "update status must be pending!"
-        );
-
-        require(genTrees[treeId].treeStatus > 1, "tree status must be Planted");
-
-        if (accessRestriction.isAdmin(_msgSender()) != true) {
-            require(
-                genTrees[treeId].planterId != _msgSender(),
-                "Planter of tree can't accept update"
-            );
-
-            uint256 gbId = genTrees[treeId].gbId;
-
-            if (accessRestriction.isAmbassador(_msgSender())) {
-                require(
-                    gbFactory.gbToAmbassador(gbId) == _msgSender(),
-                    "only ambassador of that greenBlock can accept update!"
-                );
-            } else {
-                bool isInGB = false;
-
-                for (
-                    uint256 index = 0;
-                    index < gbFactory.getGBPlantersCount(gbId);
-                    index++
-                ) {
-                    if (gbFactory.gbToPlanters(gbId, index) == _msgSender()) {
-                        isInGB = true;
-                    }
-                }
-
-                require(
-                    isInGB == true,
-                    "only one of planters of that greenBlock can accept update!"
-                );
-            }
-        }
 
         if (isVerified == 1) {
             genTrees[treeId].lastUpdate = updateGenTrees[treeId].updateDate;
             genTrees[treeId].treeSpecs = updateGenTrees[treeId].updateSpecs;
-            genTrees[treeId].treeStatus += 1;
+            genTrees[treeId].treeStatus = genTrees[treeId]
+                .treeStatus
+                .add(1)
+                .toUint16();
             updateGenTrees[treeId].updateStatus = 3;
             //ownerType moshakhas nist
         } else {
@@ -305,6 +288,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function checkAndSetProvideStatus(uint256 treeId, uint8 provideType)
         external
+        onlyAuction
         returns (uint8)
     {
         uint8 nowProvideStatus = genTrees[treeId].provideStatus;
@@ -314,7 +298,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         return nowProvideStatus;
     }
 
-    function updateOwner(uint256 treeId, address ownerId) external {
+    function updateOwner(uint256 treeId, address ownerId) external onlyAuction {
         genTrees[treeId].provideStatus = 0;
         if (!treeToken.exists(treeId)) {
             treeToken.safeMint(ownerId, treeId);
@@ -324,6 +308,33 @@ contract GenesisTree is Initializable, RelayRecipient {
                 ownerId,
                 treeId
             );
+        }
+    }
+
+    function _checkPlanter(uint256 treeId, address sender)
+        private
+        view
+        returns (bool)
+    {
+        uint256 gbId = genTrees[treeId].gbId;
+
+        if (accessRestriction.isAmbassador(sender)) {
+            return gbFactory.gbToAmbassador(gbId) == sender;
+        } else {
+            bool isInGB = false;
+
+            for (
+                uint256 index = 0;
+                index < gbFactory.getGBPlantersCount(gbId);
+                index++
+            ) {
+                if (gbFactory.gbToPlanters(gbId, index) == sender) {
+                    isInGB = true;
+                    break;
+                }
+            }
+
+            return isInGB;
         }
     }
 }

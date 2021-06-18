@@ -5,11 +5,13 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
+import "../greenblock/IGBFactory.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
     bool public isGenesisTree;
     IAccessRestriction public accessRestriction;
     using SafeCastUpgradeable for uint256;
+    IGBFactory public gbFactory;
 
     struct GenTree {
         address payable planterId;
@@ -46,6 +48,13 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    function setGBFactoryAddress(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+        IGBFactory candidateContract = IGBFactory(_address);
+        require(candidateContract.isGBFactory());
+        gbFactory = candidateContract;
+    }
+
     function addTree(uint256 _treeId, string memory _treeDescription)
         external
         onlyAdmin
@@ -80,10 +89,27 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(bytes(genTrees[_treeId].treeSpecs).length > 0, "invalid tree");
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
         //TODO:aliad010 check green block if
+        if (
+            gbFactory.greenBlocks(_gb).isExist &&
+            address(_planterId) != address(0)
+        ) {
+            bool isInGB = false;
 
-        genTrees[_treeId].gbId = _gb;
-        genTrees[_treeId].planterId = _planterId;
-        genTrees[_treeId].gbType = _gbType;
+            for (
+                uint256 index = 0;
+                index < gbFactory.getGBPlantersCount(gbId);
+                index++
+            ) {
+                if (gbFactory.gbToPlanters(gbId, index) == _msgSender()) {
+                    isInGB = true;
+                }
+            }
+
+            require(isInGB == true, "invalid planter data");
+            genTrees[_treeId].gbId = _gb;
+            genTrees[_treeId].planterId = _planterId;
+            genTrees[_treeId].gbType = _gbType;
+        }
     }
 
     function plantTree(
@@ -100,6 +126,11 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
 
     function verifyPlant(uint256 _treeId, uint256 isVerified) external {
+        require(
+            accessRestriction.ifAdmin(_msgSender()) ||
+                accessRestriction.ifPlanter(_msgSender()),
+            "invalid access"
+        );
         require(
             genTrees[_treeId].treeStatus == 1 &&
                 updateGenTrees[_treeId].updateStatus == 1,

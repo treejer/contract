@@ -253,7 +253,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         updateGenTree.updateStatus = 1;
     }
 
-    function verifyUpdate(uint256 treeId, uint256 isVerified) external {
+    function verifyUpdate(uint256 treeId, bool isVerified) external {
         require(
             genTrees[treeId].planterId != _msgSender(),
             "Planter of tree can't accept update"
@@ -272,17 +272,20 @@ contract GenesisTree is Initializable, RelayRecipient {
             "Admin or ambassador or planter can accept updates!"
         );
 
-        if (isVerified == 1) {
-            genTrees[treeId].lastUpdate = updateGenTrees[treeId].updateDate;
-            genTrees[treeId].treeSpecs = updateGenTrees[treeId].updateSpecs;
-            genTrees[treeId].treeStatus = genTrees[treeId]
-                .treeStatus
-                .add(1)
-                .toUint16();
-            updateGenTrees[treeId].updateStatus = 3;
+        UpdateGenTree storage updateGenTree = updateGenTrees[treeId];
+
+        if (isVerified) {
+            GenTree storage genTree = genTrees[treeId];
+
+            genTree.lastUpdate = updateGenTrees[treeId].updateDate;
+            genTree.treeSpecs = updateGenTrees[treeId].updateSpecs;
+            genTree.treeStatus = genTrees[treeId].treeStatus.add(1).toUint16();
+
+            updateGenTree.updateStatus = 3;
+
             //ownerType moshakhas nist
         } else {
-            updateGenTrees[treeId].updateStatus = 2;
+            updateGenTree.updateStatus = 2;
         }
     }
 
@@ -309,6 +312,11 @@ contract GenesisTree is Initializable, RelayRecipient {
                 treeId
             );
         }
+    }
+
+    // This function call when auction has no bider.
+    function updateProvideStatus(uint256 treeId) external onlyAuction {
+        genTrees[treeId].provideStatus = 0;
     }
 
     function _checkPlanter(uint256 treeId, address sender)

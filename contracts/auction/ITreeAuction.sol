@@ -41,5 +41,5 @@ interface ITreeAuction {
 
     function manualWithdraw() external returns (bool);
 
-    function auctionEnd(uint256 _auctionId) external;
+    function endAuction(uint256 _auctionId) external;
 }

@@ -78,9 +78,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         gbFactory = candidateContract;
     }
 
-    function setTreeTokenAddress(address _address) external {
-        accessRestriction.ifAdmin(_msgSender());
-
+    function setTreeTokenAddress(address _address) external onlyAdmin {
         ITree candidateContract = ITree(_address);
         require(candidateContract.isTree());
         treeToken = candidateContract;
@@ -127,8 +125,9 @@ contract GenesisTree is Initializable, RelayRecipient {
                 index < gbFactory.getGBPlantersCount(_gbId);
                 index++
             ) {
-                if (gbFactory.gbToPlanters(_gbId, index) == _msgSender()) {
+                if (gbFactory.gbToPlanters(_gbId, index) == _planterId) {
                     isInGb = true;
+                    break;
                 }
             }
 
@@ -185,6 +184,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
             genTrees[_treeId].treeStatus = 2;
             updateGenTrees[_treeId].updateStatus = 3;
+            if (!treeToken.exists(_treeId)) {
+                treeToken.safeMint(genTrees[_treeId].planterId, _treeId);
+            }
         } else {
             updateGenTrees[_treeId].updateStatus = 2;
         }

@@ -144,7 +144,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
 
     //
-    function verifyUpdate(uint256 treeId) external {
+    function verifyUpdate(uint256 treeId, uint256 isVerified) external {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 accessRestriction.isPlanterOrAmbassador(_msgSender()),
@@ -155,6 +155,13 @@ contract GenesisTree is Initializable, RelayRecipient {
             updateGenTrees[treeId].updateStatus == 1,
             "update status must be pending!"
         );
+
+        require(
+            updateGenTrees[treeId].updateStatus == 1,
+            "update status must be pending!"
+        );
+
+        require(genTrees[treeId].treeStatus > 1, "tree status must be Planted");
 
         if (accessRestriction.isAdmin(_msgSender()) != true) {
             require(
@@ -188,9 +195,30 @@ contract GenesisTree is Initializable, RelayRecipient {
                 );
             }
         }
+
+        if (isVerified == 1) {
+            genTrees[treeId].lastUpdate = updateGenTrees[treeId].updateDate;
+            genTrees[treeId].treeSpecs = updateGenTrees[treeId].updateSpecs;
+            genTrees[treeId].treeStatus += 1;
+            updateGenTrees[treeId].updateStatus = 3;
+            //ownerType moshakhas nist
+        } else {
+            updateGenTrees[treeId].updateStatus = 2;
+        }
     }
 
-    function checkAndSetProvideStatus() external {}
+    function checkAndSetProvideStatus(uint256 treeId, uint16 provideType)
+        external
+        returns (uint16)
+    {
+        uint16 nowProvideStatus = genTrees[treeId].provideStatus;
+        if (nowProvideStatus == 0) {
+            genTrees[treeId].provideStatus = provideType;
+        }
+        return nowProvideStatus;
+    }
 
-    function updateOwner() external {}
+    function updateOwner(uint256 treeId, address ownerId) external {
+        genTrees[treeId].provideStatus = 0;
+    }
 }

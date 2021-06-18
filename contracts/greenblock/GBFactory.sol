@@ -20,7 +20,6 @@ contract GBFactory is Initializable, RelayRecipient {
         string title;
         string coordinates;
         bool status;
-        bool isExist;
     }
 
     GB[] public greenBlocks;
@@ -43,7 +42,7 @@ contract GBFactory is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
 
         //create a green block, so we can check for zero green block means not assigned
-        greenBlocks.push(GB("WORLD", "ALL", true, true));
+        greenBlocks.push(GB("WORLD", "ALL", true));
     }
 
     function setTrustedForwarder(address _address) external {
@@ -61,7 +60,7 @@ contract GBFactory is Initializable, RelayRecipient {
         accessRestriction.ifNotPaused();
         accessRestriction.ifPlanterOrAmbassador(_msgSender());
 
-        greenBlocks.push(GB(_title, _coordinates, false, true));
+        greenBlocks.push(GB(_title, _coordinates, false));
         uint256 id = greenBlocks.length - 1;
 
         for (uint8 i = 0; i < _planters.length; i++) {
@@ -73,6 +72,7 @@ contract GBFactory is Initializable, RelayRecipient {
                 planterGB[_planters[i]] = id;
             }
         }
+
         require(
             _ambassador != address(0) || gbToPlanters[id].length > 0,
             "No ambassador no planter!"

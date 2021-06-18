@@ -6,12 +6,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "../greenblock/IGBFactory.sol";
+import "../tree/ITree.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
     bool public isGenesisTree;
     IAccessRestriction public accessRestriction;
-    using SafeCastUpgradeable for uint256;
+    ITree public treeToken;
     IGBFactory public gbFactory;
+
+    using SafeCastUpgradeable for uint256;
 
     struct GenTree {
         address payable planterId;
@@ -36,8 +39,6 @@ contract GenesisTree is Initializable, RelayRecipient {
     mapping(uint256 => GenTree) genTrees;
     mapping(uint256 => UpdateGenTree) updateGenTrees;
 
-    IGBFactory public gbFactory;
-
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -59,6 +60,14 @@ contract GenesisTree is Initializable, RelayRecipient {
         IGBFactory candidateContract = IGBFactory(_address);
         require(candidateContract.isGBFactory());
         gbFactory = candidateContract;
+    }
+
+    function setTreeTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+
+        ITree candidateContract = ITree(_address);
+        require(candidateContract.isTree());
+        treeToken = candidateContract;
     }
 
     function addTree(uint256 _treeId, string memory _treeDescription)
@@ -306,5 +315,14 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function updateOwner(uint256 treeId, address ownerId) external {
         genTrees[treeId].provideStatus = 0;
+        if (!treeToken.exists(treeId)) {
+            treeToken.safeMint(ownerId, treeId);
+        } else {
+            treeToken.safeTransferExtra(
+                treeToken.ownerOf(treeId),
+                ownerId,
+                treeId
+            );
+        }
     }
 }

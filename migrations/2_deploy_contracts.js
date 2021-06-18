@@ -21,6 +21,7 @@ var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
+const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -202,6 +203,7 @@ module.exports = async function (deployer, network, accounts) {
     await instance.grantRole(SEED_FACTORY_ROLE, seedFactoryAddress);
     await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
     await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
+    await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
   });
 
   console.log("Deploying ForestFactory...");

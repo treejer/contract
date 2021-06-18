@@ -10,9 +10,8 @@ import "../greenblock/IGBFactory.sol";
 contract GenesisTree is Initializable, RelayRecipient {
     bool public isGenesisTree;
     IAccessRestriction public accessRestriction;
-    using SafeCastUpgradeable for uint256;
     IGBFactory public gbFactory;
-
+    using SafeCastUpgradeable for uint256;
     struct GenTree {
         address payable planterId;
         uint256 gbId;
@@ -35,8 +34,6 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
     mapping(uint256 => GenTree) genTrees;
     mapping(uint256 => UpdateGenTree) updateGenTrees;
-
-    IGBFactory public gbFactory;
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -92,17 +89,18 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint8 _gbType
     ) external onlyAdmin validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
-        require(gbFactory.greenBlocks(_gb).isExist, "invalid gb");
+        (, , , bool isExistInGb) = gbFactory.greenBlocks(_gb);
+        require(isExistInGb, "invalid gb");
 
         if (address(_planterId) != address(0)) {
             bool isInGB = false;
 
             for (
                 uint256 index = 0;
-                index < gbFactory.getGBPlantersCount(gbId);
+                index < gbFactory.getGBPlantersCount(_gb);
                 index++
             ) {
-                if (gbFactory.gbToPlanters(gbId, index) == _msgSender()) {
+                if (gbFactory.gbToPlanters(_gb, index) == _msgSender()) {
                     isInGB = true;
                 }
             }
@@ -124,7 +122,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             uint256 tempGbId = genTrees[_treeId].gbId;
             if (accessRestriction.isAmbassador(_msgSender())) {
                 require(
-                    gbFactory.gbToAmbassador(_gbId) == _msgSender(),
+                    gbFactory.gbToAmbassador(tempGbId) == _msgSender(),
                     "ambassador of gb can verify"
                 );
             } else {
@@ -137,11 +135,11 @@ contract GenesisTree is Initializable, RelayRecipient {
                     if (
                         gbFactory.gbToPlanters(tempGbId, index) == _msgSender()
                     ) {
-                        isInGB = true;
+                        isInGb = true;
                     }
                 }
                 require(
-                    isInGB == true,
+                    isInGb == true,
                     "only one of planters of that greenBlock can accept update!"
                 );
             }
@@ -151,7 +149,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         }
 
         require(genTrees[_treeId].treeStatus == 1, "invalid status");
-        updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, block.timestamp, 1);
+        updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, now.toUint64(), 1);
         genTrees[_treeId].countryCode = _countryCode;
         genTrees[_treeId].birthDate = _birthDate;
     }
@@ -161,8 +159,8 @@ contract GenesisTree is Initializable, RelayRecipient {
         validTree(_treeId)
     {
         require(
-            accessRestriction.ifAdmin(_msgSender()) ||
-                accessRestriction.ifPlanter(_msgSender()),
+            accessRestriction.isAdmin(_msgSender()) ||
+                accessRestriction.isPlanter(_msgSender()),
             "invalid access"
         );
         require(
@@ -178,7 +176,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             uint256 tempGbId = genTrees[_treeId].gbId;
             if (accessRestriction.isAmbassador(_msgSender())) {
                 require(
-                    gbFactory.gbToAmbassador(_gbId) == _msgSender(),
+                    gbFactory.gbToAmbassador(tempGbId) == _msgSender(),
                     "ambassador of gb can verify"
                 );
             } else {
@@ -191,11 +189,11 @@ contract GenesisTree is Initializable, RelayRecipient {
                     if (
                         gbFactory.gbToPlanters(tempGbId, index) == _msgSender()
                     ) {
-                        isInGB = true;
+                        isInGb = true;
                     }
                 }
                 require(
-                    isInGB == true,
+                    isInGb == true,
                     "only one of planters of that greenBlock can accept update!"
                 );
             }

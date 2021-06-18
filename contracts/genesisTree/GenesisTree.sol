@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
+import "../greenblock/IGBFactory.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
     bool public isGenesisTree;
@@ -33,6 +34,13 @@ contract GenesisTree is Initializable, RelayRecipient {
     mapping(uint256 => GenTree) genTrees;
     mapping(uint256 => UpdateGenTree) updateGenTrees;
 
+    IGBFactory public gbFactory;
+
+    modifier onlyAdmin() {
+        accessRestriction.ifAdmin(_msgSender());
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
             IAccessRestriction(_accessRestrictionAddress);
@@ -41,9 +49,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
     }
 
-    modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
-        _;
+    function setGBFactoryAddress(address _address) external onlyAdmin {
+        IGBFactory candidateContract = IGBFactory(_address);
+        require(candidateContract.isGBFactory());
+        gbFactory = candidateContract;
     }
 
     function addTree(uint256 _treeId, string memory _treeDescription)
@@ -134,7 +143,52 @@ contract GenesisTree is Initializable, RelayRecipient {
         updateGenTrees[treeId].updateStatus = 1;
     }
 
-    function verifyUpdate() external {}
+    //
+    function verifyUpdate(uint256 treeId) external {
+        require(
+            accessRestriction.isAdmin(_msgSender()) ||
+                accessRestriction.isPlanterOrAmbassador(_msgSender()),
+            "Admin or ambassador or planter can accept updates!"
+        );
+
+        require(
+            updateGenTrees[treeId].updateStatus == 1,
+            "update status must be pending!"
+        );
+
+        if (accessRestriction.isAdmin(_msgSender()) != true) {
+            require(
+                genTrees[treeId].planterId != _msgSender(),
+                "Planter of tree can't accept update"
+            );
+
+            uint256 gbId = genTrees[treeId].gbId;
+
+            if (accessRestriction.isAmbassador(_msgSender())) {
+                require(
+                    gbFactory.gbToAmbassador(gbId) == _msgSender(),
+                    "only ambassador of that greenBlock can accept update!"
+                );
+            } else {
+                bool isInGB = false;
+
+                for (
+                    uint256 index = 0;
+                    index < gbFactory.getGBPlantersCount(gbId);
+                    index++
+                ) {
+                    if (gbFactory.gbToPlanters(gbId, index) == _msgSender()) {
+                        isInGB = true;
+                    }
+                }
+
+                require(
+                    isInGB == true,
+                    "only one of planters of that greenBlock can accept update!"
+                );
+            }
+        }
+    }
 
     function checkAndSetProvideStatus() external {}
 

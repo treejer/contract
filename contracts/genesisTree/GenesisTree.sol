@@ -225,34 +225,28 @@ contract GenesisTree is Initializable, RelayRecipient {
     {
         require(
             genTrees[_treeId].planterId != _msgSender(),
-            "Planter of tree can't accept update"
+            "Planter of tree can't verify update"
         );
-
         require(
             updateGenTrees[_treeId].updateStatus == 1,
-            "update status must be pending!"
+            "update status must be pending"
         );
-
         require(
             genTrees[_treeId].treeStatus > 1,
             "Tree status must be Planted"
         );
-
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(_treeId, _msgSender()),
-            "Admin or ambassador or planter can accept updates!"
+            "Admin or ambassador or planter can accept updates"
         );
-
         UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
-
         if (_isVerified) {
             GenTree storage genTree = genTrees[_treeId];
 
             genTree.lastUpdate = updateGenTree.updateDate;
             genTree.treeSpecs = updateGenTree.updateSpecs;
             genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
-
             updateGenTree.updateStatus = 3;
             if (treeToken.exists(_treeId)) {
                 //call genesis fund
@@ -279,15 +273,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         onlyAuction
     {
         genTrees[_treeId].provideStatus = 0;
-        if (!treeToken.exists(_treeId)) {
-            treeToken.safeMint(_ownerId, _treeId);
-        } else {
-            treeToken.safeTransferExtra(
-                treeToken.ownerOf(_treeId),
-                _ownerId,
-                _treeId
-            );
-        }
+        treeToken.safeMint(_ownerId, _treeId);
     }
 
     // This function call when auction has no bider.

@@ -112,7 +112,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         (, , , bool isExistGb) = gbFactory.greenBlocks(_gbId);
         require(isExistGb, "invalid gb");
 
-        if (address(_planterId) != address(0)) {
+        if (_planterId != address(0)) {
             bool isInGb = false;
 
             for (
@@ -142,6 +142,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(genTrees[_treeId].treeStatus == 1, "invalid status");
         if (genTrees[_treeId].planterId == address(0)) {
             require(_checkPlanter(_treeId, _msgSender()), "invalid access");
+            genTrees[_treeId].planterId = _msgSender();
         } else {
             require(
                 genTrees[_treeId].planterId == _msgSender(),

@@ -275,15 +275,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         onlyAuction
     {
         genTrees[_treeId].provideStatus = 0;
-        if (!treeToken.exists(_treeId)) {
-            treeToken.safeMint(_ownerId, _treeId);
-        } else {
-            treeToken.safeTransferExtra(
-                treeToken.ownerOf(_treeId),
-                _ownerId,
-                _treeId
-            );
-        }
+        treeToken.safeMint(_ownerId, _treeId);
     }
 
     // This function call when auction has no bider.

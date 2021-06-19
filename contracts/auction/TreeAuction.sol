@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
+import "../genesisTree/IGenesisTree.sol";
 
 contract TreeAuction is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -19,7 +20,7 @@ contract TreeAuction is Initializable {
 
     address payable treasuryAddress;
     IAccessRestriction public accessRestriction;
-    // IGenesisTree public genesisTree;
+    IGenesisTree public genesisTree;
     // IGenesisTreeFund public genesisTreeFund;
 
     struct Auction {
@@ -79,9 +80,9 @@ contract TreeAuction is Initializable {
     }
 
     function setGenesisTreeAddress(address _address) external onlyAdmin {
-        // IGenesisTree candidateContract = IGenesisTree(_address);
-        // require(candidateContract.isGenesisTree());
-        // genesisTree = candidateContract;
+        IGenesisTree candidateContract = IGenesisTree(_address);
+        require(candidateContract.isGenesisTree());
+        genesisTree = candidateContract;
     }
 
     function setGenesisTreeFundAddress(address _address) external onlyAdmin {
@@ -201,7 +202,7 @@ contract TreeAuction is Initializable {
         auction.status = bytes32("ended");
 
         if (auction.bider != address(0)) {
-            // genesisTree.updateOwner(auction.treeId,auction.bider);
+            genesisTree.updateOwner(auction.treeId, auction.bider);
             // genesisTreeFund.update(auction.treeId,auction.highestBid);
 
             emit AuctionEnded(
@@ -213,7 +214,7 @@ contract TreeAuction is Initializable {
 
             treasuryAddress.transfer(auction.highestBid);
         } else {
-            //genesisTree.updateProvideStatus(auction.treeId);
+            genesisTree.updateProvideStatus(auction.treeId);
         }
     }
 }

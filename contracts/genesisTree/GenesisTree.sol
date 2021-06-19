@@ -41,8 +41,8 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint64 updateStatus;
     }
 
-    mapping(uint256 => GenTree) genTrees;
-    mapping(uint256 => UpdateGenTree) updateGenTrees;
+    mapping(uint256 => GenTree) public genTrees;
+    mapping(uint256 => UpdateGenTree) public updateGenTrees;
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -114,8 +114,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint8 _gbType
     ) external onlyAdmin validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
-        (, , , bool isExistGb) = gbFactory.greenBlocks(_gbId);
-        require(isExistGb, "invalid gb");
+        // (, , , bool isExistGb) = gbFactory.greenBlocks(_gbId);
+        uint256 total = gbFactory.totalGB();
+        require(_gbId < total, "invalid gb"); //TODO: aliad check here using gb.isExist after gb refactoring
+        // require(address);
 
         if (_planterId != address(0)) {
             bool isInGb = false;
@@ -185,9 +187,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
             genTrees[_treeId].treeStatus = 2;
             updateGenTrees[_treeId].updateStatus = 3;
-            if (!treeToken.exists(_treeId)) {
-                treeToken.safeMint(genTrees[_treeId].planterId, _treeId);
-            }
         } else {
             updateGenTrees[_treeId].updateStatus = 2;
         }

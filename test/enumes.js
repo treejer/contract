@@ -21,9 +21,18 @@ const TreeAuctionErrorMsg = {
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
 };
+const GenesisTreeErrorMsg = {
+  DUPLICATE_TREE: "duplicate tree",
+  INVALID_IPFS: "invalid ipfs hash",
+  TREE_IS_PLANTED_BEFORE: "the tree is planted",
+  INVALID_GB: "invalid gb",
+  INVALID_PLANTER: "invalid planter data",
+  INVALID_TREE: "invalid tree",
+};
 
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
   TreeAuctionErrorMsg,
+  GenesisTreeErrorMsg,
 };

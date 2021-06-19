@@ -32,7 +32,8 @@ interface IGenesisTree {
     function verifyUpdate(uint256 treeId, bool isVerified) external;
 
     function checkAndSetProvideStatus(uint256 treeId, uint8 provideType)
-        external;
+        external
+        returns (uint8);
 
     function updateOwner(uint256 treeId, address ownerId) external;
 

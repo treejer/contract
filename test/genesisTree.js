@@ -21,6 +21,52 @@ contract("GenesisTree", (accounts) => {
   let arInstance;
   let startTime;
   let endTime;
+  let successPlant = async (
+    treeId,
+    gbId,
+    gbType,
+    birthDate,
+    countryCode,
+    gbPlanterList,
+    ambassadorAddress,
+    planterAddress,
+    deployerAccount
+  ) => {
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addAmbassador(arInstance, ambassadorAddress, deployerAccount);
+
+    await gbPlanterList.map(async (item) => {
+      await Common.addPlanter(arInstance, item, deployerAccount);
+    });
+
+    await Common.addGB(gbInstance, ambassadorAddress, gbPlanterList, "gb1");
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      planterAddress,
+      gbType,
+      { from: deployerAccount }
+    );
+
+    await genesisTreeInstance.plantTree(
+      treeId,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      {
+        from: planterAddress,
+      }
+    );
+    await genesisTreeInstance.verifyPlant(treeId, true, {
+      from: ambassadorAddress,
+    });
+  };
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -767,6 +813,417 @@ contract("GenesisTree", (accounts) => {
     );
     await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount1 });
   });
-
   ///////////////////////////////////////////////////////// mehdi //////////////////////////////
+  // it("Should update tree work seccussfully", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   let result = await genesisTreeInstance.updateGenTrees.call(treeId);
+
+  //   let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+  //   assert.equal(result.updateDate.toNumber(), now);
+  //   assert.equal(result.updateStatus.toNumber(), 1);
+  // });
+
+  // it("Should update tree not work because update time not reach", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+  //   await Common.travelTime(TimeEnumes.seconds, 2000);
+
+  //   await genesisTreeInstance
+  //     .updateTree(treeId, ipfsHash, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+  // });
+
+  // it("Should be fail because invalid address try to update", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2, userAccount3],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance
+  //     .updateTree(treeId, ipfsHash, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(
+  //       GenesisTreeErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
+  //     );
+  // });
+
+  // it("updateTree should be fail because tree not planted", async () => {
+  //   let treeId = 1;
+  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, 1, userAccount2, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .updateTree(treeId, ipfsHash, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
+  // });
+
+  // it("Should verify update work seccussfully when verify true by Admin", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+  //   let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+  //   let resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+
+  //   assert.equal(
+  //     resultAfterGT.lastUpdate.toNumber(),
+  //     resultBeforeUGT.updateDate.toNumber()
+  //   );
+
+  //   assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
+
+  //   assert.equal(
+  //     resultAfterGT.treeStatus.toNumber(),
+  //     resultBeforeGT.treeStatus.toNumber() + 1
+  //   );
+
+  //   assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
+  // });
+
+  // it("Should verify update work seccussfully when verify false by Admin", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+
+  //   assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
+  // });
+
+  // it("Should verify update work seccussfully by Ambassador", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: userAccount1,
+  //   });
+  // });
+
+  // it("Should verify update work seccussfully by other Planter in Gb", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2, userAccount3],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: userAccount3,
+  //   });
+  // });
+
+  // it("Should be fail invalid access . planter not in Gb", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .verifyUpdate(treeId, true, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+  // });
+
+  // it("Should be fail invalid access . planter of tree not access to update", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .verifyUpdate(treeId, true, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(
+  //       GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+  //     );
+  // });
+
+  // it("Should be fail because update status is not pending", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: userAccount1,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .verifyUpdate(treeId, true, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(
+  //       GenesisTreeErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
+  //     );
+  // });
+
+  // it("verifyUpdate should be fail because tree not planted", async () => {
+  //   let treeId = 1;
+  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, 1, userAccount2, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .verifyUpdate(treeId, true, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
+  // });
 });

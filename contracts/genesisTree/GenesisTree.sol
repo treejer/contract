@@ -59,6 +59,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract =
             IAccessRestriction(_accessRestrictionAddress);

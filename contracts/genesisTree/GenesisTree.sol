@@ -250,8 +250,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
 
             updateGenTree.updateStatus = 3;
-
-            //ownerType moshakhas nist
+            if (treeToken.exists(_treeId)) {
+                //call genesis fund
+            }
         } else {
             updateGenTree.updateStatus = 2;
         }

@@ -262,11 +262,42 @@ contract("GenesisTree", (accounts) => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
-    const birthDate = Number(new Date().getTime() / 1000);
+    const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
     await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
       from: deployerAccount,
     });
+    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb1");
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      userAccount2,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance.plantTree(
+      treeId,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      { from: userAccount2 }
+    );
+  });
+  it("should verify plant seccussfully", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
@@ -281,7 +312,17 @@ contract("GenesisTree", (accounts) => {
       gbType,
       { from: deployerAccount }
     );
-    // await genesisTreeInstance.plantTree(treeId, ipfsHash);
+
+    await genesisTreeInstance.plantTree(
+      treeId,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      {
+        from: userAccount2,
+      }
+    );
+    await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount1 });
   });
   ///////////////////////////////////////////////////////// mehdi //////////////////////////////
 });

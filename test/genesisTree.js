@@ -724,4 +724,28 @@ contract("GenesisTree", (accounts) => {
   //       GenesisTreeErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
   //     );
   // });
+
+  // it("verifyUpdate should be fail because tree not planted", async () => {
+  //   let treeId = 1;
+  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, 1, userAccount2, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .verifyUpdate(treeId, true, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
+  // });
 });

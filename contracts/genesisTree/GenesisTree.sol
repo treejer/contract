@@ -227,10 +227,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             updateGenTrees[_treeId].updateStatus == 1,
             "update status must be pending"
         );
-        require(
-            genTrees[_treeId].treeStatus > 1,
-            "Tree status must be Planted"
-        );
+        require(genTrees[_treeId].treeStatus > 1, "Tree not planted");
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(_treeId, _msgSender()),

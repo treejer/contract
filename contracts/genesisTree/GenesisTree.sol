@@ -147,8 +147,12 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint16 _countryCode
     ) external validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "invalid status");
+        require(bytes(_treeSpecs).length > 0, "invalid ipfs hash");
         if (genTrees[_treeId].planterId == address(0)) {
-            require(_checkPlanter(_treeId, _msgSender()), "invalid access");
+            require(
+                _checkPlanter(_treeId, _msgSender()),
+                "ambassador or planter can plant tree"
+            );
             genTrees[_treeId].planterId = _msgSender();
         } else {
             require(
@@ -179,7 +183,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(_treeId, _msgSender()),
-            "invalid access"
+            "ambassador or planter can verify plant"
         );
 
         if (_isVerified) {

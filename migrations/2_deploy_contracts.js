@@ -13,7 +13,8 @@ var Seed = artifacts.require("Seed.sol");
 var SeedFactory = artifacts.require("SeedFactory.sol");
 var ForestFactory = artifacts.require("ForestFactory.sol");
 var Dai = artifacts.require("Dai.sol");
-var TreeAuction = artifacts.require("TreeAuction");
+var TreeAuction = artifacts.require("TreeAuction.sol");
+var GenesisTree = artifacts.require("GenesisTree.sol");
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -39,6 +40,7 @@ module.exports = async function (deployer, network, accounts) {
   let forestFactory;
   let daiTokenAddress;
   let treeAuctionAddress;
+  let genesisTreeAddress;
 
   //gsn
   let trustedForwarder;
@@ -167,6 +169,17 @@ module.exports = async function (deployer, network, accounts) {
     TreeAuction.deployed().then(async (instance) => {});
   });
 
+  console.log("Deploying GenesisTree...");
+  await deployProxy(GenesisTree, [accessRestrictionAddress], {
+    deployer,
+    initializer: "initialize",
+    unsafeAllowCustomTypes: true,
+  }).then(() => {
+    genesisTreeAddress = GenesisTree.address;
+
+    GenesisTree.deployed().then(async (instance) => {});
+  });
+
   console.log("Deploying SeedFactory...");
   await deployProxy(SeedFactory, [accessRestrictionAddress], {
     deployer,
@@ -258,6 +271,7 @@ CONTRACT_TREE_ADDRESS=${treeAddress}
 CONTRACT_SEED_ADDRESS=${seedAddress}
 CONTRACT_O2_ADDRESS=${o2Address}
 CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
+CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 };

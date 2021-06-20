@@ -164,16 +164,17 @@ contract GenesisTree is Initializable, RelayRecipient {
         updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, now.toUint64(), 1);
         genTrees[_treeId].countryCode = _countryCode;
         genTrees[_treeId].birthDate = _birthDate;
+        genTrees[_treeId].plantDate = now.toUint64();
     }
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
         external
         validTree(_treeId)
     {
+        require(genTrees[_treeId].treeStatus == 1, "invalid tree status");
         require(
-            genTrees[_treeId].treeStatus == 1 &&
-                updateGenTrees[_treeId].updateStatus == 1,
-            "invalid status"
+            updateGenTrees[_treeId].updateStatus == 1,
+            "invalid update status"
         );
         require(
             genTrees[_treeId].planterId != _msgSender(),

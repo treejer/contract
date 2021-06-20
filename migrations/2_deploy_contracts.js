@@ -177,7 +177,9 @@ module.exports = async function (deployer, network, accounts) {
   }).then(() => {
     genesisTreeAddress = GenesisTree.address;
 
-    GenesisTree.deployed().then(async (instance) => {});
+    GenesisTree.deployed().then(async (instance) => {
+      await instance.setTrustedForwarder(trustedForwarder);
+    });
   });
 
   console.log("Deploying SeedFactory...");

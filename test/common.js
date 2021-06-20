@@ -10,6 +10,7 @@ const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
+const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 
 Common.sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -112,6 +113,11 @@ Common.addTreeFactoryRole = async (instance, address, adminAccount) => {
 Common.addO2FactoryRole = async (instance, address, adminAccount) => {
   await instance.grantRole(O2_FACTORY_ROLE, address, { from: adminAccount });
 };
+
+Common.addAuctionRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(AUCTION_ROLE, address, { from: adminAccount });
+};
+
 Common.travelTime = async (timeFormat, timeDuration) => {
   await time.increase(time.duration[timeFormat](timeDuration));
 };

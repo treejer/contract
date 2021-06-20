@@ -37,6 +37,7 @@ const GenesisTreeErrorMsg = {
   ADMIN_ABBASSADOR_PLANTER: "Admin or ambassador or planter can accept updates",
   INVALID_ACCESS_PLANTER_OF_TREE: "Planter of tree can't verify update",
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
+  CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
 
 module.exports = {

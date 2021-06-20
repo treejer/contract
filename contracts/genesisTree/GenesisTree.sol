@@ -244,7 +244,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTree.lastUpdate = updateGenTree.updateDate;
             genTree.treeSpecs = updateGenTree.updateSpecs;
             genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
+
             updateGenTree.updateStatus = 3;
+
             if (treeToken.exists(_treeId)) {
                 //call genesis fund
             }
@@ -259,21 +261,25 @@ contract GenesisTree is Initializable, RelayRecipient {
         returns (uint8)
     {
         uint8 nowProvideStatus = genTrees[_treeId].provideStatus;
+
         if (nowProvideStatus == 0) {
             genTrees[_treeId].provideStatus = _provideType;
         }
+
         return nowProvideStatus;
     }
 
+    // This function call when auction ended and has no bider.
     function updateOwner(uint256 _treeId, address _ownerId)
         external
         onlyAuction
     {
         genTrees[_treeId].provideStatus = 0;
+
         treeToken.safeMint(_ownerId, _treeId);
     }
 
-    // This function call when auction has no bider.
+    // This function call when auction ended and has no bider.
     function updateProvideStatus(uint256 _treeId) external onlyAuction {
         genTrees[_treeId].provideStatus = 0;
     }

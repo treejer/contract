@@ -20,6 +20,9 @@ contract GenesisTree is Initializable, RelayRecipient {
     ITree public treeToken;
     IGBFactory public gbFactory;
 
+    event PlantTree(uint256 _treeId, address _planter);
+    event VerifyPlant(uint256 _treeId, uint256 _updateStatus);
+
     struct GenTree {
         address planterId;
         uint256 gbId;
@@ -176,6 +179,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].countryCode = _countryCode;
         genTrees[_treeId].birthDate = _birthDate;
         genTrees[_treeId].plantDate = now.toUint64();
+        emit PlantTree(_treeId, genTrees[_treeId].planterId);
     }
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
@@ -203,8 +207,10 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
             genTrees[_treeId].treeStatus = 2;
             updateGenTrees[_treeId].updateStatus = 3;
+            emit VerifyPlant(_treeId, 3);
         } else {
             updateGenTrees[_treeId].updateStatus = 2;
+            emit VerifyPlant(_treeId, 2);
         }
     }
 

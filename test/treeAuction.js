@@ -1,5 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeAuction = artifacts.require("TreeAuction");
+const GenesisTree = artifacts.require("GenesisTree.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -10,6 +11,7 @@ const { TimeEnumes, CommonErrorMsg, TreeAuctionErrorMsg } = require("./enumes");
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
   let arInstance;
+  let genesisTreeInstance;
   let startTime;
   let endTime;
 
@@ -18,6 +20,8 @@ contract("TreeAuction", (accounts) => {
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
   const userAccount3 = accounts[4];
+  const ipfsHash = "some ipfs hash here";
+  console.log("deployerAccount", deployerAccount);
 
   beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
@@ -25,11 +29,28 @@ contract("TreeAuction", (accounts) => {
       unsafeAllowCustomTypes: true,
       from: deployerAccount,
     });
+
     treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+    genesisTreeInstance = await deployProxy(GenesisTree, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    await treeAuctionInstance.setGenesisTreeAddress(
+      genesisTreeInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+    await Common.addAuctionRole(
+      arInstance,
+      treeAuctionInstance.address,
+      deployerAccount
+    );
   });
 
   afterEach(async () => {});
@@ -52,12 +73,29 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
   });
-
+  it("should set genesis tree address with admin access or fail otherwise", async () => {
+    let tx = await treeAuctionInstance.setGenesisTreeAddress(
+      genesisTreeInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treeAuctionInstance
+      .setTreasuryAddress(userAccount1, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
+  });
   it("auction call by admin access or fail otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    const treeId = 1;
+    const treeId2 = 2;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     let tx = await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -66,11 +104,13 @@ contract("TreeAuction", (accounts) => {
     );
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+      from: deployerAccount,
+    });
     //only admin can call this method so it should be rejected
     await treeAuctionInstance
       .createAuction(
-        2,
+        treeId2,
         Number(startTime.toString()),
         Number(endTime.toString()),
         web3.utils.toWei("1"),
@@ -79,6 +119,34 @@ contract("TreeAuction", (accounts) => {
       )
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
+  it("should fail auction with duplicate tree id ( tree is in other provide ) ", async () => {
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    let treeId = 1;
+
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+    let tx = await treeAuctionInstance.createAuction(
+      treeId,
+      Number(startTime.toString()),
+      Number(endTime.toString()),
+      web3.utils.toWei("1"),
+      web3.utils.toWei("0.1"),
+      { from: deployerAccount }
+    );
+
+    await treeAuctionInstance
+      .createAuction(
+        treeId,
+        Number(startTime.toString()),
+        Number(endTime.toString()),
+        web3.utils.toWei("1"),
+        web3.utils.toWei("0.1"),
+        { from: deployerAccount }
+      )
+      .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+  });
 
   it("check auction data insert conrrectly", async () => {
     let treeId = 1;
@@ -86,7 +154,9 @@ contract("TreeAuction", (accounts) => {
     let bidInterval = web3.utils.toWei("0.1");
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     let tx = await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime.toString()),
@@ -97,7 +167,7 @@ contract("TreeAuction", (accounts) => {
     );
     let result = await treeAuctionInstance.auctions.call(1);
 
-    assert.equal(result.treeId.toNumber(), 1);
+    assert.equal(result.treeId.toNumber(), treeId);
     assert.equal(Number(result.highestBid.toString()), initialValue);
     assert.equal(Number(result.bidInterval.toString()), bidInterval);
     assert.equal(
@@ -108,16 +178,15 @@ contract("TreeAuction", (accounts) => {
     assert.equal(web3.utils.hexToUtf8(result.status), "started");
   });
 
-  it("auction have valid tree status", async () => {
-    //TODO: aliad010 when tree status done check here
-  });
-
   it("bid auction and check highest bid set change correctly", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -140,8 +209,12 @@ contract("TreeAuction", (accounts) => {
   it("must offer suitable value for auction or rejected otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -163,9 +236,12 @@ contract("TreeAuction", (accounts) => {
   it("should increase end time of auction beacuse bid less than 600 secconds left to end of auction", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 300);
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     let tx = await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -190,8 +266,12 @@ contract("TreeAuction", (accounts) => {
   it("bid before start of aution must be failed", async () => {
     startTime = await Common.timeInitial(TimeEnumes.minutes, 5);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -209,9 +289,12 @@ contract("TreeAuction", (accounts) => {
   it("bid after end of auction must be failed", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     let tx = await treeAuctionInstance.createAuction(
-      1,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -233,6 +316,9 @@ contract("TreeAuction", (accounts) => {
     let treeId = 1;
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime.toString()),
@@ -261,7 +347,9 @@ contract("TreeAuction", (accounts) => {
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
-
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime.toString()),
@@ -284,86 +372,101 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
+  \ / TODO;
+  // it("should end auction and fail in invalid situations", async () => {
+  //   await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
+  //     from: deployerAccount,
+  //   });
 
-  it("should end auction and fail in invalid situations", async () => {
-    await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
-      from: deployerAccount,
-    });
-    const treeId = 1;
-    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
-    const highestBid = web3.utils.toWei("1.15");
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: deployerAccount }
-    );
-    await treeAuctionInstance
-      .endAuction(1, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
-    await treeAuctionInstance.bid(1, {
-      from: userAccount1,
-      value: highestBid,
-    });
-    await Common.travelTime(TimeEnumes.seconds, 670);
-    let successEnd = await treeAuctionInstance.endAuction(1, {
-      from: deployerAccount,
-    }); //succesfully end the auction
+  //   await treeAuctionInstance.setGenesisTreeAddress(
+  //     genesisTreeInstance.address,
+  //     { from: deployerAccount }
+  //   );
+  //   const treeId = 1;
+  //   startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+  //   endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
+  //   const highestBid = web3.utils.toWei("1.15");
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+  //   await treeAuctionInstance.createAuction(
+  //     treeId,
+  //     Number(startTime.toString()),
+  //     Number(endTime.toString()),
+  //     web3.utils.toWei("1"),
+  //     web3.utils.toWei("0.1"),
+  //     { from: deployerAccount }
+  //   );
+  //   await treeAuctionInstance
+  //     .endAuction(1, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
+  //   await treeAuctionInstance.bid(1, {
+  //     from: userAccount1,
+  //     value: highestBid,
+  //   });
+  //   await Common.travelTime(TimeEnumes.seconds, 670);
+  //   let successEnd = await treeAuctionInstance.endAuction(1, {
+  //     from: deployerAccount,
+  //   }); //succesfully end the auction
 
-    let failEnd = await treeAuctionInstance
-      .endAuction(1, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(
-        TreeAuctionErrorMsg.END_AUCTION_WHEN_IT_HAS_BEEN_ENDED
-      ); //auction already ended and must be rejected
-  });
+  //   let failEnd = await treeAuctionInstance
+  //     .endAuction(1, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(
+  //       TreeAuctionErrorMsg.END_AUCTION_WHEN_IT_HAS_BEEN_ENDED
+  //     ); //auction already ended and must be rejected
+  // });
 
-  it("check emit end auction event", async () => {
-    await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
-      from: deployerAccount,
-    });
-    const treeId = 1;
-    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
-    const highestBid = web3.utils.toWei("1.15");
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: deployerAccount }
-    );
-    await treeAuctionInstance.bid(1, {
-      from: userAccount1,
-      value: highestBid,
-    });
-    await Common.travelTime(TimeEnumes.seconds, 670);
-    let successEnd = await treeAuctionInstance.endAuction(1, {
-      from: userAccount1,
-    }); //succesfully end the auction
+  // it("check emit end auction event", async () => {
+  //   await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
+  //     from: deployerAccount,
+  //   });
+  //   const treeId = 1;
+  //   startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+  //   endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
+  //   const highestBid = web3.utils.toWei("1.15");
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+  //   await treeAuctionInstance.createAuction(
+  //     treeId,
+  //     Number(startTime.toString()),
+  //     Number(endTime.toString()),
+  //     web3.utils.toWei("1"),
+  //     web3.utils.toWei("0.1"),
+  //     { from: deployerAccount }
+  //   );
+  //   await treeAuctionInstance.bid(1, {
+  //     from: userAccount1,
+  //     value: highestBid,
+  //   });
+  //   await Common.travelTime(TimeEnumes.seconds, 670);
+  //   let successEnd = await treeAuctionInstance.endAuction(1, {
+  //     from: userAccount1,
+  //   }); //succesfully end the auction
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
-      return (
-        Number(ev.auctionId.toString()) == 1 &&
-        Number(ev.treeId.toString()) == treeId &&
-        ev.winner == userAccount1 &&
-        Number(ev.amount.toString()) == highestBid
-      );
-    });
-  });
-
+  //   truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+  //     return (
+  //       Number(ev.auctionId.toString()) == 1 &&
+  //       Number(ev.treeId.toString()) == treeId &&
+  //       ev.winner == userAccount1 &&
+  //       Number(ev.amount.toString()) == highestBid
+  //     );
+  //   });
+  // });
+  // xxx
   it("end auction when there is no bidder", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
+    const treeId = 2;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     let tx = await treeAuctionInstance.createAuction(
-      2,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1"),
@@ -383,10 +486,13 @@ contract("TreeAuction", (accounts) => {
     let auctionId = 1;
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
-
+    const treeId = 0;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     //create auction
     await treeAuctionInstance.createAuction(
-      0,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1", "Ether"),
@@ -443,9 +549,12 @@ contract("TreeAuction", (accounts) => {
     endTime = await Common.timeInitial(TimeEnumes.seconds, 120);
 
     let auctionId = 1;
-
+    const treeId = 0;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      0,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1", "Ether"),
@@ -517,9 +626,12 @@ contract("TreeAuction", (accounts) => {
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      auctionId,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1", "Ether"),
@@ -551,9 +663,12 @@ contract("TreeAuction", (accounts) => {
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance.createAuction(
-      auctionId,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1", "Ether"),
@@ -586,10 +701,13 @@ contract("TreeAuction", (accounts) => {
     await arInstance.pause({
       from: deployerAccount,
     });
-
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
     await treeAuctionInstance
       .createAuction(
-        auctionId,
+        treeId,
         Number(startTime.toString()),
         Number(endTime.toString()),
         web3.utils.toWei("1", "Ether"),
@@ -605,8 +723,13 @@ contract("TreeAuction", (accounts) => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
+    const treeId = 1;
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+
     await treeAuctionInstance.createAuction(
-      auctionId,
+      treeId,
       Number(startTime.toString()),
       Number(endTime.toString()),
       web3.utils.toWei("1", "Ether"),

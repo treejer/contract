@@ -47,6 +47,9 @@ contract GenesisTree is Initializable, RelayRecipient {
     mapping(uint256 => GenTree) public genTrees;
     mapping(uint256 => UpdateGenTree) public updateGenTrees;
 
+    event UpdateTree(uint256 treeId);
+    event VerifyUpdate(uint256 treeId, uint64 updateStatus);
+
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -250,6 +253,8 @@ contract GenesisTree is Initializable, RelayRecipient {
         updateGenTree.updateSpecs = _treeSpecs;
         updateGenTree.updateDate = now.toUint64();
         updateGenTree.updateStatus = 1;
+
+        emit UpdateTree(_treeId);
     }
 
     function verifyUpdate(uint256 _treeId, bool _isVerified)
@@ -270,7 +275,9 @@ contract GenesisTree is Initializable, RelayRecipient {
                 _checkPlanter(_treeId, _msgSender()),
             "Admin or ambassador or planter can accept updates"
         );
+
         UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
+
         if (_isVerified) {
             GenTree storage genTree = genTrees[_treeId];
 
@@ -280,12 +287,14 @@ contract GenesisTree is Initializable, RelayRecipient {
 
             updateGenTree.updateStatus = 3;
 
-            if (treeToken.exists(_treeId)) {
-                //call genesis fund
-            }
+            // if (treeToken.exists(_treeId)) {
+            //     call genesis fund
+            // }
         } else {
             updateGenTree.updateStatus = 2;
         }
+
+        emit VerifyUpdate(_treeId, updateGenTree.updateStatus);
     }
 
     function checkAndSetProvideStatus(uint256 _treeId, uint8 _provideType)

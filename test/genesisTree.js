@@ -8,6 +8,7 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
+const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -1760,7 +1761,6 @@ contract("GenesisTree", (accounts) => {
     });
   });
 
-  ///////////////////////////////////////////////////////// mehdi //////////////////////////////
   // //-----------------------------------------------------------updateTree test--------------------------------------------
 
   // it("Should update tree work seccussfully", async () => {
@@ -1784,7 +1784,7 @@ contract("GenesisTree", (accounts) => {
 
   //   await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //   let tx = await genesisTreeInstance.updateTree(treeId, ipfsHash, {
   //     from: userAccount2,
   //   });
 
@@ -1794,6 +1794,10 @@ contract("GenesisTree", (accounts) => {
 
   //   assert.equal(result.updateDate.toNumber(), now);
   //   assert.equal(result.updateStatus.toNumber(), 1);
+
+  //   truffleAssert.eventEmitted(tx, "UpdateTree", (ev) => {
+  //     return ev.treeId == treeId;
+  //   });
   // });
 
   // it("Should update tree not work because update time not reach", async () => {
@@ -1821,6 +1825,57 @@ contract("GenesisTree", (accounts) => {
   //       from: userAccount2,
   //     })
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+  // });
+
+  // it("Should update tree reject (update time not reach)", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+  //     from: userAccount2,
+  //   });
+
+  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //     from: userAccount1,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .updateTree(treeId, ipfsHash, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+
+  //   let result = await genesisTreeInstance.updateGenTrees.call(treeId);
+
+  //   let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+  //   assert.equal(result.updateDate.toNumber(), now);
+  //   assert.equal(result.updateStatus.toNumber(), 3);
   // });
 
   // it("Should be fail because invalid address try to update", async () => {
@@ -1910,7 +1965,7 @@ contract("GenesisTree", (accounts) => {
   //   let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
   //   let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
 
-  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //   let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
   //     from: deployerAccount,
   //   });
 
@@ -1930,6 +1985,10 @@ contract("GenesisTree", (accounts) => {
   //   );
 
   //   assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
+
+  //   truffleAssert.eventEmitted(tx, "VerifyUpdate", (ev) => {
+  //     return ev.treeId == treeId && ev.updateStatus == 3;
+  //   });
   // });
 
   // it("Should verify update work seccussfully when verify false by Admin", async () => {
@@ -1961,13 +2020,17 @@ contract("GenesisTree", (accounts) => {
   //     from: deployerAccount,
   //   });
 
-  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
+  //   let tx = await genesisTreeInstance.verifyUpdate(treeId, false, {
   //     from: deployerAccount,
   //   });
 
   //   let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
 
   //   assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
+
+  //   truffleAssert.eventEmitted(tx, "VerifyUpdate", (ev) => {
+  //     return ev.treeId == treeId && ev.updateStatus == 2;
+  //   });
   // });
 
   // it("Should verify update work seccussfully by Ambassador", async () => {
@@ -2318,6 +2381,12 @@ contract("GenesisTree", (accounts) => {
 
   //   await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
   //   await genesisTreeInstance.checkAndSetProvideStatus(1, 1, {
   //     from: userAccount5,
   //   });
@@ -2339,12 +2408,16 @@ contract("GenesisTree", (accounts) => {
   //   assert.equal(addressGetToken, userAccount4, "token not true mint");
   // });
 
-  // it("verifyUpdate should be fail because invalid access(just auction access for this function)", async () => {
+  // it("updateOwner should be fail because invalid access(just auction access for this function)", async () => {
   //   const treeId = 1;
   //   const gbId = 1;
   //   const gbType = 1;
   //   const birthDate = parseInt(new Date().getTime() / 1000);
   //   const countryCode = 2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
   //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
   //     from: deployerAccount,
@@ -2367,6 +2440,46 @@ contract("GenesisTree", (accounts) => {
   //       from: userAccount5,
   //     })
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+  // });
+
+  // it("updateOwner should be fail because token mint for another user", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.updateOwner(1, userAccount4, {
+  //     from: userAccount5,
+  //   });
+
+  //   await genesisTreeInstance.updateOwner(1, userAccount6, {
+  //     from: userAccount5,
+  //   }).should.be.rejected;
   // });
 
   // //---------------------------------------------------------updateProvideStatus----------------------------------

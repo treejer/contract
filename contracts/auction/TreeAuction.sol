@@ -99,9 +99,8 @@ contract TreeAuction is Initializable {
         uint256 _bidInterval
     ) external ifNotPaused onlyAdmin {
         auctionId.increment();
-        // uint256 provideStatus = genesisTree.setStatus(treeId);
-        uint8 provideStatus = 0; //TODO: un cooment here  when  fixing tests.
-        // uint8 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
+
+        uint8 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
         require(provideStatus == 0, "the tree is on other provide");
 
         auctions[auctionId.current()] = Auction(
@@ -205,7 +204,6 @@ contract TreeAuction is Initializable {
         if (auction.bider != address(0)) {
             genesisTree.updateOwner(auction.treeId, auction.bider);
             // genesisTreeFund.update(auction.treeId,auction.highestBid);
-
             emit AuctionEnded(
                 _auctionId,
                 auction.treeId,

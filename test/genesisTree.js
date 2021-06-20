@@ -165,14 +165,42 @@ contract("GenesisTree", (accounts) => {
     });
     let result1 = await genesisTreeInstance.genTrees.call(treeId1);
 
+    assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
+    assert.equal(Number(result1.gbId.toString()), 0, "incorrect gbId");
+    assert.equal(Number(result1.treeType.toString()), 0, "incorrect treeType");
+    assert.equal(Number(result1.gbType.toString()), 0, "incorrect gbType");
+    assert.equal(
+      Number(result1.provideStatus.toString()),
+      0,
+      "incorrect provide status"
+    );
+    assert.equal(result1.isExist, true, "tree existance problem");
     assert.equal(
       Number(result1.treeStatus.toString()),
       1,
       "tree status is incorrect"
     );
-    assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
+    assert.equal(
+      Number(result1.countryCode.toString()),
+      0,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(result1.plantDate.toString()),
+      0,
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(result1.birthDate.toString()),
+      0,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(result1.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
     assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
-    assert.equal(result1.isExist, true, "tree existance problem");
   });
   it("fail to add tree", async () => {
     let treeId = 1;
@@ -245,14 +273,47 @@ contract("GenesisTree", (accounts) => {
       { from: deployerAccount }
     );
     let result1 = await genesisTreeInstance.genTrees.call(treeId);
+    //////////////////////////////////////////////////////////////////////////
 
-    assert.equal(result1.planterId, 0x0, "plnter id is incorrect");
-    assert.equal(Number(result1.gbId.toString()), gbId, "incorrect gbId set");
+    assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
+    assert.equal(Number(result1.gbId.toString()), gbId, "incorrect gbId");
+    assert.equal(Number(result1.treeType.toString()), 0, "incorrect treeType");
+    assert.equal(Number(result1.gbType.toString()), gbType, "incorrect gbType");
     assert.equal(
-      Number(result1.gbType.toString()),
-      gbType,
-      "invalid gbType set"
+      Number(result1.provideStatus.toString()),
+      0,
+      "incorrect provide status"
     );
+    assert.equal(result1.isExist, true, "tree existance problem");
+    assert.equal(
+      Number(result1.treeStatus.toString()),
+      1,
+      "tree status is incorrect"
+    );
+    assert.equal(
+      Number(result1.countryCode.toString()),
+      0,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(result1.plantDate.toString()),
+      0,
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(result1.birthDate.toString()),
+      0,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(result1.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
+    assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+    ////////////////////////////////////////////////////
+
     //asign to planert
     let asign2 = await genesisTreeInstance.asignTreeToPlanter(
       treeId,
@@ -262,14 +323,51 @@ contract("GenesisTree", (accounts) => {
       { from: deployerAccount }
     );
     let result2 = await genesisTreeInstance.genTrees.call(treeId);
-    console.log("result2", result2);
-    assert.equal(result2.planterId, userAccount2, "plnter id is incorrect");
-    assert.equal(Number(result2.gbId.toString()), gbId, "incorrect gbId set");
+
+    ///////////////////////////////////////////////////////////////////////////
+
     assert.equal(
-      Number(result2.gbType.toString()),
-      gbType,
-      "invalid gbType set"
+      result2.planterId,
+      userAccount2,
+      "invalid planter id in add tree"
     );
+    assert.equal(Number(result2.gbId.toString()), gbId, "incorrect gbId");
+    assert.equal(Number(result2.treeType.toString()), 0, "incorrect treeType");
+    assert.equal(Number(result2.gbType.toString()), gbType, "incorrect gbType");
+    assert.equal(
+      Number(result2.provideStatus.toString()),
+      0,
+      "incorrect provide status"
+    );
+    assert.equal(result2.isExist, true, "tree existance problem");
+    assert.equal(
+      Number(result2.treeStatus.toString()),
+      1,
+      "tree status is incorrect"
+    );
+    assert.equal(
+      Number(result2.countryCode.toString()),
+      0,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(result2.plantDate.toString()),
+      0,
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(result2.birthDate.toString()),
+      0,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(result2.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
+    assert.equal(result2.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+    ///////////////////////////////////////////////////////////////////////////
   });
   it("should fail asign tree to planter", async () => {
     const treeId = 1;
@@ -422,46 +520,75 @@ contract("GenesisTree", (accounts) => {
     );
     await genesisTreeInstance.plantTree(
       treeId,
-      ipfsHash,
+      updateIpfsHash1,
       birthDate,
       countryCode,
       { from: userAccount2 }
     );
+    const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
     let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
-    assert.equal(
-      Number(genesisTreeResult.birthDate.toString()),
-      birthDate,
-      "birthDate set inccorectly"
-    );
-    assert.equal(
-      Number(genesisTreeResult.countryCode.toString()),
-      countryCode,
-      "country code set inccorectly"
-    );
+    /////////////////////////////////////////////////////////////////////////////////////////////
     assert.equal(
       genesisTreeResult.planterId,
       userAccount2,
-      "plnter id is incorrect"
+      "invalid planter id in add tree"
     );
-    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
-    assert.equal(genesisTreeResult.isExist, true, "tree existance problem");
     assert.equal(
       Number(genesisTreeResult.gbId.toString()),
       gbId,
-      "incorrect gbId set"
+      "incorrect gbId"
+    );
+    assert.equal(
+      Number(genesisTreeResult.treeType.toString()),
+      0,
+      "incorrect treeType"
     );
     assert.equal(
       Number(genesisTreeResult.gbType.toString()),
       gbType,
-      "invalid gbType set"
+      "incorrect gbType"
     );
+    assert.equal(
+      Number(genesisTreeResult.provideStatus.toString()),
+      0,
+      "incorrect provide status"
+    );
+    assert.equal(genesisTreeResult.isExist, true, "tree existance problem");
+    assert.equal(
+      Number(genesisTreeResult.treeStatus.toString()),
+      1,
+      "tree status is incorrect"
+    );
+    assert.equal(
+      Number(genesisTreeResult.countryCode.toString()),
+      countryCode,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(genesisTreeResult.plantDate.toString()),
+      Number(plantDate.toString()),
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(genesisTreeResult.birthDate.toString()),
+      birthDate,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(genesisTreeResult.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
+    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
     let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
     assert.equal(
       updateGenResult.updateSpecs,
-      ipfsHash,
+      updateIpfsHash1,
       "ipfs hash set inccorect"
     );
     assert.equal(
@@ -498,47 +625,148 @@ contract("GenesisTree", (accounts) => {
       { from: deployerAccount }
     );
     let genTreeResult1 = await genesisTreeInstance.genTrees.call(treeId);
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+
     assert.equal(
       genTreeResult1.planterId,
       0x0,
       "invalid planter id in add tree"
     );
-    assert.equal(genTreeResult1.treeSpecs, ipfsHash, "incorrect ipfs hash");
+    assert.equal(
+      Number(genTreeResult1.gbId.toString()),
+      gbId,
+      "incorrect gbId"
+    );
+    assert.equal(
+      Number(genTreeResult1.treeType.toString()),
+      0,
+      "incorrect treeType"
+    );
+    assert.equal(
+      Number(genTreeResult1.gbType.toString()),
+      gbType,
+      "incorrect gbType"
+    );
+    assert.equal(
+      Number(genTreeResult1.provideStatus.toString()),
+      0,
+      "incorrect provide status"
+    );
     assert.equal(genTreeResult1.isExist, true, "tree existance problem");
+    assert.equal(
+      Number(genTreeResult1.treeStatus.toString()),
+      1,
+      "tree status is incorrect"
+    );
+    assert.equal(
+      Number(genTreeResult1.countryCode.toString()),
+      0,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(genTreeResult1.plantDate.toString()),
+      0,
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(genTreeResult1.birthDate.toString()),
+      0,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(genTreeResult1.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
+    assert.equal(genTreeResult1.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     await genesisTreeInstance.plantTree(
       treeId,
-      ipfsHash,
+      updateIpfsHash1,
       birthDate,
       countryCode,
       { from: userAccount2 }
     );
-    let genTreeResult2 = await genesisTreeInstance.genTrees.call(treeId);
-    assert.equal(
-      Number(genTreeResult2.birthDate.toString()),
-      birthDate,
-      "birthDate set inccorectly"
-    );
-    assert.equal(
-      Number(genTreeResult2.countryCode.toString()),
-      countryCode,
-      "country code set inccorectly"
-    );
+    const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const now = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const genTreeResult2 = await genesisTreeInstance.genTrees.call(treeId);
+
+    //////////////////////////////////////////////////////////////////////////////////
+
     assert.equal(
       genTreeResult2.planterId,
       userAccount2,
-      "plnter id is incorrect"
+      "invalid planter id in add tree"
     );
-    assert.equal(genTreeResult2.treeSpecs, ipfsHash, "incorrect ipfs hash");
-    assert.equal(genTreeResult2.isExist, true, "tree existance problem");
     assert.equal(
       Number(genTreeResult2.gbId.toString()),
       gbId,
-      "incorrect gbId set"
+      "incorrect gbId"
+    );
+    assert.equal(
+      Number(genTreeResult2.treeType.toString()),
+      0,
+      "incorrect treeType"
     );
     assert.equal(
       Number(genTreeResult2.gbType.toString()),
       gbType,
-      "invalid gbType set"
+      "incorrect gbType"
+    );
+    assert.equal(
+      Number(genTreeResult2.provideStatus.toString()),
+      0,
+      "incorrect provide status"
+    );
+    assert.equal(genTreeResult2.isExist, true, "tree existance problem");
+    assert.equal(
+      Number(genTreeResult2.treeStatus.toString()),
+      1,
+      "tree status is incorrect"
+    );
+    assert.equal(
+      Number(genTreeResult2.countryCode.toString()),
+      countryCode,
+      "incorrect country code"
+    );
+    assert.equal(
+      Number(genTreeResult2.plantDate.toString()),
+      Number(plantDate.toString()),
+      "incorrect plant date"
+    );
+    assert.equal(
+      Number(genTreeResult2.birthDate.toString()),
+      birthDate,
+      "incorrect birth date"
+    );
+    assert.equal(
+      Number(genTreeResult2.lastUpdate.toString()),
+      0,
+      "incorrect last update"
+    );
+    assert.equal(genTreeResult2.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+    assert.equal(
+      updateGenResult.updateSpecs,
+      updateIpfsHash1,
+      "ipfs hash set inccorect"
+    );
+    assert.equal(
+      Number(updateGenResult.updateStatus.toString()),
+      1,
+      "invlid updateGen update status"
+    );
+    assert.equal(
+      Number(updateGenResult.updateDate.toString()),
+      Number(now.toString()),
+      "invlid time"
     );
   });
   it("should fail plant tree with planter", async () => {

@@ -30,6 +30,7 @@ const GenesisTreeErrorMsg = {
   INVALID_UPDATE_STATUS_IN_VERIFY_PLANT: "invalid update status",
   DUPLICATE_TREE: "duplicate tree",
   INVALID_IPFS: "invalid ipfs hash",
+  INVALID_TREE_STATUS_FOR_PLANT: "invalid tree status for plant",
   TREE_IS_PLANTED_BEFORE: "the tree is planted",
   INVALID_GB: "invalid gb",
   INVALID_PLANTER: "invalid planter data",

@@ -751,7 +751,6 @@ contract("GenesisTree", (accounts) => {
 
     ////////////////////////////////////////////////////////////////////////////////////
     let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
     assert.equal(
       updateGenResult.updateSpecs,
@@ -1429,6 +1428,265 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(
         GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
       );
+  });
+  it("should fail asign tree and plant tree after verify", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    await Common.addGB(
+      gbInstance,
+      userAccount1,
+      [userAccount2, userAccount3, userAccount4],
+      "gb1"
+    );
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      userAccount2,
+      gbType,
+      { from: deployerAccount }
+    );
+
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      {
+        from: userAccount2,
+      }
+    );
+    await genesisTreeInstance.verifyPlant(treeId, true, {
+      from: userAccount1,
+    });
+    await genesisTreeInstance
+      .asignTreeToPlanter(treeId, gbId, userAccount2, gbType, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_IS_PLANTED_BEFORE);
+    await genesisTreeInstance
+      .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+      );
+  });
+  it("should asign tree to another planter after plant tree", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbId2 = 2;
+    const gbId3 = 3;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+    await Common.addAmbassador(arInstance, userAccount6, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
+    await Common.addGB(
+      gbInstance,
+      userAccount1,
+      [userAccount2, userAccount3],
+      "gb1"
+    );
+    await Common.addGB(
+      gbInstance,
+      userAccount1,
+      [userAccount4, userAccount5],
+      "gb 2"
+    );
+    await Common.addGB(
+      gbInstance,
+      userAccount6,
+      [userAccount7, userAccount8],
+      "gb3"
+    );
+
+    await await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      zeroAddress,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      {
+        from: userAccount2,
+      }
+    );
+    await genesisTreeInstance
+      .asignTreeToPlanter(treeId, gbId2, userAccount3, gbType, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId2,
+      userAccount4,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance
+      .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount4 }
+    );
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId3,
+      zeroAddress,
+      gbType,
+      { from: deployerAccount }
+    );
+
+    await genesisTreeInstance
+      .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
+
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount7 }
+    );
+  });
+  it("should plant tree after reject tree", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbId2 = 2;
+    const gbId3 = 3;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+    await Common.addAmbassador(arInstance, userAccount6, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
+    await Common.addGB(
+      gbInstance,
+      userAccount1,
+      [userAccount2, userAccount3],
+      "gb1"
+    );
+    await Common.addGB(
+      gbInstance,
+      userAccount1,
+      [userAccount4, userAccount5],
+      "gb 2"
+    );
+    await Common.addGB(
+      gbInstance,
+      userAccount6,
+      [userAccount7, userAccount8],
+      "gb3"
+    );
+    await await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      zeroAddress,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      {
+        from: userAccount2,
+      }
+    );
+    await genesisTreeInstance
+      .verifyPlant(treeId, false, { from: userAccount2 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+    await genesisTreeInstance.verifyPlant(treeId, false, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount2 }
+    );
+    await genesisTreeInstance.verifyPlant(treeId, false, {
+      from: userAccount3,
+    });
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      userAccount3,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount3 }
+    );
+    await genesisTreeInstance
+      .verifyPlant(treeId, false, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+    await genesisTreeInstance.verifyPlant(treeId, false, {
+      from: userAccount2,
+    });
   });
 
   ///////////////////////////////////////////////////////// mehdi //////////////////////////////

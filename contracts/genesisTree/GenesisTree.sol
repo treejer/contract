@@ -134,19 +134,23 @@ contract GenesisTree is Initializable, RelayRecipient {
             }
 
             require(isInGb, "invalid planter data");
-            genTrees[_treeId].planterId = _planterId;
         }
+        genTrees[_treeId].planterId = _planterId;
         genTrees[_treeId].gbId = _gbId;
         genTrees[_treeId].gbType = _gbType;
     }
 
+    //TODO: ambassedor can plant tree???????????
     function plantTree(
         uint256 _treeId,
         string memory _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external validTree(_treeId) {
-        require(genTrees[_treeId].treeStatus == 1, "invalid status");
+        require(
+            genTrees[_treeId].treeStatus == 1,
+            "invalid tree status for plant"
+        );
         require(bytes(_treeSpecs).length > 0, "invalid ipfs hash");
         if (genTrees[_treeId].planterId == address(0)) {
             require(

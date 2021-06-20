@@ -372,7 +372,7 @@ contract("TreeAuction", (accounts) => {
       );
     });
   });
-  \ / TODO;
+//TODO: aliad check out hete
   // it("should end auction and fail in invalid situations", async () => {
   //   await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
   //     from: deployerAccount,

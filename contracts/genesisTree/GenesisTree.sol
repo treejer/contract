@@ -20,8 +20,8 @@ contract GenesisTree is Initializable, RelayRecipient {
     ITree public treeToken;
     IGBFactory public gbFactory;
 
-    event PlantTree(uint256 _treeId, address _planter);
-    event VerifyPlant(uint256 _treeId, uint256 _updateStatus);
+    event PlantTree(uint256 treeId, address planter);
+    event VerifyPlant(uint256 treeId, uint256 updateStatus);
 
     struct GenTree {
         address planterId;
@@ -160,10 +160,28 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
         require(bytes(_treeSpecs).length > 0, "invalid ipfs hash");
         if (genTrees[_treeId].planterId == address(0)) {
-            require(
-                _checkPlanter(_treeId, _msgSender()),
-                "ambassador or planter can plant tree"
-            );
+            bool isInGb = false;
+
+            for (
+                uint256 index = 0;
+                index < gbFactory.getGBPlantersCount(genTrees[_treeId].gbId);
+                index++
+            ) {
+                if (
+                    gbFactory.gbToPlanters(genTrees[_treeId].gbId, index) ==
+                    _msgSender()
+                ) {
+                    isInGb = true;
+                    break;
+                }
+            }
+
+            require(isInGb, "planter in gb can plant tree");
+
+            // require(
+            //     _checkPlanter(_treeId, _msgSender()),
+            //     "ambassador or planter can plant tree"
+            // );
             genTrees[_treeId].planterId = _msgSender();
         } else {
             require(

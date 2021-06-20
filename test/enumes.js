@@ -23,7 +23,7 @@ const TreeAuctionErrorMsg = {
 };
 const GenesisTreeErrorMsg = {
   PLANT_TREE_WITH_PLANTER: "planter of tree can plant it",
-  PLANT_TREE_ACCESS_NO_PLANTER: "ambassador or planter can plant tree",
+  PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",
   VERIFY_PLANT_ACCESS: "ambassador or planter can verify plant",
   VERIFY_PLANT_BY_PLANTER: "Planter of tree can't accept update",
   INVALID_TREE_STATUS_IN_VERIFY_PLANT: "invalid tree status",

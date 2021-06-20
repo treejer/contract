@@ -439,13 +439,18 @@ contract("GenesisTree", (accounts) => {
       gbType,
       { from: deployerAccount }
     );
-    await genesisTreeInstance.plantTree(
+    let tx = await genesisTreeInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
       countryCode,
       { from: userAccount2 }
     );
+    truffleAssert.eventEmitted(tx, "PlantTree", (ev) => {
+      return (
+        ev.planter == userAccount2 && Number(ev.treeId.toString()) == treeId
+      );
+    });
   });
   it("should plant tree successfully when tree don't have planter", async () => {
     const treeId = 1;
@@ -477,13 +482,20 @@ contract("GenesisTree", (accounts) => {
       gbType,
       { from: deployerAccount }
     );
-    await genesisTreeInstance.plantTree(
+    const tx1 = await genesisTreeInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
       countryCode,
-      { from: userAccount1 }
+      { from: userAccount2 }
     );
+
+    truffleAssert.eventEmitted(tx1, "PlantTree", (ev) => {
+      return (
+        ev.planter == userAccount2 && Number(ev.treeId.toString()) == treeId
+      );
+    });
+
     await genesisTreeInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
@@ -494,13 +506,18 @@ contract("GenesisTree", (accounts) => {
       gbType,
       { from: deployerAccount }
     );
-    await genesisTreeInstance.plantTree(
+    const tx2 = await genesisTreeInstance.plantTree(
       treeId2,
       ipfsHash,
       birthDate,
       countryCode,
-      { from: userAccount2 }
+      { from: userAccount3 }
     );
+    truffleAssert.eventEmitted(tx2, "PlantTree", (ev) => {
+      return (
+        ev.planter == userAccount3 && Number(ev.treeId.toString()) == treeId2
+      );
+    });
   });
   it("check data to be correct after plant tree with planter", async () => {
     const treeId = 1;
@@ -808,6 +825,12 @@ contract("GenesisTree", (accounts) => {
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
     await genesisTreeInstance
+      .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+
+    await genesisTreeInstance
       .plantTree(treeId, "", birthDate, countryCode, { from: userAccount2 })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
   });
@@ -842,6 +865,11 @@ contract("GenesisTree", (accounts) => {
     await genesisTreeInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount4,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
+    await genesisTreeInstance
+      .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+        from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
     await genesisTreeInstance
@@ -897,7 +925,15 @@ contract("GenesisTree", (accounts) => {
         from: userAccount2,
       }
     );
-    await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount1 });
+    const tx1 = await genesisTreeInstance.verifyPlant(treeId, true, {
+      from: userAccount1,
+    });
+    truffleAssert.eventEmitted(tx1, "VerifyPlant", (ev) => {
+      return (
+        Number(ev.updateStatus.toString()) == 3 &&
+        Number(ev.treeId.toString()) == treeId
+      );
+    });
     await genesisTreeInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
@@ -915,8 +951,14 @@ contract("GenesisTree", (accounts) => {
       countryCode,
       { from: userAccount3 }
     );
-    await genesisTreeInstance.verifyPlant(treeId2, false, {
+    const tx2 = await genesisTreeInstance.verifyPlant(treeId2, false, {
       from: deployerAccount,
+    });
+    truffleAssert.eventEmitted(tx2, "VerifyPlant", (ev) => {
+      return (
+        Number(ev.updateStatus.toString()) == 2 &&
+        Number(ev.treeId.toString()) == treeId2
+      );
     });
     await genesisTreeInstance.addTree(treeId3, ipfsHash, {
       from: deployerAccount,
@@ -935,8 +977,14 @@ contract("GenesisTree", (accounts) => {
       countryCode,
       { from: userAccount4 }
     );
-    await genesisTreeInstance.verifyPlant(treeId3, true, {
+    const tx3 = await genesisTreeInstance.verifyPlant(treeId3, true, {
       from: userAccount2,
+    });
+    truffleAssert.eventEmitted(tx3, "VerifyPlant", (ev) => {
+      return (
+        Number(ev.updateStatus.toString()) == 3 &&
+        Number(ev.treeId.toString()) == treeId3
+      );
     });
   });
   it("check data to be correct after reject plant", async () => {
@@ -1551,8 +1599,27 @@ contract("GenesisTree", (accounts) => {
         from: userAccount2,
       }
     );
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      userAccount3,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount3 }
+    );
     await genesisTreeInstance
       .asignTreeToPlanter(treeId, gbId2, userAccount3, gbType, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
+    await genesisTreeInstance
+      .asignTreeToPlanter(treeId, gbId2, userAccount1, gbType, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
@@ -1600,8 +1667,6 @@ contract("GenesisTree", (accounts) => {
   it("should plant tree after reject tree", async () => {
     const treeId = 1;
     const gbId = 1;
-    const gbId2 = 2;
-    const gbId3 = 3;
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;

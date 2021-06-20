@@ -12,6 +12,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant SEED_FACTORY_ROLE = keccak256("SEED_FACTORY_ROLE");
     bytes32 public constant O2_FACTORY_ROLE = keccak256("O2_FACTORY_ROLE");
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
+    bytes32 public constant GENESIS_TREE_ROLE = keccak256("GENESIS_TREE_ROLE");
 
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right contract in our setUpdateFactoryAddress() call.
@@ -118,5 +119,13 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
 
     function isAuction(address _address) public view returns (bool) {
         return hasRole(AUCTION_ROLE, _address);
+    }
+
+    function ifGenesisTree(address _address) public view {
+        require(isAuction(_address), "Caller is not GenesisTree");
+    }
+
+    function isGenesisTree(address _address) public view returns (bool) {
+        return hasRole(GENESIS_TREE_ROLE, _address);
     }
 }

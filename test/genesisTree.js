@@ -15,6 +15,12 @@ const {
   TreeAuctionErrorMsg,
 } = require("./enumes");
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/gsn");
+const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
+const ethers = require("ethers");
+
 contract("GenesisTree", (accounts) => {
   let genesisTreeInstance;
   let treeTokenInstance;
@@ -2296,5 +2302,189 @@ contract("GenesisTree", (accounts) => {
   //       from: userAccount5,
   //     })
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+  // });
+
+  // //---------------------------------------------------------updateProvideStatus----------------------------------
+
+  // it("updateProvideStatus should be success", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+
+  //   await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+  //     from: userAccount5,
+  //   });
+
+  //   await genesisTreeInstance.updateProvideStatus(treeId, {
+  //     from: userAccount5,
+  //   });
+
+  //   let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+
+  //   assert.equal(
+  //     resultAfter.provideStatus.toNumber(),
+  //     0,
+  //     "provideStatus not true update"
+  //   );
+  // });
+
+  // it("updateProvideStatus should be success", async () => {
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await successPlant(
+  //     treeId,
+  //     gbId,
+  //     gbType,
+  //     birthDate,
+  //     countryCode,
+  //     [userAccount2],
+  //     userAccount1,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+
+  //   await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+  //     from: userAccount5,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .updateProvideStatus(treeId, {
+  //       from: userAccount6,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+  // });
+
+  // it("test gsn", async () => {
+  //   let env = await GsnTestEnvironment.startGsn("localhost");
+  //   const {
+  //     forwarderAddress,
+  //     relayHubAddress,
+  //     paymasterAddress,
+  //   } = env.contractsDeployment;
+
+  //   await genesisTreeInstance.setTrustedForwarder(forwarderAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+  //   await paymaster.setWhitelistTarget(genesisTreeInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await paymaster.setRelayHub(relayHubAddress);
+  //   await paymaster.setTrustedForwarder(forwarderAddress);
+  //   web3.eth.sendTransaction({
+  //     from: accounts[0],
+  //     to: paymaster.address,
+  //     value: web3.utils.toWei("1"),
+  //   });
+
+  //   origProvider = web3.currentProvider;
+
+  //   conf = { paymasterAddress: paymaster.address };
+
+  //   gsnProvider = await Gsn.RelayProvider.newProvider({
+  //     provider: origProvider,
+  //     config: conf,
+  //   }).init();
+
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
+
+  //   let signerPlanter = provider.getSigner(3);
+  //   let signerAmbassador = provider.getSigner(2);
+
+  //   let contractPlanter = await new ethers.Contract(
+  //     genesisTreeInstance.address,
+  //     genesisTreeInstance.abi,
+  //     signerPlanter
+  //   );
+
+  //   let contractAmbassador = await new ethers.Contract(
+  //     genesisTreeInstance.address,
+  //     genesisTreeInstance.abi,
+  //     signerAmbassador
+  //   );
+
+  //   const treeId = 1;
+  //   const gbId = 1;
+  //   const gbType = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb1");
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(
+  //     treeId,
+  //     gbId,
+  //     userAccount2,
+  //     gbType,
+  //     { from: deployerAccount }
+  //   );
+
+  //   let planterBeforeBalance = await web3.eth.getBalance(userAccount2);
+
+  //   let ambassadorBeforeBalance = await web3.eth.getBalance(userAccount1);
+
+  //   await contractPlanter.plantTree(treeId, ipfsHash, birthDate, countryCode);
+
+  //   await contractAmbassador.verifyPlant(treeId, true);
+
+  //   let planterAfterBalance = await web3.eth.getBalance(userAccount2);
+
+  //   let ambassadorAfterBalance = await web3.eth.getBalance(userAccount1);
+
+  //   assert.equal(
+  //     planterAfterBalance,
+  //     planterBeforeBalance,
+  //     "planter balance not equal"
+  //   );
+
+  //   assert.equal(
+  //     ambassadorAfterBalance,
+  //     ambassadorBeforeBalance,
+  //     "ambassador balance not equal"
+  //   );
   // });
 });

@@ -72,6 +72,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
     }
 
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
+    }
+
     function setGBFactoryAddress(address _address) external onlyAdmin {
         IGBFactory candidateContract = IGBFactory(_address);
         require(candidateContract.isGBFactory());

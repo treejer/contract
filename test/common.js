@@ -10,6 +10,8 @@ const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
+const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
+const GENESIS_TREE_ROLE = web3.utils.soliditySha3("GENESIS_TREE_ROLE");
 
 Common.sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -112,6 +114,15 @@ Common.addTreeFactoryRole = async (instance, address, adminAccount) => {
 Common.addO2FactoryRole = async (instance, address, adminAccount) => {
   await instance.grantRole(O2_FACTORY_ROLE, address, { from: adminAccount });
 };
+
+Common.addAuctionRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(AUCTION_ROLE, address, { from: adminAccount });
+};
+
+Common.addGenesisTreeRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(GENESIS_TREE_ROLE, address, { from: adminAccount });
+};
+
 Common.travelTime = async (timeFormat, timeDuration) => {
   await time.increase(time.duration[timeFormat](timeDuration));
 };
@@ -122,6 +133,57 @@ Common.timeInitial = async (timeFormat, timeDuration) => {
 };
 Common.getNow = async () => {
   return await time.latest();
+};
+
+Common.successPlant = async (
+  genesisTreeInstance,
+  gbInstance,
+  arInstance,
+  ipfsHash,
+  treeId,
+  gbId,
+  gbType,
+  birthDate,
+  countryCode,
+  gbPlanterList,
+  ambassadorAddress,
+  planterAddress,
+  deployerAccount
+) => {
+  await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+    from: deployerAccount,
+  });
+
+  await Common.addAmbassador(arInstance, ambassadorAddress, deployerAccount);
+
+  await gbPlanterList.map(async (item) => {
+    await Common.addPlanter(arInstance, item, deployerAccount);
+  });
+
+  await Common.addGB(gbInstance, ambassadorAddress, gbPlanterList, "gb1");
+  await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    from: deployerAccount,
+  });
+  await genesisTreeInstance.asignTreeToPlanter(
+    treeId,
+    gbId,
+    planterAddress,
+    gbType,
+    { from: deployerAccount }
+  );
+
+  await genesisTreeInstance.plantTree(
+    treeId,
+    ipfsHash,
+    birthDate,
+    countryCode,
+    {
+      from: planterAddress,
+    }
+  );
+  await genesisTreeInstance.verifyPlant(treeId, true, {
+    from: ambassadorAddress,
+  });
 };
 
 module.exports = Common;

@@ -3,7 +3,6 @@
 pragma solidity ^0.6.9;
 
 interface IGBFactory {
-
     event NewGBAdded(uint256 id, string title);
     event GBActivated(uint256 id);
     event PlanterJoinedGB(uint256 id, address planter);
@@ -14,6 +13,7 @@ interface IGBFactory {
         returns (
             string memory,
             string memory,
+            bool,
             bool
         );
 

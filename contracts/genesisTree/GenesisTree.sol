@@ -129,10 +129,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint8 _gbType
     ) external onlyAdmin validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
-        // (, , , bool isExistGb) = gbFactory.greenBlocks(_gbId);
+
         uint256 total = gbFactory.totalGB();
 
-        require(_gbId < total, "invalid gb"); //TODO: aliad check here using gb.isExist after gb refactoring
+        require(_gbId < total, "invalid gb");
 
         if (_planterId != address(0)) {
             require(
@@ -207,14 +207,15 @@ contract GenesisTree is Initializable, RelayRecipient {
             "ambassador or planter can verify plant"
         );
 
-        GenTree storage tempGenTree = genTrees[_treeId];
-
         UpdateGenTree storage tempUpdateGenTree = updateGenTrees[_treeId];
 
         if (_isVerified) {
+            GenTree storage tempGenTree = genTrees[_treeId];
+
             tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
             tempGenTree.lastUpdate = tempUpdateGenTree.updateDate;
             tempGenTree.treeStatus = 2;
+
             tempUpdateGenTree.updateStatus = 3;
         } else {
             tempUpdateGenTree.updateStatus = 2;

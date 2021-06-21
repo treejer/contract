@@ -1840,6 +1840,7 @@ contract("GenesisTree", (accounts) => {
       from: userAccount1,
     });
 
+    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
     await genesisTreeInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
@@ -1847,8 +1848,6 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
 
     let result = await genesisTreeInstance.updateGenTrees.call(treeId);
-
-    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
     assert.equal(Number(result.updateDate.toString()), Number(now.toString()));
     assert.equal(result.updateStatus.toNumber(), 3);

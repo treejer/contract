@@ -27,7 +27,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint256 treeType;
         bool isExist;
         uint8 gbType;
-        uint8 provideStatus;
+        uint16 provideStatus;
         uint16 treeStatus;
         uint16 countryCode;
         uint64 plantDate;
@@ -287,9 +287,9 @@ contract GenesisTree is Initializable, RelayRecipient {
         external
         onlyAuction
         validTree(_treeId)
-        returns (uint8)
+        returns (uint16)
     {
-        uint8 nowProvideStatus = genTrees[_treeId].provideStatus;
+        uint16 nowProvideStatus = genTrees[_treeId].provideStatus;
 
         if (nowProvideStatus == 0) {
             genTrees[_treeId].provideStatus = _provideType;

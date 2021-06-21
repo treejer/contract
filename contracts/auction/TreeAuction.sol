@@ -100,7 +100,7 @@ contract TreeAuction is Initializable {
     ) external ifNotPaused onlyAdmin {
         auctionId.increment();
 
-        uint8 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
+        uint16 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
         require(provideStatus == 0, "the tree is on other provide");
 
         auctions[auctionId.current()] = Auction(

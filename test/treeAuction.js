@@ -8,7 +8,12 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const { TimeEnumes, CommonErrorMsg, TreeAuctionErrorMsg } = require("./enumes");
+const {
+  TimeEnumes,
+  CommonErrorMsg,
+  TreeAuctionErrorMsg,
+  GenesisTreeErrorMsg,
+} = require("./enumes");
 
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
@@ -24,6 +29,11 @@ contract("TreeAuction", (accounts) => {
   const userAccount2 = accounts[3];
   const userAccount3 = accounts[4];
   const userAccount4 = accounts[5];
+  const userAccount5 = accounts[6];
+  const userAccount6 = accounts[7];
+  const userAccount7 = accounts[8];
+  const userAccount8 = accounts[9];
+
   const ipfsHash = "some ipfs hash here";
   console.log("deployerAccount", deployerAccount);
 
@@ -782,6 +792,132 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .endAuction(auctionId, { from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+  });
+  //------------------------------------------- complete proccess of auction ------------------------------------------ //
+  it("should do an acution completly", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const initialValue = web3.utils.toWei("1");
+    const bidInterval = web3.utils.toWei("0.1");
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
+    await Common.addAmbassador(arInstance, userAccount8, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+    await Common.addGB(gbInstance, userAccount8, [userAccount7], "gb1");
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.setTreasuryAddress(ownerAccount, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+    await treeAuctionInstance.createAuction(
+      treeId,
+      startTime,
+      endTime,
+      initialValue,
+      bidInterval,
+      { from: deployerAccount }
+    );
+    await treeAuctionInstance.bid(1, {
+      from: userAccount1,
+      value: web3.utils.toWei("1.1"),
+    });
+    const auction1 = await treeAuctionInstance.auctions.call(1);
+
+    assert.equal(auction1.bider, userAccount1, "bidder is incoreect");
+    assert.equal(
+      Number(auction1.highestBid.toString()),
+      web3.utils.toWei("1.1"),
+      "highest bid is incorrect"
+    );
+
+    await Common.travelTime(TimeEnumes.minutes, 55);
+    await treeAuctionInstance.bid(1, {
+      from: userAccount2,
+      value: web3.utils.toWei("1.2"),
+    });
+    const auction2 = await treeAuctionInstance.auctions.call(1);
+
+    assert.equal(auction2.bider, userAccount2, "bidder is incorrect");
+    assert.equal(
+      Number(auction2.endDate.toString()) - Number(auction1.endDate.toString()),
+      600,
+      "time increse incorrect"
+    );
+    await treeAuctionInstance
+      .bid(1, { from: userAccount1, value: web3.utils.toWei("1.29") })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+    await treeAuctionInstance.bid(1, {
+      from: userAccount1,
+      value: web3.utils.toWei("1.3"),
+    });
+    const auction3 = await treeAuctionInstance.auctions.call(1);
+
+    assert.equal(auction3.bider, userAccount1, "bider is incorrect");
+    assert.equal(
+      Number(auction3.endDate.toString()),
+      Number(auction2.endDate.toString()),
+      "increase end time inccorect"
+    );
+    await Common.travelTime(TimeEnumes.seconds, 600);
+    await treeAuctionInstance.bid(1, {
+      from: userAccount3,
+      value: web3.utils.toWei("1.4"),
+    });
+    await treeAuctionInstance
+      .endAuction(1, { from: deployerAccount })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
+    const auction4 = await treeAuctionInstance.auctions.call(1);
+    assert.equal(
+      Number(auction4.endDate.toString()) - Number(auction3.endDate.toString()),
+      600,
+      "increase end time incorrect"
+    );
+    assert.equal(auction4.bider, userAccount3, "bider is inccorect");
+    await Common.travelTime(TimeEnumes.minutes, 16);
+    await treeAuctionInstance.endAuction(1, { from: userAccount3 });
+
+    assert.equal(
+      await treeTokenInstance.ownerOf(treeId),
+      userAccount3,
+      "owner of token is incorrect"
+    );
+    await genesisTreeInstance.asignTreeToPlanter(
+      treeId,
+      gbId,
+      userAccount7,
+      gbType,
+      { from: deployerAccount }
+    );
+    await genesisTreeInstance
+      .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+        from: userAccount8,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+    await genesisTreeInstance.plantTree(
+      treeId,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      { from: userAccount7 }
+    );
+    await genesisTreeInstance
+      .verifyPlant(treeId, true, { from: userAccount7 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+    await genesisTreeInstance
+      .verifyPlant(treeId, true, { from: userAccount3 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+    await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount8 });
   });
 
   //---------------------------------------complex test (auction and genesisTree)-------------------------------------

@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.9;
+
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
@@ -24,9 +25,9 @@ contract GenesisTree is Initializable, RelayRecipient {
         address planterId;
         uint256 gbId;
         uint256 treeType;
+        bool isExist;
         uint8 gbType;
         uint8 provideStatus;
-        bool isExist;
         uint16 treeStatus;
         uint16 countryCode;
         uint64 plantDate;
@@ -105,9 +106,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             address(0),
             0,
             0,
-            0,
-            0,
             true,
+            0,
+            0,
             1,
             0,
             0,

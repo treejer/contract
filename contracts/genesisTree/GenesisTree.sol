@@ -55,6 +55,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     modifier onlyAuction() {
         accessRestriction.ifAuction(_msgSender());
         _;
@@ -65,8 +70,8 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
-    modifier ifNotPaused() {
-        accessRestriction.ifNotPaused();
+    modifier validIpfs(string memory _ipfs) {
+        require(bytes(_ipfs).length > 0, "invalid ipfs hash");
         _;
     }
 
@@ -97,10 +102,9 @@ contract GenesisTree is Initializable, RelayRecipient {
     function addTree(uint256 _treeId, string memory _treeDescription)
         external
         onlyAdmin
+        validIpfs(_treeDescription)
     {
         require(!genTrees[_treeId].isExist, "duplicate tree");
-
-        require(bytes(_treeDescription).length > 0, "invalid ipfs hash");
 
         genTrees[_treeId] = GenTree(
             address(0),
@@ -149,13 +153,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         string memory _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external validTree(_treeId) {
+    ) external validTree(_treeId) validIpfs(_treeSpecs) {
         require(
             genTrees[_treeId].treeStatus == 1,
             "invalid tree status for plant"
         );
-
-        require(bytes(_treeSpecs).length > 0, "invalid ipfs hash");
 
         GenTree storage tempGenTree = genTrees[_treeId];
 
@@ -224,6 +226,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     function updateTree(uint256 _treeId, string memory _treeSpecs)
         external
         validTree(_treeId)
+        validIpfs(_treeSpecs)
     {
         require(
             genTrees[_treeId].planterId == _msgSender(),

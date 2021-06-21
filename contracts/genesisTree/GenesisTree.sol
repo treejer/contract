@@ -202,6 +202,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
         external
+        ifNotPaused
         validTree(_treeId)
     {
         require(genTrees[_treeId].treeStatus == 1, "invalid tree status");
@@ -259,6 +260,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
+        ifNotPaused
         validTree(_treeId)
     {
         require(
@@ -300,6 +302,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     function checkAndSetProvideStatus(uint256 _treeId, uint8 _provideType)
         external
         onlyAuction
+        validTree(_treeId)
         returns (uint8)
     {
         uint8 nowProvideStatus = genTrees[_treeId].provideStatus;

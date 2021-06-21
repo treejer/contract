@@ -197,7 +197,6 @@ contract("GenesisTree", (accounts) => {
     await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
 
     let result = await gbInstance.gbToPlanters.call(1, 0);
-    console.log("result", result);
     //do not asign to any planter
     let asign1 = await genesisTreeInstance.asignTreeToPlanter(
       treeId,

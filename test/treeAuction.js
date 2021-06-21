@@ -35,7 +35,6 @@ contract("TreeAuction", (accounts) => {
   const userAccount8 = accounts[9];
 
   const ipfsHash = "some ipfs hash here";
-  console.log("deployerAccount", deployerAccount);
 
   beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {

@@ -1850,7 +1850,7 @@ contract("GenesisTree", (accounts) => {
 
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    assert.equal(result.updateDate.toNumber(), now);
+    assert.equal(Number(result.updateDate.toString()), Number(now.toString()));
     assert.equal(result.updateStatus.toNumber(), 3);
   });
 
@@ -2308,6 +2308,17 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
   });
 
+  it("Should be fail because function is pause", async () => {
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+    await genesisTreeInstance
+      .verifyUpdate(1, true, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+  });
+
   it("Should be fail because tree id not exist", async () => {
     await genesisTreeInstance
       .verifyUpdate(10, true, {
@@ -2368,6 +2379,16 @@ contract("GenesisTree", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+  });
+
+  it("checkAndSetProvideStatus should be fail because invalid tree", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+
+    await genesisTreeInstance
+      .checkAndSetProvideStatus(1, 1, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
   });
 
   //-------------------------------------------------------updateOwner test-------------------------------------------------------------

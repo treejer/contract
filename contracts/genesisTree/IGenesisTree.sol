@@ -3,10 +3,10 @@
 pragma solidity ^0.6.9;
 
 interface IGenesisTree {
-    event PlantTree(uint256 treeId, address planter);
-    event VerifyPlant(uint256 treeId, uint256 updateStatus);
-    event UpdateTree(uint256 treeId);
-    event VerifyUpdate(uint256 treeId, uint64 updateStatus);
+    event TreePlanted(uint256 treeId, address planter);
+    event PlantVerified(uint256 treeId, uint256 updateStatus);
+    event TreeUpdated(uint256 treeId);
+    event UpdateVerified(uint256 treeId, uint64 updateStatus);
 
     function isGenesisTree() external view returns (bool);
 

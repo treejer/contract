@@ -45,10 +45,10 @@ contract GenesisTree is Initializable, RelayRecipient {
     mapping(uint256 => GenTree) public genTrees;
     mapping(uint256 => UpdateGenTree) public updateGenTrees;
 
-    event PlantTree(uint256 treeId, address planter);
-    event VerifyPlant(uint256 treeId, uint256 updateStatus);
-    event UpdateTree(uint256 treeId);
-    event VerifyUpdate(uint256 treeId, uint64 updateStatus);
+    event TreePlanted(uint256 treeId, address planter);
+    event PlantVerified(uint256 treeId, uint256 updateStatus);
+    event TreeUpdated(uint256 treeId);
+    event UpdateVerified(uint256 treeId, uint64 updateStatus);
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -181,7 +181,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         tempGenTree.birthDate = _birthDate;
         tempGenTree.plantDate = now.toUint64();
 
-        emit PlantTree(_treeId, tempGenTree.planterId);
+        emit TreePlanted(_treeId, tempGenTree.planterId);
     }
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
@@ -221,7 +221,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             tempUpdateGenTree.updateStatus = 2;
         }
 
-        emit VerifyPlant(_treeId, tempUpdateGenTree.updateStatus);
+        emit PlantVerified(_treeId, tempUpdateGenTree.updateStatus);
     }
 
     function updateTree(uint256 _treeId, string memory _treeSpecs)
@@ -245,7 +245,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         updateGenTree.updateDate = now.toUint64();
         updateGenTree.updateStatus = 1;
 
-        emit UpdateTree(_treeId);
+        emit TreeUpdated(_treeId);
     }
 
     function verifyUpdate(uint256 _treeId, bool _isVerified)
@@ -284,7 +284,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             updateGenTree.updateStatus = 2;
         }
 
-        emit VerifyUpdate(_treeId, updateGenTree.updateStatus);
+        emit UpdateVerified(_treeId, updateGenTree.updateStatus);
     }
 
     function checkAndSetProvideStatus(uint256 _treeId, uint16 _provideType)

@@ -406,7 +406,7 @@ contract("GenesisTree", (accounts) => {
       countryCode,
       { from: userAccount2 }
     );
-    truffleAssert.eventEmitted(tx, "PlantTree", (ev) => {
+    truffleAssert.eventEmitted(tx, "TreePlanted", (ev) => {
       return (
         ev.planter == userAccount2 && Number(ev.treeId.toString()) == treeId
       );
@@ -450,7 +450,7 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount2 }
     );
 
-    truffleAssert.eventEmitted(tx1, "PlantTree", (ev) => {
+    truffleAssert.eventEmitted(tx1, "TreePlanted", (ev) => {
       return (
         ev.planter == userAccount2 && Number(ev.treeId.toString()) == treeId
       );
@@ -473,7 +473,7 @@ contract("GenesisTree", (accounts) => {
       countryCode,
       { from: userAccount3 }
     );
-    truffleAssert.eventEmitted(tx2, "PlantTree", (ev) => {
+    truffleAssert.eventEmitted(tx2, "TreePlanted", (ev) => {
       return (
         ev.planter == userAccount3 && Number(ev.treeId.toString()) == treeId2
       );
@@ -890,7 +890,7 @@ contract("GenesisTree", (accounts) => {
     const tx1 = await genesisTreeInstance.verifyPlant(treeId, true, {
       from: userAccount1,
     });
-    truffleAssert.eventEmitted(tx1, "VerifyPlant", (ev) => {
+    truffleAssert.eventEmitted(tx1, "PlantVerified", (ev) => {
       return (
         Number(ev.updateStatus.toString()) == 3 &&
         Number(ev.treeId.toString()) == treeId
@@ -916,7 +916,7 @@ contract("GenesisTree", (accounts) => {
     const tx2 = await genesisTreeInstance.verifyPlant(treeId2, false, {
       from: deployerAccount,
     });
-    truffleAssert.eventEmitted(tx2, "VerifyPlant", (ev) => {
+    truffleAssert.eventEmitted(tx2, "PlantVerified", (ev) => {
       return (
         Number(ev.updateStatus.toString()) == 2 &&
         Number(ev.treeId.toString()) == treeId2
@@ -942,7 +942,7 @@ contract("GenesisTree", (accounts) => {
     const tx3 = await genesisTreeInstance.verifyPlant(treeId3, true, {
       from: userAccount2,
     });
-    truffleAssert.eventEmitted(tx3, "VerifyPlant", (ev) => {
+    truffleAssert.eventEmitted(tx3, "PlantVerified", (ev) => {
       return (
         Number(ev.updateStatus.toString()) == 3 &&
         Number(ev.treeId.toString()) == treeId3
@@ -1762,7 +1762,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(result.updateDate.toNumber(), now);
     assert.equal(result.updateStatus.toNumber(), 1);
 
-    truffleAssert.eventEmitted(tx, "UpdateTree", (ev) => {
+    truffleAssert.eventEmitted(tx, "TreeUpdated", (ev) => {
       return ev.treeId == treeId;
     });
   });
@@ -1968,7 +1968,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
-    truffleAssert.eventEmitted(tx, "VerifyUpdate", (ev) => {
+    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
       return ev.treeId == treeId && ev.updateStatus == 3;
     });
   });
@@ -2014,7 +2014,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
 
-    truffleAssert.eventEmitted(tx, "VerifyUpdate", (ev) => {
+    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
       return ev.treeId == treeId && ev.updateStatus == 2;
     });
   });

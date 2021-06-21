@@ -283,7 +283,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         emit VerifyUpdate(_treeId, updateGenTree.updateStatus);
     }
 
-    function checkAndSetProvideStatus(uint256 _treeId, uint8 _provideType)
+    function checkAndSetProvideStatus(uint256 _treeId, uint16 _provideType)
         external
         onlyAuction
         validTree(_treeId)

@@ -237,9 +237,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].planterId == _msgSender(),
             "Only Planter of tree can send update"
         );
-
         require(genTrees[_treeId].treeStatus > 1, "Tree not planted");
-
         require(
             now >= genTrees[_treeId].lastUpdate.add(2592000),
             "Update time not reach"
@@ -285,9 +283,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
             updateGenTree.updateStatus = 3;
 
-            // if (treeToken.exists(_treeId)) {
-            //     call genesis fund
-            // }
+            //call genesis fund
         } else {
             updateGenTree.updateStatus = 2;
         }
@@ -310,7 +306,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         return nowProvideStatus;
     }
 
-    // This function call when auction ended and has no bider.
     function updateOwner(uint256 _treeId, address _ownerId)
         external
         onlyAuction
@@ -320,7 +315,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         treeToken.safeMint(_ownerId, _treeId);
     }
 
-    // This function call when auction ended and has no bider.
     function updateProvideStatus(uint256 _treeId) external onlyAuction {
         genTrees[_treeId].provideStatus = 0;
     }

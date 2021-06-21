@@ -127,7 +127,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         // (, , , bool isExistGb) = gbFactory.greenBlocks(_gbId);
         uint256 total = gbFactory.totalGB();
         require(_gbId < total, "invalid gb"); //TODO: aliad check here using gb.isExist after gb refactoring
-        // require(address);
 
         if (_planterId != address(0)) {
             bool isInGb = false;
@@ -161,16 +160,17 @@ contract GenesisTree is Initializable, RelayRecipient {
             "invalid tree status for plant"
         );
         require(bytes(_treeSpecs).length > 0, "invalid ipfs hash");
-        if (genTrees[_treeId].planterId == address(0)) {
+        GenTree storage tempGenTree = genTrees[_treeId];
+        if (tempGenTree.planterId == address(0)) {
             bool isInGb = false;
 
             for (
                 uint256 index = 0;
-                index < gbFactory.getGBPlantersCount(genTrees[_treeId].gbId);
+                index < gbFactory.getGBPlantersCount(tempGenTree.gbId);
                 index++
             ) {
                 if (
-                    gbFactory.gbToPlanters(genTrees[_treeId].gbId, index) ==
+                    gbFactory.gbToPlanters(tempGenTree.gbId, index) ==
                     _msgSender()
                 ) {
                     isInGb = true;
@@ -180,19 +180,19 @@ contract GenesisTree is Initializable, RelayRecipient {
 
             require(isInGb, "planter in gb can plant tree");
 
-            genTrees[_treeId].planterId = _msgSender();
+            tempGenTree.planterId = _msgSender();
         } else {
             require(
-                genTrees[_treeId].planterId == _msgSender(),
+                tempGenTree.planterId == _msgSender(),
                 "planter of tree can plant it"
             );
         }
 
         updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, now.toUint64(), 1);
-        genTrees[_treeId].countryCode = _countryCode;
-        genTrees[_treeId].birthDate = _birthDate;
-        genTrees[_treeId].plantDate = now.toUint64();
-        emit PlantTree(_treeId, genTrees[_treeId].planterId);
+        tempGenTree.countryCode = _countryCode;
+        tempGenTree.birthDate = _birthDate;
+        tempGenTree.plantDate = now.toUint64();
+        emit PlantTree(_treeId, tempGenTree.planterId);
     }
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
@@ -215,15 +215,16 @@ contract GenesisTree is Initializable, RelayRecipient {
                 _checkPlanter(_treeId, _msgSender()),
             "ambassador or planter can verify plant"
         );
-
+        GenTree storage tempGenTree = genTrees[_treeId];
+        UpdateGenTree storage tempUpdateGenTree = updateGenTrees[_treeId];
         if (_isVerified) {
-            genTrees[_treeId].treeSpecs = updateGenTrees[_treeId].updateSpecs;
-            genTrees[_treeId].lastUpdate = updateGenTrees[_treeId].updateDate;
-            genTrees[_treeId].treeStatus = 2;
-            updateGenTrees[_treeId].updateStatus = 3;
+            tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
+            tempGenTree.lastUpdate = tempUpdateGenTree.updateDate;
+            tempGenTree.treeStatus = 2;
+            tempUpdateGenTree.updateStatus = 3;
             emit VerifyPlant(_treeId, 3);
         } else {
-            updateGenTrees[_treeId].updateStatus = 2;
+            tempUpdateGenTree.updateStatus = 2;
             emit VerifyPlant(_treeId, 2);
         }
     }

@@ -150,7 +150,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].gbType = _gbType;
     }
 
-    //TODO: ambassedor can plant tree???????????
     function plantTree(
         uint256 _treeId,
         string memory _treeSpecs,
@@ -181,10 +180,6 @@ contract GenesisTree is Initializable, RelayRecipient {
 
             require(isInGb, "planter in gb can plant tree");
 
-            // require(
-            //     _checkPlanter(_treeId, _msgSender()),
-            //     "ambassador or planter can plant tree"
-            // );
             genTrees[_treeId].planterId = _msgSender();
         } else {
             require(

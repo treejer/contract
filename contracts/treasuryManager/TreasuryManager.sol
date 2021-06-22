@@ -238,12 +238,13 @@ contract TreasuryManager is Initializable {
                         break;
                     }
                     if (
-                        i > 0 && _endTreeId + 1 < localAssigns[i].startingTreeId
+                        i > 0 &&
+                        _endTreeId.add(1) < localAssigns[i].startingTreeId
                     ) {
                         assignModels.push(
                             AssignModel(
-                                _endTreeId + 1,
-                                localAssigns[i - 1].distributionModelId
+                                _endTreeId.add(1),
+                                localAssigns[i.sub(1)].distributionModelId
                             )
                         );
                         checkFlag = 2;
@@ -268,8 +269,8 @@ contract TreasuryManager is Initializable {
             } else {
                 assignModels.push(
                     AssignModel(
-                        _endTreeId + 1,
-                        localAssigns[localAssigns.length - 1]
+                        _endTreeId.add(1),
+                        localAssigns[localAssigns.length.sub(1)]
                             .distributionModelId
                     )
                 );

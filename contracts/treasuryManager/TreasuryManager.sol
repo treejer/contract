@@ -231,6 +231,7 @@ contract TreasuryManager is Initializable {
                     assignModels.push(
                         AssignModel(_startTreeId, _distributionModelId)
                     );
+                    checkFlag = 1;
                 }
                 if (checkFlag == 1) {
                     if (_endTreeId == 0 && _startTreeId != 0) {

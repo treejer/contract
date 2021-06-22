@@ -315,25 +315,6 @@ contract TreasuryManager is Initializable {
         );
     }
 
-    function _findTreeDistributionModelId(uint256 _treeId)
-        private
-        returns (uint256)
-    {
-        uint256 i = 0;
-        for (i; i < assignModels.length; i++) {
-            if (assignModels[i].startingTreeId > _treeId) {
-                require(i.sub(1) >= 0, "invalid fund model");
-                return i.sub(1);
-            }
-        }
-        if (_treeId > maxAssignedIndex) {
-            emit DistributionModelOfTreeNotExist(
-                "there is no assigned values for this treeId"
-            );
-        }
-        return i;
-    }
-
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
@@ -366,6 +347,17 @@ contract TreasuryManager is Initializable {
             emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
         }
     }
+
+    function distributionModelExistance(uint256 _treeId)
+        external
+        view
+        returns (bool)
+    {
+        accessRestriction.ifAuction(msg.sender);
+        return
+            _treeId >= assignModels[0].startingTreeId &&
+            _treeId <= maxAssignedIndex;
+    } //check in add auction
 
     function withdrawGb(uint256 _amount, string memory _reason)
         external
@@ -481,16 +473,24 @@ contract TreasuryManager is Initializable {
         }
     }
 
-    function distributionModelExistance(uint256 _treeId)
-        external
-        view
-        returns (bool)
+    function _findTreeDistributionModelId(uint256 _treeId)
+        private
+        returns (uint256)
     {
-        accessRestriction.ifAuction(msg.sender);
-        return
-            _treeId >= assignModels[0].startingTreeId &&
-            _treeId <= maxAssignedIndex;
-    } //check in add auction
+        uint256 i = 0;
+        for (i; i < assignModels.length; i++) {
+            if (assignModels[i].startingTreeId > _treeId) {
+                require(i.sub(1) >= 0, "invalid fund model");
+                return i.sub(1);
+            }
+        }
+        if (_treeId > maxAssignedIndex) {
+            emit DistributionModelOfTreeNotExist(
+                "there is no assigned values for this treeId"
+            );
+        }
+        return i;
+    }
 
     function _add(uint16 a, uint16 b) private pure returns (uint16) {
         uint16 c = a + b;

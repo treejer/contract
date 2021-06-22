@@ -237,11 +237,14 @@ contract TreasuryManager is Initializable {
                         checkFlag = 5;
                         break;
                     }
-                    if (i > 0 && _endTreeId < localAssigns[i].startingTreeId) {
+                    if (
+                        i > 0 &&
+                        _endTreeId.add(1) < localAssigns[i].startingTreeId
+                    ) {
                         assignModels.push(
                             AssignModel(
-                                _endTreeId,
-                                localAssigns[i - 1].distributionModelId
+                                _endTreeId.add(1),
+                                localAssigns[i.sub(1)].distributionModelId
                             )
                         );
                         checkFlag = 2;
@@ -266,13 +269,19 @@ contract TreasuryManager is Initializable {
             } else {
                 assignModels.push(
                     AssignModel(
-                        _endTreeId + 1,
-                        localAssigns[localAssigns.length - 1]
+                        _endTreeId.add(1),
+                        localAssigns[localAssigns.length.sub(1)]
                             .distributionModelId
                     )
                 );
             }
         }
+
+        emit FundDistributionModelAssigned(
+            _startTreeId,
+            _endTreeId,
+            _distributionModelId
+        );
     }
 
     function fundTree(uint256 _treeId, uint256 _amount) external {

@@ -174,7 +174,10 @@ contract TreasuryManager is Initializable {
     function fundTree(uint256 _treeId, uint256 _amount) external {
         require(accessRestriction.isAuction(msg.sender));
         FundDistribution memory dm =
-            fundDistributions[_findTreeDistributionModelId(_treeId)];
+            fundDistributions[
+                assignModels[_findTreeDistributionModelId(_treeId)]
+                    .distributionModelId
+            ];
         planterFunds[_treeId] = _amount.mul(dm.planterFund).div(1000);
         totalFunds.gbFund = totalFunds.gbFund.add(
             _amount.mul(dm.gbFund).div(1000)
@@ -225,6 +228,7 @@ contract TreasuryManager is Initializable {
         uint16 _treeStatus
     ) external {
         accessRestriction.ifGenesisTree(msg.sender);
+        require(planterFunds[_treeId] > 0, "planter fund not exist");
         uint256 totalPayablePlanter;
         if (_treeStatus > 25920) {
             //25920 = 30 * 24 * 36

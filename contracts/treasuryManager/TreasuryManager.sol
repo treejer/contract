@@ -19,6 +19,7 @@ contract TreasuryManager is Initializable {
     AssignModel[] public assignModels;
     uint256 public maxAssignedIndex;
     IAccessRestriction public accessRestriction;
+    uint256 constant MAX_UINT256 = 2**256 - 1;
 
     address payable gbFundAddress;
     address payable treeResearchAddress;
@@ -168,7 +169,73 @@ contract TreasuryManager is Initializable {
         fundDistributionCount.increment();
     }
 
-    function assignTreeFundDistributionModel() external onlyAdmin {}
+    function assignTreeFundDistributionModel(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint256 _distributionModelId
+    ) external onlyAdmin {
+        require(
+            fundDistributions[_distributionModelId].planterFund > 0,
+            "Distribution model not found"
+        );
+
+        AssignModel[] storage localAssigns = assignModels;
+
+        delete assignModels;
+
+        uint256 checkFlag = 0;
+
+        for (uint256 i = 0; i < localAssigns.length; i++) {
+            if (localAssigns[i].startingTreeId < _startTreeId) {
+                assignModels.push(localAssigns[i]);
+            } else {
+                if (checkFlag == 0) {
+                    assignModels.push(
+                        AssignModel(_startTreeId, _distributionModelId)
+                    );
+                }
+                if (checkFlag == 1) {
+                    if (_endTreeId == 0 && _startTreeId != 0) {
+                        checkFlag = 5;
+                        break;
+                    }
+                    if (i > 0 && _endTreeId < localAssigns[i].startingTreeId) {
+                        assignModels.push(
+                            AssignModel(
+                                _endTreeId,
+                                localAssigns[i - 1].distributionModelId
+                            )
+                        );
+                        checkFlag = 2;
+                    }
+                }
+                if (checkFlag == 2) {
+                    assignModels.push(localAssigns[i]);
+                }
+            }
+        }
+
+        if (checkFlag == 5) {
+            maxAssignedIndex = MAX_UINT256;
+        } else if (checkFlag == 0) {
+            assignModels.push(AssignModel(_startTreeId, _distributionModelId));
+            checkFlag = 1;
+        }
+
+        if (checkFlag == 1) {
+            if (maxAssignedIndex < _endTreeId) {
+                maxAssignedIndex = _endTreeId;
+            } else {
+                assignModels.push(
+                    AssignModel(
+                        _endTreeId + 1,
+                        localAssigns[localAssigns.length - 1]
+                            .distributionModelId
+                    )
+                );
+            }
+        }
+    }
 
     function fundTree(uint256 _treeId, uint256 _amount) external {
         require(accessRestriction.isAuction(msg.sender));

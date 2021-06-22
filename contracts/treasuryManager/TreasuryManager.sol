@@ -175,20 +175,20 @@ contract TreasuryManager is Initializable {
     ) external onlyAdmin {
         require(
             _add(
+                _otherFund2,
                 _add(
+                    _otherFund1,
                     _add(
+                        _treejerDevelop,
                         _add(
+                            _rescueFund,
                             _add(
-                                _add(_add(_planter, _referral), _treeResearch),
-                                _localDevelop
-                            ),
-                            _rescueFund
-                        ),
-                        _treejerDevelop
-                    ),
-                    _otherFund1
-                ),
-                _otherFund2
+                                _localDevelop,
+                                _add(_treeResearch, _add(_planter, _referral))
+                            )
+                        )
+                    )
+                )
             ) == 10000,
             "sum must be 10000"
         );

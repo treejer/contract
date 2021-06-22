@@ -63,8 +63,45 @@ contract TreasuryManager is Initializable {
 
     TotalFunds public totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
 
-    event Event1(string description);
-    event TreejerWithdraw(string title, uint256 amount, string reason);
+    event DistributionModelOfTreeNotExist(string description);
+    event FundDistributionModelAssigned(
+        uint256 startingTreeId,
+        uint256 endingTreeId,
+        uint256 distributionModelId
+    );
+    event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
+    event PlanterBalanceWithdrawn(uint256 amount, address account);
+    event GbBalanceWithdrawn(uint256 amount, address account, string reason);
+    event TreeResearchBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event LocalDevelopBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event RescueBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event TreejerDevelopBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event OtherBalanceWithdrawn1(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event OtherBalanceWithdrawn2(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -217,7 +254,9 @@ contract TreasuryManager is Initializable {
             }
         }
         if (_treeId > maxAssignedIndex) {
-            emit Event1("there is no assigned values for this treeId");
+            emit DistributionModelOfTreeNotExist(
+                "there is no assigned values for this treeId"
+            );
         }
         return i;
     }
@@ -251,6 +290,67 @@ contract TreasuryManager is Initializable {
             totalFunds.planterFund = totalFunds.planterFund.sub(
                 totalPayablePlanter
             );
+            emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
+        }
+    }
+
+    function withdrawGb(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (gbFundAddress.send(_amount)) {
+            emit GbBalanceWithdrawn(_amount, gbFundAddress, _reason);
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+        }
+    }
+
+    function withdrawTreeResearch(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (treeResearchAddress.send(_amount)) {
+            emit TreeResearchBalanceWithdrawn(
+                _amount,
+                treeResearchAddress,
+                _reason
+            );
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+        }
+    }
+
+    function withdrawLocalDevelop(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (localDevelopAddress.send(_amount)) {
+            emit LocalDevelopBalanceWithdrawn(
+                _amount,
+                localDevelopAddress,
+                _reason
+            );
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+        }
+    }
+
+    function withdrawRescueFund(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (rescueFundAddress.send(_amount)) {
+            emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
         }
     }
 
@@ -260,8 +360,38 @@ contract TreasuryManager is Initializable {
     {
         require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
         totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
-        if (!treejerDevelopAddress.send(_amount)) {
-            emit TreejerWithdraw("treejerDevelop withdraw", _amount, _reason);
+        if (treejerDevelopAddress.send(_amount)) {
+            emit TreejerDevelopBalanceWithdrawn(
+                _amount,
+                treejerDevelopAddress,
+                _reason
+            );
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+        }
+    }
+
+    function withdrawOtherFund1(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (otherFundAddress1.send(_amount)) {
+            emit OtherBalanceWithdrawn1(_amount, otherFundAddress1, _reason);
+        } else {
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+        }
+    }
+
+    function withdrawOtherFund2(uint256 _amount, string memory _reason)
+        external
+        onlyAdmin
+    {
+        require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        if (otherFundAddress2.send(_amount)) {
+            emit OtherBalanceWithdrawn2(_amount, otherFundAddress2, _reason);
         } else {
             totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
         }
@@ -269,12 +399,25 @@ contract TreasuryManager is Initializable {
 
     function withdrawPlanterBalance(uint256 _amount) external {
         accessRestriction.ifPlanter(msg.sender);
-        require(_amount <= balances[msg.sender], "insufficient balance");
+        require(_amount <= balances[msg.sender], "insufficient amount");
         balances[msg.sender] = balances[msg.sender].sub(_amount);
         if (!msg.sender.send(_amount)) {
             balances[msg.sender] = balances[msg.sender].add(_amount);
+        } else {
+            emit PlanterBalanceWithdrawn(_amount, msg.sender);
         }
     }
+
+    function distributionModelExistance(uint256 _treeId)
+        external
+        view
+        returns (bool)
+    {
+        accessRestriction.ifAuction(msg.sender);
+        return
+            _treeId >= assignModels[0].startingTreeId &&
+            _treeId <= maxAssignedIndex;
+    } //check in add auction
 
     function _add(uint16 a, uint16 b) private pure returns (uint16) {
         uint16 c = a + b;

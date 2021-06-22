@@ -273,6 +273,12 @@ contract TreasuryManager is Initializable {
                 );
             }
         }
+
+        emit FundDistributionModelAssigned(
+            _startTreeId,
+            _endTreeId,
+            _distributionModelId
+        );
     }
 
     function fundTree(uint256 _treeId, uint256 _amount) external {

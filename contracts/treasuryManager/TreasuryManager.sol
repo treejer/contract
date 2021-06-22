@@ -12,6 +12,7 @@ contract TreasuryManager is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeMathUpgradeable for uint64;
+    using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint16;
 
     CountersUpgradeable.Counter private fundDistributionCount;
@@ -174,15 +175,31 @@ contract TreasuryManager is Initializable {
         require(accessRestriction.isAuction(msg.sender));
         FundDistribution memory dm =
             fundDistributions[_findTreeDistributionModelId(_treeId)];
-        planterFunds[_treeId] = (_amount * dm.planterFund) / 1000;
-        totalFunds.gbFund += (_amount * dm.gbFund) / 1000;
-        totalFunds.localDevelop += (_amount * dm.localDevelop) / 1000;
-        totalFunds.otherFund1 += (_amount * dm.OtherFund1) / 1000;
-        totalFunds.otherFund2 += (_amount * dm.otherFund2) / 1000;
-        totalFunds.planterFund += (_amount * dm.planterFund) / 1000;
-        totalFunds.rescueFund += (_amount * dm.rescueFund) / 1000;
-        totalFunds.treejerDevelop += (_amount * dm.treejerDevelop) / 1000;
-        totalFunds.treeResearch += (_amount * dm.treeResearch) / 1000;
+        planterFunds[_treeId] = _amount.mul(dm.planterFund).div(1000);
+        totalFunds.gbFund = totalFunds.gbFund.add(
+            _amount.mul(dm.gbFund).div(1000)
+        );
+        totalFunds.localDevelop = totalFunds.localDevelop.add(
+            _amount.mul(dm.localDevelop).div(1000)
+        );
+        totalFunds.otherFund1 = totalFunds.otherFund1.add(
+            _amount.mul(dm.OtherFund1).div(1000)
+        );
+        totalFunds.otherFund2 = totalFunds.otherFund2.add(
+            _amount.mul(dm.otherFund2).div(1000)
+        );
+        totalFunds.planterFund = totalFunds.planterFund.add(
+            _amount.mul(dm.planterFund).div(1000)
+        );
+        totalFunds.rescueFund = totalFunds.rescueFund.add(
+            _amount.mul(dm.rescueFund).div(1000)
+        );
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(
+            _amount.mul(dm.treejerDevelop).div(1000)
+        );
+        totalFunds.treeResearch = totalFunds.treeResearch.add(
+            _amount.mul(dm.treeResearch).div(1000)
+        );
     }
 
     function _findTreeDistributionModelId(uint256 _treeId)
@@ -192,7 +209,8 @@ contract TreasuryManager is Initializable {
         uint256 i = 0;
         for (i; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
-                return i - 1;
+                require(i.sub(1) >= 0, "invalid fund model");
+                return i.sub(1);
             }
         }
         if (_treeId > maxAssignedIndex) {
@@ -206,16 +224,29 @@ contract TreasuryManager is Initializable {
         address payable _planterId,
         uint16 _treeStatus
     ) external {
+        accessRestriction.ifGenesisTree(msg.sender);
         uint256 totalPayablePlanter;
-        if (_treeStatus > 30 * 24 * 36) {
-            totalPayablePlanter = planterFunds[_treeId] - plantersPaid[_treeId];
+        if (_treeStatus > 25920) {
+            //25920 = 30 * 24 * 36
+            totalPayablePlanter = planterFunds[_treeId].sub(
+                plantersPaid[_treeId]
+            );
         } else {
-            totalPayablePlanter = planterFunds[_treeId] * _treeStatus; //TODO: sk farid about here
+            totalPayablePlanter = planterFunds[_treeId]
+                .mul(_treeStatus)
+                .div(25920)
+                .sub(plantersPaid[_treeId]);
         }
         if (totalPayablePlanter > 0) {
-            plantersPaid[_treeId] += totalPayablePlanter;
-            balances[_planterId] += totalPayablePlanter;
-            totalFunds.planterFund -= totalPayablePlanter;
+            plantersPaid[_treeId] = plantersPaid[_treeId].add(
+                totalPayablePlanter
+            );
+            balances[_planterId] = balances[_planterId].add(
+                totalPayablePlanter
+            );
+            totalFunds.planterFund = totalFunds.planterFund.sub(
+                totalPayablePlanter
+            );
         }
     }
 
@@ -224,20 +255,20 @@ contract TreasuryManager is Initializable {
         onlyAdmin
     {
         require(_amount <= totalFunds.treejerDevelop, "insufficient amount");
-        totalFunds.treejerDevelop -= _amount;
+        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
         if (!treejerDevelopAddress.send(_amount)) {
             emit TreejerWithdraw("treejerDevelop withdraw", _amount, _reason);
         } else {
-            totalFunds.treejerDevelop += _amount;
+            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
         }
     }
 
     function withdrawPlanterBalance(uint256 _amount) external {
         accessRestriction.ifPlanter(msg.sender);
         require(_amount <= balances[msg.sender], "insufficient balance");
-        balances[msg.sender] -= _amount;
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
         if (!msg.sender.send(_amount)) {
-            balances[msg.sender] += _amount;
+            balances[msg.sender] = balances[msg.sender].add(_amount);
         }
     }
 

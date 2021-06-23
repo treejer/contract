@@ -659,6 +659,28 @@ contract("TreasuryManager", (accounts) => {
   //   );
   // });
 
+  // it("assignTreeFundDistributionModel should be reject invalid access", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance
+  //     .assignTreeFundDistributionModel(0, 0, 0, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
   // ///////////////////////////////////////////////////mahdi
   //  //************************************ fund tree test ****************************************//
   // it("should fund tree succesfully", async () => {

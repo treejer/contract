@@ -10,6 +10,8 @@ const TimeEnumes = {
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
+  CHECK_AUCTION: "Caller is not Auction",
+  CHECK_GENESIS_TREE: "Caller is not GenesisTree",
 };
 
 const TreeAuctionErrorMsg = {
@@ -44,7 +46,9 @@ const GenesisTreeErrorMsg = {
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
-const TreesuryManagerErrorMsg = {};
+const TreesuryManagerErrorMsg = {
+  PLANTER_FUND_NOT_EXIST: "planter fund not exist",
+};
 
 module.exports = {
   TimeEnumes,
@@ -52,4 +56,5 @@ module.exports = {
   TreeAuctionErrorMsg,
   GenesisTreeErrorMsg,
   TreeAuctionErrorMsg,
+  TreesuryManagerErrorMsg,
 };

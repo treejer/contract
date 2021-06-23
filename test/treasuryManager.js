@@ -6,7 +6,11 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
-const { TimeEnumes, CommonErrorMsg } = require("./enumes");
+const {
+  TimeEnumes,
+  CommonErrorMsg,
+  TreesuryManagerErrorMsg,
+} = require("./enumes");
 
 contract("TreasuryManager", (accounts) => {
   let treasuryManagerInstance;
@@ -137,10 +141,525 @@ contract("TreasuryManager", (accounts) => {
   //     .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
   //       from: deployerAccount,
   //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  //     .should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
+
+  //   await treasuryManagerInstance
+  //     .addFundDistributionModel(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
   // });
 
-  ///////////////////////////////////////////////////////mahdi
+  // //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
+  // it("1.assignTreeFundDistributionModel should be success", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     3000,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     2000,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     1000,
+  //     2200,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 0, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(1, 10, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(11, 100, 2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(
+  //     101,
+  //     1000000,
+  //     3,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   let expected = [
+  //     {
+  //       startingTreeId: 0,
+  //       distributionModelId: 0,
+  //     },
+  //     {
+  //       startingTreeId: 1,
+  //       distributionModelId: 1,
+  //     },
+  //     {
+  //       startingTreeId: 11,
+  //       distributionModelId: 2,
+  //     },
+  //     {
+  //       startingTreeId: 101,
+  //       distributionModelId: 3,
+  //     },
+  //   ];
+
+  //   let resultMaxAssignedIndex = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(resultMaxAssignedIndex.toString()),
+  //     1000000,
+  //     "1.maxAssignedIndex not true"
+  //   );
+
+  //   for (let i = 0; i < 4; i++) {
+  //     let array = await treasuryManagerInstance.assignModels(i);
+  //     assert.equal(
+  //       Number(array.startingTreeId.toString()),
+  //       expected[i].startingTreeId,
+  //       i + " startingTreeId not true"
+  //     );
+
+  //     assert.equal(
+  //       Number(array.distributionModelId.toString()),
+  //       expected[i].distributionModelId,
+  //       i + " distributionModelId not true"
+  //     );
+  //   }
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(
+  //     1000001,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   let resultMaxAssignedIndex2 = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(resultMaxAssignedIndex2.toString()),
+  //     2 ** 256 - 1,
+  //     "2.maxAssignedIndex not true"
+  //   );
+  // });
+
+  // it("2.assignTreeFundDistributionModel should be success", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     3000,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     2000,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     1000,
+  //     2200,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(
+  //     1000001,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(
+  //     101,
+  //     1000000,
+  //     3,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(11, 100, 2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let expected1 = [
+  //     {
+  //       startingTreeId: 11,
+  //       distributionModelId: 2,
+  //     },
+  //     {
+  //       startingTreeId: 101,
+  //       distributionModelId: 3,
+  //     },
+  //     {
+  //       startingTreeId: 1000001,
+  //       distributionModelId: 0,
+  //     },
+  //   ];
+
+  //   for (let i = 0; i < 3; i++) {
+  //     let array = await treasuryManagerInstance.assignModels(i);
+  //     assert.equal(
+  //       Number(array.startingTreeId.toString()),
+  //       expected1[i].startingTreeId,
+  //       i + " startingTreeId not true"
+  //     );
+
+  //     assert.equal(
+  //       Number(array.distributionModelId.toString()),
+  //       expected1[i].distributionModelId,
+  //       i + " distributionModelId not true"
+  //     );
+  //   }
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(1, 10, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 0, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let resultMaxAssignedIndex1 = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(resultMaxAssignedIndex1.toString()),
+  //     2 ** 256 - 1,
+  //     "1.maxAssignedIndex not true"
+  //   );
+
+  //   let expected = [
+  //     {
+  //       startingTreeId: 0,
+  //       distributionModelId: 0,
+  //     },
+  //     {
+  //       startingTreeId: 1,
+  //       distributionModelId: 1,
+  //     },
+  //     {
+  //       startingTreeId: 11,
+  //       distributionModelId: 2,
+  //     },
+  //     {
+  //       startingTreeId: 101,
+  //       distributionModelId: 3,
+  //     },
+  //     {
+  //       startingTreeId: 1000001,
+  //       distributionModelId: 0,
+  //     },
+  //   ];
+
+  //   for (let i = 0; i < 5; i++) {
+  //     let array = await treasuryManagerInstance.assignModels(i);
+  //     assert.equal(
+  //       Number(array.startingTreeId.toString()),
+  //       expected[i].startingTreeId,
+  //       i + " startingTreeId not true"
+  //     );
+
+  //     assert.equal(
+  //       Number(array.distributionModelId.toString()),
+  //       expected[i].distributionModelId,
+  //       i + " distributionModelId not true"
+  //     );
+  //   }
+  // });
+
+  // it("3.assignTreeFundDistributionModel should be success", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     3000,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     2000,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     1000,
+  //     2200,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(11, 100, 2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 0, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(1, 10, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let expected = [
+  //     {
+  //       startingTreeId: 0,
+  //       distributionModelId: 0,
+  //     },
+  //     {
+  //       startingTreeId: 1,
+  //       distributionModelId: 1,
+  //     },
+  //     {
+  //       startingTreeId: 11,
+  //       distributionModelId: 2,
+  //     },
+  //   ];
+
+  //   for (let i = 0; i < 3; i++) {
+  //     let array = await treasuryManagerInstance.assignModels(i);
+  //     assert.equal(
+  //       Number(array.startingTreeId.toString()),
+  //       expected[i].startingTreeId,
+  //       i + " startingTreeId not true"
+  //     );
+
+  //     assert.equal(
+  //       Number(array.distributionModelId.toString()),
+  //       expected[i].distributionModelId,
+  //       i + " distributionModelId not true"
+  //     );
+  //   }
+
+  //   let resultMaxAssignedIndex1 = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(resultMaxAssignedIndex1.toString()),
+  //     100,
+  //     "1.maxAssignedIndex not true"
+  //   );
+  // });
+
+  // it("4.assignTreeFundDistributionModel should be success", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     3000,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     2000,
+  //     2200,
+  //     2200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(1, 2, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 5, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(8, 10, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(3, 9, 2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let expected = [
+  //     {
+  //       startingTreeId: 0,
+  //       distributionModelId: 1,
+  //     },
+  //     {
+  //       startingTreeId: 3,
+  //       distributionModelId: 2,
+  //     },
+  //     {
+  //       startingTreeId: 10,
+  //       distributionModelId: 0,
+  //     },
+  //   ];
+
+  //   for (let i = 0; i < 3; i++) {
+  //     let array = await treasuryManagerInstance.assignModels(i);
+  //     assert.equal(
+  //       Number(array.startingTreeId.toString()),
+  //       expected[i].startingTreeId,
+  //       i + " startingTreeId not true"
+  //     );
+
+  //     assert.equal(
+  //       Number(array.distributionModelId.toString()),
+  //       expected[i].distributionModelId,
+  //       i + " distributionModelId not true"
+  //     );
+  //   }
+
+  //   let resultMaxAssignedIndex1 = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(resultMaxAssignedIndex1.toString()),
+  //     10,
+  //     "1.maxAssignedIndex not true"
+  //   );
+  // });
+
+  // ///////////////////////////////////////////////////mahdi
   //  //************************************ fund tree test ****************************************//
   // it("should fund tree succesfully", async () => {
   //   const treeId = 1;

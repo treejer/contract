@@ -44,7 +44,9 @@ const GenesisTreeErrorMsg = {
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
-const TreesuryManagerErrorMsg = {};
+const TreesuryManagerErrorMsg = {
+  SUM_INVALID: "sum must be 10000",
+};
 
 module.exports = {
   TimeEnumes,
@@ -52,4 +54,5 @@ module.exports = {
   TreeAuctionErrorMsg,
   GenesisTreeErrorMsg,
   TreeAuctionErrorMsg,
+  TreesuryManagerErrorMsg,
 };

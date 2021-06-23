@@ -212,7 +212,7 @@ contract TreasuryManager is Initializable {
             "Distribution model not found"
         );
 
-        AssignModel[] storage localAssigns = assignModels;
+        AssignModel[] memory localAssigns = assignModels;
 
         delete assignModels;
 
@@ -252,17 +252,23 @@ contract TreasuryManager is Initializable {
             }
         }
 
+        if (checkFlag == 0) {
+            assignModels.push(AssignModel(_startTreeId, _distributionModelId));
+            if (_endTreeId == 0 && _startTreeId != 0) {
+                checkFlag = 5;
+            } else {
+                checkFlag = 1;
+            }
+        }
+
         if (checkFlag == 5) {
             maxAssignedIndex = MAX_UINT256;
-        } else if (checkFlag == 0) {
-            assignModels.push(AssignModel(_startTreeId, _distributionModelId));
-            checkFlag = 1;
         }
 
         if (checkFlag == 1) {
             if (maxAssignedIndex < _endTreeId) {
                 maxAssignedIndex = _endTreeId;
-            } else {
+            } else if (localAssigns.length > 0) {
                 assignModels.push(
                     AssignModel(
                         _endTreeId.add(1),

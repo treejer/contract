@@ -1223,19 +1223,19 @@ contract("TreasuryManager", (accounts) => {
   //     from: deployerAccount,
   //   });
 
-  // let fundT = await treasuryManagerInstance.fundTree(treeId, amount, {
-  //   from: userAccount1,
-  // });
-  // let fundP = await treasuryManagerInstance
-  //   .fundPlanter(treeId, userAccount2, treeStatus, {
+  //   let fundT = await treasuryManagerInstance.fundTree(treeId, amount, {
   //     from: userAccount1,
-  //   })
-  //   .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+  //   });
+  //   let fundP = await treasuryManagerInstance
+  //     .fundPlanter(treeId, userAccount2, treeStatus, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
 
-  // await treasuryManagerInstance
-  //   .fundPlanter(treeId2, userAccount2, treeStatus, {
-  //     from: userAccount2,
-  //   })
-  //   .should.be.rejectedWith(TreesuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
+  //   await treasuryManagerInstance
+  //     .fundPlanter(treeId2, userAccount2, treeStatus, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(TreesuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
   // });
 });

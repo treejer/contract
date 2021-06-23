@@ -62,7 +62,7 @@ contract TreasuryManager is Initializable {
     mapping(uint256 => uint256) public plantersPaid;
     mapping(address => uint256) public balances;
 
-    TotalFunds public totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
+    TotalFunds public totalFunds;
 
     event DistributionModelOfTreeNotExist(string description);
     event FundDistributionModelAssigned(
@@ -119,11 +119,14 @@ contract TreasuryManager is Initializable {
     }
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract =
-            IAccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         isTreasuryManager = true;
         accessRestriction = candidateContract;
+
+        totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     function setGbFundAddress(address payable _address) external onlyAdmin {
@@ -173,22 +176,15 @@ contract TreasuryManager is Initializable {
         uint16 _otherFund1,
         uint16 _otherFund2
     ) external onlyAdmin {
+        uint16 totalSum = _add(
+            _rescueFund,
+            _add(_localDevelop, _add(_treeResearch, _add(_planter, _referral)))
+        );
+
         require(
             _add(
                 _otherFund2,
-                _add(
-                    _otherFund1,
-                    _add(
-                        _treejerDevelop,
-                        _add(
-                            _rescueFund,
-                            _add(
-                                _localDevelop,
-                                _add(_treeResearch, _add(_planter, _referral))
-                            )
-                        )
-                    )
-                )
+                _add(_otherFund1, _add(_treejerDevelop, totalSum))
             ) == 10000,
             "sum must be 10000"
         );
@@ -203,7 +199,6 @@ contract TreasuryManager is Initializable {
             _otherFund1,
             _otherFund2
         );
-
         fundDistributionCount.increment();
     }
 
@@ -287,11 +282,10 @@ contract TreasuryManager is Initializable {
 
     function fundTree(uint256 _treeId, uint256 _amount) external {
         require(accessRestriction.isAuction(msg.sender));
-        FundDistribution memory dm =
-            fundDistributions[
-                assignModels[_findTreeDistributionModelId(_treeId)]
-                    .distributionModelId
-            ];
+        FundDistribution memory dm = fundDistributions[
+            assignModels[_findTreeDistributionModelId(_treeId)]
+            .distributionModelId
+        ];
         planterFunds[_treeId] = _amount.mul(dm.planterFund).div(1000);
         totalFunds.gbFund = totalFunds.gbFund.add(
             _amount.mul(dm.gbFund).div(1000)
@@ -334,9 +328,9 @@ contract TreasuryManager is Initializable {
             );
         } else {
             totalPayablePlanter = planterFunds[_treeId]
-                .mul(_treeStatus)
-                .div(25920)
-                .sub(plantersPaid[_treeId]);
+            .mul(_treeStatus)
+            .div(25920)
+            .sub(plantersPaid[_treeId]);
         }
         if (totalPayablePlanter > 0) {
             plantersPaid[_treeId] = plantersPaid[_treeId].add(

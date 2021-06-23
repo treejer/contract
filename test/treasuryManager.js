@@ -134,40 +134,34 @@ contract("TreasuryManager", (accounts) => {
   //     from: userAccount1,
   //   });
   // });
-  it("data must be correct after fund tree", async () => {
-    const treeId = 1;
-    const amount = web3.utils.toWei("1");
-    await treasuryManagerInstance.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: deployerAccount,
-      }
-    );
-    await treasuryManagerInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
-    });
+  // it("data must be correct after fund tree", async () => {
+  //   const treeId = 1;
+  //   const amount = web3.utils.toWei("1");
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  //     from: deployerAccount,
+  //   });
 
-    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+  //   await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
 
-    let tx = await treasuryManagerInstance.fundTree(treeId, amount, {
-      from: userAccount1,
-    });
-    const data = await treasuryManagerInstance.totalFunds();
-    console.log("data", data);
-
-    truffleAssert.eventEmitted(tx, "Event1", (ev) => {
-      console.log("ev", ev);
-
-      return true;
-    });
-  });
+  //   let tx = await treasuryManagerInstance.fundTree(treeId, amount, {
+  //     from: userAccount1,
+  //   });
+  //   const data = await treasuryManagerInstance.totalFunds();
+  //   console.log("data", data);
+  // });
   // it("should fund tree fail", async () => {
   //   const treeId = 1;
   //   const amount = web3.utils.toWei("1");

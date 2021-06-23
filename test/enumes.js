@@ -43,10 +43,12 @@ const GenesisTreeErrorMsg = {
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
+const TreesuryManagerErrorMsg = {};
 
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
   TreeAuctionErrorMsg,
   GenesisTreeErrorMsg,
+  TreeAuctionErrorMsg,
 };

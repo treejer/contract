@@ -57,4 +57,24 @@ contract("TreasuryManager", (accounts) => {
     assert.notEqual(address, undefined);
   });
   ///////////////////////////////////////////////////////mahdi
+
+  it("should fund tree succesfully", async () => {
+    const treeId = 1;
+    const amount = web3.utils.toWei("1");
+    Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+
+    treasuryManagerInstance.fundTree(treeId, amount, { from: userAccount1 });
+  });
+  // it("data must be correct after fund tree", async () => {});
+  it("should fund tree fail", async () => {
+    const treeId = 1;
+    const amount = web3.utils.toWei("1");
+    treasuryManagerInstance
+      .fundTree(treeId, amount, { from: userAccount1 })
+      .should.be.rejected();
+    Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    treasuryManagerInstance
+      .fundTree(treeId, amount, { from: userAccount2 })
+      .should.be.rejected();
+  });
 });

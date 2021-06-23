@@ -21,6 +21,7 @@ const TreeAuctionErrorMsg = {
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
 };
+
 const GenesisTreeErrorMsg = {
   PLANT_TREE_WITH_PLANTER: "planter of tree can plant it",
   PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",

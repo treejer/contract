@@ -123,5 +123,22 @@ contract("TreasuryManager", (accounts) => {
       "otherFund2 percent not true"
     );
   });
+
+  it("addFundDistributionModel should be reject invalid access", async () => {
+    await treasuryManagerInstance
+      .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  it("addFundDistributionModel should be reject sum must be 10000", async () => {
+    await treasuryManagerInstance
+      .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
   ///////////////////////////////////////////////////////mahdi
 });

@@ -282,6 +282,7 @@ contract TreasuryManager is Initializable {
 
     function fundTree(uint256 _treeId, uint256 _amount) external {
         require(accessRestriction.isAuction(msg.sender), "aaaaaaa");
+
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
             .distributionModelId
@@ -511,7 +512,7 @@ contract TreasuryManager is Initializable {
                 "there is no assigned values for this treeId"
             );
         }
-        return i;
+        return i.sub(1, "invalid fund model");
     }
 
     function _add(uint16 a, uint16 b) private pure returns (uint16) {

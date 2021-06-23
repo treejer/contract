@@ -49,12 +49,79 @@ contract("TreasuryManager", (accounts) => {
 
   //************************************ deploy successfully ****************************************//
 
-  it("deploys successfully", async () => {
-    const address = treasuryManagerInstance.address;
-    assert.notEqual(address, 0x0);
-    assert.notEqual(address, "");
-    assert.notEqual(address, null);
-    assert.notEqual(address, undefined);
+  // it("deploys successfully", async () => {
+  //   const address = treasuryManagerInstance.address;
+  //   assert.notEqual(address, 0x0);
+  //   assert.notEqual(address, "");
+  //   assert.notEqual(address, null);
+  //   assert.notEqual(address, undefined);
+  // });
+
+  // //--------------------------------addFundDistributionModel test-----------------------------------------------
+  it("addFundDistributionModel should be success", async () => {
+    await treasuryManagerInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let result = await treasuryManagerInstance.fundDistributions.call(0);
+
+    assert.equal(
+      Number(result.planterFund.toString()),
+      4000,
+      "planterFund percent not true"
+    );
+
+    assert.equal(
+      Number(result.gbFund.toString()),
+      1200,
+      "gbFund percent not true"
+    );
+
+    assert.equal(
+      Number(result.treeResearch.toString()),
+      1200,
+      "treeResearch percent not true"
+    );
+
+    assert.equal(
+      Number(result.localDevelop.toString()),
+      1200,
+      "localDevelop percent not true"
+    );
+
+    assert.equal(
+      Number(result.rescueFund.toString()),
+      1200,
+      "rescueFund percent not true"
+    );
+
+    assert.equal(
+      Number(result.treejerDevelop.toString()),
+      1200,
+      "planterFund percent not true"
+    );
+
+    assert.equal(
+      Number(result.otherFund1.toString()),
+      0,
+      "otherFund1 percent not true"
+    );
+
+    assert.equal(
+      Number(result.otherFund2.toString()),
+      0,
+      "otherFund2 percent not true"
+    );
   });
   ///////////////////////////////////////////////////////mahdi
 });

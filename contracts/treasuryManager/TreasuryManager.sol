@@ -36,7 +36,7 @@ contract TreasuryManager is Initializable {
         uint16 localDevelop;
         uint16 rescueFund;
         uint16 treejerDevelop;
-        uint16 OtherFund1;
+        uint16 otherFund1;
         uint16 otherFund2;
     }
 
@@ -294,7 +294,7 @@ contract TreasuryManager is Initializable {
             _amount.mul(dm.localDevelop).div(1000)
         );
         totalFunds.otherFund1 = totalFunds.otherFund1.add(
-            _amount.mul(dm.OtherFund1).div(1000)
+            _amount.mul(dm.otherFund1).div(1000)
         );
         totalFunds.otherFund2 = totalFunds.otherFund2.add(
             _amount.mul(dm.otherFund2).div(1000)

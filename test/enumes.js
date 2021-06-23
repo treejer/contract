@@ -12,6 +12,7 @@ const CommonErrorMsg = {
   CHECK_ADMIN: "Caller is not admin",
   CHECK_AUCTION: "Caller is not Auction",
   CHECK_GENESIS_TREE: "Caller is not GenesisTree",
+  CHECK_PLANTER: "Caller is not a planter",
 };
 
 const TreeAuctionErrorMsg = {
@@ -47,6 +48,7 @@ const GenesisTreeErrorMsg = {
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
 const TreesuryManagerErrorMsg = {
+  INSUFFICIENT_AMOUNT: "insufficient amount",
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
 };

@@ -681,7 +681,6 @@ contract("TreasuryManager", (accounts) => {
   //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   // });
 
-  // ///////////////////////////////////////////////////mahdi
   //  //************************************ fund tree test ****************************************//
   it("should fund tree succesfully", async () => {
     const treeId = 5;
@@ -837,7 +836,7 @@ contract("TreasuryManager", (accounts) => {
   //     from: userAccount2,
   //   }).should.be.rejected;
   // });
-
+  // ///////////////////////////////////////////////////mahdi
   //  //************************************ fund planter test ****************************************//
   // it("fund planter successfully", async () => {
   //   await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);

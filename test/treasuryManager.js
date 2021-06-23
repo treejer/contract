@@ -58,87 +58,87 @@ contract("TreasuryManager", (accounts) => {
   // });
 
   // //--------------------------------addFundDistributionModel test-----------------------------------------------
-  it("addFundDistributionModel should be success", async () => {
-    await treasuryManagerInstance.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: deployerAccount,
-      }
-    );
+  // it("addFundDistributionModel should be success", async () => {
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     4000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
 
-    let result = await treasuryManagerInstance.fundDistributions.call(0);
+  //   let result = await treasuryManagerInstance.fundDistributions.call(0);
 
-    assert.equal(
-      Number(result.planterFund.toString()),
-      4000,
-      "planterFund percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.planterFund.toString()),
+  //     4000,
+  //     "planterFund percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.gbFund.toString()),
-      1200,
-      "gbFund percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.gbFund.toString()),
+  //     1200,
+  //     "gbFund percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.treeResearch.toString()),
-      1200,
-      "treeResearch percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.treeResearch.toString()),
+  //     1200,
+  //     "treeResearch percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.localDevelop.toString()),
-      1200,
-      "localDevelop percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.localDevelop.toString()),
+  //     1200,
+  //     "localDevelop percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.rescueFund.toString()),
-      1200,
-      "rescueFund percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.rescueFund.toString()),
+  //     1200,
+  //     "rescueFund percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.treejerDevelop.toString()),
-      1200,
-      "planterFund percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.treejerDevelop.toString()),
+  //     1200,
+  //     "planterFund percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.otherFund1.toString()),
-      0,
-      "otherFund1 percent not true"
-    );
+  //   assert.equal(
+  //     Number(result.otherFund1.toString()),
+  //     0,
+  //     "otherFund1 percent not true"
+  //   );
 
-    assert.equal(
-      Number(result.otherFund2.toString()),
-      0,
-      "otherFund2 percent not true"
-    );
-  });
+  //   assert.equal(
+  //     Number(result.otherFund2.toString()),
+  //     0,
+  //     "otherFund2 percent not true"
+  //   );
+  // });
 
-  it("addFundDistributionModel should be reject invalid access", async () => {
-    await treasuryManagerInstance
-      .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-  });
+  // it("addFundDistributionModel should be reject invalid access", async () => {
+  //   await treasuryManagerInstance
+  //     .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
 
-  it("addFundDistributionModel should be reject sum must be 10000", async () => {
-    await treasuryManagerInstance
-      .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-  });
+  // it("addFundDistributionModel should be reject sum must be 10000", async () => {
+  //   await treasuryManagerInstance
+  //     .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
 
   ///////////////////////////////////////////////////////mahdi
 });

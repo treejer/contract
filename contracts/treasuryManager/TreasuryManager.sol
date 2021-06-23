@@ -484,8 +484,7 @@ contract TreasuryManager is Initializable {
         uint256 i = 0;
         for (i; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
-                require(i.sub(1) >= 0, "invalid fund model");
-                return i.sub(1);
+                return i.sub(1, "invalid fund model");
             }
         }
         if (_treeId > maxAssignedIndex) {

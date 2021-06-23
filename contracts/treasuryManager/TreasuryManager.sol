@@ -281,36 +281,39 @@ contract TreasuryManager is Initializable {
     }
 
     function fundTree(uint256 _treeId, uint256 _amount) external {
-        require(accessRestriction.isAuction(msg.sender), "aaaaaaa");
+        require(
+            accessRestriction.isAuction(msg.sender),
+            "only auction can access"
+        );
 
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
             .distributionModelId
         ];
-        planterFunds[_treeId] = _amount.mul(dm.planterFund).div(1000);
+        planterFunds[_treeId] = _amount.mul(dm.planterFund).div(10000);
         totalFunds.gbFund = totalFunds.gbFund.add(
-            _amount.mul(dm.gbFund).div(1000)
+            _amount.mul(dm.gbFund).div(10000)
         );
         totalFunds.localDevelop = totalFunds.localDevelop.add(
-            _amount.mul(dm.localDevelop).div(1000)
+            _amount.mul(dm.localDevelop).div(10000)
         );
         totalFunds.otherFund1 = totalFunds.otherFund1.add(
-            _amount.mul(dm.otherFund1).div(1000)
+            _amount.mul(dm.otherFund1).div(10000)
         );
         totalFunds.otherFund2 = totalFunds.otherFund2.add(
-            _amount.mul(dm.otherFund2).div(1000)
+            _amount.mul(dm.otherFund2).div(10000)
         );
         totalFunds.planterFund = totalFunds.planterFund.add(
-            _amount.mul(dm.planterFund).div(1000)
+            _amount.mul(dm.planterFund).div(10000)
         );
         totalFunds.rescueFund = totalFunds.rescueFund.add(
-            _amount.mul(dm.rescueFund).div(1000)
+            _amount.mul(dm.rescueFund).div(10000)
         );
         totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(
-            _amount.mul(dm.treejerDevelop).div(1000)
+            _amount.mul(dm.treejerDevelop).div(10000)
         );
         totalFunds.treeResearch = totalFunds.treeResearch.add(
-            _amount.mul(dm.treeResearch).div(1000)
+            _amount.mul(dm.treeResearch).div(10000)
         );
     }
 

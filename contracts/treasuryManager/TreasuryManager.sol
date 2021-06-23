@@ -17,7 +17,6 @@ contract TreasuryManager is Initializable {
 
     CountersUpgradeable.Counter private fundDistributionCount;
     bool public isTreasuryManager;
-    AssignModel[] public assignModels;
     uint256 public maxAssignedIndex;
     IAccessRestriction public accessRestriction;
     uint256 constant MAX_UINT256 = 2**256 - 1;
@@ -57,6 +56,7 @@ contract TreasuryManager is Initializable {
         uint256 distributionModelId;
     }
 
+    AssignModel[] public assignModels;
     mapping(uint256 => FundDistribution) public fundDistributions;
     mapping(uint256 => uint256) public planterFunds;
     mapping(uint256 => uint256) public plantersPaid;

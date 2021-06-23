@@ -7,4 +7,18 @@ interface ITreasuryManager {
         external
         view
         returns (uint256 startingTreeId, uint256 distributionModelId);
+
+    function totalFunds()
+        external
+        view
+        returns (
+            uint256 planterFund,
+            uint256 gbFund,
+            uint256 treeResearch,
+            uint256 localDevelop,
+            uint256 rescueFund,
+            uint256 treejerDevelop,
+            uint256 otherFund1,
+            uint256 otherFund2
+        );
 }

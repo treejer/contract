@@ -51,6 +51,7 @@ const TreesuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
+  INVALID_FUND_MODEL: "invalid fund model",
 };
 
 module.exports = {

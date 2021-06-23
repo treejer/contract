@@ -15,6 +15,7 @@ var ForestFactory = artifacts.require("ForestFactory.sol");
 var Dai = artifacts.require("Dai.sol");
 var TreeAuction = artifacts.require("TreeAuction.sol");
 var GenesisTree = artifacts.require("GenesisTree.sol");
+var IncrementalSell = artifacts.require("IncrementalSell.sol");
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -23,6 +24,7 @@ const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
+const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -41,6 +43,7 @@ module.exports = async function (deployer, network, accounts) {
   let daiTokenAddress;
   let treeAuctionAddress;
   let genesisTreeAddress;
+  let incrementalSellAddress;
 
   //gsn
   let trustedForwarder;
@@ -166,7 +169,18 @@ module.exports = async function (deployer, network, accounts) {
   }).then(() => {
     treeAuctionAddress = TreeAuction.address;
 
-    TreeAuction.deployed().then(async (instance) => {});
+    TreeAuction.deployed().then(async (instance) => { });
+  });
+
+  console.log("Deploying IncrementalSell...");
+  await deployProxy(IncrementalSell, [accessRestrictionAddress], {
+    deployer,
+    initializer: "initialize",
+    unsafeAllowCustomTypes: true,
+  }).then(() => {
+    incrementalSellAddress = IncrementalSell.address;
+
+    IncrementalSell.deployed().then(async (instance) => { });
   });
 
   console.log("Deploying GenesisTree...");
@@ -219,6 +233,7 @@ module.exports = async function (deployer, network, accounts) {
     await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
     await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
     await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
+    await instance.grantRole(INCREMENTAL_SELL_ROLE, incrementalSellAddress);
   });
 
   console.log("Deploying ForestFactory...");
@@ -273,6 +288,7 @@ CONTRACT_TREE_ADDRESS=${treeAddress}
 CONTRACT_SEED_ADDRESS=${seedAddress}
 CONTRACT_O2_ADDRESS=${o2Address}
 CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
+CONTRACT_INCREAMENTAL_SELL_ADDRESS=${incrementalSellAddress}
 CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);

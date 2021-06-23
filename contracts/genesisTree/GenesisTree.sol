@@ -65,6 +65,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier auctionOrIncrementalSell() {
+        accessRestriction.ifAuctionOrIncrementalSell(_msgSender());
+        _;
+    }
+
     modifier validTree(uint256 _treeId) {
         require(genTrees[_treeId].isExist, "invalid tree");
         _;
@@ -289,7 +294,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function checkAndSetProvideStatus(uint256 _treeId, uint16 _provideType)
         external
-        onlyAuction
+        auctionOrIncrementalSell
         validTree(_treeId)
         returns (uint16)
     {

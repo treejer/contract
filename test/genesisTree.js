@@ -2376,7 +2376,7 @@ contract("GenesisTree", (accounts) => {
       .checkAndSetProvideStatus(1, 1, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION_OR_INCS);
   });
 
   it("checkAndSetProvideStatus should be fail because invalid tree", async () => {

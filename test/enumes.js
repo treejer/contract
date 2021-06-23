@@ -21,6 +21,14 @@ const TreeAuctionErrorMsg = {
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
 };
+
+const IncrementalSellErrorMsg = {
+  TREE_STATUS: "one of trees is on other provide.",
+  INVALID_PARAM: "all params must have value",
+  INVALID_AMOUNT: "invalid amount",
+  OFFER_NOT_RUNNING: "offer not runing"
+};
+
 const GenesisTreeErrorMsg = {
   PLANT_TREE_WITH_PLANTER: "planter of tree can plant it",
   PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",
@@ -41,6 +49,7 @@ const GenesisTreeErrorMsg = {
   ADMIN_ABBASSADOR_PLANTER: "Admin or ambassador or planter can accept updates",
   INVALID_ACCESS_PLANTER_OF_TREE: "Planter of tree can't verify update",
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
+  CALLER_IS_NOT_AUCTION_OR_INCS: "Caller is not IncrementalSell or Auction",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
 
@@ -48,5 +57,6 @@ module.exports = {
   TimeEnumes,
   CommonErrorMsg,
   TreeAuctionErrorMsg,
+  IncrementalSellErrorMsg,
   GenesisTreeErrorMsg,
 };

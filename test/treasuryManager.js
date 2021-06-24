@@ -62,6 +62,81 @@ contract("TreasuryManager", (accounts) => {
   //   assert.notEqual(address, undefined);
   // });
 
+  //  //-------------------------------setGbFundAddress test-------------------------------------------------------
+  // it("setGbFundAddress should be success", async () => {
+  //   let gbAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setGbFundAddress(gbAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.gbFundAddress(),
+  //     gbAddress,
+  //     "gbAddress not true"
+  //   );
+  // });
+
+  // it("setGbFundAddress should be fail (invalid access)", async () => {
+  //   let gbAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setGbFundAddress(gbAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
+  //  //-------------------------------setTreeResearchAddress test-------------------------------------------------------
+  // it("setTreeResearchAddress should be success", async () => {
+  //   let treeResearchAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setTreeResearchAddress(treeResearchAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.treeResearchAddress(),
+  //     treeResearchAddress,
+  //     "Set treeResearchAddress address not true"
+  //   );
+  // });
+
+  // it("setTreeResearchAddress should be fail (invalid access)", async () => {
+  //   let treeResearchAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setTreeResearchAddress(treeResearchAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
+  //  //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
+  // it("setLocalDevelopAddress should be success", async () => {
+  //   let localDevelopAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setLocalDevelopAddress(localDevelopAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.localDevelopAddress(),
+  //     localDevelopAddress,
+  //     "Set localDevelopAddress address not true"
+  //   );
+  // });
+
+  // it("setLocalDevelopAddress should be fail (invalid access)", async () => {
+  //   let localDevelopAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setLocalDevelopAddress(localDevelopAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
   // //--------------------------------addFundDistributionModel test-----------------------------------------------
   // it("addFundDistributionModel should be success", async () => {
   //   await treasuryManagerInstance.addFundDistributionModel(
@@ -1053,7 +1128,7 @@ contract("TreasuryManager", (accounts) => {
   // });
 
   // it("3.fundTree should be success", async () => {
-  //   let amount = web3.utils.toWei("1", "Ether");
+  //   let amount = web3.utils.toWei(".2", "Ether");
 
   //   await treasuryManagerInstance.addFundDistributionModel(
   //     8000,
@@ -1140,6 +1215,7 @@ contract("TreasuryManager", (accounts) => {
   //     planterFundModel2: (40 * amount) / 100,
   //     planterFundModel3: (20 * amount) / 100,
   //     planterFundModel4: (10 * amount) / 100,
+  //     planterFundModel5: (5 * amount) / 100,
   //   };
 
   //   //check treeId 0
@@ -1315,6 +1391,21 @@ contract("TreasuryManager", (accounts) => {
   //     }
   //   );
 
+  //   //check treeId 4999
+
+  //   await treasuryManagerInstance.fundTree(4999, {
+  //     from: userAccount3,
+  //     value: amount,
+  //   });
+
+  //   let pFund4999 = await treasuryManagerInstance.planterFunds.call(4999);
+
+  //   assert.equal(
+  //     Number(pFund4999.toString()),
+  //     expected.planterFundModel3,
+  //     "Planter funds invalid treeId 4999"
+  //   );
+
   //   //check treeId 5000
 
   //   await treasuryManagerInstance.fundTree(5000, {
@@ -1373,6 +1464,88 @@ contract("TreasuryManager", (accounts) => {
   //     Number(pFund10001.toString()),
   //     expected.planterFundModel3,
   //     "Planter funds invalid treeId 10001"
+  //   );
+
+  //   await treasuryManagerInstance.addFundDistributionModel(
+  //     500,
+  //     0,
+  //     9500,
+  //     0,
+  //     0,
+  //     0,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await treasuryManagerInstance.assignTreeFundDistributionModel(4, 10, 5, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //check treeId 4
+  //   await treasuryManagerInstance.fundTree(4, {
+  //     from: userAccount3,
+  //     value: amount,
+  //   });
+
+  //   let pFund4 = await treasuryManagerInstance.planterFunds.call(4);
+
+  //   assert.equal(
+  //     Number(pFund4.toString()),
+  //     expected.planterFundModel5,
+  //     "Planter funds invalid treeId 4"
+  //   );
+
+  //   //check treeId 10_2
+  //   await treasuryManagerInstance.fundTree(10, {
+  //     from: userAccount3,
+  //     value: amount,
+  //   });
+
+  //   let pFund10_2 = await treasuryManagerInstance.planterFunds.call(10);
+
+  //   assert.equal(
+  //     Number(pFund10_2.toString()),
+  //     expected.planterFundModel5,
+  //     "Planter funds invalid treeId pFund10_2"
+  //   );
+
+  //   //check treeId 11_2
+  //   await treasuryManagerInstance.fundTree(11, {
+  //     from: userAccount3,
+  //     value: amount,
+  //   });
+
+  //   let pFund11_2 = await treasuryManagerInstance.planterFunds.call(11);
+
+  //   assert.equal(
+  //     Number(pFund11_2.toString()),
+  //     expected.planterFundModel2,
+  //     "Planter funds invalid treeId pFund11_2"
+  //   );
+
+  //   //check treeId 3
+  //   await treasuryManagerInstance.fundTree(3, {
+  //     from: userAccount3,
+  //     value: amount,
+  //   });
+
+  //   let pFund3 = await treasuryManagerInstance.planterFunds.call(3);
+
+  //   assert.equal(
+  //     Number(pFund3.toString()),
+  //     expected.planterFundModel1,
+  //     "Planter funds invalid treeId pFund3"
+  //   );
+
+  //   let maxAssignedIndex1 = await treasuryManagerInstance.maxAssignedIndex();
+
+  //   assert.equal(
+  //     Number(maxAssignedIndex1.toString()),
+  //     1000000,
+  //     "maxAssignedIndex1 not tTrue"
   //   );
   // });
 
@@ -1455,159 +1628,6 @@ contract("TreasuryManager", (accounts) => {
   //   });
 
   //   truffleAssert.eventNotEmitted(tx1000000, "DistributionModelOfTreeNotExist");
-  // });
-
-  // it("should fund tree succesfully", async () => {
-  //   const treeId = 5;
-  //   const treeId2 = 10;
-  //   const treeId3 = 12;
-  //   const amount = web3.utils.toWei("1");
-  //   await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-  //   await treasuryManagerInstance.addFundDistributionModel(
-  //     4000,
-  //     1200,
-  //     1200,
-  //     1200,
-  //     1200,
-  //     1200,
-  //     0,
-  //     0,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
-  //   await treasuryManagerInstance.addFundDistributionModel(
-  //     5000,
-  //     1000,
-  //     1000,
-  //     1000,
-  //     1000,
-  //     1000,
-  //     0,
-  //     0,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
-
-  //   await treasuryManagerInstance.assignTreeFundDistributionModel(3, 10, 0, {
-  //     from: deployerAccount,
-  //   });
-  //   await treasuryManagerInstance.assignTreeFundDistributionModel(11, 15, 1, {
-  //     from: deployerAccount,
-  //   });
-  //   let a1 = await treasuryManagerInstance.assignModels.call(0);
-  //   // let a2 = await treasuryManagerInstance.assignModels.call(1);
-  //   console.log("a1", a1);
-  //   // console.log("a2", a2);
-
-  //   // await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-
-  //   // await treasuryManagerInstance.fundTree(treeId, amount, {
-  //   //   from: userAccount1,
-  //   // });
-  //   // await treasuryManagerInstance.fundTree(treeId2, amount, {
-  //   //   from: userAccount1,
-  //   // });
-  //   // await treasuryManagerInstance.fundTree(treeId3, amount, {
-  //   //   from: userAccount1,
-  //   // });
-  // });
-
-  // it("data must be correct after fund tree", async () => {
-  //   const treeId = 12;
-  //   const amount = web3.utils.toWei("1");
-  //   const planterFund = 4000;
-  //   const gbFund = 1200;
-  //   const treeResearch = 1200;
-  //   const localDevelop = 1200;
-  //   const rescueFund = 1200;
-  //   const treejerDevelop = 1200;
-  //   const otherFund1 = 0;
-  //   const otherFund2 = 0;
-
-  //   await treasuryManagerInstance.addFundDistributionModel(
-  //     planterFund,
-  //     gbFund,
-  //     treeResearch,
-  //     localDevelop,
-  //     rescueFund,
-  //     treejerDevelop,
-  //     otherFund1,
-  //     otherFund2,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
-  //   await treasuryManagerInstance.assignTreeFundDistributionModel(0, 10, 0, {
-  //     from: deployerAccount,
-  //   });
-
-  //   await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-
-  //   let tx = await treasuryManagerInstance.fundTree(treeId, amount, {
-  //     from: userAccount1,
-  //   });
-  //   const pFund = await treasuryManagerInstance.planterFunds.call(treeId);
-
-  //   assert.equal(
-  //     Number(pFund.toString()),
-  //     (planterFund / 10000) * Number(web3.utils.toWei("1")),
-  //     "planter funds invalid"
-  //   );
-  //   const tFunds = await treasuryManagerInstance.totalFunds();
-  //   assert.equal(
-  //     Number(tFunds.planterFund.toString()),
-  //     (planterFund / 10000) * Number(web3.utils.toWei("1")),
-  //     "planter funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.gbFund.toString()),
-  //     (gbFund / 10000) * Number(web3.utils.toWei("1")),
-  //     "gb total funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.treeResearch.toString()),
-  //     (treeResearch / 10000) * Number(web3.utils.toWei("1")),
-  //     "tree research total funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.localDevelop.toString()),
-  //     (localDevelop / 10000) * Number(web3.utils.toWei("1")),
-  //     "local funds total funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.rescueFund.toString()),
-  //     (rescueFund / 10000) * Number(web3.utils.toWei("1")),
-  //     "rescue total funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.treejerDevelop.toString()),
-  //     (treejerDevelop / 10000) * Number(web3.utils.toWei("1")),
-  //     "treejer develop total funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.otherFund1.toString()),
-  //     (otherFund1 / 10000) * Number(web3.utils.toWei("1")),
-  //     "other1 total  funds invalid"
-  //   );
-  //   assert.equal(
-  //     Number(tFunds.otherFund2.toString()),
-  //     (otherFund2 / 10000) * Number(web3.utils.toWei("1")),
-  //     "other2 total funds invalid"
-  //   );
-  // });
-
-  // it("should fund tree fail", async () => {
-  //   const treeId = 1;
-  //   const amount = web3.utils.toWei("1");
-  //   await treasuryManagerInstance.fundTree(treeId, amount, {
-  //     from: userAccount1,
-  //   }).should.be.rejected;
-  //   await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-  //   await treasuryManagerInstance.fundTree(treeId, amount, {
-  //     from: userAccount2,
-  //   }).should.be.rejected;
   // });
 
   // ///////////////////////////////////////////////////mahdi

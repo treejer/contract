@@ -13,6 +13,7 @@ const CommonErrorMsg = {
   CHECK_AUCTION: "Caller is not Auction",
   CHECK_GENESIS_TREE: "Caller is not GenesisTree",
   CHECK_PLANTER: "Caller is not a planter",
+  INVALID_ADDRESS: "invalid address",
 };
 
 const TreeAuctionErrorMsg = {

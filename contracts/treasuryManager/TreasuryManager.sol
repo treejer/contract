@@ -158,11 +158,11 @@ contract TreasuryManager is Initializable {
         treejerDevelopAddress = _address;
     }
 
-    function setOtherFund1(address payable _address) external onlyAdmin {
+    function setOtherFund1Address(address payable _address) external onlyAdmin {
         otherFundAddress1 = _address;
     }
 
-    function setOtherFund2(address payable _address) external onlyAdmin {
+    function setOtherFund2Address(address payable _address) external onlyAdmin {
         otherFundAddress2 = _address;
     }
 
@@ -376,6 +376,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.gbFund && _amount > 0,
             "insufficient amount"
         );
+        require(gbFundAddress != address(0), "invalid address");
         totalFunds.gbFund = totalFunds.gbFund.sub(_amount);
         if (gbFundAddress.send(_amount)) {
             emit GbBalanceWithdrawn(_amount, gbFundAddress, _reason);
@@ -392,6 +393,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.treeResearch && _amount > 0,
             "insufficient amount"
         );
+        require(treeResearchAddress != address(0), "invalid address");
         totalFunds.treeResearch = totalFunds.treeResearch.sub(_amount);
         if (treeResearchAddress.send(_amount)) {
             emit TreeResearchBalanceWithdrawn(
@@ -412,6 +414,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.localDevelop && _amount > 0,
             "insufficient amount"
         );
+        require(localDevelopAddress != address(0), "invalid address");
         totalFunds.localDevelop = totalFunds.localDevelop.sub(_amount);
         if (localDevelopAddress.send(_amount)) {
             emit LocalDevelopBalanceWithdrawn(
@@ -432,6 +435,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.rescueFund && _amount > 0,
             "insufficient amount"
         );
+        require(rescueFundAddress != address(0), "invalid address");
         totalFunds.rescueFund = totalFunds.rescueFund.sub(_amount);
         if (rescueFundAddress.send(_amount)) {
             emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
@@ -448,6 +452,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.treejerDevelop && _amount > 0,
             "insufficient amount"
         );
+        require(treejerDevelopAddress != address(0), "invalid address");
         totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
         if (treejerDevelopAddress.send(_amount)) {
             emit TreejerDevelopBalanceWithdrawn(
@@ -468,6 +473,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.otherFund1 && _amount > 0,
             "insufficient amount"
         );
+        require(otherFundAddress1 != address(0), "invalid address");
         totalFunds.otherFund1 = totalFunds.otherFund1.sub(_amount);
         if (otherFundAddress1.send(_amount)) {
             emit OtherBalanceWithdrawn1(_amount, otherFundAddress1, _reason);
@@ -484,6 +490,7 @@ contract TreasuryManager is Initializable {
             _amount <= totalFunds.otherFund2 && _amount > 0,
             "insufficient amount"
         );
+        require(otherFundAddress2 != address(0), "invalid address");
         totalFunds.otherFund2 = totalFunds.otherFund2.sub(_amount);
         if (otherFundAddress2.send(_amount)) {
             emit OtherBalanceWithdrawn2(_amount, otherFundAddress2, _reason);
@@ -498,6 +505,7 @@ contract TreasuryManager is Initializable {
             _amount <= balances[msg.sender] && _amount > 0,
             "insufficient amount"
         );
+        require(msg.sender != address(0), "invalid address");
         balances[msg.sender] = balances[msg.sender].sub(_amount);
         if (msg.sender.send(_amount)) {
             emit PlanterBalanceWithdrawn(_amount, msg.sender);

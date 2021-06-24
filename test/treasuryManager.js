@@ -6,11 +6,13 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
-const {
-  TimeEnumes,
-  CommonErrorMsg,
-  TreesuryManagerErrorMsg,
-} = require("./enumes");
+const { CommonErrorMsg, TreesuryManagerErrorMsg } = require("./enumes");
+
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/gsn");
+const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("TreasuryManager", (accounts) => {
   let treasuryManagerInstance;
@@ -4302,5 +4304,74 @@ contract("TreasuryManager", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  // //----------------------------------------------gsn test-------------------------------------------
+  it("Test gsn in treasuryManager", async () => {
+    let env = await GsnTestEnvironment.startGsn("localhost");
+    const {
+      forwarderAddress,
+      relayHubAddress,
+      paymasterAddress,
+    } = env.contractsDeployment;
+
+    await treasuryManagerInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(treasuryManagerInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    await Common.addPlanter(arInstance, deployerAccount, deployerAccount);
+
+    let signer = provider.getSigner(1);
+
+    let contract = await new ethers.Contract(
+      treasuryManagerInstance.address,
+      treasuryManagerInstance.abi,
+      signer
+    );
+
+    let balanceBefore = await web3.eth.getBalance(deployerAccount);
+
+    await await contract.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0
+    );
+
+    let balanceAfter = await web3.eth.getBalance(deployerAccount);
+
+    assert.equal(
+      Number(balanceAfter.toString()),
+      Number(balanceBefore.toString()),
+      "Set otherFundAddress1 address not true"
+    );
   });
 });

@@ -2360,7 +2360,7 @@ contract("TreasuryManager", (accounts) => {
       .withdrawPlanterBalance(web3.utils.toWei("0.05"), {
         from: userAccount4,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
+      .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
     await treasuryManagerInstance
       .withdrawPlanterBalance(web3.utils.toWei("0.05"), {
         from: userAccount5,

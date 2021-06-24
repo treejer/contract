@@ -119,12 +119,22 @@ contract TreasuryManager is Initializable, RelayRecipient {
         accessRestriction.ifAuction(_msgSender());
         _;
     }
+    modifier onlyGenesisTree() {
+        accessRestriction.ifGenesisTree(_msgSender());
+        _;
+    }
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
+
         require(candidateContract.isAccessRestriction());
+
         isTreasuryManager = true;
         accessRestriction = candidateContract;
 
@@ -205,6 +215,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
             _otherFund1,
             _otherFund2
         );
+
         fundDistributionCount.increment();
     }
 
@@ -302,28 +313,37 @@ contract TreasuryManager is Initializable, RelayRecipient {
             assignModels[_findTreeDistributionModelId(_treeId)]
             .distributionModelId
         ];
+
         planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
+
         totalFunds.gbFund = totalFunds.gbFund.add(
             msg.value.mul(dm.gbFund).div(10000)
         );
+
         totalFunds.localDevelop = totalFunds.localDevelop.add(
             msg.value.mul(dm.localDevelop).div(10000)
         );
+
         totalFunds.otherFund1 = totalFunds.otherFund1.add(
             msg.value.mul(dm.otherFund1).div(10000)
         );
+
         totalFunds.otherFund2 = totalFunds.otherFund2.add(
             msg.value.mul(dm.otherFund2).div(10000)
         );
+
         totalFunds.planterFund = totalFunds.planterFund.add(
             msg.value.mul(dm.planterFund).div(10000)
         );
+
         totalFunds.rescueFund = totalFunds.rescueFund.add(
             msg.value.mul(dm.rescueFund).div(10000)
         );
+
         totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(
             msg.value.mul(dm.treejerDevelop).div(10000)
         );
+
         totalFunds.treeResearch = totalFunds.treeResearch.add(
             msg.value.mul(dm.treeResearch).div(10000)
         );
@@ -333,10 +353,11 @@ contract TreasuryManager is Initializable, RelayRecipient {
         uint256 _treeId,
         address payable _planterId,
         uint16 _treeStatus
-    ) external {
-        accessRestriction.ifGenesisTree(_msgSender());
+    ) external onlyGenesisTree {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
+
         uint256 totalPayablePlanter;
+
         if (_treeStatus > 25920) {
             //25920 = 30 * 24 * 36
             totalPayablePlanter = planterFunds[_treeId].sub(
@@ -352,12 +373,15 @@ contract TreasuryManager is Initializable, RelayRecipient {
             plantersPaid[_treeId] = plantersPaid[_treeId].add(
                 totalPayablePlanter
             );
+
             balances[_planterId] = balances[_planterId].add(
                 totalPayablePlanter
             );
+
             totalFunds.planterFund = totalFunds.planterFund.sub(
                 totalPayablePlanter
             );
+
             emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
         }
     }
@@ -365,9 +389,9 @@ contract TreasuryManager is Initializable, RelayRecipient {
     function distributionModelExistance(uint256 _treeId)
         external
         view
+        onlyAuction
         returns (bool)
     {
-        accessRestriction.ifAuction(_msgSender());
         require(assignModels.length > 0, "assign models not exist");
         return
             _treeId >= assignModels[0].startingTreeId &&
@@ -376,14 +400,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawGb(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(gbFundAddress)
     {
         require(
             _amount <= totalFunds.gbFund && _amount > 0,
             "insufficient amount"
         );
-        require(gbFundAddress != address(0), "invalid address");
+
         totalFunds.gbFund = totalFunds.gbFund.sub(_amount);
+
         if (gbFundAddress.send(_amount)) {
             emit GbBalanceWithdrawn(_amount, gbFundAddress, _reason);
         } else {
@@ -393,14 +420,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawTreeResearch(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(treeResearchAddress)
     {
         require(
             _amount <= totalFunds.treeResearch && _amount > 0,
             "insufficient amount"
         );
-        require(treeResearchAddress != address(0), "invalid address");
+
         totalFunds.treeResearch = totalFunds.treeResearch.sub(_amount);
+
         if (treeResearchAddress.send(_amount)) {
             emit TreeResearchBalanceWithdrawn(
                 _amount,
@@ -414,14 +444,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawLocalDevelop(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(localDevelopAddress)
     {
         require(
             _amount <= totalFunds.localDevelop && _amount > 0,
             "insufficient amount"
         );
-        require(localDevelopAddress != address(0), "invalid address");
+
         totalFunds.localDevelop = totalFunds.localDevelop.sub(_amount);
+
         if (localDevelopAddress.send(_amount)) {
             emit LocalDevelopBalanceWithdrawn(
                 _amount,
@@ -435,14 +468,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawRescueFund(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(rescueFundAddress)
     {
         require(
             _amount <= totalFunds.rescueFund && _amount > 0,
             "insufficient amount"
         );
-        require(rescueFundAddress != address(0), "invalid address");
+
         totalFunds.rescueFund = totalFunds.rescueFund.sub(_amount);
+
         if (rescueFundAddress.send(_amount)) {
             emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
         } else {
@@ -452,14 +488,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawTreejerDevelop(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(treejerDevelopAddress)
     {
         require(
             _amount <= totalFunds.treejerDevelop && _amount > 0,
             "insufficient amount"
         );
-        require(treejerDevelopAddress != address(0), "invalid address");
+
         totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+
         if (treejerDevelopAddress.send(_amount)) {
             emit TreejerDevelopBalanceWithdrawn(
                 _amount,
@@ -473,14 +512,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawOtherFund1(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(otherFundAddress1)
     {
         require(
             _amount <= totalFunds.otherFund1 && _amount > 0,
             "insufficient amount"
         );
-        require(otherFundAddress1 != address(0), "invalid address");
+
         totalFunds.otherFund1 = totalFunds.otherFund1.sub(_amount);
+
         if (otherFundAddress1.send(_amount)) {
             emit OtherBalanceWithdrawn1(_amount, otherFundAddress1, _reason);
         } else {
@@ -490,14 +532,17 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
     function withdrawOtherFund2(uint256 _amount, string memory _reason)
         external
+        ifNotPaused
         onlyAdmin
+        validAddress(otherFundAddress2)
     {
         require(
             _amount <= totalFunds.otherFund2 && _amount > 0,
             "insufficient amount"
         );
-        require(otherFundAddress2 != address(0), "invalid address");
+
         totalFunds.otherFund2 = totalFunds.otherFund2.sub(_amount);
+
         if (otherFundAddress2.send(_amount)) {
             emit OtherBalanceWithdrawn2(_amount, otherFundAddress2, _reason);
         } else {
@@ -505,14 +550,14 @@ contract TreasuryManager is Initializable, RelayRecipient {
         }
     }
 
-    function withdrawPlanterBalance(uint256 _amount) external {
-        accessRestriction.ifPlanter(_msgSender()); //this is not required
+    function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
         require(
             _amount <= balances[_msgSender()] && _amount > 0,
             "insufficient amount"
         );
 
         balances[_msgSender()] = balances[_msgSender()].sub(_amount);
+
         if (_msgSender().send(_amount)) {
             emit PlanterBalanceWithdrawn(_amount, _msgSender());
         } else {
@@ -525,21 +570,25 @@ contract TreasuryManager is Initializable, RelayRecipient {
         returns (uint256)
     {
         uint256 i = 0;
+
         for (i; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
                 return i.sub(1, "invalid fund model");
             }
         }
+
         if (_treeId > maxAssignedIndex) {
             emit DistributionModelOfTreeNotExist(
                 "there is no assigned values for this treeId"
             );
         }
+
         return i.sub(1, "invalid fund model");
     }
 
     function _add(uint16 a, uint16 b) private pure returns (uint16) {
         uint16 c = a + b;
+
         require(c >= a, "SafeMath: addition overflow");
 
         return c;

@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract TreasuryManager is Initializable {
+contract TreasuryManager is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeMathUpgradeable for uint256;
@@ -107,7 +108,7 @@ contract TreasuryManager is Initializable {
     );
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
     modifier ifNotPaused() {
@@ -115,7 +116,7 @@ contract TreasuryManager is Initializable {
         _;
     }
     modifier onlyAuction() {
-        accessRestriction.ifAuction(msg.sender);
+        accessRestriction.ifAuction(_msgSender());
         _;
     }
 
@@ -128,6 +129,10 @@ contract TreasuryManager is Initializable {
         accessRestriction = candidateContract;
 
         totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
     }
 
     function setGbFundAddress(address payable _address) external onlyAdmin {
@@ -289,7 +294,7 @@ contract TreasuryManager is Initializable {
 
     function fundTree(uint256 _treeId) external payable {
         require(
-            accessRestriction.isAuction(msg.sender),
+            accessRestriction.isAuction(_msgSender()),
             "only auction can access"
         );
 
@@ -329,7 +334,7 @@ contract TreasuryManager is Initializable {
         address payable _planterId,
         uint16 _treeStatus
     ) external {
-        accessRestriction.ifGenesisTree(msg.sender);
+        accessRestriction.ifGenesisTree(_msgSender());
         require(planterFunds[_treeId] > 0, "planter fund not exist");
         uint256 totalPayablePlanter;
         if (_treeStatus > 25920) {
@@ -362,7 +367,7 @@ contract TreasuryManager is Initializable {
         view
         returns (bool)
     {
-        accessRestriction.ifAuction(msg.sender);
+        accessRestriction.ifAuction(_msgSender());
         require(assignModels.length > 0, "assign models not exist");
         return
             _treeId >= assignModels[0].startingTreeId &&
@@ -501,17 +506,17 @@ contract TreasuryManager is Initializable {
     }
 
     function withdrawPlanterBalance(uint256 _amount) external {
-        accessRestriction.ifPlanter(msg.sender); //this is not required
+        accessRestriction.ifPlanter(_msgSender()); //this is not required
         require(
-            _amount <= balances[msg.sender] && _amount > 0,
+            _amount <= balances[_msgSender()] && _amount > 0,
             "insufficient amount"
         );
 
-        balances[msg.sender] = balances[msg.sender].sub(_amount);
-        if (msg.sender.send(_amount)) {
-            emit PlanterBalanceWithdrawn(_amount, msg.sender);
+        balances[_msgSender()] = balances[_msgSender()].sub(_amount);
+        if (_msgSender().send(_amount)) {
+            emit PlanterBalanceWithdrawn(_amount, _msgSender());
         } else {
-            balances[msg.sender] = balances[msg.sender].add(_amount);
+            balances[_msgSender()] = balances[_msgSender()].add(_amount);
         }
     }
 

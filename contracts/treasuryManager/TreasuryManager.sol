@@ -13,15 +13,15 @@ contract TreasuryManager is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeMathUpgradeable for uint256;
-    using SafeMathUpgradeable for uint64;
-    using SafeMathUpgradeable for uint16;
 
     CountersUpgradeable.Counter private fundDistributionCount;
 
-    bool public isTreasuryManager;
-    IAccessRestriction public accessRestriction;
-    uint256 public maxAssignedIndex;
     uint256 constant MAX_UINT256 = 2**256 - 1;
+    bool public isTreasuryManager;
+    uint256 public maxAssignedIndex;
+
+    IAccessRestriction public accessRestriction;
+    TotalFunds public totalFunds;
 
     address payable public gbFundAddress;
     address payable public treeResearchAddress;
@@ -64,8 +64,6 @@ contract TreasuryManager is Initializable, RelayRecipient {
     mapping(uint256 => uint256) public planterFunds;
     mapping(uint256 => uint256) public plantersPaid;
     mapping(address => uint256) public balances;
-
-    TotalFunds public totalFunds;
 
     event DistributionModelOfTreeNotExist(string description);
     event FundDistributionModelAssigned(

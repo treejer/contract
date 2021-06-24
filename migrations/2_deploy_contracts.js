@@ -191,7 +191,9 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     treasuryManagerAddress = TreasuryManager.address;
-    TreasuryManager.deployed().then(async (instance) => {});
+    TreasuryManager.deployed().then(async (instance) => {
+      await instance.setTrustedForwarder(trustedForwarder);
+    });
   });
 
   console.log("Deploying SeedFactory...");

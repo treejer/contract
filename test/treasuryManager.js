@@ -2089,7 +2089,7 @@ contract("TreasuryManager", (accounts) => {
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
     const treeId = 1;
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2141,7 +2141,7 @@ contract("TreasuryManager", (accounts) => {
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2174,7 +2174,7 @@ contract("TreasuryManager", (accounts) => {
       from: userAccount2,
     });
     const tx = await treasuryManagerInstance.withdrawPlanterBalance(
-      web3.utils.toWei("0.005"),
+      web3.utils.toWei("0.5"),
       { from: userAccount3 }
     );
   });
@@ -2377,7 +2377,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2409,7 +2409,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawGb(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -2648,7 +2648,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 500;
     const treeResearch = 2000;
@@ -2680,7 +2680,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawTreeResearch(
-      web3.utils.toWei("0.004"),
+      web3.utils.toWei("0.4"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -2928,7 +2928,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2960,7 +2960,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawLocalDevelop(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -3207,7 +3207,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3239,7 +3239,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawRescueFund(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -3483,7 +3483,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3515,7 +3515,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawTreejerDevelop(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -3762,7 +3762,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3794,7 +3794,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawOtherFund1(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -4038,7 +4038,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     const treeId = 1;
-    const amount = web3.utils.toWei("0.02");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -4070,7 +4070,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     const tx = await treasuryManagerInstance.withdrawOtherFund2(
-      web3.utils.toWei("0.002"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       { from: deployerAccount }
     );
@@ -4373,5 +4373,109 @@ contract("TreasuryManager", (accounts) => {
       Number(balanceBefore.toString()),
       "Set otherFundAddress1 address not true"
     );
+  });
+  it("Should be fail withdraw gb beacuse function is pause", async () => {
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+
+    await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await treasuryManagerInstance.setGbFundAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("0.2");
+    const amount1 = web3.utils.toWei("0.1");
+    const planterFund = 5000;
+    const gbFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const otherFund1 = 0;
+    const otherFund2 = 0;
+
+    await treasuryManagerInstance.addFundDistributionModel(
+      planterFund,
+      gbFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      otherFund1,
+      otherFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryManagerInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await treasuryManagerInstance.fundTree(treeId, {
+      from: userAccount8,
+      value: amount,
+    });
+    await treasuryManagerInstance.fundTree(treeId2, {
+      from: userAccount8,
+      value: amount1,
+    });
+    await treasuryManagerInstance
+      .withdrawGb(web3.utils.toWei("0.02"), "reason to withdraw", {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+  });
+
+  it("Should be fail withdraw planter beacuse function is pause", async () => {
+    await arInstance.pause({
+      from: deployerAccount,
+    });
+
+    await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    const treeId = 1;
+    const amount = web3.utils.toWei("0.2");
+    const planterFund = 5000;
+    const gbFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const otherFund1 = 0;
+    const otherFund2 = 0;
+    await treasuryManagerInstance.addFundDistributionModel(
+      planterFund,
+      gbFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      otherFund1,
+      otherFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryManagerInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    await treasuryManagerInstance.fundTree(treeId, {
+      from: userAccount8,
+      value: amount,
+    });
+
+    await treasuryManagerInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    await treasuryManagerInstance
+      .withdrawPlanterBalance(web3.utils.toWei("0.02"), { from: userAccount3 })
+      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
 });

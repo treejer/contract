@@ -62,6 +62,31 @@ contract("TreasuryManager", (accounts) => {
   //   assert.notEqual(address, undefined);
   // });
 
+  //  //-------------------------------setGbFundAddress test-------------------------------------------------------
+  // it("setGbFundAddress should be success", async () => {
+  //   let gbAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setGbFundAddress(gbAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.gbFundAddress(),
+  //     gbAddress,
+  //     "gbAddress not true"
+  //   );
+  // });
+
+  // it("setGbFundAddress should be fail (invalid access)", async () => {
+  //   let gbAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setGbFundAddress(gbAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
   // //--------------------------------addFundDistributionModel test-----------------------------------------------
   // it("addFundDistributionModel should be success", async () => {
   //   await treasuryManagerInstance.addFundDistributionModel(

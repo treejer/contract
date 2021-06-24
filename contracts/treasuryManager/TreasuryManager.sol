@@ -21,13 +21,13 @@ contract TreasuryManager is Initializable {
     IAccessRestriction public accessRestriction;
     uint256 constant MAX_UINT256 = 2**256 - 1;
 
-    address payable private gbFundAddress;
-    address payable private treeResearchAddress;
-    address payable private localDevelopAddress;
-    address payable private rescueFundAddress;
-    address payable private treejerDevelopAddress;
-    address payable private otherFundAddress1;
-    address payable private otherFundAddress2;
+    address payable public gbFundAddress;
+    address payable public treeResearchAddress;
+    address payable public localDevelopAddress;
+    address payable public rescueFundAddress;
+    address payable public treejerDevelopAddress;
+    address payable public otherFundAddress1;
+    address payable public otherFundAddress2;
 
     struct FundDistribution {
         uint16 planterFund;

@@ -87,6 +87,31 @@ contract("TreasuryManager", (accounts) => {
   //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   // });
 
+  //  //-------------------------------setTreeResearchAddress test-------------------------------------------------------
+  // it("setTreeResearchAddress should be success", async () => {
+  //   let treeResearchAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setTreeResearchAddress(treeResearchAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.treeResearchAddress(),
+  //     treeResearchAddress,
+  //     "Set treeResearchAddress address not true"
+  //   );
+  // });
+
+  // it("setTreeResearchAddress should be fail (invalid access)", async () => {
+  //   let treeResearchAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setTreeResearchAddress(treeResearchAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
   // //--------------------------------addFundDistributionModel test-----------------------------------------------
   // it("addFundDistributionModel should be success", async () => {
   //   await treasuryManagerInstance.addFundDistributionModel(

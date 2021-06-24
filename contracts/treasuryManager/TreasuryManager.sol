@@ -19,8 +19,8 @@ contract TreasuryManager is Initializable, RelayRecipient {
     CountersUpgradeable.Counter private fundDistributionCount;
 
     bool public isTreasuryManager;
-    uint256 public maxAssignedIndex;
     IAccessRestriction public accessRestriction;
+    uint256 public maxAssignedIndex;
     uint256 constant MAX_UINT256 = 2**256 - 1;
 
     address payable public gbFundAddress;
@@ -396,7 +396,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
         return
             _treeId >= assignModels[0].startingTreeId &&
             _treeId <= maxAssignedIndex;
-    } //check in add auction
+    }
 
     function withdrawGb(uint256 _amount, string memory _reason)
         external

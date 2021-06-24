@@ -3095,19 +3095,19 @@ contract("TreasuryManager", (accounts) => {
     assert.equal(
       Number(totalFunds3.localDevelop.toString()),
       0,
-      "gb total fund must be zero"
+      "local develop total fund must be zero"
     ); //total value of localDevelop has withdrawn
     assert.equal(
       Number(localDevelopBalnance3.toString()),
       Number(localDevelopBalnance1.toString()) +
         Number(web3.utils.toWei("0.3")),
-      "gb account balance  is not ok after withdraw2 ( checking with gbBalance1 )"
+      "local develop account balance  is not ok after withdraw2 ( checking with localDevelopBalance1 )"
     );
     assert.equal(
       Number(localDevelopBalnance3.toString()),
       Number(localDevelopBalnance2.toString()) +
         Number(web3.utils.toWei("0.2")),
-      "gb account balance is not ok after withdraw2"
+      "local develop account balance is not ok after withdraw2"
     );
   });
   it("should fail local develop withdraw", async () => {

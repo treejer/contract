@@ -6,6 +6,8 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
+const Math = require("./math");
+
 const { CommonErrorMsg, TreesuryManagerErrorMsg } = require("./enumes");
 
 //gsn
@@ -1183,49 +1185,49 @@ contract("TreasuryManager", (accounts) => {
 
     assert.equal(
       Number(totalFunds.planterFund.toString()),
-      expected.planterFund + expected2.planterFund,
+      Math.add(expected.planterFund, expected2.planterFund),
       "2.planterFund totalFunds invalid"
     );
 
     assert.equal(
       Number(totalFunds.gbFund.toString()),
-      expected.gbFund + expected2.gbFund,
+      Math.add(expected.gbFund, expected2.gbFund),
       "2.gbFund funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.treeResearch.toString()),
-      expected.treeResearch + expected2.treeResearch,
+      Math.add(expected.treeResearch, expected2.treeResearch),
       "2.treeResearch funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.localDevelop.toString()),
-      expected.localDevelop + expected2.localDevelop,
+      Math.add(expected.localDevelop, expected2.localDevelop),
       "2.localDevelop funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.rescueFund.toString()),
-      expected.rescueFund + expected2.rescueFund,
+      Math.add(expected.rescueFund, expected2.rescueFund),
       "2.rescueFund funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.treejerDevelop.toString()),
-      expected.treejerDevelop + expected2.treejerDevelop,
+      Math.add(expected.treejerDevelop, expected2.treejerDevelop),
       "2.treejerDevelop funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.otherFund1.toString()),
-      expected.otherFund1 + expected2.otherFund1,
+      Math.add(expected.otherFund1, expected2.otherFund1),
       "2.otherFund1 funds invalid"
     );
 
     assert.equal(
       Number(totalFunds.otherFund2.toString()),
-      expected.otherFund2 + expected2.otherFund2,
+      Math.add(expected.otherFund2, expected2.otherFund2),
       "2.otherFund2 funds invalid"
     );
   });
@@ -1792,7 +1794,10 @@ contract("TreasuryManager", (accounts) => {
     const treeStatus4 = 25920;
     const treeStatus5 = 65535; //2^16-1
     const finalStatus = 25920;
-    const planterTotalFunded = (Number(amount) * planterFund) / 10000;
+    const planterTotalFunded = Math.divide(
+      Math.mul(Number(amount), planterFund),
+      10000
+    );
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
       gbFund,
@@ -1818,7 +1823,7 @@ contract("TreasuryManager", (accounts) => {
     const totalFund = await treasuryManagerInstance.totalFunds();
     assert.equal(
       Number(totalFund.planterFund.toString()),
-      (amount * planterFund) / 10000,
+      Math.divide(Math.mul(Number(amount), planterFund), 10000),
       "total fund is not correct1"
     );
 
@@ -1835,19 +1840,21 @@ contract("TreasuryManager", (accounts) => {
     let planterBalance1 = await treasuryManagerInstance.balances(userAccount2);
     console.log("planterBalance.toString()", planterBalance1.toString());
     assert.equal(
-      (amount * planterFund) / 10000 -
-        (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
+      ),
       Number(totalFund1.planterFund.toString()),
       "total fund1 is not ok"
     );
     // console.log("planterPaid", planterPaid.toString());
     assert.equal(
-      (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
       Number(planterPaid1.toString()),
       "planter paid is not ok"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
       Number(planterBalance1.toString()),
       "planter balance is not ok1"
     );
@@ -1864,18 +1871,21 @@ contract("TreasuryManager", (accounts) => {
     let planterBalance2 = await treasuryManagerInstance.balances(userAccount2);
     console.log("planterBalance.toString()2", planterBalance2.toString());
     assert.equal(
-      (amount * planterFund) / 10000 -
-        (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
+      ),
       Number(totalFund2.planterFund.toString()),
       "total fund2 is not ok"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
+
       Number(planterPaid2.toString()),
       "planter paid is not ok2"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus1) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
       Number(planterBalance2.toString()),
       "planter balance is not ok2"
     );
@@ -1894,18 +1904,20 @@ contract("TreasuryManager", (accounts) => {
     console.log("planterBalance.toString()3", planterBalance3.toString());
 
     assert.equal(
-      (amount * planterFund) / 10000 -
-        (planterTotalFunded * treeStatus2) / finalStatus,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus)
+      ),
       Number(totalFund3.planterFund.toString()),
       "total fund3 is not ok"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus2) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus),
       Number(planterPaid3.toString()),
       "planter paid is not ok3"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus2) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus),
       Number(planterBalance3.toString()),
       "planter balance is not ok3"
     );
@@ -1924,18 +1936,20 @@ contract("TreasuryManager", (accounts) => {
     let planterBalance4 = await treasuryManagerInstance.balances(userAccount2);
     console.log("planterBalance.toString()4", planterBalance4.toString());
     assert.equal(
-      (amount * planterFund) / 10000 -
-        (planterTotalFunded * treeStatus3) / finalStatus,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus)
+      ),
       Number(totalFund4.planterFund.toString()),
       "total fund4 is not ok"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus3) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus),
       Number(planterPaid4.toString()),
       "planter paid is not ok4"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus3) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus),
       Number(planterBalance4.toString()),
       "planter balance is not ok4"
     );
@@ -1952,18 +1966,20 @@ contract("TreasuryManager", (accounts) => {
     let planterBalance5 = await treasuryManagerInstance.balances(userAccount2);
     console.log("planterBalance.toString()5", planterBalance5.toString());
     assert.equal(
-      (amount * planterFund) / 10000 -
-        (planterTotalFunded * treeStatus4) / finalStatus,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus)
+      ),
       Number(totalFund5.planterFund.toString()),
       "total fund5 is not ok"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus4) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus),
       Number(planterPaid5.toString()),
       "planter paid is not ok5"
     );
     assert.equal(
-      (planterTotalFunded * treeStatus4) / finalStatus,
+      Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus),
       Number(planterBalance5.toString()),
       "planter balance is not ok5"
     );
@@ -1981,7 +1997,10 @@ contract("TreasuryManager", (accounts) => {
     console.log("planterBalance.toString()6", planterBalance6.toString());
 
     assert.equal(
-      (amount * planterFund) / 10000 - planterTotalFunded,
+      Math.subtract(
+        Math.divide(Math.mul(amount, planterFund), 10000),
+        planterTotalFunded
+      ),
       Number(totalFund6.planterFund.toString()),
       "total fund6 is not ok"
     );
@@ -2013,7 +2032,10 @@ contract("TreasuryManager", (accounts) => {
     const otherFund2 = 0;
     const treeStatus = 65535; //2^16-1
 
-    const planterTotalFunded = (Number(amount) * planterFund) / 10000;
+    const planterTotalFunded = Math.divide(
+      Math.mul(Number(amount), planterFund),
+      10000
+    );
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
       gbFund,
@@ -2043,7 +2065,10 @@ contract("TreasuryManager", (accounts) => {
     });
     const totalFunds = await treasuryManagerInstance.totalFunds();
     assert.equal(
-      (planterFund * amount) / 10000 + (planterFund * amount2) / 10000,
+      Math.add(
+        Math.divide(Math.mul(planterFund, Number(amount)), 10000),
+        Math.divide(Math.mul(planterFund, Number(amount2)), 10000)
+      ),
       Number(totalFunds.planterFund.toString()),
       "invalid planter total funds"
     );
@@ -2079,7 +2104,7 @@ contract("TreasuryManager", (accounts) => {
       "planter balance is not ok1"
     );
     assert.equal(
-      (planterFund * amount2) / 10000,
+      Math.divide(Math.mul(planterFund, amount2), 10000),
       Number(totalFunds2.planterFund.toString()),
       "total funds2 is not ok"
     );
@@ -2100,7 +2125,10 @@ contract("TreasuryManager", (accounts) => {
     const otherFund2 = 0;
     const treeStatus = 65535; //2^16-1
 
-    const planterTotalFunded = (Number(amount) * planterFund) / 10000;
+    const planterTotalFunded = Math.divide(
+      Math.mul(Number(amount), planterFund),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -2193,7 +2221,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalPlanterFund = (Number(amount) * planterFund) / 10000;
+    const totalPlanterFund = Math.divide(
+      Math.mul(Number(amount), planterFund),
+      10000
+    );
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
       gbFund,
@@ -2221,8 +2252,10 @@ contract("TreasuryManager", (accounts) => {
       treasuryManagerInstance.address
     );
     assert.equal(
-      Number(contractBalanceAfterFund.toString()) -
-        Number(contractBalanceBeforeFund.toString()),
+      Math.subtract(
+        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceBeforeFund.toString())
+      ),
       Number(amount),
       "contrct balance charged inconrrectly"
     );
@@ -2256,8 +2289,10 @@ contract("TreasuryManager", (accounts) => {
       treasuryManagerInstance.address
     );
     assert.equal(
-      Number(contractBalanceAfterFund.toString()) -
-        Number(web3.utils.toWei("0.1")),
+      Math.subtract(
+        Number(contractBalanceAfterFund.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       Number(contractBalanceAfterWithdraw1.toString()),
       "contract balance is not ok after withdraw 1"
     );
@@ -2267,7 +2302,7 @@ contract("TreasuryManager", (accounts) => {
 
     const accountBalance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      totalPlanterFund - Number(web3.utils.toWei("0.1")),
+      Math.subtract(totalPlanterFund, Number(web3.utils.toWei("0.1"))),
       Number(planterBalance2.toString()),
       "planter blance is not ok 2"
     );
@@ -2290,8 +2325,10 @@ contract("TreasuryManager", (accounts) => {
       treasuryManagerInstance.address
     );
     assert.equal(
-      Number(contractBalanceAfterFund.toString()) -
-        Number(web3.utils.toWei("0.6")),
+      Math.subtract(
+        Number(contractBalanceAfterFund.toString()),
+        Number(web3.utils.toWei("0.6"))
+      ),
       Number(contractBalanceAfterWithdraw2.toString()),
       "contract balance is not ok after withdraw 2"
     );
@@ -2299,7 +2336,7 @@ contract("TreasuryManager", (accounts) => {
       userAccount3
     );
     assert.equal(
-      totalPlanterFund - Number(web3.utils.toWei("0.6")),
+      Math.subtract(totalPlanterFund, Number(web3.utils.toWei("0.6"))),
       Number(planterBalance3.toString()),
       "planter blance is not ok 3"
     );
@@ -2434,7 +2471,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalGbFunded = ((Number(amount) + Number(amount1)) * gbFund) / 10000;
+    const totalGbFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), gbFund),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -2501,14 +2541,17 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.gbFund.toString()) -
-        Number(totalFunds2.gbFund.toString()),
+      Math.subtract(
+        Number(totalFunds1.gbFund.toString()),
+        Number(totalFunds2.gbFund.toString())
+      ),
+
       Number(web3.utils.toWei("0.1")),
       "gb total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(gbBalnance2.toString()),
-      Number(gbBalnance1.toString()) + Number(web3.utils.toWei("0.1")),
+      Math.add(Number(gbBalnance1.toString()), Number(web3.utils.toWei("0.1"))),
       "gb account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -2536,8 +2579,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.gbFund.toString()) -
-        Number(totalFunds3.gbFund.toString()),
+      Math.subtract(
+        Number(totalFunds1.gbFund.toString()),
+        Number(totalFunds3.gbFund.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "gb total fund is not ok after withdraw1"
     );
@@ -2548,12 +2593,12 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of gbFund has withdrawn
     assert.equal(
       Number(gbBalnance3.toString()),
-      Number(gbBalnance1.toString()) + Number(web3.utils.toWei("0.3")),
+      Math.add(Number(gbBalnance1.toString()), Number(web3.utils.toWei("0.3"))),
       "gb account balance  is not ok after withdraw2 ( checking with gbBalance1 )"
     );
     assert.equal(
       Number(gbBalnance3.toString()),
-      Number(gbBalnance2.toString()) + Number(web3.utils.toWei("0.2")),
+      Math.add(Number(gbBalnance2.toString()), Number(web3.utils.toWei("0.2"))),
       "gb account balance is not ok after withdraw2"
     );
   });
@@ -2705,8 +2750,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalTreeResearchFunded =
-      ((Number(amount) + Number(amount1)) * treeResearch) / 10000;
+    const totalTreeResearchFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), treeResearch),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -2773,15 +2820,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.treeResearch.toString()) -
-        Number(totalFunds2.treeResearch.toString()),
+      Math.subtract(
+        Number(totalFunds1.treeResearch.toString()),
+        Number(totalFunds2.treeResearch.toString())
+      ),
       Number(web3.utils.toWei("0.2")),
       "tree research total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(treeResearchBalnance2.toString()),
-      Number(treeResearchBalnance1.toString()) +
-        Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(treeResearchBalnance1.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "tree research account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -2809,8 +2860,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.treeResearch.toString()) -
-        Number(totalFunds3.treeResearch.toString()),
+      Math.subtract(
+        Number(totalFunds1.treeResearch.toString()),
+        Number(totalFunds3.treeResearch.toString())
+      ),
       Number(web3.utils.toWei("0.5")),
       "tree research total fund is not ok after withdraw1"
     );
@@ -2820,20 +2873,24 @@ contract("TreasuryManager", (accounts) => {
       "tree research total fund must be 0.5 eth"
     );
     assert.equal(
-      totalTreeResearchFunded - Number(web3.utils.toWei("0.5")),
+      Math.subtract(totalTreeResearchFunded, Number(web3.utils.toWei("0.5"))),
       Number(totalFunds3.treeResearch.toString()),
       "tree research total fund3 is not ok"
     );
     assert.equal(
       Number(treeResearchBalnance3.toString()),
-      Number(treeResearchBalnance1.toString()) +
-        Number(web3.utils.toWei("0.5")),
+      Math.add(
+        Number(treeResearchBalnance1.toString()),
+        Number(web3.utils.toWei("0.5"))
+      ),
       "tree research account balance  is not ok after withdraw2 ( checking with tree researchBalance1 )"
     );
     assert.equal(
       Number(treeResearchBalnance3.toString()),
-      Number(treeResearchBalnance2.toString()) +
-        Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(treeResearchBalnance2.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "tree research account balance is not ok after withdraw2"
     );
   });
@@ -2985,8 +3042,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalLocalDevelopFunded =
-      ((Number(amount) + Number(amount1)) * localDevelop) / 10000;
+    const totalLocalDevelopFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), localDevelop),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -3053,15 +3112,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.localDevelop.toString()) -
-        Number(totalFunds2.localDevelop.toString()),
+      Math.subtract(
+        Number(totalFunds1.localDevelop.toString()),
+        Number(totalFunds2.localDevelop.toString())
+      ),
       Number(web3.utils.toWei("0.1")),
       "local develop total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(localDevelopBalnance2.toString()),
-      Number(localDevelopBalnance1.toString()) +
-        Number(web3.utils.toWei("0.1")),
+      Math.add(
+        Number(localDevelopBalnance1.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       "local develop account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -3089,8 +3152,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.localDevelop.toString()) -
-        Number(totalFunds3.localDevelop.toString()),
+      Math.subtract(
+        Number(totalFunds1.localDevelop.toString()),
+        Number(totalFunds3.localDevelop.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "localDevelop total fund is not ok after withdraw1"
     );
@@ -3101,14 +3166,18 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of localDevelop has withdrawn
     assert.equal(
       Number(localDevelopBalnance3.toString()),
-      Number(localDevelopBalnance1.toString()) +
-        Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(localDevelopBalnance1.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "local develop account balance  is not ok after withdraw2 ( checking with localDevelopBalance1 )"
     );
     assert.equal(
       Number(localDevelopBalnance3.toString()),
-      Number(localDevelopBalnance2.toString()) +
-        Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(localDevelopBalnance2.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "local develop account balance is not ok after withdraw2"
     );
   });
@@ -3264,8 +3333,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalRescueFundFunded =
-      ((Number(amount) + Number(amount1)) * rescueFund) / 10000;
+    const totalRescueFundFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), rescueFund),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -3332,14 +3403,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.rescueFund.toString()) -
-        Number(totalFunds2.rescueFund.toString()),
+      Math.subtract(
+        Number(totalFunds1.rescueFund.toString()),
+        Number(totalFunds2.rescueFund.toString())
+      ),
       Number(web3.utils.toWei("0.1")),
       "rescue fund total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(rescueFundBalnance2.toString()),
-      Number(rescueFundBalnance1.toString()) + Number(web3.utils.toWei("0.1")),
+      Math.add(
+        Number(rescueFundBalnance1.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       "rescue fund account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -3367,8 +3443,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.rescueFund.toString()) -
-        Number(totalFunds3.rescueFund.toString()),
+      Math.subtract(
+        Number(totalFunds1.rescueFund.toString()),
+        Number(totalFunds3.rescueFund.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "rescue fund total fund is not ok after withdraw1"
     );
@@ -3379,12 +3457,18 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of rescueFund has withdrawn
     assert.equal(
       Number(rescueFundBalnance3.toString()),
-      Number(rescueFundBalnance1.toString()) + Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(rescueFundBalnance1.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "rescueFund account balance  is not ok after withdraw2 ( checking with rescueFundBalance1 )"
     );
     assert.equal(
       Number(rescueFundBalnance3.toString()),
-      Number(rescueFundBalnance2.toString()) + Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(rescueFundBalnance2.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "rescueFund account balance is not ok after withdraw2"
     );
   });
@@ -3540,8 +3624,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 1000;
     const otherFund1 = 0;
     const otherFund2 = 0;
-    const totalTreejerDevelopFunded =
-      ((Number(amount) + Number(amount1)) * treejerDevelop) / 10000;
+    const totalTreejerDevelopFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), treejerDevelop),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -3608,15 +3694,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.treejerDevelop.toString()) -
-        Number(totalFunds2.treejerDevelop.toString()),
+      Math.subtract(
+        Number(totalFunds1.treejerDevelop.toString()),
+        Number(totalFunds2.treejerDevelop.toString())
+      ),
       Number(web3.utils.toWei("0.1")),
       "treejerDevelop total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(treejerDevelopBalnance2.toString()),
-      Number(treejerDevelopBalnance1.toString()) +
-        Number(web3.utils.toWei("0.1")),
+      Math.add(
+        Number(treejerDevelopBalnance1.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       "treejer develop account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -3644,8 +3734,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.treejerDevelop.toString()) -
-        Number(totalFunds3.treejerDevelop.toString()),
+      Math.subtract(
+        Number(totalFunds1.treejerDevelop.toString()),
+        Number(totalFunds3.treejerDevelop.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "treejer develop total fund is not ok after withdraw1"
     );
@@ -3656,14 +3748,18 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of treejerDevelop has withdrawn
     assert.equal(
       Number(treejerDevelopBalnance3.toString()),
-      Number(treejerDevelopBalnance1.toString()) +
-        Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(treejerDevelopBalnance1.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "treejer develop account balance  is not ok after withdraw2 ( checking with treejerDevelopBalance1 )"
     );
     assert.equal(
       Number(treejerDevelopBalnance3.toString()),
-      Number(treejerDevelopBalnance2.toString()) +
-        Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(treejerDevelopBalnance2.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "treejer develop account balance is not ok after withdraw2"
     );
   });
@@ -3819,8 +3915,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 0;
     const otherFund1 = 1000;
     const otherFund2 = 0;
-    const totalOtherFund1Funded =
-      ((Number(amount) + Number(amount1)) * otherFund1) / 10000;
+    const totalOtherFund1Funded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), otherFund1),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -3887,14 +3985,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.otherFund1.toString()) -
-        Number(totalFunds2.otherFund1.toString()),
+      Math.subtract(
+        Number(totalFunds1.otherFund1.toString()),
+        Number(totalFunds2.otherFund1.toString())
+      ),
       Number(web3.utils.toWei("0.1")),
       "otherFund1 total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(otherFund1Balnance2.toString()),
-      Number(otherFund1Balnance1.toString()) + Number(web3.utils.toWei("0.1")),
+      Math.add(
+        Number(otherFund1Balnance1.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       "other fund1 account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -3922,8 +4025,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.otherFund1.toString()) -
-        Number(totalFunds3.otherFund1.toString()),
+      Math.subtract(
+        Number(totalFunds1.otherFund1.toString()),
+        Number(totalFunds3.otherFund1.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "other fund1 total fund is not ok after withdraw1"
     );
@@ -3934,12 +4039,18 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of otherFund1 has withdrawn
     assert.equal(
       Number(otherFund1Balnance3.toString()),
-      Number(otherFund1Balnance1.toString()) + Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(otherFund1Balnance1.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "other fund1 account balance is not ok after withdraw2 ( checking with otherFund1Balance1 )"
     );
     assert.equal(
       Number(otherFund1Balnance3.toString()),
-      Number(otherFund1Balnance2.toString()) + Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(otherFund1Balnance2.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "other fund1 account balance is not ok after withdraw2"
     );
   });
@@ -4095,8 +4206,10 @@ contract("TreasuryManager", (accounts) => {
     const treejerDevelop = 0;
     const otherFund1 = 0;
     const otherFund2 = 1000;
-    const totalOtherFund2Funded =
-      ((Number(amount) + Number(amount1)) * otherFund2) / 10000;
+    const totalOtherFund2Funded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), otherFund2),
+      10000
+    );
 
     await treasuryManagerInstance.addFundDistributionModel(
       planterFund,
@@ -4163,14 +4276,19 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.otherFund2.toString()) -
-        Number(totalFunds2.otherFund2.toString()),
+      Math.subtract(
+        Number(totalFunds1.otherFund2.toString()),
+        Number(totalFunds2.otherFund2.toString())
+      ),
       Number(web3.utils.toWei("0.1")),
       "otherFund2 total fund is not ok after withdraw1"
     );
     assert.equal(
       Number(otherFund2Balnance2.toString()),
-      Number(otherFund2Balnance1.toString()) + Number(web3.utils.toWei("0.1")),
+      Math.add(
+        Number(otherFund2Balnance1.toString()),
+        Number(web3.utils.toWei("0.1"))
+      ),
       "other fund2 account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -4198,8 +4316,10 @@ contract("TreasuryManager", (accounts) => {
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
-      Number(totalFunds1.otherFund2.toString()) -
-        Number(totalFunds3.otherFund2.toString()),
+      Math.subtract(
+        Number(totalFunds1.otherFund2.toString()),
+        Number(totalFunds3.otherFund2.toString())
+      ),
       Number(web3.utils.toWei("0.3")),
       "other fund2 total fund is not ok after withdraw1"
     );
@@ -4210,12 +4330,18 @@ contract("TreasuryManager", (accounts) => {
     ); //total value of otherFund2 has withdrawn
     assert.equal(
       Number(otherFund2Balnance3.toString()),
-      Number(otherFund2Balnance1.toString()) + Number(web3.utils.toWei("0.3")),
+      Math.add(
+        Number(otherFund2Balnance1.toString()),
+        Number(web3.utils.toWei("0.3"))
+      ),
       "other fund2 account balance is not ok after withdraw2 ( checking with otherFund2Balance1 )"
     );
     assert.equal(
       Number(otherFund2Balnance3.toString()),
-      Number(otherFund2Balnance2.toString()) + Number(web3.utils.toWei("0.2")),
+      Math.add(
+        Number(otherFund2Balnance2.toString()),
+        Number(web3.utils.toWei("0.2"))
+      ),
       "other fund2 account balance is not ok after withdraw2"
     );
   });

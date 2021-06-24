@@ -112,6 +112,31 @@ contract("TreasuryManager", (accounts) => {
   //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   // });
 
+  //  //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
+  // it("setLocalDevelopAddress should be success", async () => {
+  //   let localDevelopAddress = userAccount4;
+
+  //   await treasuryManagerInstance.setLocalDevelopAddress(localDevelopAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     await treasuryManagerInstance.localDevelopAddress(),
+  //     localDevelopAddress,
+  //     "Set localDevelopAddress address not true"
+  //   );
+  // });
+
+  // it("setLocalDevelopAddress should be fail (invalid access)", async () => {
+  //   let localDevelopAddress = userAccount4;
+
+  //   await treasuryManagerInstance
+  //     .setLocalDevelopAddress(localDevelopAddress, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
+
   // //--------------------------------addFundDistributionModel test-----------------------------------------------
   // it("addFundDistributionModel should be success", async () => {
   //   await treasuryManagerInstance.addFundDistributionModel(

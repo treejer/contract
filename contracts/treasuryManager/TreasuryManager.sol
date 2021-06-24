@@ -505,7 +505,7 @@ contract TreasuryManager is Initializable {
             _amount <= balances[msg.sender] && _amount > 0,
             "insufficient amount"
         );
-        require(msg.sender != address(0), "invalid address");
+
         balances[msg.sender] = balances[msg.sender].sub(_amount);
         if (msg.sender.send(_amount)) {
             emit PlanterBalanceWithdrawn(_amount, msg.sender);

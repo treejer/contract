@@ -16,6 +16,7 @@ contract TreasuryManager is Initializable {
     using SafeMathUpgradeable for uint16;
 
     CountersUpgradeable.Counter private fundDistributionCount;
+
     bool public isTreasuryManager;
     uint256 public maxAssignedIndex;
     IAccessRestriction public accessRestriction;
@@ -57,6 +58,7 @@ contract TreasuryManager is Initializable {
     }
 
     AssignModel[] public assignModels;
+
     mapping(uint256 => FundDistribution) public fundDistributions;
     mapping(uint256 => uint256) public planterFunds;
     mapping(uint256 => uint256) public plantersPaid;
@@ -108,7 +110,6 @@ contract TreasuryManager is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
-
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;

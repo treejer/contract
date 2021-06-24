@@ -2315,7 +2315,7 @@ contract("TreasuryManager", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
     const treeId = 1;
-    const amount = web3.utils.toWei("0.2");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2359,12 +2359,12 @@ contract("TreasuryManager", (accounts) => {
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await treasuryManagerInstance
-      .withdrawPlanterBalance(web3.utils.toWei("0.05"), {
+      .withdrawPlanterBalance(web3.utils.toWei("0.5"), {
         from: userAccount4,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
     await treasuryManagerInstance
-      .withdrawPlanterBalance(web3.utils.toWei("0.05"), {
+      .withdrawPlanterBalance(web3.utils.toWei("0.5"), {
         from: userAccount5,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -2566,8 +2566,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2602,7 +2602,7 @@ contract("TreasuryManager", (accounts) => {
       value: amount1,
     });
     await treasuryManagerInstance
-      .withdrawGb(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawGb(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -2610,7 +2610,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawGb(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawGb(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -2627,7 +2627,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw  some balance and then try to withdraw
     await treasuryManagerInstance.withdrawGb(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       {
         from: deployerAccount,
@@ -2635,7 +2635,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawGb(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawGb(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -2846,8 +2846,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -2882,7 +2882,7 @@ contract("TreasuryManager", (accounts) => {
       value: amount1,
     });
     await treasuryManagerInstance
-      .withdrawTreeResearch(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -2890,7 +2890,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawTreeResearch(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -2907,14 +2907,14 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw  some balance and then try to withdraw
     await treasuryManagerInstance.withdrawTreeResearch(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       "reason to withdraw",
       {
         from: deployerAccount,
       }
     );
     await treasuryManagerInstance
-      .withdrawTreeResearch(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -3121,8 +3121,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3158,7 +3158,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawLocalDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawLocalDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -3167,7 +3167,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawLocalDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawLocalDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -3185,7 +3185,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw some balance and then try to withdraw
     await treasuryManagerInstance.withdrawLocalDevelop(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       withdrawReason,
       {
         from: deployerAccount,
@@ -3193,7 +3193,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawLocalDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawLocalDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -3397,8 +3397,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3434,7 +3434,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawRescueFund(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawRescueFund(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -3443,7 +3443,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawRescueFund(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawRescueFund(web3.utils.toWei("0.2"), withdrawReason, {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -3461,7 +3461,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw some balance and then try to withdraw
     await treasuryManagerInstance.withdrawRescueFund(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       withdrawReason,
       {
         from: deployerAccount,
@@ -3469,7 +3469,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawRescueFund(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawRescueFund(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -3676,8 +3676,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3713,7 +3713,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawTreejerDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawTreejerDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -3722,7 +3722,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawTreejerDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawTreejerDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -3740,7 +3740,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw some balance and then try to withdraw
     await treasuryManagerInstance.withdrawTreejerDevelop(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       withdrawReason,
       {
         from: deployerAccount,
@@ -3748,7 +3748,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawTreejerDevelop(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawTreejerDevelop(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -3952,8 +3952,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -3989,7 +3989,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawOtherFund1(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund1(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -3998,7 +3998,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawOtherFund1(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund1(web3.utils.toWei("0.2"), withdrawReason, {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -4016,7 +4016,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw some balance and then try to withdraw
     await treasuryManagerInstance.withdrawOtherFund1(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       withdrawReason,
       {
         from: deployerAccount,
@@ -4024,7 +4024,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawOtherFund1(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund1(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -4228,8 +4228,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -4265,7 +4265,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawOtherFund2(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund2(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
@@ -4274,7 +4274,7 @@ contract("TreasuryManager", (accounts) => {
       from: deployerAccount,
     });
     await treasuryManagerInstance
-      .withdrawOtherFund2(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund2(web3.utils.toWei("0.2"), withdrawReason, {
         from: userAccount7,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -4292,7 +4292,7 @@ contract("TreasuryManager", (accounts) => {
 
     //withdraw some balance and then try to withdraw
     await treasuryManagerInstance.withdrawOtherFund2(
-      web3.utils.toWei("0.02"),
+      web3.utils.toWei("0.2"),
       withdrawReason,
       {
         from: deployerAccount,
@@ -4300,7 +4300,7 @@ contract("TreasuryManager", (accounts) => {
     );
 
     await treasuryManagerInstance
-      .withdrawOtherFund2(web3.utils.toWei("0.02"), withdrawReason, {
+      .withdrawOtherFund2(web3.utils.toWei("0.2"), withdrawReason, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -4387,8 +4387,8 @@ contract("TreasuryManager", (accounts) => {
     const treeId = 1;
 
     const treeId2 = 2;
-    const amount = web3.utils.toWei("0.2");
-    const amount1 = web3.utils.toWei("0.1");
+    const amount = web3.utils.toWei("2");
+
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -4418,12 +4418,9 @@ contract("TreasuryManager", (accounts) => {
       from: userAccount8,
       value: amount,
     });
-    await treasuryManagerInstance.fundTree(treeId2, {
-      from: userAccount8,
-      value: amount1,
-    });
+
     await treasuryManagerInstance
-      .withdrawGb(web3.utils.toWei("0.02"), "reason to withdraw", {
+      .withdrawGb(web3.utils.toWei("0.15"), "reason to withdraw", {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
@@ -4439,7 +4436,7 @@ contract("TreasuryManager", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
     const treeId = 1;
-    const amount = web3.utils.toWei("0.2");
+    const amount = web3.utils.toWei("2");
     const planterFund = 5000;
     const gbFund = 1000;
     const treeResearch = 1000;
@@ -4475,7 +4472,7 @@ contract("TreasuryManager", (accounts) => {
     });
 
     await treasuryManagerInstance
-      .withdrawPlanterBalance(web3.utils.toWei("0.02"), { from: userAccount3 })
+      .withdrawPlanterBalance(web3.utils.toWei("0.2"), { from: userAccount3 })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
 });

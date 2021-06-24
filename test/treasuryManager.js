@@ -1833,14 +1833,14 @@ contract("TreasuryManager", (accounts) => {
     const totalFund1 = await treasuryManagerInstance.totalFunds();
     let planterPaid1 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance1 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()", planterBalance1.toString());
+
     assert.equal(
       (amount * planterFund) / 10000 -
         (planterTotalFunded * treeStatus1) / finalStatus,
       Number(totalFund1.planterFund.toString()),
       "total fund1 is not ok"
     );
-    // console.log("planterPaid", planterPaid.toString());
+
     assert.equal(
       (planterTotalFunded * treeStatus1) / finalStatus,
       Number(planterPaid1.toString()),
@@ -1862,7 +1862,6 @@ contract("TreasuryManager", (accounts) => {
     const totalFund2 = await treasuryManagerInstance.totalFunds();
     let planterPaid2 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance2 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()2", planterBalance2.toString());
     assert.equal(
       (amount * planterFund) / 10000 -
         (planterTotalFunded * treeStatus1) / finalStatus,
@@ -1891,7 +1890,6 @@ contract("TreasuryManager", (accounts) => {
 
     let planterPaid3 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance3 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()3", planterBalance3.toString());
 
     assert.equal(
       (amount * planterFund) / 10000 -
@@ -1922,7 +1920,6 @@ contract("TreasuryManager", (accounts) => {
 
     let planterPaid4 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance4 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()4", planterBalance4.toString());
     assert.equal(
       (amount * planterFund) / 10000 -
         (planterTotalFunded * treeStatus3) / finalStatus,
@@ -1950,7 +1947,6 @@ contract("TreasuryManager", (accounts) => {
     const totalFund5 = await treasuryManagerInstance.totalFunds();
     let planterPaid5 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance5 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()5", planterBalance5.toString());
     assert.equal(
       (amount * planterFund) / 10000 -
         (planterTotalFunded * treeStatus4) / finalStatus,
@@ -1978,7 +1974,6 @@ contract("TreasuryManager", (accounts) => {
     const totalFund6 = await treasuryManagerInstance.totalFunds();
     let planterPaid6 = await treasuryManagerInstance.plantersPaid.call(treeId);
     let planterBalance6 = await treasuryManagerInstance.balances(userAccount2);
-    console.log("planterBalance.toString()6", planterBalance6.toString());
 
     assert.equal(
       (amount * planterFund) / 10000 - planterTotalFunded,

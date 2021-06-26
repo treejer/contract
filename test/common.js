@@ -185,5 +185,51 @@ Common.successPlant = async (
     from: ambassadorAddress,
   });
 };
+Common.successFundTree = async (
+  arInstance,
+  deployerAccount,
+  genesisTreeAddress,
+  auctionAddress,
+  treasuryInstance,
+  treeId
+) => {
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeAddress,
+    deployerAccount
+  );
+  const amount = web3.utils.toWei("1");
+  const planterFund = 5000;
+  const gbFund = 1000;
+  const treeResearch = 1000;
+  const localDevelop = 1000;
+  const rescueFund = 1000;
+  const treejerDevelop = 1000;
+  const otherFund1 = 0;
+  const otherFund2 = 0;
 
+  await treasuryInstance.addFundDistributionModel(
+    planterFund,
+    gbFund,
+    treeResearch,
+    localDevelop,
+    rescueFund,
+    treejerDevelop,
+    otherFund1,
+    otherFund2,
+    {
+      from: deployerAccount,
+    }
+  );
+  await treasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    from: deployerAccount,
+  });
+
+  await Common.addAuctionRole(arInstance, auctionAddress, deployerAccount);
+
+  let tx = await treasuryInstance.fundTree(treeId, {
+    from: auctionAddress,
+    value: amount,
+  });
+};
 module.exports = Common;

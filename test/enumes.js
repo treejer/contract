@@ -10,6 +10,10 @@ const TimeEnumes = {
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
+  CHECK_AUCTION: "Caller is not Auction",
+  CHECK_GENESIS_TREE: "Caller is not GenesisTree",
+  CHECK_PLANTER: "Caller is not a planter",
+  INVALID_ADDRESS: "invalid address",
 };
 
 const TreeAuctionErrorMsg = {
@@ -21,6 +25,7 @@ const TreeAuctionErrorMsg = {
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
 };
+
 const GenesisTreeErrorMsg = {
   PLANT_TREE_WITH_PLANTER: "planter of tree can plant it",
   PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",
@@ -43,10 +48,19 @@ const GenesisTreeErrorMsg = {
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
 };
+const TreesuryManagerErrorMsg = {
+  INSUFFICIENT_AMOUNT: "insufficient amount",
+  PLANTER_FUND_NOT_EXIST: "planter fund not exist",
+  SUM_INVALID: "sum must be 10000",
+  INVALID_FUND_MODEL: "invalid fund model",
+  ONLY_AUCTION: "only auction can access",
+};
 
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
   TreeAuctionErrorMsg,
   GenesisTreeErrorMsg,
+  TreeAuctionErrorMsg,
+  TreesuryManagerErrorMsg,
 };

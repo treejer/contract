@@ -122,7 +122,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     }
 
     function ifGenesisTree(address _address) public view {
-        require(isAuction(_address), "Caller is not GenesisTree");
+        require(isGenesisTree(_address), "Caller is not GenesisTree");
     }
 
     function isGenesisTree(address _address) public view returns (bool) {

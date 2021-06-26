@@ -27,7 +27,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     ITreasury public treasury;
 
     struct GenTree {
-        address planterId;
+        address payable planterId;
         uint256 gbId;
         uint256 treeType;
         // bool isExist;
@@ -135,7 +135,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     function asignTreeToPlanter(
         uint256 _treeId,
         uint256 _gbId,
-        address _planterId,
+        address payable _planterId,
         uint8 _gbType
     ) external onlyAdmin validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
@@ -301,11 +301,11 @@ contract GenesisTree is Initializable, RelayRecipient {
             // genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
 
             //call genesis fund
-            // treasury.fundPlanter(
-            //     _treeId,
-            //     genTree.planterId,
-            //     genTree.treeStatus
-            // );
+            treasury.fundPlanter(
+                _treeId,
+                genTree.planterId,
+                genTree.treeStatus
+            );
         } else {
             updateGenTree.updateStatus = 2;
         }

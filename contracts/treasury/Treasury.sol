@@ -350,7 +350,7 @@ contract Treasury is Initializable, RelayRecipient {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint16 _treeStatus
+        uint32 _treeStatus
     ) external onlyGenesisTree {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
 

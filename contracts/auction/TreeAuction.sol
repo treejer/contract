@@ -92,9 +92,13 @@ contract TreeAuction is Initializable {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external ifNotPaused onlyAdmin {
-        auctionId.increment();
+        require(
+            treasury.distributionModelExistance(_treeId),
+            "Assign models not exist"
+        );
 
-        uint16 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
+        uint8 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
+
         require(provideStatus == 0, "the tree is on other provide");
 
         auctions[auctionId.current()] = Auction(
@@ -106,10 +110,13 @@ contract TreeAuction is Initializable {
             _intialPrice,
             _bidInterval
         );
+
+        auctionId.increment();
     }
 
     function bid(uint256 _auctionId) external payable ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
+
         require(now <= _storageAuction.endDate, "auction already ended");
         require(now >= _storageAuction.startDate, "auction not started");
         require(
@@ -120,14 +127,17 @@ contract TreeAuction is Initializable {
 
         address payable oldBidder = _storageAuction.bider;
         uint256 oldBid = _storageAuction.highestBid;
+
         _storageAuction.highestBid = msg.value;
         _storageAuction.bider = msg.sender;
+
         emit HighestBidIncreased(
             _auctionId,
             _storageAuction.treeId,
             msg.sender,
             msg.value
         );
+
         _increaseAuctionEndTime(_auctionId);
         _withdraw(oldBid, oldBidder);
     }
@@ -152,9 +162,11 @@ contract TreeAuction is Initializable {
     function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
         if (_oldBidder != address(0)) {
             uint32 size;
+
             assembly {
                 size := extcodesize(_oldBidder)
             }
+
             if (size > 0) {
                 pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
                     _oldBid

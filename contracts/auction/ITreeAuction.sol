@@ -22,11 +22,9 @@ interface ITreeAuction {
 
     function isTreeAuction() external view returns (bool);
 
-    function setTreasuryAddress(address payable _treasuryAddress) external;
+    function setTreasuryAddress(address _address) external;
 
     function setGenesisTreeAddress(address _address) external;
-
-    function setGenesisTreeFundAddress(address _address) external;
 
     function createAuction(
         uint256 _treeId,

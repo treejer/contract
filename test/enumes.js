@@ -24,6 +24,7 @@ const TreeAuctionErrorMsg = {
   BID_AFTER_END: "auction already ended",
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
+  INVALID_ASSIGN_MODEL: "Assign models not exist",
 };
 
 const GenesisTreeErrorMsg = {

@@ -390,7 +390,10 @@ contract Treasury is Initializable, RelayRecipient {
         onlyAuction
         returns (bool)
     {
-        require(assignModels.length > 0, "assign models not exist");
+        if (assignModels.length == 0) {
+            return false;
+        }
+
         return
             _treeId >= assignModels[0].startingTreeId &&
             _treeId <= maxAssignedIndex;

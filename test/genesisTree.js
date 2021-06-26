@@ -1783,59 +1783,59 @@ contract("GenesisTree", (accounts) => {
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
   // });
 
-  // it("Should update tree reject (update time not reach)", async () => {
-  //   const treeId = 1;
-  //   const gbId = 1;
-  //   const gbType = 1;
-  //   const birthDate = parseInt(new Date().getTime() / 1000);
-  //   const countryCode = 2;
+  it("Should update tree reject (update time not reach)", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
 
-  //   await Common.successPlant(
-  //     genesisTreeInstance,
-  //     gbInstance,
-  //     arInstance,
-  //     ipfsHash,
-  //     treeId,
-  //     gbId,
-  //     gbType,
-  //     birthDate,
-  //     countryCode,
-  //     [userAccount2],
-  //     userAccount1,
-  //     userAccount2,
-  //     deployerAccount
-  //   );
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
 
-  //   await Common.travelTime(TimeEnumes.seconds, 2592000);
+    await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
-  //     from: userAccount2,
-  //   });
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
 
-  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
-  //     from: userAccount2,
-  //   });
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
 
-  //   await genesisTreeInstance.updateTree(treeId, ipfsHash, {
-  //     from: userAccount2,
-  //   });
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
 
-  //   await genesisTreeInstance.verifyUpdate(treeId, true, {
-  //     from: userAccount1,
-  //   });
+    await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: userAccount1,
+    });
 
-  //   let now = await Common.timeInitial(TimeEnumes.seconds, 0);
-  //   await genesisTreeInstance
-  //     .updateTree(treeId, ipfsHash, {
-  //       from: userAccount2,
-  //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
 
-  //   let result = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let result = await genesisTreeInstance.updateGenTrees.call(treeId);
 
-  //   assert.equal(Number(result.updateDate.toString()), Number(now.toString()));
-  //   assert.equal(result.updateStatus.toNumber(), 3);
-  // });
+    assert.equal(Number(result.updateDate.toString()), Number(now.toString()));
+    assert.equal(result.updateStatus.toNumber(), 3);
+  });
 
   // it("Should be fail because invalid address try to update", async () => {
   //   const treeId = 1;

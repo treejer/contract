@@ -12,6 +12,8 @@ interface IGenesisTree {
 
     function setGBFactoryAddress(address _address) external;
 
+    function setTreasuryAddress(address _address) external;
+
     function setTreeTokenAddress(address _address) external;
 
     function addTree(uint256 _treeId, string memory _treeDescription) external;

@@ -41,6 +41,8 @@ const GenesisTreeErrorMsg = {
   INVALID_PLANTER: "invalid planter data",
   INVALID_TREE: "invalid tree",
   UPDATE_TIME_NOT_REACH: "Update time not reach",
+  UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS:
+    "update genesis tree status is pending",
   ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE: "Only Planter of tree can send update",
   TREE_NOT_PLANTED: "Tree not planted",
   ADMIN_ABBASSADOR_PLANTER: "Admin or ambassador or planter can accept updates",

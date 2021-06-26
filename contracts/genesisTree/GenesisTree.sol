@@ -99,7 +99,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         gbFactory = candidateContract;
     }
 
-    function setTreasuryddress(address _address) external onlyAdmin {
+    function setTreasuryAddress(address _address) external onlyAdmin {
         ITreasury candidateContract = ITreasury(_address);
         require(candidateContract.isTreasury());
         treasury = candidateContract;
@@ -246,11 +246,14 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
         require(genTrees[_treeId].treeStatus > 1, "Tree not planted");
         require(
+            updateGenTrees[_treeId].updateStatus != 1,
+            "update genesis tree status is pending"
+        );
+        require(
             now >=
                 genTrees[_treeId].plantDate.add(
                     genTrees[_treeId].treeStatus.mul(3600).add(86400)
-                ) &&
-                updateGenTrees[_treeId].updateStatus != 1,
+                ),
             "Update time not reach"
         );
 

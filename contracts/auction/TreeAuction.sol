@@ -19,7 +19,6 @@ contract TreeAuction is Initializable {
     CountersUpgradeable.Counter private auctionId;
     bool public isTreeAuction;
 
-    address payable treasuryAddress;
     IAccessRestriction public accessRestriction;
     IGenesisTree public genesisTree;
     ITreasury public treasury;
@@ -74,20 +73,13 @@ contract TreeAuction is Initializable {
         accessRestriction = candidateContract;
     }
 
-    function setTreasuryAddress(address payable _treasuryAddress)
-        external
-        onlyAdmin
-    {
-        treasuryAddress = _treasuryAddress;
-    }
-
     function setGenesisTreeAddress(address _address) external onlyAdmin {
         IGenesisTree candidateContract = IGenesisTree(_address);
         require(candidateContract.isGenesisTree());
         genesisTree = candidateContract;
     }
 
-    function setGenesisTreeFundAddress(address _address) external onlyAdmin {
+    function setTreasuryAddress(address _address) external onlyAdmin {
         ITreasury candidateContract = ITreasury(_address);
         require(candidateContract.isTreasury());
         treasury = candidateContract;
@@ -205,7 +197,7 @@ contract TreeAuction is Initializable {
 
         if (auction.bider != address(0)) {
             genesisTree.updateOwner(auction.treeId, auction.bider);
-            // genesisTreeFund.update(auction.treeId,auction.highestBid);
+
             emit AuctionEnded(
                 _auctionId,
                 auction.treeId,
@@ -213,7 +205,7 @@ contract TreeAuction is Initializable {
                 auction.highestBid
             );
 
-            treasuryAddress.transfer(auction.highestBid);
+            treasury.fundTree{value: auction.highestBid}(auction.treeId);
         } else {
             genesisTree.updateProvideStatus(auction.treeId);
         }

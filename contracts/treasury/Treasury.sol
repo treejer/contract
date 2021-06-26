@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
-contract TreasuryManager is Initializable, RelayRecipient {
+contract Treasury is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeMathUpgradeable for uint256;
@@ -17,7 +17,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
     CountersUpgradeable.Counter private fundDistributionCount;
 
     uint256 constant MAX_UINT256 = 2**256 - 1;
-    bool public isTreasuryManager;
+    bool public isTreasury;
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;
@@ -133,7 +133,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
         require(candidateContract.isAccessRestriction());
 
-        isTreasuryManager = true;
+        isTreasury = true;
         accessRestriction = candidateContract;
 
         totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);

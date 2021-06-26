@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../genesisTree/IGenesisTree.sol";
+import "../treasury/ITreasury.sol";
 
 contract TreeAuction is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -21,7 +22,7 @@ contract TreeAuction is Initializable {
     address payable treasuryAddress;
     IAccessRestriction public accessRestriction;
     IGenesisTree public genesisTree;
-    // IGenesisTreeFund public genesisTreeFund;
+    ITreasury public treasury;
 
     struct Auction {
         uint256 treeId;
@@ -65,8 +66,9 @@ contract TreeAuction is Initializable {
     }
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract =
-            IAccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         isTreeAuction = true;
         accessRestriction = candidateContract;
@@ -86,9 +88,9 @@ contract TreeAuction is Initializable {
     }
 
     function setGenesisTreeFundAddress(address _address) external onlyAdmin {
-        // IGenesisTreeFund candidateContract = IGenesisTreeFund(_address);
-        // require(candidateContract.isGenesisTreeFund());
-        // genesisTreeFund = candidateContract;
+        ITreasury candidateContract = ITreasury(_address);
+        require(candidateContract.isTreasury());
+        treasury = candidateContract;
     }
 
     function createAuction(
@@ -143,9 +145,9 @@ contract TreeAuction is Initializable {
         // we will increase auctionEndTime 600 seconds
         if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
             auctions[_auctionId].endDate = auctions[_auctionId]
-                .endDate
-                .add(600)
-                .toUint64();
+            .endDate
+            .add(600)
+            .toUint64();
 
             emit AuctionEndTimeIncreased(
                 _auctionId,

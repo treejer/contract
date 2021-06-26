@@ -2,7 +2,9 @@
 
 pragma solidity ^0.6.9;
 
-interface ITreasuryManager {
+interface ITreasury {
+    function isTreasury() external view returns (bool);
+
     function setGbFundAddress(address payable _address) external;
 
     function setTreeResearchAddress(address payable _address) external;

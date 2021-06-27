@@ -191,32 +191,27 @@ Common.successFundTree = async (
   genesisTreeAddress,
   auctionAddress,
   treasuryInstance,
-  treeId
+  treeId,
+  fundsPercent,
+  fundAmount,
+  tokenOwner,
+  genesisTreeInstance
 ) => {
   await Common.addGenesisTreeRole(
     arInstance,
     genesisTreeAddress,
     deployerAccount
   );
-  const amount = web3.utils.toWei("1");
-  const planterFund = 5000;
-  const gbFund = 1000;
-  const treeResearch = 1000;
-  const localDevelop = 1000;
-  const rescueFund = 1000;
-  const treejerDevelop = 1000;
-  const otherFund1 = 0;
-  const otherFund2 = 0;
 
   await treasuryInstance.addFundDistributionModel(
-    planterFund,
-    gbFund,
-    treeResearch,
-    localDevelop,
-    rescueFund,
-    treejerDevelop,
-    otherFund1,
-    otherFund2,
+    fundsPercent.planterFund,
+    fundsPercent.gbFund,
+    fundsPercent.treeResearch,
+    fundsPercent.localDevelop,
+    fundsPercent.rescueFund,
+    fundsPercent.treejerDevelop,
+    fundsPercent.otherFund1,
+    fundsPercent.otherFund2,
     {
       from: deployerAccount,
     }
@@ -227,9 +222,23 @@ Common.successFundTree = async (
 
   await Common.addAuctionRole(arInstance, auctionAddress, deployerAccount);
 
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeAddress,
+    deployerAccount
+  );
+
+  await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    from: auctionAddress,
+  });
+
+  await genesisTreeInstance.updateOwner(treeId, tokenOwner, {
+    from: auctionAddress,
+  });
+
   let tx = await treasuryInstance.fundTree(treeId, {
     from: auctionAddress,
-    value: amount,
+    value: fundAmount,
   });
 };
 module.exports = Common;

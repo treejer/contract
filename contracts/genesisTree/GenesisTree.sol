@@ -304,11 +304,13 @@ contract GenesisTree is Initializable, RelayRecipient {
             // genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
 
             //call genesis fund
-            treasury.fundPlanter(
-                _treeId,
-                genTree.planterId,
-                genTree.treeStatus
-            );
+            if (treeToken.exists(_treeId)) {
+                treasury.fundPlanter(
+                    _treeId,
+                    genTree.planterId,
+                    genTree.treeStatus
+                );
+            }
         } else {
             updateGenTree.updateStatus = 2;
         }

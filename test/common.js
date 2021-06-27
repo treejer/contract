@@ -228,7 +228,7 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+  await genesisTreeInstance.availability(treeId, 1, {
     from: auctionAddress,
   });
 

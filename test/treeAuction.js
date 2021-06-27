@@ -2326,6 +2326,12 @@ contract("TreeAuction", (accounts) => {
       from: userAccount4,
     });
 
+    await treeAuctionInstance
+      .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+
     assert.equal(
       await web3.eth.getBalance(treeAuctionInstance.address),
       web3.utils.toWei("0", "Ether"),

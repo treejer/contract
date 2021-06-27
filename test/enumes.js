@@ -18,7 +18,7 @@ const CommonErrorMsg = {
 
 const TreeAuctionErrorMsg = {
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
-  TREE_STATUS: "the tree is on other provide",
+  TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
   BID_BEFORE_START: "auction not started",
   BID_AFTER_END: "auction already ended",

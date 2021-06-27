@@ -309,12 +309,15 @@ contract GenesisTree is Initializable, RelayRecipient {
         emit UpdateVerified(_treeId, updateGenTree.updateStatus);
     }
 
-    function checkAndSetProvideStatus(uint256 _treeId, uint8 _provideType)
+    function availability(uint256 _treeId, uint8 _provideType)
         external
         onlyAuction
         validTree(_treeId)
         returns (uint8)
     {
+        if (treeToken.exists(_treeId)) {
+            return 1;
+        }
         uint8 nowProvideStatus = genTrees[_treeId].provideStatus;
 
         if (nowProvideStatus == 0) {
@@ -333,7 +336,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         treeToken.safeMint(_ownerId, _treeId);
     }
 
-    function updateProvideStatus(uint256 _treeId) external onlyAuction {
+    function updateAvailability(uint256 _treeId) external onlyAuction {
         genTrees[_treeId].provideStatus = 0;
     }
 

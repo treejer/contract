@@ -97,9 +97,9 @@ contract TreeAuction is Initializable {
             "Assign models not exist"
         );
 
-        uint8 provideStatus = genesisTree.checkAndSetProvideStatus(_treeId, 1);
+        uint8 provideStatus = genesisTree.availability(_treeId, 1);
 
-        require(provideStatus == 0, "the tree is on other provide");
+        require(provideStatus == 0, "not available for auction");
 
         auctions[auctionId.current()] = Auction(
             _treeId,
@@ -219,7 +219,7 @@ contract TreeAuction is Initializable {
 
             treasury.fundTree{value: auction.highestBid}(auction.treeId);
         } else {
-            genesisTree.updateProvideStatus(auction.treeId);
+            genesisTree.updateAvailability(auction.treeId);
         }
     }
 }

@@ -19,6 +19,8 @@ const {
   TreesuryManagerErrorMsg,
 } = require("./enumes");
 
+const Math = require("./math");
+
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Gsn = require("@opengsn/gsn");
@@ -2474,7 +2476,7 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    await genesisTreeInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
@@ -3104,9 +3106,9 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
   });
 
-  //--------------------------------------------------checkAndSetProvideStatus test----------------------------------------
+  //--------------------------------------------------availability test----------------------------------------
 
-  it("checkAndSetProvideStatus should be success", async () => {
+  it("availability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -3131,15 +3133,15 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
     let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
 
-    let lastProvideStatus = await genesisTreeInstance.checkAndSetProvideStatus(
-      1,
-      1,
-      {
-        from: userAccount5,
-      }
-    );
+    let lastProvideStatus = await genesisTreeInstance.availability(1, 1, {
+      from: userAccount5,
+    });
 
     let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
 
@@ -3150,22 +3152,69 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  it("checkAndSetProvideStatus should be fail because invalid access(just auction access for this function)", async () => {
+  it("availability should be fail because invalid access(just auction access for this function)", async () => {
     await genesisTreeInstance
-      .checkAndSetProvideStatus(1, 1, {
+      .availability(1, 1, {
         from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
   });
 
-  it("checkAndSetProvideStatus should be fail because invalid tree", async () => {
+  it("availability should be fail because invalid tree", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
 
     await genesisTreeInstance
-      .checkAndSetProvideStatus(1, 1, {
+      .availability(1, 1, {
         from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+  });
+
+  it("availability should be fail because tree has owner", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+
+      deployerAccount
+    );
+
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+
+    await treeTokenInstance.safeMint(userAccount2, 1, {
+      from: deployerAccount,
+    });
+
+    let balance = await web3.eth.getBalance(userAccount1);
+
+    let x = await genesisTreeInstance.availability(1, 3, {
+      from: userAccount1,
+    }).should.be.rejected;
   });
 
   //-------------------------------------------------------updateOwner test-------------------------------------------------------------
@@ -3205,7 +3254,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.checkAndSetProvideStatus(1, 1, {
+    await genesisTreeInstance.availability(1, 1, {
       from: userAccount5,
     });
 
@@ -3308,9 +3357,9 @@ contract("GenesisTree", (accounts) => {
     }).should.be.rejected;
   });
 
-  //---------------------------------------------------------updateProvideStatus----------------------------------
+  //---------------------------------------------------------updateAvailability----------------------------------
 
-  it("updateProvideStatus should be success", async () => {
+  it("updateAvailability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -3339,11 +3388,11 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    await genesisTreeInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance.updateProvideStatus(treeId, {
+    await genesisTreeInstance.updateAvailability(treeId, {
       from: userAccount5,
     });
 
@@ -3356,7 +3405,7 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  it("updateProvideStatus should be success", async () => {
+  it("updateAvailability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -3385,12 +3434,12 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    await genesisTreeInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
     await genesisTreeInstance
-      .updateProvideStatus(treeId, {
+      .updateAvailability(treeId, {
         from: userAccount6,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);

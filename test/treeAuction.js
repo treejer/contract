@@ -2463,8 +2463,8 @@ contract("TreeAuction", (accounts) => {
 
     let firstWithdrawPlanter = Number(web3.utils.toWei("1"));
 
-    await TreasuryInstance.withdrawPlanterBalance(firstWithdrawPlanter, {
-      from: userAccount2,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    // await TreasuryInstance.withdrawPlanterBalance(firstWithdrawPlanter, {
+    //   from: userAccount2,
+    // }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 });

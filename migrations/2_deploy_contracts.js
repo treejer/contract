@@ -12,10 +12,17 @@ var O2Factory = artifacts.require("O2Factory.sol");
 var Seed = artifacts.require("Seed.sol");
 var SeedFactory = artifacts.require("SeedFactory.sol");
 var ForestFactory = artifacts.require("ForestFactory.sol");
-var Dai = artifacts.require("Dai.sol");
 var TreeAuction = artifacts.require("TreeAuction.sol");
 var GenesisTree = artifacts.require("GenesisTree.sol");
 var IncrementalSell = artifacts.require("IncrementalSell.sol");
+var RandomNumberConsumer = artifacts.require("RandomNumberConsumer.sol");
+var TreeAttribute = artifacts.require("TreeAttribute.sol");
+
+//link
+const { LinkToken } = require('@chainlink/contracts/truffle/v0.4/LinkToken')
+
+//dai
+var Dai = artifacts.require("Dai.sol");
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -45,14 +52,34 @@ module.exports = async function (deployer, network, accounts) {
   let genesisTreeAddress;
   let incrementalSellAddress;
 
+  let randomNumberConsumerAddress;
+  let attributeAddress;
+
   //gsn
   let trustedForwarder;
   let relayHub;
   let paymasterAddress;
 
+  let defaultAccount = accounts[0];
+
   console.log(
-    "Deploying on network '" + network + "' by account '" + accounts[0] + "'"
+    "Deploying on network '" + network + "' by account '" + defaultAccount + "'"
   );
+
+  // Local (development) networks need their own deployment of the LINK
+  // token and the Oracle contract
+  if (!network.startsWith('kovan')) {
+    console.log("RandomNumberConsumer only for Kovan right now!")
+  } else {
+    // For now, this is hard coded to Kovan
+    const KOVAN_KEYHASH = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
+    const KOVAN_FEE = '100000000000000000'
+    const KOVAN_LINK_TOKEN = '0xa36085F69e2889c224210F603D836748e7dC0088'
+    const KOVAN_VRF_COORDINATOR = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
+    deployer.deploy(RandomNumberConsumer, KOVAN_LINK_TOKEN, KOVAN_KEYHASH, KOVAN_VRF_COORDINATOR, KOVAN_FEE).then(() => {
+      randomNumberConsumerAddress = RandomNumberConsumer.address;
+    });
+  }
 
   if (isLocal) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
@@ -61,6 +88,14 @@ module.exports = async function (deployer, network, accounts) {
     await deployer.deploy(Dai, web3.utils.toWei("1000000")).then(() => {
       daiTokenAddress = Dai.address;
     });
+
+    LinkToken.setProvider(deployer.provider)
+    try {
+      await deployer.deploy(LinkToken, { from: defaultAccount })
+    } catch (err) {
+      console.error(err)
+    }
+
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;
@@ -71,7 +106,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Deploying AccessRestriction...");
 
-  await deployProxy(AccessRestriction, [accounts[0]], {
+  await deployProxy(AccessRestriction, [defaultAccount], {
     deployer,
     initializer: "initialize",
     unsafeAllowCustomTypes: true,
@@ -248,6 +283,25 @@ module.exports = async function (deployer, network, accounts) {
     });
   });
 
+  console.log("Deploying TreeAttribute...");
+  await deployProxy(TreeAttribute, [accessRestrictionAddress], {
+    deployer,
+    initializer: "initialize",
+    unsafeAllowCustomTypes: true
+  }).then(() => {
+    attributeAddress = TreeAttribute.address;
+    TreeAttribute.deployed().then(async (instance) => {
+      await instance.setTreeAddress(treeAddress);
+      if (!isLocal) {
+        await instance.setRandomNumberConsumerAddress(daiTokenAddress);
+      }
+    });
+  });
+
+
+
+
+
   console.log("Deploying WhitelistPaymaster...");
   await deployer
     .deploy(WhitelistPaymaster, accessRestrictionAddress)
@@ -269,7 +323,7 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Fund Paymaster");
   if (!isLocal) {
     await web3.eth.sendTransaction({
-      from: accounts[0],
+      from: defaultAccount,
       to: paymasterAddress,
       value: web3.utils.toWei("1"),
     });
@@ -291,5 +345,6 @@ CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
 CONTRACT_INCREAMENTAL_SELL_ADDRESS=${incrementalSellAddress}
 CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
+CONTRACT_TREE_ATTRIBUTE_ADDRESS=${attributeAddress}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 };

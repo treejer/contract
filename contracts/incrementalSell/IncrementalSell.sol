@@ -141,15 +141,22 @@ contract IncrementalSell is Initializable {
         uint256 currentPrice = _currentPrice(_offerId);
         require(msg.value >= currentPrice, "invalid amount");
 
-        //@todo calc attributes
-
         // increase latetsoldtree
         _storageOffer.latestTreeSold = _storageOffer.latestTreeSold.add(1);
 
         //transfer value to treasury
         treasuryAddress.transfer(currentPrice);
 
+
+
+
         //@todo mint tree or update owner
+
+        _checkEndAndChangeStatus(_offerId);
+
+        //@todo generate symbol
+
+
 
         emit IncrementalTreeSold(
             _offerId,
@@ -158,7 +165,6 @@ contract IncrementalSell is Initializable {
             msg.sender,
             msg.value
         );
-        _checkEndAndChangeStatus(_offerId);
     }
 
     //@todo are we need somthing like this?

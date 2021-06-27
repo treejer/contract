@@ -30,20 +30,17 @@ contract GenesisTree is Initializable, RelayRecipient {
         address payable planterId;
         uint256 gbId;
         uint256 treeType;
-        // bool isExist;
         uint8 gbType;
-        uint8 provideStatus; //uint16
+        uint8 provideStatus;
         uint16 countryCode;
-        uint32 treeStatus; //uint16
+        uint32 treeStatus;
         uint64 plantDate;
         uint64 birthDate;
-        // uint64 lastUpdate;
         string treeSpecs;
     }
 
     struct UpdateGenTree {
         string updateSpecs;
-        // uint64 updateDate;
         uint64 updateStatus;
     }
 
@@ -185,7 +182,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             );
         }
 
-        // updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, now.toUint64(), 1);
         updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, 1);
 
         tempGenTree.countryCode = _countryCode;
@@ -224,7 +220,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             GenTree storage tempGenTree = genTrees[_treeId];
 
             tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
-            // tempGenTree.lastUpdate = tempUpdateGenTree.updateDate;
             tempGenTree.treeStatus = 2;
 
             tempUpdateGenTree.updateStatus = 3;
@@ -260,7 +255,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
 
         updateGenTree.updateSpecs = _treeSpecs;
-        // updateGenTree.updateDate = now.toUint64();
         updateGenTree.updateStatus = 1;
 
         emit TreeUpdated(_treeId);
@@ -291,7 +285,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         if (_isVerified) {
             GenTree storage genTree = genTrees[_treeId];
 
-            // genTree.lastUpdate = updateGenTree.updateDate;
             updateGenTree.updateStatus = 3;
             uint32 age = now
             .sub(genTrees[_treeId].plantDate)
@@ -301,9 +294,7 @@ contract GenesisTree is Initializable, RelayRecipient {
                 genTree.treeStatus = age;
             }
             genTree.treeSpecs = updateGenTree.updateSpecs;
-            // genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
 
-            //call genesis fund
             if (treeToken.exists(_treeId)) {
                 treasury.fundPlanter(
                     _treeId,

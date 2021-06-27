@@ -3,11 +3,6 @@
 pragma solidity ^0.6.9;
 
 interface IGenesisTree {
-    event TreePlanted(uint256 treeId, address planter);
-    event PlantVerified(uint256 treeId, uint256 updateStatus);
-    event TreeUpdated(uint256 treeId);
-    event UpdateVerified(uint256 treeId, uint64 updateStatus);
-
     function isGenesisTree() external view returns (bool);
 
     function setGBFactoryAddress(address _address) external;
@@ -45,4 +40,9 @@ interface IGenesisTree {
     function updateOwner(uint256 treeId, address ownerId) external;
 
     function updateProvideStatus(uint256 treeId) external;
+
+    event TreePlanted(uint256 treeId, address planter);
+    event PlantVerified(uint256 treeId, uint256 updateStatus);
+    event TreeUpdated(uint256 treeId);
+    event UpdateVerified(uint256 treeId, uint64 updateStatus);
 }

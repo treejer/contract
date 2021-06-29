@@ -3,10 +3,12 @@
 pragma solidity ^0.6.9;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract Planter is Initializable, RelayRecipient {
+    using SafeMathUpgradeable for uint32;
     bool public isPlanter;
 
     IAccessRestriction public accessRestriction;
@@ -37,6 +39,11 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
+    modifier existPlanter(address _planterAddress) {
+        require(planters[_planterAddress].planterType > 0);
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -56,9 +63,34 @@ contract Planter is Initializable, RelayRecipient {
 
     function acceptPlanterFromOrganization() external {}
 
-    function updateCapacity() external {}
+    function updateCapacity(address _planterAddress, uint32 _capacity)
+        external
+        onlyAdmin
+        existPlanter(_planterAddress)
+    {
+        if (_capacity > planters[_planterAddress].plantedCount) {
+            planters[_planterAddress].capacity = _capacity;
+        }
+    }
 
-    function plantingPermision() external {}
+    function plantingPermision(address _planterAddress)
+        external
+        existPlanter(_planterAddress)
+        returns (bool)
+    {
+        accessRestriction.isGenesisTree(msg.sender);
+        if (
+            planters[_planterAddress].plantedCount <
+            planters[_planterAddress].capacity &&
+            planters[_planterAddress].status == 1
+        ) {
+            planters[_planterAddress].plantedCount = planters[_planterAddress]
+            .plantedCount
+            .add(1);
+            return true;
+        }
+        return false;
+    }
 
     function updateOrganizationPlanterPayment() external {}
 

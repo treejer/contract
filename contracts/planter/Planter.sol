@@ -50,7 +50,26 @@ contract Planter is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
-    function planterJoin() external {}
+    function planterJoin(
+        uint8 _planterType,
+        uint64 _longitude,
+        uint64 _latitude,
+        uint16 _countryCode,
+        address payable _refferedBy,
+        address _organizationAddress
+    ) external {
+        require(_planterType >= 1 && _planterType <= 3, "planterType not true");
+        if (_refferedBy != address(0)) {
+            require(
+                _refferedBy != _msgSender() &&
+                    accessRestriction.isPlanter(_refferedBy),
+                "refferedBy not true"
+            );
+        }
+        if (_organizationAddress != address(0)) {
+            //TODO:_organizationAddress has organization role
+        }
+    }
 
     function updatePlanterType() external {}
 

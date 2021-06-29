@@ -3115,6 +3115,10 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successPlant(
       genesisTreeInstance,
       gbInstance,
@@ -3133,7 +3137,7 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
@@ -3206,15 +3210,31 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await treeTokenInstance.safeMint(userAccount2, 1, {
+    await treeTokenInstance.safeMint(userAccount2, treeId, {
       from: deployerAccount,
     });
 
     let balance = await web3.eth.getBalance(userAccount1);
 
-    let x = await genesisTreeInstance.availability(1, 3, {
+    let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
+
+    assert.equal(
+      resultBefore.provideStatus.toNumber(),
+      0,
+      "provideStatus not true update"
+    );
+
+    await genesisTreeInstance.availability(1, 3, {
       from: userAccount1,
-    }).should.be.rejected;
+    });
+
+    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+
+    assert.equal(
+      resultAfter.provideStatus.toNumber(),
+      0,
+      "provideStatus not true update"
+    );
   });
 
   //-------------------------------------------------------updateOwner test-------------------------------------------------------------

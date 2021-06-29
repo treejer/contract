@@ -3,6 +3,8 @@ const GenesisTree = artifacts.require("GenesisTree.sol");
 const GBFactory = artifacts.require("GBFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
+const Treasury = artifacts.require("Treasury.sol");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -14,7 +16,10 @@ const {
   CommonErrorMsg,
   GenesisTreeErrorMsg,
   TreeAuctionErrorMsg,
+  TreesuryManagerErrorMsg,
 } = require("./enumes");
+
+const Math = require("./math");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
@@ -27,6 +32,7 @@ contract("GenesisTree", (accounts) => {
   let treeTokenInstance;
   let gbInstance;
   let arInstance;
+  let treasuryInstance;
   let startTime;
   let endTime;
 
@@ -80,6 +86,11 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
   });
 
   afterEach(async () => {});
@@ -101,6 +112,20 @@ contract("GenesisTree", (accounts) => {
       .setGBFactoryAddress(gbInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
+  //************************************ treasury address ****************************************//
+
+  it("set treasury address", async () => {
+    let tx = await genesisTreeInstance.setTreasuryAddress(
+      treasuryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+    await genesisTreeInstance
+      .setTreasuryAddress(treasuryInstance.address, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
   //************************************ tree token address ****************************************//
   it("set tree token address", async () => {
     let tx = await genesisTreeInstance.setTreeTokenAddress(
@@ -139,7 +164,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(result1.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(result1.treeStatus.toString()),
       1,
@@ -160,11 +185,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(result1.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
   });
   it("fail to add tree", async () => {
@@ -205,7 +226,7 @@ contract("GenesisTree", (accounts) => {
       1,
       { from: deployerAccount }
     );
-    //asign to planert
+    //asign to planter
     let asign2 = await genesisTreeInstance.asignTreeToPlanter(
       treeId,
       1,
@@ -249,7 +270,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(result1.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(result1.treeStatus.toString()),
       1,
@@ -270,11 +291,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(result1.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     ////////////////////////////////////////////////////
@@ -304,7 +321,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(result2.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(result2.treeStatus.toString()),
       1,
@@ -325,11 +342,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(result2.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(result2.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     ///////////////////////////////////////////////////////////////////////////
@@ -536,7 +549,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(genesisTreeResult.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(genesisTreeResult.treeStatus.toString()),
       1,
@@ -557,11 +570,7 @@ contract("GenesisTree", (accounts) => {
       birthDate,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(genesisTreeResult.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -578,11 +587,6 @@ contract("GenesisTree", (accounts) => {
       Number(updateGenResult.updateStatus.toString()),
       1,
       "invlid updateGen update status"
-    );
-    assert.equal(
-      Number(updateGenResult.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
     );
   });
   it("check data to be correct after plant tree with no planter", async () => {
@@ -636,7 +640,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(genTreeResult1.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(genTreeResult1.treeStatus.toString()),
       1,
@@ -657,11 +661,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(genTreeResult1.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(genTreeResult1.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -704,7 +704,7 @@ contract("GenesisTree", (accounts) => {
       0,
       "incorrect provide status"
     );
-    assert.equal(genTreeResult2.isExist, true, "tree existance problem");
+
     assert.equal(
       Number(genTreeResult2.treeStatus.toString()),
       1,
@@ -725,11 +725,7 @@ contract("GenesisTree", (accounts) => {
       birthDate,
       "incorrect birth date"
     );
-    assert.equal(
-      Number(genTreeResult2.lastUpdate.toString()),
-      0,
-      "incorrect last update"
-    );
+
     assert.equal(genTreeResult2.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -744,11 +740,6 @@ contract("GenesisTree", (accounts) => {
       Number(updateGenResult.updateStatus.toString()),
       1,
       "invlid updateGen update status"
-    );
-    assert.equal(
-      Number(updateGenResult.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
     );
   });
   it("should fail plant tree with planter", async () => {
@@ -1014,7 +1005,6 @@ contract("GenesisTree", (accounts) => {
       "incorrect provide status"
     );
 
-    assert.equal(genesisTreeResult.isExist, true, "tree existance problem");
     assert.equal(
       Number(genesisTreeResult.treeStatus.toString()),
       1,
@@ -1037,11 +1027,6 @@ contract("GenesisTree", (accounts) => {
       birthDate,
       "birthDate set inccorectly"
     );
-    assert.equal(
-      Number(genesisTreeResult.lastUpdate.toString()),
-      0,
-      "invalid last update"
-    );
 
     assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
@@ -1059,11 +1044,6 @@ contract("GenesisTree", (accounts) => {
       Number(updateGenResult.updateStatus.toString()),
       1,
       "invlid updateGen update status"
-    );
-    assert.equal(
-      Number(updateGenResult.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
     );
 
     await genesisTreeInstance.verifyPlant(treeId, false, {
@@ -1098,11 +1078,6 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      genesisTreeResultAfterVerify.isExist,
-      true,
-      "tree existance problem"
-    );
-    assert.equal(
       Number(genesisTreeResultAfterVerify.treeStatus.toString()),
       1,
       "tree status is not ok"
@@ -1123,11 +1098,6 @@ contract("GenesisTree", (accounts) => {
       Number(genesisTreeResultAfterVerify.birthDate.toString()),
       birthDate,
       "birthDate set inccorectly"
-    );
-    assert.equal(
-      Number(genesisTreeResultAfterVerify.lastUpdate.toString()),
-      0,
-      "invalid last update"
     );
 
     assert.equal(
@@ -1151,11 +1121,6 @@ contract("GenesisTree", (accounts) => {
       Number(updateGenResultAfterVerify.updateStatus.toString()),
       2,
       "invlid updateGen update status"
-    );
-    assert.equal(
-      Number(updateGenResultAfterVerify.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
     );
   });
   it("check data to be correct after verify plant", async () => {
@@ -1221,7 +1186,6 @@ contract("GenesisTree", (accounts) => {
       "incorrect provide status"
     );
 
-    assert.equal(genesisTreeResult.isExist, true, "tree existance problem");
     assert.equal(
       Number(genesisTreeResult.treeStatus.toString()),
       1,
@@ -1244,11 +1208,6 @@ contract("GenesisTree", (accounts) => {
       birthDate,
       "birthDate set inccorectly"
     );
-    assert.equal(
-      Number(genesisTreeResult.lastUpdate.toString()),
-      0,
-      "invalid last update"
-    );
 
     assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
@@ -1265,11 +1224,7 @@ contract("GenesisTree", (accounts) => {
       1,
       "invlid updateGen update status"
     );
-    assert.equal(
-      Number(updateGenResult.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
-    );
+
     await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount1 });
 
     let genesisTreeResultAfterVerify = await genesisTreeInstance.genTrees.call(
@@ -1300,11 +1255,6 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      genesisTreeResultAfterVerify.isExist,
-      true,
-      "tree existance problem"
-    );
-    assert.equal(
       Number(genesisTreeResultAfterVerify.treeStatus.toString()),
       2,
       "tree status is not ok"
@@ -1325,11 +1275,6 @@ contract("GenesisTree", (accounts) => {
       Number(genesisTreeResultAfterVerify.birthDate.toString()),
       birthDate,
       "birthDate set inccorectly"
-    );
-    assert.equal(
-      Number(genesisTreeResultAfterVerify.lastUpdate.toString()),
-      Number(updateGenResult.updateDate.toString()),
-      "invalid last update"
     );
 
     assert.equal(
@@ -1352,11 +1297,6 @@ contract("GenesisTree", (accounts) => {
       Number(updateGenResultAfterVerify.updateStatus.toString()),
       3,
       "invlid updateGen update status"
-    );
-    assert.equal(
-      Number(updateGenResultAfterVerify.updateDate.toString()),
-      Number(now.toString()),
-      "invlid time"
     );
   });
   it("should fail verify", async () => {
@@ -1724,9 +1664,9 @@ contract("GenesisTree", (accounts) => {
     });
   });
 
-  //-----------------------------------------------------------updateTree test--------------------------------------------
+  //  -----------------------------------------------------------updateTree test--------------------------------------------
 
-  it("Should update tree work seccussfully", async () => {
+  it("Should update tree work successfully", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -1749,7 +1689,9 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await Common.travelTime(TimeEnumes.seconds, 2592000);
+    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let travelTime = (Number(tree.treeStatus) * 3600 + 24 * 3600) * 2;
+    await Common.travelTime(TimeEnumes.seconds, travelTime);
 
     let tx = await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -1757,10 +1699,12 @@ contract("GenesisTree", (accounts) => {
 
     let result = await genesisTreeInstance.updateGenTrees.call(treeId);
 
-    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
-
-    assert.equal(result.updateDate.toNumber(), now);
-    assert.equal(result.updateStatus.toNumber(), 1);
+    assert.equal(
+      result.updateStatus.toNumber(),
+      1,
+      "update status set problem"
+    );
+    assert.equal(result.updateSpecs, ipfsHash, "update specs set problem");
 
     truffleAssert.eventEmitted(tx, "TreeUpdated", (ev) => {
       return ev.treeId == treeId;
@@ -1789,6 +1733,7 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+
     await Common.travelTime(TimeEnumes.seconds, 2000);
 
     await genesisTreeInstance
@@ -1797,8 +1742,41 @@ contract("GenesisTree", (accounts) => {
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
   });
+  it("Should update tree do not work because update time does not reach (using update status)", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
 
-  it("Should update tree reject (update time not reach)", async () => {
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let travelTime = Number(tree.treeStatus) * 3600 + 24 * 3600 - 100;
+
+    await Common.travelTime(TimeEnumes.seconds, travelTime);
+
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+  });
+
+  it("Should update tree reject (updateGen updateStaus is 1)", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -1827,29 +1805,90 @@ contract("GenesisTree", (accounts) => {
       from: userAccount2,
     });
 
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS
+      );
+  });
+  it("should update successfully after reject update and fail update after verify update because update time does not reach", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("0.1");
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount1,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let travelTime = Number(tree.treeStatus) * 3600 + 24 * 3600 + 100;
+
+    await Common.travelTime(TimeEnumes.seconds, travelTime);
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
-
+    let tx = await genesisTreeInstance.verifyUpdate(treeId, false, {
+      from: deployerAccount,
+    });
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
-
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
-      from: userAccount1,
+    let tx2 = await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
     });
 
-    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
     await genesisTreeInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
-
-    let result = await genesisTreeInstance.updateGenTrees.call(treeId);
-
-    assert.equal(Number(result.updateDate.toString()), Number(now.toString()));
-    assert.equal(result.updateStatus.toNumber(), 3);
   });
 
   it("Should be fail because invalid address try to update", async () => {
@@ -1909,14 +1948,23 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
   });
 
-  //-----------------------------------------------------------verifyUpdate test--------------------------------------------
-
-  it("Should verify update work seccussfully when verify true by Admin", async () => {
+  it("should fail update after two time update and verify", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -1933,6 +1981,102 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount1,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    let tree = await genesisTreeInstance.genTrees.call(treeId);
+
+    let travelTime = Number(tree.treeStatus) * 3600 + 25 * 3600;
+
+    await Common.travelTime(TimeEnumes.seconds, travelTime);
+
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+    await Common.travelTime(TimeEnumes.seconds, 86400);
+
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, { from: userAccount2 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+
+    await Common.travelTime(TimeEnumes.seconds, 86300);
+
+    await genesisTreeInstance
+      .updateTree(treeId, ipfsHash, { from: userAccount2 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+    await Common.travelTime(TimeEnumes.seconds, 100);
+
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+  });
+
+  //-----------------------------------------------------------verifyUpdate test--------------------------------------------
+
+  it("Should verify update work seccussfully when verify true by Admin (no fund tree)", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
@@ -1951,19 +2095,21 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
+    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
     let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
     let resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
-
-    assert.equal(
-      resultAfterGT.lastUpdate.toNumber(),
-      resultBeforeUGT.updateDate.toNumber()
-    );
+    let pFund = await treasuryInstance.planterFunds.call(treeId);
+    let planterPaid = await treasuryInstance.plantersPaid.call(treeId);
 
     assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
 
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
-      resultBeforeGT.treeStatus.toNumber() + 1
+      parseInt(
+        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
     );
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
@@ -1971,6 +2117,479 @@ contract("GenesisTree", (accounts) => {
     truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
       return ev.treeId == treeId && ev.updateStatus == 3;
     });
+
+    assert.equal(
+      Number(pFund.toString()),
+      0,
+      "no fund beacuse tree fund did not call"
+    );
+
+    assert.equal(planterPaid, 0, "planter fund did not call");
+  });
+
+  it("Should verify update work seccussfully when verify true by Admin (fund planter) ", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+
+    const fundTreeAmount = web3.utils.toWei("1");
+
+    const planterTotalFund =
+      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    const pFund = await treasuryInstance.planterFunds.call(treeId);
+    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(pFund.toString()),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+
+    assert.equal(
+      Number(planterPaidBeforeVerify.toString()),
+      0,
+      "planter paid before verify update is not ok"
+    );
+
+    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+
+    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+    const resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(
+      treeId
+    );
+    const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    const now = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const planterPaidAfterVerify = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    const expectedPaid = parseInt(
+      (planterTotalFund * Number(resultAfterGT.treeStatus.toString())) / 25920
+    );
+
+    assert.equal(
+      Number(planterPaidAfterVerify.toString()),
+      expectedPaid,
+
+      "planter paid after verify is not ok"
+    );
+
+    assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
+
+    assert.equal(
+      resultAfterGT.treeStatus.toNumber(),
+      parseInt(
+        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
+    );
+
+    assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
+
+    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      return ev.treeId == treeId && ev.updateStatus == 3;
+    });
+  });
+
+  it("Should verify update work seccussfully when verify after more 3 years true by Admin (fund planter ) ", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+
+    const fundTreeAmount = web3.utils.toWei("1");
+
+    const planterTotalFund =
+      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    const pFund = await treasuryInstance.planterFunds.call(treeId);
+    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(pFund.toString()),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+
+    assert.equal(
+      Number(planterPaidBeforeVerify.toString()),
+      0,
+      "planter paid before verify update is not ok"
+    );
+
+    await Common.travelTime(TimeEnumes.seconds, 93312000); //93312000 is equal to 3 years
+    await Common.travelTime(TimeEnumes.seconds, 31104000); //31104000 is equal to 1 year
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+
+    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+    const resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(
+      treeId
+    );
+    const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    const now = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const planterPaidAfterVerify = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(planterPaidAfterVerify.toString()),
+      planterTotalFund,
+
+      "planter paid after verify is not ok"
+    );
+
+    assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
+
+    assert.equal(
+      resultAfterGT.treeStatus.toNumber(),
+      parseInt(
+        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
+    );
+
+    assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
+
+    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      return ev.treeId == treeId && ev.updateStatus == 3;
+    });
+
+    ////////////////////// update after 1 year and verify ///////////////////////////
+
+    await Common.travelTime(TimeEnumes.seconds, 31104000); //31104000 is equal to 1 year
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    const resultAfterGT2 = await genesisTreeInstance.genTrees.call(treeId);
+    const nowAfterVerify = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const planterPaidAfterVerify2 = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      resultAfterGT2.treeStatus.toNumber(),
+      parseInt(
+        (Number(nowAfterVerify.toString()) -
+          Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
+    );
+
+    assert.equal(
+      Number(planterPaidAfterVerify2.toString()),
+      planterTotalFund,
+      "planter paid after verify is not ok"
+    );
+  });
+
+  it("Should verify update work seccussfully when verify true by Admin (no fund planter first because there is no token owner exist and fund planter in try 2 beacuse token owner setted) ", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
+    const planterTotalFund =
+      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    ///////////////////// fund tree without tree token owner ////////////////////////////////
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
+    );
+
+    await treasuryInstance.addFundDistributionModel(
+      fundsPercent.planterFund,
+      fundsPercent.gbFund,
+      fundsPercent.treeResearch,
+      fundsPercent.localDevelop,
+      fundsPercent.rescueFund,
+      fundsPercent.treejerDevelop,
+      fundsPercent.otherFund1,
+      fundsPercent.otherFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+
+    await genesisTreeInstance.availability(treeId, 1, {
+      from: userAccount5,
+    });
+
+    await treasuryInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: fundTreeAmount,
+    });
+
+    /////////////////////////////////////////////////////////
+
+    const pFund = await treasuryInstance.planterFunds.call(treeId);
+    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(pFund.toString()),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+
+    assert.equal(
+      Number(planterPaidBeforeVerify.toString()),
+      0,
+      "planter paid before verify update is not ok"
+    );
+    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+
+    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+    const planterPaidAfterVerify1 = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(planterPaidAfterVerify1.toString()),
+      0,
+
+      "planter paid after verify1 is not ok"
+    );
+
+    assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
+
+    assert.equal(
+      resultAfterGT.treeStatus.toNumber(),
+      parseInt(
+        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
+    );
+
+    assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
+
+    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      return ev.treeId == treeId && ev.updateStatus == 3;
+    });
+
+    /////////////////// verify 2 and set token owner ////////////////////////
+
+    await genesisTreeInstance.updateOwner(treeId, userAccount8, {
+      from: userAccount5,
+    });
+
+    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+
+    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    await genesisTreeInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    let resultAfterGT2 = await genesisTreeInstance.genTrees.call(treeId);
+    const nowAfterVerify2 = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const planterPaidAfterVerify2 = await treasuryInstance.plantersPaid.call(
+      treeId
+    );
+
+    assert.equal(
+      resultAfterGT2.treeStatus.toNumber(),
+      parseInt(
+        (Number(nowAfterVerify2.toString()) -
+          Number(resultBeforeGT.plantDate.toString())) /
+          3600,
+        "tree status update does not match"
+      )
+    );
+
+    let expectedPaid = parseInt(
+      (planterTotalFund * Number(resultAfterGT2.treeStatus.toString())) / 25920
+    );
+
+    assert.equal(
+      Number(planterPaidAfterVerify2.toString()),
+      expectedPaid,
+
+      "planter paid after verify is not ok"
+    );
   });
 
   it("Should verify update work seccussfully when verify false by Admin", async () => {
@@ -2025,7 +2644,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
-
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
     await Common.successPlant(
       genesisTreeInstance,
       gbInstance,
@@ -2042,14 +2671,30 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
@@ -2063,7 +2708,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
-
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
     await Common.successPlant(
       genesisTreeInstance,
       gbInstance,
@@ -2079,15 +2734,30 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
@@ -2101,6 +2771,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2117,15 +2798,31 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance
@@ -2141,6 +2838,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2157,15 +2865,30 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance
@@ -2183,6 +2906,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2199,15 +2933,31 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
@@ -2229,6 +2979,17 @@ contract("GenesisTree", (accounts) => {
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+    const fundsPercent = {
+      planterFund: 5000,
+      gbFund: 1000,
+      treeResearch: 1000,
+      localDevelop: 1000,
+      rescueFund: 1000,
+      treejerDevelop: 1000,
+      otherFund1: 0,
+      otherFund2: 0,
+    };
+    const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2245,15 +3006,31 @@ contract("GenesisTree", (accounts) => {
       userAccount2,
       deployerAccount
     );
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successFundTree(
+      arInstance,
+      deployerAccount,
+      genesisTreeInstance.address,
+      userAccount7,
+      treasuryInstance,
+      treeId,
+      fundsPercent,
+      fundTreeAmount,
+      userAccount8,
+      genesisTreeInstance
+    );
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
     await genesisTreeInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
-    });
-
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, false, {
@@ -2299,6 +3076,10 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
     await genesisTreeInstance
       .verifyUpdate(treeId, true, {
         from: userAccount1,
@@ -2325,14 +3106,18 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
   });
 
-  //--------------------------------------------------checkAndSetProvideStatus test----------------------------------------
+  //--------------------------------------------------availability test----------------------------------------
 
-  it("checkAndSetProvideStatus should be success", async () => {
+  it("availability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
+
+    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2352,15 +3137,15 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
     let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
 
-    let lastProvideStatus = await genesisTreeInstance.checkAndSetProvideStatus(
-      1,
-      1,
-      {
-        from: userAccount5,
-      }
-    );
+    let lastProvideStatus = await genesisTreeInstance.availability(1, 1, {
+      from: userAccount5,
+    });
 
     let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
 
@@ -2371,22 +3156,85 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  it("checkAndSetProvideStatus should be fail because invalid access(just auction access for this function)", async () => {
+  it("availability should be fail because invalid access(just auction access for this function)", async () => {
     await genesisTreeInstance
-      .checkAndSetProvideStatus(1, 1, {
+      .availability(1, 1, {
         from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
   });
 
-  it("checkAndSetProvideStatus should be fail because invalid tree", async () => {
+  it("availability should be fail because invalid tree", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
 
     await genesisTreeInstance
-      .checkAndSetProvideStatus(1, 1, {
+      .availability(1, 1, {
         from: userAccount1,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+  });
+
+  it("availability should be fail because tree has owner", async () => {
+    const treeId = 1;
+    const gbId = 1;
+    const gbType = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.successPlant(
+      genesisTreeInstance,
+      gbInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      gbId,
+      gbType,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount1,
+      userAccount2,
+
+      deployerAccount
+    );
+
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+
+    await treeTokenInstance.safeMint(userAccount2, treeId, {
+      from: deployerAccount,
+    });
+
+    let balance = await web3.eth.getBalance(userAccount1);
+
+    let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
+
+    assert.equal(
+      resultBefore.provideStatus.toNumber(),
+      0,
+      "provideStatus not true update"
+    );
+
+    await genesisTreeInstance.availability(1, 3, {
+      from: userAccount1,
+    });
+
+    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+
+    assert.equal(
+      resultAfter.provideStatus.toNumber(),
+      0,
+      "provideStatus not true update"
+    );
   });
 
   //-------------------------------------------------------updateOwner test-------------------------------------------------------------
@@ -2426,7 +3274,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.checkAndSetProvideStatus(1, 1, {
+    await genesisTreeInstance.availability(1, 1, {
       from: userAccount5,
     });
 
@@ -2529,9 +3377,9 @@ contract("GenesisTree", (accounts) => {
     }).should.be.rejected;
   });
 
-  //---------------------------------------------------------updateProvideStatus----------------------------------
+  //---------------------------------------------------------updateAvailability----------------------------------
 
-  it("updateProvideStatus should be success", async () => {
+  it("updateAvailability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -2560,11 +3408,11 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    await genesisTreeInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance.updateProvideStatus(treeId, {
+    await genesisTreeInstance.updateAvailability(treeId, {
       from: userAccount5,
     });
 
@@ -2577,7 +3425,7 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  it("updateProvideStatus should be success", async () => {
+  it("updateAvailability should be success", async () => {
     const treeId = 1;
     const gbId = 1;
     const gbType = 1;
@@ -2606,12 +3454,12 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.checkAndSetProvideStatus(treeId, 1, {
+    await genesisTreeInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
     await genesisTreeInstance
-      .updateProvideStatus(treeId, {
+      .updateAvailability(treeId, {
         from: userAccount6,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);

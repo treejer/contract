@@ -18,12 +18,13 @@ const CommonErrorMsg = {
 
 const TreeAuctionErrorMsg = {
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
-  TREE_STATUS: "the tree is on other provide",
+  TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
   BID_BEFORE_START: "auction not started",
   BID_AFTER_END: "auction already ended",
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
+  INVALID_ASSIGN_MODEL: "Assign models not exist",
 };
 
 const GenesisTreeErrorMsg = {
@@ -41,6 +42,8 @@ const GenesisTreeErrorMsg = {
   INVALID_PLANTER: "invalid planter data",
   INVALID_TREE: "invalid tree",
   UPDATE_TIME_NOT_REACH: "Update time not reach",
+  UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS:
+    "update genesis tree status is pending",
   ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE: "Only Planter of tree can send update",
   TREE_NOT_PLANTED: "Tree not planted",
   ADMIN_ABBASSADOR_PLANTER: "Admin or ambassador or planter can accept updates",

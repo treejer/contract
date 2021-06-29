@@ -4,11 +4,13 @@ pragma solidity ^0.6.9;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract Planter is Initializable, RelayRecipient {
     using SafeMathUpgradeable for uint32;
+    using SafeCastUpgradeable for uint256;
     bool public isPlanter;
 
     IAccessRestriction public accessRestriction;
@@ -113,7 +115,8 @@ contract Planter is Initializable, RelayRecipient {
         ) {
             planters[_planterAddress].plantedCount = planters[_planterAddress]
             .plantedCount
-            .add(1);
+            .add(1)
+            .toUint32();
             return true;
         }
         return false;

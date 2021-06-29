@@ -28,11 +28,6 @@ contract Planter is Initializable, RelayRecipient {
     //mapping(address => address) public organizationRules;
     // mapping(address => uint256) public refferedBy;
 
-    event TreePlanted(uint256 treeId, address planter);
-    event PlantVerified(uint256 treeId, uint256 updateStatus);
-    event TreeUpdated(uint256 treeId);
-    event UpdateVerified(uint256 treeId, uint64 updateStatus);
-
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

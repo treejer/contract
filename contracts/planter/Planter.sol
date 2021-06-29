@@ -65,7 +65,14 @@ contract Planter is Initializable, RelayRecipient {
         address payable _refferedBy,
         address _organizationAddress
     ) external {
+        require(
+            planters[_msgSender()].planterType == 0 &&
+                accessRestriction.isPlanter(_msgSender()),
+            "User exist or not planter"
+        );
+
         require(_planterType >= 1 && _planterType <= 3, "planterType not true");
+
         if (_refferedBy != address(0)) {
             require(
                 _refferedBy != _msgSender() &&
@@ -73,6 +80,7 @@ contract Planter is Initializable, RelayRecipient {
                 "refferedBy not true"
             );
         }
+
         if (_organizationAddress != address(0)) {
             //TODO:_organizationAddress has organization role
         }

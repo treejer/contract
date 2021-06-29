@@ -22,11 +22,10 @@ contract Planter is Initializable, RelayRecipient {
         uint64 latitude;
     }
 
-    mapping(address => uint8) public planters;
+    mapping(address => PlanterData) public planters;
     mapping(address => address) public refferedBy;
     mapping(address => address) public memberOf;
-    //mapping(address => address) public organizationRules;
-    // mapping(address => uint256) public refferedBy;
+    mapping(address => mapping(address => uint256)) public organizationRules;
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());

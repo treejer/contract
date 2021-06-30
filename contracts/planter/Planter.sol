@@ -49,6 +49,13 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction.ifTreasury(_msgSender());
         _;
     }
+    modifier onlyOrganization() {
+        require(
+            planters[_msgSender()].planterType == 2,
+            "Planter is not organization"
+        );
+        _;
+    }
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -189,15 +196,10 @@ contract Planter is Initializable, RelayRecipient {
     function acceptPlanterFromOrganization(
         address _planterAddress,
         bool acceptance
-    ) external existPlanter(_planterAddress) {
-        require(
-            planters[_msgSender()].planterType == 2,
-            "organization Address not valid"
-        );
-
+    ) external onlyOrganization existPlanter(_planterAddress) {
         require(
             memberOf[_planterAddress] == _msgSender() &&
-                planters[_msgSender()].status == 0,
+                planters[_planterAddress].status == 0,
             "Planter not request or not pending"
         );
 
@@ -245,12 +247,11 @@ contract Planter is Initializable, RelayRecipient {
     function updateOrganizationPlanterPayment(
         address _planterAddress,
         uint256 _planterAutomaticPaymentPortion
-    ) external existPlanter(_planterAddress) {
+    ) external onlyOrganization existPlanter(_planterAddress) {
         require(
-            planters[_planterAddress].planterType == 2,
-            "planter is not organization"
+            memberOf[_planterAddress] == _msgSender() &&
+                planters[_planterAddress].status > 0
         );
-        require(memberOf[_planterAddress] == _msgSender());
         if (_planterAutomaticPaymentPortion < 10001) {
             organizationRules[_msgSender()][
                 _planterAddress

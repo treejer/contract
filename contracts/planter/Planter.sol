@@ -42,7 +42,10 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     modifier existPlanter(address _planterAddress) {
-        require(planters[_planterAddress].planterType > 0);
+        require(
+            planters[_planterAddress].planterType > 0,
+            "planter does not exist"
+        );
         _;
     }
     modifier onlyTreasury() {
@@ -220,9 +223,9 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        if (_capacity > tempPlanter.plantedCount) {
-            tempPlanter.capacity = _capacity;
-        }
+        require(_capacity > tempPlanter.plantedCount, "invalid capacity");
+
+        tempPlanter.capacity = _capacity;
     }
 
     function plantingPermision(address _planterAddress)
@@ -230,7 +233,7 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
         returns (bool)
     {
-        accessRestriction.isGenesisTree(_msgSender());
+        accessRestriction.ifGenesisTree(_msgSender());
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (
             tempPlanter.plantedCount < tempPlanter.capacity &&

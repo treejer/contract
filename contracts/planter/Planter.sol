@@ -99,7 +99,7 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
         returns (bool)
     {
-        accessRestriction.isGenesisTree(msg.sender);
+        accessRestriction.isGenesisTree(_msgSender());
         if (
             planters[_planterAddress].plantedCount <
             planters[_planterAddress].capacity &&
@@ -114,7 +114,26 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    function updateOrganizationPlanterPayment() external {}
+    function updateOrganizationPlanterPayment(
+        address _planterAddress,
+        uint256 _planterAutomaticPaymentPortion
+    ) external existPlanter(_planterAddress) {
+        require(memberOf[_planterAddress] == _msgSender());
+    }
 
-    function getPlanterPaymentPortion() external {}
+    function getPlanterPaymentPortion(address _planterAddress)
+        external
+        existPlanter(_planterAddress)
+        returns (
+            address,
+            address,
+            uint256
+        )
+    {
+        if (false) {
+            return (_planterAddress, address(0), 10000);
+        } else {
+            return (address(0), address(0), 1000);
+        }
+    }
 }

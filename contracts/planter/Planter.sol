@@ -45,6 +45,10 @@ contract Planter is Initializable, RelayRecipient {
         require(planters[_planterAddress].planterType > 0);
         _;
     }
+    modifier onlyTreasury() {
+        accessRestriction.ifTreasury(_msgSender());
+        _;
+    }
 
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -223,7 +227,7 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
         returns (bool)
     {
-        accessRestriction.isGenesisTree(msg.sender);
+        accessRestriction.isGenesisTree(_msgSender());
         if (
             planters[_planterAddress].plantedCount <
             planters[_planterAddress].capacity &&
@@ -238,7 +242,49 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    function updateOrganizationPlanterPayment() external {}
+    function updateOrganizationPlanterPayment(
+        address _planterAddress,
+        uint256 _planterAutomaticPaymentPortion
+    ) external existPlanter(_planterAddress) {
+        require(
+            planters[_planterAddress].planterType == 2,
+            "planter is not organization"
+        );
+        require(memberOf[_planterAddress] == _msgSender());
+        if (_planterAutomaticPaymentPortion < 10001) {
+            organizationRules[_msgSender()][
+                _planterAddress
+            ] = _planterAutomaticPaymentPortion;
+        }
+    }
 
-    function getPlanterPaymentPortion() external {}
+    function getPlanterPaymentPortion(address _planterAddress)
+        external
+        view
+        existPlanter(_planterAddress)
+        onlyTreasury
+        returns (
+            address,
+            address,
+            uint256
+        )
+    {
+        require(
+            planters[_planterAddress].status != 4,
+            "invalid status for planter"
+        );
+        if (
+            planters[_planterAddress].planterType == 1 ||
+            planters[_planterAddress].planterType == 2 ||
+            planters[_planterAddress].status == 0
+        ) {
+            return (_planterAddress, address(0), 10000);
+        } else {
+            return (
+                _planterAddress,
+                memberOf[_planterAddress],
+                organizationRules[memberOf[_planterAddress]][_planterAddress]
+            );
+        }
+    }
 }

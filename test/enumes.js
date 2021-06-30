@@ -55,7 +55,7 @@ const TreesuryManagerErrorMsg = {
   INVALID_FUND_MODEL: "invalid fund model",
   ONLY_AUCTION: "only auction can access",
 };
-
+const PlanterErrorMsg = {};
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -63,4 +63,5 @@ module.exports = {
   GenesisTreeErrorMsg,
   TreeAuctionErrorMsg,
   TreesuryManagerErrorMsg,
+  PlanterErrorMsg,
 };

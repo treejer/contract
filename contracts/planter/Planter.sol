@@ -67,22 +67,106 @@ contract Planter is Initializable, RelayRecipient {
         address payable _refferedBy,
         address _organizationAddress
     ) external {
-        require(_planterType >= 1 && _planterType <= 3, "planterType not true");
+        require(
+            planters[_msgSender()].planterType == 0 &&
+                accessRestriction.isPlanter(_msgSender()),
+            "User exist or not planter"
+        );
+
+        require(
+            _planterType >= 1 && _planterType <= 3,
+            "planterType not allowed values"
+        );
+
+        //TODO:check if _planterType == 2 msg.sender has organization role
+
+        if (_organizationAddress != address(0)) {
+            //TODO:_organizationAddress has organization role and _planterType == 3
+        }
+
         if (_refferedBy != address(0)) {
             require(
                 _refferedBy != _msgSender() &&
                     accessRestriction.isPlanter(_refferedBy),
                 "refferedBy not true"
             );
+
+            refferedBy[_msgSender()] = _refferedBy;
         }
+
+        uint8 status = 1;
+
+        if (_planterType == 3) {
+            memberOf[_msgSender()] = _organizationAddress;
+            status = 0;
+        }
+
+        planters[_msgSender()] = PlanterData(
+            _planterType,
+            status,
+            _countryCode,
+            0,
+            100,
+            0,
+            _longitude,
+            _latitude
+        );
+    }
+
+    function updatePlanterType(uint8 _planterType, address _organizationAddress)
+        external
+        existPlanter(_msgSender())
+    {
+        require(
+            _planterType >= 1 && _planterType <= 3,
+            "planterType not allowed values"
+        );
+
+        //TODO:check if _planterType == 2 msg.sender has organization role
+
         if (_organizationAddress != address(0)) {
-            //TODO:_organizationAddress has organization role
+            //TODO:_organizationAddress has organization role and _planterType == 3
+        }
+
+        PlanterData storage planter = planters[_msgSender()];
+
+        if (_planterType == 3) {
+            memberOf[_msgSender()] = _organizationAddress;
+            planter.status = 0;
+            planter.planterType = _planterType;
+        } else {
+            if (planter.planterType == 3) {
+                memberOf[_msgSender()] = address(0);
+            }
+            if (planter.status == 0) {
+                planter.status = 1;
+            }
         }
     }
 
-    function updatePlanterType() external {}
+    function acceptPlanterFromOrganization(
+        address _planterAddress,
+        bool acceptance
+    ) external existPlanter(_msgSender()) existPlanter(_planterAddress) {
+        //TODO:msg.sender organization
 
-    function acceptPlanterFromOrganization() external {}
+        //TODO:Do we need to check planter status?
+
+        require(
+            memberOf[_planterAddress] == _msgSender(),
+            "PlanterAddress not request"
+        );
+
+        PlanterData storage planter = planters[_planterAddress];
+
+        if (acceptance == true) {
+            planter.status = 1;
+        } else {
+            planter.status = 1;
+            planter.planterType = 1;
+            memberOf[_planterAddress] = address(0);
+        }
+    }
 
     function updateCapacity(address _planterAddress, uint32 _capacity)
         external

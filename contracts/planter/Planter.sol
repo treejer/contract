@@ -219,8 +219,9 @@ contract Planter is Initializable, RelayRecipient {
         onlyAdmin
         existPlanter(_planterAddress)
     {
-        if (_capacity > planters[_planterAddress].plantedCount) {
-            planters[_planterAddress].capacity = _capacity;
+        PlanterData storage tempPlanter = planters[_planterAddress];
+        if (_capacity > tempPlanter.plantedCount) {
+            tempPlanter.capacity = _capacity;
         }
     }
 
@@ -230,12 +231,12 @@ contract Planter is Initializable, RelayRecipient {
         returns (bool)
     {
         accessRestriction.isGenesisTree(_msgSender());
+        PlanterData storage tempPlanter = planters[_planterAddress];
         if (
-            planters[_planterAddress].plantedCount <
-            planters[_planterAddress].capacity &&
-            planters[_planterAddress].status == 1
+            tempPlanter.plantedCount < tempPlanter.capacity &&
+            tempPlanter.status == 1
         ) {
-            planters[_planterAddress].plantedCount = planters[_planterAddress]
+            tempPlanter.plantedCount = tempPlanter
             .plantedCount
             .add(1)
             .toUint32();
@@ -250,7 +251,8 @@ contract Planter is Initializable, RelayRecipient {
     ) external onlyOrganization existPlanter(_planterAddress) {
         require(
             memberOf[_planterAddress] == _msgSender() &&
-                planters[_planterAddress].status > 0
+                planters[_planterAddress].status > 0,
+            "invalid input planter"
         );
         if (_planterAutomaticPaymentPortion < 10001) {
             organizationRules[_msgSender()][
@@ -270,14 +272,12 @@ contract Planter is Initializable, RelayRecipient {
             uint256
         )
     {
-        require(
-            planters[_planterAddress].status != 4,
-            "invalid status for planter"
-        );
+        PlanterData storage tempPlanter = planters[_planterAddress];
+        require(tempPlanter.status != 4, "invalid status for planter");
         if (
-            planters[_planterAddress].planterType == 1 ||
-            planters[_planterAddress].planterType == 2 ||
-            planters[_planterAddress].status == 0
+            tempPlanter.planterType == 1 ||
+            tempPlanter.planterType == 2 ||
+            tempPlanter.status == 0
         ) {
             return (_planterAddress, address(0), 10000);
         } else {

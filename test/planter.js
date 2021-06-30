@@ -61,4 +61,22 @@ contract("GenesisTree", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+  //////////////// mahdi ///////////////////////////////////////////////////////////////////////////////
+
+  it("should update capacity successfully", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.updateCapacity(userAccount1, 5, {
+      from: deployerAccount,
+    });
+  });
+  it("should check data after update capacity", async () => {});
+  it("should fail update capacity", async () => {});
 });

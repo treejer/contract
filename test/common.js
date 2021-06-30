@@ -185,5 +185,26 @@ Common.successPlant = async (
     from: ambassadorAddress,
   });
 };
+Common.joinSimplePlanter = async (
+  instance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await instance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
 
 module.exports = Common;

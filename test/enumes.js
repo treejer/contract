@@ -64,6 +64,10 @@ const PlanterErrorMsg = {
   ORGANIZATION_NOT_VALID: "organization address not valid",
   REFFERED_NOT_TRUE: "refferedBy not true",
   INVALID_PLANTER_TYPE: "invalid planterType in change",
+  PLANTER_NOT_ORGANIZATION: "Planter is not organization",
+  INVALID_PLANTER: "invalid input planter",
+  INVALID_PLANTER_STATUS: "invalid planter status",
+  INVALID_PAYMENT_PORTION: "invalid payment portion",
 };
 
 module.exports = {

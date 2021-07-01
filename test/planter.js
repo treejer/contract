@@ -113,6 +113,8 @@ contract("GenesisTree", (accounts) => {
   ///////////////////////////////////////////////mahdi/////////////////////////////////
   //////// *********************************************  accept planter from organization  **************************************************
   it("should accept planter from organization", async () => {});
+  it("should check data to be correct after accept planter from organization", async () => {});
+  it("should fail accept planter from organization", async () => {});
 
   //   /////// ********************************************** update capacity *************************************
 

@@ -57,6 +57,8 @@ const TreesuryManagerErrorMsg = {
 };
 const PlanterErrorMsg = {
   ONLY_PLANTER: "User exist or not planter",
+  INVALID_CAPACITY: "invalid capacity",
+  PLANTER_NOT_EXIST: "planter does not exist",
 };
 
 module.exports = {

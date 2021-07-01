@@ -110,10 +110,99 @@ contract("GenesisTree", (accounts) => {
   //   });
   // });
 
-  //////////////// mahdi ///////////////////////////////////////////////////////////////////////////////
-
-  // it("should update capacity successfully", async () => {
+  ///////////////////////////////////////////////mahdi/////////////////////////////////
+  // it("should check data after update capacity", async () => {
   //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount1,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+  //   const planterBeforeUpdate = await planterInstance.planters.call(
+  //     userAccount1
+  //   );
+  //   assert.equal(
+  //     Number(planterBeforeUpdate.capacity.toString()),
+  //     100,
+  //     "planter capacity is incorrect"
+  //   );
+
+  //   await planterInstance.updateCapacity(userAccount1, 5, {
+  //     from: deployerAccount,
+  //   });
+  //   const planterAfterUpdate = await planterInstance.planters.call(
+  //     userAccount1
+  //   );
+  //   assert.equal(
+  //     Number(planterAfterUpdate.capacity.toString()),
+  //     5,
+  //     "capacity update incorrect"
+  //   );
+  // });
+  // it("should fail update capacity", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount1,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   ////////------------ fail because caller is not admin
+  //   await planterInstance
+  //     .updateCapacity(userAccount1, 2, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  //   await planterInstance
+  //     .updateCapacity(userAccount4, 2, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+  //   /////////////////----------- update capacity
+  //   await planterInstance.updateCapacity(userAccount1, 2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   await planterInstance
+  //     .updateCapacity(userAccount1, 1, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.INVALID_CAPACITY);
+  // });
+  // it("should give planting permision succusfully", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount1,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  // });
+  // it("should check data after give planting permision to be correct 1", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
   //   await Common.joinSimplePlanter(
   //     planterInstance,
   //     1,
@@ -122,10 +211,102 @@ contract("GenesisTree", (accounts) => {
   //     zeroAddress
   //   );
 
-  //   await planterInstance.updateCapacity(userAccount1, 5, {
+  //   const planter1 = await planterInstance.planters.call(userAccount1);
+  //   assert.equal(
+  //     Number(planter1.plantedCount.toString()),
+  //     0,
+  //     "incorrect plantedCount"
+  //   );
+
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   const planter2 = await planterInstance.planters.call(userAccount1);
+  //   assert.equal(
+  //     Number(planter2.plantedCount.toString()),
+  //     1,
+  //     "incorrect plantedCount"
+  //   );
+  //   ///////////-------------------- update capacity
+  //   await planterInstance.updateCapacity(userAccount1, 2, {
   //     from: deployerAccount,
   //   });
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   const planter3 = await planterInstance.planters.call(userAccount1);
+  //   assert.equal(
+  //     Number(planter3.plantedCount.toString()),
+  //     2,
+  //     "incorrect plantedCount"
+  //   );
+  //   ////////////////// planter count must be 2 because it dont give permision
+  //   await planterInstance.plantingPermision(userAccount1, {
+  //     from: userAccount2,
+  //   });
+  //   const planter4 = await planterInstance.planters.call(userAccount1);
+  //   assert.equal(
+  //     Number(planter4.plantedCount.toString()),
+  //     2,
+  //     "incorrect plantedCount"
+  //   );
   // });
-  // it("should check data after update capacity", async () => {});
-  // it("should fail update capacity", async () => {});
+
+  // it("should check data after give planting permision to be correct 2", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount2,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+
+  //   const planter1 = await planterInstance.planters.call(userAccount2);
+  //   assert.equal(
+  //     Number(planter1.plantedCount.toString()),
+  //     0,
+  //     "incorrect plantedCount"
+  //   );
+
+  //   await planterInstance.plantingPermision(userAccount2, {
+  //     from: userAccount3,
+  //   });
+  //   const planter2 = await planterInstance.planters.call(userAccount2);
+  //   assert.equal(
+  //     Number(planter2.plantedCount.toString()),
+  //     0,
+  //     "incorrect plantedCount"
+  //   );
+  // });
+
+  // it("should fail to give planting permision", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount1,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+  //   await planterInstance
+  //     .plantingPermision(userAccount1, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+  //   await planterInstance
+  //     .plantingPermision(userAccount4, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+  // });
 });

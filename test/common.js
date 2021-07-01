@@ -207,4 +207,25 @@ Common.joinSimplePlanter = async (
   );
 };
 
+Common.joinOrganizationPlanter = async (
+  instance,
+  organizationAddress,
+  refferedBy,
+  adminAccount
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+  const capcity = 1000;
+  await instance.organizationJoin(
+    organizationAddress,
+    longitude,
+    latitude,
+    countryCode,
+    capcity,
+    refferedBy,
+    { from: adminAccount }
+  );
+};
+
 module.exports = Common;

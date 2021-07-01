@@ -252,23 +252,25 @@ contract Planter is Initializable, RelayRecipient {
         address _planterAddress,
         uint256 _planterAutomaticPaymentPortion
     ) external onlyOrganization existPlanter(_planterAddress) {
+        require(planters[_planterAddress].status > 0, "invalid planter status");
         require(
-            memberOf[_planterAddress] == _msgSender() &&
-                planters[_planterAddress].status > 0,
+            memberOf[_planterAddress] == _msgSender(),
             "invalid input planter"
         );
-        if (_planterAutomaticPaymentPortion < 10001) {
-            organizationRules[_msgSender()][
-                _planterAddress
-            ] = _planterAutomaticPaymentPortion;
-        }
+        require(
+            _planterAutomaticPaymentPortion < 10001,
+            "invalid payment portion"
+        );
+
+        organizationRules[_msgSender()][
+            _planterAddress
+        ] = _planterAutomaticPaymentPortion;
     }
 
     function getPlanterPaymentPortion(address _planterAddress)
         external
         view
         existPlanter(_planterAddress)
-        onlyTreasury
         returns (
             address,
             address,
@@ -276,19 +278,24 @@ contract Planter is Initializable, RelayRecipient {
         )
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        require(tempPlanter.status != 4, "invalid status for planter");
-        if (
-            tempPlanter.planterType == 1 ||
-            tempPlanter.planterType == 2 ||
-            tempPlanter.status == 0
-        ) {
-            return (_planterAddress, address(0), 10000);
+        if (tempPlanter.status == 4) {
+            return (address(0), address(0), 0);
         } else {
-            return (
-                _planterAddress,
-                memberOf[_planterAddress],
-                organizationRules[memberOf[_planterAddress]][_planterAddress]
-            );
+            if (
+                tempPlanter.planterType == 1 ||
+                tempPlanter.planterType == 2 ||
+                tempPlanter.status == 0
+            ) {
+                return (_planterAddress, address(0), 10000);
+            } else {
+                return (
+                    _planterAddress,
+                    memberOf[_planterAddress],
+                    organizationRules[memberOf[_planterAddress]][
+                        _planterAddress
+                    ]
+                );
+            }
         }
     }
 }

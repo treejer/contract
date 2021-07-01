@@ -59,6 +59,10 @@ const PlanterErrorMsg = {
   ONLY_PLANTER: "User exist or not planter",
   INVALID_CAPACITY: "invalid capacity",
   PLANTER_NOT_EXIST: "planter does not exist",
+  PLANTER_NOT_ORGANIZATION: "Planter is not organization",
+  INVALID_PLANTER: "invalid input planter",
+  INVALID_PLANTER_STATUS: "invalid planter status",
+  INVALID_PAYMENT_PORTION: "invalid payment portion",
 };
 
 module.exports = {

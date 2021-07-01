@@ -68,6 +68,7 @@ const PlanterErrorMsg = {
   INVALID_PLANTER: "invalid input planter",
   INVALID_PLANTER_STATUS: "invalid planter status",
   INVALID_PAYMENT_PORTION: "invalid payment portion",
+  ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
 };
 
 module.exports = {

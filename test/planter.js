@@ -682,10 +682,188 @@ contract("GenesisTree", (accounts) => {
   // });
 
   ///////////////////////////////////////////////mahdi/////////////////////////////////
-  //////// *********************************************  accept planter from organization  **************************************************
-  it("should accept planter from organization", async () => {});
-  it("should check data to be correct after accept planter from organization", async () => {});
-  it("should fail accept planter from organization", async () => {});
+  // //////// *********************************************  accept planter from organization  **************************************************
+  // it("should accept planter from organization", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount2,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+  //     from: userAccount1,
+  //   });
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount4, false, {
+  //     from: userAccount1,
+  //   });
+  // });
+  // it("should check data to be correct after acceptPlanterFromOrganization (accept)", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount2,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+  //   const planterBefore = await planterInstance.planters.call(userAccount2);
+  //   const memberOfBefore = await planterInstance.memberOf.call(userAccount2);
+  //   assert.equal(Number(planterBefore.status.toString()), 0, "invalid status");
+  //   assert.equal(
+  //     Number(planterBefore.planterType.toString()),
+  //     3,
+  //     "invalid type"
+  //   );
+
+  //   assert.equal(memberOfBefore, userAccount1, "invalid memberOf");
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+  //     from: userAccount1,
+  //   });
+  //   const planterAfter = await planterInstance.planters.call(userAccount2);
+  //   const memberOfAfter = await planterInstance.memberOf.call(userAccount2);
+
+  //   assert.equal(Number(planterAfter.status.toString()), 1, "invalid status");
+  //   assert.equal(
+  //     Number(planterAfter.planterType.toString()),
+  //     3,
+  //     "invalid type"
+  //   );
+
+  //   assert.equal(memberOfAfter, userAccount1, "invalid memberOf");
+  // });
+
+  // it("should check data to be correct after acceptPlanterFromOrganization (reject)", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount2,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+  //   const planterBefore = await planterInstance.planters.call(userAccount2);
+  //   const memberOfBefore = await planterInstance.memberOf.call(userAccount2);
+  //   assert.equal(Number(planterBefore.status.toString()), 0, "invalid status");
+  //   assert.equal(
+  //     Number(planterBefore.planterType.toString()),
+  //     3,
+  //     "invalid type"
+  //   );
+
+  //   assert.equal(memberOfBefore, userAccount1, "invalid memberOf");
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount2, false, {
+  //     from: userAccount1,
+  //   });
+  //   const planterAfter = await planterInstance.planters.call(userAccount2);
+  //   const memberOfAfter = await planterInstance.memberOf.call(userAccount2);
+
+  //   assert.equal(Number(planterAfter.status.toString()), 1, "invalid status");
+  //   assert.equal(
+  //     Number(planterAfter.planterType.toString()),
+  //     1,
+  //     "invalid type"
+  //   );
+
+  //   assert.equal(memberOfAfter, 0x0, "invalid memberOf");
+  // });
+
+  // it("should fail accept planter from organization", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount2,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount3,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount2
+  //   );
+
+  //   await planterInstance
+  //     .acceptPlanterFromOrganization(userAccount3, true, {
+  //       from: userAccount4,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_ORGANIZATION);
+
+  //   await planterInstance
+  //     .acceptPlanterFromOrganization(userAccount6, true, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+
+  //   await planterInstance
+  //     .acceptPlanterFromOrganization(userAccount4, true, { from: userAccount1 })
+  //     .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+  //     from: userAccount1,
+  //   });
+
+  //   await planterInstance
+  //     .acceptPlanterFromOrganization(userAccount3, true, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
+  // });
 
   //   /////// ********************************************** update capacity *************************************
 

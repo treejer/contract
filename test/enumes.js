@@ -55,7 +55,10 @@ const TreesuryManagerErrorMsg = {
   INVALID_FUND_MODEL: "invalid fund model",
   ONLY_AUCTION: "only auction can access",
 };
-const PlanterErrorMsg = {};
+const PlanterErrorMsg = {
+  ONLY_PLANTER: "User exist or not planter",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,

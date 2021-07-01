@@ -186,7 +186,7 @@ Common.successPlant = async (
   });
 };
 Common.joinSimplePlanter = async (
-  instance,
+  planterInstance,
   planterType,
   planterAddress,
   refferedBy,
@@ -196,7 +196,7 @@ Common.joinSimplePlanter = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await instance.planterJoin(
+  await planterInstance.planterJoin(
     planterType,
     longitude,
     latitude,

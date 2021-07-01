@@ -12,6 +12,7 @@ const {
   CommonErrorMsg,
   GenesisTreeErrorMsg,
   TreeAuctionErrorMsg,
+  PlanterErrorMsg,
 } = require("./enumes");
 
 //gsn
@@ -54,29 +55,77 @@ contract("GenesisTree", (accounts) => {
 
   afterEach(async () => {});
   //************************************ deploy successfully ****************************************//
-  it("deploys successfully", async () => {
-    const address = planterInstance.address;
-    assert.notEqual(address, 0x0);
-    assert.notEqual(address, "");
-    assert.notEqual(address, null);
-    assert.notEqual(address, undefined);
-  });
-  //////////////// mahdi ///////////////////////////////////////////////////////////////////////////////
+  // it("deploys successfully", async () => {
+  //   const address = planterInstance.address;
+  //   assert.notEqual(address, 0x0);
+  //   assert.notEqual(address, "");
+  //   assert.notEqual(address, null);
+  //   assert.notEqual(address, undefined);
+  // });
 
-  it("should update capacity successfully", async () => {
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.joinSimplePlanter(
+  //---------------------------------planterJoin--------------------------------------------------------
+
+  it("planterJoin should be work successfully without refferedBy and organizationAddress", async () => {
+    Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+    Common.joinSimplePlanter(
       planterInstance,
       1,
-      userAccount1,
+      userAccount2,
       zeroAddress,
       zeroAddress
     );
 
-    await planterInstance.updateCapacity(userAccount1, 5, {
-      from: deployerAccount,
-    });
+    let planter = await planterInstance.planters.call(userAccount2);
+
+    // assert.equal(
+    //   Number(planter.planterType.toString()),
+    //   1,
+    //   "planterType not true"
+    // );
+    // assert.equal(Number(planter.status), 1, "status not true");
+    // assert.equal(Number(planter.capacity), 100, "capacity not true");
+    // assert.equal(Number(planter.longitude), 1, "longitude not true");
+    // assert.equal(Number(planter.latitude), 2, "latitude not true");
+    // assert.equal(Number(planter.countryCode), 10, "countryCode not true");
+    // assert.equal(Number(planter.score), 0, "score not true");
+    // assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
+
+    console.log("planter", planter);
   });
-  it("should check data after update capacity", async () => {});
-  it("should fail update capacity", async () => {});
+
+  // it("planterJoin should be fail because user not planter", async () => {
+  //   planterInstance
+  //     .planterJoin(1, 12, 24, 12, zeroAddress, zeroAddress, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
+  // });
+
+  // it("planterJoin should be fail because user exist", async () => {
+  //   Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+  //   planterInstance.planterJoin(1, 12, 24, 12, zeroAddress, zeroAddress, {
+  //     from: userAccount2,
+  //   });
+  // });
+
+  //////////////// mahdi ///////////////////////////////////////////////////////////////////////////////
+
+  // it("should update capacity successfully", async () => {
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount1,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await planterInstance.updateCapacity(userAccount1, 5, {
+  //     from: deployerAccount,
+  //   });
+  // });
+  // it("should check data after update capacity", async () => {});
+  // it("should fail update capacity", async () => {});
 });

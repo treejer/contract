@@ -56,9 +56,14 @@ const TreesuryManagerErrorMsg = {
   ONLY_AUCTION: "only auction can access",
 };
 const PlanterErrorMsg = {
+  ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
   ONLY_PLANTER: "User exist or not planter",
   INVALID_CAPACITY: "invalid capacity",
   PLANTER_NOT_EXIST: "planter does not exist",
+  PLANTERTYPE_ALLOWED_VALUE: "planterType not allowed values",
+  ORGANIZATION_NOT_VALID: "organization address not valid",
+  REFFERED_NOT_TRUE: "refferedBy not true",
+  INVALID_PLANTER_TYPE: "invalid planterType in change",
 };
 
 module.exports = {

@@ -35,12 +35,10 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
-
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
-
     modifier existPlanter(address _planterAddress) {
         require(
             planters[_planterAddress].planterType > 0,
@@ -95,7 +93,7 @@ contract Planter is Initializable, RelayRecipient {
         if (_planterType == 3) {
             require(
                 planters[_organizationAddress].planterType == 2,
-                "organization Address not valid"
+                "organization address not valid"
             );
         }
 
@@ -149,7 +147,7 @@ contract Planter is Initializable, RelayRecipient {
                 "refferedBy not true"
             );
 
-            refferedBy[_msgSender()] = _refferedBy;
+            refferedBy[organizationAddress] = _refferedBy;
         }
 
         planters[organizationAddress] = PlanterData(
@@ -168,23 +166,28 @@ contract Planter is Initializable, RelayRecipient {
         external
         existPlanter(_msgSender())
     {
+        PlanterData storage planter = planters[_msgSender()];
+
         require(
             _planterType == 1 || _planterType == 3,
             "planterType not allowed values"
         );
 
-        PlanterData storage planter = planters[_msgSender()];
+        require(planter.planterType != 2, "Caller is organizationPlanter");
+
+        if (_planterType == 1) {
+            require(planter.planterType == 3, "invalid planterType in change");
+        }
 
         if (_planterType == 3) {
             require(
                 planters[_organizationAddress].planterType == 2,
-                "organization Address not valid"
+                "organization address not valid"
             );
 
             memberOf[_msgSender()] = _organizationAddress;
 
             planter.status = 0;
-            planter.planterType = _planterType;
         } else {
             if (planter.planterType == 3) {
                 memberOf[_msgSender()] = address(0);
@@ -194,6 +197,7 @@ contract Planter is Initializable, RelayRecipient {
                 planter.status = 1;
             }
         }
+        planter.planterType = _planterType;
     }
 
     function acceptPlanterFromOrganization(
@@ -208,7 +212,7 @@ contract Planter is Initializable, RelayRecipient {
 
         PlanterData storage planter = planters[_planterAddress];
 
-        if (acceptance == true) {
+        if (acceptance) {
             planter.status = 1;
         } else {
             planter.status = 1;
@@ -223,9 +227,9 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        require(_capacity > tempPlanter.plantedCount, "invalid capacity");
-
-        tempPlanter.capacity = _capacity;
+        if (_capacity > tempPlanter.plantedCount) {
+            tempPlanter.capacity = _capacity;
+        }
     }
 
     function plantingPermision(address _planterAddress)
@@ -233,7 +237,7 @@ contract Planter is Initializable, RelayRecipient {
         existPlanter(_planterAddress)
         returns (bool)
     {
-        accessRestriction.ifGenesisTree(_msgSender());
+        accessRestriction.isGenesisTree(_msgSender());
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (
             tempPlanter.plantedCount < tempPlanter.capacity &&

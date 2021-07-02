@@ -197,6 +197,7 @@ contract Planter is Initializable, RelayRecipient {
                 planter.status = 1;
             }
         }
+
         planter.planterType = _planterType;
     }
 

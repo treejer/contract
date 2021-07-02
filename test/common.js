@@ -13,6 +13,8 @@ const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 const GENESIS_TREE_ROLE = web3.utils.soliditySha3("GENESIS_TREE_ROLE");
 
+const Math = require("./math");
+
 Common.sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -225,6 +227,19 @@ Common.joinOrganizationPlanter = async (
     capcity,
     refferedBy,
     { from: adminAccount }
+  );
+};
+
+Common.checkBalance = async (InitialBalance, tx, account) => {
+  const gasUsed = tx.receipt.gasUsed;
+  const gasPrice = (await web3.eth.getTransaction(receipt.tx)).gasPrice;
+
+  const finalCost = await web3.eth.getBalance(account);
+
+  assert.equal(
+    Number(Math.add(finalCost, Math.mul(gasPrice, gasUsed))),
+    Number(InitialBalance),
+    "balance not true"
   );
 };
 

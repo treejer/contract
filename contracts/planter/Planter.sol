@@ -167,18 +167,14 @@ contract Planter is Initializable, RelayRecipient {
         external
         existPlanter(_msgSender())
     {
-        PlanterData storage planter = planters[_msgSender()];
-
         require(
             _planterType == 1 || _planterType == 3,
             "planterType not allowed values"
         );
 
-        require(planter.planterType != 2, "Caller is organizationPlanter");
+        PlanterData storage planter = planters[_msgSender()];
 
-        if (_planterType == 1) {
-            require(planter.planterType == 3, "invalid planterType in change");
-        }
+        require(planter.planterType != 2, "Caller is organizationPlanter");
 
         if (_planterType == 3) {
             require(
@@ -190,6 +186,8 @@ contract Planter is Initializable, RelayRecipient {
 
             planter.status = 0;
         } else {
+            require(planter.planterType == 3, "invalid planterType in change");
+
             if (planter.planterType == 3) {
                 memberOf[_msgSender()] = address(0);
             }

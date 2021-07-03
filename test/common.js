@@ -2,6 +2,8 @@ const Units = require("ethereumjs-units");
 const { time } = require("@openzeppelin/test-helpers");
 var Common = {};
 
+const assert = require("chai").assert;
+
 const DEFAULT_ADMIN_ROLE =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 const AMBASSADOR_ROLE = web3.utils.soliditySha3("AMBASSADOR_ROLE");

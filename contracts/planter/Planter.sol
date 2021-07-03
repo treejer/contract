@@ -11,6 +11,7 @@ import "../gsn/RelayRecipient.sol";
 contract Planter is Initializable, RelayRecipient {
     using SafeMathUpgradeable for uint32;
     using SafeCastUpgradeable for uint256;
+
     bool public isPlanter;
 
     IAccessRestriction public accessRestriction;

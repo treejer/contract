@@ -81,8 +81,8 @@ contract Planter is Initializable, RelayRecipient {
         address _organizationAddress
     ) external {
         require(
-            planters[_msgSender()].planterType == 0 &&
-                accessRestriction.isPlanter(_msgSender()),
+            accessRestriction.isPlanter(_msgSender()) &&
+                planters[_msgSender()].planterType == 0,
             "User exist or not planter"
         );
 
@@ -240,8 +240,8 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction.isGenesisTree(_msgSender());
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (
-            tempPlanter.plantedCount < tempPlanter.capacity &&
-            tempPlanter.status == 1
+            tempPlanter.status == 1 &&
+            tempPlanter.plantedCount < tempPlanter.capacity
         ) {
             tempPlanter.plantedCount = tempPlanter
             .plantedCount

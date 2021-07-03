@@ -2301,10 +2301,16 @@ contract("TreasuryManager", (accounts) => {
       Number(planterBalance2.toString()),
       "planter blance is not ok 2"
     );
-    assert.isTrue(
-      Number(accountBalance2.toString()) > Number(accountBalance1.toString()),
+    const txFee = await Common.getTransactionFee(tx);
+    assert.equal(
+      Number(accountBalance2),
+      Math.subtract(
+        Math.add(Number(accountBalance1), Number(web3.utils.toWei("0.1"))),
+        txFee
+      ),
       "planter balance is not ok 2"
     );
+
     //////////////////////
     const tx2 = await treasuryManagerInstance.withdrawPlanterBalance(
       web3.utils.toWei("0.5"),
@@ -2336,8 +2342,13 @@ contract("TreasuryManager", (accounts) => {
       "planter blance is not ok 3"
     );
     const accountBalance3 = await web3.eth.getBalance(userAccount3);
-    assert.isTrue(
-      Number(accountBalance3.toString()) > Number(accountBalance2.toString()),
+    const txFee2 = await Common.getTransactionFee(tx2);
+    assert.equal(
+      Number(accountBalance3),
+      Math.subtract(
+        Math.add(Number(accountBalance2), Number(web3.utils.toWei("0.5"))),
+        txFee2
+      ),
       "planter balance is not ok 3"
     );
   });

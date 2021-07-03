@@ -232,17 +232,11 @@ Common.joinOrganizationPlanter = async (
   );
 };
 
-Common.checkBalance = async (InitialBalance, tx, account) => {
+Common.getTransactionFee = async (tx) => {
   const gasUsed = tx.receipt.gasUsed;
-  const gasPrice = (await web3.eth.getTransaction(receipt.tx)).gasPrice;
+  const gasPrice = (await web3.eth.getTransaction(tx.tx)).gasPrice;
 
-  const finalCost = await web3.eth.getBalance(account);
-
-  assert.equal(
-    Number(Math.add(finalCost, Math.mul(gasPrice, gasUsed))),
-    Number(InitialBalance),
-    "balance not true"
-  );
+  return Math.mul(gasPrice, gasUsed);
 };
 
 module.exports = Common;

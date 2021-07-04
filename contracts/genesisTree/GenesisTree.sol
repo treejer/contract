@@ -76,8 +76,9 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
 
     function initialize(address _accessRestrictionAddress) public initializer {
-        IAccessRestriction candidateContract =
-            IAccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         isGenesisTree = true;
         accessRestriction = candidateContract;

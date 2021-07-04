@@ -229,24 +229,34 @@ contract Planter is Initializable, RelayRecipient {
         PlanterData storage tempPlanter = planters[_planterAddress];
         require(_capacity > tempPlanter.plantedCount, "invalid capacity");
         tempPlanter.capacity = _capacity;
+        if (tempPlanter.status == 1) {
+            tempPlanter.status = 2;
+        }
     }
 
-    function plantingPermision(address _planterAddress)
-        external
-        existPlanter(_planterAddress)
-        returns (bool)
-    {
+    function plantingPermision(
+        address _planterAddress,
+        address _assignedPlanterAddress
+    ) external existPlanter(_planterAddress) returns (bool) {
         accessRestriction.ifGenesisTree(_msgSender());
+
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (
-            tempPlanter.status == 1 &&
-            tempPlanter.plantedCount < tempPlanter.capacity
+            _planterAddress == _assignedPlanterAddress ||
+            (tempPlanter.planterType == 3 &&
+                memberOf[_planterAddress] == _assignedPlanterAddress)
         ) {
-            tempPlanter.plantedCount = tempPlanter
-            .plantedCount
-            .add(1)
-            .toUint32();
-            return true;
+            if (
+                tempPlanter.status == 1 &&
+                tempPlanter.plantedCount < tempPlanter.capacity
+            ) {
+                tempPlanter.plantedCount = tempPlanter
+                .plantedCount
+                .add(1)
+                .toUint32();
+                return true;
+            }
+            return false;
         }
         return false;
     }
@@ -270,6 +280,7 @@ contract Planter is Initializable, RelayRecipient {
         ] = _planterAutomaticPaymentPortion;
     }
 
+    //TODO: remove existPlanter check?
     function getPlanterPaymentPortion(address _planterAddress)
         external
         view

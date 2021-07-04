@@ -163,6 +163,7 @@ contract Planter is Initializable, RelayRecipient {
         );
     }
 
+    //TODO:remove this function??
     function updatePlanterType(uint8 _planterType, address _organizationAddress)
         external
         existPlanter(_msgSender())

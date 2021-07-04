@@ -2,7 +2,9 @@
 
 pragma solidity ^0.6.9;
 
-interface ITreasuryManager {
+interface ITreasury {
+    function isTreasury() external view returns (bool);
+
     function setGbFundAddress(address payable _address) external;
 
     function setTreeResearchAddress(address payable _address) external;
@@ -39,7 +41,7 @@ interface ITreasuryManager {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint16 _treeStatus
+        uint32 _treeStatus
     ) external;
 
     function distributionModelExistance(uint256 _treeId)

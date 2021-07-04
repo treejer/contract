@@ -238,5 +238,60 @@ Common.getTransactionFee = async (tx) => {
 
   return Math.mul(gasPrice, gasUsed);
 };
+Common.successFundTree = async (
+  arInstance,
+  deployerAccount,
+  genesisTreeAddress,
+  auctionAddress,
+  treasuryInstance,
+  treeId,
+  fundsPercent,
+  fundAmount,
+  tokenOwner,
+  genesisTreeInstance
+) => {
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeAddress,
+    deployerAccount
+  );
 
+  await treasuryInstance.addFundDistributionModel(
+    fundsPercent.planterFund,
+    fundsPercent.gbFund,
+    fundsPercent.treeResearch,
+    fundsPercent.localDevelop,
+    fundsPercent.rescueFund,
+    fundsPercent.treejerDevelop,
+    fundsPercent.otherFund1,
+    fundsPercent.otherFund2,
+    {
+      from: deployerAccount,
+    }
+  );
+  await treasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    from: deployerAccount,
+  });
+
+  await Common.addAuctionRole(arInstance, auctionAddress, deployerAccount);
+
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeAddress,
+    deployerAccount
+  );
+
+  await genesisTreeInstance.availability(treeId, 1, {
+    from: auctionAddress,
+  });
+
+  await genesisTreeInstance.updateOwner(treeId, tokenOwner, {
+    from: auctionAddress,
+  });
+
+  let tx = await treasuryInstance.fundTree(treeId, {
+    from: auctionAddress,
+    value: fundAmount,
+  });
+};
 module.exports = Common;

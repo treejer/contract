@@ -9,10 +9,14 @@ import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "../greenblock/IGBFactory.sol";
 import "../tree/ITree.sol";
+import "../treasury/ITreasury.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
+    using SafeCastUpgradeable for uint32;
+    using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint64;
+    using SafeMathUpgradeable for uint32;
     using SafeMathUpgradeable for uint16;
 
     bool public isGenesisTree;
@@ -20,25 +24,23 @@ contract GenesisTree is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
     IGBFactory public gbFactory;
+    ITreasury public treasury;
 
     struct GenTree {
-        address planterId;
+        address payable planterId;
         uint256 gbId;
         uint256 treeType;
-        bool isExist;
         uint8 gbType;
-        uint16 provideStatus;
-        uint16 treeStatus;
+        uint8 provideStatus;
         uint16 countryCode;
+        uint32 treeStatus;
         uint64 plantDate;
         uint64 birthDate;
-        uint64 lastUpdate;
         string treeSpecs;
     }
 
     struct UpdateGenTree {
         string updateSpecs;
-        uint64 updateDate;
         uint64 updateStatus;
     }
 
@@ -66,7 +68,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
 
     modifier validTree(uint256 _treeId) {
-        require(genTrees[_treeId].isExist, "invalid tree");
+        require(genTrees[_treeId].treeStatus > 0, "invalid tree");
         _;
     }
 
@@ -94,6 +96,12 @@ contract GenesisTree is Initializable, RelayRecipient {
         gbFactory = candidateContract;
     }
 
+    function setTreasuryAddress(address _address) external onlyAdmin {
+        ITreasury candidateContract = ITreasury(_address);
+        require(candidateContract.isTreasury());
+        treasury = candidateContract;
+    }
+
     function setTreeTokenAddress(address _address) external onlyAdmin {
         ITree candidateContract = ITree(_address);
         require(candidateContract.isTree());
@@ -105,18 +113,16 @@ contract GenesisTree is Initializable, RelayRecipient {
         onlyAdmin
         validIpfs(_treeDescription)
     {
-        require(!genTrees[_treeId].isExist, "duplicate tree");
+        require(genTrees[_treeId].treeStatus == 0, "duplicate tree");
 
         genTrees[_treeId] = GenTree(
             address(0),
             0,
             0,
-            true,
+            0,
             0,
             0,
             1,
-            0,
-            0,
             0,
             0,
             _treeDescription
@@ -126,7 +132,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     function asignTreeToPlanter(
         uint256 _treeId,
         uint256 _gbId,
-        address _planterId,
+        address payable _planterId,
         uint8 _gbType
     ) external onlyAdmin validTree(_treeId) {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
@@ -176,7 +182,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             );
         }
 
-        updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, now.toUint64(), 1);
+        updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, 1);
 
         tempGenTree.countryCode = _countryCode;
         tempGenTree.birthDate = _birthDate;
@@ -214,7 +220,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             GenTree storage tempGenTree = genTrees[_treeId];
 
             tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
-            tempGenTree.lastUpdate = tempUpdateGenTree.updateDate;
             tempGenTree.treeStatus = 2;
 
             tempUpdateGenTree.updateStatus = 3;
@@ -236,14 +241,20 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
         require(genTrees[_treeId].treeStatus > 1, "Tree not planted");
         require(
-            now >= genTrees[_treeId].lastUpdate.add(2592000),
+            updateGenTrees[_treeId].updateStatus != 1,
+            "update genesis tree status is pending"
+        );
+        require(
+            now >=
+                genTrees[_treeId].plantDate.add(
+                    genTrees[_treeId].treeStatus.mul(3600).add(86400)
+                ),
             "Update time not reach"
         );
 
         UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
 
         updateGenTree.updateSpecs = _treeSpecs;
-        updateGenTree.updateDate = now.toUint64();
         updateGenTree.updateStatus = 1;
 
         emit TreeUpdated(_treeId);
@@ -274,13 +285,23 @@ contract GenesisTree is Initializable, RelayRecipient {
         if (_isVerified) {
             GenTree storage genTree = genTrees[_treeId];
 
-            genTree.lastUpdate = updateGenTree.updateDate;
-            genTree.treeSpecs = updateGenTree.updateSpecs;
-            genTree.treeStatus = genTree.treeStatus.add(1).toUint16();
-
             updateGenTree.updateStatus = 3;
+            uint32 age = now
+            .sub(genTrees[_treeId].plantDate)
+            .div(3600)
+            .toUint32();
+            if (age > genTree.treeStatus) {
+                genTree.treeStatus = age;
+            }
+            genTree.treeSpecs = updateGenTree.updateSpecs;
 
-            //call genesis fund
+            if (treeToken.exists(_treeId)) {
+                treasury.fundPlanter(
+                    _treeId,
+                    genTree.planterId,
+                    genTree.treeStatus
+                );
+            }
         } else {
             updateGenTree.updateStatus = 2;
         }
@@ -288,13 +309,16 @@ contract GenesisTree is Initializable, RelayRecipient {
         emit UpdateVerified(_treeId, updateGenTree.updateStatus);
     }
 
-    function checkAndSetProvideStatus(uint256 _treeId, uint16 _provideType)
+    function availability(uint256 _treeId, uint8 _provideType)
         external
         onlyAuction
         validTree(_treeId)
-        returns (uint16)
+        returns (uint8)
     {
-        uint16 nowProvideStatus = genTrees[_treeId].provideStatus;
+        if (treeToken.exists(_treeId)) {
+            return 1;
+        }
+        uint8 nowProvideStatus = genTrees[_treeId].provideStatus;
 
         if (nowProvideStatus == 0) {
             genTrees[_treeId].provideStatus = _provideType;
@@ -312,7 +336,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         treeToken.safeMint(_ownerId, _treeId);
     }
 
-    function updateProvideStatus(uint256 _treeId) external onlyAuction {
+    function updateAvailability(uint256 _treeId) external onlyAuction {
         genTrees[_treeId].provideStatus = 0;
     }
 

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
-contract TreasuryManager is Initializable, RelayRecipient {
+contract Treasury is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeMathUpgradeable for uint256;
@@ -17,7 +17,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
     CountersUpgradeable.Counter private fundDistributionCount;
 
     uint256 constant MAX_UINT256 = 2**256 - 1;
-    bool public isTreasuryManager;
+    bool public isTreasury;
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;
@@ -133,7 +133,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
 
         require(candidateContract.isAccessRestriction());
 
-        isTreasuryManager = true;
+        isTreasury = true;
         accessRestriction = candidateContract;
 
         totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
@@ -350,7 +350,7 @@ contract TreasuryManager is Initializable, RelayRecipient {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint16 _treeStatus
+        uint32 _treeStatus
     ) external onlyGenesisTree {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
 
@@ -390,7 +390,10 @@ contract TreasuryManager is Initializable, RelayRecipient {
         onlyAuction
         returns (bool)
     {
-        require(assignModels.length > 0, "assign models not exist");
+        if (assignModels.length == 0) {
+            return false;
+        }
+
         return
             _treeId >= assignModels[0].startingTreeId &&
             _treeId <= maxAssignedIndex;

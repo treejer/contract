@@ -15,8 +15,12 @@ var ForestFactory = artifacts.require("ForestFactory.sol");
 var Dai = artifacts.require("Dai.sol");
 var TreeAuction = artifacts.require("TreeAuction.sol");
 var GenesisTree = artifacts.require("GenesisTree.sol");
+<<<<<<< HEAD
 var TreasuryManager = artifacts.require("TreasuryManager.sol");
 var Planter = artifacts.require("Planter.sol");
+=======
+var Treasury = artifacts.require("Treasury.sol");
+>>>>>>> develop
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -43,8 +47,12 @@ module.exports = async function (deployer, network, accounts) {
   let daiTokenAddress;
   let treeAuctionAddress;
   let genesisTreeAddress;
+<<<<<<< HEAD
   let treasuryManagerAddress;
   let planterAddress;
+=======
+  let treasuryAddress;
+>>>>>>> develop
 
   //gsn
   let trustedForwarder;
@@ -186,14 +194,14 @@ module.exports = async function (deployer, network, accounts) {
     });
   });
 
-  console.log("Deploying Treasury Manager ...");
-  await deployProxy(TreasuryManager, [accessRestrictionAddress], {
+  console.log("Deploying Treasury...");
+  await deployProxy(Treasury, [accessRestrictionAddress], {
     deployer,
     initializer: "initialize",
     unsafeAllowCustomTypes: true,
   }).then(() => {
-    treasuryManagerAddress = TreasuryManager.address;
-    TreasuryManager.deployed().then(async (instance) => {
+    treasuryAddress = Treasury.address;
+    Treasury.deployed().then(async (instance) => {
       await instance.setTrustedForwarder(trustedForwarder);
     });
   });
@@ -301,8 +309,12 @@ CONTRACT_SEED_ADDRESS=${seedAddress}
 CONTRACT_O2_ADDRESS=${o2Address}
 CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
 CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
+<<<<<<< HEAD
 CONTRACT_TREASURY_MANAGER_ADDRESS=${treasuryManagerAddress}
 CONTRACT_PLANTER_ADDRESS=${planterAddress}
+=======
+CONTRACT_TREASURY_MANAGER_ADDRESS=${treasuryAddress}
+>>>>>>> develop
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 };

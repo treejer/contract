@@ -289,23 +289,30 @@ contract Planter is Initializable, RelayRecipient {
         returns (
             address,
             address,
+            address,
             uint256
         )
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (tempPlanter.status == 4) {
-            return (address(0), address(0), 0);
+            return (address(0), address(0), address(0), 0);
         } else {
             if (
                 tempPlanter.planterType == 1 ||
                 tempPlanter.planterType == 2 ||
                 tempPlanter.status == 0
             ) {
-                return (_planterAddress, address(0), 10000);
+                return (
+                    _planterAddress,
+                    address(0),
+                    refferedBy[_planterAddress],
+                    10000
+                );
             } else {
                 return (
                     _planterAddress,
                     memberOf[_planterAddress],
+                    refferedBy[_planterAddress],
                     organizationRules[memberOf[_planterAddress]][
                         _planterAddress
                     ]

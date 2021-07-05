@@ -5,6 +5,20 @@ pragma solidity ^0.6.9;
 interface IPlanter {
     function isPlanter() external view returns (bool);
 
+    function planters(address _planterAddress)
+        external
+        view
+        returns (
+            uint8,
+            uint8,
+            uint16,
+            uint32,
+            uint32,
+            uint32,
+            uint64,
+            uint64
+        );
+
     function planterJoin(
         uint8 _planterType,
         uint64 _longitude,
@@ -33,7 +47,12 @@ interface IPlanter {
 
     function updateCapacity(address _planterAddress, uint32 _capacity) external;
 
-    function plantingPermision(address _planterAddress) external;
+    function plantingPermision(
+        address _planterAddress,
+        address _assignedPlanterAddress
+    ) external returns (bool);
+
+    function memberOf(address _planterAddress) external view returns (address);
 
     function updateOrganizationPlanterPayment(
         address _planterAddress,

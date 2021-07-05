@@ -41,6 +41,12 @@ interface IGenesisTree {
 
     function updateAvailability(uint256 treeId) external;
 
+    // function updateTreefromOffer(
+    //     uint256 _treeId,
+    //     string memory _specsCid,
+    //     address _owner
+    // ) external;
+
     event TreePlanted(uint256 treeId, address planter);
     event PlantVerified(uint256 treeId, uint256 updateStatus);
     event TreeUpdated(uint256 treeId);

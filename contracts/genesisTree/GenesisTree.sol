@@ -10,6 +10,7 @@ import "../gsn/RelayRecipient.sol";
 import "../greenblock/IGBFactory.sol";
 import "../tree/ITree.sol";
 import "../treasury/ITreasury.sol";
+import "../planter/IPlanter.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
@@ -25,15 +26,14 @@ contract GenesisTree is Initializable, RelayRecipient {
     ITree public treeToken;
     IGBFactory public gbFactory;
     ITreasury public treasury;
+    IPlanter public planter;
 
     struct GenTree {
         address payable planterId;
-        uint256 gbId;
         uint256 treeType;
-        uint8 gbType;
-        uint8 provideStatus;
-        uint16 countryCode;
-        uint32 treeStatus;
+        uint32 provideStatus;
+        uint32 countryCode;
+        uint64 treeStatus;
         uint64 plantDate;
         uint64 birthDate;
         string treeSpecs;
@@ -102,6 +102,12 @@ contract GenesisTree is Initializable, RelayRecipient {
         treasury = candidateContract;
     }
 
+    function setPlanterAddress(address _address) external onlyAdmin {
+        IPlanter candidateContract = IPlanter(_address);
+        require(candidateContract.isPlanter());
+        planter = candidateContract;
+    }
+
     function setTreeTokenAddress(address _address) external onlyAdmin {
         ITree candidateContract = ITree(_address);
         require(candidateContract.isTree());
@@ -120,8 +126,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             0,
             0,
             0,
-            0,
-            0,
             1,
             0,
             0,
@@ -129,30 +133,18 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
     }
 
-    function asignTreeToPlanter(
-        uint256 _treeId,
-        uint256 _gbId,
-        address payable _planterId,
-        uint8 _gbType
-    ) external onlyAdmin validTree(_treeId) {
+    function asignTreeToPlanter(uint256 _treeId, address payable _planterId)
+        external
+        onlyAdmin
+        validTree(_treeId)
+    {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
 
-        uint256 total = gbFactory.totalGB();
+        (uint8 _planterType, , , , , , , ) = planter.planters(_planterId);
 
-        require(_gbId < total, "invalid gb");
+        require(_planterType > 0, "planter not exist");
 
-        if (_planterId != address(0)) {
-            require(
-                _checkPlanterIsInGb(_gbId, _planterId),
-                "invalid planter data"
-            );
-        }
-
-        GenTree storage tempGenTree = genTrees[_treeId];
-
-        tempGenTree.planterId = _planterId;
-        tempGenTree.gbId = _gbId;
-        tempGenTree.gbType = _gbType;
+        genTrees[_treeId].planterId = _planterId;
     }
 
     function plantTree(
@@ -167,19 +159,14 @@ contract GenesisTree is Initializable, RelayRecipient {
         );
 
         GenTree storage tempGenTree = genTrees[_treeId];
+        bool _canPlant = planter.plantingPermision(
+            _msgSender(),
+            tempGenTree.planterId
+        );
+        require(_canPlant, "can't plant");
 
-        if (tempGenTree.planterId == address(0)) {
-            require(
-                _checkPlanterIsInGb(tempGenTree.gbId, _msgSender()),
-                "planter in gb can plant tree"
-            );
-
+        if (_msgSender() != tempGenTree.planterId) {
             tempGenTree.planterId = _msgSender();
-        } else {
-            require(
-                tempGenTree.planterId == _msgSender(),
-                "planter of tree can plant it"
-            );
         }
 
         updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, 1);
@@ -210,7 +197,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanterOrAmbassador(_treeId, _msgSender()),
+                _checkPlanter(_treeId, _msgSender()),
             "ambassador or planter can verify plant"
         );
 
@@ -276,7 +263,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(genTrees[_treeId].treeStatus > 1, "Tree not planted");
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanterOrAmbassador(_treeId, _msgSender()),
+                _checkPlanter(_treeId, _msgSender()),
             "Admin or ambassador or planter can accept updates"
         );
 
@@ -309,16 +296,16 @@ contract GenesisTree is Initializable, RelayRecipient {
         emit UpdateVerified(_treeId, updateGenTree.updateStatus);
     }
 
-    function availability(uint256 _treeId, uint8 _provideType)
+    function availability(uint256 _treeId, uint32 _provideType)
         external
         onlyAuction
         validTree(_treeId)
-        returns (uint8)
+        returns (uint32)
     {
         if (treeToken.exists(_treeId)) {
             return 1;
         }
-        uint8 nowProvideStatus = genTrees[_treeId].provideStatus;
+        uint32 nowProvideStatus = genTrees[_treeId].provideStatus;
 
         if (nowProvideStatus == 0) {
             genTrees[_treeId].provideStatus = _provideType;
@@ -340,50 +327,41 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].provideStatus = 0;
     }
 
-    function _checkPlanterIsInGb(uint256 _gbId, address _planterId)
-        private
-        view
-        returns (bool)
-    {
-        bool isInGb = false;
+    function updateTreefromOffer(
+        uint256 _treeId,
+        string memory _specsCid,
+        address _owner
+    ) external onlyAuction validIpfs(_specsCid) {
+        genTrees[_treeId].provideStatus = 0;
 
-        for (
-            uint256 index = 0;
-            index < gbFactory.getGBPlantersCount(_gbId);
-            index++
-        ) {
-            if (gbFactory.gbToPlanters(_gbId, index) == _planterId) {
-                isInGb = true;
-                break;
-            }
-        }
-        return isInGb;
+        genTrees[_treeId].treeSpecs = _specsCid;
+
+        treeToken.safeMint(_owner, _treeId);
     }
 
-    function _checkPlanterOrAmbassador(uint256 _treeId, address _sender)
+    function _checkPlanter(uint256 _treeId, address _sender)
         private
         view
         returns (bool)
     {
-        uint256 gbId = genTrees[_treeId].gbId;
+        address _planterAddress = genTrees[_treeId].planterId;
 
-        if (accessRestriction.isAmbassador(_sender)) {
-            return gbFactory.gbToAmbassador(gbId) == _sender;
-        } else {
-            bool isInGB = false;
+        (uint8 _planterType, , , , , , , ) = planter.planters(_planterAddress);
 
-            for (
-                uint256 index = 0;
-                index < gbFactory.getGBPlantersCount(gbId);
-                index++
-            ) {
-                if (gbFactory.gbToPlanters(gbId, index) == _sender) {
-                    isInGB = true;
-                    break;
+        (, uint8 _verifierStatus, , , , , , ) = planter.planters(_sender);
+
+        if (_planterType > 1) {
+            if (_verifierStatus == 1 || _verifierStatus == 2) {
+                if (_planterType == 2) {
+                    return planter.memberOf(_sender) == _planterAddress;
+                } else if (_planterType == 3) {
+                    return
+                        planter.memberOf(_sender) ==
+                        planter.memberOf(_planterAddress) ||
+                        planter.memberOf(_planterAddress) == _sender;
                 }
             }
-
-            return isInGB;
         }
+        return false;
     }
 }

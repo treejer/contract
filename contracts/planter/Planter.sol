@@ -231,8 +231,8 @@ contract Planter is Initializable, RelayRecipient {
         PlanterData storage tempPlanter = planters[_planterAddress];
         require(_capacity > tempPlanter.plantedCount, "invalid capacity");
         tempPlanter.capacity = _capacity;
-        if (tempPlanter.status == 1) {
-            tempPlanter.status = 2;
+        if (tempPlanter.status == 2) {
+            tempPlanter.status = 1;
         }
     }
 
@@ -256,9 +256,11 @@ contract Planter is Initializable, RelayRecipient {
                 .plantedCount
                 .add(1)
                 .toUint32();
+                if (tempPlanter.plantedCount >= tempPlanter.capacity) {
+                    tempPlanter.status = 2;
+                }
                 return true;
             }
-            return false;
         }
         return false;
     }

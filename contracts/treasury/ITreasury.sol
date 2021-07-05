@@ -41,7 +41,7 @@ interface ITreasury {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint32 _treeStatus
+        uint64 _treeStatus
     ) external;
 
     function distributionModelExistance(uint256 _treeId)

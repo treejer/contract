@@ -314,6 +314,8 @@ contract Treasury is Initializable, RelayRecipient {
 
         planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
 
+        planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
+
         totalFunds.gbFund = totalFunds.gbFund.add(
             msg.value.mul(dm.gbFund).div(10000)
         );

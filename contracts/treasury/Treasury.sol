@@ -76,7 +76,7 @@ contract Treasury is Initializable, RelayRecipient {
     );
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
-    event GbBalanceWithdrawn(uint256 amount, address account, string reason);
+
     event TreeResearchBalanceWithdrawn(
         uint256 amount,
         address account,

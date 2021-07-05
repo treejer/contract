@@ -97,7 +97,7 @@ contract TreeAuction is Initializable {
             "Assign models not exist"
         );
 
-        uint8 provideStatus = genesisTree.availability(_treeId, 1);
+        uint32 provideStatus = genesisTree.availability(_treeId, 1);
 
         require(provideStatus == 0, "not available for auction");
 

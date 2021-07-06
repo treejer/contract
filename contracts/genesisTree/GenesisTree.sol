@@ -167,7 +167,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             tempGenTree.planterId
         );
 
-        require(_canPlant, "can't plant");
+        require(_canPlant, "planting permission denied");
 
         if (_msgSender() != tempGenTree.planterId) {
             tempGenTree.planterId = _msgSender();

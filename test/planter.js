@@ -1086,6 +1086,26 @@ contract("GenesisTree", (accounts) => {
       }
     );
   });
+  it("should return false when there is no planter (planter type is not > 0)", async () => {
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await planterInstance.plantingPermision.call(
+      userAccount3,
+      userAccount3,
+      { from: userAccount2 },
+      (err, result) => {
+        if (err) {
+          console.log("err", err);
+        } else {
+          assert.equal(
+            result,
+            false,
+            "it must return false because planterType is not > 0"
+          );
+        }
+      }
+    );
+  });
 
   it("should return false when planter type is 1", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -1304,12 +1324,6 @@ contract("GenesisTree", (accounts) => {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
-
-    await planterInstance
-      .plantingPermision(userAccount4, userAccount4, {
-        from: userAccount2,
-      })
-      .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
   });
   /////// ********************************************** update organization planter payment  *************************************
 

@@ -28,7 +28,6 @@ const TreeAuctionErrorMsg = {
 };
 
 const GenesisTreeErrorMsg = {
-  PLANT_TREE_WITH_PLANTER: "planter of tree can plant it",
   PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",
   VERIFY_PLANT_ACCESS: "ambassador or planter can verify plant",
   VERIFY_PLANT_BY_PLANTER: "Planter of tree can't accept update",
@@ -36,6 +35,7 @@ const GenesisTreeErrorMsg = {
   INVALID_UPDATE_STATUS_IN_VERIFY_PLANT: "invalid update status",
   DUPLICATE_TREE: "duplicate tree",
   INVALID_IPFS: "invalid ipfs hash",
+  PLANTING_PERMISSION_DENIED: "planting permission denied",
   INVALID_TREE_STATUS_FOR_PLANT: "invalid tree status for plant",
   TREE_IS_PLANTED_BEFORE: "the tree is planted",
   ZERO_ADDRESS_PLANTER: "invalid planter address",

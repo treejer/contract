@@ -97,6 +97,9 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+    await genesisTreeInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
   });
 
   afterEach(async () => {});
@@ -200,394 +203,257 @@ contract("GenesisTree", (accounts) => {
   //     .addTree(treeId, ipfsHash, { from: deployerAccount })
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.DUPLICATE_TREE);
   // });
-  ////////////////////////************************************ asign tree ****************************************//
-  it("assign tree to planter succussfuly", async () => {
-    let treeId = 1;
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
-    });
-
-    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
-
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount2,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-
-    let result = await gbInstance.gbToPlanters.call(1, 0);
-    // //do not asign to any planter
-    // await genesisTreeInstance.asignTreeToPlanter(treeId, zeroAddress, {
-    //   from: deployerAccount,
-    // });
-    //asign to planter
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
-      from: deployerAccount,
-    });
-  });
-  it("check data to be correct after asigning tree to planter", async () => {
-    let treeId = 1;
-
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
-    });
-
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount2,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount3,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-
-    //asign to planter user2
-    let asign1 = await genesisTreeInstance.asignTreeToPlanter(
-      treeId,
-      userAccount2,
-
-      { from: deployerAccount }
-    );
-    let result1 = await genesisTreeInstance.genTrees.call(treeId);
-    //////////////////////////////////////////////////////////////////////////
-
-    assert.equal(
-      result1.planterId,
-      userAccount2,
-      "invalid planter id in add tree"
-    );
-    assert.equal(Number(result1.treeType), 0, "incorrect treeType");
-    assert.equal(Number(result1.provideStatus), 0, "incorrect provide status");
-    assert.equal(Number(result1.treeStatus), 1, "tree status is incorrect");
-    assert.equal(Number(result1.countryCode), 0, "incorrect country code");
-    assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
-    assert.equal(Number(result1.birthDate), 0, "incorrect birth date");
-    assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
-
-    ////////////////////////////////////////////////////
-
-    //asign to planter user3
-    let asign2 = await genesisTreeInstance.asignTreeToPlanter(
-      treeId,
-      userAccount3,
-      { from: deployerAccount }
-    );
-    let result2 = await genesisTreeInstance.genTrees.call(treeId);
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    assert.equal(
-      result2.planterId,
-      userAccount3,
-      "invalid planter id in add tree"
-    );
-    assert.equal(Number(result2.treeType), 0, "incorrect treeType");
-    assert.equal(Number(result2.provideStatus), 0, "incorrect provide status");
-    assert.equal(Number(result2.treeStatus), 1, "tree status is incorrect");
-    assert.equal(Number(result2.countryCode), 0, "incorrect country code");
-    assert.equal(Number(result2.plantDate), 0, "incorrect plant date");
-    assert.equal(Number(result2.birthDate), 0, "incorrect birth date");
-    assert.equal(result2.treeSpecs, ipfsHash, "incorrect ipfs hash");
-  });
-  it("should fail asign tree to planter", async () => {
-    const treeId = 1;
-    const invalidTreeId = 10;
-
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //add planter role but it is not join to planters
-
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount2,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-
-    let tree1 = await genesisTreeInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
-    });
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount2, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-    await genesisTreeInstance
-      .asignTreeToPlanter(invalidTreeId, userAccount2, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, zeroAddress, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ZERO_ADDRESS_PLANTER);
-
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount1, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount3, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
-      from: deployerAccount,
-    });
-
-    ////////// try to plant tree and verify it to change staus to 2 and fail because it is planted
-    await Common.addGenesisTreeRole(
-      arInstance,
-      genesisTreeInstance.address,
-      deployerAccount
-    );
-    await genesisTreeInstance.plantTree(treeId, ipfsHash, 2, 4, {
-      from: userAccount2,
-    });
-    await genesisTreeInstance.verifyPlant(treeId, true, {
-      from: deployerAccount,
-    });
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_IS_PLANTED_BEFORE);
-  });
-  ////////////////************************************ plant tree ****************************************//
-  it("should plant tree successfuly when have planter", async () => {
-    const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
-    const countryCode = 2;
-
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGenesisTreeRole(
-      arInstance,
-      genesisTreeInstance.address,
-      deployerAccount
-    );
-
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount2,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
-    });
-    await genesisTreeInstance.asignTreeToPlanter(
-      treeId,
-      userAccount2,
-
-      { from: deployerAccount }
-    );
-    let tx = await genesisTreeInstance.plantTree(
-      treeId,
-      ipfsHash,
-      birthDate,
-      countryCode,
-      { from: userAccount2 }
-    );
-    truffleAssert.eventEmitted(tx, "TreePlanted", (ev) => {
-      return (
-        ev.planter == userAccount2 && Number(ev.treeId.toString()) == treeId
-      );
-    });
-  });
-
-  it("check data to be correct after plant tree with planter", async () => {
-    const treeId = 1;
-
-    const birthDate = parseInt(new Date().getTime() / 1000);
-    const countryCode = 2;
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-
-    await Common.joinSimplePlanterFromGenesis(
-      planterInstance,
-      1,
-      userAccount2,
-      zeroAddress,
-      zeroAddress,
-      genesisTreeInstance,
-      deployerAccount
-    );
-
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
-    });
-
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
-      from: deployerAccount,
-    });
-    await genesisTreeInstance.plantTree(
-      treeId,
-      updateIpfsHash1,
-      birthDate,
-      countryCode,
-      { from: userAccount2 }
-    );
-    const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-    let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    assert.equal(
-      genesisTreeResult.planterId,
-      userAccount2,
-      "invalid planter id in add tree"
-    );
-
-    assert.equal(Number(genesisTreeResult.treeType), 0, "incorrect treeType");
-
-    assert.equal(
-      Number(genesisTreeResult.provideStatus),
-      0,
-      "incorrect provide status"
-    );
-
-    assert.equal(
-      Number(genesisTreeResult.treeStatus),
-      1,
-      "tree status is incorrect"
-    );
-    assert.equal(
-      Number(genesisTreeResult.countryCode),
-      countryCode,
-      "incorrect country code"
-    );
-    assert.equal(
-      Number(genesisTreeResult.plantDate),
-      Number(plantDate.toString()),
-      "incorrect plant date"
-    );
-    assert.equal(
-      Number(genesisTreeResult.birthDate),
-      birthDate,
-      "incorrect birth date"
-    );
-
-    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
-
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-    let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let now = await Common.timeInitial(TimeEnumes.seconds, 0);
-
-    assert.equal(
-      updateGenResult.updateSpecs,
-      updateIpfsHash1,
-      "ipfs hash set inccorect"
-    );
-    assert.equal(
-      Number(updateGenResult.updateStatus.toString()),
-      1,
-      "invlid updateGen update status"
-    );
-  });
-  // it("check data to be correct after plant tree with no planter", async () => {
-  //   const treeId = 1;
-  //   const gbId = 1;
-  //   const gbType = 1;
-  //   const birthDate = parseInt(new Date().getTime() / 1000);
-  //   const countryCode = 2;
+  // ////////////////////////************************************ asign tree ****************************************//
+  // it("assign tree to planter succussfuly", async () => {
+  //   let treeId = 1;
   //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
   //     from: deployerAccount,
   //   });
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
   //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb1");
+  //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
+
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
+  //   );
+
+  //   let result = await gbInstance.gbToPlanters.call(1, 0);
+  //   // //do not asign to any planter
+  //   // await genesisTreeInstance.asignTreeToPlanter(treeId, zeroAddress, {
+  //   //   from: deployerAccount,
+  //   // });
+  //   //asign to planter
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
+  // });
+  // it("check data to be correct after asigning tree to planter", async () => {
+  //   let treeId = 1;
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount3,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
+  //   );
+
+  //   //asign to planter user2
+  //   let asign1 = await genesisTreeInstance.asignTreeToPlanter(
+  //     treeId,
+  //     userAccount2,
+
+  //     { from: deployerAccount }
+  //   );
+  //   let result1 = await genesisTreeInstance.genTrees.call(treeId);
+  //   //////////////////////////////////////////////////////////////////////////
+
+  //   assert.equal(
+  //     result1.planterId,
+  //     userAccount2,
+  //     "invalid planter id in add tree"
+  //   );
+  //   assert.equal(Number(result1.treeType), 0, "incorrect treeType");
+  //   assert.equal(Number(result1.provideStatus), 0, "incorrect provide status");
+  //   assert.equal(Number(result1.treeStatus), 1, "tree status is incorrect");
+  //   assert.equal(Number(result1.countryCode), 0, "incorrect country code");
+  //   assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
+  //   assert.equal(Number(result1.birthDate), 0, "incorrect birth date");
+  //   assert.equal(result1.treeSpecs, ipfsHash, "incorrect ipfs hash");
+
+  //   ////////////////////////////////////////////////////
+
+  //   //asign to planter user3
+  //   let asign2 = await genesisTreeInstance.asignTreeToPlanter(
+  //     treeId,
+  //     userAccount3,
+  //     { from: deployerAccount }
+  //   );
+  //   let result2 = await genesisTreeInstance.genTrees.call(treeId);
+
+  //   ///////////////////////////////////////////////////////////////////////////
+
+  //   assert.equal(
+  //     result2.planterId,
+  //     userAccount3,
+  //     "invalid planter id in add tree"
+  //   );
+  //   assert.equal(Number(result2.treeType), 0, "incorrect treeType");
+  //   assert.equal(Number(result2.provideStatus), 0, "incorrect provide status");
+  //   assert.equal(Number(result2.treeStatus), 1, "tree status is incorrect");
+  //   assert.equal(Number(result2.countryCode), 0, "incorrect country code");
+  //   assert.equal(Number(result2.plantDate), 0, "incorrect plant date");
+  //   assert.equal(Number(result2.birthDate), 0, "incorrect birth date");
+  //   assert.equal(result2.treeSpecs, ipfsHash, "incorrect ipfs hash");
+  // });
+  // it("should fail asign tree to planter", async () => {
+  //   const treeId = 1;
+  //   const invalidTreeId = 10;
+
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount); //add planter role but it is not join to planters
+
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
+  //   );
+
+  //   let tree1 = await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(treeId, userAccount2, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(invalidTreeId, userAccount2, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(treeId, zeroAddress, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.ZERO_ADDRESS_PLANTER);
+
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(treeId, userAccount1, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(treeId, userAccount3, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   ////////// try to plant tree and verify it to change staus to 2 and fail because it is planted
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+  //   await genesisTreeInstance.plantTree(treeId, ipfsHash, 2, 4, {
+  //     from: userAccount2,
+  //   });
+  //   await genesisTreeInstance.verifyPlant(treeId, true, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance
+  //     .asignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_IS_PLANTED_BEFORE);
+  // });
+  ////////////////************************************ plant tree ****************************************//
+  // it("should plant tree successfuly when have planter", async () => {
+  //   const treeId = 1;
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
+  //   );
+
   //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
   //     from: deployerAccount,
   //   });
   //   await genesisTreeInstance.asignTreeToPlanter(
   //     treeId,
-  //     gbId,
-  //     zeroAddress,
-  //     gbType,
+  //     userAccount2,
+
   //     { from: deployerAccount }
   //   );
-  //   let genTreeResult1 = await genesisTreeInstance.genTrees.call(treeId);
+  //   let tx = await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     { from: userAccount2 }
+  //   );
+  //   truffleAssert.eventEmitted(tx, "TreePlanted", (ev) => {
+  //     return ev.planter == userAccount2 && Number(ev.treeId) == treeId;
+  //   });
+  // });
 
-  //   /////////////////////////////////////////////////////////////////////////////////////////
+  // it("check data to be correct after plant tree with planter", async () => {
+  //   const treeId = 1;
 
-  //   assert.equal(
-  //     genTreeResult1.planterId,
-  //     0x0,
-  //     "invalid planter id in add tree"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.treeType.toString()),
-  //     0,
-  //     "incorrect treeType"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.gbType.toString()),
-  //     gbType,
-  //     "incorrect gbType"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.provideStatus.toString()),
-  //     0,
-  //     "incorrect provide status"
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
   //   );
 
-  //   assert.equal(
-  //     Number(genTreeResult1.treeStatus.toString()),
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
   //     1,
-  //     "tree status is incorrect"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.countryCode.toString()),
-  //     0,
-  //     "incorrect country code"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.plantDate.toString()),
-  //     0,
-  //     "incorrect plant date"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult1.birthDate.toString()),
-  //     0,
-  //     "incorrect birth date"
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
   //   );
 
-  //   assert.equal(genTreeResult1.treeSpecs, ipfsHash, "incorrect ipfs hash");
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
 
-  //   ///////////////////////////////////////////////////////////////////////////////////////////////
-
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
   //   await genesisTreeInstance.plantTree(
   //     treeId,
   //     updateIpfsHash1,
@@ -596,61 +462,50 @@ contract("GenesisTree", (accounts) => {
   //     { from: userAccount2 }
   //   );
   //   const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-  //   const now = await Common.timeInitial(TimeEnumes.seconds, 0);
-  //   const genTreeResult2 = await genesisTreeInstance.genTrees.call(treeId);
-
-  //   //////////////////////////////////////////////////////////////////////////////////
-
+  //   let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
+  //   /////////////////////////////////////////////////////////////////////////////////////////////
   //   assert.equal(
-  //     genTreeResult2.planterId,
+  //     genesisTreeResult.planterId,
   //     userAccount2,
   //     "invalid planter id in add tree"
   //   );
+
+  //   assert.equal(Number(genesisTreeResult.treeType), 0, "incorrect treeType");
+
   //   assert.equal(
-  //     Number(genTreeResult2.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult2.treeType.toString()),
-  //     0,
-  //     "incorrect treeType"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult2.gbType.toString()),
-  //     gbType,
-  //     "incorrect gbType"
-  //   );
-  //   assert.equal(
-  //     Number(genTreeResult2.provideStatus.toString()),
+  //     Number(genesisTreeResult.provideStatus),
   //     0,
   //     "incorrect provide status"
   //   );
 
   //   assert.equal(
-  //     Number(genTreeResult2.treeStatus.toString()),
-  //     1,
+  //     Number(genesisTreeResult.treeStatus),
+  //     2,
   //     "tree status is incorrect"
   //   );
+
   //   assert.equal(
-  //     Number(genTreeResult2.countryCode.toString()),
+  //     Number(genesisTreeResult.countryCode),
   //     countryCode,
   //     "incorrect country code"
   //   );
+
   //   assert.equal(
-  //     Number(genTreeResult2.plantDate.toString()),
+  //     Number(genesisTreeResult.plantDate),
   //     Number(plantDate.toString()),
   //     "incorrect plant date"
   //   );
+
   //   assert.equal(
-  //     Number(genTreeResult2.birthDate.toString()),
+  //     Number(genesisTreeResult.birthDate),
   //     birthDate,
   //     "incorrect birth date"
   //   );
 
-  //   assert.equal(genTreeResult2.treeSpecs, ipfsHash, "incorrect ipfs hash");
+  //   assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
-  //   ////////////////////////////////////////////////////////////////////////////////////
+  //   /////////////////////////////////////////////////////////////////////////////////////////////
+
   //   let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
 
   //   assert.equal(
@@ -658,136 +513,679 @@ contract("GenesisTree", (accounts) => {
   //     updateIpfsHash1,
   //     "ipfs hash set inccorect"
   //   );
+
   //   assert.equal(
   //     Number(updateGenResult.updateStatus.toString()),
   //     1,
   //     "invlid updateGen update status"
   //   );
   // });
+
   // it("should fail plant tree with planter", async () => {
   //   const treeId = 1;
-  //   const gbId = 1;
-  //   const gbType = 1;
+  //   const invlidTreeId = 2;
   //   const birthDate = parseInt(new Date().getTime() / 1000);
   //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3],
-  //     "gb1"
+
+  //   await Common.joinSimplePlanterFromGenesis(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress,
+  //     genesisTreeInstance,
+  //     deployerAccount
   //   );
+
   //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
   //     from: deployerAccount,
   //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.ZERO_ADDRESS_PLANTER);
+
   //   await genesisTreeInstance.asignTreeToPlanter(
   //     treeId,
-  //     gbId,
   //     userAccount2,
-  //     gbType,
+
   //     { from: deployerAccount }
   //   );
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, "", birthDate, countryCode, { from: userAccount2 })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
+
+  //   await genesisTreeInstance
+  //     .plantTree(invlidTreeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: userAccount2,
+  //     }
+  //   );
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount2,
+  //     })
+  //     .should.be.rejectedWith(
+  //       GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+  //     );
+  // });
+
+  // it("should fail because of planting permision (1)", async () => {
+  //   const treeId = 1;
+
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+  //   await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+  //   await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount3,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount5,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount6,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount7,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount8,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
   //   await genesisTreeInstance
   //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
   //       from: userAccount3,
   //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
-  //   await genesisTreeInstance
-  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
 
-  //   await genesisTreeInstance
-  //     .plantTree(treeId, "", birthDate, countryCode, { from: userAccount2 })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
-  // });
-  // it("should fail plant tree with no planter", async () => {
-  //   const treeId = 1;
-  //   const gbId = 1;
-  //   const gbType = 1;
-  //   const birthDate = parseInt(new Date().getTime() / 1000);
-  //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
-  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3],
-  //     "gb1"
-  //   );
-  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
-  //     from: deployerAccount,
-  //   });
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId,
-  //     gbId,
-  //     zeroAddress,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
   //   await genesisTreeInstance
   //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
   //       from: userAccount4,
   //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount8,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: userAccount2,
+  //     }
+  //   );
+  // });
+
+  // it("should fail because of planting permision (assign to type 2 and test with type 1 and type 2)", async () => {
+  //   const treeId = 1;
+
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+  //   await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+  //   await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount3,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount5,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount6,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount7,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount8,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+  //     from: deployerAccount,
+  //   });
+
   //   await genesisTreeInstance
   //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
   //       from: userAccount1,
   //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
   //   await genesisTreeInstance
   //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
-  //       from: deployerAccount,
+  //       from: userAccount6,
   //     })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_ACCESS_NO_PLANTER);
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
 
-  //   await genesisTreeInstance
-  //     .plantTree(treeId, "", birthDate, countryCode, { from: userAccount2 })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
+  //   await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: userAccount3,
+  //     }
+  //   );
   // });
 
-  // //************************************ verify plant ****************************************//
+  // it("should fail because of planting permision (assign to type 2 and test with type 3)", async () => {
+  //   const treeId = 1;
+  //   const treeId2 = 2;
+
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+  //   await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+  //   await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount3,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount5,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount6,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount7,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount8,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+  //   ///////////////////------------------ update planter usrAccount4 capacity to 1 so he can plant just 1 tree
+
+  //   await planterInstance.updateCapacity(userAccount4, 1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+  //     from: deployerAccount,
+  //   });
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount7,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount8,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   ///////////////-------------- it must fail because planter status is not active
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount4,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+  //   //////////////------------------ accept user to organiztion
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+  //     from: userAccount3,
+  //   });
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: userAccount4,
+  //     }
+  //   );
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId2, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount4,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   ////////////////------------- update capacity to 5 and now an plant
+
+  //   await planterInstance.updateCapacity(userAccount4, 5, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId2,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     { from: userAccount4 }
+  //   );
+  // });
+
+  // it("should fail because of planting permision assign to type 3", async () => {
+  //   const treeId = 1;
+
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+
+  //   await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+  //   await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+  //   await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+  //   await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount3,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount5,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount6,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount7,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount8,
+  //     zeroAddress,
+  //     userAccount6
+  //   );
+
+  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount4, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+  //   //////////////-------------- call with user5 in same orgnization but not assignee
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   /////////////-------------- accept user account5 as planter to organization 3 but it should be fail because tree asigned to userAccount4 in organization 3
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+  //     from: userAccount3,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   /////////////////////////////////------------ type 3 from other organization want to plant
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount7,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   ///////////////////////////--------------------- accept user from other org and must be fail because not assingee
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+  //     from: userAccount6,
+  //   });
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount7,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+  //   /////////////////////----------------- plant with assignee and fail becuase not accpted by org
+
+  //   await genesisTreeInstance
+  //     .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+  //       from: userAccount4,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+  //   //////////////////////// --------------------- accept and plant succusfully
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+  //     from: userAccount3,
+  //   });
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     { from: userAccount4 }
+  //   );
+  // });
+
+  // //////////************************************ verify plant ****************************************//
   // it("should verify plant seccussfully", async () => {
   //   const treeId = 1;
   //   const treeId2 = 2;
   //   const treeId3 = 3;
-  //   const gbId = 1;
-  //   const gbType = 1;
+  //   const treeId4 = 4;
+
   //   const birthDate = parseInt(new Date().getTime() / 1000);
   //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
 
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3, userAccount4],
-  //     "gb1"
+  //   await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+  //   await Common.addPlanter(arInstance, userAccount6, deployerAccount);
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
   //   );
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount3,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount4,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount5,
+  //     zeroAddress,
+  //     userAccount3
+  //   );
+  //   //////////////----------------- accept org planter
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+  //     from: userAccount3,
+  //   });
+
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+  //     from: userAccount3,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+  //   //////////////////// verify type 1 by admin
+
   //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
   //     from: deployerAccount,
   //   });
 
   //   await genesisTreeInstance.asignTreeToPlanter(
   //     treeId,
-  //     gbId,
   //     userAccount2,
-  //     gbType,
+
   //     { from: deployerAccount }
   //   );
 
@@ -800,25 +1198,25 @@ contract("GenesisTree", (accounts) => {
   //       from: userAccount2,
   //     }
   //   );
+
   //   const tx1 = await genesisTreeInstance.verifyPlant(treeId, true, {
-  //     from: userAccount1,
+  //     from: deployerAccount,
   //   });
+
   //   truffleAssert.eventEmitted(tx1, "PlantVerified", (ev) => {
-  //     return (
-  //       Number(ev.updateStatus.toString()) == 3 &&
-  //       Number(ev.treeId.toString()) == treeId
-  //     );
+  //     return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId;
   //   });
+
+  //   //////////////////---------------- assing to type 2 anad verify by org
+
   //   await genesisTreeInstance.addTree(treeId2, ipfsHash, {
   //     from: deployerAccount,
   //   });
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId2,
-  //     gbId,
-  //     zeroAddress,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+  //     from: deployerAccount,
+  //   });
+
   //   await genesisTreeInstance.plantTree(
   //     treeId2,
   //     ipfsHash,
@@ -826,25 +1224,23 @@ contract("GenesisTree", (accounts) => {
   //     countryCode,
   //     { from: userAccount3 }
   //   );
+
   //   const tx2 = await genesisTreeInstance.verifyPlant(treeId2, false, {
-  //     from: deployerAccount,
+  //     from: userAccount4,
   //   });
+
   //   truffleAssert.eventEmitted(tx2, "PlantVerified", (ev) => {
-  //     return (
-  //       Number(ev.updateStatus.toString()) == 2 &&
-  //       Number(ev.treeId.toString()) == treeId2
-  //     );
+  //     return Number(ev.updateStatus) == 2 && Number(ev.treeId) == treeId2;
   //   });
+  //   ///////////////////////////---------------- assing to type 3 and  verify by org
   //   await genesisTreeInstance.addTree(treeId3, ipfsHash, {
   //     from: deployerAccount,
   //   });
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId3,
-  //     gbId,
-  //     userAccount4,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId3, userAccount4, {
+  //     from: deployerAccount,
+  //   });
+
   //   await genesisTreeInstance.plantTree(
   //     treeId3,
   //     ipfsHash,
@@ -852,14 +1248,38 @@ contract("GenesisTree", (accounts) => {
   //     countryCode,
   //     { from: userAccount4 }
   //   );
+
   //   const tx3 = await genesisTreeInstance.verifyPlant(treeId3, true, {
-  //     from: userAccount2,
+  //     from: userAccount3,
   //   });
+
   //   truffleAssert.eventEmitted(tx3, "PlantVerified", (ev) => {
-  //     return (
-  //       Number(ev.updateStatus.toString()) == 3 &&
-  //       Number(ev.treeId.toString()) == treeId3
-  //     );
+  //     return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId3;
+  //   });
+
+  //   ///////////////////////////---------------- assing to type 3 and  verify by other planters in org
+  //   await genesisTreeInstance.addTree(treeId4, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId4, userAccount4, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.plantTree(
+  //     treeId4,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     { from: userAccount4 }
+  //   );
+
+  //   const tx4 = await genesisTreeInstance.verifyPlant(treeId4, true, {
+  //     from: userAccount5,
+  //   });
+
+  //   truffleAssert.eventEmitted(tx4, "PlantVerified", (ev) => {
+  //     return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId4;
   //   });
   // });
   // it("check data to be correct after reject plant", async () => {
@@ -868,31 +1288,33 @@ contract("GenesisTree", (accounts) => {
   //   const gbType = 1;
   //   const birthDate = parseInt(new Date().getTime() / 1000);
   //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
 
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3, userAccount4],
-  //     "gb1"
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
   //   );
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
   //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
   //     from: deployerAccount,
   //   });
 
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId,
-  //     gbId,
-  //     userAccount2,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
+
   //   await genesisTreeInstance.plantTree(
   //     treeId,
   //     updateIpfsHash1,
@@ -911,41 +1333,33 @@ contract("GenesisTree", (accounts) => {
   //     userAccount2,
   //     "plnter id is incorrect"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResult.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResult.gbType.toString()),
-  //     gbType,
-  //     "invalid gbType set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResult.provideStatus.toString()),
+  //     Number(genesisTreeResult.provideStatus),
   //     0,
   //     "incorrect provide status"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.treeStatus.toString()),
-  //     1,
+  //     Number(genesisTreeResult.treeStatus),
+  //     2,
   //     "tree status is not ok"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.countryCode.toString()),
+  //     Number(genesisTreeResult.countryCode),
   //     countryCode,
   //     "country code set inccorectly"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResult.plantDate.toString()),
+  //     Number(genesisTreeResult.plantDate),
   //     Number(plantDate.toString()),
   //     "invalid plant date"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.birthDate.toString()),
+  //     Number(genesisTreeResult.birthDate),
   //     birthDate,
   //     "birthDate set inccorectly"
   //   );
@@ -955,21 +1369,21 @@ contract("GenesisTree", (accounts) => {
   //   /////////////////////////////////////////////////////////////////////////////////////
 
   //   let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
-  //   let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
   //   assert.equal(
   //     updateGenResult.updateSpecs,
   //     updateIpfsHash1,
   //     "ipfs hash set inccorect"
   //   );
+
   //   assert.equal(
-  //     Number(updateGenResult.updateStatus.toString()),
+  //     Number(updateGenResult.updateStatus),
   //     1,
   //     "invlid updateGen update status"
   //   );
 
   //   await genesisTreeInstance.verifyPlant(treeId, false, {
-  //     from: userAccount1,
+  //     from: deployerAccount,
   //   });
 
   //   let genesisTreeResultAfterVerify = await genesisTreeInstance.genTrees.call(
@@ -983,41 +1397,32 @@ contract("GenesisTree", (accounts) => {
   //     userAccount2,
   //     "plnter id is incorrect"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.gbType.toString()),
-  //     gbType,
-  //     "invalid gbType set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.provideStatus.toString()),
+  //     Number(genesisTreeResultAfterVerify.provideStatus),
   //     0,
   //     "incorrect provide status"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.treeStatus.toString()),
+  //     Number(genesisTreeResultAfterVerify.treeStatus),
   //     1,
   //     "tree status is not ok"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.countryCode.toString()),
+  //     Number(genesisTreeResultAfterVerify.countryCode),
   //     countryCode,
   //     "country code set inccorectly"
   //   );
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.plantDate.toString()),
+  //     Number(genesisTreeResultAfterVerify.plantDate),
   //     Number(plantDate.toString()),
   //     "invalid plant date"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.birthDate.toString()),
+  //     Number(genesisTreeResultAfterVerify.birthDate),
   //     birthDate,
   //     "birthDate set inccorectly"
   //   );
@@ -1040,42 +1445,45 @@ contract("GenesisTree", (accounts) => {
   //     "ipfs hash set inccorect"
   //   );
   //   assert.equal(
-  //     Number(updateGenResultAfterVerify.updateStatus.toString()),
+  //     Number(updateGenResultAfterVerify.updateStatus),
   //     2,
   //     "invlid updateGen update status"
   //   );
   // });
+
   // it("check data to be correct after verify plant", async () => {
   //   const treeId = 1;
   //   const gbId = 1;
   //   const gbType = 1;
   //   const birthDate = parseInt(new Date().getTime() / 1000);
   //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
 
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
   //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3, userAccount4],
-  //     "gb1"
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
   //   );
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
   //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
   //     from: deployerAccount,
   //   });
 
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId,
-  //     gbId,
-  //     userAccount2,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
+  //   await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+  //     from: deployerAccount,
+  //   });
+
   //   await genesisTreeInstance.plantTree(
   //     treeId,
   //     updateIpfsHash1,
@@ -1085,48 +1493,41 @@ contract("GenesisTree", (accounts) => {
   //       from: userAccount2,
   //     }
   //   );
+
   //   const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
   //   let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
   //   assert.equal(
   //     genesisTreeResult.planterId,
   //     userAccount2,
   //     "plnter id is incorrect"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResult.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResult.gbType.toString()),
-  //     gbType,
-  //     "invalid gbType set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResult.provideStatus.toString()),
+  //     Number(genesisTreeResult.provideStatus),
   //     0,
   //     "incorrect provide status"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.treeStatus.toString()),
-  //     1,
+  //     Number(genesisTreeResult.treeStatus),
+  //     2,
   //     "tree status is not ok"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.countryCode.toString()),
+  //     Number(genesisTreeResult.countryCode),
   //     countryCode,
   //     "country code set inccorectly"
   //   );
   //   assert.equal(
-  //     Number(genesisTreeResult.plantDate.toString()),
+  //     Number(genesisTreeResult.plantDate),
   //     Number(plantDate.toString()),
   //     "invalid plant date"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResult.birthDate.toString()),
+  //     Number(genesisTreeResult.birthDate),
   //     birthDate,
   //     "birthDate set inccorectly"
   //   );
@@ -1135,19 +1536,22 @@ contract("GenesisTree", (accounts) => {
 
   //   //////////////////////////////
   //   let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
-  //   let now = await Common.timeInitial(TimeEnumes.seconds, 0);
+
   //   assert.equal(
   //     updateGenResult.updateSpecs,
   //     updateIpfsHash1,
   //     "ipfs hash set inccorect"
   //   );
+
   //   assert.equal(
-  //     Number(updateGenResult.updateStatus.toString()),
+  //     Number(updateGenResult.updateStatus),
   //     1,
   //     "invlid updateGen update status"
   //   );
 
-  //   await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount1 });
+  //   await genesisTreeInstance.verifyPlant(treeId, true, {
+  //     from: deployerAccount,
+  //   });
 
   //   let genesisTreeResultAfterVerify = await genesisTreeInstance.genTrees.call(
   //     treeId
@@ -1160,41 +1564,33 @@ contract("GenesisTree", (accounts) => {
   //     userAccount2,
   //     "plnter id is incorrect"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.gbId.toString()),
-  //     gbId,
-  //     "incorrect gbId set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.gbType.toString()),
-  //     gbType,
-  //     "invalid gbType set"
-  //   );
-  //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.provideStatus.toString()),
+  //     Number(genesisTreeResultAfterVerify.provideStatus),
   //     0,
   //     "incorrect provide status"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.treeStatus.toString()),
-  //     2,
+  //     Number(genesisTreeResultAfterVerify.treeStatus),
+  //     3,
   //     "tree status is not ok"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.countryCode.toString()),
+  //     Number(genesisTreeResultAfterVerify.countryCode),
   //     countryCode,
   //     "country code set inccorectly"
   //   );
+
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.plantDate.toString()),
+  //     Number(genesisTreeResultAfterVerify.plantDate),
   //     Number(plantDate.toString()),
   //     "invalid plant date"
   //   );
 
   //   assert.equal(
-  //     Number(genesisTreeResultAfterVerify.birthDate.toString()),
+  //     Number(genesisTreeResultAfterVerify.birthDate),
   //     birthDate,
   //     "birthDate set inccorectly"
   //   );
@@ -1216,97 +1612,116 @@ contract("GenesisTree", (accounts) => {
   //     "ipfs hash set inccorect"
   //   );
   //   assert.equal(
-  //     Number(updateGenResultAfterVerify.updateStatus.toString()),
+  //     Number(updateGenResultAfterVerify.updateStatus),
   //     3,
   //     "invlid updateGen update status"
   //   );
   // });
-  // it("should fail verify", async () => {
-  //   const treeId = 1;
-  //   const treeId2 = 2;
-  //   const invalidTreeId = 100;
-  //   const gbId = 1;
-  //   const gbType = 1;
-  //   const birthDate = parseInt(new Date().getTime() / 1000);
-  //   const countryCode = 2;
-  //   await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-  //     from: deployerAccount,
-  //   });
+  it("should fail verify", async () => {
+    const treeId = 1;
+    const treeId2 = 2;
+    const invalidTreeId = 100;
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
 
-  //   await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
-  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-  //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-  //   await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-  //   await Common.addGB(
-  //     gbInstance,
-  //     userAccount1,
-  //     [userAccount2, userAccount3, userAccount4],
-  //     "gb1"
-  //   );
-  //   await genesisTreeInstance.addTree(treeId, ipfsHash, {
-  //     from: deployerAccount,
-  //   });
+    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+      from: deployerAccount,
+    });
 
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId,
-  //     gbId,
-  //     userAccount2,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
-  //   await genesisTreeInstance.plantTree(
-  //     treeId,
-  //     updateIpfsHash1,
-  //     birthDate,
-  //     countryCode,
-  //     {
-  //       from: userAccount2,
-  //     }
-  //   );
-  //   await genesisTreeInstance
-  //     .verifyPlant(invalidTreeId, true, { from: userAccount1 })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
-  //   await genesisTreeInstance
-  //     .verifyPlant(treeId, true, { from: userAccount2 })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
-  //   await genesisTreeInstance
-  //     .verifyPlant(treeId, true, { from: userAccount5 })
-  //     .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
-  //   await genesisTreeInstance.verifyPlant(treeId, false, {
-  //     from: userAccount1,
-  //   });
-  //   await genesisTreeInstance
-  //     .verifyPlant(treeId, false, { from: userAccount1 })
-  //     .should.be.rejectedWith(
-  //       GenesisTreeErrorMsg.INVALID_UPDATE_STATUS_IN_VERIFY_PLANT
-  //     );
-  //   await genesisTreeInstance.addTree(treeId2, ipfsHash, {
-  //     from: deployerAccount,
-  //   });
-  //   await genesisTreeInstance.asignTreeToPlanter(
-  //     treeId2,
-  //     gbId,
-  //     userAccount3,
-  //     gbType,
-  //     { from: deployerAccount }
-  //   );
-  //   await genesisTreeInstance.plantTree(
-  //     treeId2,
-  //     updateIpfsHash1,
-  //     birthDate,
-  //     countryCode,
-  //     { from: userAccount3 }
-  //   );
-  //   await genesisTreeInstance.verifyPlant(treeId2, true, {
-  //     from: userAccount4,
-  //   });
-  //   await genesisTreeInstance
-  //     .verifyPlant(treeId2, true, { from: userAccount4 })
-  //     .should.be.rejectedWith(
-  //       GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
-  //     );
-  // });
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount2,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount3,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .verifyPlant(treeId, true, { from: deployerAccount })
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+      );
+
+    await genesisTreeInstance.plantTree(
+      treeId,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      {
+        from: userAccount2,
+      }
+    );
+
+    await genesisTreeInstance
+      .verifyPlant(invalidTreeId, true, { from: deployerAccount })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+
+    await genesisTreeInstance
+      .verifyPlant(treeId, true, { from: userAccount2 })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+
+    await genesisTreeInstance.verifyPlant(treeId, false, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .verifyPlant(treeId, false, { from: userAccount1 })
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+      );
+
+    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.plantTree(
+      treeId2,
+      updateIpfsHash1,
+      birthDate,
+      countryCode,
+      { from: userAccount3 }
+    );
+
+    await genesisTreeInstance.verifyPlant(treeId2, true, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .verifyPlant(treeId2, true, { from: userAccount4 })
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+      );
+  });
 
   // //************************************ more complex test for function asign and plant ****************************************//
   // it("should fail asign tree and plant tree after verify", async () => {

@@ -244,10 +244,6 @@ Common.joinSimplePlanterFromGenesis = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await genesisTreeInstance.setPlanterAddress(planterInstance.address, {
-    from: adminAccount,
-  });
-
   await planterInstance.planterJoin(
     planterType,
     longitude,

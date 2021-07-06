@@ -244,29 +244,32 @@ contract Planter is Initializable, RelayRecipient {
     function plantingPermision(
         address _planterAddress,
         address _assignedPlanterAddress
-    ) external existPlanter(_planterAddress) returns (bool) {
+    ) external returns (bool) {
         accessRestriction.ifGenesisTree(_msgSender());
 
         PlanterData storage tempPlanter = planters[_planterAddress];
-        if (
-            _planterAddress == _assignedPlanterAddress ||
-            (tempPlanter.planterType == 3 &&
-                memberOf[_planterAddress] == _assignedPlanterAddress)
-        ) {
+        if (tempPlanter.planterType > 0) {
             if (
-                tempPlanter.status == 1 &&
-                tempPlanter.plantedCount < tempPlanter.capacity
+                _planterAddress == _assignedPlanterAddress ||
+                (tempPlanter.planterType == 3 &&
+                    memberOf[_planterAddress] == _assignedPlanterAddress)
             ) {
-                tempPlanter.plantedCount = tempPlanter
-                .plantedCount
-                .add(1)
-                .toUint32();
-                if (tempPlanter.plantedCount >= tempPlanter.capacity) {
-                    tempPlanter.status = 2;
+                if (
+                    tempPlanter.status == 1 &&
+                    tempPlanter.plantedCount < tempPlanter.capacity
+                ) {
+                    tempPlanter.plantedCount = tempPlanter
+                    .plantedCount
+                    .add(1)
+                    .toUint32();
+                    if (tempPlanter.plantedCount >= tempPlanter.capacity) {
+                        tempPlanter.status = 2;
+                    }
+                    return true;
                 }
-                return true;
             }
         }
+
         return false;
     }
 

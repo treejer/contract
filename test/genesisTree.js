@@ -2354,7 +2354,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("Should update tree do not work because update time does not reach (using update status)", async () => {
     const treeId = 1;
-    const gbId = 1;
+    const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
     await Common.successPlant(

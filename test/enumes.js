@@ -38,8 +38,9 @@ const GenesisTreeErrorMsg = {
   INVALID_IPFS: "invalid ipfs hash",
   INVALID_TREE_STATUS_FOR_PLANT: "invalid tree status for plant",
   TREE_IS_PLANTED_BEFORE: "the tree is planted",
+  ZERO_ADDRESS_PLANTER: "invalid planter address",
   INVALID_GB: "invalid gb",
-  INVALID_PLANTER: "invalid planter data",
+  INVALID_PLANTER: "planter not exist",
   INVALID_TREE: "invalid tree",
   UPDATE_TIME_NOT_REACH: "Update time not reach",
   UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS:

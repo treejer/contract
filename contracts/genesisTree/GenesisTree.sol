@@ -139,6 +139,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         validTree(_treeId)
     {
         require(genTrees[_treeId].treeStatus == 1, "the tree is planted");
+        require(_planterId != address(0), "invalid planter address");
 
         (uint8 _planterType, , , , , , , ) = planter.planters(_planterId);
 

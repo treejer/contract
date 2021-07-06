@@ -231,6 +231,33 @@ Common.joinOrganizationPlanter = async (
     { from: adminAccount }
   );
 };
+Common.joinSimplePlanterFromGenesis = async (
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress,
+  genesisTreeInstance,
+  adminAccount
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await genesisTreeInstance.setPlanterAddress(planterInstance.address, {
+    from: adminAccount,
+  });
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
 
 Common.getTransactionFee = async (tx) => {
   const gasUsed = tx.receipt.gasUsed;

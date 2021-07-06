@@ -51,11 +51,16 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction.ifTreasury(_msgSender());
         _;
     }
+
     modifier onlyOrganization() {
         require(
             planters[_msgSender()].planterType == 2,
             "Planter is not organization"
         );
+        _;
+    }
+    modifier onlyGenesisTree() {
+        accessRestriction.ifGenesisTree(_msgSender());
         _;
     }
 
@@ -320,6 +325,20 @@ contract Planter is Initializable, RelayRecipient {
                     ]
                 );
             }
+        }
+    }
+
+    function reducePlantCount(address _planterAddress)
+        external
+        existPlanter(_planterAddress)
+        onlyGenesisTree
+    {
+        PlanterData storage tempPlanter = planters[_planterAddress];
+
+        tempPlanter.plantedCount = tempPlanter.plantedCount.sub(1).toUint32();
+
+        if (tempPlanter.status == 2) {
+            tempPlanter.status = 1;
         }
     }
 }

@@ -687,7 +687,6 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -719,7 +718,7 @@ contract("GenesisTree", (accounts) => {
   it("should check data to be correct after acceptPlanterFromOrganization (accept)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -763,7 +762,6 @@ contract("GenesisTree", (accounts) => {
   it("should check data to be correct after acceptPlanterFromOrganization (reject)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1318,7 +1316,6 @@ contract("GenesisTree", (accounts) => {
   it("should update organization planter payment succussfully done", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1348,7 +1345,6 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1506,7 +1502,6 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1593,7 +1588,6 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount); //independent planter
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1695,6 +1689,92 @@ contract("GenesisTree", (accounts) => {
       }
     );
   });
+  ///////////////////////***********************************************  reduce plant count  *********************************************/
+  it("should reduce planted count and check data to be ok", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.updateCapacity(userAccount1, 3, {
+      from: deployerAccount,
+    });
+
+    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+      from: userAccount2,
+    });
+
+    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+      from: userAccount2,
+    });
+
+    const planter1 = await planterInstance.planters.call(userAccount1);
+
+    assert.equal(Number(planter1.plantedCount), 2, "planted count must be 2");
+
+    assert.equal(Number(planter1.status), 1, "status must be 1");
+
+    await planterInstance.reducePlantCount(userAccount1, {
+      from: userAccount2,
+    });
+
+    const planter2 = await planterInstance.planters.call(userAccount1);
+
+    assert.equal(Number(planter2.plantedCount), 1, "planted count must be 1");
+
+    assert.equal(Number(planter2.status), 1, "status must be 1");
+
+    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+      from: userAccount2,
+    });
+    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+      from: userAccount2,
+    });
+
+    const planter3 = await planterInstance.planters.call(userAccount1);
+    assert.equal(Number(planter3.plantedCount), 3, "planted count must be 3");
+    assert.equal(Number(planter3.status), 2, "status must be 2");
+    await planterInstance.reducePlantCount(userAccount1, {
+      from: userAccount2,
+    });
+    const planter4 = await planterInstance.planters.call(userAccount1);
+    assert.equal(Number(planter4.status), 1, "status must be 1");
+    assert.equal(Number(planter4.plantedCount), 2, "planted count must be 2");
+  });
+  it("should fail to reduce planted count", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.updateCapacity(userAccount1, 3, {
+      from: deployerAccount,
+    });
+
+    await planterInstance
+      .plantingPermision(userAccount1, userAccount1, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+    await planterInstance
+      .reducePlantCount(userAccount4, { from: userAccount2 })
+      .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+  });
+
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");

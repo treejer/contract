@@ -10,6 +10,7 @@ import "../gsn/RelayRecipient.sol";
 
 contract Planter is Initializable, RelayRecipient {
     using SafeMathUpgradeable for uint32;
+    using SafeMathUpgradeable for uint256;
     using SafeCastUpgradeable for uint256;
 
     bool public isPlanter;
@@ -294,7 +295,7 @@ contract Planter is Initializable, RelayRecipient {
         view
         existPlanter(_planterAddress)
         returns (
-            address,
+            bool,
             address,
             address,
             uint256
@@ -302,22 +303,17 @@ contract Planter is Initializable, RelayRecipient {
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (tempPlanter.status == 4) {
-            return (address(0), address(0), address(0), 0);
+            return (false, address(0), address(0), 0);
         } else {
             if (
                 tempPlanter.planterType == 1 ||
                 tempPlanter.planterType == 2 ||
                 tempPlanter.status == 0
             ) {
-                return (
-                    _planterAddress,
-                    address(0),
-                    refferedBy[_planterAddress],
-                    10000
-                );
+                return (true, address(0), refferedBy[_planterAddress], 10000);
             } else {
                 return (
-                    _planterAddress,
+                    true,
                     memberOf[_planterAddress],
                     refferedBy[_planterAddress],
                     organizationRules[memberOf[_planterAddress]][

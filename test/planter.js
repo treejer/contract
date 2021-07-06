@@ -1617,7 +1617,7 @@ contract("GenesisTree", (accounts) => {
         if (err) {
           console.log("err", err);
         } else {
-          assert.equal(result[0], userAccount2, "invalid planter address");
+          assert.equal(result[0], true, "invalid bool");
           assert.equal(result[1], 0x0, "invalid organaizer address");
           assert.equal(result[2], userAccount5, "invalid refferal address");
           assert.equal(Number(result[3]), 10000, "invalid payment portion");
@@ -1631,7 +1631,7 @@ contract("GenesisTree", (accounts) => {
         if (err) {
           console.log("err", err);
         } else {
-          assert.equal(result[0], userAccount1, "invalid planter address");
+          assert.equal(result[0], true, "invalid bool");
           assert.equal(result[1], 0x0, "invalid organaizer address");
           assert.equal(result[2], 0x0, "invalid refferal address");
           assert.equal(Number(result[3]), 10000, "invalid payment portion");
@@ -1645,7 +1645,7 @@ contract("GenesisTree", (accounts) => {
         if (err) {
           console.log("err", err);
         } else {
-          assert.equal(result[0], userAccount3, "invalid planter address");
+          assert.equal(result[0], true, "invalid bool");
           assert.equal(result[1], 0x0, "invalid organaizer address");
           assert.equal(result[2], 0x0, "invalid refferal address");
           assert.equal(Number(result[3]), 10000, "invalid payment portion");
@@ -1663,7 +1663,7 @@ contract("GenesisTree", (accounts) => {
         if (err) {
           console.log("err", err);
         } else {
-          assert.equal(result[0], userAccount3, "invalid planter address");
+          assert.equal(result[0], true, "invalid bool");
           assert.equal(result[1], userAccount1, "invalid organaizer address");
           assert.equal(result[2], 0x0, "invalid refferal address");
           assert.equal(Number(result[3]), 0, "invalid payment portion /:");
@@ -1681,7 +1681,7 @@ contract("GenesisTree", (accounts) => {
         if (err) {
           console.log("err", err);
         } else {
-          assert.equal(result[0], userAccount3, "invalid planter address");
+          assert.equal(result[0], true, "invalid bool");
           assert.equal(result[1], userAccount1, "invalid organaizer address");
           assert.equal(result[2], 0x0, "invalid refferal address");
           assert.equal(Number(result[3]), 2000, "invalid payment portion");

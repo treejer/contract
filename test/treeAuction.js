@@ -1668,12 +1668,6 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
-      expected.planterFund,
-      "planterFund totalFunds invalid"
-    );
-
-    assert.equal(
       Number(totalFunds.referralFund.toString()),
       expected.referralFund,
       "referralFund funds invalid"

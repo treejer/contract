@@ -138,8 +138,6 @@ contract Treasury is Initializable, RelayRecipient {
 
         isTreasury = true;
         accessRestriction = candidateContract;
-
-        totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     function setTrustedForwarder(address _address) external onlyAdmin {

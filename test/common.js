@@ -32,8 +32,6 @@ Common.addType = async (instance, account, name = null) => {
   });
 };
 
-const zeroAddress = "0x0000000000000000000000000000000000000000";
-
 Common.approveAndTransfer = async (
   instance,
   account,

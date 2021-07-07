@@ -1440,7 +1440,9 @@ contract("TreeAuction", (accounts) => {
       .endAuction(auctionId, { from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
+
   //------------------------------------------- complete proccess of auction ------------------------------------------ //
+
   it("should do an acution completly", async () => {
     const treeId = 1;
     const gbId = 1;
@@ -2037,8 +2039,6 @@ contract("TreeAuction", (accounts) => {
   it("complex test 2", async () => {
     const treeId = 0;
     const auctionId = 0;
-    const gbId = 1;
-    const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
@@ -2062,18 +2062,15 @@ contract("TreeAuction", (accounts) => {
 
     await Common.successPlant(
       genesisTreeInstance,
-      gbInstance,
       arInstance,
       ipfsHash,
       treeId,
-      gbId,
-      gbType,
       birthDate,
       countryCode,
-      [userAccount2, userAccount6, userAccount7], //GB planter list
-      userAccount1,
+      [userAccount2],
       userAccount2,
-      deployerAccount
+      deployerAccount,
+      planterInstance
     );
 
     await TreasuryInstance.addFundDistributionModel(

@@ -1646,7 +1646,7 @@ contract("TreeAuction", (accounts) => {
 
   //   let expected = {
   //     planterFund: (40 * amount) / 100,
-  //     gbFund: (12 * amount) / 100,
+  //     referralFund: (12 * amount) / 100,
   //     treeResearch: (12 * amount) / 100,
   //     localDevelop: (12 * amount) / 100,
   //     rescueFund: (12 * amount) / 100,
@@ -1668,9 +1668,9 @@ contract("TreeAuction", (accounts) => {
   //   );
 
   //   assert.equal(
-  //     Number(totalFunds.gbFund.toString()),
-  //     expected.gbFund,
-  //     "gbFund funds invalid"
+  //     Number(totalFunds.referralFund.toString()),
+  //     expected.referralFund,
+  //     "referralFund funds invalid"
   //   );
 
   //   assert.equal(
@@ -1973,7 +1973,7 @@ contract("TreeAuction", (accounts) => {
 
   //   let expected = {
   //     planterFund: (30 * amount) / 100,
-  //     gbFund: (12 * amount) / 100,
+  //     referralFund: (12 * amount) / 100,
   //     treeResearch: (12 * amount) / 100,
   //     localDevelop: (12 * amount) / 100,
   //     rescueFund: (12 * amount) / 100,
@@ -1995,9 +1995,9 @@ contract("TreeAuction", (accounts) => {
   //   );
 
   //   assert.equal(
-  //     Number(totalFunds.gbFund.toString()),
-  //     expected.gbFund,
-  //     "gbFund funds invalid"
+  //     Number(totalFunds.referralFund.toString()),
+  //     expected.referralFund,
+  //     "referralFund funds invalid"
   //   );
 
   //   assert.equal(
@@ -2283,7 +2283,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
-      from: userAccount7,
+      from: deployerAccount,
     });
 
     let planterBalance = await TreasuryInstance.balances.call(userAccount2);
@@ -2382,7 +2382,7 @@ contract("TreeAuction", (accounts) => {
 
     let expected = {
       planterFund: (35 * amount) / 100,
-      gbFund: (10 * amount) / 100,
+      referralFund: (10 * amount) / 100,
       treeResearch: (10 * amount) / 100,
       localDevelop: (15 * amount) / 100,
       rescueFund: (10 * amount) / 100,
@@ -2404,9 +2404,9 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.gbFund.toString()),
-      expected.gbFund,
-      "gbFund funds invalid"
+      Number(totalFunds.referralFund.toString()),
+      expected.referralFund,
+      "referralFund funds invalid"
     );
 
     assert.equal(
@@ -2767,9 +2767,9 @@ contract("TreeAuction", (accounts) => {
   //     "invalid planterFund"
   //   );
   //   assert.equal(
-  //     Number(totalFundBeforeAuctionEnd.gbFund.toString()),
+  //     Number(totalFundBeforeAuctionEnd.referralFund.toString()),
   //     0,
-  //     "invalid gbFund"
+  //     "invalid referralFund"
   //   );
   //   assert.equal(
   //     Number(totalFundBeforeAuctionEnd.treeResearch.toString()),
@@ -2818,7 +2818,7 @@ contract("TreeAuction", (accounts) => {
   //     (Number(web3.utils.toWei("2").toString()) * 5000) / 10000;
   //   const expectedPayValue = {
   //     planterFund: (Number(web3.utils.toWei("2").toString()) * 5000) / 10000,
-  //     gbFund: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
+  //     referralFund: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
   //     treeResearch: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
   //     localDevelop: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
   //     rescueFund: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
@@ -2835,9 +2835,9 @@ contract("TreeAuction", (accounts) => {
   //     "invalid planterFund"
   //   );
   //   assert.equal(
-  //     Number(totalFundAfterAuctionEnd.gbFund.toString()),
-  //     expectedPayValue.gbFund,
-  //     "invalid gbFund"
+  //     Number(totalFundAfterAuctionEnd.referralFund.toString()),
+  //     expectedPayValue.referralFund,
+  //     "invalid referralFund"
   //   );
   //   assert.equal(
   //     Number(totalFundAfterAuctionEnd.treeResearch.toString()),

@@ -4,6 +4,7 @@ const GenesisTree = artifacts.require("GenesisTree.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
 const GBFactory = artifacts.require("GBFactory.sol");
+const Planter = artifacts.require("Planter.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -19,6 +20,7 @@ const {
 
 const Math = require("./math");
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
   let arInstance;
@@ -27,6 +29,7 @@ contract("TreeAuction", (accounts) => {
   let startTime;
   let endTime;
   let gbInstance;
+  let planterInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -73,6 +76,12 @@ contract("TreeAuction", (accounts) => {
     });
 
     gbInstance = await deployProxy(GBFactory, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -1459,9 +1468,15 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addAmbassador(arInstance, userAccount8, deployerAccount);
     await Common.addPlanter(arInstance, userAccount7, deployerAccount);
-    await Common.addGB(gbInstance, userAccount8, [userAccount7], "gb1");
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount7,
+      zeroAddress,
+      zeroAddress
+    );
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -1686,13 +1701,9 @@ contract("TreeAuction", (accounts) => {
       "otherFund2 funds invalid"
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(
-      treeId,
-      gbId,
-      userAccount7,
-      gbType,
-      { from: deployerAccount }
-    );
+    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount7, {
+      from: deployerAccount,
+    });
 
     await genesisTreeInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {

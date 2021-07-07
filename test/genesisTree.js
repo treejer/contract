@@ -518,7 +518,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.plantDate),
-      Number(plantDate.toString()),
+      Number(plantDate),
       "incorrect plant date"
     );
 
@@ -541,7 +541,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(updateGenResult.updateStatus.toString()),
+      Number(updateGenResult.updateStatus),
       1,
       "invlid updateGen update status"
     );
@@ -1390,7 +1390,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.plantDate),
-      Number(plantDate.toString()),
+      Number(plantDate),
       "invalid plant date"
     );
 
@@ -1454,7 +1454,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.plantDate),
-      Number(plantDate.toString()),
+      Number(plantDate),
       "invalid plant date"
     );
 
@@ -1559,7 +1559,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.plantDate),
-      Number(plantDate.toString()),
+      Number(plantDate),
       "invalid plant date"
     );
 
@@ -1622,7 +1622,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.plantDate),
-      Number(plantDate.toString()),
+      Number(plantDate),
       "invalid plant date"
     );
 
@@ -2758,8 +2758,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
@@ -2770,11 +2769,7 @@ contract("GenesisTree", (accounts) => {
       return ev.treeId == treeId && ev.updateStatus == 3;
     });
 
-    assert.equal(
-      Number(pFund.toString()),
-      0,
-      "no fund beacuse tree fund did not call"
-    );
+    assert.equal(Number(pFund), 0, "no fund beacuse tree fund did not call");
 
     assert.equal(planterPaid, 0, "planter fund did not call");
   });
@@ -2796,7 +2791,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     const planterTotalFund =
-      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2842,13 +2837,13 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(pFund.toString()),
+      Number(pFund),
       planterTotalFund,
       "planter total fund is not ok"
     );
 
     assert.equal(
-      Number(planterPaidBeforeVerify.toString()),
+      Number(planterPaidBeforeVerify),
       0,
       "planter paid before verify update is not ok"
     );
@@ -2879,11 +2874,11 @@ contract("GenesisTree", (accounts) => {
     );
 
     const expectedPaid = parseInt(
-      (planterTotalFund * Number(resultAfterGT.treeStatus.toString())) / 25920
+      (planterTotalFund * Number(resultAfterGT.treeStatus)) / 25920
     );
 
     assert.equal(
-      Number(planterPaidAfterVerify.toString()),
+      Number(planterPaidAfterVerify),
       expectedPaid,
 
       "planter paid after verify is not ok"
@@ -2894,8 +2889,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
@@ -2925,7 +2919,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     const planterTotalFund =
-      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2972,13 +2966,13 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(pFund.toString()),
+      Number(pFund),
       planterTotalFund,
       "planter total fund is not ok"
     );
 
     assert.equal(
-      Number(planterPaidBeforeVerify.toString()),
+      Number(planterPaidBeforeVerify),
       0,
       "planter paid before verify update is not ok"
     );
@@ -3011,7 +3005,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(planterPaidAfterVerify.toString()),
+      Number(planterPaidAfterVerify),
       planterTotalFund,
 
       "planter paid after verify is not ok"
@@ -3022,8 +3016,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
@@ -3057,15 +3050,13 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT2.treeStatus.toNumber(),
       parseInt(
-        (Number(nowAfterVerify.toString()) -
-          Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(nowAfterVerify) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
 
     assert.equal(
-      Number(planterPaidAfterVerify2.toString()),
+      Number(planterPaidAfterVerify2),
       planterTotalFund,
       "planter paid after verify is not ok"
     );
@@ -3088,7 +3079,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     const planterTotalFund =
-      (Number(fundTreeAmount.toString()) * fundsPercent.planterFund) / 10000;
+      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -3160,13 +3151,13 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(pFund.toString()),
+      Number(pFund),
       planterTotalFund,
       "planter total fund is not ok"
     );
 
     assert.equal(
-      Number(planterPaidBeforeVerify.toString()),
+      Number(planterPaidBeforeVerify),
       0,
       "planter paid before verify update is not ok"
     );
@@ -3195,7 +3186,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     assert.equal(
-      Number(planterPaidAfterVerify1.toString()),
+      Number(planterPaidAfterVerify1),
       0,
 
       "planter paid after verify1 is not ok"
@@ -3206,8 +3197,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now.toString()) - Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
@@ -3245,19 +3235,17 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT2.treeStatus.toNumber(),
       parseInt(
-        (Number(nowAfterVerify2.toString()) -
-          Number(resultBeforeGT.plantDate.toString())) /
-          3600,
+        (Number(nowAfterVerify2) - Number(resultBeforeGT.plantDate)) / 3600,
         "tree status update does not match"
       )
     );
 
     let expectedPaid = parseInt(
-      (planterTotalFund * Number(resultAfterGT2.treeStatus.toString())) / 25920
+      (planterTotalFund * Number(resultAfterGT2.treeStatus)) / 25920
     );
 
     assert.equal(
-      Number(planterPaidAfterVerify2.toString()),
+      Number(planterPaidAfterVerify2),
       expectedPaid,
 
       "planter paid after verify is not ok"

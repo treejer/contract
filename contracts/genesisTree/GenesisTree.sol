@@ -121,16 +121,21 @@ contract GenesisTree is Initializable, RelayRecipient {
     {
         require(genTrees[_treeId].treeStatus == 0, "duplicate tree");
 
-        genTrees[_treeId] = GenTree(
-            address(0),
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            _treeDescription
-        );
+        GenTree storage genTree = genTrees[_treeId];
+        genTree.treeStatus = 1;
+        genTree.treeSpecs = _treeDescription;
+
+        //TODO:remove this code
+        // genTrees[_treeId] = GenTree(
+        //     address(0),
+        //     0,
+        //     0,
+        //     0,
+        //     1,
+        //     0,
+        //     0,
+        //     _treeDescription
+        // );
     }
 
     function asignTreeToPlanter(uint256 _treeId, address payable _planterId)
@@ -173,7 +178,12 @@ contract GenesisTree is Initializable, RelayRecipient {
             tempGenTree.planterId = _msgSender();
         }
 
-        updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, 1);
+        UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
+
+        updateGenTree.updateSpecs = _treeSpecs;
+        updateGenTree.updateStatus = 1;
+
+        // updateGenTrees[_treeId] = UpdateGenTree(_treeSpecs, 1); //TODO:remove this code
 
         tempGenTree.countryCode = _countryCode;
         tempGenTree.birthDate = _birthDate;

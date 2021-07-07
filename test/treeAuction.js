@@ -2902,6 +2902,17 @@ contract("TreeAuction", (accounts) => {
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
   //   await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
   //   /////////////----------------------- plant tree
+
+  //   await Common.successPlanterJoin(
+  //     arInstance,
+  //     deployerAccount,
+  //     planterInstance,
+  //     1,
+  //     userAccount2,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
   //   await genesisTreeInstance.asignTreeToPlanter(treeId1, userAccount2, {
   //     from: deployerAccount,
   //   });
@@ -2915,7 +2926,7 @@ contract("TreeAuction", (accounts) => {
   //   await genesisTreeInstance
   //     .updateTree(treeId1, ipfsHash, { from: userAccount2 })
   //     .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
-  //   await Common.travelTime(TimeEnumes.hours, 26);
+  //   await Common.travelTime(TimeEnumes.hours, 27);
 
   //   await genesisTreeInstance.updateTree(treeId1, ipfsHash, {
   //     from: userAccount2,

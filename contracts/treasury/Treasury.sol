@@ -413,7 +413,11 @@ contract Treasury is Initializable, RelayRecipient {
                 balances[gottenOrganizationAddress] = balances[
                     gottenOrganizationAddress
                 ]
-                .add(totalPayablePlanter.mul(fullPortion.sub(gottenPortion)));
+                .add(
+                    totalPayablePlanter.mul(fullPortion.sub(gottenPortion)).div(
+                        fullPortion
+                    )
+                );
 
                 //planter calculation section
                 plantersPaid[_treeId] = plantersPaid[_treeId].add(
@@ -421,7 +425,7 @@ contract Treasury is Initializable, RelayRecipient {
                 );
 
                 balances[_planterId] = balances[_planterId].add(
-                    totalPayablePlanter.mul(gottenPortion)
+                    totalPayablePlanter.mul(gottenPortion).div(fullPortion)
                 );
 
                 emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
@@ -443,26 +447,6 @@ contract Treasury is Initializable, RelayRecipient {
             _treeId >= assignModels[0].startingTreeId &&
             _treeId <= maxAssignedIndex;
     }
-
-    // function withdrawGb(uint256 _amount, string memory _reason)
-    //     external
-    //     ifNotPaused
-    //     onlyAdmin
-    //     validAddress(gbFundAddress)
-    // {
-    //     require(
-    //         _amount <= totalFunds.gbFund && _amount > 0,
-    //         "insufficient amount"
-    //     );
-
-    //     totalFunds.gbFund = totalFunds.gbFund.sub(_amount);
-
-    //     if (gbFundAddress.send(_amount)) {
-    //         emit GbBalanceWithdrawn(_amount, gbFundAddress, _reason);
-    //     } else {
-    //         totalFunds.gbFund = totalFunds.gbFund.add(_amount);
-    //     }
-    // }
 
     function withdrawTreeResearch(uint256 _amount, string memory _reason)
         external

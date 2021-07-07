@@ -32,6 +32,8 @@ Common.addType = async (instance, account, name = null) => {
   });
 };
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 Common.approveAndTransfer = async (
   instance,
   account,
@@ -238,6 +240,66 @@ Common.getTransactionFee = async (tx) => {
 
   return Math.mul(gasPrice, gasUsed);
 };
+
+Common.successPlanterJoin = async (
+  arInstance,
+  adminAccount,
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress
+) => {
+  await Common.addPlanter(arInstance, planterAddress, adminAccount);
+
+  if (refferedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  }
+
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
+
+Common.successOrganizationPlanterJoin = async (
+  arInstance,
+  instance,
+  organizationAddress,
+  refferedBy,
+  adminAccount
+) => {
+  await Common.addPlanter(arInstance, organizationAddress, adminAccount);
+
+  if (refferedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  }
+
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+  const capcity = 1000;
+
+  await instance.organizationJoin(
+    organizationAddress,
+    longitude,
+    latitude,
+    countryCode,
+    capcity,
+    refferedBy,
+    { from: adminAccount }
+  );
+};
+
 Common.successFundTree = async (
   arInstance,
   deployerAccount,
@@ -294,4 +356,24 @@ Common.successFundTree = async (
     value: fundAmount,
   });
 };
+
+Common.acceptPlanterByOrganization = async (
+  planterInstance,
+  organizationAddress,
+  planterAddress,
+  planterProtion
+) => {
+  await planterInstance.acceptPlanterFromOrganization(planterAddress, true, {
+    from: organizationAddress,
+  });
+
+  await planterInstance.updateOrganizationPlanterPayment(
+    planterAddress,
+    planterProtion,
+    {
+      from: organizationAddress,
+    }
+  );
+};
+
 module.exports = Common;

@@ -1713,11 +1713,21 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
+    );
+
     await genesisTreeInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount8,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+
+    await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      from: userAccount8,
+    });
 
     await genesisTreeInstance.plantTree(
       treeId,

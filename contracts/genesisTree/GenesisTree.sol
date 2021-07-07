@@ -192,10 +192,10 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(tempGenTree.treeStatus == 2, "invalid tree status");
 
-        require(
-            updateGenTrees[_treeId].updateStatus == 1,
-            "invalid update status"
-        );
+        // require(
+        //     updateGenTrees[_treeId].updateStatus == 1,
+        //     "invalid update status"
+        // ); //TODO:remove this check
 
         require(
             tempGenTree.planterId != _msgSender(),

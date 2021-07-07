@@ -225,52 +225,44 @@ contract("Treasury", (accounts) => {
     let result = await TreasuryInstance.fundDistributions.call(0);
 
     assert.equal(
-      Number(result.planterFund.toString()),
+      Number(result.planterFund),
       4000,
       "planterFund percent not true"
     );
 
     assert.equal(
-      Number(result.referralFund.toString()),
+      Number(result.referralFund),
       1200,
       "referralFund percent not true"
     );
 
     assert.equal(
-      Number(result.treeResearch.toString()),
+      Number(result.treeResearch),
       1200,
       "treeResearch percent not true"
     );
 
     assert.equal(
-      Number(result.localDevelop.toString()),
+      Number(result.localDevelop),
       1200,
       "localDevelop percent not true"
     );
 
     assert.equal(
-      Number(result.rescueFund.toString()),
+      Number(result.rescueFund),
       1200,
       "rescueFund percent not true"
     );
 
     assert.equal(
-      Number(result.treejerDevelop.toString()),
+      Number(result.treejerDevelop),
       1200,
       "planterFund percent not true"
     );
 
-    assert.equal(
-      Number(result.otherFund1.toString()),
-      0,
-      "otherFund1 percent not true"
-    );
+    assert.equal(Number(result.otherFund1), 0, "otherFund1 percent not true");
 
-    assert.equal(
-      Number(result.otherFund2.toString()),
-      0,
-      "otherFund2 percent not true"
-    );
+    assert.equal(Number(result.otherFund2), 0, "otherFund2 percent not true");
   });
 
   it("addFundDistributionModel should be reject invalid access", async () => {
@@ -415,7 +407,7 @@ contract("Treasury", (accounts) => {
     let resultMaxAssignedIndex = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(resultMaxAssignedIndex.toString()),
+      Number(resultMaxAssignedIndex),
       1000000,
       "1.maxAssignedIndex not true"
     );
@@ -423,13 +415,13 @@ contract("Treasury", (accounts) => {
     for (let i = 0; i < 4; i++) {
       let array = await TreasuryInstance.assignModels(i);
       assert.equal(
-        Number(array.startingTreeId.toString()),
+        Number(array.startingTreeId),
         expected[i].startingTreeId,
         i + " startingTreeId not true"
       );
 
       assert.equal(
-        Number(array.distributionModelId.toString()),
+        Number(array.distributionModelId),
         expected[i].distributionModelId,
         i + " distributionModelId not true"
       );
@@ -442,7 +434,7 @@ contract("Treasury", (accounts) => {
     let resultMaxAssignedIndex2 = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(resultMaxAssignedIndex2.toString()),
+      Number(resultMaxAssignedIndex2),
       2 ** 256 - 1,
       "2.maxAssignedIndex not true"
     );
@@ -535,13 +527,13 @@ contract("Treasury", (accounts) => {
     for (let i = 0; i < 3; i++) {
       let array = await TreasuryInstance.assignModels(i);
       assert.equal(
-        Number(array.startingTreeId.toString()),
+        Number(array.startingTreeId),
         expected1[i].startingTreeId,
         i + " startingTreeId not true"
       );
 
       assert.equal(
-        Number(array.distributionModelId.toString()),
+        Number(array.distributionModelId),
         expected1[i].distributionModelId,
         i + " distributionModelId not true"
       );
@@ -558,7 +550,7 @@ contract("Treasury", (accounts) => {
     let resultMaxAssignedIndex1 = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(resultMaxAssignedIndex1.toString()),
+      Number(resultMaxAssignedIndex1),
       2 ** 256 - 1,
       "1.maxAssignedIndex not true"
     );
@@ -589,13 +581,13 @@ contract("Treasury", (accounts) => {
     for (let i = 0; i < 5; i++) {
       let array = await TreasuryInstance.assignModels(i);
       assert.equal(
-        Number(array.startingTreeId.toString()),
+        Number(array.startingTreeId),
         expected[i].startingTreeId,
         i + " startingTreeId not true"
       );
 
       assert.equal(
-        Number(array.distributionModelId.toString()),
+        Number(array.distributionModelId),
         expected[i].distributionModelId,
         i + " distributionModelId not true"
       );
@@ -689,13 +681,13 @@ contract("Treasury", (accounts) => {
     for (let i = 0; i < 3; i++) {
       let array = await TreasuryInstance.assignModels(i);
       assert.equal(
-        Number(array.startingTreeId.toString()),
+        Number(array.startingTreeId),
         expected[i].startingTreeId,
         i + " startingTreeId not true"
       );
 
       assert.equal(
-        Number(array.distributionModelId.toString()),
+        Number(array.distributionModelId),
         expected[i].distributionModelId,
         i + " distributionModelId not true"
       );
@@ -704,7 +696,7 @@ contract("Treasury", (accounts) => {
     let resultMaxAssignedIndex1 = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(resultMaxAssignedIndex1.toString()),
+      Number(resultMaxAssignedIndex1),
       100,
       "1.maxAssignedIndex not true"
     );
@@ -787,13 +779,13 @@ contract("Treasury", (accounts) => {
     for (let i = 0; i < 3; i++) {
       let array = await TreasuryInstance.assignModels(i);
       assert.equal(
-        Number(array.startingTreeId.toString()),
+        Number(array.startingTreeId),
         expected[i].startingTreeId,
         i + " startingTreeId not true"
       );
 
       assert.equal(
-        Number(array.distributionModelId.toString()),
+        Number(array.distributionModelId),
         expected[i].distributionModelId,
         i + " distributionModelId not true"
       );
@@ -802,7 +794,7 @@ contract("Treasury", (accounts) => {
     let resultMaxAssignedIndex1 = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(resultMaxAssignedIndex1.toString()),
+      Number(resultMaxAssignedIndex1),
       10,
       "1.maxAssignedIndex not true"
     );
@@ -936,11 +928,7 @@ contract("Treasury", (accounts) => {
       otherFund2: 0,
     };
 
-    assert.equal(
-      Number(pFund.toString()),
-      expected.planterFund,
-      "planter funds invalid"
-    );
+    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
 
     assert.equal(
       Number(rFund),
@@ -949,49 +937,49 @@ contract("Treasury", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
+      Number(totalFunds.planterFund),
       expected.planterFund,
       "planterFund totalFunds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.referralFund.toString()),
+      Number(totalFunds.referralFund),
       expected.referralFund,
       "referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treeResearch.toString()),
+      Number(totalFunds.treeResearch),
       expected.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop.toString()),
+      Number(totalFunds.localDevelop),
       expected.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund.toString()),
+      Number(totalFunds.rescueFund),
       expected.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop.toString()),
+      Number(totalFunds.treejerDevelop),
       expected.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1.toString()),
+      Number(totalFunds.otherFund1),
       expected.otherFund1,
       "otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2.toString()),
+      Number(totalFunds.otherFund2),
       expected.otherFund2,
       "otherFund2 funds invalid"
     );
@@ -1070,61 +1058,61 @@ contract("Treasury", (accounts) => {
     };
 
     assert.equal(
-      Number(pFund2.toString()),
+      Number(pFund2),
       expected2.planterFund,
       "planter funds invalid"
     );
 
     assert.equal(
-      Number(rFund2.toString()),
+      Number(rFund2),
       expected2.referralFund,
       "referral funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.planterFund.toString()),
+      Number(totalFunds2.planterFund),
       expected2.planterFund,
       "planterFund totalFunds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.referralFund.toString()),
+      Number(totalFunds2.referralFund),
       expected2.referralFund,
       "referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.treeResearch.toString()),
+      Number(totalFunds2.treeResearch),
       expected2.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.localDevelop.toString()),
+      Number(totalFunds2.localDevelop),
       expected2.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.rescueFund.toString()),
+      Number(totalFunds2.rescueFund),
       expected2.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.treejerDevelop.toString()),
+      Number(totalFunds2.treejerDevelop),
       expected2.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.otherFund1.toString()),
+      Number(totalFunds2.otherFund1),
       expected2.otherFund1,
       "otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds2.otherFund2.toString()),
+      Number(totalFunds2.otherFund2),
       expected2.otherFund2,
       "otherFund2 funds invalid"
     );
@@ -1158,61 +1146,61 @@ contract("Treasury", (accounts) => {
     let totalFunds = await TreasuryInstance.totalFunds();
 
     assert.equal(
-      Number(pFund.toString()),
+      Number(pFund),
       expected.planterFund,
       "2.planter funds invalid"
     );
 
     assert.equal(
-      Number(rFund.toString()),
+      Number(rFund),
       expected.referralFund,
       "2.referral funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
+      Number(totalFunds.planterFund),
       Math.add(expected.planterFund, expected2.planterFund),
       "2.planterFund totalFunds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.referralFund.toString()),
+      Number(totalFunds.referralFund),
       Math.add(expected.referralFund, expected2.referralFund),
       "2.referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treeResearch.toString()),
+      Number(totalFunds.treeResearch),
       Math.add(expected.treeResearch, expected2.treeResearch),
       "2.treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop.toString()),
+      Number(totalFunds.localDevelop),
       Math.add(expected.localDevelop, expected2.localDevelop),
       "2.localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund.toString()),
+      Number(totalFunds.rescueFund),
       Math.add(expected.rescueFund, expected2.rescueFund),
       "2.rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop.toString()),
+      Number(totalFunds.treejerDevelop),
       Math.add(expected.treejerDevelop, expected2.treejerDevelop),
       "2.treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1.toString()),
+      Number(totalFunds.otherFund1),
       Math.add(expected.otherFund1, expected2.otherFund1),
       "2.otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2.toString()),
+      Number(totalFunds.otherFund2),
       Math.add(expected.otherFund2, expected2.otherFund2),
       "2.otherFund2 funds invalid"
     );
@@ -1314,7 +1302,7 @@ contract("Treasury", (accounts) => {
     let pFund0 = await TreasuryInstance.planterFunds.call(0);
 
     assert.equal(
-      Number(pFund0.toString()),
+      Number(pFund0),
       expected.planterFundModel0,
       "Planter funds invalid treeId 0"
     );
@@ -1329,7 +1317,7 @@ contract("Treasury", (accounts) => {
     let pFund1 = await TreasuryInstance.planterFunds.call(1);
 
     assert.equal(
-      Number(pFund1.toString()),
+      Number(pFund1),
       expected.planterFundModel1,
       "Planter funds invalid treeId 1"
     );
@@ -1344,7 +1332,7 @@ contract("Treasury", (accounts) => {
     let pFund5 = await TreasuryInstance.planterFunds.call(5);
 
     assert.equal(
-      Number(pFund5.toString()),
+      Number(pFund5),
       expected.planterFundModel1,
       "Planter funds invalid treeId 5"
     );
@@ -1359,7 +1347,7 @@ contract("Treasury", (accounts) => {
     let pFund10 = await TreasuryInstance.planterFunds.call(10);
 
     assert.equal(
-      Number(pFund10.toString()),
+      Number(pFund10),
       expected.planterFundModel1,
       "Planter funds invalid treeId 10"
     );
@@ -1374,7 +1362,7 @@ contract("Treasury", (accounts) => {
     let pFund11 = await TreasuryInstance.planterFunds.call(11);
 
     assert.equal(
-      Number(pFund11.toString()),
+      Number(pFund11),
       expected.planterFundModel2,
       "Planter funds invalid treeId 11"
     );
@@ -1389,7 +1377,7 @@ contract("Treasury", (accounts) => {
     let pFund99 = await TreasuryInstance.planterFunds.call(99);
 
     assert.equal(
-      Number(pFund99.toString()),
+      Number(pFund99),
       expected.planterFundModel2,
       "Planter funds invalid treeId 99"
     );
@@ -1404,7 +1392,7 @@ contract("Treasury", (accounts) => {
     let pFund100 = await TreasuryInstance.planterFunds.call(100);
 
     assert.equal(
-      Number(pFund100.toString()),
+      Number(pFund100),
       expected.planterFundModel2,
       "Planter funds invalid treeId 100"
     );
@@ -1419,7 +1407,7 @@ contract("Treasury", (accounts) => {
     let pFund101 = await TreasuryInstance.planterFunds.call(101);
 
     assert.equal(
-      Number(pFund101.toString()),
+      Number(pFund101),
       expected.planterFundModel3,
       "Planter funds invalid treeId 101"
     );
@@ -1434,7 +1422,7 @@ contract("Treasury", (accounts) => {
     let pFund1500 = await TreasuryInstance.planterFunds.call(1500);
 
     assert.equal(
-      Number(pFund1500.toString()),
+      Number(pFund1500),
       expected.planterFundModel3,
       "Planter funds invalid treeId 1500"
     );
@@ -1449,7 +1437,7 @@ contract("Treasury", (accounts) => {
     let pFund1000000 = await TreasuryInstance.planterFunds.call(1000000);
 
     assert.equal(
-      Number(pFund1000000.toString()),
+      Number(pFund1000000),
       expected.planterFundModel3,
       "Planter funds invalid treeId 1000000"
     );
@@ -1482,7 +1470,7 @@ contract("Treasury", (accounts) => {
     let pFund4999 = await TreasuryInstance.planterFunds.call(4999);
 
     assert.equal(
-      Number(pFund4999.toString()),
+      Number(pFund4999),
       expected.planterFundModel3,
       "Planter funds invalid treeId 4999"
     );
@@ -1497,7 +1485,7 @@ contract("Treasury", (accounts) => {
     let pFund5000 = await TreasuryInstance.planterFunds.call(5000);
 
     assert.equal(
-      Number(pFund5000.toString()),
+      Number(pFund5000),
       expected.planterFundModel4,
       "Planter funds invalid treeId 5000"
     );
@@ -1512,7 +1500,7 @@ contract("Treasury", (accounts) => {
     let pFund6000 = await TreasuryInstance.planterFunds.call(6000);
 
     assert.equal(
-      Number(pFund6000.toString()),
+      Number(pFund6000),
       expected.planterFundModel4,
       "Planter funds invalid treeId 6000"
     );
@@ -1527,7 +1515,7 @@ contract("Treasury", (accounts) => {
     let pFund10000 = await TreasuryInstance.planterFunds.call(10000);
 
     assert.equal(
-      Number(pFund10000.toString()),
+      Number(pFund10000),
       expected.planterFundModel4,
       "Planter funds invalid treeId 10000"
     );
@@ -1542,7 +1530,7 @@ contract("Treasury", (accounts) => {
     let pFund10001 = await TreasuryInstance.planterFunds.call(10001);
 
     assert.equal(
-      Number(pFund10001.toString()),
+      Number(pFund10001),
       expected.planterFundModel3,
       "Planter funds invalid treeId 10001"
     );
@@ -1574,7 +1562,7 @@ contract("Treasury", (accounts) => {
     let pFund4 = await TreasuryInstance.planterFunds.call(4);
 
     assert.equal(
-      Number(pFund4.toString()),
+      Number(pFund4),
       expected.planterFundModel5,
       "Planter funds invalid treeId 4"
     );
@@ -1588,7 +1576,7 @@ contract("Treasury", (accounts) => {
     let pFund10_2 = await TreasuryInstance.planterFunds.call(10);
 
     assert.equal(
-      Number(pFund10_2.toString()),
+      Number(pFund10_2),
       expected.planterFundModel5,
       "Planter funds invalid treeId pFund10_2"
     );
@@ -1602,7 +1590,7 @@ contract("Treasury", (accounts) => {
     let pFund11_2 = await TreasuryInstance.planterFunds.call(11);
 
     assert.equal(
-      Number(pFund11_2.toString()),
+      Number(pFund11_2),
       expected.planterFundModel2,
       "Planter funds invalid treeId pFund11_2"
     );
@@ -1616,7 +1604,7 @@ contract("Treasury", (accounts) => {
     let pFund3 = await TreasuryInstance.planterFunds.call(3);
 
     assert.equal(
-      Number(pFund3.toString()),
+      Number(pFund3),
       expected.planterFundModel1,
       "Planter funds invalid treeId pFund3"
     );
@@ -1624,7 +1612,7 @@ contract("Treasury", (accounts) => {
     let maxAssignedIndex1 = await TreasuryInstance.maxAssignedIndex();
 
     assert.equal(
-      Number(maxAssignedIndex1.toString()),
+      Number(maxAssignedIndex1),
       1000000,
       "maxAssignedIndex1 not tTrue"
     );
@@ -1911,7 +1899,7 @@ contract("Treasury", (accounts) => {
     const totalFund = await TreasuryInstance.totalFunds();
 
     assert.equal(
-      Number(totalFund.planterFund.toString()),
+      Number(totalFund.planterFund),
       Math.divide(Math.mul(Number(amount), planterFund), 10000),
       "total fund is not correct1"
     );
@@ -1935,7 +1923,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
       ),
-      Number(totalFund1.planterFund.toString()),
+      Number(totalFund1.planterFund),
       "total fund1 is not ok"
     );
 
@@ -1950,12 +1938,12 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
-      Number(planterPaid1.toString()),
+      Number(planterPaid1),
       "planter paid is not ok"
     );
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
-      Number(planterBalance1.toString()),
+      Number(planterBalance1),
       "planter balance is not ok1"
     );
 
@@ -1982,7 +1970,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
       ),
-      Number(totalFund2.planterFund.toString()),
+      Number(totalFund2.planterFund),
       "total fund2 is not ok"
     );
     assert.equal(
@@ -1996,12 +1984,12 @@ contract("Treasury", (accounts) => {
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
 
-      Number(planterPaid2.toString()),
+      Number(planterPaid2),
       "planter paid is not ok2"
     );
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
-      Number(planterBalance2.toString()),
+      Number(planterBalance2),
       "planter balance is not ok2"
     );
 
@@ -2029,7 +2017,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus)
       ),
-      Number(totalFund3.planterFund.toString()),
+      Number(totalFund3.planterFund),
       "total fund3 is not ok"
     );
 
@@ -2044,12 +2032,12 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus),
-      Number(planterPaid3.toString()),
+      Number(planterPaid3),
       "planter paid is not ok3"
     );
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus),
-      Number(planterBalance3.toString()),
+      Number(planterBalance3),
       "planter balance is not ok3"
     );
 
@@ -2078,7 +2066,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus)
       ),
-      Number(totalFund4.planterFund.toString()),
+      Number(totalFund4.planterFund),
       "total fund4 is not ok"
     );
 
@@ -2093,12 +2081,12 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus),
-      Number(planterPaid4.toString()),
+      Number(planterPaid4),
       "planter paid is not ok4"
     );
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus),
-      Number(planterBalance4.toString()),
+      Number(planterBalance4),
       "planter balance is not ok4"
     );
 
@@ -2126,7 +2114,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus)
       ),
-      Number(totalFund5.planterFund.toString()),
+      Number(totalFund5.planterFund),
       "total fund5 is not ok"
     );
 
@@ -2141,13 +2129,13 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus),
-      Number(planterPaid5.toString()),
+      Number(planterPaid5),
       "planter paid is not ok5"
     );
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus),
-      Number(planterBalance5.toString()),
+      Number(planterBalance5),
       "planter balance is not ok5"
     );
 
@@ -2174,7 +2162,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         planterTotalFunded
       ),
-      Number(totalFund6.planterFund.toString()),
+      Number(totalFund6.planterFund),
       "total fund6 is not ok"
     );
 
@@ -2189,12 +2177,12 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       planterTotalFunded,
-      Number(planterPaid6.toString()),
+      Number(planterPaid6),
       "planter paid is not ok6"
     );
     assert.equal(
       planterTotalFunded,
-      Number(planterBalance6.toString()),
+      Number(planterBalance6),
       "planter balance is not ok6"
     );
 
@@ -2293,7 +2281,7 @@ contract("Treasury", (accounts) => {
     const totalFund = await TreasuryInstance.totalFunds();
 
     assert.equal(
-      Number(totalFund.planterFund.toString()),
+      Number(totalFund.planterFund),
       Math.divide(Math.mul(Number(amount), planterFund), 10000),
       "total fund is not correct1"
     );
@@ -2318,7 +2306,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
       ),
-      Number(totalFund1.planterFund.toString()),
+      Number(totalFund1.planterFund),
       "total fund1 is not ok"
     );
 
@@ -2333,7 +2321,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
-      Number(planterPaid1.toString()),
+      Number(planterPaid1),
       "planter paid is not ok"
     );
     assert.equal(
@@ -2344,7 +2332,7 @@ contract("Treasury", (accounts) => {
         ),
         10000
       ),
-      Number(planterBalance1.toString()),
+      Number(planterBalance1),
       "planter balance is not ok1"
     );
 
@@ -2384,7 +2372,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus)
       ),
-      Number(totalFund2.planterFund.toString()),
+      Number(totalFund2.planterFund),
       "total fund2 is not ok"
     );
     assert.equal(
@@ -2398,7 +2386,7 @@ contract("Treasury", (accounts) => {
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
 
-      Number(planterPaid2.toString()),
+      Number(planterPaid2),
       "planter paid is not ok2"
     );
     assert.equal(
@@ -2409,7 +2397,7 @@ contract("Treasury", (accounts) => {
         ),
         10000
       ),
-      Number(planterBalance2.toString()),
+      Number(planterBalance2),
       "planter balance is not ok2"
     );
 
@@ -2451,7 +2439,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus)
       ),
-      Number(totalFund3.planterFund.toString()),
+      Number(totalFund3.planterFund),
       "total fund3 is not ok"
     );
 
@@ -2466,7 +2454,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus2), finalStatus),
-      Number(planterPaid3.toString()),
+      Number(planterPaid3),
       "planter paid is not ok3"
     );
     assert.equal(
@@ -2477,7 +2465,7 @@ contract("Treasury", (accounts) => {
         ),
         10000
       ),
-      Number(planterBalance3.toString()),
+      Number(planterBalance3),
       "planter balance is not ok3"
     );
 
@@ -2527,7 +2515,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus)
       ),
-      Number(totalFund4.planterFund.toString()),
+      Number(totalFund4.planterFund),
       "total fund4 is not ok"
     );
 
@@ -2542,7 +2530,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus3), finalStatus),
-      Number(planterPaid4.toString()),
+      Number(planterPaid4),
       "planter paid is not ok4"
     );
 
@@ -2630,7 +2618,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus)
       ),
-      Number(totalFund5.planterFund.toString()),
+      Number(totalFund5.planterFund),
       "total fund5 is not ok"
     );
 
@@ -2645,7 +2633,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.divide(Math.mul(planterTotalFunded, treeStatus4), finalStatus),
-      Number(planterPaid5.toString()),
+      Number(planterPaid5),
       "planter paid is not ok5"
     );
 
@@ -2755,7 +2743,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(amount, planterFund), 10000),
         planterTotalFunded
       ),
-      Number(totalFund6.planterFund.toString()),
+      Number(totalFund6.planterFund),
       "total fund6 is not ok"
     );
 
@@ -2770,7 +2758,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       planterTotalFunded,
-      Number(planterPaid6.toString()),
+      Number(planterPaid6),
       "planter paid is not ok6"
     );
 
@@ -2948,7 +2936,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(planterFund, Number(amount)), 10000),
         Math.divide(Math.mul(planterFund, Number(amount2)), 10000)
       ),
-      Number(totalFunds.planterFund.toString()),
+      Number(totalFunds.planterFund),
       "invalid planter total funds"
     );
 
@@ -2972,9 +2960,9 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(fundP, "PlanterFunded", (ev) => {
       return (
-        Number(ev.treeId.toString()) == treeId &&
+        Number(ev.treeId) == treeId &&
         ev.planterId == userAccount2 &&
-        Number(ev.amount.toString()) == planterTotalFunded
+        Number(ev.amount) == planterTotalFunded
       );
     });
 
@@ -2985,25 +2973,25 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       planterTotalFunded,
-      Number(planterPaid.toString()),
+      Number(planterPaid),
       "planter paid is not ok"
     );
 
     assert.equal(
       planterTotalFunded,
-      Number(planterBalance.toString()),
+      Number(planterBalance),
       "planter balance is not ok1"
     );
 
     assert.equal(
       referralTotalFunded,
-      Number(referralBalance.toString()),
+      Number(referralBalance),
       "referral balance is not ok1"
     );
 
     assert.equal(
       Math.divide(Math.mul(planterFund, amount2), 10000),
-      Number(totalFunds2.planterFund.toString()),
+      Number(totalFunds2.planterFund),
       "total funds2 is not ok"
     );
 
@@ -3381,8 +3369,8 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
-        Number(contractBalanceBeforeFund.toString())
+        Number(contractBalanceAfterFund),
+        Number(contractBalanceBeforeFund)
       ),
       Number(amount),
       "contrct balance charged inconrrectly"
@@ -3399,12 +3387,12 @@ contract("Treasury", (accounts) => {
     const accountReferralBalance1 = await web3.eth.getBalance(userAccount4);
 
     assert.equal(
-      Number(planterBalance1.toString()),
+      Number(planterBalance1),
       totalPlanterFund,
       "planter balance is not ok 1"
     );
     assert.equal(
-      Number(referralBalance1.toString()),
+      Number(referralBalance1),
       totalReferralFund,
       "referral balance is not ok 1"
     );
@@ -3416,7 +3404,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3
       );
     });
@@ -3428,7 +3416,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(txReferral, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount4
       );
     });
@@ -3439,10 +3427,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("0.2"))
       ),
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       "contract balance is not ok after withdraw 1"
     );
 
@@ -3454,7 +3442,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(totalPlanterFund, Number(web3.utils.toWei("0.1"))),
-      Number(planterBalance2.toString()),
+      Number(planterBalance2),
       "planter blance is not ok 2"
     );
     assert.equal(
@@ -3487,7 +3475,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.5")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.5")) &&
         ev.account == userAccount3
       );
     });
@@ -3505,10 +3493,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("0.8"))
       ),
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       "contract balance is not ok after withdraw 2"
     );
 
@@ -3517,7 +3505,7 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(totalPlanterFund, Number(web3.utils.toWei("0.6"))),
-      Number(planterBalance3.toString()),
+      Number(planterBalance3),
       "planter blance is not ok 3"
     );
 
@@ -3639,8 +3627,8 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
-        Number(contractBalanceBeforeFund.toString())
+        Number(contractBalanceAfterFund),
+        Number(contractBalanceBeforeFund)
       ),
       Number(amount),
       "contrct balance charged inconrrectly"
@@ -3689,7 +3677,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3
       );
     });
@@ -3701,7 +3689,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(txReferral, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount4
       );
     });
@@ -3716,7 +3704,7 @@ contract("Treasury", (accounts) => {
       "PlanterBalanceWithdrawn",
       (ev) => {
         return (
-          Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+          Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
           ev.account == userAccount5
         );
       }
@@ -3728,10 +3716,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("0.3"))
       ),
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       "contract balance is not ok after withdraw 1"
     );
 
@@ -3751,7 +3739,7 @@ contract("Treasury", (accounts) => {
         Math.divide(Math.mul(totalPlanterFund, planterPortion), 10000),
         Number(web3.utils.toWei("0.1"))
       ),
-      Number(planterBalance2.toString()),
+      Number(planterBalance2),
       "planter blance is not ok 2"
     );
 
@@ -3816,7 +3804,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.53")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.53")) &&
         ev.account == userAccount3
       );
     });
@@ -3826,7 +3814,7 @@ contract("Treasury", (accounts) => {
       "PlanterBalanceWithdrawn",
       (ev) => {
         return (
-          Number(ev.amount.toString()) == Number(web3.utils.toWei("0.27")) &&
+          Number(ev.amount) == Number(web3.utils.toWei("0.27")) &&
           ev.account == userAccount5
         );
       }
@@ -3845,10 +3833,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("1.2"))
       ),
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       "contract balance is not ok after withdraw 2"
     );
 
@@ -3998,8 +3986,8 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
-        Number(contractBalanceBeforeFund.toString())
+        Number(contractBalanceAfterFund),
+        Number(contractBalanceBeforeFund)
       ),
       Number(amount),
       "contrct balance charged inconrrectly"
@@ -4040,7 +4028,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3
       );
     });
@@ -4056,7 +4044,7 @@ contract("Treasury", (accounts) => {
       "LocalDevelopBalanceWithdrawn",
       (ev) => {
         return (
-          Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+          Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
           ev.account == userAccount6 &&
           ev.reason == "some reason"
         );
@@ -4069,10 +4057,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("0.2"))
       ),
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       "contract balance is not ok after withdraw 1"
     );
 
@@ -4139,7 +4127,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.9")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.9")) &&
         ev.account == userAccount3
       );
     });
@@ -4149,7 +4137,7 @@ contract("Treasury", (accounts) => {
       "LocalDevelopBalanceWithdrawn",
       (ev) => {
         return (
-          Number(ev.amount.toString()) == Number(web3.utils.toWei("0.3")) &&
+          Number(ev.amount) == Number(web3.utils.toWei("0.3")) &&
           ev.account == userAccount6 &&
           ev.reason == "some reason"
         );
@@ -4162,10 +4150,10 @@ contract("Treasury", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(contractBalanceAfterFund.toString()),
+        Number(contractBalanceAfterFund),
         Number(web3.utils.toWei("1.4"))
       ),
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       "contract balance is not ok after withdraw 2"
     );
 
@@ -4403,13 +4391,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("5").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("5")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalTreeResearchFunded,
-      Number(totalFunds1.treeResearch.toString()),
+      Number(totalFunds1.treeResearch),
       "treeResearch total fund1 is not ok"
     );
     const treeResearchBalnance1 = await web3.eth.getBalance(userAccount3);
@@ -4422,7 +4410,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "TreeResearchBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -4433,24 +4421,21 @@ contract("Treasury", (accounts) => {
     );
     const treeResearchBalnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("4.8")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.treeResearch.toString()),
-        Number(totalFunds2.treeResearch.toString())
+        Number(totalFunds1.treeResearch),
+        Number(totalFunds2.treeResearch)
       ),
       Number(web3.utils.toWei("0.2")),
       "tree research total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(treeResearchBalnance2.toString()),
-      Math.add(
-        Number(treeResearchBalnance1.toString()),
-        Number(web3.utils.toWei("0.2"))
-      ),
+      Number(treeResearchBalnance2),
+      Math.add(Number(treeResearchBalnance1), Number(web3.utils.toWei("0.2"))),
       "tree research account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -4461,7 +4446,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "TreeResearchBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.3")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.3")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -4473,42 +4458,36 @@ contract("Treasury", (accounts) => {
     );
     const treeResearchBalnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("4.5")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.treeResearch.toString()),
-        Number(totalFunds3.treeResearch.toString())
+        Number(totalFunds1.treeResearch),
+        Number(totalFunds3.treeResearch)
       ),
       Number(web3.utils.toWei("0.5")),
       "tree research total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.treeResearch.toString()),
+      Number(totalFunds3.treeResearch),
       Number(web3.utils.toWei("0.5")),
       "tree research total fund must be 0.5 eth"
     );
     assert.equal(
       Math.subtract(totalTreeResearchFunded, Number(web3.utils.toWei("0.5"))),
-      Number(totalFunds3.treeResearch.toString()),
+      Number(totalFunds3.treeResearch),
       "tree research total fund3 is not ok"
     );
     assert.equal(
-      Number(treeResearchBalnance3.toString()),
-      Math.add(
-        Number(treeResearchBalnance1.toString()),
-        Number(web3.utils.toWei("0.5"))
-      ),
+      Number(treeResearchBalnance3),
+      Math.add(Number(treeResearchBalnance1), Number(web3.utils.toWei("0.5"))),
       "tree research account balance  is not ok after withdraw2 ( checking with tree researchBalance1 )"
     );
     assert.equal(
-      Number(treeResearchBalnance3.toString()),
-      Math.add(
-        Number(treeResearchBalnance2.toString()),
-        Number(web3.utils.toWei("0.3"))
-      ),
+      Number(treeResearchBalnance3),
+      Math.add(Number(treeResearchBalnance2), Number(web3.utils.toWei("0.3"))),
       "tree research account balance is not ok after withdraw2"
     );
   });
@@ -4705,13 +4684,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("3").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalLocalDevelopFunded,
-      Number(totalFunds1.localDevelop.toString()),
+      Number(totalFunds1.localDevelop),
       "local develop total fund1 is not ok"
     );
     const localDevelopBalnance1 = await web3.eth.getBalance(userAccount3);
@@ -4724,7 +4703,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -4735,24 +4714,21 @@ contract("Treasury", (accounts) => {
     );
     const localDevelopBalnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("2.9")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.localDevelop.toString()),
-        Number(totalFunds2.localDevelop.toString())
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds2.localDevelop)
       ),
       Number(web3.utils.toWei("0.1")),
       "local develop total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(localDevelopBalnance2.toString()),
-      Math.add(
-        Number(localDevelopBalnance1.toString()),
-        Number(web3.utils.toWei("0.1"))
-      ),
+      Number(localDevelopBalnance2),
+      Math.add(Number(localDevelopBalnance1), Number(web3.utils.toWei("0.1"))),
       "local develop account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -4763,7 +4739,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -4775,37 +4751,31 @@ contract("Treasury", (accounts) => {
     );
     const localDevelopBalnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("2.7")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.localDevelop.toString()),
-        Number(totalFunds3.localDevelop.toString())
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds3.localDevelop)
       ),
       Number(web3.utils.toWei("0.3")),
       "localDevelop total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.localDevelop.toString()),
+      Number(totalFunds3.localDevelop),
       0,
       "local develop total fund must be zero"
     ); //total value of localDevelop has withdrawn
     assert.equal(
-      Number(localDevelopBalnance3.toString()),
-      Math.add(
-        Number(localDevelopBalnance1.toString()),
-        Number(web3.utils.toWei("0.3"))
-      ),
+      Number(localDevelopBalnance3),
+      Math.add(Number(localDevelopBalnance1), Number(web3.utils.toWei("0.3"))),
       "local develop account balance  is not ok after withdraw2 ( checking with localDevelopBalance1 )"
     );
     assert.equal(
-      Number(localDevelopBalnance3.toString()),
-      Math.add(
-        Number(localDevelopBalnance2.toString()),
-        Number(web3.utils.toWei("0.2"))
-      ),
+      Number(localDevelopBalnance3),
+      Math.add(Number(localDevelopBalnance2), Number(web3.utils.toWei("0.2"))),
       "local develop account balance is not ok after withdraw2"
     );
   });
@@ -5006,13 +4976,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("3").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalRescueFundFunded,
-      Number(totalFunds1.rescueFund.toString()),
+      Number(totalFunds1.rescueFund),
       "rescue total fund1 is not ok"
     );
     const rescueFundBalnance1 = await web3.eth.getBalance(userAccount3);
@@ -5025,7 +4995,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "RescueBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5036,24 +5006,21 @@ contract("Treasury", (accounts) => {
     );
     const rescueFundBalnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("2.9")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.rescueFund.toString()),
-        Number(totalFunds2.rescueFund.toString())
+        Number(totalFunds1.rescueFund),
+        Number(totalFunds2.rescueFund)
       ),
       Number(web3.utils.toWei("0.1")),
       "rescue fund total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(rescueFundBalnance2.toString()),
-      Math.add(
-        Number(rescueFundBalnance1.toString()),
-        Number(web3.utils.toWei("0.1"))
-      ),
+      Number(rescueFundBalnance2),
+      Math.add(Number(rescueFundBalnance1), Number(web3.utils.toWei("0.1"))),
       "rescue fund account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -5064,7 +5031,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5076,37 +5043,31 @@ contract("Treasury", (accounts) => {
     );
     const rescueFundBalnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("2.7")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.rescueFund.toString()),
-        Number(totalFunds3.rescueFund.toString())
+        Number(totalFunds1.rescueFund),
+        Number(totalFunds3.rescueFund)
       ),
       Number(web3.utils.toWei("0.3")),
       "rescue fund total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.rescueFund.toString()),
+      Number(totalFunds3.rescueFund),
       0,
       "rescueFund total fund must be zero"
     ); //total value of rescueFund has withdrawn
     assert.equal(
-      Number(rescueFundBalnance3.toString()),
-      Math.add(
-        Number(rescueFundBalnance1.toString()),
-        Number(web3.utils.toWei("0.3"))
-      ),
+      Number(rescueFundBalnance3),
+      Math.add(Number(rescueFundBalnance1), Number(web3.utils.toWei("0.3"))),
       "rescueFund account balance  is not ok after withdraw2 ( checking with rescueFundBalance1 )"
     );
     assert.equal(
-      Number(rescueFundBalnance3.toString()),
-      Math.add(
-        Number(rescueFundBalnance2.toString()),
-        Number(web3.utils.toWei("0.2"))
-      ),
+      Number(rescueFundBalnance3),
+      Math.add(Number(rescueFundBalnance2), Number(web3.utils.toWei("0.2"))),
       "rescueFund account balance is not ok after withdraw2"
     );
   });
@@ -5307,13 +5268,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("3").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalTreejerDevelopFunded,
-      Number(totalFunds1.treejerDevelop.toString()),
+      Number(totalFunds1.treejerDevelop),
       "treejerDevelop total fund1 is not ok"
     );
     const treejerDevelopBalnance1 = await web3.eth.getBalance(userAccount3);
@@ -5326,7 +5287,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "TreejerDevelopBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5337,22 +5298,22 @@ contract("Treasury", (accounts) => {
     );
     const treejerDevelopBalnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("2.9")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.treejerDevelop.toString()),
-        Number(totalFunds2.treejerDevelop.toString())
+        Number(totalFunds1.treejerDevelop),
+        Number(totalFunds2.treejerDevelop)
       ),
       Number(web3.utils.toWei("0.1")),
       "treejerDevelop total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(treejerDevelopBalnance2.toString()),
+      Number(treejerDevelopBalnance2),
       Math.add(
-        Number(treejerDevelopBalnance1.toString()),
+        Number(treejerDevelopBalnance1),
         Number(web3.utils.toWei("0.1"))
       ),
       "treejer develop account balance is not ok after withdraw1"
@@ -5365,7 +5326,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "TreejerDevelopBalanceWithdrawn", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5377,35 +5338,35 @@ contract("Treasury", (accounts) => {
     );
     const treejerDevelopBalnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("2.7")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.treejerDevelop.toString()),
-        Number(totalFunds3.treejerDevelop.toString())
+        Number(totalFunds1.treejerDevelop),
+        Number(totalFunds3.treejerDevelop)
       ),
       Number(web3.utils.toWei("0.3")),
       "treejer develop total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.treejerDevelop.toString()),
+      Number(totalFunds3.treejerDevelop),
       0,
       "treejerDevelop total fund must be zero"
     ); //total value of treejerDevelop has withdrawn
     assert.equal(
-      Number(treejerDevelopBalnance3.toString()),
+      Number(treejerDevelopBalnance3),
       Math.add(
-        Number(treejerDevelopBalnance1.toString()),
+        Number(treejerDevelopBalnance1),
         Number(web3.utils.toWei("0.3"))
       ),
       "treejer develop account balance  is not ok after withdraw2 ( checking with treejerDevelopBalance1 )"
     );
     assert.equal(
-      Number(treejerDevelopBalnance3.toString()),
+      Number(treejerDevelopBalnance3),
       Math.add(
-        Number(treejerDevelopBalnance2.toString()),
+        Number(treejerDevelopBalnance2),
         Number(web3.utils.toWei("0.2"))
       ),
       "treejer develop account balance is not ok after withdraw2"
@@ -5608,13 +5569,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("3").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalOtherFund1Funded,
-      Number(totalFunds1.otherFund1.toString()),
+      Number(totalFunds1.otherFund1),
       "otherFund1 total fund1 is not ok"
     );
     const otherFund1Balnance1 = await web3.eth.getBalance(userAccount3);
@@ -5627,7 +5588,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn1", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5638,24 +5599,21 @@ contract("Treasury", (accounts) => {
     );
     const otherFund1Balnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("2.9")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.otherFund1.toString()),
-        Number(totalFunds2.otherFund1.toString())
+        Number(totalFunds1.otherFund1),
+        Number(totalFunds2.otherFund1)
       ),
       Number(web3.utils.toWei("0.1")),
       "otherFund1 total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(otherFund1Balnance2.toString()),
-      Math.add(
-        Number(otherFund1Balnance1.toString()),
-        Number(web3.utils.toWei("0.1"))
-      ),
+      Number(otherFund1Balnance2),
+      Math.add(Number(otherFund1Balnance1), Number(web3.utils.toWei("0.1"))),
       "other fund1 account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -5666,7 +5624,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn1", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5678,37 +5636,31 @@ contract("Treasury", (accounts) => {
     );
     const otherFund1Balnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("2.7")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.otherFund1.toString()),
-        Number(totalFunds3.otherFund1.toString())
+        Number(totalFunds1.otherFund1),
+        Number(totalFunds3.otherFund1)
       ),
       Number(web3.utils.toWei("0.3")),
       "other fund1 total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.otherFund1.toString()),
+      Number(totalFunds3.otherFund1),
       0,
       "other fund1 total fund must be zero"
     ); //total value of otherFund1 has withdrawn
     assert.equal(
-      Number(otherFund1Balnance3.toString()),
-      Math.add(
-        Number(otherFund1Balnance1.toString()),
-        Number(web3.utils.toWei("0.3"))
-      ),
+      Number(otherFund1Balnance3),
+      Math.add(Number(otherFund1Balnance1), Number(web3.utils.toWei("0.3"))),
       "other fund1 account balance is not ok after withdraw2 ( checking with otherFund1Balance1 )"
     );
     assert.equal(
-      Number(otherFund1Balnance3.toString()),
-      Math.add(
-        Number(otherFund1Balnance2.toString()),
-        Number(web3.utils.toWei("0.2"))
-      ),
+      Number(otherFund1Balnance3),
+      Math.add(Number(otherFund1Balnance2), Number(web3.utils.toWei("0.2"))),
       "other fund1 account balance is not ok after withdraw2"
     );
   });
@@ -5909,13 +5861,13 @@ contract("Treasury", (accounts) => {
     );
     const totalFunds1 = await TreasuryInstance.totalFunds();
     assert.equal(
-      Number(contractBalanceAfterFund.toString()),
-      Number(web3.utils.toWei("3").toString()),
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
       "contract balance after fund is not ok"
     );
     assert.equal(
       totalOtherFund2Funded,
-      Number(totalFunds1.otherFund2.toString()),
+      Number(totalFunds1.otherFund2),
       "otherFund2 total fund1 is not ok"
     );
     const otherFund2Balnance1 = await web3.eth.getBalance(userAccount3);
@@ -5928,7 +5880,7 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn2", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.1")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5939,24 +5891,21 @@ contract("Treasury", (accounts) => {
     );
     const otherFund2Balnance2 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw1.toString()),
+      Number(contractBalanceAfterWithdraw1),
       Number(web3.utils.toWei("2.9")),
       "contract balance after withdraw1 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.otherFund2.toString()),
-        Number(totalFunds2.otherFund2.toString())
+        Number(totalFunds1.otherFund2),
+        Number(totalFunds2.otherFund2)
       ),
       Number(web3.utils.toWei("0.1")),
       "otherFund2 total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(otherFund2Balnance2.toString()),
-      Math.add(
-        Number(otherFund2Balnance1.toString()),
-        Number(web3.utils.toWei("0.1"))
-      ),
+      Number(otherFund2Balnance2),
+      Math.add(Number(otherFund2Balnance1), Number(web3.utils.toWei("0.1"))),
       "other fund2 account balance is not ok after withdraw1"
     );
     // -------------------- seccond withdraw and check data ------------------------------
@@ -5967,7 +5916,7 @@ contract("Treasury", (accounts) => {
     );
     truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn2", (ev) => {
       return (
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("0.2")) &&
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
         ev.account == userAccount3 &&
         ev.reason == withdrawReason
       );
@@ -5979,37 +5928,31 @@ contract("Treasury", (accounts) => {
     );
     const otherFund2Balnance3 = await web3.eth.getBalance(userAccount3);
     assert.equal(
-      Number(contractBalanceAfterWithdraw2.toString()),
+      Number(contractBalanceAfterWithdraw2),
       Number(web3.utils.toWei("2.7")),
       "contract balance after withdraw2 is not ok"
     );
     assert.equal(
       Math.subtract(
-        Number(totalFunds1.otherFund2.toString()),
-        Number(totalFunds3.otherFund2.toString())
+        Number(totalFunds1.otherFund2),
+        Number(totalFunds3.otherFund2)
       ),
       Number(web3.utils.toWei("0.3")),
       "other fund2 total fund is not ok after withdraw1"
     );
     assert.equal(
-      Number(totalFunds3.otherFund2.toString()),
+      Number(totalFunds3.otherFund2),
       0,
       "other fund2 total fund must be zero"
     ); //total value of otherFund2 has withdrawn
     assert.equal(
-      Number(otherFund2Balnance3.toString()),
-      Math.add(
-        Number(otherFund2Balnance1.toString()),
-        Number(web3.utils.toWei("0.3"))
-      ),
+      Number(otherFund2Balnance3),
+      Math.add(Number(otherFund2Balnance1), Number(web3.utils.toWei("0.3"))),
       "other fund2 account balance is not ok after withdraw2 ( checking with otherFund2Balance1 )"
     );
     assert.equal(
-      Number(otherFund2Balnance3.toString()),
-      Math.add(
-        Number(otherFund2Balnance2.toString()),
-        Number(web3.utils.toWei("0.2"))
-      ),
+      Number(otherFund2Balnance3),
+      Math.add(Number(otherFund2Balnance2), Number(web3.utils.toWei("0.2"))),
       "other fund2 account balance is not ok after withdraw2"
     );
   });
@@ -6173,8 +6116,8 @@ contract("Treasury", (accounts) => {
     let balanceAfter = await web3.eth.getBalance(deployerAccount);
 
     assert.equal(
-      Number(balanceAfter.toString()),
-      Number(balanceBefore.toString()),
+      Number(balanceAfter),
+      Number(balanceBefore),
       "Set otherFundAddress1 address not true"
     );
   });

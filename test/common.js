@@ -3,7 +3,7 @@ const { time } = require("@openzeppelin/test-helpers");
 var Common = {};
 
 const assert = require("chai").assert;
-
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 const DEFAULT_ADMIN_ROLE =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 const AMBASSADOR_ROLE = web3.utils.soliditySha3("AMBASSADOR_ROLE");
@@ -143,40 +143,43 @@ Common.getNow = async () => {
 
 Common.successPlant = async (
   genesisTreeInstance,
-  gbInstance,
   arInstance,
   ipfsHash,
   treeId,
-  gbId,
-  gbType,
   birthDate,
   countryCode,
-  gbPlanterList,
-  ambassadorAddress,
+  planterList,
   planterAddress,
-  deployerAccount
+  deployerAccount,
+  planterInstance
 ) => {
-  await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-    from: deployerAccount,
-  });
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeInstance.address,
+    deployerAccount
+  );
 
-  await Common.addAmbassador(arInstance, ambassadorAddress, deployerAccount);
-
-  await gbPlanterList.map(async (item) => {
+  await planterList.map(async (item) => {
     await Common.addPlanter(arInstance, item, deployerAccount);
   });
 
-  await Common.addGB(gbInstance, ambassadorAddress, gbPlanterList, "gb1");
+  await planterList.map(async (item) => {
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      item,
+      zeroAddress,
+      zeroAddress
+    );
+  });
+
   await genesisTreeInstance.addTree(treeId, ipfsHash, {
     from: deployerAccount,
   });
-  await genesisTreeInstance.asignTreeToPlanter(
-    treeId,
-    gbId,
-    planterAddress,
-    gbType,
-    { from: deployerAccount }
-  );
+
+  await genesisTreeInstance.asignTreeToPlanter(treeId, planterAddress, {
+    from: deployerAccount,
+  });
 
   await genesisTreeInstance.plantTree(
     treeId,
@@ -188,7 +191,7 @@ Common.successPlant = async (
     }
   );
   await genesisTreeInstance.verifyPlant(treeId, true, {
-    from: ambassadorAddress,
+    from: deployerAccount,
   });
 };
 Common.joinSimplePlanter = async (
@@ -231,6 +234,29 @@ Common.joinOrganizationPlanter = async (
     capcity,
     refferedBy,
     { from: adminAccount }
+  );
+};
+Common.joinSimplePlanterFromGenesis = async (
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress,
+  genesisTreeInstance,
+  adminAccount
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
   );
 };
 

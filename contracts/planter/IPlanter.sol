@@ -68,4 +68,6 @@ interface IPlanter {
             address,
             uint256
         );
+
+    function reducePlantCount(address _planterAddress) external;
 }

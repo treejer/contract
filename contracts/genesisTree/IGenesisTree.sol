@@ -9,16 +9,13 @@ interface IGenesisTree {
 
     function setTreasuryAddress(address _address) external;
 
+    function setPlanterAddress(address _address) external;
+
     function setTreeTokenAddress(address _address) external;
 
     function addTree(uint256 _treeId, string memory _treeDescription) external;
 
-    function asignTreeToPlanter(
-        uint256 _treeId,
-        uint256 _gbId,
-        address _planterId,
-        uint8 _gbType
-    ) external;
+    function asignTreeToPlanter(uint256 _treeId, address _planterId) external;
 
     function plantTree(
         uint256 _treeId,

@@ -81,7 +81,9 @@ contract GenesisTree is Initializable, RelayRecipient {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
+
         require(candidateContract.isAccessRestriction());
+
         isGenesisTree = true;
         accessRestriction = candidateContract;
     }
@@ -92,25 +94,33 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function setGBFactoryAddress(address _address) external onlyAdmin {
         IGBFactory candidateContract = IGBFactory(_address);
+
         require(candidateContract.isGBFactory());
+
         gbFactory = candidateContract;
     }
 
     function setTreasuryAddress(address _address) external onlyAdmin {
         ITreasury candidateContract = ITreasury(_address);
+
         require(candidateContract.isTreasury());
+
         treasury = candidateContract;
     }
 
     function setPlanterAddress(address _address) external onlyAdmin {
         IPlanter candidateContract = IPlanter(_address);
+
         require(candidateContract.isPlanter());
+
         planter = candidateContract;
     }
 
     function setTreeTokenAddress(address _address) external onlyAdmin {
         ITree candidateContract = ITree(_address);
+
         require(candidateContract.isTree());
+
         treeToken = candidateContract;
     }
 
@@ -154,6 +164,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         GenTree storage tempGenTree = genTrees[_treeId];
 
         require(tempGenTree.treeStatus == 1, "invalid tree status for plant");
+
         require(tempGenTree.planterId != address(0), "invalid planter address");
 
         bool _canPlant = planter.plantingPermision(
@@ -224,11 +235,14 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].planterId == _msgSender(),
             "Only Planter of tree can send update"
         );
+
         require(genTrees[_treeId].treeStatus > 2, "Tree not planted");
+
         require(
             updateGenTrees[_treeId].updateStatus != 1,
             "update genesis tree status is pending"
         );
+
         require(
             now >=
                 genTrees[_treeId].plantDate.add(
@@ -254,11 +268,14 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[_treeId].planterId != _msgSender(),
             "Planter of tree can't verify update"
         );
+
         require(
             updateGenTrees[_treeId].updateStatus == 1,
             "update status must be pending"
         );
+
         require(genTrees[_treeId].treeStatus > 2, "Tree not planted");
+
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(_treeId, _msgSender()),
@@ -278,6 +295,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             if (age > genTree.treeStatus) {
                 genTree.treeStatus = age;
             }
+
             genTree.treeSpecs = updateGenTree.updateSpecs;
 
             if (treeToken.exists(_treeId)) {
@@ -303,6 +321,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         if (treeToken.exists(_treeId)) {
             return 1;
         }
+
         uint32 nowProvideStatus = genTrees[_treeId].provideStatus;
 
         if (nowProvideStatus == 0) {
@@ -325,17 +344,17 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].provideStatus = 0;
     }
 
-    function updateTreefromOffer(
-        uint256 _treeId,
-        string memory _specsCid,
-        address _owner
-    ) external onlyAuction validIpfs(_specsCid) {
-        genTrees[_treeId].provideStatus = 0;
+    // function updateTreefromOffer(
+    //     uint256 _treeId,
+    //     string memory _specsCid,
+    //     address _owner
+    // ) external onlyAuction validIpfs(_specsCid) {
+    //     genTrees[_treeId].provideStatus = 0;
 
-        genTrees[_treeId].treeSpecs = _specsCid;
+    //     genTrees[_treeId].treeSpecs = _specsCid;
 
-        treeToken.safeMint(_owner, _treeId);
-    }
+    //     treeToken.safeMint(_owner, _treeId);
+    // }
 
     function _checkPlanter(uint256 _treeId, address _sender)
         private

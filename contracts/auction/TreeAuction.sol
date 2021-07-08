@@ -17,6 +17,7 @@ contract TreeAuction is Initializable {
     using SafeCastUpgradeable for uint256;
 
     CountersUpgradeable.Counter private auctionId;
+
     bool public isTreeAuction;
 
     IAccessRestriction public accessRestriction;
@@ -141,43 +142,6 @@ contract TreeAuction is Initializable {
         _withdraw(oldBid, oldBidder);
     }
 
-    function _increaseAuctionEndTime(uint256 _auctionId) private {
-        // if latest bid is less than 10 minutes to the end of auctionEndTime:
-        // we will increase auctionEndTime 600 seconds
-        if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
-            auctions[_auctionId].endDate = auctions[_auctionId]
-            .endDate
-            .add(600)
-            .toUint64();
-
-            emit AuctionEndTimeIncreased(
-                _auctionId,
-                auctions[_auctionId].endDate,
-                msg.sender
-            );
-        }
-    }
-
-    function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
-        if (_oldBidder != address(0)) {
-            uint32 size;
-
-            assembly {
-                size := extcodesize(_oldBidder)
-            }
-
-            if (size > 0) {
-                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                    _oldBid
-                );
-            } else if (!_oldBidder.send(_oldBid)) {
-                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                    _oldBid
-                );
-            }
-        }
-    }
-
     function manualWithdraw() external ifNotPaused returns (bool) {
         uint256 amount = pendingWithdraw[msg.sender];
 
@@ -219,6 +183,43 @@ contract TreeAuction is Initializable {
             treasury.fundTree{value: auction.highestBid}(auction.treeId);
         } else {
             genesisTree.updateAvailability(auction.treeId);
+        }
+    }
+
+    function _increaseAuctionEndTime(uint256 _auctionId) private {
+        // if latest bid is less than 10 minutes to the end of auctionEndTime:
+        // we will increase auctionEndTime 600 seconds
+        if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
+            auctions[_auctionId].endDate = auctions[_auctionId]
+            .endDate
+            .add(600)
+            .toUint64();
+
+            emit AuctionEndTimeIncreased(
+                _auctionId,
+                auctions[_auctionId].endDate,
+                msg.sender
+            );
+        }
+    }
+
+    function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
+        if (_oldBidder != address(0)) {
+            uint32 size;
+
+            assembly {
+                size := extcodesize(_oldBidder)
+            }
+
+            if (size > 0) {
+                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
+                    _oldBid
+                );
+            } else if (!_oldBidder.send(_oldBid)) {
+                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
+                    _oldBid
+                );
+            }
         }
     }
 }

@@ -206,29 +206,16 @@ contract Treasury is Initializable, RelayRecipient {
             "sum must be 10000"
         );
 
-        FundDistribution storage fundDistribution = fundDistributions[
-            fundDistributionCount.current()
-        ];
-
-        fundDistribution.planterFund = _planter;
-        fundDistribution.referralFund = _referral;
-        fundDistribution.treeResearch = _treeResearch;
-        fundDistribution.localDevelop = _localDevelop;
-        fundDistribution.rescueFund = _rescueFund;
-        fundDistribution.treejerDevelop = _treejerDevelop;
-        fundDistribution.otherFund1 = _otherFund1;
-        fundDistribution.otherFund2 = _otherFund2;
-
-        // fundDistributions[fundDistributionCount.current()] = FundDistribution(
-        //     _planter,
-        //     _referral,
-        //     _treeResearch,
-        //     _localDevelop,
-        //     _rescueFund,
-        //     _treejerDevelop,
-        //     _otherFund1,
-        //     _otherFund2
-        // );
+        fundDistributions[fundDistributionCount.current()] = FundDistribution(
+            _planter,
+            _referral,
+            _treeResearch,
+            _localDevelop,
+            _rescueFund,
+            _treejerDevelop,
+            _otherFund1,
+            _otherFund2
+        );
 
         fundDistributionCount.increment();
     }

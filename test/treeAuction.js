@@ -3,7 +3,6 @@ const TreeAuction = artifacts.require("TreeAuction.sol");
 const GenesisTree = artifacts.require("GenesisTree.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
-const GBFactory = artifacts.require("GBFactory.sol");
 const Planter = artifacts.require("Planter.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -28,7 +27,6 @@ contract("TreeAuction", (accounts) => {
   let genesisTreeInstance;
   let startTime;
   let endTime;
-  let gbInstance;
   let planterInstance;
 
   const ownerAccount = accounts[0];
@@ -70,12 +68,6 @@ contract("TreeAuction", (accounts) => {
     });
 
     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    gbInstance = await deployProxy(GBFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -1465,10 +1457,6 @@ contract("TreeAuction", (accounts) => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
     await Common.addPlanter(arInstance, userAccount7, deployerAccount);
     await Common.addPlanter(arInstance, userAccount8, deployerAccount);
 
@@ -1743,8 +1731,6 @@ contract("TreeAuction", (accounts) => {
 
   it("complex test 1", async () => {
     const treeId = 1;
-    const gbId = 1;
-    const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
@@ -2870,13 +2856,9 @@ contract("TreeAuction", (accounts) => {
         Number(ev.amount) == Number(web3.utils.toWei("2"))
       );
     });
-    //////////////// ----------------------- setting up gb
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
+
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
+
     /////////////----------------------- plant tree
 
     await Common.successPlanterJoin(

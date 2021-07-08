@@ -101,15 +101,25 @@ contract TreeAuction is Initializable {
 
         require(provideStatus == 0, "not available for auction");
 
-        auctions[auctionId.current()] = Auction(
-            _treeId,
-            address(0),
-            bytes32("started"),
-            _startDate,
-            _endDate,
-            _intialPrice,
-            _bidInterval
-        );
+        Auction storage auction = auctions[auctionId.current()];
+
+        auction.treeId = _treeId;
+        auction.status = bytes32("started");
+        auction.startDate = _startDate;
+        auction.endDate = _endDate;
+        auction.highestBid = _intialPrice;
+        auction.bidInterval = _bidInterval;
+
+        //TODO:remove this code
+        // auctions[auctionId.current()] = Auction(
+        //     _treeId,
+        //     address(0),
+        //     bytes32("started"),
+        //     _startDate,
+        //     _endDate,
+        //     _intialPrice,
+        //     _bidInterval
+        // );
 
         auctionId.increment();
     }

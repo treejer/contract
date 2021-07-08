@@ -110,17 +110,6 @@ contract TreeAuction is Initializable {
         auction.highestBid = _intialPrice;
         auction.bidInterval = _bidInterval;
 
-        //TODO:remove this code
-        // auctions[auctionId.current()] = Auction(
-        //     _treeId,
-        //     address(0),
-        //     bytes32("started"),
-        //     _startDate,
-        //     _endDate,
-        //     _intialPrice,
-        //     _bidInterval
-        // );
-
         auctionId.increment();
     }
 

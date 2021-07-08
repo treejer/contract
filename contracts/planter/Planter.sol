@@ -129,18 +129,6 @@ contract Planter is Initializable, RelayRecipient {
         planter.capacity = 100;
         planter.longitude = _longitude;
         planter.latitude = _latitude;
-
-        //TODO:remove this code
-        // planters[_msgSender()] = PlanterData(
-        //     _planterType,
-        //     status,
-        //     _countryCode,
-        //     0,
-        //     100,
-        //     0,
-        //     _longitude,
-        //     _latitude
-        // );
     }
 
     function organizationJoin(
@@ -175,18 +163,6 @@ contract Planter is Initializable, RelayRecipient {
         planter.capacity = _capacity;
         planter.longitude = _longitude;
         planter.latitude = _latitude;
-
-        //TODO:remove this function
-        // planters[organizationAddress] = PlanterData(
-        //     2,
-        //     1,
-        //     _countryCode,
-        //     0,
-        //     _capacity,
-        //     0,
-        //     _longitude,
-        //     _latitude
-        // );
     }
 
     //TODO:remove this function??

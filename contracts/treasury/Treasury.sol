@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
+import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract Treasury is Initializable, RelayRecipient {
@@ -21,9 +22,10 @@ contract Treasury is Initializable, RelayRecipient {
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;
+    IPlanter public planterContract;
+
     TotalFunds public totalFunds;
 
-    address payable public gbFundAddress;
     address payable public treeResearchAddress;
     address payable public localDevelopAddress;
     address payable public rescueFundAddress;
@@ -33,7 +35,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     struct FundDistribution {
         uint16 planterFund;
-        uint16 gbFund;
+        uint16 referralFund;
         uint16 treeResearch;
         uint16 localDevelop;
         uint16 rescueFund;
@@ -44,7 +46,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     struct TotalFunds {
         uint256 planterFund;
-        uint256 gbFund;
+        uint256 referralFund;
         uint256 treeResearch;
         uint256 localDevelop;
         uint256 rescueFund;
@@ -62,6 +64,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     mapping(uint256 => FundDistribution) public fundDistributions;
     mapping(uint256 => uint256) public planterFunds;
+    mapping(uint256 => uint256) public referralFunds;
     mapping(uint256 => uint256) public plantersPaid;
     mapping(address => uint256) public balances;
 
@@ -73,7 +76,7 @@ contract Treasury is Initializable, RelayRecipient {
     );
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
-    event GbBalanceWithdrawn(uint256 amount, address account, string reason);
+
     event TreeResearchBalanceWithdrawn(
         uint256 amount,
         address account,
@@ -135,16 +138,16 @@ contract Treasury is Initializable, RelayRecipient {
 
         isTreasury = true;
         accessRestriction = candidateContract;
-
-        totalFunds = TotalFunds(0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
-    function setGbFundAddress(address payable _address) external onlyAdmin {
-        gbFundAddress = _address;
+    function setPlanterContractAddress(address _address) external onlyAdmin {
+        IPlanter candidateContract = IPlanter(_address);
+        require(candidateContract.isPlanter());
+        planterContract = candidateContract;
     }
 
     function setTreeResearchAddress(address payable _address)
@@ -314,8 +317,10 @@ contract Treasury is Initializable, RelayRecipient {
 
         planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
 
-        totalFunds.gbFund = totalFunds.gbFund.add(
-            msg.value.mul(dm.gbFund).div(10000)
+        referralFunds[_treeId] = msg.value.mul(dm.referralFund).div(10000);
+
+        totalFunds.referralFund = totalFunds.referralFund.add(
+            msg.value.mul(dm.referralFund).div(10000)
         );
 
         totalFunds.localDevelop = totalFunds.localDevelop.add(
@@ -350,37 +355,79 @@ contract Treasury is Initializable, RelayRecipient {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint32 _treeStatus
+        uint64 _treeStatus
     ) external onlyGenesisTree {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
 
-        uint256 totalPayablePlanter;
+        (
+            bool getBool,
+            address gottenOrganizationAddress,
+            address gottenReferralAddress,
+            uint256 gottenPortion
+        ) = planterContract.getPlanterPaymentPortion(_planterId);
 
-        if (_treeStatus > 25920) {
-            //25920 = 30 * 24 * 36
-            totalPayablePlanter = planterFunds[_treeId].sub(
-                plantersPaid[_treeId]
-            );
-        } else {
-            totalPayablePlanter = planterFunds[_treeId]
-            .mul(_treeStatus)
-            .div(25920)
-            .sub(plantersPaid[_treeId]);
-        }
-        if (totalPayablePlanter > 0) {
-            plantersPaid[_treeId] = plantersPaid[_treeId].add(
-                totalPayablePlanter
-            );
+        if (getBool) {
+            uint256 totalPayablePlanter;
 
-            balances[_planterId] = balances[_planterId].add(
-                totalPayablePlanter
-            );
+            if (_treeStatus > 25920) {
+                //25920 = 30 * 24 * 36
+                totalPayablePlanter = planterFunds[_treeId].sub(
+                    plantersPaid[_treeId]
+                );
+            } else {
+                totalPayablePlanter = planterFunds[_treeId]
+                .mul(_treeStatus)
+                .div(25920)
+                .sub(plantersPaid[_treeId]);
+            }
 
-            totalFunds.planterFund = totalFunds.planterFund.sub(
-                totalPayablePlanter
-            );
+            if (totalPayablePlanter > 0) {
+                uint256 totalPayableRefferal = referralFunds[_treeId]
+                .mul(totalPayablePlanter)
+                .div(planterFunds[_treeId]);
 
-            emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
+                //referral calculation section
+                totalFunds.referralFund = totalFunds.referralFund.sub(
+                    totalPayableRefferal
+                );
+
+                if (gottenReferralAddress == address(0)) {
+                    totalFunds.localDevelop = totalFunds.localDevelop.add(
+                        totalPayableRefferal
+                    );
+                } else {
+                    balances[gottenReferralAddress] = balances[
+                        gottenReferralAddress
+                    ]
+                    .add(totalPayableRefferal);
+                }
+
+                totalFunds.planterFund = totalFunds.planterFund.sub(
+                    totalPayablePlanter
+                );
+
+                //Organization calculation section
+                uint256 fullPortion = 10000;
+                balances[gottenOrganizationAddress] = balances[
+                    gottenOrganizationAddress
+                ]
+                .add(
+                    totalPayablePlanter.mul(fullPortion.sub(gottenPortion)).div(
+                        fullPortion
+                    )
+                );
+
+                //planter calculation section
+                plantersPaid[_treeId] = plantersPaid[_treeId].add(
+                    totalPayablePlanter
+                );
+
+                balances[_planterId] = balances[_planterId].add(
+                    totalPayablePlanter.mul(gottenPortion).div(fullPortion)
+                );
+
+                emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
+            }
         }
     }
 
@@ -397,26 +444,6 @@ contract Treasury is Initializable, RelayRecipient {
         return
             _treeId >= assignModels[0].startingTreeId &&
             _treeId <= maxAssignedIndex;
-    }
-
-    function withdrawGb(uint256 _amount, string memory _reason)
-        external
-        ifNotPaused
-        onlyAdmin
-        validAddress(gbFundAddress)
-    {
-        require(
-            _amount <= totalFunds.gbFund && _amount > 0,
-            "insufficient amount"
-        );
-
-        totalFunds.gbFund = totalFunds.gbFund.sub(_amount);
-
-        if (gbFundAddress.send(_amount)) {
-            emit GbBalanceWithdrawn(_amount, gbFundAddress, _reason);
-        } else {
-            totalFunds.gbFund = totalFunds.gbFund.add(_amount);
-        }
     }
 
     function withdrawTreeResearch(uint256 _amount, string memory _reason)

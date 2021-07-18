@@ -12,7 +12,6 @@ interface ITreeAuction {
         uint256 _treeId,
         uint64 _startDate,
         uint64 _endDate,
-        uint256 _highestBid,
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external;

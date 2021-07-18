@@ -5,8 +5,6 @@ pragma solidity ^0.6.9;
 interface ITreasury {
     function isTreasury() external view returns (bool);
 
-    function setGbFundAddress(address payable _address) external;
-
     function setTreeResearchAddress(address payable _address) external;
 
     function setLocalDevelopAddress(address payable _address) external;
@@ -41,15 +39,13 @@ interface ITreasury {
     function fundPlanter(
         uint256 _treeId,
         address payable _planterId,
-        uint32 _treeStatus
+        uint64 _treeStatus
     ) external;
 
     function distributionModelExistance(uint256 _treeId)
         external
         view
         returns (bool);
-
-    function withdrawGb(uint256 _amount, string memory _reason) external;
 
     function withdrawTreeResearch(uint256 _amount, string memory _reason)
         external;
@@ -81,7 +77,7 @@ interface ITreasury {
         view
         returns (
             uint256 planterFund,
-            uint256 gbFund,
+            uint256 referralFund,
             uint256 treeResearch,
             uint256 localDevelop,
             uint256 rescueFund,
@@ -98,7 +94,6 @@ interface ITreasury {
     );
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
-    event GbBalanceWithdrawn(uint256 amount, address account, string reason);
     event TreeResearchBalanceWithdrawn(
         uint256 amount,
         address account,

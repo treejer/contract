@@ -3,7 +3,7 @@ const TreeAuction = artifacts.require("TreeAuction.sol");
 const GenesisTree = artifacts.require("GenesisTree.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
-const GBFactory = artifacts.require("GBFactory.sol");
+const Planter = artifacts.require("Planter.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -19,6 +19,7 @@ const {
 
 const Math = require("./math");
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
   let arInstance;
@@ -26,7 +27,7 @@ contract("TreeAuction", (accounts) => {
   let genesisTreeInstance;
   let startTime;
   let endTime;
-  let gbInstance;
+  let planterInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -72,7 +73,7 @@ contract("TreeAuction", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    gbInstance = await deployProxy(GBFactory, [arInstance.address], {
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -86,6 +87,14 @@ contract("TreeAuction", (accounts) => {
     );
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    await TreasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
     });
 
@@ -180,8 +189,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -197,8 +206,8 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .createAuction(
         treeId2,
-        Number(startTime.toString()),
-        Number(endTime.toString()),
+        Number(startTime),
+        Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
         { from: userAccount1 }
@@ -246,8 +255,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -256,8 +265,8 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .createAuction(
         treeId,
-        Number(startTime.toString()),
-        Number(endTime.toString()),
+        Number(startTime),
+        Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
@@ -282,8 +291,8 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .createAuction(
         treeId,
-        Number(startTime.toString()),
-        Number(endTime.toString()),
+        Number(startTime),
+        Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
@@ -313,8 +322,8 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .createAuction(
         treeId,
-        Number(startTime.toString()),
-        Number(endTime.toString()),
+        Number(startTime),
+        Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
@@ -365,8 +374,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       initialValue,
       bidInterval,
       { from: deployerAccount }
@@ -375,13 +384,10 @@ contract("TreeAuction", (accounts) => {
     let result = await treeAuctionInstance.auctions.call(0);
 
     assert.equal(result.treeId.toNumber(), treeId);
-    assert.equal(Number(result.highestBid.toString()), initialValue);
-    assert.equal(Number(result.bidInterval.toString()), bidInterval);
-    assert.equal(
-      Number(result.startDate.toString()),
-      Number(startTime.toString())
-    );
-    assert.equal(Number(result.endDate.toString()), Number(endTime.toString()));
+    assert.equal(Number(result.highestBid), initialValue);
+    assert.equal(Number(result.bidInterval), bidInterval);
+    assert.equal(Number(result.startDate), Number(startTime));
+    assert.equal(Number(result.endDate), Number(endTime));
     assert.equal(web3.utils.hexToUtf8(result.status), "started");
   });
 
@@ -423,8 +429,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -436,8 +442,7 @@ contract("TreeAuction", (accounts) => {
     });
     const resultAfter = await treeAuctionInstance.auctions.call(0);
     assert.equal(
-      Number(resultAfter.highestBid.toString()) -
-        Number(resultBefore.highestBid.toString()),
+      Number(resultAfter.highestBid) - Number(resultBefore.highestBid),
       web3.utils.toWei("0.15")
     );
   });
@@ -480,8 +485,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -536,8 +541,8 @@ contract("TreeAuction", (accounts) => {
 
     let tx = await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -595,8 +600,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -647,8 +652,8 @@ contract("TreeAuction", (accounts) => {
 
     let tx = await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -703,8 +708,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -716,10 +721,10 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "HighestBidIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == 0 &&
+        Number(ev.auctionId) == 0 &&
         ev.bidder == userAccount1 &&
-        Number(ev.amount.toString()) == web3.utils.toWei("1.15") &&
-        Number(ev.treeId.toString()) == treeId
+        Number(ev.amount) == web3.utils.toWei("1.15") &&
+        Number(ev.treeId) == treeId
       );
     });
   });
@@ -764,8 +769,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -777,10 +782,9 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == 0 &&
+        Number(ev.auctionId) == 0 &&
         ev.bidder == userAccount1 &&
-        Number(ev.newAuctionEndTime.toString()) ==
-          Number(endTime.toString()) + 600
+        Number(ev.newAuctionEndTime) == Number(endTime) + 600
       );
     });
   });
@@ -832,8 +836,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -903,8 +907,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -927,10 +931,10 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == 0 &&
-        Number(ev.treeId.toString()) == treeId &&
+        Number(ev.auctionId) == 0 &&
+        Number(ev.treeId) == treeId &&
         ev.winner == userAccount1 &&
-        Number(ev.amount.toString()) == highestBid
+        Number(ev.amount) == highestBid
       );
     });
   });
@@ -975,8 +979,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
@@ -1033,8 +1037,8 @@ contract("TreeAuction", (accounts) => {
     //create auction
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
@@ -1126,8 +1130,8 @@ contract("TreeAuction", (accounts) => {
     });
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
@@ -1232,8 +1236,8 @@ contract("TreeAuction", (accounts) => {
     });
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
@@ -1299,8 +1303,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
@@ -1367,8 +1371,8 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance
       .createAuction(
         treeId,
-        Number(startTime.toString()),
-        Number(endTime.toString()),
+        Number(startTime),
+        Number(endTime),
         web3.utils.toWei("1", "Ether"),
         web3.utils.toWei(".5", "Ether"),
         { from: deployerAccount }
@@ -1418,8 +1422,8 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance.createAuction(
       treeId,
-      Number(startTime.toString()),
-      Number(endTime.toString()),
+      Number(startTime),
+      Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
       { from: deployerAccount }
@@ -1440,11 +1444,11 @@ contract("TreeAuction", (accounts) => {
       .endAuction(auctionId, { from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
-  //------------------------------------------- complete proccess of auction ------------------------------------------ //
+
+  // //------------------------------------------- complete proccess of auction ------------------------------------------ //
+
   it("should do an acution completly", async () => {
     const treeId = 1;
-    const gbId = 1;
-    const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
     const initialValue = web3.utils.toWei("1");
@@ -1453,13 +1457,23 @@ contract("TreeAuction", (accounts) => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
-    await Common.addAmbassador(arInstance, userAccount8, deployerAccount);
     await Common.addPlanter(arInstance, userAccount7, deployerAccount);
-    await Common.addGB(gbInstance, userAccount8, [userAccount7], "gb1");
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
+
+    await Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount8,
+      zeroAddress,
+      deployerAccount
+    );
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      3,
+      userAccount7,
+      zeroAddress,
+      userAccount8
+    );
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -1516,7 +1530,7 @@ contract("TreeAuction", (accounts) => {
     assert.equal(auction1.bider, userAccount1, "bidder is incoreect");
 
     assert.equal(
-      Number(auction1.highestBid.toString()),
+      Number(auction1.highestBid),
       web3.utils.toWei("1.1"),
       "highest bid is incorrect"
     );
@@ -1532,7 +1546,7 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(auction2.bider, userAccount2, "bidder is incorrect");
     assert.equal(
-      Number(auction2.endDate.toString()) - Number(auction1.endDate.toString()),
+      Number(auction2.endDate) - Number(auction1.endDate),
       600,
       "time increse incorrect"
     );
@@ -1550,8 +1564,8 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(auction3.bider, userAccount1, "bider is incorrect");
     assert.equal(
-      Number(auction3.endDate.toString()),
-      Number(auction2.endDate.toString()),
+      Number(auction3.endDate),
+      Number(auction2.endDate),
       "increase end time inccorect"
     );
 
@@ -1569,7 +1583,7 @@ contract("TreeAuction", (accounts) => {
     const auction4 = await treeAuctionInstance.auctions.call(0);
 
     assert.equal(
-      Number(auction4.endDate.toString()) - Number(auction3.endDate.toString()),
+      Number(auction4.endDate) - Number(auction3.endDate),
       600,
       "increase end time incorrect"
     );
@@ -1583,7 +1597,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(contractBalanceBefore.toString()),
+      Number(contractBalanceBefore),
       Number(web3.utils.toWei("1.4")),
       "1.Contract balance not true"
     );
@@ -1595,7 +1609,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(contractBalanceAfter.toString()),
+      Number(contractBalanceAfter),
       0,
       "2.Contract balance not true"
     );
@@ -1621,7 +1635,7 @@ contract("TreeAuction", (accounts) => {
 
     let expected = {
       planterFund: (40 * amount) / 100,
-      gbFund: (12 * amount) / 100,
+      referralFund: (12 * amount) / 100,
       treeResearch: (12 * amount) / 100,
       localDevelop: (12 * amount) / 100,
       rescueFund: (12 * amount) / 100,
@@ -1630,66 +1644,58 @@ contract("TreeAuction", (accounts) => {
       otherFund2: 0,
     };
 
+    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
+
     assert.equal(
-      Number(pFund.toString()),
-      expected.planterFund,
-      "planter funds invalid"
+      Number(totalFunds.referralFund),
+      expected.referralFund,
+      "referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
-      expected.planterFund,
-      "planterFund totalFunds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.gbFund.toString()),
-      expected.gbFund,
-      "gbFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.treeResearch.toString()),
+      Number(totalFunds.treeResearch),
       expected.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop.toString()),
+      Number(totalFunds.localDevelop),
       expected.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund.toString()),
+      Number(totalFunds.rescueFund),
       expected.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop.toString()),
+      Number(totalFunds.treejerDevelop),
       expected.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1.toString()),
+      Number(totalFunds.otherFund1),
       expected.otherFund1,
       "otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2.toString()),
+      Number(totalFunds.otherFund2),
       expected.otherFund2,
       "otherFund2 funds invalid"
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(
-      treeId,
-      gbId,
-      userAccount7,
-      gbType,
-      { from: deployerAccount }
+    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount7, {
+      from: deployerAccount,
+    });
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
     );
 
     await genesisTreeInstance
@@ -1697,6 +1703,10 @@ contract("TreeAuction", (accounts) => {
         from: userAccount8,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
+
+    await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      from: userAccount8,
+    });
 
     await genesisTreeInstance.plantTree(
       treeId,
@@ -1721,8 +1731,6 @@ contract("TreeAuction", (accounts) => {
 
   it("complex test 1", async () => {
     const treeId = 1;
-    const gbId = 1;
-    const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
@@ -1742,18 +1750,15 @@ contract("TreeAuction", (accounts) => {
 
     await Common.successPlant(
       genesisTreeInstance,
-      gbInstance,
       arInstance,
       ipfsHash,
       treeId,
-      gbId,
-      gbType,
       birthDate,
       countryCode,
-      [userAccount2, userAccount3],
-      userAccount1,
+      [userAccount2],
       userAccount2,
-      deployerAccount
+      deployerAccount,
+      planterInstance
     );
 
     await TreasuryInstance.addFundDistributionModel(
@@ -1952,7 +1957,7 @@ contract("TreeAuction", (accounts) => {
 
     let expected = {
       planterFund: (30 * amount) / 100,
-      gbFund: (12 * amount) / 100,
+      referralFund: (12 * amount) / 100,
       treeResearch: (12 * amount) / 100,
       localDevelop: (12 * amount) / 100,
       rescueFund: (12 * amount) / 100,
@@ -1961,56 +1966,52 @@ contract("TreeAuction", (accounts) => {
       otherFund2: 0,
     };
 
-    assert.equal(
-      Number(pFund.toString()),
-      expected.planterFund,
-      "planter funds invalid"
-    );
+    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
+      Number(totalFunds.planterFund),
       expected.planterFund,
       "planterFund totalFunds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.gbFund.toString()),
-      expected.gbFund,
-      "gbFund funds invalid"
+      Number(totalFunds.referralFund),
+      expected.referralFund,
+      "referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treeResearch.toString()),
+      Number(totalFunds.treeResearch),
       expected.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop.toString()),
+      Number(totalFunds.localDevelop),
       expected.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund.toString()),
+      Number(totalFunds.rescueFund),
       expected.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop.toString()),
+      Number(totalFunds.treejerDevelop),
       expected.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1.toString()),
+      Number(totalFunds.otherFund1),
       expected.otherFund1,
       "otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2.toString()),
+      Number(totalFunds.otherFund2),
       expected.otherFund2,
       "otherFund2 funds invalid"
     );
@@ -2025,20 +2026,18 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == 1 &&
-        Number(ev.treeId.toString()) == treeId &&
+        Number(ev.auctionId) == 1 &&
+        Number(ev.treeId) == treeId &&
         ev.winner == userAccount4 &&
-        Number(ev.amount.toString()) == web3.utils.toWei("1.25", "Ether")
+        Number(ev.amount) == web3.utils.toWei("1.25", "Ether")
       );
     });
   });
 
-  //check hold auction
+  // check hold auction
   it("complex test 2", async () => {
     const treeId = 0;
     const auctionId = 0;
-    const gbId = 1;
-    const gbType = 1;
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
@@ -2062,18 +2061,15 @@ contract("TreeAuction", (accounts) => {
 
     await Common.successPlant(
       genesisTreeInstance,
-      gbInstance,
       arInstance,
       ipfsHash,
       treeId,
-      gbId,
-      gbType,
       birthDate,
       countryCode,
-      [userAccount2, userAccount6, userAccount7], //GB planter list
-      userAccount1,
+      [userAccount2],
       userAccount2,
-      deployerAccount
+      deployerAccount,
+      planterInstance
     );
 
     await TreasuryInstance.addFundDistributionModel(
@@ -2267,7 +2263,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
-      from: userAccount7,
+      from: deployerAccount,
     });
 
     let planterBalance = await TreasuryInstance.balances.call(userAccount2);
@@ -2294,10 +2290,9 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == 0 &&
+        Number(ev.auctionId) == 0 &&
         ev.bidder == userAccount4 &&
-        Number(ev.newAuctionEndTime.toString()) ==
-          Math.add(Number(endTime.toString()), 600)
+        Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
 
@@ -2346,10 +2341,10 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == auctionId &&
-        Number(ev.treeId.toString()) == treeId &&
+        Number(ev.auctionId) == auctionId &&
+        Number(ev.treeId) == treeId &&
         ev.winner == userAccount4 &&
-        Number(ev.amount.toString()) == web3.utils.toWei("2.52", "Ether")
+        Number(ev.amount) == web3.utils.toWei("2.52", "Ether")
       );
     });
 
@@ -2366,7 +2361,7 @@ contract("TreeAuction", (accounts) => {
 
     let expected = {
       planterFund: (35 * amount) / 100,
-      gbFund: (10 * amount) / 100,
+      referralFund: (10 * amount) / 100,
       treeResearch: (10 * amount) / 100,
       localDevelop: (15 * amount) / 100,
       rescueFund: (10 * amount) / 100,
@@ -2375,56 +2370,52 @@ contract("TreeAuction", (accounts) => {
       otherFund2: 0,
     };
 
-    assert.equal(
-      Number(pFund.toString()),
-      expected.planterFund,
-      "planter funds invalid"
-    );
+    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
 
     assert.equal(
-      Number(totalFunds.planterFund.toString()),
+      Number(totalFunds.planterFund),
       expected.planterFund,
       "planterFund totalFunds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.gbFund.toString()),
-      expected.gbFund,
-      "gbFund funds invalid"
+      Number(totalFunds.referralFund),
+      expected.referralFund,
+      "referralFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treeResearch.toString()),
+      Number(totalFunds.treeResearch),
       expected.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop.toString()),
+      Number(totalFunds.localDevelop),
       expected.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund.toString()),
+      Number(totalFunds.rescueFund),
       expected.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop.toString()),
+      Number(totalFunds.treejerDevelop),
       expected.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1.toString()),
+      Number(totalFunds.otherFund1),
       expected.otherFund1,
       "otherFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2.toString()),
+      Number(totalFunds.otherFund2),
       expected.otherFund2,
       "otherFund2 funds invalid"
     );
@@ -2435,7 +2426,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
-      from: userAccount7,
+      from: deployerAccount,
     });
 
     let planterBalance2 = await TreasuryInstance.balances.call(userAccount2);
@@ -2502,7 +2493,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await genesisTreeInstance.verifyUpdate(treeId, true, {
-      from: userAccount7,
+      from: deployerAccount,
     });
 
     let planterBalance4 = await TreasuryInstance.balances.call(userAccount2);
@@ -2525,8 +2516,8 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(plantersPaidTreeId0_2.toString()),
-      Number(planterFundsTreeId0_2.toString()),
+      Number(plantersPaidTreeId0_2),
+      Number(planterFundsTreeId0_2),
       "planter paid not equal to planter funds"
     );
 
@@ -2543,7 +2534,7 @@ contract("TreeAuction", (accounts) => {
 
     let totalFunds2 = await TreasuryInstance.totalFunds();
 
-    let treejerDevelopBalance = totalFunds2.treejerDevelop.toString();
+    let treejerDevelopBalance = totalFunds2.treejerDevelop;
     let ownerAccountBalanceBefore = await web3.eth.getBalance(ownerAccount);
 
     await TreasuryInstance.setTreejerDevelopAddress(ownerAccount, {
@@ -2551,7 +2542,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await TreasuryInstance.withdrawTreejerDevelop(
-      web3.utils.toWei(totalFunds2.treejerDevelop.toString(), "wei"),
+      web3.utils.toWei(totalFunds2.treejerDevelop, "wei"),
       "reason message",
       {
         from: deployerAccount,
@@ -2561,10 +2552,10 @@ contract("TreeAuction", (accounts) => {
     let ownerAccountBalanceAfter = await web3.eth.getBalance(ownerAccount);
 
     assert.equal(
-      Number(ownerAccountBalanceAfter.toString()),
+      Number(ownerAccountBalanceAfter),
       Math.add(
-        Number(ownerAccountBalanceBefore.toString()),
-        Number(treejerDevelopBalance.toString())
+        Number(ownerAccountBalanceBefore),
+        Number(treejerDevelopBalance)
       ),
       "1.owner balance not true"
     );
@@ -2575,7 +2566,7 @@ contract("TreeAuction", (accounts) => {
         Number(web3.utils.toWei("2.52")),
         Math.add(
           Number(web3.utils.toWei(".001")),
-          Number(treejerDevelopBalance.toString())
+          Number(treejerDevelopBalance)
         )
       ),
       "3.treasury balance not true"
@@ -2585,7 +2576,6 @@ contract("TreeAuction", (accounts) => {
   it("complex test 3 ( complete auction done ) ", async () => {
     const treeId1 = 1;
     const treeId2 = 2;
-    const gbId = 1;
     const auctionId1 = 0;
     const initialPrice = web3.utils.toWei("1");
     const bidInterval = web3.utils.toWei("0.1");
@@ -2699,11 +2689,10 @@ contract("TreeAuction", (accounts) => {
     });
     truffleAssert.eventEmitted(bidTx, "HighestBidIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == auctionId1 &&
+        Number(ev.auctionId) == auctionId1 &&
         ev.treeId == treeId1 &&
         ev.bidder == userAccount8 &&
-        Number(ev.amount.toString()) ==
-          Number(web3.utils.toWei("1.5").toString())
+        Number(ev.amount) == Number(web3.utils.toWei("1.5"))
       );
     });
 
@@ -2719,24 +2708,23 @@ contract("TreeAuction", (accounts) => {
 
     truffleAssert.eventEmitted(FinalBidTx, "HighestBidIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == auctionId1 &&
+        Number(ev.auctionId) == auctionId1 &&
         ev.treeId == treeId1 &&
         ev.bidder == userAccount7 &&
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("2").toString())
+        Number(ev.amount) == Number(web3.utils.toWei("2"))
       );
     });
 
     assert.equal(
-      Number(initailAuction.endDate.toString()) + 600,
-      Number(auctionAfterEndTimeIncrease.endDate.toString()),
+      Number(initailAuction.endDate) + 600,
+      Number(auctionAfterEndTimeIncrease.endDate),
       "invaild end time for auction after increase time"
     );
     truffleAssert.eventEmitted(FinalBidTx, "AuctionEndTimeIncreased", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == auctionId1 &&
+        Number(ev.auctionId) == auctionId1 &&
         ev.bidder == userAccount7 &&
-        Number(ev.newAuctionEndTime.toString()) ==
-          Number(initailAuction.endDate.toString()) + 600
+        Number(ev.newAuctionEndTime) == Number(initailAuction.endDate) + 600
       );
     });
 
@@ -2746,42 +2734,42 @@ contract("TreeAuction", (accounts) => {
     const totalFundBeforeAuctionEnd = await TreasuryInstance.totalFunds();
     ///------------ check totalFunds before auction end
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.planterFund.toString()),
+      Number(totalFundBeforeAuctionEnd.planterFund),
       0,
       "invalid planterFund"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.gbFund.toString()),
+      Number(totalFundBeforeAuctionEnd.referralFund),
       0,
-      "invalid gbFund"
+      "invalid referralFund"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.treeResearch.toString()),
+      Number(totalFundBeforeAuctionEnd.treeResearch),
       0,
       "invalid treeResearch"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.localDevelop.toString()),
+      Number(totalFundBeforeAuctionEnd.localDevelop),
       0,
       "invalid localDevelop"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.rescueFund.toString()),
+      Number(totalFundBeforeAuctionEnd.rescueFund),
       0,
       "invalid rescueFund"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.treejerDevelop.toString()),
+      Number(totalFundBeforeAuctionEnd.treejerDevelop),
       0,
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.otherFund1.toString()),
+      Number(totalFundBeforeAuctionEnd.otherFund1),
       0,
       "invalid otherFund1"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.otherFund2.toString()),
+      Number(totalFundBeforeAuctionEnd.otherFund2),
       0,
       "invalid otherFund2"
     );
@@ -2798,15 +2786,14 @@ contract("TreeAuction", (accounts) => {
 
     let tokenOwner = await treeTokenInstance.ownerOf(treeId1);
     assert.equal(tokenOwner, userAccount7, "token owner not correct");
-    const totalPlanterFund =
-      (Number(web3.utils.toWei("2").toString()) * 5000) / 10000;
+    const totalPlanterFund = (Number(web3.utils.toWei("2")) * 5000) / 10000;
     const expectedPayValue = {
-      planterFund: (Number(web3.utils.toWei("2").toString()) * 5000) / 10000,
-      gbFund: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
-      treeResearch: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
-      localDevelop: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
-      rescueFund: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
-      treejerDevelop: (Number(web3.utils.toWei("2").toString()) * 1000) / 10000,
+      planterFund: (Number(web3.utils.toWei("2")) * 5000) / 10000,
+      referralFund: (Number(web3.utils.toWei("2")) * 1000) / 10000,
+      treeResearch: (Number(web3.utils.toWei("2")) * 1000) / 10000,
+      localDevelop: (Number(web3.utils.toWei("2")) * 1000) / 10000,
+      rescueFund: (Number(web3.utils.toWei("2")) * 1000) / 10000,
+      treejerDevelop: (Number(web3.utils.toWei("2")) * 1000) / 10000,
       otherFund1: 0,
       otherFund2: 0,
     };
@@ -2814,78 +2801,79 @@ contract("TreeAuction", (accounts) => {
     const totalFundAfterAuctionEnd = await TreasuryInstance.totalFunds();
     ///------------ check totalFunds after auction end
     assert.equal(
-      Number(totalFundAfterAuctionEnd.planterFund.toString()),
+      Number(totalFundAfterAuctionEnd.planterFund),
       expectedPayValue.planterFund,
       "invalid planterFund"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.gbFund.toString()),
-      expectedPayValue.gbFund,
-      "invalid gbFund"
+      Number(totalFundAfterAuctionEnd.referralFund),
+      expectedPayValue.referralFund,
+      "invalid referralFund"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.treeResearch.toString()),
+      Number(totalFundAfterAuctionEnd.treeResearch),
       expectedPayValue.treeResearch,
       "invalid treeResearch"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.localDevelop.toString()),
+      Number(totalFundAfterAuctionEnd.localDevelop),
       expectedPayValue.localDevelop,
       "invalid localDevelop"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.rescueFund.toString()),
+      Number(totalFundAfterAuctionEnd.rescueFund),
       expectedPayValue.rescueFund,
       "invalid rescueFund"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.treejerDevelop.toString()),
+      Number(totalFundAfterAuctionEnd.treejerDevelop),
       expectedPayValue.treejerDevelop,
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.otherFund1.toString()),
+      Number(totalFundAfterAuctionEnd.otherFund1),
       expectedPayValue.otherFund1,
       "invalid otherFund1"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.otherFund2.toString()),
+      Number(totalFundAfterAuctionEnd.otherFund2),
       expectedPayValue.otherFund2,
       "invalid otherFund2"
     );
     ///////////------------ check charge treasury contract
     assert.equal(
-      Number(treasuryBalanceAfterAuctionEnd.toString()) -
-        Number(treasuryBalanceBeforeAuctionEnd.toString()),
-      Number(web3.utils.toWei("2").toString()),
+      Number(treasuryBalanceAfterAuctionEnd) -
+        Number(treasuryBalanceBeforeAuctionEnd),
+      Number(web3.utils.toWei("2")),
       "treasury done charge correctly"
     );
 
     truffleAssert.eventEmitted(endAuctionTx, "AuctionEnded", (ev) => {
       return (
-        Number(ev.auctionId.toString()) == auctionId1 &&
-        Number(ev.treeId.toString()) == treeId1 &&
+        Number(ev.auctionId) == auctionId1 &&
+        Number(ev.treeId) == treeId1 &&
         ev.winner == userAccount7 &&
-        Number(ev.amount.toString()) == Number(web3.utils.toWei("2").toString())
+        Number(ev.amount) == Number(web3.utils.toWei("2"))
       );
     });
-    //////////////// ----------------------- setting up gb
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
+
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+    /////////////----------------------- plant tree
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      1,
+      userAccount2,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await genesisTreeInstance.asignTreeToPlanter(treeId1, userAccount2, {
       from: deployerAccount,
     });
-    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
-    /////////////----------------------- plant tree
-    await genesisTreeInstance.asignTreeToPlanter(
-      treeId1,
-      gbId,
-      userAccount2,
-      1,
-      {
-        from: deployerAccount,
-      }
-    );
     await genesisTreeInstance.plantTree(treeId1, ipfsHash, 1, 1, {
       from: userAccount2,
     });
@@ -2896,7 +2884,7 @@ contract("TreeAuction", (accounts) => {
     await genesisTreeInstance
       .updateTree(treeId1, ipfsHash, { from: userAccount2 })
       .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
-    await Common.travelTime(TimeEnumes.hours, 26);
+    await Common.travelTime(TimeEnumes.hours, 27);
 
     await genesisTreeInstance.updateTree(treeId1, ipfsHash, {
       from: userAccount2,
@@ -2915,18 +2903,18 @@ contract("TreeAuction", (accounts) => {
     );
     const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId1);
     const expectedPaidAfterFundPlanter = parseInt(
-      (totalPlanterFund * Number(resultAfterGT.treeStatus.toString())) / 25920
+      (totalPlanterFund * Number(resultAfterGT.treeStatus)) / 25920
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.planterFund.toString()) -
+      Number(totalFundAfterAuctionEnd.planterFund) -
         expectedPaidAfterFundPlanter,
-      Number(totalFundsAfterFundPlanter.planterFund.toString()),
+      Number(totalFundsAfterFundPlanter.planterFund),
       "planter total fund is not ok"
     );
 
     ///////////// ------------------------- check paid planter funds
     assert.equal(
-      Number(planterPaidAfterVerify.toString()),
+      Number(planterPaidAfterVerify),
       expectedPaidAfterFundPlanter,
       "planter paid not correct"
     );
@@ -2937,7 +2925,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(planterPaidBeforeWithdrawTotalAmount.toString()),
+      Number(planterPaidBeforeWithdrawTotalAmount),
       expectedPaidAfterFundPlanter,
       "planter balance before withdraw is not ok"
     );
@@ -2954,7 +2942,7 @@ contract("TreeAuction", (accounts) => {
       userAccount2
     );
     assert.equal(
-      Number(planterPaidAfterWithdrawTotalAmount.toString()),
+      Number(planterPaidAfterWithdrawTotalAmount),
       0,
       "planter fund is not ok after withdraw total amount"
     );

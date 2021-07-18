@@ -2,6 +2,8 @@ const Units = require("ethereumjs-units");
 const { time } = require("@openzeppelin/test-helpers");
 var Common = {};
 
+const assert = require("chai").assert;
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 const DEFAULT_ADMIN_ROLE =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 const AMBASSADOR_ROLE = web3.utils.soliditySha3("AMBASSADOR_ROLE");
@@ -12,6 +14,8 @@ const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 const GENESIS_TREE_ROLE = web3.utils.soliditySha3("GENESIS_TREE_ROLE");
+
+const Math = require("./math");
 
 Common.sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -137,40 +141,43 @@ Common.getNow = async () => {
 
 Common.successPlant = async (
   genesisTreeInstance,
-  gbInstance,
   arInstance,
   ipfsHash,
   treeId,
-  gbId,
-  gbType,
   birthDate,
   countryCode,
-  gbPlanterList,
-  ambassadorAddress,
+  planterList,
   planterAddress,
-  deployerAccount
+  deployerAccount,
+  planterInstance
 ) => {
-  await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-    from: deployerAccount,
-  });
+  await Common.addGenesisTreeRole(
+    arInstance,
+    genesisTreeInstance.address,
+    deployerAccount
+  );
 
-  await Common.addAmbassador(arInstance, ambassadorAddress, deployerAccount);
-
-  await gbPlanterList.map(async (item) => {
+  await planterList.map(async (item) => {
     await Common.addPlanter(arInstance, item, deployerAccount);
   });
 
-  await Common.addGB(gbInstance, ambassadorAddress, gbPlanterList, "gb1");
+  await planterList.map(async (item) => {
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      item,
+      zeroAddress,
+      zeroAddress
+    );
+  });
+
   await genesisTreeInstance.addTree(treeId, ipfsHash, {
     from: deployerAccount,
   });
-  await genesisTreeInstance.asignTreeToPlanter(
-    treeId,
-    gbId,
-    planterAddress,
-    gbType,
-    { from: deployerAccount }
-  );
+
+  await genesisTreeInstance.asignTreeToPlanter(treeId, planterAddress, {
+    from: deployerAccount,
+  });
 
   await genesisTreeInstance.plantTree(
     treeId,
@@ -182,9 +189,141 @@ Common.successPlant = async (
     }
   );
   await genesisTreeInstance.verifyPlant(treeId, true, {
-    from: ambassadorAddress,
+    from: deployerAccount,
   });
 };
+Common.joinSimplePlanter = async (
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
+
+Common.joinOrganizationPlanter = async (
+  instance,
+  organizationAddress,
+  refferedBy,
+  adminAccount
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+  const capcity = 1000;
+  await instance.organizationJoin(
+    organizationAddress,
+    longitude,
+    latitude,
+    countryCode,
+    capcity,
+    refferedBy,
+    { from: adminAccount }
+  );
+};
+Common.joinSimplePlanterFromGenesis = async (
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress,
+  genesisTreeInstance,
+  adminAccount
+) => {
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
+
+Common.getTransactionFee = async (tx) => {
+  const gasUsed = tx.receipt.gasUsed;
+  const gasPrice = (await web3.eth.getTransaction(tx.tx)).gasPrice;
+
+  return Math.mul(gasPrice, gasUsed);
+};
+
+Common.successPlanterJoin = async (
+  arInstance,
+  adminAccount,
+  planterInstance,
+  planterType,
+  planterAddress,
+  refferedBy,
+  organizationAddress
+) => {
+  await Common.addPlanter(arInstance, planterAddress, adminAccount);
+
+  if (refferedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  }
+
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+
+  await planterInstance.planterJoin(
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    refferedBy,
+    organizationAddress,
+    { from: planterAddress }
+  );
+};
+
+Common.successOrganizationPlanterJoin = async (
+  arInstance,
+  instance,
+  organizationAddress,
+  refferedBy,
+  adminAccount
+) => {
+  await Common.addPlanter(arInstance, organizationAddress, adminAccount);
+
+  if (refferedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  }
+
+  let longitude = 1;
+  let latitude = 2;
+  const countryCode = 10;
+  const capcity = 1000;
+
+  await instance.organizationJoin(
+    organizationAddress,
+    longitude,
+    latitude,
+    countryCode,
+    capcity,
+    refferedBy,
+    { from: adminAccount }
+  );
+};
+
 Common.successFundTree = async (
   arInstance,
   deployerAccount,
@@ -241,4 +380,24 @@ Common.successFundTree = async (
     value: fundAmount,
   });
 };
+
+Common.acceptPlanterByOrganization = async (
+  planterInstance,
+  organizationAddress,
+  planterAddress,
+  planterProtion
+) => {
+  await planterInstance.acceptPlanterFromOrganization(planterAddress, true, {
+    from: organizationAddress,
+  });
+
+  await planterInstance.updateOrganizationPlanterPayment(
+    planterAddress,
+    planterProtion,
+    {
+      from: organizationAddress,
+    }
+  );
+};
+
 module.exports = Common;

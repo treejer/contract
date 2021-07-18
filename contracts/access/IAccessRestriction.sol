@@ -75,6 +75,10 @@ interface IAccessRestriction {
 
     function isGenesisTree(address _address) external view returns (bool);
 
+    function ifTreasury(address _address) external view;
+
+    function isTreasury(address _address) external view returns (bool);
+
     function paused() external view returns (bool);
 
     function ifNotPaused() external view;

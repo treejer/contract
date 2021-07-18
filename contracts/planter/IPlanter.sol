@@ -70,4 +70,6 @@ interface IPlanter {
         );
 
     function reducePlantCount(address _planterAddress) external;
+
+    function planterCheck(address _planterAddress) external returns (bool);
 }

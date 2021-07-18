@@ -336,4 +336,26 @@ contract Planter is Initializable, RelayRecipient {
             tempPlanter.status = 1;
         }
     }
+
+    function planterCheck(address _planterAddress)
+        external
+        existPlanter(_planterAddress)
+        onlyGenesisTree
+        returns (bool)
+    {
+        PlanterData storage tempPlanter = planters[_planterAddress];
+
+        if (tempPlanter.status == 1) {
+            tempPlanter.plantedCount = tempPlanter
+            .plantedCount
+            .add(1)
+            .toUint32();
+
+            if (tempPlanter.plantedCount == tempPlanter.capacity) {
+                tempPlanter.status = 2;
+            }
+            return true;
+        }
+        return false;
+    }
 }

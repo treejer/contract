@@ -1789,6 +1789,119 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
   });
 
+  /////////// ---------------------------- planter check ---------------------------------------------------------
+
+  it("should planterCheck return true", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.planterCheck.call(
+      userAccount1,
+      { from: userAccount2 },
+      (err, result) => {
+        if (err) {
+          console.log("err", err);
+        } else {
+          assert.equal(result, true, "it must return true");
+        }
+      }
+    );
+  });
+  it("should planterCheck return false", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.updateCapacity(userAccount1, 1, {
+      from: deployerAccount,
+    });
+
+    await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
+
+    await planterInstance.planterCheck.call(
+      userAccount1,
+      { from: userAccount2 },
+      (err, result) => {
+        if (err) {
+          console.log("err", err);
+        } else {
+          assert.equal(result, false, "it must return false");
+        }
+      }
+    );
+  });
+
+  it("should check data to be correct when call planterCheck function", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
+
+    const planter1 = await planterInstance.planters.call(userAccount1);
+
+    assert.equal(planter1.status, 1, "status is incorrect");
+    assert.equal(planter1.plantedCount, 1, "plant count is incorrect");
+
+    await planterInstance.updateCapacity(userAccount1, 2, {
+      from: deployerAccount,
+    });
+
+    await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
+
+    const planter2 = await planterInstance.planters.call(userAccount1);
+
+    assert.equal(planter2.status, 2, "planter status is incorrect");
+    assert.equal(planter2.plantedCount, 2, "planted count is incorrect");
+  });
+
+  it("should fail planterCheck", async () => {
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      1,
+      userAccount1,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterInstance
+      .planterCheck(userAccount3, { from: userAccount2 })
+      .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+
+    await planterInstance
+      .planterCheck(userAccount1, { from: userAccount3 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+  });
+
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");

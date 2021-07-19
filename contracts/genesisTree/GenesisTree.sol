@@ -93,6 +93,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyRegularSellContract() {
+        accessRestriction.ifRegularSell(_msgSender());
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -391,17 +396,18 @@ contract GenesisTree is Initializable, RelayRecipient {
         regularTreeId.increment();
     }
 
-    function verifyRegularPlant(uint256 regularTreeId, bool isVerified)
+    function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)
         external
     {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(regularTreeId, _msgSender()),
+                _checkPlanter(_regularTreeId, _msgSender()),
             "Admin or planter can accept updates"
         );
 
         if (isVerified) {
             uint256 tempLastRegularPlantedTree = lastRegularPlantedTree;
+
             while (
                 !(genTrees[lastRegularPlantedTree].treeStatus == 0) ||
                 !(genTrees[lastRegularPlantedTree].provideStatus == 0)
@@ -413,31 +419,51 @@ contract GenesisTree is Initializable, RelayRecipient {
 
             GenTree storage genTree = genTrees[lastRegularPlantedTree];
 
-            RegularTree storage regularTree = regularTrees[regularTreeId];
+            RegularTree storage regularTree = regularTrees[_regularTreeId];
 
             genTree.plantDate = regularTree.plantDate;
-            // genTree.countryCode = regularTree.countryCode;
+            genTree.countryCode = uint32(regularTree.countryCode);
             genTree.birthDate = regularTree.birthDate;
             genTree.treeSpecs = regularTree.treeSpecs;
             genTree.planterId = regularTree.planterAddress;
-
             genTree.treeStatus = 4;
 
             if (!treeToken.exists(lastRegularPlantedTree)) {
                 genTree.provideStatus = 4;
             }
 
-            delete regularTrees[regularTreeId];
+            delete regularTrees[_regularTreeId];
         }
     }
 
-    // function mintRegularTrees(uint256 lastSold, address newOwner)
-    //     external
-    //     onlyRegularSellContract(_msgSender())
-    // {
-    //     uint256 x = lastSold + 1;
+    function mintRegularTrees(uint256 lastSold, address _owner)
+        external
+        onlyRegularSellContract
+        returns (uint256)
+    {
+        uint256 localLastSold = lastSold.add(1);
 
-    // }
+        bool flag = (genTrees[localLastSold].treeStatus == 0 &&
+            genTrees[localLastSold].provideStatus == 0) ||
+            (genTrees[localLastSold].treeStatus == 4 &&
+                genTrees[localLastSold].provideStatus == 4);
+
+        while (!flag) {
+            localLastSold = localLastSold.add(1);
+
+            flag =
+                (genTrees[localLastSold].treeStatus == 0 &&
+                    genTrees[localLastSold].provideStatus == 0) ||
+                (genTrees[localLastSold].treeStatus == 4 &&
+                    genTrees[localLastSold].provideStatus == 4);
+        }
+
+        treeToken.safeMint(_owner, localLastSold);
+
+        genTrees[localLastSold].provideStatus == 0;
+
+        return localLastSold;
+    }
 
     function _checkPlanter(uint256 _treeId, address _sender)
         private

@@ -79,6 +79,10 @@ interface IAccessRestriction {
 
     function isTreasury(address _address) external view returns (bool);
 
+    function ifRegularSell(address _address) external view;
+
+    function isRegularSell(address _address) external view returns (bool);
+
     function paused() external view returns (bool);
 
     function ifNotPaused() external view;

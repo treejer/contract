@@ -412,7 +412,7 @@ contract GenesisTree is Initializable, RelayRecipient {
                 !(genTrees[lastRegularPlantedTree].treeStatus == 0) ||
                 !(genTrees[lastRegularPlantedTree].provideStatus == 0)
             ) {
-                tempLastRegularPlantedTree += 1;
+                tempLastRegularPlantedTree = tempLastRegularPlantedTree.add(1);
             }
 
             lastRegularPlantedTree = tempLastRegularPlantedTree;

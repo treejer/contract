@@ -465,6 +465,16 @@ contract GenesisTree is Initializable, RelayRecipient {
         return localLastSold;
     }
 
+    function requestRegularTree(uint256 _treeId, address _owner) external {
+        GenTree storage genTree = genTrees[_treeId];
+
+        require(genTree.treeStatus == 4 && genTree.provideStatus == 4);
+
+        genTree.provideStatus = 0;
+
+        treeToken.safeMint(_owner, _treeId);
+    }
+
     function _checkPlanter(uint256 _treeId, address _sender)
         private
         view

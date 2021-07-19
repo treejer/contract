@@ -38,15 +38,20 @@ interface IGenesisTree {
 
     function updateAvailability(uint256 treeId) external;
 
-    function mintRegularTrees(uint256 lastSold, address _owner)
-        external
-        returns (uint256);
-
     // function updateTreefromOffer(
     //     uint256 _treeId,
     //     string memory _specsCid,
     //     address _owner
     // ) external;
+
+    function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)
+        external;
+
+    function mintRegularTrees(uint256 lastSold, address _owner)
+        external
+        returns (uint256);
+
+    function requestRegularTree(uint256 _treeId, address _owner) external;
 
     event TreePlanted(uint256 treeId, address planter);
     event PlantVerified(uint256 treeId, uint256 updateStatus);

@@ -10,8 +10,8 @@ import "../genesisTree/IGenesisTree.sol";
 contract RegularSell is Initializable {
     using SafeMathUpgradeable for uint256;
 
-    uint256 lastSoldRegularTree = 10000;
-    uint256 treePrice;
+    uint256 public lastSoldRegularTree;
+    uint256 public treePrice;
 
     bool public isRegularSell;
     IAccessRestriction public accessRestriction;
@@ -29,6 +29,7 @@ contract RegularSell is Initializable {
         );
         require(candidateContract.isAccessRestriction());
         isRegularSell = true;
+        lastSoldRegularTree = 10000;
         accessRestriction = candidateContract;
     }
 

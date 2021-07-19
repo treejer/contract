@@ -71,7 +71,8 @@ contract RegularSell is Initializable {
         require(_treeId > lastSoldRegularTree, "invlid tree");
         require(daiToken.balanceOf(msg.sender) >= treePrice, "invalid amount");
 
-        // treeFactory.requestRegularTree(_treeId, msg.sender);// un comment here after develop
+        treeFactory.requestRegularTree(_treeId, msg.sender);
+
         //treasury call here;
     }
 }

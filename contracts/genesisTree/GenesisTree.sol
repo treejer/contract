@@ -4,6 +4,7 @@ pragma solidity ^0.6.9;
 
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
@@ -13,12 +14,15 @@ import "../treasury/ITreasury.sol";
 import "../planter/IPlanter.sol";
 
 contract GenesisTree is Initializable, RelayRecipient {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
     using SafeMathUpgradeable for uint256;
     using SafeMathUpgradeable for uint64;
     using SafeMathUpgradeable for uint32;
     using SafeMathUpgradeable for uint16;
+
+    CountersUpgradeable.Counter private regularTreeId;
 
     bool public isGenesisTree;
 
@@ -27,6 +31,8 @@ contract GenesisTree is Initializable, RelayRecipient {
     IGBFactory public gbFactory;
     ITreasury public treasury;
     IPlanter public planter;
+
+    uint256 public lastRegularPlantedTree;
 
     struct GenTree {
         address payable planterId;
@@ -44,8 +50,18 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint64 updateStatus;
     }
 
+    struct RegularTree {
+        uint64 birthDate;
+        uint64 plantDate;
+        uint64 countryCode;
+        uint64 otherData;
+        address payable planterAddress;
+        string treeSpecs;
+    }
+
     mapping(uint256 => GenTree) public genTrees; //tree id to GenesisTree struct
     mapping(uint256 => UpdateGenTree) public updateGenTrees; //tree id to UpdateGenesisTree struct
+    mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
 
     event TreePlanted(uint256 treeId, address planter);
     event PlantVerified(uint256 treeId, uint256 updateStatus);
@@ -86,6 +102,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         isGenesisTree = true;
         accessRestriction = candidateContract;
+        lastRegularPlantedTree = 10000;
     }
 
     function setTrustedForwarder(address _address) external onlyAdmin {
@@ -354,6 +371,72 @@ contract GenesisTree is Initializable, RelayRecipient {
     //     genTrees[_treeId].treeSpecs = _specsCid;
 
     //     treeToken.safeMint(_owner, _treeId);
+    // }
+
+    function regularPlantTree(
+        string memory _treeSpecs,
+        uint64 _birthDate,
+        uint16 _countryCode
+    ) external {
+        require(planter.planterCheck(_msgSender()));
+
+        RegularTree storage regularTree = regularTrees[regularTreeId.current()];
+
+        regularTree.treeSpecs = _treeSpecs;
+        regularTree.birthDate = _birthDate;
+        regularTree.countryCode = _countryCode;
+        regularTree.plantDate = now.toUint64();
+        regularTree.planterAddress = _msgSender();
+
+        regularTreeId.increment();
+    }
+
+    function verifyRegularPlant(uint256 regularTreeId, bool isVerified)
+        external
+    {
+        require(
+            accessRestriction.isAdmin(_msgSender()) ||
+                _checkPlanter(regularTreeId, _msgSender()),
+            "Admin or planter can accept updates"
+        );
+
+        if (isVerified) {
+            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree;
+            while (
+                !(genTrees[lastRegularPlantedTree].treeStatus == 0) ||
+                !(genTrees[lastRegularPlantedTree].provideStatus == 0)
+            ) {
+                tempLastRegularPlantedTree += 1;
+            }
+
+            lastRegularPlantedTree = tempLastRegularPlantedTree;
+
+            GenTree storage genTree = genTrees[lastRegularPlantedTree];
+
+            RegularTree storage regularTree = regularTrees[regularTreeId];
+
+            genTree.plantDate = regularTree.plantDate;
+            // genTree.countryCode = regularTree.countryCode;
+            genTree.birthDate = regularTree.birthDate;
+            genTree.treeSpecs = regularTree.treeSpecs;
+            genTree.planterId = regularTree.planterAddress;
+
+            genTree.treeStatus = 4;
+
+            if (!treeToken.exists(lastRegularPlantedTree)) {
+                genTree.provideStatus = 4;
+            }
+
+            delete regularTrees[regularTreeId];
+        }
+    }
+
+    // function mintRegularTrees(uint256 lastSold, address newOwner)
+    //     external
+    //     onlyRegularSellContract(_msgSender())
+    // {
+    //     uint256 x = lastSold + 1;
+
     // }
 
     function _checkPlanter(uint256 _treeId, address _sender)

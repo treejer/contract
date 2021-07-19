@@ -155,7 +155,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         GenTree storage genTree = genTrees[_treeId];
 
-        genTree.treeStatus = 1;
+        genTree.treeStatus = 2;
         genTree.treeSpecs = _treeDescription;
     }
 
@@ -166,7 +166,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     {
         GenTree storage tempTree = genTrees[_treeId];
 
-        require(tempTree.treeStatus == 1, "the tree is planted");
+        require(tempTree.treeStatus == 2, "the tree is planted");
 
         require(_planterId != address(0), "invalid planter address");
 
@@ -185,7 +185,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     ) external validTree(_treeId) validIpfs(_treeSpecs) {
         GenTree storage tempGenTree = genTrees[_treeId];
 
-        require(tempGenTree.treeStatus == 1, "invalid tree status for plant");
+        require(tempGenTree.treeStatus == 2, "invalid tree status for plant");
 
         require(tempGenTree.planterId != address(0), "invalid planter address");
 
@@ -208,7 +208,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         tempGenTree.countryCode = _countryCode;
         tempGenTree.birthDate = _birthDate;
         tempGenTree.plantDate = now.toUint64();
-        tempGenTree.treeStatus = 2;
+        tempGenTree.treeStatus = 3;
 
         emit TreePlanted(_treeId, tempGenTree.planterId);
     }
@@ -220,7 +220,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     {
         GenTree storage tempGenTree = genTrees[_treeId];
 
-        require(tempGenTree.treeStatus == 2, "invalid tree status");
+        require(tempGenTree.treeStatus == 3, "invalid tree status");
 
         require(
             tempGenTree.planterId != _msgSender(),
@@ -237,10 +237,10 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         if (_isVerified) {
             tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
-            tempGenTree.treeStatus = 3;
+            tempGenTree.treeStatus = 4;
             tempUpdateGenTree.updateStatus = 3;
         } else {
-            tempGenTree.treeStatus = 1;
+            tempGenTree.treeStatus = 2;
             tempUpdateGenTree.updateStatus = 2;
             planter.reducePlantCount(tempGenTree.planterId);
         }
@@ -258,7 +258,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             "Only Planter of tree can send update"
         );
 
-        require(genTrees[_treeId].treeStatus > 2, "Tree not planted");
+        require(genTrees[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
             updateGenTrees[_treeId].updateStatus != 1,
@@ -296,7 +296,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             "update status must be pending"
         );
 
-        require(genTrees[_treeId].treeStatus > 2, "Tree not planted");
+        require(genTrees[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||

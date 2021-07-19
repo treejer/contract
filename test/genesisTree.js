@@ -189,7 +189,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
     assert.equal(Number(result1.treeType), 0, "incorrect treeType");
     assert.equal(Number(result1.provideStatus), 0, "incorrect provide status");
-    assert.equal(Number(result1.treeStatus), 1, "tree status is incorrect");
+    assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
     assert.equal(Number(result1.countryCode), 0, "incorrect country code");
     assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
     assert.equal(Number(result1.birthDate), 0, "incorrect birth date");
@@ -293,7 +293,7 @@ contract("GenesisTree", (accounts) => {
     );
     assert.equal(Number(result1.treeType), 0, "incorrect treeType");
     assert.equal(Number(result1.provideStatus), 0, "incorrect provide status");
-    assert.equal(Number(result1.treeStatus), 1, "tree status is incorrect");
+    assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
     assert.equal(Number(result1.countryCode), 0, "incorrect country code");
     assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
     assert.equal(Number(result1.birthDate), 0, "incorrect birth date");
@@ -319,7 +319,7 @@ contract("GenesisTree", (accounts) => {
     );
     assert.equal(Number(result2.treeType), 0, "incorrect treeType");
     assert.equal(Number(result2.provideStatus), 0, "incorrect provide status");
-    assert.equal(Number(result2.treeStatus), 1, "tree status is incorrect");
+    assert.equal(Number(result2.treeStatus), 2, "tree status is incorrect"); //updated
     assert.equal(Number(result2.countryCode), 0, "incorrect country code");
     assert.equal(Number(result2.plantDate), 0, "incorrect plant date");
     assert.equal(Number(result2.birthDate), 0, "incorrect birth date");
@@ -506,9 +506,9 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.treeStatus),
-      2,
+      3,
       "tree status is incorrect"
-    );
+    ); //updated
 
     assert.equal(
       Number(genesisTreeResult.countryCode),
@@ -1378,9 +1378,9 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.treeStatus),
-      2,
+      3,
       "tree status is not ok"
-    );
+    ); //updated
 
     assert.equal(
       Number(genesisTreeResult.countryCode),
@@ -1442,9 +1442,9 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.treeStatus),
-      1,
+      2,
       "tree status is not ok"
-    );
+    ); //updated
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.countryCode),
@@ -1547,9 +1547,9 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResult.treeStatus),
-      2,
+      3,
       "tree status is not ok"
-    );
+    ); //updated
 
     assert.equal(
       Number(genesisTreeResult.countryCode),
@@ -1610,9 +1610,9 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.treeStatus),
-      3,
+      4,
       "tree status is not ok"
-    );
+    ); //updated
 
     assert.equal(
       Number(genesisTreeResultAfterVerify.countryCode),

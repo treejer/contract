@@ -58,11 +58,11 @@ contract RegularSell is Initializable {
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
         for (uint256 i = 0; i < _count; i++) {
-            // tempLastRegularSold = treeFactory.mintRegularTrees(
-            //     tempLastRegularSold,
-            //     msg.sender
-            // );// uncomment here after develop
-            //call treasry
+            tempLastRegularSold = treeFactory.mintRegularTrees(
+                tempLastRegularSold,
+                msg.sender
+            );
+            // call treasry
         }
         lastSoldRegularTree = tempLastRegularSold;
     }

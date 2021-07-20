@@ -5309,42 +5309,42 @@ contract("GenesisTree", (accounts) => {
   //   assert.equal(addressGetToken3, userAccount6, "3-address not true");
   // });
 
-  it("mintRegularTrees should be fail(only RegularSellContract call)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
-    const countryCode = 2;
-    const planter = userAccount2;
+  // it("mintRegularTrees should be fail(only RegularSellContract call)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    await Common.addGenesisTreeRole(
-      arInstance,
-      genesisTreeInstance.address,
-      deployerAccount
-    );
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
 
-    await Common.regularPlantTreeSuccess(
-      arInstance,
-      genesisTreeInstance,
-      planterInstance,
-      ipfsHash,
-      birthDate,
-      countryCode,
-      planter,
-      deployerAccount
-    );
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
-      from: deployerAccount,
-    });
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: deployerAccount,
+  //   });
 
-    await genesisTreeInstance
-      .mintRegularTrees(9999, userAccount4, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_REGULAR_SELL);
-  });
+  //   await genesisTreeInstance
+  //     .mintRegularTrees(9999, userAccount4, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_REGULAR_SELL);
+  // });
 
   ////////////////////////////////////////////////////////////////////////////////////////////////
 

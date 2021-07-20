@@ -2,4 +2,6 @@
 
 pragma solidity ^0.6.9;
 
-interface RegularSell {}
+interface RegularSell {
+    function isRegularSell() external view returns (bool);
+}

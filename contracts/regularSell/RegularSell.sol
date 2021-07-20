@@ -51,10 +51,12 @@ contract RegularSell is Initializable {
         treePrice = _price;
     }
 
-    function RequestTrees(uint256 _count) external payable {
+    function requestTrees(uint256 _count) external payable {
+        require(_count > 0, "invalid count");
+
         require(
             daiToken.balanceOf(msg.sender) >= treePrice.mul(_count),
-            "invalid mount"
+            "invalid amount"
         );
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
@@ -69,7 +71,7 @@ contract RegularSell is Initializable {
     }
 
     function requestByTreeId(uint256 _treeId) external payable {
-        require(_treeId > lastSoldRegularTree, "invlid tree");
+        require(_treeId > lastSoldRegularTree, "invalid tree");
         require(daiToken.balanceOf(msg.sender) >= treePrice, "invalid amount");
 
         treeFactory.requestRegularTree(_treeId, msg.sender);

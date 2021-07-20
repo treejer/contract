@@ -475,13 +475,10 @@ contract GenesisTree is Initializable, RelayRecipient {
     }
 
     function requestRegularTree(uint256 _treeId, address _owner) external {
-        GenTree storage genTree = genTrees[_treeId];
-
-        require(genTree.treeStatus == 4 && genTree.provideStatus == 4);
-
-        genTree.provideStatus = 0;
-
-        treeToken.safeMint(_owner, _treeId);
+        // GenTree storage genTree = genTrees[_treeId];
+        // require(genTree.treeStatus == 4 && genTree.provideStatus == 4);
+        // genTree.provideStatus = 0;
+        // treeToken.safeMint(_owner, _treeId);
     }
 
     function _checkPlanter(address _planterAddress, address _sender)

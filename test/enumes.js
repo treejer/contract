@@ -75,7 +75,11 @@ const PlanterErrorMsg = {
   ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
 };
 
-RegularSellErrors = {};
+const RegularSellErrors = {
+  INVALID_TREE: "invalid tree",
+  INVALID_AMOUNT: "invalid amount",
+  INVALID_COUNT: "invalid count",
+};
 
 module.exports = {
   TimeEnumes,

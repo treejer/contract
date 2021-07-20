@@ -152,6 +152,7 @@ contract("TreeFactory", (accounts) => {
       ["", "38.0962", "46.2738"],
       ["1", "1"]
     );
+
     let result = await truffleAssert.createTransactionResult(
       treeInstance,
       transaction.hash
@@ -171,6 +172,7 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       "1000"
     );
+
     await treeInstance.fund(2, { from: secondAccount, value: 0 });
     await Common.addPlanter(arInstance, planterAccount, deployerAccount);
     let tx = await Common.addTree(treeInstance, planterAccount);

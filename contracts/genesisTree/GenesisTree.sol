@@ -474,6 +474,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         return localLastSold;
     }
 
+    //TODO:onlyRegularSellContract ??
     function requestRegularTree(uint256 _treeId, address _owner) external {
         GenTree storage genTree = genTrees[_treeId];
 

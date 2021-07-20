@@ -52,6 +52,8 @@ const GenesisTreeErrorMsg = {
   INVALID_ACCESS_PLANTER_OF_TREE: "Planter of tree can't verify update",
   UPDATE_STATUS_MUST_BE_PENDING: "update status must be pending",
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
+  TREE_MUST_BE_PLANTED: "tree must be planted",
+  REGULAR_TREE_NOT_EXIST: "regularTree not exist",
 };
 const TreesuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",

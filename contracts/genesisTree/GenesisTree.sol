@@ -413,11 +413,10 @@ contract GenesisTree is Initializable, RelayRecipient {
             "Admin or ambassador or planter can accept updates"
         );
 
-        //TODO:check _regularTreeId is exist
+        require(regularTree.plantDate > 0, "regularTree not exist");
 
         if (isVerified) {
-            //TODO: tempLastRegularPlantedTree = lastRegularPlantedTree+1??
-            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree;
+            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree.add(1);
 
             while (
                 !(genTrees[tempLastRegularPlantedTree].treeStatus == 0 &&
@@ -467,18 +466,23 @@ contract GenesisTree is Initializable, RelayRecipient {
                     genTrees[localLastSold].provideStatus == 4);
         }
 
-        treeToken.safeMint(_owner, localLastSold);
-
         genTrees[localLastSold].provideStatus = 0;
+
+        treeToken.safeMint(_owner, localLastSold);
 
         return localLastSold;
     }
 
-    //TODO:onlyRegularSellContract ??
-    function requestRegularTree(uint256 _treeId, address _owner) external {
+    function requestRegularTree(uint256 _treeId, address _owner)
+        external
+        onlyRegularSellContract
+    {
         GenTree storage genTree = genTrees[_treeId];
 
-        require(genTree.treeStatus == 4 && genTree.provideStatus == 4);
+        require(
+            genTree.treeStatus == 4 && genTree.provideStatus == 4,
+            "tree must be planted"
+        );
 
         genTree.provideStatus = 0;
 
@@ -490,8 +494,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         view
         returns (bool)
     {
-        // address _planterAddress = genTrees[_treeId].planterId;
-
         (uint8 _planterType, , , , , , , ) = planter.planters(_planterAddress);
 
         (, uint8 _verifierStatus, , , , , , ) = planter.planters(_sender);

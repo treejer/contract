@@ -15,6 +15,8 @@ const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 const GENESIS_TREE_ROLE = web3.utils.soliditySha3("GENESIS_TREE_ROLE");
 
+const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
+
 const Math = require("./math");
 
 Common.sleep = (ms) => {
@@ -125,6 +127,10 @@ Common.addAuctionRole = async (instance, address, adminAccount) => {
 
 Common.addGenesisTreeRole = async (instance, address, adminAccount) => {
   await instance.grantRole(GENESIS_TREE_ROLE, address, { from: adminAccount });
+};
+
+Common.addRegularSellRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(REGULAR_SELL_ROLE, address, { from: adminAccount });
 };
 
 Common.travelTime = async (timeFormat, timeDuration) => {
@@ -398,6 +404,66 @@ Common.acceptPlanterByOrganization = async (
       from: organizationAddress,
     }
   );
+};
+
+Common.regularPlantTreeSuccess = async (
+  arInstance,
+  genesisTreeInstance,
+  planterInstance,
+  ipfsHash,
+  birthDate,
+  countryCode,
+  planter,
+  deployerAccount
+) => {
+  await Common.addPlanter(arInstance, planter, deployerAccount);
+
+  await Common.joinSimplePlanter(
+    planterInstance,
+    1,
+    planter,
+    zeroAddress,
+    zeroAddress
+  );
+
+  await genesisTreeInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+    from: planter,
+  });
+};
+
+Common.regularPlantTreeSuccessOrganization = async (
+  arInstance,
+  genesisTreeInstance,
+  planterInstance,
+  ipfsHash,
+  birthDate,
+  countryCode,
+  planter,
+  organizationAdmin,
+  deployerAccount
+) => {
+  await Common.addPlanter(arInstance, planter, deployerAccount);
+  await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
+  await Common.joinOrganizationPlanter(
+    planterInstance,
+    organizationAdmin,
+    zeroAddress,
+    deployerAccount
+  );
+  await Common.joinSimplePlanter(
+    planterInstance,
+    3,
+    planter,
+    zeroAddress,
+    organizationAdmin
+  );
+  await planterInstance.acceptPlanterFromOrganization(planter, true, {
+    from: organizationAdmin,
+  });
+
+  await genesisTreeInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+    from: planter,
+  });
 };
 
 module.exports = Common;

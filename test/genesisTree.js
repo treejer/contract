@@ -106,7 +106,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   afterEach(async () => {});
-  /////////////************************************ deploy successfully ****************************************//
+  // /////////////************************************ deploy successfully ****************************************//
   it("deploys successfully", async () => {
     const address = genesisTreeInstance.address;
 
@@ -4473,6 +4473,835 @@ contract("GenesisTree", (accounts) => {
   });
 
   ///////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiii///////////////////////////////////////////////
+
+  // //--------------------------regularPlantTree test----------------------------------------------
+
+  // it("regularPlantTree should be success (Individual Planter)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addPlanter(arInstance, planter, deployerAccount);
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     1,
+  //     planter,
+  //     zeroAddress,
+  //     zeroAddress
+  //   );
+
+  //   await genesisTreeInstance.regularPlantTree(
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: planter,
+  //     }
+  //   );
+
+  //   const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+  //   let result = await genesisTreeInstance.regularTrees.call(0);
+
+  //   assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
+
+  //   assert.equal(
+  //     Number(result.birthDate),
+  //     Number(birthDate),
+  //     "birthDate not true"
+  //   );
+
+  //   assert.equal(
+  //     Number(result.countryCode),
+  //     countryCode,
+  //     "countryCode not true"
+  //   );
+
+  //   assert.equal(
+  //     Number(result.plantDate),
+  //     Number(plantDate),
+  //     "plantDate not true"
+  //   );
+
+  //   assert.equal(result.planterAddress, planter, "planter address not true");
+
+  //   let planterPlantedCount = (await planterInstance.planters.call(planter))
+  //     .plantedCount;
+
+  //   assert.equal(
+  //     planterPlantedCount,
+  //     1,
+  //     "planter PlantedCount address not true"
+  //   );
+  // });
+
+  // it("regularPlantTree should be success (Planter of organization)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+  //   const organizationAdmin = userAccount1;
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addPlanter(arInstance, planter, deployerAccount);
+  //   await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     organizationAdmin,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     planter,
+  //     zeroAddress,
+  //     organizationAdmin
+  //   );
+
+  //   await planterInstance.acceptPlanterFromOrganization(planter, true, {
+  //     from: organizationAdmin,
+  //   });
+
+  //   await genesisTreeInstance.regularPlantTree(
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: planter,
+  //     }
+  //   );
+
+  //   const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+  //   let result = await genesisTreeInstance.regularTrees.call(0);
+
+  //   assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
+
+  //   assert.equal(
+  //     Number(result.birthDate),
+  //     Number(birthDate),
+  //     "birthDate not true"
+  //   );
+
+  //   assert.equal(
+  //     Number(result.countryCode),
+  //     countryCode,
+  //     "countryCode not true"
+  //   );
+
+  //   assert.equal(
+  //     Number(result.plantDate),
+  //     Number(plantDate),
+  //     "plantDate not true"
+  //   );
+
+  //   assert.equal(result.planterAddress, planter, "planter address not true");
+
+  //   let planterPlantedCount = (await planterInstance.planters.call(planter))
+  //     .plantedCount;
+
+  //   assert.equal(
+  //     planterPlantedCount,
+  //     1,
+  //     "planter PlantedCount address not true"
+  //   );
+  // });
+
+  // it("regularPlantTree should be rejected (organizationAdmin not accept planter)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+  //   const organizationAdmin = userAccount1;
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addPlanter(arInstance, planter, deployerAccount);
+  //   await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
+
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     organizationAdmin,
+  //     zeroAddress,
+  //     deployerAccount
+  //   );
+
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     planter,
+  //     zeroAddress,
+  //     organizationAdmin
+  //   );
+
+  //   await genesisTreeInstance.regularPlantTree(
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: planter,
+  //     }
+  //   ).should.be.rejected;
+  // });
+
+  // //---------------------------------------------verifyRegularPlant-----------------------------------------------
+
+  // it("verifyRegularPlant should be success(Admin Verify)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   let regularTree = await genesisTreeInstance.regularTrees.call(0);
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let genTree = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(
+  //     Number(genTree.birthDate),
+  //     Number(regularTree.birthDate),
+  //     "birthDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.plantDate),
+  //     Number(regularTree.plantDate),
+  //     "plantDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.treeSpecs,
+  //     regularTree.treeSpecs,
+  //     "treeSpecs not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.countryCode),
+  //     Number(regularTree.countryCode),
+  //     "countryCode not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.planterId,
+  //     regularTree.planterAddress,
+  //     "planterAddress not true update"
+  //   );
+
+  //   assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     4,
+  //     "provideStatus not true update"
+  //   );
+  // });
+
+  // it("2.verifyRegularPlant should be success", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+  //   const organizationAddress = userAccount1;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccessOrganization(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     organizationAddress,
+  //     deployerAccount
+  //   );
+
+  //   let regularTree = await genesisTreeInstance.regularTrees.call(0);
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: organizationAddress,
+  //   });
+
+  //   let genTree = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(
+  //     Number(genTree.birthDate),
+  //     Number(regularTree.birthDate),
+  //     "birthDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.plantDate),
+  //     Number(regularTree.plantDate),
+  //     "plantDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.treeSpecs,
+  //     regularTree.treeSpecs,
+  //     "treeSpecs not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.countryCode),
+  //     Number(regularTree.countryCode),
+  //     "countryCode not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.planterId,
+  //     regularTree.planterAddress,
+  //     "planterAddress not true update"
+  //   );
+
+  //   assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     4,
+  //     "provideStatus not true update"
+  //   );
+  // });
+
+  // it("3.verifyRegularPlant should be success(isVerified is false)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+  //   const organizationAddress = userAccount1;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccessOrganization(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     organizationAddress,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, false, {
+  //     from: organizationAddress,
+  //   });
+
+  //   let genTree = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(genTree.treeSpecs, "", "treeSpecs not true update");
+
+  //   assert.equal(
+  //     genTree.planterId,
+  //     zeroAddress,
+  //     "planterAddress not true update"
+  //   );
+  // });
+
+  // it("verifyRegularPlant should be success(tree has owner)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   let regularTree = await genesisTreeInstance.regularTrees.call(0);
+
+  //   // tree mint for userAccount4
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     deployerAccount,
+  //     deployerAccount
+  //   );
+  //   await treeTokenInstance.safeMint(userAccount4, 10000, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let genTree = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(
+  //     Number(genTree.birthDate),
+  //     Number(regularTree.birthDate),
+  //     "birthDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.plantDate),
+  //     Number(regularTree.plantDate),
+  //     "plantDate not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.treeSpecs,
+  //     regularTree.treeSpecs,
+  //     "treeSpecs not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTree.countryCode),
+  //     Number(regularTree.countryCode),
+  //     "countryCode not true update"
+  //   );
+
+  //   assert.equal(
+  //     genTree.planterId,
+  //     regularTree.planterAddress,
+  //     "planterAddress not true update"
+  //   );
+
+  //   assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     0,
+  //     "provideStatus not true update"
+  //   );
+  // });
+
+  // it("verifyRegularPlant should be reject(Planter of tree can't verify update)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   let regularTree = await genesisTreeInstance.regularTrees.call(0);
+
+  //   await genesisTreeInstance
+  //     .verifyRegularPlant(0, true, {
+  //       from: planter,
+  //     })
+  //     .should.be.rejectedWith(
+  //       GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+  //     );
+  // });
+
+  // it("verifyRegularPlant should be reject(Other planter can't verify update)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   let regularTree = await genesisTreeInstance.regularTrees.call(0);
+
+  //   await genesisTreeInstance
+  //     .verifyRegularPlant(0, true, {
+  //       from: userAccount5,
+  //     })
+  //     .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+  // });
+
+  // it("Check lastRegularPlantedTree count", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   const startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+  //   const endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+  //   const treeId = 10000;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.setGenesisTreeAddress(
+  //     genesisTreeInstance.address,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.addTree(10000, ipfsHash, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treasuryInstance.addFundDistributionModel(
+  //     3000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     2200,
+  //     0,
+  //     0,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await Common.addAuctionRole(
+  //     arInstance,
+  //     treeAuctionInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await treasuryInstance.assignTreeFundDistributionModel(0, 100000, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.createAuction(
+  //     treeId,
+  //     Number(startTime),
+  //     Number(endTime),
+  //     web3.utils.toWei("1"),
+  //     web3.utils.toWei("0.1"),
+  //     { from: deployerAccount }
+  //   );
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let result1 = await genesisTreeInstance.lastRegularPlantedTree();
+
+  //   assert.equal(result1, 10001, "1-lastRegularPlantedTree not true");
+
+  //   for (let i = 10002; i < 10006; i++) {
+  //     await genesisTreeInstance.addTree(i, ipfsHash, {
+  //       from: deployerAccount,
+  //     });
+
+  //     await treeAuctionInstance.createAuction(
+  //       i,
+  //       Number(startTime),
+  //       Number(endTime),
+  //       web3.utils.toWei("1"),
+  //       web3.utils.toWei("0.1"),
+  //       { from: deployerAccount }
+  //     );
+  //   }
+
+  //   await genesisTreeInstance.regularPlantTree(
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     {
+  //       from: planter,
+  //     }
+  //   );
+
+  //   await genesisTreeInstance.verifyRegularPlant(1, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let result2 = await genesisTreeInstance.lastRegularPlantedTree();
+
+  //   assert.equal(result2, 10006, "2-lastRegularPlantedTree not true");
+  // });
+
+  // //-----------------------------mintRegularTrees---------------------------------
+
+  // it("mintRegularTrees should be successfully (tree not planted)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.addRegularSellRole(
+  //     arInstance,
+  //     deployerAccount,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.mintRegularTrees(15000, userAccount4, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let addressGetToken = await treeTokenInstance.ownerOf(15001);
+
+  //   assert.equal(addressGetToken, userAccount4, "address not true");
+  // });
+
+  // it("mintRegularTrees should be successfully(tree planted)", async () => {
+  //   const birthDate = parseInt(new Date().getTime() / 1000);
+  //   const countryCode = 2;
+  //   const planter = userAccount2;
+
+  //   await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addGenesisTreeRole(
+  //     arInstance,
+  //     genesisTreeInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   await Common.regularPlantTreeSuccess(
+  //     arInstance,
+  //     genesisTreeInstance,
+  //     planterInstance,
+  //     ipfsHash,
+  //     birthDate,
+  //     countryCode,
+  //     planter,
+  //     deployerAccount
+  //   );
+
+  //   await genesisTreeInstance.verifyRegularPlant(0, true, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await Common.addRegularSellRole(
+  //     arInstance,
+  //     deployerAccount,
+  //     deployerAccount
+  //   );
+
+  //   let genTreeBefore = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(
+  //     Number(genTreeBefore.treeStatus),
+  //     4,
+  //     "treeStatusBefore not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTreeBefore.provideStatus),
+  //     4,
+  //     "provideStatusBefore not true update"
+  //   );
+
+  //   await genesisTreeInstance.mintRegularTrees(9999, userAccount4, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let addressGetToken = await treeTokenInstance.ownerOf(10000);
+
+  //   assert.equal(addressGetToken, userAccount4, "address not true");
+
+  //   let genTreeAfter = await genesisTreeInstance.genTrees.call(10000);
+
+  //   assert.equal(
+  //     Number(genTreeAfter.treeStatus),
+  //     4,
+  //     "treeStatusAfter not true update"
+  //   );
+
+  //   assert.equal(
+  //     Number(genTreeAfter.provideStatus),
+  //     0,
+  //     "provideStatusAfter not true update"
+  //   );
+  // });
+
+  it("2-mintRegularTrees should be successfully(tree planted)", async () => {
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const planter = userAccount2;
+
+    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
+    );
+
+    await Common.regularPlantTreeSuccess(
+      arInstance,
+      genesisTreeInstance,
+      planterInstance,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      planter,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.verifyRegularPlant(0, true, {
+      from: deployerAccount,
+    });
+
+    await Common.addRegularSellRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+
+    await genesisTreeInstance.mintRegularTrees(9999, userAccount4, {
+      from: deployerAccount,
+    });
+
+    let addressGetToken = await treeTokenInstance.ownerOf(10000);
+
+    assert.equal(addressGetToken, userAccount4, "address not true");
+
+    await genesisTreeInstance.mintRegularTrees(9999, userAccount5, {
+      from: deployerAccount,
+    });
+
+    let addressGetToken2 = await treeTokenInstance.ownerOf(10001);
+
+    assert.equal(addressGetToken2, userAccount5, "2-address not true");
+
+    let genTreeBefore = await genesisTreeInstance.genTrees.call(10001);
+
+    assert.equal(
+      Number(genTreeBefore.treeStatus),
+      0,
+      "treeStatusBefore not true update"
+    );
+
+    assert.equal(
+      Number(genTreeBefore.provideStatus),
+      0,
+      "provideStatusBefore not true update"
+    );
+  });
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////
 
   it("test gsn", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");

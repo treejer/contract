@@ -229,7 +229,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(_treeId, _msgSender()),
+                _checkPlanter(tempGenTree.planterId, _msgSender()),
             "ambassador or planter can verify plant"
         );
 
@@ -300,7 +300,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(_treeId, _msgSender()),
+                _checkPlanter(genTrees[_treeId].planterId, _msgSender()),
             "Admin or ambassador or planter can accept updates"
         );
 
@@ -385,13 +385,14 @@ contract GenesisTree is Initializable, RelayRecipient {
     ) external {
         require(planter.planterCheck(_msgSender()));
 
-        RegularTree storage regularTree = regularTrees[regularTreeId.current()];
-
-        regularTree.treeSpecs = _treeSpecs;
-        regularTree.birthDate = _birthDate;
-        regularTree.countryCode = _countryCode;
-        regularTree.plantDate = now.toUint64();
-        regularTree.planterAddress = _msgSender();
+        regularTrees[regularTreeId.current()] = RegularTree(
+            _birthDate,
+            now.toUint64(),
+            _countryCode,
+            0,
+            _msgSender(),
+            _treeSpecs
+        );
 
         regularTreeId.increment();
     }
@@ -399,18 +400,28 @@ contract GenesisTree is Initializable, RelayRecipient {
     function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)
         external
     {
+        RegularTree storage regularTree = regularTrees[_regularTreeId];
+
         require(
-            accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(_regularTreeId, _msgSender()),
-            "Admin or planter can accept updates"
+            regularTree.planterAddress != _msgSender(),
+            "Planter of tree can't verify update"
         );
 
+        require(
+            accessRestriction.isAdmin(_msgSender()) ||
+                _checkPlanter(regularTree.planterAddress, _msgSender()),
+            "Admin or ambassador or planter can accept updates"
+        );
+
+        //TODO:check _regularTreeId is exist
+
         if (isVerified) {
+            //TODO: tempLastRegularPlantedTree = lastRegularPlantedTree+1??
             uint256 tempLastRegularPlantedTree = lastRegularPlantedTree;
 
             while (
-                !(genTrees[lastRegularPlantedTree].treeStatus == 0) ||
-                !(genTrees[lastRegularPlantedTree].provideStatus == 0)
+                !(genTrees[tempLastRegularPlantedTree].treeStatus == 0 &&
+                    genTrees[tempLastRegularPlantedTree].provideStatus == 0)
             ) {
                 tempLastRegularPlantedTree = tempLastRegularPlantedTree.add(1);
             }
@@ -418,8 +429,6 @@ contract GenesisTree is Initializable, RelayRecipient {
             lastRegularPlantedTree = tempLastRegularPlantedTree;
 
             GenTree storage genTree = genTrees[lastRegularPlantedTree];
-
-            RegularTree storage regularTree = regularTrees[_regularTreeId];
 
             genTree.plantDate = regularTree.plantDate;
             genTree.countryCode = uint32(regularTree.countryCode);
@@ -431,9 +440,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             if (!treeToken.exists(lastRegularPlantedTree)) {
                 genTree.provideStatus = 4;
             }
-
-            delete regularTrees[_regularTreeId];
         }
+
+        delete regularTrees[_regularTreeId];
     }
 
     function mintRegularTrees(uint256 lastSold, address _owner)
@@ -460,7 +469,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         treeToken.safeMint(_owner, localLastSold);
 
-        genTrees[localLastSold].provideStatus == 0;
+        genTrees[localLastSold].provideStatus = 0;
 
         return localLastSold;
     }
@@ -475,12 +484,12 @@ contract GenesisTree is Initializable, RelayRecipient {
         treeToken.safeMint(_owner, _treeId);
     }
 
-    function _checkPlanter(uint256 _treeId, address _sender)
+    function _checkPlanter(address _planterAddress, address _sender)
         private
         view
         returns (bool)
     {
-        address _planterAddress = genTrees[_treeId].planterId;
+        // address _planterAddress = genTrees[_treeId].planterId;
 
         (uint8 _planterType, , , , , , , ) = planter.planters(_planterAddress);
 

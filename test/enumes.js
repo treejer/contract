@@ -75,6 +75,8 @@ const PlanterErrorMsg = {
   ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
 };
 
+RegularSellErrors = {};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -83,4 +85,5 @@ module.exports = {
   TreeAuctionErrorMsg,
   TreesuryManagerErrorMsg,
   PlanterErrorMsg,
+  RegularSellErrors,
 };

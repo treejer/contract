@@ -3,6 +3,7 @@ const RegularSell = artifacts.require("RegularSell.sol");
 const GenesisTree = artifacts.require("GenesisTree.sol");
 const Dai = artifacts.require("Dai.sol");
 const Tree = artifacts.require("Tree.sol");
+const Planter = artifacts.require("Planter.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -75,78 +76,78 @@ contract("GenesisTree", (accounts) => {
 
   afterEach(async () => {});
   //////////////////************************************ deploy successfully ****************************************//
-  // it("deploys successfully", async () => {
-  //   const address = regularSellInstance.address;
-  //   assert.notEqual(address, 0x0);
-  //   assert.notEqual(address, "");
-  //   assert.notEqual(address, null);
-  //   assert.notEqual(address, undefined);
-  // });
+  it("deploys successfully", async () => {
+    const address = regularSellInstance.address;
+    assert.notEqual(address, 0x0);
+    assert.notEqual(address, "");
+    assert.notEqual(address, null);
+    assert.notEqual(address, undefined);
+  });
 
-  // /////////////////---------------------------------set tree factory address--------------------------------------------------------
-  // it("set tree factory address", async () => {
-  //   await regularSellInstance
-  //     .setTreeFactoryAddress(treeFactoryInstance.address, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  /////////////////---------------------------------set tree factory address--------------------------------------------------------
+  it("set tree factory address", async () => {
+    await regularSellInstance
+      .setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-  //   await regularSellInstance.setTreeFactoryAddress(
-  //     treeFactoryInstance.address,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-  //   assert.equal(
-  //     treeFactoryInstance.address,
-  //     await regularSellInstance.treeFactory.call(),
-  //     "address set incorect"
-  //   );
-  // });
+    assert.equal(
+      treeFactoryInstance.address,
+      await regularSellInstance.treeFactory.call(),
+      "address set incorect"
+    );
+  });
 
-  // /////////////////---------------------------------set tree factory address--------------------------------------------------------
-  // it("set dai address", async () => {
-  //   await regularSellInstance
-  //     .setDaiTokenAddress(daiInstance.address, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  /////////////////---------------------------------set tree factory address--------------------------------------------------------
+  it("set dai address", async () => {
+    await regularSellInstance
+      .setDaiTokenAddress(daiInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-  //   await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
-  //     from: deployerAccount,
-  //   });
+    await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
 
-  //   assert.equal(
-  //     daiInstance.address,
-  //     await regularSellInstance.daiToken.call(),
-  //     "address set incorect"
-  //   );
-  // });
+    assert.equal(
+      daiInstance.address,
+      await regularSellInstance.daiToken.call(),
+      "address set incorect"
+    );
+  });
 
-  // ///////////////////------------------------------------- set price ------------------------------------------
-  // it("set price and check data", async () => {
-  //   let treePrice1 = await regularSellInstance.treePrice.call();
+  ///////////////////------------------------------------- set price ------------------------------------------
+  it("set price and check data", async () => {
+    let treePrice1 = await regularSellInstance.treePrice.call();
 
-  //   assert.equal(Number(treePrice1), 0, "treePriceInvalid");
+    assert.equal(Number(treePrice1), 0, "treePriceInvalid");
 
-  //   await regularSellInstance.setPrice(10, { from: deployerAccount });
+    await regularSellInstance.setPrice(10, { from: deployerAccount });
 
-  //   const treePrice2 = await regularSellInstance.treePrice.call();
+    const treePrice2 = await regularSellInstance.treePrice.call();
 
-  //   assert.equal(Number(treePrice2), 10, "tree price is incorrect");
-  // });
+    assert.equal(Number(treePrice2), 10, "tree price is incorrect");
+  });
 
-  // it("should fail set price", async () => {
-  //   await regularSellInstance
-  //     .setPrice(10, { from: userAccount1 })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-  // });
+  it("should fail set price", async () => {
+    await regularSellInstance
+      .setPrice(10, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
 
   //////////TODO: must be complete below tests
 
   /////////////////////// -------------------------------------- request trees ----------------------------------------------------
-  it("should request trees successfully", async () => {});
+  // it("should request trees successfully", async () => {});
 
   it("should fail request trees", async () => {
     let price = Units.convert("1", "eth", "wei");
@@ -230,11 +231,53 @@ contract("GenesisTree", (accounts) => {
       { from: deployerAccount }
     );
 
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////////////////////////////////// plant regualar
+
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const planter = userAccount2;
+    const ipfsHash = "some ipfs hash here";
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.addGenesisTreeRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.regularPlantTreeSuccess(
+      arInstance,
+      treeFactoryInstance,
+      planterInstance,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      planter,
+      deployerAccount
+    );
+
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
+      from: deployerAccount,
+    });
 
     await regularSellInstance.requestByTreeId(10001, { from: userAccount1 });
   });
@@ -284,6 +327,56 @@ contract("GenesisTree", (accounts) => {
       treeFactoryInstance.address,
       { from: deployerAccount }
     );
+
+    await regularSellInstance
+      .requestByTreeId(10001, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_REGULAR_SELL);
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+    ///////////////////////////////////////////////////// plant regualar
+
+    const birthDate = parseInt(new Date().getTime() / 1000);
+    const countryCode = 2;
+    const planter = userAccount2;
+    const ipfsHash = "some ipfs hash here";
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.regularPlantTreeSuccess(
+      arInstance,
+      treeFactoryInstance,
+      planterInstance,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      planter,
+      deployerAccount
+    );
+
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
+      from: deployerAccount,
+    });
 
     await regularSellInstance.requestByTreeId(10001, { from: userAccount1 });
   });

@@ -65,7 +65,7 @@ contract RegularSell is Initializable {
                 tempLastRegularSold,
                 msg.sender
             );
-            // call treasry
+            //TODO://call treasry
         }
         lastSoldRegularTree = tempLastRegularSold;
     }
@@ -76,6 +76,6 @@ contract RegularSell is Initializable {
 
         treeFactory.requestRegularTree(_treeId, msg.sender);
 
-        //treasury call here;
+        //TODO:call treasury
     }
 }

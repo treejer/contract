@@ -27,7 +27,7 @@ const Gsn = require("@opengsn/gsn");
 const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-contract("GenesisTree", (accounts) => {
+contract("regularSell", (accounts) => {
   let regularSellInstance;
   let treeFactoryInstance;
   let arInstance;
@@ -49,17 +49,23 @@ contract("GenesisTree", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   beforeEach(async () => {
+    const treePrice = Number(web3.utils.toWei("0.00000000000000001"));
+
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       unsafeAllowCustomTypes: true,
       from: deployerAccount,
     });
 
-    regularSellInstance = await deployProxy(RegularSell, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, treePrice],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     treeFactoryInstance = await deployProxy(GenesisTree, [arInstance.address], {
       initializer: "initialize",
@@ -156,9 +162,6 @@ contract("GenesisTree", (accounts) => {
 
   //////////TODO: must be complete below tests
 
-  /////////////////////// -------------------------------------- request trees ----------------------------------------------------
-  // it("should request trees successfully", async () => {});
-
   it("should fail request trees", async () => {
     let price = Units.convert("1", "eth", "wei");
     await regularSellInstance.setPrice(price, { from: deployerAccount });
@@ -217,8 +220,522 @@ contract("GenesisTree", (accounts) => {
 
     await regularSellInstance.requestTrees(2, { from: userAccount1 });
   });
-  ////////////////////////////////------------------------- aliad ----------------------------------------------------------------------
-  //////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
+
+  /////////////////////// -------------------------------------- request trees ----------------------------------------------------
+  it("should request trees successfully", async () => {
+    let funder = userAccount3;
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(10001, 10007, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    let funderBalanceBefore = await web3.eth.getBalance(funder);
+
+    let requestTx = await regularSellInstance.requestTrees(7, {
+      from: funder,
+      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 7),
+    });
+
+    const treasuryBalanceAfter = await web3.eth.getBalance(
+      treasuryInstance.address
+    );
+
+    const regularSellBalanceAfter = await web3.eth.getBalance(
+      regularSellInstance.address
+    );
+
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      Math.mul(web3.utils.toWei("0.00000000000000001"), 7),
+      "treasury balance not true"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "regularSell balance not true"
+    );
+
+    let tokentOwner;
+    for (let i = 10001; i < 10008; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(10001);
+      assert.equal(tokentOwner, funder, "funder not true " + i);
+    }
+
+    await treeTokenInstance.ownerOf(10000).should.be.rejected;
+    await treeTokenInstance.ownerOf(10008).should.be.rejected;
+
+    let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10007,
+      "lastSoldRegularTree not true"
+    );
+
+    let funderBalanceAfter = await web3.eth.getBalance(funder);
+
+    const txFee = await Common.getTransactionFee(requestTx);
+
+    console.log("first test fee", web3.utils.fromWei(txFee.toString()));
+
+    assert.equal(
+      Number(funderBalanceAfter),
+      Math.subtract(
+        Math.subtract(
+          Number(funderBalanceBefore),
+          Math.mul(web3.utils.toWei("0.00000000000000001"), 7)
+        ),
+        txFee
+      ),
+      "funder balance not true"
+    );
+  });
+
+  it("2.should request trees successfully", async () => {
+    let funder1 = userAccount3;
+    let funder2 = userAccount3;
+    let funder3 = userAccount3;
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(10001, 10003, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    let funder1BalanceBefore = await web3.eth.getBalance(funder1);
+
+    let requestTx1 = await regularSellInstance.requestTrees(1, {
+      from: funder1,
+      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+    });
+
+    const txFee1 = await Common.getTransactionFee(requestTx1);
+
+    let funder1BalanceAfter = await web3.eth.getBalance(funder1);
+
+    assert.equal(
+      Number(funder1BalanceAfter),
+      Math.subtract(
+        Math.subtract(
+          Number(funder1BalanceBefore),
+          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+        ),
+        txFee1
+      ),
+      "funder1 balance not true"
+    );
+
+    let treasuryBalanceAfter = await web3.eth.getBalance(
+      treasuryInstance.address
+    );
+
+    let regularSellBalanceAfter = await web3.eth.getBalance(
+      regularSellInstance.address
+    );
+
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+      "treasury balance not true"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "regularSell balance not true"
+    );
+
+    let tokentOwner;
+
+    tokentOwner = await treeTokenInstance.ownerOf(10001);
+    assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
+
+    let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10001,
+      "lastSoldRegularTree not true"
+    );
+
+    ///------------- funder2 -----------------
+
+    let funder2BalanceBefore = await web3.eth.getBalance(funder2);
+
+    let requestTx2 = await regularSellInstance.requestTrees(1, {
+      from: funder2,
+      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+    });
+
+    const txFee2 = await Common.getTransactionFee(requestTx2);
+
+    let funder2BalanceAfter = await web3.eth.getBalance(funder2);
+
+    assert.equal(
+      Number(funder2BalanceAfter),
+      Math.subtract(
+        Math.subtract(
+          Number(funder2BalanceBefore),
+          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+        ),
+        txFee2
+      ),
+      "funder2 balance not true"
+    );
+
+    treasuryBalanceAfter = await web3.eth.getBalance(treasuryInstance.address);
+
+    regularSellBalanceAfter = await web3.eth.getBalance(
+      regularSellInstance.address
+    );
+
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      Math.mul(web3.utils.toWei("0.00000000000000001"), 2),
+      "treasury balance not true"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "regularSell balance not true"
+    );
+
+    tokentOwner = await treeTokenInstance.ownerOf(10002);
+    assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
+
+    lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10002,
+      "2.lastSoldRegularTree not true"
+    );
+
+    ///------------- funder3 -----------------
+
+    let funder3BalanceBefore = await web3.eth.getBalance(funder3);
+
+    let requestTx = await regularSellInstance.requestTrees(1, {
+      from: funder3,
+      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+    });
+
+    const txFee = await Common.getTransactionFee(requestTx);
+
+    console.log("2.test fee", web3.utils.fromWei(txFee.toString()));
+
+    let funder3BalanceAfter = await web3.eth.getBalance(funder3);
+
+    assert.equal(
+      Number(funder3BalanceAfter),
+      Math.subtract(
+        Math.subtract(
+          Number(funder3BalanceBefore),
+          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+        ),
+        txFee
+      ),
+      "funder balance not true"
+    );
+
+    treasuryBalanceAfter = await web3.eth.getBalance(treasuryInstance.address);
+
+    regularSellBalanceAfter = await web3.eth.getBalance(
+      regularSellInstance.address
+    );
+
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      Math.mul(web3.utils.toWei("0.00000000000000001"), 3),
+      "3.treasury balance not true"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "3.regularSell balance not true"
+    );
+
+    tokentOwner = await treeTokenInstance.ownerOf(10003);
+    assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
+
+    lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10003,
+      "3.lastSoldRegularTree not true"
+    );
+  });
+
+  it("Should request trees rejece(The count must be greater than zero)", async () => {
+    let funder = userAccount3;
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(10001, 10003, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    await regularSellInstance
+      .requestTrees(0, {
+        from: funder,
+        value: Math.mul(web3.utils.toWei("0.00000000000000001"), 0),
+      })
+      .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
+  });
+
+  it("Should request trees rejece(The value we sent to the counter is incorrect)", async () => {
+    let funder = userAccount3;
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(10001, 10003, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    await regularSellInstance
+      .requestTrees(3, {
+        from: funder,
+        value: Math.mul(web3.utils.toWei("0.00000000000000001"), 2),
+      })
+      .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
+  });
+
+  //////////////////////////////------------------------- aliad ----------------------------------------------------------------------
+  ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
   it("should request tree by id successfully", async () => {
     const treePrice = Number(web3.utils.toWei("0.00000000000000001"));
     const birthDate = parseInt(new Date().getTime() / 1000);

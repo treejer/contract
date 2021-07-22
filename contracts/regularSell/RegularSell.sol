@@ -72,13 +72,16 @@ contract RegularSell is Initializable {
         require(msg.value == treePrice.mul(_count), "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
+
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
                 msg.sender
             );
-            //TODO://call treasry
+            //TODO://check is truee ???
+            treasury.fundTree{value: treePrice}(tempLastRegularSold);
         }
+
         lastSoldRegularTree = tempLastRegularSold;
     }
 

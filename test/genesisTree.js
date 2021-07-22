@@ -205,7 +205,6 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanterFromGenesis(

@@ -33,11 +33,10 @@ contract Tree is ERC721Upgradeable {
     }
 
     function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
-        //TODO: isPlanterOrAmbassedor change to isPlanter
+        //TODO: isPlanterOrAmbassedor change to isPlanter and isTreeFactory deleted
         require(
             accessRestriction.isPlanter(msg.sender) ||
                 ownerOf(_tokenId) == msg.sender ||
-                accessRestriction.isTreeFactory(msg.sender) ||
                 accessRestriction.isGenesisTree(msg.sender),
             "Caller must be planter or ambassador or owner of tree OR TreeFactory or GenesisTree!"
         );
@@ -67,9 +66,8 @@ contract Tree is ERC721Upgradeable {
 
     function safeMint(address _to, uint256 _tokenId) external {
         require(
-            accessRestriction.isTreeFactory(msg.sender) ||
-                accessRestriction.isGenesisTree(msg.sender),
-            "Caller must be GenesisTree or TreeFactory"
+            accessRestriction.isGenesisTree(msg.sender),
+            "Caller must be GenesisTree"
         );
         _safeMint(_to, _tokenId);
     }

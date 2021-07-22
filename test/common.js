@@ -256,7 +256,7 @@ Common.successFundTree = async (
 
   await treasuryInstance.addFundDistributionModel(
     fundsPercent.planterFund,
-    fundsPercent.gbFund,
+    fundsPercent.referralFund,
     fundsPercent.treeResearch,
     fundsPercent.localDevelop,
     fundsPercent.rescueFund,

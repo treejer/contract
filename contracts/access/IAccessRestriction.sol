@@ -44,10 +44,6 @@ interface IAccessRestriction {
 
     function isAdmin(address _address) external view returns (bool);
 
-    function ifTreeFactory(address _address) external view;
-
-    function isTreeFactory(address _address) external view returns (bool);
-
     function ifAuction(address _address) external view;
 
     function isAuction(address _address) external view returns (bool);

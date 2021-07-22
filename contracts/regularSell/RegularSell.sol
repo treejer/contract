@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../access/IAccessRestriction.sol";
 import "../genesisTree/IGenesisTree.sol";
+import "../treasury/ITreasury.sol";
 
 contract RegularSell is Initializable {
     using SafeMathUpgradeable for uint256;
@@ -17,6 +18,7 @@ contract RegularSell is Initializable {
     IAccessRestriction public accessRestriction;
     IGenesisTree public treeFactory;
     IERC20 public daiToken;
+    ITreasury public treasury;
 
     modifier onlyAdmin {
         accessRestriction.ifAdmin(msg.sender);
@@ -44,6 +46,14 @@ contract RegularSell is Initializable {
         require(candidateContract.isGenesisTree());
 
         treeFactory = candidateContract;
+    }
+
+    function setTreasuryAddress(address _address) external onlyAdmin {
+        ITreasury candidateContract = ITreasury(_address);
+
+        require(candidateContract.isTreasury());
+
+        treasury = candidateContract;
     }
 
     function setDaiTokenAddress(address _address) external onlyAdmin {
@@ -74,10 +84,10 @@ contract RegularSell is Initializable {
 
     function requestByTreeId(uint256 _treeId) external payable {
         require(_treeId > lastSoldRegularTree, "invalid tree");
-        require(daiToken.balanceOf(msg.sender) >= treePrice, "invalid amount");
+        require(msg.value == treePrice, "invalid amount");
 
         treeFactory.requestRegularTree(_treeId, msg.sender);
 
-        //TODO:call treasury
+        treasury.fundTree{value: msg.value}(_treeId);
     }
 }

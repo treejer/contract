@@ -306,9 +306,10 @@ contract Treasury is Initializable, RelayRecipient {
 
     function fundTree(uint256 _treeId) external payable {
         require(
-            accessRestriction.isAuction(_msgSender()),
+            accessRestriction.isAuction(_msgSender()) ||
+                accessRestriction.isRegularSell(_msgSender()),
             "only auction can access"
-        );
+        ); //TODO: message must fix
 
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]

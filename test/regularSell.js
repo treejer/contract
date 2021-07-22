@@ -50,10 +50,6 @@ contract("regularSell", (accounts) => {
 
   beforeEach(async () => {
     const treePrice = Number(web3.utils.toWei("0.00000000000000001"));
-    console.log(
-      'Number(web3.utils.toWei("0.00000000000000001")',
-      Number(web3.utils.toWei("0.00000000000000001"))
-    );
 
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
@@ -96,54 +92,54 @@ contract("regularSell", (accounts) => {
 
   afterEach(async () => {});
   //////////////////************************************ deploy successfully ****************************************//
-  // it("deploys successfully", async () => {
-  //   const address = regularSellInstance.address;
-  //   assert.notEqual(address, 0x0);
-  //   assert.notEqual(address, "");
-  //   assert.notEqual(address, null);
-  //   assert.notEqual(address, undefined);
-  // });
+  it("deploys successfully", async () => {
+    const address = regularSellInstance.address;
+    assert.notEqual(address, 0x0);
+    assert.notEqual(address, "");
+    assert.notEqual(address, null);
+    assert.notEqual(address, undefined);
+  });
 
-  // /////////////////---------------------------------set tree factory address--------------------------------------------------------
-  // it("set tree factory address", async () => {
-  //   await regularSellInstance
-  //     .setTreeFactoryAddress(treeFactoryInstance.address, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  /////////////////---------------------------------set tree factory address--------------------------------------------------------
+  it("set tree factory address", async () => {
+    await regularSellInstance
+      .setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-  //   await regularSellInstance.setTreeFactoryAddress(
-  //     treeFactoryInstance.address,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-  //   assert.equal(
-  //     treeFactoryInstance.address,
-  //     await regularSellInstance.treeFactory.call(),
-  //     "address set incorect"
-  //   );
-  // });
+    assert.equal(
+      treeFactoryInstance.address,
+      await regularSellInstance.treeFactory.call(),
+      "address set incorect"
+    );
+  });
 
-  // /////////////////---------------------------------set  tresury address--------------------------------------------------------
-  // it("set treasury address", async () => {
-  //   await regularSellInstance
-  //     .setTreasuryAddress(treasuryInstance.address, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  /////////////////---------------------------------set  tresury address--------------------------------------------------------
+  it("set treasury address", async () => {
+    await regularSellInstance
+      .setTreasuryAddress(treasuryInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-  //   await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
-  //     from: deployerAccount,
-  //   });
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
 
-  //   assert.equal(
-  //     treasuryInstance.address,
-  //     await regularSellInstance.treasury.call(),
-  //     "address set incorect"
-  //   );
-  // });
+    assert.equal(
+      treasuryInstance.address,
+      await regularSellInstance.treasury.call(),
+      "address set incorect"
+    );
+  });
 
   /////////////////------------------------------------- set price ------------------------------------------
   it("set price and check data", async () => {

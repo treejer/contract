@@ -11,13 +11,6 @@ interface ITree is IERC721Upgradeable {
     function isTree() external view returns (bool);
 
     //only TreeFactory
-    function safeTransferExtra(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external;
-
-    //only TreeFactory
     function safeMint(address _to, uint256 _tokenId) external;
 
     function tokenOfOwnerByIndex(address owner, uint256 index)

@@ -15,8 +15,9 @@ contract WhitelistPaymaster is BasePaymaster {
     IAccessRestriction public accessRestriction;
 
     constructor(address _accessRestrictionAddress) public {
-        IAccessRestriction candidateContract =
-            IAccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -41,8 +42,8 @@ contract WhitelistPaymaster is BasePaymaster {
         _verifyForwarder(relayRequest);
 
         (relayRequest, signature, approvalData, maxPossibleGas);
-
-        accessRestriction.ifPlanterOrAmbassador(relayRequest.request.from);
+        //TODO: isPlanterOrAmbassedor change to isPlanter
+        accessRestriction.ifPlanter(relayRequest.request.from);
 
         require(
             targetWhitelist[relayRequest.request.to],

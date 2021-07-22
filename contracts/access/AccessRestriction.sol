@@ -7,10 +7,6 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
-    bytes32 public constant AMBASSADOR_ROLE = keccak256("AMBASSADOR_ROLE");
-    bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
-    bytes32 public constant SEED_FACTORY_ROLE = keccak256("SEED_FACTORY_ROLE");
-    bytes32 public constant O2_FACTORY_ROLE = keccak256("O2_FACTORY_ROLE");
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
     bytes32 public constant GENESIS_TREE_ROLE = keccak256("GENESIS_TREE_ROLE");
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
@@ -36,35 +32,12 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         _;
     }
 
-    function ifPlanterOrAmbassador(address _address) public view {
-        require(
-            isPlanterOrAmbassador(_address),
-            "Caller is not a planter or ambassador"
-        );
-    }
-
-    function isPlanterOrAmbassador(address _address)
-        public
-        view
-        returns (bool)
-    {
-        return (isPlanter(_address) || isAmbassador(_address));
-    }
-
     function ifPlanter(address _address) public view {
         require(isPlanter(_address), "Caller is not a planter");
     }
 
     function isPlanter(address _address) public view returns (bool) {
         return hasRole(PLANTER_ROLE, _address);
-    }
-
-    function ifAmbassador(address _address) public view {
-        require(isAmbassador(_address), "Caller is not a ambassador");
-    }
-
-    function isAmbassador(address _address) public view returns (bool) {
-        return hasRole(AMBASSADOR_ROLE, _address);
     }
 
     function ifAdmin(address _address) public view {
@@ -89,30 +62,6 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
 
     function unpause() external onlyAdmin {
         _unpause();
-    }
-
-    function ifTreeFactory(address _address) public view {
-        require(isTreeFactory(_address), "Caller is not TreeFactory");
-    }
-
-    function isTreeFactory(address _address) public view returns (bool) {
-        return hasRole(TREE_FACTORY_ROLE, _address);
-    }
-
-    function ifSeedFactory(address _address) public view {
-        require(isSeedFactory(_address), "Caller is not SeedFactory");
-    }
-
-    function isSeedFactory(address _address) public view returns (bool) {
-        return hasRole(SEED_FACTORY_ROLE, _address);
-    }
-
-    function ifO2Factory(address _address) public view {
-        require(isO2Factory(_address), "Caller is not O2Factory");
-    }
-
-    function isO2Factory(address _address) public view returns (bool) {
-        return hasRole(O2_FACTORY_ROLE, _address);
     }
 
     function ifAuction(address _address) public view {

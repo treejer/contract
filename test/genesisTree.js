@@ -1,6 +1,5 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const GenesisTree = artifacts.require("GenesisTree.sol");
-const GBFactory = artifacts.require("GBFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const Treasury = artifacts.require("Treasury.sol");
@@ -10,7 +9,7 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
+
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -30,7 +29,7 @@ const ethers = require("ethers");
 contract("GenesisTree", (accounts) => {
   let genesisTreeInstance;
   let treeTokenInstance;
-  let gbInstance;
+
   let arInstance;
   let treasuryInstance;
   let planterInstance;
@@ -82,12 +81,6 @@ contract("GenesisTree", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    gbInstance = await deployProxy(GBFactory, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
     treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
@@ -115,17 +108,7 @@ contract("GenesisTree", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-  /////////////************************************ gb factory address ****************************************//
 
-  it("set gb factory address", async () => {
-    let tx = await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
-    await genesisTreeInstance
-      .setGBFactoryAddress(gbInstance.address, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-  });
   /////////////************************************ treasury address ****************************************//
 
   it("set treasury address", async () => {
@@ -218,17 +201,12 @@ contract("GenesisTree", (accounts) => {
   it("assign tree to planter succussfuly", async () => {
     let treeId = 1;
 
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
     await genesisTreeInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
     await Common.addAmbassador(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGB(gbInstance, userAccount1, [userAccount2], "gb 1");
 
     await Common.joinSimplePlanterFromGenesis(
       planterInstance,
@@ -239,8 +217,6 @@ contract("GenesisTree", (accounts) => {
       genesisTreeInstance,
       deployerAccount
     );
-
-    let result = await gbInstance.gbToPlanters.call(1, 0);
 
     await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
@@ -1663,10 +1639,6 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -2235,10 +2207,6 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
 
-    await genesisTreeInstance.setGBFactoryAddress(gbInstance.address, {
-      from: deployerAccount,
-    });
-
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -2467,7 +2435,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -2606,7 +2574,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -2780,7 +2748,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -2907,7 +2875,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -3068,7 +3036,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -3115,7 +3083,7 @@ contract("GenesisTree", (accounts) => {
 
     await treasuryInstance.addFundDistributionModel(
       fundsPercent.planterFund,
-      fundsPercent.gbFund,
+      fundsPercent.referralFund,
       fundsPercent.treeResearch,
       fundsPercent.localDevelop,
       fundsPercent.rescueFund,
@@ -3930,7 +3898,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,
@@ -4003,7 +3971,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
-      gbFund: 1000,
+      referralFund: 1000,
       treeResearch: 1000,
       localDevelop: 1000,
       rescueFund: 1000,

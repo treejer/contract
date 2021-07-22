@@ -36,20 +36,9 @@ interface IAccessRestriction {
 
     function renounceRole(bytes32 role, address account) external;
 
-    function ifPlanterOrAmbassador(address _address) external view;
-
-    function isPlanterOrAmbassador(address _address)
-        external
-        view
-        returns (bool);
-
     function ifPlanter(address _address) external view;
 
     function isPlanter(address _address) external view returns (bool);
-
-    function ifAmbassador(address _address) external view;
-
-    function isAmbassador(address _address) external view returns (bool);
 
     function ifAdmin(address _address) external view;
 
@@ -58,14 +47,6 @@ interface IAccessRestriction {
     function ifTreeFactory(address _address) external view;
 
     function isTreeFactory(address _address) external view returns (bool);
-
-    function ifSeedFactory(address _address) external view;
-
-    function isSeedFactory(address _address) external view returns (bool);
-
-    function ifO2Factory(address _address) external view;
-
-    function isO2Factory(address _address) external view returns (bool);
 
     function ifAuction(address _address) external view;
 

@@ -19,8 +19,9 @@ contract Tree is ERC721Upgradeable {
         __ERC721_init("Tree", "TREE");
         _setBaseURI(_baseURI);
 
-        IAccessRestriction candidateContract =
-            IAccessRestriction(_accessRestrictionAddress);
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
     }
@@ -32,8 +33,9 @@ contract Tree is ERC721Upgradeable {
     }
 
     function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
+        //TODO: isPlanterOrAmbassedor change to isPlanter
         require(
-            accessRestriction.isPlanterOrAmbassador(msg.sender) ||
+            accessRestriction.isPlanter(msg.sender) ||
                 ownerOf(_tokenId) == msg.sender ||
                 accessRestriction.isTreeFactory(msg.sender) ||
                 accessRestriction.isGenesisTree(msg.sender),
@@ -61,15 +63,6 @@ contract Tree is ERC721Upgradeable {
         }
 
         return result;
-    }
-
-    function safeTransferExtra(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
-        accessRestriction.ifTreeFactory(msg.sender);
-        _safeTransfer(_from, _to, _tokenId, "");
     }
 
     function safeMint(address _to, uint256 _tokenId) external {

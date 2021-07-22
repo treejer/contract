@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
-import "../greenblock/IGBFactory.sol";
 import "../tree/ITree.sol";
 import "../treasury/ITreasury.sol";
 import "../planter/IPlanter.sol";
@@ -28,7 +27,6 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
-    IGBFactory public gbFactory;
     ITreasury public treasury;
     IPlanter public planter;
 
@@ -112,14 +110,6 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
-    }
-
-    function setGBFactoryAddress(address _address) external onlyAdmin {
-        IGBFactory candidateContract = IGBFactory(_address);
-
-        require(candidateContract.isGBFactory());
-
-        gbFactory = candidateContract;
     }
 
     function setTreasuryAddress(address _address) external onlyAdmin {

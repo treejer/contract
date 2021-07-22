@@ -25,14 +25,19 @@ contract RegularSell is Initializable {
         _;
     }
 
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress, uint256 _price)
+        public
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());
+        accessRestriction = candidateContract;
+
         isRegularSell = true;
         lastSoldRegularTree = 10000;
-        accessRestriction = candidateContract;
+        treePrice = _price;
     }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -64,19 +69,19 @@ contract RegularSell is Initializable {
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
-        require(
-            daiToken.balanceOf(msg.sender) >= treePrice.mul(_count),
-            "invalid amount"
-        );
+        require(msg.value == treePrice.mul(_count), "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
+
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
                 msg.sender
             );
-            //TODO://call treasry
+            //TODO://check is truee ???
+            treasury.fundTree{value: treePrice}(tempLastRegularSold);
         }
+
         lastSoldRegularTree = tempLastRegularSold;
     }
 

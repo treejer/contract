@@ -10,6 +10,8 @@ import "../access/IAccessRestriction.sol";
 import "../genesisTree/IGenesisTree.sol";
 import "../treasury/ITreasury.sol";
 
+/** @title Tree Auction */
+
 contract TreeAuction is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeMathUpgradeable for uint256;
@@ -17,6 +19,8 @@ contract TreeAuction is Initializable {
     using SafeCastUpgradeable for uint256;
 
     CountersUpgradeable.Counter private auctionId;
+
+    /** NOTE {isTreeAuction} set inside the initialize to {true} */
 
     bool public isTreeAuction;
 
@@ -34,7 +38,10 @@ contract TreeAuction is Initializable {
         uint256 bidInterval;
     }
 
+    /** NOTE mapping of auctionId to Auction struct */
     mapping(uint256 => Auction) public auctions;
+
+    /** NOTE mapping of address to amount */
     mapping(address => uint256) public pendingWithdraw;
 
     event HighestBidIncreased(
@@ -65,6 +72,10 @@ contract TreeAuction is Initializable {
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isTreeAuction
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -74,17 +85,36 @@ contract TreeAuction is Initializable {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev admin set GenesisTreeAddress
+     * @param _address set to the address of genesisTree
+     */
+
     function setGenesisTreeAddress(address _address) external onlyAdmin {
         IGenesisTree candidateContract = IGenesisTree(_address);
         require(candidateContract.isGenesisTree());
         genesisTree = candidateContract;
     }
 
+    /**
+     * @dev admin set TreasuryAddress
+     * @param _address set to the address of treasury
+     */
+
     function setTreasuryAddress(address _address) external onlyAdmin {
         ITreasury candidateContract = ITreasury(_address);
         require(candidateContract.isTreasury());
         treasury = candidateContract;
     }
+
+    /**
+     * @dev admin create auction to a tree with provideStatus of '0' and push that auction to {auctions[auctionId]} and increament auctionId by 1.
+     * @param _treeId treeId that auction create for
+     * @param _startDate strat time of auction
+     * @param _endDate end time of auction
+     * @param _intialPrice initial price of auction
+     * @param _bidInterval bid interval for auction . if it set to 10 for example and the last bid is 100.new bidder can bid for 110
+     */
 
     function createAuction(
         uint256 _treeId,
@@ -114,6 +144,12 @@ contract TreeAuction is Initializable {
         auctionId.increment();
     }
 
+    /**
+     * @dev bid to {auctions[_auctionId]} by user in a time beetwen start time and end time
+     * its require to send at least {higestBid + bidInterval } value.
+     * @param _auctionId auctionId that user bid for it.
+     */
+
     function bid(uint256 _auctionId) external payable ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
@@ -142,6 +178,10 @@ contract TreeAuction is Initializable {
         _withdraw(oldBid, oldBidder);
     }
 
+    /** @dev users can manually withdraw if its balance is more than 0.
+     * @return true in case of successfull withdraw and false otherwise.
+     */
+
     function manualWithdraw() external ifNotPaused returns (bool) {
         uint256 amount = pendingWithdraw[msg.sender];
 
@@ -157,6 +197,10 @@ contract TreeAuction is Initializable {
         return true;
     }
 
+    /** @dev everyone can call this method  including the winner of auction after
+     * auction end time and if auction have bidder transfer owner of tree to bidder and fund tree.
+     * @param _auctionId id of auction that want to finish.
+     */
     function endAuction(uint256 _auctionId) external ifNotPaused {
         Auction storage auction = auctions[_auctionId];
 
@@ -186,9 +230,11 @@ contract TreeAuction is Initializable {
         }
     }
 
+    /** @dev if latest bid is less than 10 minutes to the end of auctionEndTime:
+     * we will increase auctionEndTime 600 seconds
+     * @param _auctionId id of auction that increase end time of it.
+     */
     function _increaseAuctionEndTime(uint256 _auctionId) private {
-        // if latest bid is less than 10 minutes to the end of auctionEndTime:
-        // we will increase auctionEndTime 600 seconds
         if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
             auctions[_auctionId].endDate = auctions[_auctionId]
             .endDate
@@ -202,6 +248,10 @@ contract TreeAuction is Initializable {
             );
         }
     }
+
+    /** @dev when new bid take apart we charge the previous bidder as
+     * much as paid before using this function
+     */
 
     function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
         if (_oldBidder != address(0)) {

@@ -737,7 +737,7 @@ contract("regularSell", (accounts) => {
   //////////////////////////////------------------------- aliad ----------------------------------------------------------------------
   ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
   it("should request tree by id successfully", async () => {
-    const treePrice = Number(web3.utils.toWei("0.00000000000000001"));
+    const treePrice = Units.convert("1", "eth", "wei");
     const birthDate = parseInt(new Date().getTime() / 1000);
     const countryCode = 2;
     const planter = userAccount2;
@@ -829,7 +829,7 @@ contract("regularSell", (accounts) => {
 
     await regularSellInstance.requestByTreeId(10001, {
       from: userAccount1,
-      value: web3.utils.toWei("0.00000000000000001"),
+      value: web3.utils.toWei("1"),
     });
   });
 
@@ -839,8 +839,10 @@ contract("regularSell", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
     const ipfsHash = "some ipfs hash here";
+    const treeId = 10001;
 
     ////////////// ------------------- handle fund distribution model ----------------------
+
     await treasuryInstance.addFundDistributionModel(
       3000,
       1200,
@@ -869,7 +871,9 @@ contract("regularSell", (accounts) => {
     await treasuryInstance.assignTreeFundDistributionModel(1, 100000, 0, {
       from: deployerAccount,
     });
+
     ///////////////////// ------------------------- handle tree price ------------------------
+
     await regularSellInstance.setPrice(treePrice, {
       from: deployerAccount,
     });
@@ -881,31 +885,40 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+
     ///////////////////// ------------------- handle addresses here --------------------------
+
     await regularSellInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,
       { from: deployerAccount }
     );
+
     await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
+
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
+
     await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
       from: deployerAccount,
     });
+
     ///////////////////////// -------------------- handle roles here ----------------
+
     await Common.addRegularSellRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
+
     await Common.addGenesisTreeRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
+
     //////////////////-------------------------- plant regualar -----------------
 
     await Common.regularPlantTreeSuccess(
@@ -918,68 +931,99 @@ contract("regularSell", (accounts) => {
       planter,
       deployerAccount
     );
+
     await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
-    ///////////////////////////////////////////
 
-    //
+    ///////////////////////////////////////////
 
     /////////////--------------------- check total fund before request
 
     const totalFundsBefore = await treasuryInstance.totalFunds.call();
 
-    assert.equal(Number(totalFundsBefore.planterFund), 0);
-    assert.equal(Number(totalFundsBefore.referralFund), 0);
-    assert.equal(Number(totalFundsBefore.treeResearch), 0);
-    assert.equal(Number(totalFundsBefore.localDevelop), 0);
-    assert.equal(Number(totalFundsBefore.rescueFund), 0);
-    assert.equal(Number(totalFundsBefore.treejerDevelop), 0);
-    assert.equal(Number(totalFundsBefore.otherFund1), 0);
-    assert.equal(Number(totalFundsBefore.otherFund2), 0);
+    assert.equal(
+      Number(totalFundsBefore.planterFund),
+      0,
+      "invalid planter fund"
+    );
+
+    assert.equal(
+      Number(totalFundsBefore.referralFund),
+      0,
+      "invalid refferal fund"
+    );
+
+    assert.equal(
+      Number(totalFundsBefore.treeResearch),
+      0,
+      "invalid tree research fund"
+    );
+
+    assert.equal(
+      Number(totalFundsBefore.localDevelop),
+      0,
+      "invalid local develop fund"
+    );
+    assert.equal(Number(totalFundsBefore.rescueFund), 0, "invalid rescue fund");
+
+    assert.equal(
+      Number(totalFundsBefore.treejerDevelop),
+      0,
+      "invalid treejer develop fund"
+    );
+
+    assert.equal(Number(totalFundsBefore.otherFund1), 0, "invalid other fund1");
+
+    assert.equal(Number(totalFundsBefore.otherFund2), 0, "invalid other fund2");
 
     ////////////////// ---------------- check tree before -----------------------
 
-    const treeBefore = await treeFactoryInstance.genTrees.call(10001);
+    const treeBefore = await treeFactoryInstance.genTrees.call(treeId);
 
-    assert.equal(Number(treeBefore.treeStatus), 4);
-    assert.equal(Number(treeBefore.provideStatus), 4);
+    assert.equal(Number(treeBefore.treeStatus), 4, "invalid tree status");
+
+    assert.equal(
+      Number(treeBefore.provideStatus),
+      4,
+      "invalid tree provide status"
+    );
 
     /////// --------- get user balacne before request
 
     const userBalanceBefore = await web3.eth.getBalance(userAccount1);
 
     ///////////////////////////---------------------- check treasury and regular sell balance after request
+
     const treasuryBalanceBefore = await web3.eth.getBalance(
       treasuryInstance.address
     );
+
     const regularSellBalanceBefore = await web3.eth.getBalance(
       regularSellInstance.address
     );
 
-    assert.equal(Number(treasuryBalanceBefore), 0);
-    assert.equal(Number(regularSellBalanceBefore), 0);
+    assert.equal(
+      Number(treasuryBalanceBefore),
+      0,
+      "invalid treasury balance before"
+    );
 
-    ////////////////////// ----------------------- check token owner before
+    assert.equal(
+      Number(regularSellBalanceBefore),
+      0,
+      "invalid regular sell balance before"
+    );
 
-    // const tokentOwnerBefore = await treeTokenInstance.ownerOf(10001);
-    // console.log("before", tokentOwnerBefore);
+    ///////////////// ----------------- request tree -------------------------------------------
 
-    ///////////////// ----------------- request tree
-
-    const requestTx = await regularSellInstance.requestByTreeId(10001, {
+    const requestTx = await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
     });
 
-    ////////////////////// ----------------------- check token owner before
-
-    const tokentOwnerAfter = await treeTokenInstance.ownerOf(10001);
-    console.log("after", tokentOwnerAfter);
-
-    assert.equal(tokentOwnerAfter, userAccount1);
-
     ///////////////------------------ check user balace to be correct ---------------------
+
     const userBalanceAfter = await web3.eth.getBalance(userAccount1);
 
     const txFee = await Common.getTransactionFee(requestTx);
@@ -989,41 +1033,101 @@ contract("regularSell", (accounts) => {
       Math.subtract(
         Math.subtract(Number(userBalanceBefore), Number(web3.utils.toWei("1"))),
         txFee
-      )
+      ),
+      "invalid user balance update"
     );
+
     ///////////////////////////---------------------- check treasury and regular sell balance after request
+
     const treasuryBalanceAfter = await web3.eth.getBalance(
       treasuryInstance.address
     );
+
     const regularSellBalanceAfter = await web3.eth.getBalance(
       regularSellInstance.address
     );
 
-    assert.equal(Number(treasuryBalanceAfter), treePrice);
-    assert.equal(Number(regularSellBalanceAfter), 0);
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      treePrice,
+      "invalid treasury balance after"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "invalid regular sell balance after"
+    );
+
+    ////////////////////// ----------------------- check token owner before
+
+    const tokentOwnerAfter = await treeTokenInstance.ownerOf(treeId);
+
+    assert.equal(tokentOwnerAfter, userAccount1, "invalid token owner");
+
+    ////////////////// ---------------- check tree after request-----------------------
+
+    const treeAfter = await treeFactoryInstance.genTrees.call(treeId);
+
+    assert.equal(Number(treeAfter.treeStatus), 4, "invalid tree status");
+
+    assert.equal(
+      Number(treeAfter.provideStatus),
+      0,
+      "invalid tree provide status"
+    );
 
     ////////////////// ---------------------- check total fund after request
 
     const totalFundsAfter = await treasuryInstance.totalFunds.call();
 
-    assert.equal(Number(totalFundsAfter.planterFund), expected.planterFund);
-    assert.equal(Number(totalFundsAfter.referralFund), expected.referralFund);
-    assert.equal(Number(totalFundsAfter.treeResearch), expected.treeResearch);
-    assert.equal(Number(totalFundsAfter.localDevelop), expected.localDevelop);
-    assert.equal(Number(totalFundsAfter.rescueFund), expected.rescueFund);
+    assert.equal(
+      Number(totalFundsAfter.planterFund),
+      expected.planterFund,
+      "invalid planter fund"
+    );
+
+    assert.equal(
+      Number(totalFundsAfter.referralFund),
+      expected.referralFund,
+      "invalid refferal fund"
+    );
+
+    assert.equal(
+      Number(totalFundsAfter.treeResearch),
+      expected.treeResearch,
+      "invalid tree research fund"
+    );
+
+    assert.equal(
+      Number(totalFundsAfter.localDevelop),
+      expected.localDevelop,
+      "invalid local develop fund"
+    );
+
+    assert.equal(
+      Number(totalFundsAfter.rescueFund),
+      expected.rescueFund,
+      "invalid rescue fund"
+    );
+
     assert.equal(
       Number(totalFundsAfter.treejerDevelop),
-      expected.treejerDevelop
+      expected.treejerDevelop,
+      "invalid treejer develop fund"
     );
-    assert.equal(Number(totalFundsAfter.otherFund1), expected.otherFund1);
-    assert.equal(Number(totalFundsAfter.otherFund2), expected.otherFund2);
 
-    ////////////////// ---------------- check tree after request-----------------------
+    assert.equal(
+      Number(totalFundsAfter.otherFund1),
+      expected.otherFund1,
+      "invalid other fund1"
+    );
 
-    const treeAfter = await treeFactoryInstance.genTrees.call(10001);
-
-    assert.equal(Number(treeAfter.treeStatus), 4);
-    assert.equal(Number(treeAfter.provideStatus), 0);
+    assert.equal(
+      Number(totalFundsAfter.otherFund2),
+      expected.otherFund2,
+      "invalid other fund2"
+    );
   });
 
   it("should be reject request by tree id", async () => {
@@ -1032,6 +1136,7 @@ contract("regularSell", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
     const ipfsHash = "some ipfs hash here";
+    const treeId = 10001;
 
     await regularSellInstance.setPrice(price, { from: deployerAccount });
 
@@ -1044,7 +1149,7 @@ contract("regularSell", (accounts) => {
     /////////////////// ------------------ fail because of invalid amount -----------------
 
     await regularSellInstance
-      .requestByTreeId(10001, {
+      .requestByTreeId(treeId, {
         from: userAccount1,
         value: web3.utils.toWei("0.5"),
       })
@@ -1052,7 +1157,7 @@ contract("regularSell", (accounts) => {
 
     ////////////////////////// ----------------- fail because treeFactory address not set
 
-    await regularSellInstance.requestByTreeId(10001, {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
     }).should.be.rejected;
@@ -1065,8 +1170,9 @@ contract("regularSell", (accounts) => {
     );
 
     ///////////////////////// ------------------ fail because caller is not Regular sell in TreeFactory
+
     await regularSellInstance
-      .requestByTreeId(10001, {
+      .requestByTreeId(treeId, {
         from: userAccount1,
         value: web3.utils.toWei("1"),
       })
@@ -1079,9 +1185,11 @@ contract("regularSell", (accounts) => {
       regularSellInstance.address,
       deployerAccount
     );
+
     ////////////////// ----------------- fail because tree is not planted -------------------
+
     await regularSellInstance
-      .requestByTreeId(10001, {
+      .requestByTreeId(treeId, {
         from: userAccount1,
         value: web3.utils.toWei("1"),
       })
@@ -1127,7 +1235,8 @@ contract("regularSell", (accounts) => {
     ///////////////////////// ---------------- end plant regular tree-------------------------
 
     //////////--------------------------- fail because treasury address not set
-    await regularSellInstance.requestByTreeId(10001, {
+
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
     }).should.be.rejected;
@@ -1137,7 +1246,7 @@ contract("regularSell", (accounts) => {
     });
 
     await regularSellInstance
-      .requestByTreeId(10001, {
+      .requestByTreeId(treeId, {
         from: userAccount1,
         value: web3.utils.toWei("1"),
       })
@@ -1163,7 +1272,7 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await regularSellInstance.requestByTreeId(10001, {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
     });

@@ -681,7 +681,6 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.ORGANIZATION_NOT_VALID);
   });
 
-  ///////////////////////////////////////////mahdi/////////////////////////////////
   ////// *********************************************  accept planter from organization  **************************************************
   it("should accept planter from organization", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);

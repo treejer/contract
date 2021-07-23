@@ -10,6 +10,7 @@ import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
 
+/** @title Tree Auction */
 contract Treasury is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;

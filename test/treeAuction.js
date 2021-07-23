@@ -9,6 +9,7 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
+const Math = require("./math");
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -16,8 +17,6 @@ const {
   GenesisTreeErrorMsg,
   TreesuryManagerErrorMsg,
 } = require("./enumes");
-
-const Math = require("./math");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 contract("TreeAuction", (accounts) => {
@@ -442,7 +441,10 @@ contract("TreeAuction", (accounts) => {
     });
     const resultAfter = await treeAuctionInstance.auctions.call(0);
     assert.equal(
-      Number(resultAfter.highestBid) - Number(resultBefore.highestBid),
+      Math.subtract(
+        Number(resultAfter.highestBid),
+        Number(resultBefore.highestBid)
+      ),
       web3.utils.toWei("0.15")
     );
   });
@@ -556,8 +558,10 @@ contract("TreeAuction", (accounts) => {
     let resultAfterChangeTime = await treeAuctionInstance.auctions.call(0);
 
     assert.equal(
-      resultAfterChangeTime.endDate.toNumber() -
-        resultBefore.endDate.toNumber(),
+      Math.subtract(
+        resultAfterChangeTime.endDate.toNumber(),
+        resultBefore.endDate.toNumber()
+      ),
       600
     );
   });
@@ -784,7 +788,7 @@ contract("TreeAuction", (accounts) => {
       return (
         Number(ev.auctionId) == 0 &&
         ev.bidder == userAccount1 &&
-        Number(ev.newAuctionEndTime) == Number(endTime) + 600
+        Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
   });
@@ -1449,7 +1453,7 @@ contract("TreeAuction", (accounts) => {
 
   it("should do an acution completly", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const initialValue = web3.utils.toWei("1");
     const bidInterval = web3.utils.toWei("0.1");
@@ -1546,7 +1550,7 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(auction2.bider, userAccount2, "bidder is incorrect");
     assert.equal(
-      Number(auction2.endDate) - Number(auction1.endDate),
+      Math.subtract(Number(auction2.endDate), Number(auction1.endDate)),
       600,
       "time increse incorrect"
     );
@@ -1583,7 +1587,7 @@ contract("TreeAuction", (accounts) => {
     const auction4 = await treeAuctionInstance.auctions.call(0);
 
     assert.equal(
-      Number(auction4.endDate) - Number(auction3.endDate),
+      Math.subtract(Number(auction4.endDate), Number(auction3.endDate)),
       600,
       "increase end time incorrect"
     );
@@ -1634,12 +1638,12 @@ contract("TreeAuction", (accounts) => {
     let amount = Number(web3.utils.toWei("1.4"));
 
     let expected = {
-      planterFund: (40 * amount) / 100,
-      referralFund: (12 * amount) / 100,
-      treeResearch: (12 * amount) / 100,
-      localDevelop: (12 * amount) / 100,
-      rescueFund: (12 * amount) / 100,
-      treejerDevelop: (12 * amount) / 100,
+      planterFund: Math.divide(Math.mul(40, amount), 100),
+      referralFund: Math.divide(Math.mul(12, amount), 100),
+      treeResearch: Math.divide(Math.mul(12, amount), 100),
+      localDevelop: Math.divide(Math.mul(12, amount), 100),
+      rescueFund: Math.divide(Math.mul(12, amount), 100),
+      treejerDevelop: Math.divide(Math.mul(12, amount), 100),
       otherFund1: 0,
       otherFund2: 0,
     };
@@ -1731,7 +1735,7 @@ contract("TreeAuction", (accounts) => {
 
   it("complex test 1", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     let initialValue = web3.utils.toWei("1");
@@ -1956,12 +1960,12 @@ contract("TreeAuction", (accounts) => {
     let amount = Number(web3.utils.toWei("1.25"));
 
     let expected = {
-      planterFund: (30 * amount) / 100,
-      referralFund: (12 * amount) / 100,
-      treeResearch: (12 * amount) / 100,
-      localDevelop: (12 * amount) / 100,
-      rescueFund: (12 * amount) / 100,
-      treejerDevelop: (22 * amount) / 100,
+      planterFund: Math.divide(Math.mul(30, amount), 100),
+      referralFund: Math.divide(Math.mul(12, amount), 100),
+      treeResearch: Math.divide(Math.mul(12, amount), 100),
+      localDevelop: Math.divide(Math.mul(12, amount), 100),
+      rescueFund: Math.divide(Math.mul(12, amount), 100),
+      treejerDevelop: Math.divide(Math.mul(22, amount), 100),
       otherFund1: 0,
       otherFund2: 0,
     };
@@ -2038,7 +2042,7 @@ contract("TreeAuction", (accounts) => {
   it("complex test 2", async () => {
     const treeId = 0;
     const auctionId = 0;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     let initialValue = web3.utils.toWei("1");
@@ -2360,12 +2364,12 @@ contract("TreeAuction", (accounts) => {
     let amount = Number(web3.utils.toWei("2.52"));
 
     let expected = {
-      planterFund: (35 * amount) / 100,
-      referralFund: (10 * amount) / 100,
-      treeResearch: (10 * amount) / 100,
-      localDevelop: (15 * amount) / 100,
-      rescueFund: (10 * amount) / 100,
-      treejerDevelop: (20 * amount) / 100,
+      planterFund: Math.divide(Math.mul(35, amount), 100),
+      referralFund: Math.divide(Math.mul(10, amount), 100),
+      treeResearch: Math.divide(Math.mul(10, amount), 100),
+      localDevelop: Math.divide(Math.mul(15, amount), 100),
+      rescueFund: Math.divide(Math.mul(10, amount), 100),
+      treejerDevelop: Math.divide(Math.mul(20, amount), 100),
       otherFund1: 0,
       otherFund2: 0,
     };
@@ -2716,7 +2720,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     assert.equal(
-      Number(initailAuction.endDate) + 600,
+      Math.add(Number(initailAuction.endDate), 600),
       Number(auctionAfterEndTimeIncrease.endDate),
       "invaild end time for auction after increase time"
     );
@@ -2724,7 +2728,8 @@ contract("TreeAuction", (accounts) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         ev.bidder == userAccount7 &&
-        Number(ev.newAuctionEndTime) == Number(initailAuction.endDate) + 600
+        Number(ev.newAuctionEndTime) ==
+          Math.add(Number(initailAuction.endDate), 600)
       );
     });
 
@@ -2786,14 +2791,35 @@ contract("TreeAuction", (accounts) => {
 
     let tokenOwner = await treeTokenInstance.ownerOf(treeId1);
     assert.equal(tokenOwner, userAccount7, "token owner not correct");
-    const totalPlanterFund = (Number(web3.utils.toWei("2")) * 5000) / 10000;
+    const totalPlanterFund = Math.divide(
+      Math.mul(Number(web3.utils.toWei("2")), 5000),
+      10000
+    );
     const expectedPayValue = {
-      planterFund: (Number(web3.utils.toWei("2")) * 5000) / 10000,
-      referralFund: (Number(web3.utils.toWei("2")) * 1000) / 10000,
-      treeResearch: (Number(web3.utils.toWei("2")) * 1000) / 10000,
-      localDevelop: (Number(web3.utils.toWei("2")) * 1000) / 10000,
-      rescueFund: (Number(web3.utils.toWei("2")) * 1000) / 10000,
-      treejerDevelop: (Number(web3.utils.toWei("2")) * 1000) / 10000,
+      planterFund: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 5000),
+        10000
+      ),
+      referralFund: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 1000),
+        10000
+      ),
+      treeResearch: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 1000),
+        10000
+      ),
+      localDevelop: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 1000),
+        10000
+      ),
+      rescueFund: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 1000),
+        10000
+      ),
+      treejerDevelop: Math.divide(
+        Math.mul(Number(web3.utils.toWei("2")), 1000),
+        10000
+      ),
       otherFund1: 0,
       otherFund2: 0,
     };
@@ -2842,8 +2868,10 @@ contract("TreeAuction", (accounts) => {
     );
     ///////////------------ check charge treasury contract
     assert.equal(
-      Number(treasuryBalanceAfterAuctionEnd) -
-        Number(treasuryBalanceBeforeAuctionEnd),
+      Math.subtract(
+        Number(treasuryBalanceAfterAuctionEnd),
+        Number(treasuryBalanceBeforeAuctionEnd)
+      ),
       Number(web3.utils.toWei("2")),
       "treasury done charge correctly"
     );
@@ -2903,11 +2931,16 @@ contract("TreeAuction", (accounts) => {
     );
     const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId1);
     const expectedPaidAfterFundPlanter = parseInt(
-      (totalPlanterFund * Number(resultAfterGT.treeStatus)) / 25920
+      Math.divide(
+        Math.mul(totalPlanterFund, Number(resultAfterGT.treeStatus)),
+        25920
+      )
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.planterFund) -
-        expectedPaidAfterFundPlanter,
+      Math.subtract(
+        Number(totalFundAfterAuctionEnd.planterFund),
+        expectedPaidAfterFundPlanter
+      ),
       Number(totalFundsAfterFundPlanter.planterFund),
       "planter total fund is not ok"
     );

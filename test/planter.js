@@ -499,7 +499,9 @@ contract("GenesisTree", (accounts) => {
       (await planterInstance.planters.call(userAccount2)).status
     );
 
-    let organizationAddressBefore = await planterInstance.ll(userAccount2);
+    let organizationAddressBefore = await planterInstance.memberOf.call(
+      userAccount2
+    );
 
     assert.equal(
       organizationAddressBefore,

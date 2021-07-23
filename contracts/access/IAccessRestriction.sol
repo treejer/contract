@@ -71,6 +71,12 @@ interface IAccessRestriction {
 
     function isAuction(address _address) external view returns (bool);
 
+    function ifIncrementalSell(address _address) external view;
+
+    function isIncrementalSell(address _address) external view returns (bool);
+
+    function ifIncrementalSellOrAuction(address _address) external view;
+
     function ifGenesisTree(address _address) external view;
 
     function isGenesisTree(address _address) external view returns (bool);

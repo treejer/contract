@@ -305,11 +305,7 @@ contract Treasury is Initializable, RelayRecipient {
     }
 
     function fundTree(uint256 _treeId) external payable {
-        require(
-            accessRestriction.isAuction(_msgSender()),
-            "only auction can access"
-        );
-
+        accessRestriction.ifIncrementalSellOrAuction(_msgSender());
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
             .distributionModelId
@@ -434,7 +430,6 @@ contract Treasury is Initializable, RelayRecipient {
     function distributionModelExistance(uint256 _treeId)
         external
         view
-        onlyAuction
         returns (bool)
     {
         if (assignModels.length == 0) {

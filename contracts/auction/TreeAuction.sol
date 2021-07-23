@@ -95,7 +95,7 @@ contract TreeAuction is Initializable {
     ) external ifNotPaused onlyAdmin {
         require(
             treasury.distributionModelExistance(_treeId),
-            "Assign models not exist"
+            "equivalant fund Model not exists"
         );
 
         uint32 provideStatus = genesisTree.availability(_treeId, 1);

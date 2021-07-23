@@ -17,7 +17,8 @@ var TreeAuction = artifacts.require("TreeAuction.sol");
 var GenesisTree = artifacts.require("GenesisTree.sol");
 var Treasury = artifacts.require("Treasury.sol");
 var Planter = artifacts.require("Planter.sol");
-
+var IncrementalSell=artifacts.require("IncrementalSell.sol");
+var TreeAttribute = artifacts.require("TreeAttribute.sol");
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 
@@ -45,6 +46,8 @@ module.exports = async function (deployer, network, accounts) {
   let genesisTreeAddress;
   let treasuryAddress;
   let planterAddress;
+  let incrementalSellAddress;
+  let treeAttributeAddress;
 
   //gsn
   let trustedForwarder;
@@ -129,6 +132,15 @@ module.exports = async function (deployer, network, accounts) {
     treeTypeAddress = TreeType.address;
   });
 
+  console.log("Deploying TreeAttribute ...");
+  await deployProxy(TreeAttribute, [accessRestrictionAddress], {
+    deployer,
+    initializer: "initialize",
+    unsafeAllowCustomTypes: true,
+  }).then(() => {
+    treeAttributeAddress = TreeAttribute.address;
+  });
+
   console.log("Deploying UpdateFactory...");
   await deployProxy(UpdateFactory, [accessRestrictionAddress], {
     deployer,
@@ -171,6 +183,17 @@ module.exports = async function (deployer, network, accounts) {
     treeAuctionAddress = TreeAuction.address;
 
     TreeAuction.deployed().then(async (instance) => {});
+  });
+
+  console.log("Deploying IncrementalSell...");
+  await deployProxy(IncrementalSell, [accessRestrictionAddress], {
+    deployer,
+    initializer: "initialize",
+    unsafeAllowCustomTypes: true,
+  }).then(() => {
+    incrementalSellAddress = IncrementalSell.address;
+
+    IncrementalSell.deployed().then(async (instance) => { });
   });
 
   console.log("Deploying GenesisTree...");
@@ -304,5 +327,7 @@ CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
 CONTRACT_TREASURY_ADDRESS=${treasuryAddress}
 CONTRACT_PLANTER_ADDRESS=${planterAddress}
 CONTRACT_FORESTFACTORY_ADDRESS=${forestFactory}
+CONTRACT_TREE_ATTRIBUTE_ADDRESS=${treeAttributeAddress}
+CONTRACT_INCREMENTAL_SELL_ADDRESS=${incrementalSellAddress}
 CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 };

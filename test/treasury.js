@@ -871,7 +871,7 @@ contract("Treasury", (accounts) => {
     await TreasuryInstance.fundTree(1, {
       from: userAccount1,
       value: web3.utils.toWei("1", "Ether"),
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.ONLY_AUCTION); //TODO: @mahdi there is no thing like this
+    }).should.be.rejectedWith(TreesuryManagerErrorMsg.ONLY_AUCTION);
   });
 
   it("1.fundTree should be success", async () => {

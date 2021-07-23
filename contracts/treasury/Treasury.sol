@@ -144,7 +144,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     /**
      * @dev set trusted forwarder address
-     *@param _address set to {trustedForwarder}
+     * @param _address set to {trustedForwarder}
      */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
@@ -366,7 +366,7 @@ contract Treasury is Initializable, RelayRecipient {
             accessRestriction.isAuction(_msgSender()) ||
                 accessRestriction.isRegularSell(_msgSender()),
             "only auction and regularSell can access"
-        ); //TODO: message must fix
+        );
 
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
@@ -411,7 +411,7 @@ contract Treasury is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev based on the treeStatus planter charged in every update verifying
+     * @dev based on the treeStatus planter charged in every tree update verifying
      *
      * @param _treeId id of a tree to fund
      * @param _planterId  address of planter to fund
@@ -733,8 +733,8 @@ contract Treasury is Initializable, RelayRecipient {
 
     /**
      * @dev privte function to calculate sum of two number safely
-     * @param a
-     * @param b
+     * @param a input 1
+     * @param b input 2
      * @return sum of inputs thar is uint256
      */
 

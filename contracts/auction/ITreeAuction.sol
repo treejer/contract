@@ -37,24 +37,45 @@ interface ITreeAuction {
      */
     function bid(uint256 _auctionId) external payable;
 
-    /** @dev */
+    /** @dev accounts that not funded while automatic withdraw in bid can manually
+     * withdraw
+     * @return true in case of seccussful withdraw and false otherwise
+     */
     function manualWithdraw() external returns (bool);
 
-    /** @dev */
+    /** @dev everyone can call this method after
+     * auction end time and if auction have bidder , transfer owner of tree to bidder and fund tree.
+     * NOTE auction status set to end here
+     * emit a {AuctionEnded} event
+     */
     function endAuction(uint256 _auctionId) external;
 
+    /**
+     * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
+     * with value of {amount}
+     */
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
         address bidder,
         uint256 amount
     );
+
+    /**
+     * @dev emiited when auctions {auctionId} for tree {treeId} finisehd.
+     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     */
     event AuctionEnded(
         uint256 auctionId,
         uint256 treeId,
         address winner,
         uint256 amount
     );
+
+    /**
+     * @dev emmited when a bid take apart less than 10 minutes to end of auction by {bidder}
+     * {newAuctionEndTime} is old auction end time plus 10 minutes
+     */
     event AuctionEndTimeIncreased(
         uint256 auctionId,
         uint256 newAuctionEndTime,

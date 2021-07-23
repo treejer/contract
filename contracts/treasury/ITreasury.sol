@@ -2,12 +2,10 @@
 
 pragma solidity ^0.6.9;
 
-/**
- * @title Treasury interfce
- */
+/** @title Treasury interfce */
 interface ITreasury {
     /**
-     * @dev return if Treasury contract initialze
+     * @dev return if Treasury contract initialize
      * @return true in case of Treasury contract have been initialized
      */
     function isTreasury() external view returns (bool);

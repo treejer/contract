@@ -377,7 +377,7 @@ contract("GenesisTree", (accounts) => {
   //////////////************************************ plant tree ****************************************//
   it("should plant tree successfuly when have planter", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -424,7 +424,7 @@ contract("GenesisTree", (accounts) => {
 
   it("check data to be correct after plant tree with planter", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -525,7 +525,7 @@ contract("GenesisTree", (accounts) => {
   it("should fail plant tree with planter", async () => {
     const treeId = 1;
     const invlidTreeId = 2;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -601,7 +601,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail because of planting permision (1)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -718,7 +718,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail because of planting permision (assign to type 2 and test with type 1 and type 2)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -824,7 +824,7 @@ contract("GenesisTree", (accounts) => {
   it("should fail because of planting permision (assign to type 2 and test with type 3)", async () => {
     const treeId = 1;
     const treeId2 = 2;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -974,7 +974,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail because of planting permision assign to type 3", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -1131,7 +1131,7 @@ contract("GenesisTree", (accounts) => {
     const treeId2 = 2;
     const treeId3 = 3;
     const treeId4 = 4;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -1295,7 +1295,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("check data to be correct after reject plant", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -1466,7 +1466,7 @@ contract("GenesisTree", (accounts) => {
 
   it("check data to be correct after verify plant", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -1635,7 +1635,7 @@ contract("GenesisTree", (accounts) => {
     const treeId = 1;
     const treeId2 = 2;
     const invalidTreeId = 100;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -1735,7 +1735,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail verify plant when planterType=1", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -1872,7 +1872,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should fail verify plant when planterType=2", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -2009,7 +2009,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should fail verify plant when planterType=3", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -2143,7 +2143,7 @@ contract("GenesisTree", (accounts) => {
   /////////////************************************ more complex test for function asign and plant ****************************************//
   it("should fail asign tree and plant tree after verify", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -2203,7 +2203,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should plant tree after reject tree", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -2300,7 +2300,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should update tree work successfully", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2317,7 +2317,10 @@ contract("GenesisTree", (accounts) => {
     );
 
     let tree = await genesisTreeInstance.genTrees.call(treeId);
-    let travelTime = (Number(tree.treeStatus) * 3600 + 24 * 3600) * 2;
+    let travelTime = Math.mul(
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      2
+    );
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
@@ -2342,7 +2345,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should update tree not work because update time not reach", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2368,7 +2371,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("Should update tree do not work because update time does not reach (using update status)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2385,7 +2388,10 @@ contract("GenesisTree", (accounts) => {
     );
 
     let tree = await genesisTreeInstance.genTrees.call(treeId);
-    let travelTime = Number(tree.treeStatus) * 3600 + 24 * 3600 - 100;
+    let travelTime = Math.subtract(
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      100
+    );
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
@@ -2398,7 +2404,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should update tree reject (updateGen updateStaus is 1)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2430,7 +2436,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should update successfully after reject update and fail update after verify update because update time does not reach", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -2483,7 +2489,10 @@ contract("GenesisTree", (accounts) => {
     });
 
     let tree = await genesisTreeInstance.genTrees.call(treeId);
-    let travelTime = Number(tree.treeStatus) * 3600 + 24 * 3600 + 100;
+    let travelTime = Math.add(
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      100
+    );
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
@@ -2512,7 +2521,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should be fail because invalid address try to update", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2569,7 +2578,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail update after two time update and verify", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -2622,7 +2631,10 @@ contract("GenesisTree", (accounts) => {
     });
 
     let tree = await genesisTreeInstance.genTrees.call(treeId);
-    let travelTime = Number(tree.treeStatus) * 3600 + 25 * 3600;
+    let travelTime = Math.add(
+      Math.mul(Number(tree.treeStatus), 3600),
+      Math.mul(25, 3600)
+    );
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
@@ -2673,7 +2685,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should verify update work seccussfully when verify true by Admin (no fund tree)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -2725,9 +2737,12 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(Number(now), Number(resultBeforeGT.plantDate)),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
@@ -2743,7 +2758,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should verify update work seccussfully when verify true by Admin (fund planter) ", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -2757,8 +2772,10 @@ contract("GenesisTree", (accounts) => {
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
-    const planterTotalFund =
-      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
+    const planterTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.planterFund),
+      10000
+    );
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -2841,7 +2858,10 @@ contract("GenesisTree", (accounts) => {
     );
 
     const expectedPaid = parseInt(
-      (planterTotalFund * Number(resultAfterGT.treeStatus)) / 25920
+      Math.divide(
+        Math.mul(planterTotalFund, Number(resultAfterGT.treeStatus)),
+        25920
+      )
     );
 
     assert.equal(
@@ -2856,9 +2876,12 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(Number(now), Number(resultBeforeGT.plantDate)),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
@@ -2870,7 +2893,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should verify update work seccussfully when verify after more 3 years true by Admin (fund planter ) ", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -2885,9 +2908,10 @@ contract("GenesisTree", (accounts) => {
 
     const fundTreeAmount = web3.utils.toWei("1");
 
-    const planterTotalFund =
-      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
-
+    const planterTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.planterFund),
+      10000
+    );
     await Common.successPlant(
       genesisTreeInstance,
       arInstance,
@@ -2983,9 +3007,12 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(Number(now), Number(resultBeforeGT.plantDate)),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
@@ -3017,9 +3044,15 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT2.treeStatus.toNumber(),
       parseInt(
-        (Number(nowAfterVerify) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(
+            Number(nowAfterVerify),
+            Number(resultBeforeGT.plantDate)
+          ),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     assert.equal(
@@ -3031,7 +3064,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should verify update work seccussfully when verify true by Admin (no fund planter first because there is no token owner exist and fund planter in try 2 beacuse token owner setted) ", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -3045,8 +3078,10 @@ contract("GenesisTree", (accounts) => {
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
-    const planterTotalFund =
-      (Number(fundTreeAmount) * fundsPercent.planterFund) / 10000;
+    const planterTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.planterFund),
+      10000
+    );
 
     await Common.successPlant(
       genesisTreeInstance,
@@ -3164,9 +3199,12 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT.treeStatus.toNumber(),
       parseInt(
-        (Number(now) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(Number(now), Number(resultBeforeGT.plantDate)),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
@@ -3202,13 +3240,22 @@ contract("GenesisTree", (accounts) => {
     assert.equal(
       resultAfterGT2.treeStatus.toNumber(),
       parseInt(
-        (Number(nowAfterVerify2) - Number(resultBeforeGT.plantDate)) / 3600,
-        "tree status update does not match"
-      )
+        Math.divide(
+          Math.subtract(
+            Number(nowAfterVerify2),
+            Number(resultBeforeGT.plantDate)
+          ),
+          3600
+        )
+      ),
+      "tree status update does not match"
     );
 
     let expectedPaid = parseInt(
-      (planterTotalFund * Number(resultAfterGT2.treeStatus)) / 25920
+      Math.divide(
+        Math.mul(planterTotalFund, Number(resultAfterGT2.treeStatus)),
+        25920
+      )
     );
 
     assert.equal(
@@ -3221,7 +3268,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should verify update work seccussfully when verify false by Admin", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.successPlant(
@@ -3266,7 +3313,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should verify by planter in organization where organiation is planter (planterType=2) and fail otherwise", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -3423,7 +3470,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should verify by planter in organization where organiation is planter in organization (planterType=3)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -3581,7 +3628,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should verify by organization where organiation is planter in organization (planterType=3)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -3735,7 +3782,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should verify by admin where planter is individual (planterType=1)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
@@ -3893,7 +3940,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should be fail because update status is not pending when verify is true", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -3966,7 +4013,7 @@ contract("GenesisTree", (accounts) => {
 
   it("Should be fail because update status is not pending when verfiy is false", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const fundsPercent = {
       planterFund: 5000,
@@ -4039,7 +4086,7 @@ contract("GenesisTree", (accounts) => {
 
   it("verifyUpdate should be fail because tree not planted", async () => {
     let treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.addTree(treeId, ipfsHash, {
@@ -4119,7 +4166,7 @@ contract("GenesisTree", (accounts) => {
 
   it("availability should be success", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
@@ -4156,7 +4203,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(
       resultAfter.provideStatus.toNumber(),
-      resultBefore.provideStatus.toNumber() + 1,
+      Math.add(resultBefore.provideStatus.toNumber(), 1),
       "provideStatus not true update"
     );
   });
@@ -4181,7 +4228,7 @@ contract("GenesisTree", (accounts) => {
 
   it("availability should be fail because tree has owner", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -4240,7 +4287,7 @@ contract("GenesisTree", (accounts) => {
 
   it("updateOwner should be success", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -4291,7 +4338,7 @@ contract("GenesisTree", (accounts) => {
 
   it("updateOwner should be fail because invalid access(just auction access for this function)", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -4324,7 +4371,7 @@ contract("GenesisTree", (accounts) => {
 
   it("updateOwner should be fail because token mint for another user", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addGenesisTreeRole(
@@ -4365,7 +4412,7 @@ contract("GenesisTree", (accounts) => {
 
   it("updateAvailability should be success", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -4406,7 +4453,7 @@ contract("GenesisTree", (accounts) => {
 
   it("updateAvailability should be success", async () => {
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -4444,7 +4491,7 @@ contract("GenesisTree", (accounts) => {
   // //--------------------------regularPlantTree test----------------------------------------------
 
   it("regularPlantTree should be success (Individual Planter)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -4510,7 +4557,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("regularPlantTree should be success (Planter of organization)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
@@ -4589,7 +4636,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("regularPlantTree should be rejected (organizationAdmin not accepted planter)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
@@ -4631,7 +4678,7 @@ contract("GenesisTree", (accounts) => {
   //---------------------------------------------verifyRegularPlant-----------------------------------------------
 
   it("verifyRegularPlant should be success(Admin Verify)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -4704,7 +4751,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("2.verifyRegularPlant should be success", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
     const organizationAddress = userAccount1;
@@ -4779,7 +4826,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("3.verifyRegularPlant should be success(isVerified is false)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
     const organizationAddress = userAccount1;
@@ -4822,7 +4869,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("verifyRegularPlant should be success(tree has owner)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -4905,7 +4952,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("verifyRegularPlant should be reject(Planter of tree can't verify update)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -4942,7 +4989,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("verifyRegularPlant should be reject(regularTree not exist)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -4975,7 +5022,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("verifyRegularPlant should be reject(Other planter can't verify update)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5010,7 +5057,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("Check lastRegularPlantedTree count", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5132,7 +5179,7 @@ contract("GenesisTree", (accounts) => {
   //-----------------------------mintRegularTrees---------------------------------
 
   it("mintRegularTrees should be successfully (tree not planted)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5162,7 +5209,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("mintRegularTrees should be successfully(tree planted)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5235,7 +5282,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("3.mintRegularTrees should be successfully", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5310,7 +5357,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("mintRegularTrees should be fail(only RegularSellContract call)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5349,7 +5396,7 @@ contract("GenesisTree", (accounts) => {
   // //----------------------------------------requestRegularTree---------------------------------
 
   it("requestRegularTree should be successfully", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5422,7 +5469,7 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("requestRegularTree should be fail(only RegularSellContract call)", async () => {
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
 
@@ -5546,7 +5593,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     const treeId = 1;
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);

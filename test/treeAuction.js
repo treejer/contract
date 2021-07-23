@@ -2884,7 +2884,7 @@ contract("TreeAuction", (accounts) => {
     await genesisTreeInstance
       .updateTree(treeId1, ipfsHash, { from: userAccount2 })
       .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
-    await Common.travelTime(TimeEnumes.hours, 27);
+    await Common.travelTime(TimeEnumes.hours, 28);
 
     await genesisTreeInstance.updateTree(treeId1, ipfsHash, {
       from: userAccount2,

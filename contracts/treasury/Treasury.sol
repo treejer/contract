@@ -10,7 +10,8 @@ import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
 
-/** @title Tree Auction */
+/** @title Treasury Contract */
+
 contract Treasury is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
@@ -141,16 +142,28 @@ contract Treasury is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev set trusted forwarder address
+     *@param _address set to {trustedForwarder}
+     */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
+    /**
+     * @dev admin set planter contract address
+     * @param _address set to the address of planter contract
+     */
     function setPlanterContractAddress(address _address) external onlyAdmin {
         IPlanter candidateContract = IPlanter(_address);
         require(candidateContract.isPlanter());
         planterContract = candidateContract;
     }
 
+    /**
+     * @dev admin set treeResearch  address to fund
+     * @param _address tree research address
+     */
     function setTreeResearchAddress(address payable _address)
         external
         onlyAdmin
@@ -158,6 +171,10 @@ contract Treasury is Initializable, RelayRecipient {
         treeResearchAddress = _address;
     }
 
+    /**
+     * @dev admin set localDevelop  address to fund
+     * @param _address local develop address
+     */
     function setLocalDevelopAddress(address payable _address)
         external
         onlyAdmin
@@ -165,10 +182,18 @@ contract Treasury is Initializable, RelayRecipient {
         localDevelopAddress = _address;
     }
 
+    /**
+     * @dev admin set rescue address to fund
+     * @param _address rescue fund address
+     */
     function setRescueFundAddress(address payable _address) external onlyAdmin {
         rescueFundAddress = _address;
     }
 
+    /**
+     * @dev admin set treejerDevelop  address to fund
+     * @param _address treejer develop address
+     */
     function setTreejerDevelopAddress(address payable _address)
         external
         onlyAdmin
@@ -176,14 +201,33 @@ contract Treasury is Initializable, RelayRecipient {
         treejerDevelopAddress = _address;
     }
 
+    /**
+     * @dev admin set otherFund1  address to fund
+     * @param _address otherFund1 address
+     */
     function setOtherFund1Address(address payable _address) external onlyAdmin {
         otherFundAddress1 = _address;
     }
 
+    /**
+     * @dev admin set otherFund2  address to fund
+     * @param _address otherFund2 address
+     */
     function setOtherFund2Address(address payable _address) external onlyAdmin {
         otherFundAddress2 = _address;
     }
 
+    /**
+     * @dev admin add a model for funding distribution that sum of the inputs must be 10000
+     * @param _planter planter share
+     * @param _referral referral share
+     * @param _treeResearch tree research share
+     * @param _localDevelop local develop share
+     * @param _rescueFund rescue share
+     * @param _treejerDevelop treejer develop share
+     * @param _otherFund1 other fund1 share
+     * @param _otherFund2 other fund2 share
+     */
     function addFundDistributionModel(
         uint16 _planter,
         uint16 _referral,
@@ -221,6 +265,13 @@ contract Treasury is Initializable, RelayRecipient {
         fundDistributionCount.increment();
     }
 
+    /**
+     * @dev admin assgign a funding distribution model to trees start from
+     * {_startTreeId} and end at {_endTreeId}
+     * @param _startTreeId strating tree id to assign distribution model to
+     * @param _endTreeId ending tree id to assign distribution model to
+     * @param _distributionModelId distribution model id to assign
+     */
     function assignTreeFundDistributionModel(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -305,11 +356,16 @@ contract Treasury is Initializable, RelayRecipient {
         );
     }
 
+    /**
+     * @dev fund a tree by Auction or RegularSell contracts and based on distribution
+     * model of tree shares divide beetwen community
+     * @param _treeId id of a tree to fund
+     */
     function fundTree(uint256 _treeId) external payable {
         require(
             accessRestriction.isAuction(_msgSender()) ||
                 accessRestriction.isRegularSell(_msgSender()),
-            "only auction can access"
+            "only auction and regularSell can access"
         ); //TODO: message must fix
 
         FundDistribution memory dm = fundDistributions[
@@ -353,6 +409,14 @@ contract Treasury is Initializable, RelayRecipient {
             msg.value.mul(dm.treeResearch).div(10000)
         );
     }
+
+    /**
+     * @dev based on the treeStatus planter charged in every update verifying
+     *
+     * @param _treeId id of a tree to fund
+     * @param _planterId  address of planter to fund
+     * @param _treeStatus status of tree
+     */
 
     function fundPlanter(
         uint256 _treeId,
@@ -433,6 +497,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev check if there is distribution model for {_treeId} or not
+     * @param _treeId id of a tree to check if there is a distributionModel
+     * @return true in case of distributionModel existance for {_treeId} and false otherwise
+     */
+
     function distributionModelExistance(uint256 _treeId)
         external
         view
@@ -448,6 +518,12 @@ contract Treasury is Initializable, RelayRecipient {
             _treeId <= maxAssignedIndex;
     }
 
+    /**
+     * @dev admin withdraw {_amount} from treeResearch totalFund in case of valid {_amount}
+     * and money transfer to {treeResearchAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawTreeResearch(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -472,6 +548,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev admin withdraw {_amount} from localDevelop totalFund in case of valid {_amount}
+     * and money transfer to {localDevelopAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawLocalDevelop(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -496,6 +578,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev admin withdraw {_amount} from rescueFund totalFund in case of valid {_amount}
+     * and money transfer to {rescueFundAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawRescueFund(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -516,6 +604,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of valid {_amount}
+     * and money transfer to {treejerDevelopAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawTreejerDevelop(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -540,6 +634,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev admin withdraw {_amount} from otherFund1 totalFund in case of valid {_amount}
+     * and money transfer to {otherFundAddress1}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawOtherFund1(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -560,6 +660,12 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev admin withdraw {_amount} from otherFund2 totalFund in case of valid {_amount}
+     * and money transfer to {otherFundAddress2}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
     function withdrawOtherFund2(uint256 _amount, string memory _reason)
         external
         ifNotPaused
@@ -580,6 +686,11 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev planter withdraw {_amount} from planter's balances in case of valid {_amount}
+     * and money transfer to planters address (to msgSender())
+     * @param _amount amount to withdraw
+     */
     function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
         require(
             _amount <= balances[_msgSender()] && _amount > 0,
@@ -595,6 +706,10 @@ contract Treasury is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev private function to find index of assignModels to {_treeId}
+     * @param _treeId id of tree to find assignModels of it
+     */
     function _findTreeDistributionModelId(uint256 _treeId)
         private
         returns (uint256)
@@ -615,6 +730,13 @@ contract Treasury is Initializable, RelayRecipient {
 
         return i.sub(1, "invalid fund model");
     }
+
+    /**
+     * @dev privte function to calculate sum of two number safely
+     * @param a
+     * @param b
+     * @return sum of inputs thar is uint256
+     */
 
     function _add(uint16 a, uint16 b) private pure returns (uint16) {
         uint16 c = a + b;

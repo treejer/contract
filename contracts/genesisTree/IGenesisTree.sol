@@ -38,6 +38,12 @@ interface IGenesisTree {
 
     function updateAvailability(uint256 treeId) external;
 
+    function bulkAvailability(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        returns (bool);
+
+    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
+
     // function updateTreefromOffer(
     //     uint256 _treeId,
     //     string memory _specsCid,
@@ -65,7 +71,7 @@ interface IGenesisTree {
      * @dev In this function, the admin approves or rejects the pending trees
      * After calling this function, if the tree is approved the tree information will be transferred to the {genTrees}
      *
-     * @param _regularTreeId
+     * @param _regularTreeId _regularTreeId
      * @param isVerified Tree approved or not
      */
     function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)

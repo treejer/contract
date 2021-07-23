@@ -25,7 +25,6 @@ const TreeAuctionErrorMsg = {
   BID_AFTER_END: "auction already ended",
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
-  INVALID_ASSIGN_MODEL: "Assign models not exist",
 };
 
 const GenesisTreeErrorMsg = {
@@ -60,7 +59,10 @@ const TreesuryManagerErrorMsg = {
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
   INVALID_FUND_MODEL: "invalid fund model",
-  ONLY_AUCTION: "only auction and regularSell can access",
+  ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL:
+    "not IncrementalSell or Auction or RegularSell",
+
+  INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
 };
 const PlanterErrorMsg = {
   ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
@@ -84,6 +86,18 @@ const RegularSellErrors = {
   INVALID_COUNT: "invalid count",
 };
 
+const IncrementalSellErrorMsg = {
+  TREE_TO_SELL: "assign at least one tree",
+  OCCUPIED_TREES: "trees are under Auction",
+  PRICE_CHANGE_PERIODS: "incremental period should be positive",
+  TREE_PROVIDED_BEFORE: "trees are not available for sell",
+  INVALID_TREE: "tree is not in incremental sell",
+  LOW_PRICE_PAID: "low price paid",
+};
+const TreeAttributeErrorMsg = {
+  DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
+  TREE_HAS_ATTRIBUTES: "tree attributes are set before",
+};
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -93,4 +107,6 @@ module.exports = {
   TreesuryManagerErrorMsg,
   PlanterErrorMsg,
   RegularSellErrors,
+  IncrementalSellErrorMsg,
+  TreeAttributeErrorMsg,
 };

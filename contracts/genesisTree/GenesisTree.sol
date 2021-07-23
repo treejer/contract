@@ -81,6 +81,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyIncremental() {
+        accessRestriction.ifIncrementalSell(_msgSender());
+        _;
+    }
+
     modifier validTree(uint256 _treeId) {
         require(genTrees[_treeId].treeStatus > 0, "invalid tree");
         _;
@@ -356,6 +361,36 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTrees[_treeId].provideStatus = 0;
     }
 
+    //cancel all old incremental sell of trees
+    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        onlyIncremental
+    {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
+            if (genTrees[i].provideStatus == 2) {
+                genTrees[i].provideStatus = 0;
+            }
+        }
+    }
+
+    //set incremental sell for trees
+    function bulkAvailability(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        onlyIncremental
+        returns (bool)
+    {
+        uint256 i;
+        for (i = _startTreeId; i < _endTreeId; i++) {
+            if (genTrees[i].provideStatus > 0) {
+                return false;
+            }
+        }
+        for (i = _startTreeId; i < _endTreeId; i++) {
+            genTrees[i].provideStatus = 2;
+        }
+        return true;
+    }
+
     // function updateTreefromOffer(
     //     uint256 _treeId,
     //     string memory _specsCid,
@@ -402,7 +437,7 @@ contract GenesisTree is Initializable, RelayRecipient {
      * @dev In this function, the admin approves or rejects the pending trees
      * After calling this function, if the tree is approved the tree information will be transferred to the {genTrees}
      *
-     * @param _regularTreeId
+     * @param _regularTreeId _regularTreeId
      * @param isVerified Tree approved or not
      */
     function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)

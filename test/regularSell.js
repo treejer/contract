@@ -1065,7 +1065,7 @@ contract("regularSell", (accounts) => {
 
   it("should be reject request by tree id", async () => {
     const price = Units.convert("1", "eth", "wei");
-    const birthDate = parseInt(new Date().getTime() / 1000);
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
     const ipfsHash = "some ipfs hash here";

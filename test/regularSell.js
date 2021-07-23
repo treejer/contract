@@ -1,7 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const RegularSell = artifacts.require("RegularSell.sol");
 const GenesisTree = artifacts.require("GenesisTree.sol");
-const Dai = artifacts.require("Dai.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const Treasury = artifacts.require("Treasury.sol");
@@ -31,7 +30,7 @@ contract("regularSell", (accounts) => {
   let regularSellInstance;
   let treeFactoryInstance;
   let arInstance;
-  let daiInstance;
+
   let treeTokenInstance;
   let treasuryInstance;
 
@@ -83,10 +82,6 @@ contract("regularSell", (accounts) => {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
-    });
-
-    daiInstance = await Dai.new(Units.convert("1000000", "eth", "wei"), {
-      from: deployerAccount,
     });
   });
 

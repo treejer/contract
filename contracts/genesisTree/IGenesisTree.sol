@@ -38,6 +38,10 @@ interface IGenesisTree {
 
     function updateAvailability(uint256 treeId) external;
 
+    function bulkAvailability(uint256 _startTreeId,uint256 _endTreeId) external returns(bool);
+
+    function bulkRevert(uint256 _startTreeId,uint256 _endTreeId) external;
+
     // function updateTreefromOffer(
     //     uint256 _treeId,
     //     string memory _specsCid,

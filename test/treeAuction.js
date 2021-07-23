@@ -297,7 +297,7 @@ contract("TreeAuction", (accounts) => {
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
       )
-      .should.be.rejectedWith(TreeAuctionErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
     await TreasuryInstance.addFundDistributionModel(
       3000,
@@ -328,7 +328,7 @@ contract("TreeAuction", (accounts) => {
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
       )
-      .should.be.rejectedWith(TreeAuctionErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
   });
 
   it("Check auction data insert conrrectly", async () => {
@@ -1779,7 +1779,7 @@ contract("TreeAuction", (accounts) => {
       .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
     await TreasuryInstance.addFundDistributionModel(
       3000,
@@ -2610,7 +2610,7 @@ contract("TreeAuction", (accounts) => {
       .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreeAuctionErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
     await Common.addAuctionRole(
       arInstance,
       treeAuctionInstance.address,

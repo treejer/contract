@@ -67,6 +67,11 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyIncremental(){
+        accessRestriction.ifIncrementalSell(_msgSender());
+        _;
+    }
+
     modifier validTree(uint256 _treeId) {
         require(genTrees[_treeId].treeStatus > 0, "invalid tree");
         _;
@@ -343,6 +348,29 @@ contract GenesisTree is Initializable, RelayRecipient {
     function updateAvailability(uint256 _treeId) external onlyAuction {
         genTrees[_treeId].provideStatus = 0;
     }
+    
+    //cancel all old incremental sell of trees
+    function bulkRevert(uint256 _startTreeId,uint256 _endTreeId) external onlyIncremental {
+         for(uint256 i = _startTreeId; i < _endTreeId; i++){
+             if (genTrees[i].provideStatus==2){
+                 genTrees[i].provideStatus=0;
+             }
+         }
+    }
+    //set incremental sell for trees
+    function bulkAvailability(uint256 _startTreeId,uint256 _endTreeId) external onlyIncremental returns(bool){
+         uint256 i;
+         for( i= _startTreeId; i <_endTreeId; i++){
+             if (genTrees[i].provideStatus>0){
+                 return false;
+             }
+         }
+         for(i = _startTreeId; i < _endTreeId; i++){
+             genTrees[i].provideStatus=2;
+         }
+         return true;
+    }
+
 
     // function updateTreefromOffer(
     //     uint256 _treeId,

@@ -93,37 +93,37 @@ interface ITreasury {
     /**
      * @dev trnasfer {_amount} from treeResearch in {totalFunds} to treeResearchAddress
      */
-    function withdrawTreeResearch(uint256 _amount, string memory _reason)
+    function withdrawTreeResearch(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev trnasfer {_amount} from localDevelop in {totalFunds} to localDevelopAddress
      */
-    function withdrawLocalDevelop(uint256 _amount, string memory _reason)
+    function withdrawLocalDevelop(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev trnasfer {_amount} from rescueFund in {totalFunds} to rescueFundAddress
      */
-    function withdrawRescueFund(uint256 _amount, string memory _reason)
+    function withdrawRescueFund(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev trnasfer {_amount} from treejerDevelop in {totalFunds} to treejerDevelopAddress
      */
-    function withdrawTreejerDevelop(uint256 _amount, string memory _reason)
+    function withdrawTreejerDevelop(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev trnasfer {_amount} from otherFund1 in {totalFunds} to otherFundAddress1
      */
-    function withdrawOtherFund1(uint256 _amount, string memory _reason)
+    function withdrawOtherFund1(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev trnasfer {_amount} from otherFund2 in {totalFunds} to otherFundAddress2
      */
-    function withdrawOtherFund2(uint256 _amount, string memory _reason)
+    function withdrawOtherFund2(uint256 _amount, string calldata _reason)
         external;
 
     /**

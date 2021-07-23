@@ -26,13 +26,13 @@ contract Tree is ERC721Upgradeable {
         accessRestriction = candidateContract;
     }
 
-    function setBaseURI(string memory _baseURI) external {
+    function setBaseURI(string calldata _baseURI) external {
         accessRestriction.ifAdmin(msg.sender);
 
         _setBaseURI(_baseURI);
     }
 
-    function setTokenURI(uint256 _tokenId, string memory _tokenURI) external {
+    function setTokenURI(uint256 _tokenId, string calldata _tokenURI) external {
         //TODO: isPlanterOrAmbassedor change to isPlanter and isTreeFactory deleted
         require(
             accessRestriction.isPlanter(msg.sender) ||

@@ -899,7 +899,7 @@ contract("GenesisTree", (accounts) => {
       "capacity update incorrect"
     );
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
@@ -913,7 +913,7 @@ contract("GenesisTree", (accounts) => {
       "planter after plant 1 status is not ok"
     );
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
@@ -957,7 +957,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress,
       zeroAddress
     );
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
     ///////////////------------ fail because caller is not admin
@@ -977,10 +977,10 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
     await planterInstance
@@ -1018,11 +1018,11 @@ contract("GenesisTree", (accounts) => {
       userAccount3
     );
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
-    await planterInstance.plantingPermision(userAccount3, userAccount4, {
+    await planterInstance.plantingPermission(userAccount3, userAccount4, {
       from: userAccount2,
     });
   });
@@ -1041,7 +1041,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(Number(planter1.plantedCount), 0, "incorrect plantedCount");
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
     const planter2 = await planterInstance.planters.call(userAccount1);
@@ -1054,7 +1054,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
@@ -1065,10 +1065,10 @@ contract("GenesisTree", (accounts) => {
     assert.equal(Number(planter3.status), 2, "planter status must be 2");
 
     ////////////////// function must return false it dont give permision
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount1,
       userAccount1,
       { from: userAccount2 },
@@ -1088,7 +1088,7 @@ contract("GenesisTree", (accounts) => {
   it("should return false when there is no planter (planter type is not > 0)", async () => {
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
 
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount3,
       userAccount3,
       { from: userAccount2 },
@@ -1124,7 +1124,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress,
       zeroAddress
     );
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount3,
       userAccount1,
       { from: userAccount2 },
@@ -1159,7 +1159,7 @@ contract("GenesisTree", (accounts) => {
       userAccount1
     );
 
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount3,
       userAccount1,
       { from: userAccount2 },
@@ -1205,7 +1205,7 @@ contract("GenesisTree", (accounts) => {
       userAccount1
     );
     /////////---------------- return false because another one in organization want to plant but assigned to another one
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount3,
       userAccount4,
       { from: userAccount2 },
@@ -1251,7 +1251,7 @@ contract("GenesisTree", (accounts) => {
       userAccount1
     );
     /////////---------------- return false because organization want to plant but assigned to another one
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount1,
       userAccount4,
       { from: userAccount2 },
@@ -1289,7 +1289,7 @@ contract("GenesisTree", (accounts) => {
     const planter1 = await planterInstance.planters.call(userAccount2);
     assert.equal(Number(planter1.plantedCount), 0, "incorrect plantedCount");
     //////////////////// should return false because status is not zero
-    await planterInstance.plantingPermision.call(
+    await planterInstance.plantingPermission.call(
       userAccount2,
       userAccount2,
       { from: userAccount3 },
@@ -1319,7 +1319,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     await planterInstance
-      .plantingPermision(userAccount1, userAccount1, {
+      .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
@@ -1720,11 +1720,11 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
@@ -1744,10 +1744,10 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(Number(planter2.status), 1, "status must be 1");
 
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
-    await planterInstance.plantingPermision(userAccount1, userAccount1, {
+    await planterInstance.plantingPermission(userAccount1, userAccount1, {
       from: userAccount2,
     });
 
@@ -1779,7 +1779,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     await planterInstance
-      .plantingPermision(userAccount1, userAccount1, {
+      .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);

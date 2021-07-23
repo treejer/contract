@@ -237,7 +237,7 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
-    function plantingPermision(
+    function plantingPermission(
         address _planterAddress,
         address _assignedPlanterAddress
     ) external returns (bool) {

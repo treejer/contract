@@ -185,10 +185,6 @@ contract("GenesisTree", (accounts) => {
       .addTree(treeId, ipfsHash, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-    await genesisTreeInstance
-      .addTree(treeId, "", { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
-
     await genesisTreeInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
@@ -331,7 +327,7 @@ contract("GenesisTree", (accounts) => {
       .asignTreeToPlanter(invalidTreeId, userAccount2, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
 
     await genesisTreeInstance
       .asignTreeToPlanter(treeId, zeroAddress, {
@@ -372,7 +368,7 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .asignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_IS_PLANTED_BEFORE);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
   });
   //////////////************************************ plant tree ****************************************//
   it("should plant tree successfuly when have planter", async () => {
@@ -559,14 +555,12 @@ contract("GenesisTree", (accounts) => {
     );
 
     await genesisTreeInstance
-      .plantTree(treeId, "", birthDate, countryCode, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_IPFS);
-
-    await genesisTreeInstance
       .plantTree(invlidTreeId, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+      );
 
     await genesisTreeInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
@@ -1690,7 +1684,9 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyPlant(invalidTreeId, true, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+      .should.be.rejectedWith(
+        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+      );
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
@@ -1848,23 +1844,23 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount3 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount8 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
@@ -1985,23 +1981,23 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     //////////////--------------- verify successfully
 
@@ -2122,19 +2118,19 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyPlant(treeId, true, { from: userAccount5 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_ACCESS);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     /////////////////------------- try to verify: success
     await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount3 });
@@ -2190,7 +2186,7 @@ contract("GenesisTree", (accounts) => {
       .asignTreeToPlanter(treeId, userAccount2, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_IS_PLANTED_BEFORE);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
 
     await genesisTreeInstance
       .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
@@ -3444,7 +3440,7 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount3 })
@@ -3454,11 +3450,11 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     const verifyTx = await genesisTreeInstance.verifyUpdate(treeId, true, {
       from: userAccount4,
@@ -3597,15 +3593,15 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
@@ -3615,7 +3611,7 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount5 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
       from: userAccount3,
@@ -3759,15 +3755,15 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
@@ -3913,19 +3909,19 @@ contract("GenesisTree", (accounts) => {
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount3 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await genesisTreeInstance
       .verifyUpdate(treeId, true, { from: userAccount2 })
@@ -4152,14 +4148,6 @@ contract("GenesisTree", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
-  });
-
-  it("Should be fail because tree id not exist", async () => {
-    await genesisTreeInstance
-      .verifyUpdate(10, true, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
   });
 
   ////////////////--------------------------------------------------availability test----------------------------------------
@@ -5053,7 +5041,7 @@ contract("GenesisTree", (accounts) => {
       .verifyRegularPlant(0, true, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ADMIN_ABBASSADOR_PLANTER);
+      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
   });
 
   it("Check lastRegularPlantedTree count", async () => {

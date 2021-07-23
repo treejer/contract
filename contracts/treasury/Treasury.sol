@@ -519,7 +519,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreeResearch(uint256 _amount, string memory _reason)
+    function withdrawTreeResearch(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
@@ -549,7 +549,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawLocalDevelop(uint256 _amount, string memory _reason)
+    function withdrawLocalDevelop(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
@@ -579,7 +579,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawRescueFund(uint256 _amount, string memory _reason)
+    function withdrawRescueFund(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
@@ -605,7 +605,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreejerDevelop(uint256 _amount, string memory _reason)
+    function withdrawTreejerDevelop(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
@@ -635,7 +635,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawOtherFund1(uint256 _amount, string memory _reason)
+    function withdrawOtherFund1(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
@@ -661,7 +661,7 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawOtherFund2(uint256 _amount, string memory _reason)
+    function withdrawOtherFund2(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin

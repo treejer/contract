@@ -13,20 +13,21 @@ interface IGenesisTree {
 
     function setTreeTokenAddress(address _address) external;
 
-    function addTree(uint256 _treeId, string memory _treeDescription) external;
+    function addTree(uint256 _treeId, string calldata _treeDescription)
+        external;
 
     function asignTreeToPlanter(uint256 _treeId, address _planterId) external;
 
     function plantTree(
         uint256 _treeId,
-        string memory _treeSpecs,
+        string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external;
 
     function verifyPlant(uint256 _treeId, bool _isVerified) external;
 
-    function updateTree(uint256 treeId, string memory treeSpecs) external;
+    function updateTree(uint256 treeId, string calldata treeSpecs) external;
 
     function verifyUpdate(uint256 treeId, bool isVerified) external;
 
@@ -62,7 +63,7 @@ interface IGenesisTree {
      * @param _countryCode Code of the country where the tree was planted
      */
     function regularPlantTree(
-        string memory _treeSpecs,
+        string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external;

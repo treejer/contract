@@ -23,7 +23,7 @@ interface ITree is IERC721Upgradeable {
         view
         returns (uint256[] memory);
 
-    function setTokenURI(uint256 _tokenId, string memory _tokenURI) external;
+    function setTokenURI(uint256 _tokenId, string calldata _tokenURI) external;
 
     function exists(uint256 tokenId) external view returns (bool);
 }

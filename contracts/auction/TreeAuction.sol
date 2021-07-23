@@ -30,7 +30,7 @@ contract TreeAuction is Initializable {
 
     struct Auction {
         uint256 treeId;
-        address payable bider;
+        address payable bidder;
         bytes32 status;
         uint64 startDate;
         uint64 endDate;
@@ -163,11 +163,11 @@ contract TreeAuction is Initializable {
             "invalid amount"
         );
 
-        address payable oldBidder = _storageAuction.bider;
+        address payable oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
         _storageAuction.highestBid = msg.value;
-        _storageAuction.bider = msg.sender;
+        _storageAuction.bidder = msg.sender;
 
         emit HighestBidIncreased(
             _auctionId,
@@ -216,13 +216,13 @@ contract TreeAuction is Initializable {
 
         auction.status = bytes32("ended");
 
-        if (auction.bider != address(0)) {
-            genesisTree.updateOwner(auction.treeId, auction.bider);
+        if (auction.bidder != address(0)) {
+            genesisTree.updateOwner(auction.treeId, auction.bidder);
 
             emit AuctionEnded(
                 _auctionId,
                 auction.treeId,
-                auction.bider,
+                auction.bidder,
                 auction.highestBid
             );
 

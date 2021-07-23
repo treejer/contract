@@ -49,7 +49,7 @@ interface IPlanter {
 
     function updateCapacity(address _planterAddress, uint32 _capacity) external;
 
-    function plantingPermision(
+    function plantingPermission(
         address _planterAddress,
         address _assignedPlanterAddress
     ) external returns (bool);

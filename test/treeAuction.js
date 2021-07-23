@@ -1531,7 +1531,7 @@ contract("TreeAuction", (accounts) => {
 
     const auction1 = await treeAuctionInstance.auctions.call(0);
 
-    assert.equal(auction1.bider, userAccount1, "bidder is incoreect");
+    assert.equal(auction1.bidder, userAccount1, "bidder is incoreect");
 
     assert.equal(
       Number(auction1.highestBid),
@@ -1548,7 +1548,7 @@ contract("TreeAuction", (accounts) => {
 
     const auction2 = await treeAuctionInstance.auctions.call(0);
 
-    assert.equal(auction2.bider, userAccount2, "bidder is incorrect");
+    assert.equal(auction2.bidder, userAccount2, "bidder is incorrect");
     assert.equal(
       Math.subtract(Number(auction2.endDate), Number(auction1.endDate)),
       600,
@@ -1566,7 +1566,7 @@ contract("TreeAuction", (accounts) => {
 
     const auction3 = await treeAuctionInstance.auctions.call(0);
 
-    assert.equal(auction3.bider, userAccount1, "bider is incorrect");
+    assert.equal(auction3.bidder, userAccount1, "bidder is incorrect");
     assert.equal(
       Number(auction3.endDate),
       Number(auction2.endDate),
@@ -1592,7 +1592,7 @@ contract("TreeAuction", (accounts) => {
       "increase end time incorrect"
     );
 
-    assert.equal(auction4.bider, userAccount3, "bider is inccorect");
+    assert.equal(auction4.bidder, userAccount3, "bidder is inccorect");
 
     await Common.travelTime(TimeEnumes.minutes, 16);
 
@@ -1888,7 +1888,7 @@ contract("TreeAuction", (accounts) => {
       from: userAccount3,
     });
 
-    let firstBiderAfterBid = await web3.eth.getBalance(userAccount3);
+    let firstBidderAfterBid = await web3.eth.getBalance(userAccount3);
 
     await treeAuctionInstance
       .bid(1, {
@@ -1902,14 +1902,14 @@ contract("TreeAuction", (accounts) => {
       from: userAccount4,
     });
 
-    let firstBiderAfterAutomaticWithdraw = await web3.eth.getBalance(
+    let firstBidderAfterAutomaticWithdraw = await web3.eth.getBalance(
       userAccount3
     );
 
     assert.equal(
-      firstBiderAfterAutomaticWithdraw,
+      firstBidderAfterAutomaticWithdraw,
       Math.add(
-        Number(firstBiderAfterBid),
+        Number(firstBidderAfterBid),
         Number(web3.utils.toWei("1.15", "Ether"))
       ),
       "automatic withdraw not true work"
@@ -2167,7 +2167,7 @@ contract("TreeAuction", (accounts) => {
       "1.Contract balance is not true"
     );
 
-    let firstBiderAfterBid = await web3.eth.getBalance(userAccount3);
+    let firstBidderAfterBid = await web3.eth.getBalance(userAccount3);
 
     await treeAuctionInstance
       .bid(auctionId, {
@@ -2188,7 +2188,7 @@ contract("TreeAuction", (accounts) => {
       from: userAccount4,
     });
 
-    let firstBiderAfterAutomaticWithdraw1 = await web3.eth.getBalance(
+    let firstBidderAfterAutomaticWithdraw1 = await web3.eth.getBalance(
       userAccount3
     );
 
@@ -2199,29 +2199,29 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      firstBiderAfterAutomaticWithdraw1,
+      firstBidderAfterAutomaticWithdraw1,
       Math.add(
-        Number(firstBiderAfterBid),
+        Number(firstBidderAfterBid),
         Number(web3.utils.toWei("1.15", "Ether"))
       ),
       "1.automatic withdraw not true work"
     );
 
-    let firstBiderAfterBid4 = await web3.eth.getBalance(userAccount4);
+    let firstBidderAfterBid4 = await web3.eth.getBalance(userAccount4);
 
     await treeAuctionInstance.bid(auctionId, {
       value: web3.utils.toWei("1.5312"),
       from: userAccount5,
     });
 
-    let firstBiderAfterAutomaticWithdraw2 = await web3.eth.getBalance(
+    let firstBidderAfterAutomaticWithdraw2 = await web3.eth.getBalance(
       userAccount4
     );
 
     assert.equal(
-      firstBiderAfterAutomaticWithdraw2,
+      firstBidderAfterAutomaticWithdraw2,
       Math.add(
-        Number(firstBiderAfterBid4),
+        Number(firstBidderAfterBid4),
         Number(web3.utils.toWei("1.25", "Ether"))
       ),
       "2.automatic withdraw not true work"
@@ -2235,21 +2235,21 @@ contract("TreeAuction", (accounts) => {
 
     await Common.travelTime(TimeEnumes.days, 2);
 
-    let firstBiderAfterBid5 = await web3.eth.getBalance(userAccount5);
+    let firstBidderAfterBid5 = await web3.eth.getBalance(userAccount5);
 
     await treeAuctionInstance.bid(auctionId, {
       value: web3.utils.toWei("2.12"),
       from: userAccount3,
     });
 
-    let firstBiderAfterAutomaticWithdraw3 = await web3.eth.getBalance(
+    let firstBidderAfterAutomaticWithdraw3 = await web3.eth.getBalance(
       userAccount5
     );
 
     assert.equal(
-      firstBiderAfterAutomaticWithdraw3,
+      firstBidderAfterAutomaticWithdraw3,
       Math.add(
-        Number(firstBiderAfterBid5),
+        Number(firstBidderAfterBid5),
         Number(web3.utils.toWei("1.5312", "Ether"))
       ),
       "3.automatic withdraw not true work"
@@ -2285,7 +2285,7 @@ contract("TreeAuction", (accounts) => {
     await Common.travelTime(TimeEnumes.minutes, 1430);
 
     //final bid
-    let firstBiderAfterBid3_2 = await web3.eth.getBalance(userAccount3);
+    let firstBidderAfterBid3_2 = await web3.eth.getBalance(userAccount3);
 
     let tx = await treeAuctionInstance.bid(auctionId, {
       value: web3.utils.toWei("2.52"),
@@ -2300,14 +2300,14 @@ contract("TreeAuction", (accounts) => {
       );
     });
 
-    let firstBiderAfterAutomaticWithdraw4 = await web3.eth.getBalance(
+    let firstBidderAfterAutomaticWithdraw4 = await web3.eth.getBalance(
       userAccount3
     );
 
     assert.equal(
-      firstBiderAfterAutomaticWithdraw4,
+      firstBidderAfterAutomaticWithdraw4,
       Math.add(
-        Number(firstBiderAfterBid3_2),
+        Number(firstBidderAfterBid3_2),
         Number(web3.utils.toWei("2.12", "Ether"))
       ),
       "4.automatic withdraw not true work"

@@ -91,11 +91,6 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
-    modifier validIpfs(string memory _ipfs) {
-        require(bytes(_ipfs).length > 0, "invalid ipfs hash");
-        _;
-    }
-
     modifier onlyRegularSellContract() {
         accessRestriction.ifRegularSell(_msgSender());
         _;
@@ -141,10 +136,9 @@ contract GenesisTree is Initializable, RelayRecipient {
         treeToken = candidateContract;
     }
 
-    function addTree(uint256 _treeId, string memory _treeDescription)
+    function addTree(uint256 _treeId, string calldata _treeDescription)
         external
         onlyAdmin
-        validIpfs(_treeDescription)
     {
         require(genTrees[_treeId].treeStatus == 0, "duplicate tree");
 
@@ -157,11 +151,10 @@ contract GenesisTree is Initializable, RelayRecipient {
     function asignTreeToPlanter(uint256 _treeId, address payable _planterId)
         external
         onlyAdmin
-        validTree(_treeId)
     {
         GenTree storage tempTree = genTrees[_treeId];
 
-        require(tempTree.treeStatus == 2, "the tree is planted");
+        require(tempTree.treeStatus == 2, "invalid tree to assign");
 
         require(_planterId != address(0), "invalid planter address");
 
@@ -174,17 +167,17 @@ contract GenesisTree is Initializable, RelayRecipient {
 
     function plantTree(
         uint256 _treeId,
-        string memory _treeSpecs,
+        string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external validTree(_treeId) validIpfs(_treeSpecs) {
+    ) external {
         GenTree storage tempGenTree = genTrees[_treeId];
 
         require(tempGenTree.treeStatus == 2, "invalid tree status for plant");
 
         require(tempGenTree.planterId != address(0), "invalid planter address");
 
-        bool _canPlant = planter.plantingPermision(
+        bool _canPlant = planter.plantingPermission(
             _msgSender(),
             tempGenTree.planterId
         );
@@ -211,7 +204,6 @@ contract GenesisTree is Initializable, RelayRecipient {
     function verifyPlant(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
-        validTree(_treeId)
     {
         GenTree storage tempGenTree = genTrees[_treeId];
 
@@ -225,7 +217,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(tempGenTree.planterId, _msgSender()),
-            "ambassador or planter can verify plant"
+            "invalid access to verify"
         );
 
         UpdateGenTree storage tempUpdateGenTree = updateGenTrees[_treeId];
@@ -243,11 +235,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         emit PlantVerified(_treeId, tempUpdateGenTree.updateStatus);
     }
 
-    function updateTree(uint256 _treeId, string memory _treeSpecs)
-        external
-        validTree(_treeId)
-        validIpfs(_treeSpecs)
-    {
+    function updateTree(uint256 _treeId, string memory _treeSpecs) external {
         require(
             genTrees[_treeId].planterId == _msgSender(),
             "Only Planter of tree can send update"
@@ -279,7 +267,6 @@ contract GenesisTree is Initializable, RelayRecipient {
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
-        validTree(_treeId)
     {
         require(
             genTrees[_treeId].planterId != _msgSender(),
@@ -296,7 +283,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(genTrees[_treeId].planterId, _msgSender()),
-            "Admin or ambassador or planter can accept updates"
+            "invalid access to verify"
         );
 
         UpdateGenTree storage updateGenTree = updateGenTrees[_treeId];
@@ -395,7 +382,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     //     uint256 _treeId,
     //     string memory _specsCid,
     //     address _owner
-    // ) external onlyAuction validIpfs(_specsCid) {
+    // ) external onlyAuction {
     //     genTrees[_treeId].provideStatus = 0;
 
     //     genTrees[_treeId].treeSpecs = _specsCid;
@@ -415,7 +402,7 @@ contract GenesisTree is Initializable, RelayRecipient {
      * @param _countryCode Code of the country where the tree was planted
      */
     function regularPlantTree(
-        string memory _treeSpecs,
+        string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external {
@@ -453,7 +440,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         require(
             accessRestriction.isAdmin(_msgSender()) ||
                 _checkPlanter(regularTree.planterAddress, _msgSender()),
-            "Admin or ambassador or planter can accept updates"
+            "invalid access to verify"
         );
 
         require(regularTree.plantDate > 0, "regularTree not exist");

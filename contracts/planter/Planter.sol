@@ -83,7 +83,7 @@ contract Planter is Initializable, RelayRecipient {
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        address payable _refferedBy,
+        address _refferedBy,
         address _organizationAddress
     ) external {
         require(
@@ -137,7 +137,7 @@ contract Planter is Initializable, RelayRecipient {
         uint64 _latitude,
         uint16 _countryCode,
         uint32 _capacity,
-        address payable _refferedBy
+        address _refferedBy
     ) external onlyAdmin {
         require(
             planters[organizationAddress].planterType == 0 &&
@@ -292,7 +292,6 @@ contract Planter is Initializable, RelayRecipient {
     function getPlanterPaymentPortion(address _planterAddress)
         external
         view
-        existPlanter(_planterAddress)
         returns (
             bool,
             address,
@@ -301,7 +300,7 @@ contract Planter is Initializable, RelayRecipient {
         )
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        if (tempPlanter.status == 4) {
+        if (tempPlanter.status == 4 || tempPlanter.planterType == 0) {
             return (false, address(0), address(0), 0);
         } else {
             if (

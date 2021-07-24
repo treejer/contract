@@ -532,28 +532,4 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         treeToken.safeMint(_owner, _treeId);
     }
-
-    function _checkPlanter(address _planterAddress, address _sender)
-        private
-        view
-        returns (bool)
-    {
-        (uint8 _planterType, , , , , , , ) = planter.planters(_planterAddress);
-
-        (, uint8 _verifierStatus, , , , , , ) = planter.planters(_sender);
-
-        if (_planterType > 1) {
-            if (_verifierStatus == 1 || _verifierStatus == 2) {
-                if (_planterType == 2) {
-                    return planter.memberOf(_sender) == _planterAddress;
-                } else if (_planterType == 3) {
-                    return
-                        planter.memberOf(_sender) ==
-                        planter.memberOf(_planterAddress) ||
-                        planter.memberOf(_planterAddress) == _sender;
-                }
-            }
-        }
-        return false;
-    }
 }

@@ -61,8 +61,8 @@ const TreesuryManagerErrorMsg = {
   INVALID_FUND_MODEL: "invalid fund model",
   ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL:
     "not IncrementalSell or Auction or RegularSell",
-
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
+  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
 };
 const PlanterErrorMsg = {
   ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",

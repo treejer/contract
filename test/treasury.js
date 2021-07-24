@@ -820,6 +820,14 @@ contract("Treasury", (accounts) => {
     }).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
+  it("assignTreeFundDistributionModel should be reject Distribution model not found", async () => {
+    await TreasuryInstance.assignTreeFundDistributionModel(0, 0, 0, {
+      from: deployerAccount,
+    }).should.be.rejectedWith(
+      TreesuryManagerErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
+    );
+  });
+
   // ************************************ fund tree test ****************************************
 
   it("fundTree should be fail (invalid fund model)", async () => {

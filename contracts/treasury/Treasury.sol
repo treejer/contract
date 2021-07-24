@@ -44,6 +44,7 @@ contract Treasury is Initializable, RelayRecipient {
         uint16 treejerDevelop;
         uint16 otherFund1;
         uint16 otherFund2;
+        uint16 exists;
     }
 
     struct TotalFunds {
@@ -259,7 +260,8 @@ contract Treasury is Initializable, RelayRecipient {
             _rescueFund,
             _treejerDevelop,
             _otherFund1,
-            _otherFund2
+            _otherFund2,
+            1
         );
 
         fundDistributionCount.increment();
@@ -278,7 +280,7 @@ contract Treasury is Initializable, RelayRecipient {
         uint256 _distributionModelId
     ) external onlyAdmin {
         require(
-            fundDistributions[_distributionModelId].planterFund > 0,
+            fundDistributions[_distributionModelId].exists > 0,
             "Distribution model not found"
         );
 

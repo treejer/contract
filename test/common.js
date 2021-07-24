@@ -261,8 +261,8 @@ Common.successFundTree = async (
     fundsPercent.localDevelop,
     fundsPercent.rescueFund,
     fundsPercent.treejerDevelop,
-    fundsPercent.otherFund1,
-    fundsPercent.otherFund2,
+    fundsPercent.reserveFund1,
+    fundsPercent.reserveFund2,
     {
       from: deployerAccount,
     }

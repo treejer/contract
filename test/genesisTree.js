@@ -2441,8 +2441,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("0.1");
 
@@ -2583,8 +2583,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
@@ -2763,8 +2763,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
@@ -2898,8 +2898,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
 
     const fundTreeAmount = web3.utils.toWei("1");
@@ -3069,8 +3069,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
@@ -3118,8 +3118,8 @@ contract("GenesisTree", (accounts) => {
       fundsPercent.localDevelop,
       fundsPercent.rescueFund,
       fundsPercent.treejerDevelop,
-      fundsPercent.otherFund1,
-      fundsPercent.otherFund2,
+      fundsPercent.reserveFund1,
+      fundsPercent.reserveFund2,
       {
         from: deployerAccount,
       }
@@ -3945,8 +3945,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("1");
 
@@ -4018,8 +4018,8 @@ contract("GenesisTree", (accounts) => {
       localDevelop: 1000,
       rescueFund: 1000,
       treejerDevelop: 1000,
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
     const fundTreeAmount = web3.utils.toWei("1");
 

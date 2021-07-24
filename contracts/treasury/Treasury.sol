@@ -32,8 +32,8 @@ contract Treasury is Initializable, RelayRecipient {
     address payable public localDevelopAddress;
     address payable public rescueFundAddress;
     address payable public treejerDevelopAddress;
-    address payable public otherFundAddress1;
-    address payable public otherFundAddress2;
+    address payable public reserveFundAddress1;
+    address payable public reserveFundAddress2;
 
     struct FundDistribution {
         uint16 planterFund;
@@ -42,8 +42,8 @@ contract Treasury is Initializable, RelayRecipient {
         uint16 localDevelop;
         uint16 rescueFund;
         uint16 treejerDevelop;
-        uint16 otherFund1;
-        uint16 otherFund2;
+        uint16 reserveFund1;
+        uint16 reserveFund2;
         uint16 exists;
     }
 
@@ -54,8 +54,8 @@ contract Treasury is Initializable, RelayRecipient {
         uint256 localDevelop;
         uint256 rescueFund;
         uint256 treejerDevelop;
-        uint256 otherFund1;
-        uint256 otherFund2;
+        uint256 reserveFund1;
+        uint256 reserveFund2;
     }
 
     struct AssignModel {
@@ -203,19 +203,25 @@ contract Treasury is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set otherFund1  address to fund
-     * @param _address otherFund1 address
+     * @dev admin set reserveFund1  address to fund
+     * @param _address reserveFund1 address
      */
-    function setOtherFund1Address(address payable _address) external onlyAdmin {
-        otherFundAddress1 = _address;
+    function setReserveFund1Address(address payable _address)
+        external
+        onlyAdmin
+    {
+        reserveFundAddress1 = _address;
     }
 
     /**
-     * @dev admin set otherFund2  address to fund
-     * @param _address otherFund2 address
+     * @dev admin set reserveFund2  address to fund
+     * @param _address reserveFund2 address
      */
-    function setOtherFund2Address(address payable _address) external onlyAdmin {
-        otherFundAddress2 = _address;
+    function setReserveFund2Address(address payable _address)
+        external
+        onlyAdmin
+    {
+        reserveFundAddress2 = _address;
     }
 
     /**
@@ -226,8 +232,8 @@ contract Treasury is Initializable, RelayRecipient {
      * @param _localDevelop local develop share
      * @param _rescueFund rescue share
      * @param _treejerDevelop treejer develop share
-     * @param _otherFund1 other fund1 share
-     * @param _otherFund2 other fund2 share
+     * @param _reserveFund1 other fund1 share
+     * @param _reserveFund2 other fund2 share
      */
     function addFundDistributionModel(
         uint16 _planter,
@@ -236,8 +242,8 @@ contract Treasury is Initializable, RelayRecipient {
         uint16 _localDevelop,
         uint16 _rescueFund,
         uint16 _treejerDevelop,
-        uint16 _otherFund1,
-        uint16 _otherFund2
+        uint16 _reserveFund1,
+        uint16 _reserveFund2
     ) external onlyAdmin {
         uint16 totalSum = _add(
             _rescueFund,
@@ -246,8 +252,8 @@ contract Treasury is Initializable, RelayRecipient {
 
         require(
             _add(
-                _otherFund2,
-                _add(_otherFund1, _add(_treejerDevelop, totalSum))
+                _reserveFund2,
+                _add(_reserveFund1, _add(_treejerDevelop, totalSum))
             ) == 10000,
             "sum must be 10000"
         );
@@ -259,8 +265,8 @@ contract Treasury is Initializable, RelayRecipient {
             _localDevelop,
             _rescueFund,
             _treejerDevelop,
-            _otherFund1,
-            _otherFund2,
+            _reserveFund1,
+            _reserveFund2,
             1
         );
 
@@ -383,12 +389,12 @@ contract Treasury is Initializable, RelayRecipient {
             msg.value.mul(dm.localDevelop).div(10000)
         );
 
-        totalFunds.otherFund1 = totalFunds.otherFund1.add(
-            msg.value.mul(dm.otherFund1).div(10000)
+        totalFunds.reserveFund1 = totalFunds.reserveFund1.add(
+            msg.value.mul(dm.reserveFund1).div(10000)
         );
 
-        totalFunds.otherFund2 = totalFunds.otherFund2.add(
-            msg.value.mul(dm.otherFund2).div(10000)
+        totalFunds.reserveFund2 = totalFunds.reserveFund2.add(
+            msg.value.mul(dm.reserveFund2).div(10000)
         );
 
         totalFunds.planterFund = totalFunds.planterFund.add(
@@ -630,54 +636,54 @@ contract Treasury is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin withdraw {_amount} from otherFund1 totalFund in case of valid {_amount}
-     * and money transfer to {otherFundAddress1}
+     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of valid {_amount}
+     * and money transfer to {reserveFundAddress1}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawOtherFund1(uint256 _amount, string calldata _reason)
+    function withdrawReserveFund1(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(otherFundAddress1)
+        validAddress(reserveFundAddress1)
     {
         require(
-            _amount <= totalFunds.otherFund1 && _amount > 0,
+            _amount <= totalFunds.reserveFund1 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.otherFund1 = totalFunds.otherFund1.sub(_amount);
+        totalFunds.reserveFund1 = totalFunds.reserveFund1.sub(_amount);
 
-        if (otherFundAddress1.send(_amount)) {
-            emit OtherBalanceWithdrawn1(_amount, otherFundAddress1, _reason);
+        if (reserveFundAddress1.send(_amount)) {
+            emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
         } else {
-            totalFunds.otherFund1 = totalFunds.otherFund1.add(_amount);
+            totalFunds.reserveFund1 = totalFunds.reserveFund1.add(_amount);
         }
     }
 
     /**
-     * @dev admin withdraw {_amount} from otherFund2 totalFund in case of valid {_amount}
-     * and money transfer to {otherFundAddress2}
+     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of valid {_amount}
+     * and money transfer to {reserveFundAddress2}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawOtherFund2(uint256 _amount, string calldata _reason)
+    function withdrawReserveFund2(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(otherFundAddress2)
+        validAddress(reserveFundAddress2)
     {
         require(
-            _amount <= totalFunds.otherFund2 && _amount > 0,
+            _amount <= totalFunds.reserveFund2 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.otherFund2 = totalFunds.otherFund2.sub(_amount);
+        totalFunds.reserveFund2 = totalFunds.reserveFund2.sub(_amount);
 
-        if (otherFundAddress2.send(_amount)) {
-            emit OtherBalanceWithdrawn2(_amount, otherFundAddress2, _reason);
+        if (reserveFundAddress2.send(_amount)) {
+            emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
         } else {
-            totalFunds.otherFund2 = totalFunds.otherFund2.add(_amount);
+            totalFunds.reserveFund2 = totalFunds.reserveFund2.add(_amount);
         }
     }
 

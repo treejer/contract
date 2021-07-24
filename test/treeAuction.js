@@ -1644,8 +1644,8 @@ contract("TreeAuction", (accounts) => {
       localDevelop: Math.divide(Math.mul(12, amount), 100),
       rescueFund: Math.divide(Math.mul(12, amount), 100),
       treejerDevelop: Math.divide(Math.mul(12, amount), 100),
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
 
     assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
@@ -1681,15 +1681,15 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1),
-      expected.otherFund1,
-      "otherFund1 funds invalid"
+      Number(totalFunds.reserveFund1),
+      expected.reserveFund1,
+      "reserveFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2),
-      expected.otherFund2,
-      "otherFund2 funds invalid"
+      Number(totalFunds.reserveFund2),
+      expected.reserveFund2,
+      "reserveFund2 funds invalid"
     );
 
     await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount7, {
@@ -1966,8 +1966,8 @@ contract("TreeAuction", (accounts) => {
       localDevelop: Math.divide(Math.mul(12, amount), 100),
       rescueFund: Math.divide(Math.mul(12, amount), 100),
       treejerDevelop: Math.divide(Math.mul(22, amount), 100),
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
 
     assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
@@ -2009,15 +2009,15 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1),
-      expected.otherFund1,
-      "otherFund1 funds invalid"
+      Number(totalFunds.reserveFund1),
+      expected.reserveFund1,
+      "reserveFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2),
-      expected.otherFund2,
-      "otherFund2 funds invalid"
+      Number(totalFunds.reserveFund2),
+      expected.reserveFund2,
+      "reserveFund2 funds invalid"
     );
 
     let successResult = await genesisTreeInstance.genTrees.call(treeId);
@@ -2370,8 +2370,8 @@ contract("TreeAuction", (accounts) => {
       localDevelop: Math.divide(Math.mul(15, amount), 100),
       rescueFund: Math.divide(Math.mul(10, amount), 100),
       treejerDevelop: Math.divide(Math.mul(20, amount), 100),
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
 
     assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
@@ -2413,15 +2413,15 @@ contract("TreeAuction", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFunds.otherFund1),
-      expected.otherFund1,
-      "otherFund1 funds invalid"
+      Number(totalFunds.reserveFund1),
+      expected.reserveFund1,
+      "reserveFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.otherFund2),
-      expected.otherFund2,
-      "otherFund2 funds invalid"
+      Number(totalFunds.reserveFund2),
+      expected.reserveFund2,
+      "reserveFund2 funds invalid"
     );
 
     //planter update tree
@@ -2769,14 +2769,14 @@ contract("TreeAuction", (accounts) => {
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.otherFund1),
+      Number(totalFundBeforeAuctionEnd.reserveFund1),
       0,
-      "invalid otherFund1"
+      "invalid reserveFund1"
     );
     assert.equal(
-      Number(totalFundBeforeAuctionEnd.otherFund2),
+      Number(totalFundBeforeAuctionEnd.reserveFund2),
       0,
-      "invalid otherFund2"
+      "invalid reserveFund2"
     );
     //------------- end auction
     await treeAuctionInstance
@@ -2820,8 +2820,8 @@ contract("TreeAuction", (accounts) => {
         Math.mul(Number(web3.utils.toWei("2")), 1000),
         10000
       ),
-      otherFund1: 0,
-      otherFund2: 0,
+      reserveFund1: 0,
+      reserveFund2: 0,
     };
 
     const totalFundAfterAuctionEnd = await TreasuryInstance.totalFunds();
@@ -2857,14 +2857,14 @@ contract("TreeAuction", (accounts) => {
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.otherFund1),
-      expectedPayValue.otherFund1,
-      "invalid otherFund1"
+      Number(totalFundAfterAuctionEnd.reserveFund1),
+      expectedPayValue.reserveFund1,
+      "invalid reserveFund1"
     );
     assert.equal(
-      Number(totalFundAfterAuctionEnd.otherFund2),
-      expectedPayValue.otherFund2,
-      "invalid otherFund2"
+      Number(totalFundAfterAuctionEnd.reserveFund2),
+      expectedPayValue.reserveFund2,
+      "invalid reserveFund2"
     );
     ///////////------------ check charge treasury contract
     assert.equal(

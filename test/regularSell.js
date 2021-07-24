@@ -797,8 +797,8 @@ contract("regularSell", (accounts) => {
       localDevelop: Math.divide(Math.mul(12, treePrice), 100),
       rescueFund: Math.divide(Math.mul(12, treePrice), 100),
       treejerDevelop: Math.divide(Math.mul(12, treePrice), 100),
-      otherFund1: Math.divide(Math.mul(5, treePrice), 100),
-      otherFund2: Math.divide(Math.mul(5, treePrice), 100),
+      reserveFund1: Math.divide(Math.mul(5, treePrice), 100),
+      reserveFund2: Math.divide(Math.mul(5, treePrice), 100),
     };
 
     await treasuryInstance.assignTreeFundDistributionModel(1, 100000, 0, {
@@ -906,9 +906,17 @@ contract("regularSell", (accounts) => {
       "invalid treejer develop fund"
     );
 
-    assert.equal(Number(totalFundsBefore.otherFund1), 0, "invalid other fund1");
+    assert.equal(
+      Number(totalFundsBefore.reserveFund1),
+      0,
+      "invalid other fund1"
+    );
 
-    assert.equal(Number(totalFundsBefore.otherFund2), 0, "invalid other fund2");
+    assert.equal(
+      Number(totalFundsBefore.reserveFund2),
+      0,
+      "invalid other fund2"
+    );
 
     ////////////////// ---------------- check tree before -----------------------
 
@@ -1051,14 +1059,14 @@ contract("regularSell", (accounts) => {
     );
 
     assert.equal(
-      Number(totalFundsAfter.otherFund1),
-      expected.otherFund1,
+      Number(totalFundsAfter.reserveFund1),
+      expected.reserveFund1,
       "invalid other fund1"
     );
 
     assert.equal(
-      Number(totalFundsAfter.otherFund2),
-      expected.otherFund2,
+      Number(totalFundsAfter.reserveFund2),
+      expected.reserveFund2,
       "invalid other fund2"
     );
   });

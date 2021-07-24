@@ -31,14 +31,14 @@ interface ITreasury {
     function setTreejerDevelopAddress(address payable _address) external;
 
     /**
-     * @dev set {_address} to otherFundAddress1
+     * @dev set {_address} to reserveFundAddress1
      */
-    function setOtherFund1Address(address payable _address) external;
+    function setReserveFund1Address(address payable _address) external;
 
     /**
-     * @dev set {_address} to otherFundAddress2
+     * @dev set {_address} to reserveFundAddress2
      */
-    function setOtherFund2Address(address payable _address) external;
+    function setReserveFund2Address(address payable _address) external;
 
     /**
      * @dev add a distributionModel based on input arguments that sum of them are 10000
@@ -50,8 +50,8 @@ interface ITreasury {
         uint16 _localDevelop,
         uint16 _rescueFund,
         uint16 _treejerDevelop,
-        uint16 _otherFund1,
-        uint16 _otherFund2
+        uint16 _reserveFund1,
+        uint16 _reserveFund2
     ) external;
 
     /**
@@ -115,15 +115,15 @@ interface ITreasury {
         external;
 
     /**
-     * @dev trnasfer {_amount} from otherFund1 in {totalFunds} to otherFundAddress1
+     * @dev trnasfer {_amount} from reserveFund1 in {totalFunds} to reserveFundAddress1
      */
-    function withdrawOtherFund1(uint256 _amount, string calldata _reason)
+    function withdrawReserveFund1(uint256 _amount, string calldata _reason)
         external;
 
     /**
-     * @dev trnasfer {_amount} from otherFund2 in {totalFunds} to otherFundAddress2
+     * @dev trnasfer {_amount} from reserveFund2 in {totalFunds} to reserveFundAddress2
      */
-    function withdrawOtherFund2(uint256 _amount, string calldata _reason)
+    function withdrawReserveFund2(uint256 _amount, string calldata _reason)
         external;
 
     /**
@@ -142,8 +142,8 @@ interface ITreasury {
 
     /**
      * @dev return totalFunds struct data containing {plnaterFund} {referralFund}
-     * {treeResearch} {localDevelop} {rescueFund} {treejerDevelop} {otherFund1}
-     * {otherFund2}
+     * {treeResearch} {localDevelop} {rescueFund} {treejerDevelop} {reserveFund1}
+     * {reserveFund2}
      */
     function totalFunds()
         external
@@ -155,8 +155,8 @@ interface ITreasury {
             uint256 localDevelop,
             uint256 rescueFund,
             uint256 treejerDevelop,
-            uint256 otherFund1,
-            uint256 otherFund2
+            uint256 reserveFund1,
+            uint256 reserveFund2
         );
 
     event DistributionModelOfTreeNotExist(string description);

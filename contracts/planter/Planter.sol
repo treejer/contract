@@ -83,7 +83,7 @@ contract Planter is Initializable, RelayRecipient {
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        address payable _refferedBy,
+        address _refferedBy,
         address _organizationAddress
     ) external {
         require(
@@ -137,7 +137,7 @@ contract Planter is Initializable, RelayRecipient {
         uint64 _latitude,
         uint16 _countryCode,
         uint32 _capacity,
-        address payable _refferedBy
+        address _refferedBy
     ) external onlyAdmin {
         require(
             planters[organizationAddress].planterType == 0 &&

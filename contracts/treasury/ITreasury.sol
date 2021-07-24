@@ -77,7 +77,7 @@ interface ITreasury {
      */
     function fundPlanter(
         uint256 _treeId,
-        address payable _planterId,
+        address _planterId,
         uint64 _treeStatus
     ) external;
 

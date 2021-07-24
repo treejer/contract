@@ -33,7 +33,7 @@ contract GenesisTree is Initializable, RelayRecipient {
     uint256 public lastRegularPlantedTree;
 
     struct GenTree {
-        address payable planterId;
+        address planterId;
         uint256 treeType;
         uint32 provideStatus;
         uint32 countryCode;
@@ -53,7 +53,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         uint64 plantDate;
         uint64 countryCode;
         uint64 otherData;
-        address payable planterAddress;
+        address planterAddress;
         string treeSpecs;
     }
 
@@ -148,7 +148,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTree.treeSpecs = _treeDescription;
     }
 
-    function asignTreeToPlanter(uint256 _treeId, address payable _planterId)
+    function asignTreeToPlanter(uint256 _treeId, address _planterId)
         external
         onlyAdmin
     {

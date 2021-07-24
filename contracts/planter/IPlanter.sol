@@ -26,7 +26,7 @@ interface IPlanter {
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        address payable _refferedBy,
+        address _refferedBy,
         address _organizationAddress
     ) external;
 
@@ -35,8 +35,8 @@ interface IPlanter {
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        uint32 capacity,
-        address payable _refferedBy
+        uint32 _capacity,
+        address _refferedBy
     ) external;
 
     function updatePlanterType(uint8 _planterType, address _organizationAddress)

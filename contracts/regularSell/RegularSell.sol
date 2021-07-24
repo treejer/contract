@@ -3,7 +3,7 @@ pragma solidity ^0.6.9;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "../access/IAccessRestriction.sol";
 import "../genesisTree/IGenesisTree.sol";
 import "../treasury/ITreasury.sol";
@@ -17,7 +17,6 @@ contract RegularSell is Initializable {
     bool public isRegularSell;
     IAccessRestriction public accessRestriction;
     IGenesisTree public treeFactory;
-    IERC20 public daiToken;
     ITreasury public treasury;
 
     modifier onlyAdmin {
@@ -54,12 +53,6 @@ contract RegularSell is Initializable {
         require(candidateContract.isTreasury());
 
         treasury = candidateContract;
-    }
-
-    function setDaiTokenAddress(address _address) external onlyAdmin {
-        IERC20 candidateContract = IERC20(_address);
-
-        daiToken = candidateContract;
     }
 
     function setPrice(uint256 _price) external onlyAdmin {

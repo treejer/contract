@@ -22,6 +22,7 @@ contract WhitelistPaymaster is BasePaymaster {
         accessRestriction = candidateContract;
     }
 
+
     function setWhitelistTarget(address target) external {
         accessRestriction.ifAdmin(msg.sender);
 

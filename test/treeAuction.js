@@ -387,7 +387,7 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.bidInterval), bidInterval);
     assert.equal(Number(result.startDate), Number(startTime));
     assert.equal(Number(result.endDate), Number(endTime));
-    assert.equal(web3.utils.hexToUtf8(result.status), "started");
+    assert.equal(Number(result.status), 1);
   });
 
   it("bid auction and check highest bid set change correctly", async () => {
@@ -998,7 +998,7 @@ contract("TreeAuction", (accounts) => {
 
     let result = await treeAuctionInstance.auctions.call(0);
 
-    assert.equal(web3.utils.hexToUtf8(result.status), "ended");
+    assert.equal(Number(result.status), 2);
   });
 
   it("Should automatic withdraw successfully", async () => {

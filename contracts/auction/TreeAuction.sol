@@ -31,7 +31,7 @@ contract TreeAuction is Initializable {
     struct Auction {
         uint256 treeId;
         address payable bidder;
-        bytes32 status;
+        uint64 status;
         uint64 startDate;
         uint64 endDate;
         uint256 highestBid;
@@ -137,7 +137,7 @@ contract TreeAuction is Initializable {
         Auction storage auction = auctions[auctionId.current()];
 
         auction.treeId = _treeId;
-        auction.status = bytes32("started");
+        auction.status = 1;
         auction.startDate = _startDate;
         auction.endDate = _endDate;
         auction.highestBid = _intialPrice;
@@ -208,16 +208,14 @@ contract TreeAuction is Initializable {
 
         require(now >= auction.endDate, "Auction not yet ended");
 
-        require(
-            keccak256(abi.encodePacked((auction.status))) !=
-                keccak256(abi.encodePacked((bytes32("ended")))),
-            "endAuction has already been called"
-        );
+        require(auction.status != 2, "endAuction has already been called");
 
-        auction.status = bytes32("ended");
+        auction.status = 2;
 
         if (auction.bidder != address(0)) {
             genesisTree.updateOwner(auction.treeId, auction.bidder);
+
+            treasury.fundTree{value: auction.highestBid}(auction.treeId);
 
             emit AuctionEnded(
                 _auctionId,
@@ -225,8 +223,6 @@ contract TreeAuction is Initializable {
                 auction.bidder,
                 auction.highestBid
             );
-
-            treasury.fundTree{value: auction.highestBid}(auction.treeId);
         } else {
             genesisTree.updateAvailability(auction.treeId);
         }

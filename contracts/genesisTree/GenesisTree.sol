@@ -478,18 +478,18 @@ contract GenesisTree is Initializable, RelayRecipient {
      * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
      * This function is called only by the regularSell contract
      *
-     * @param lastSold The last tree sold in the regular
+     * @param _lastSold The last tree sold in the regular
      * @param _owner Owner of a new tree sold in Regular
      *
      *
      * @return The last tree sold after update
      */
-    function mintRegularTrees(uint256 lastSold, address _owner)
+    function mintRegularTrees(uint256 _lastSold, address _owner)
         external
         onlyRegularSellContract
         returns (uint256)
     {
-        uint256 localLastSold = lastSold.add(1);
+        uint256 localLastSold = _lastSold.add(1);
 
         bool flag = (genTrees[localLastSold].treeStatus == 0 &&
             genTrees[localLastSold].provideStatus == 0) ||

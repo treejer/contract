@@ -286,6 +286,148 @@ contract("regularSell", (accounts) => {
   });
 
   it("2.should request trees successfully", async () => {
+    let funder = userAccount3;
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(10001, 10007, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    let funderBalanceBefore = await web3.eth.getBalance(funder);
+
+    let requestTx = await regularSellInstance.requestTrees(7, {
+      from: funder,
+      value: Math.mul(web3.utils.toWei("0.00000000000000011"), 7),
+    });
+
+    const treasuryBalanceAfter = await web3.eth.getBalance(
+      treasuryInstance.address
+    );
+
+    const regularSellBalanceAfter = await web3.eth.getBalance(
+      regularSellInstance.address
+    );
+
+    assert.equal(
+      Number(treasuryBalanceAfter),
+      Math.mul(web3.utils.toWei("0.00000000000000011"), 7),
+      "treasury balance not true"
+    );
+
+    assert.equal(
+      Number(regularSellBalanceAfter),
+      0,
+      "regularSell balance not true"
+    );
+
+    let tokentOwner;
+    for (let i = 10001; i < 10008; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(10001);
+      assert.equal(tokentOwner, funder, "funder not true " + i);
+    }
+
+    await treeTokenInstance.ownerOf(10000).should.be.rejected;
+    await treeTokenInstance.ownerOf(10008).should.be.rejected;
+
+    let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10007,
+      "lastSoldRegularTree not true"
+    );
+
+    let funderBalanceAfter = await web3.eth.getBalance(funder);
+
+    const txFee = await Common.getTransactionFee(requestTx);
+
+    console.log("first test fee", web3.utils.fromWei(txFee.toString()));
+
+    let planterFunds;
+    for (let i = 10001; i < 10008; i++) {
+      planterFunds = await treasuryInstance.planterFunds.call(i);
+
+      assert.equal(
+        Number(planterFunds),
+        Math.divide(
+          Math.mul(Math.mul(web3.utils.toWei("0.00000000000000011"), 1), 4000),
+          10000
+        )
+      );
+    }
+
+    assert.equal(
+      Number(funderBalanceAfter),
+      Math.subtract(
+        Math.subtract(
+          Number(funderBalanceBefore),
+          Math.mul(web3.utils.toWei("0.00000000000000011"), 7)
+        ),
+        txFee
+      ),
+      "funder balance not true"
+    );
+  });
+
+  it("3.should request trees successfully", async () => {
     let funder1 = userAccount3;
     let funder2 = userAccount3;
     let funder3 = userAccount3;

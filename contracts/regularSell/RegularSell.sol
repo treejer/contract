@@ -69,17 +69,19 @@ contract RegularSell is Initializable {
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
-        require(msg.value == treePrice.mul(_count), "invalid amount");
+        require(msg.value >= treePrice.mul(_count), "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
+
+        uint256 transferAmount = msg.value / _count;
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
                 msg.sender
             );
-            //TODO://check is truee ???
-            treasury.fundTree{value: treePrice}(tempLastRegularSold);
+
+            treasury.fundTree{value: transferAmount}(tempLastRegularSold);
         }
 
         lastSoldRegularTree = tempLastRegularSold;
@@ -87,7 +89,7 @@ contract RegularSell is Initializable {
 
     function requestByTreeId(uint256 _treeId) external payable {
         require(_treeId > lastSoldRegularTree, "invalid tree");
-        require(msg.value == treePrice, "invalid amount");
+        require(msg.value >= treePrice, "invalid amount");
 
         treeFactory.requestRegularTree(_treeId, msg.sender);
 

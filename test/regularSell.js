@@ -48,7 +48,7 @@ contract("regularSell", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   beforeEach(async () => {
-    const treePrice = Number(web3.utils.toWei("0.00000000000000001"));
+    const treePrice = Units.convert("0.1", "eth", "wei");
 
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
@@ -95,7 +95,7 @@ contract("regularSell", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
-  /////////////////---------------------------------set tree factory address--------------------------------------------------------
+  ///////////////---------------------------------set tree factory address--------------------------------------------------------
   it("set tree factory address", async () => {
     await regularSellInstance
       .setTreeFactoryAddress(treeFactoryInstance.address, {
@@ -140,7 +140,11 @@ contract("regularSell", (accounts) => {
   it("set price and check data", async () => {
     let treePrice1 = await regularSellInstance.treePrice.call();
 
-    assert.equal(Number(treePrice1), 10, "treePriceInvalid");
+    assert.equal(
+      Number(treePrice1),
+      Number(web3.utils.toWei("0.1")),
+      "treePriceInvalid"
+    );
 
     await regularSellInstance.setPrice(100, { from: deployerAccount });
 
@@ -226,7 +230,7 @@ contract("regularSell", (accounts) => {
 
     let requestTx = await regularSellInstance.requestTrees(7, {
       from: funder,
-      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 7),
+      value: Math.mul(web3.utils.toWei("0.1"), 7),
     });
 
     const treasuryBalanceAfter = await web3.eth.getBalance(
@@ -239,7 +243,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       Number(treasuryBalanceAfter),
-      Math.mul(web3.utils.toWei("0.00000000000000001"), 7),
+      Math.mul(Number(web3.utils.toWei("0.1")), 7),
       "treasury balance not true"
     );
 
@@ -277,7 +281,7 @@ contract("regularSell", (accounts) => {
       Math.subtract(
         Math.subtract(
           Number(funderBalanceBefore),
-          Math.mul(web3.utils.toWei("0.00000000000000001"), 7)
+          Math.mul(Number(web3.utils.toWei("0.1")), 7)
         ),
         txFee
       ),
@@ -355,7 +359,7 @@ contract("regularSell", (accounts) => {
 
     let requestTx = await regularSellInstance.requestTrees(7, {
       from: funder,
-      value: Math.mul(web3.utils.toWei("0.00000000000000011"), 7),
+      value: Math.mul(web3.utils.toWei("0.15"), 7),
     });
 
     const treasuryBalanceAfter = await web3.eth.getBalance(
@@ -368,7 +372,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       Number(treasuryBalanceAfter),
-      Math.mul(web3.utils.toWei("0.00000000000000011"), 7),
+      Math.mul(web3.utils.toWei("0.15"), 7),
       "treasury balance not true"
     );
 
@@ -408,7 +412,7 @@ contract("regularSell", (accounts) => {
       assert.equal(
         Number(planterFunds),
         Math.divide(
-          Math.mul(Math.mul(web3.utils.toWei("0.00000000000000011"), 1), 4000),
+          Math.mul(Math.mul(web3.utils.toWei("0.15"), 1), 4000),
           10000
         )
       );
@@ -419,7 +423,7 @@ contract("regularSell", (accounts) => {
       Math.subtract(
         Math.subtract(
           Number(funderBalanceBefore),
-          Math.mul(web3.utils.toWei("0.00000000000000011"), 7)
+          Math.mul(web3.utils.toWei("0.15"), 7)
         ),
         txFee
       ),
@@ -499,7 +503,7 @@ contract("regularSell", (accounts) => {
 
     let requestTx1 = await regularSellInstance.requestTrees(1, {
       from: funder1,
-      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+      value: Math.mul(web3.utils.toWei("0.1"), 1),
     });
 
     const txFee1 = await Common.getTransactionFee(requestTx1);
@@ -511,7 +515,7 @@ contract("regularSell", (accounts) => {
       Math.subtract(
         Math.subtract(
           Number(funder1BalanceBefore),
-          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+          Math.mul(web3.utils.toWei("0.1"), 1)
         ),
         txFee1
       ),
@@ -528,7 +532,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       Number(treasuryBalanceAfter),
-      Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+      Math.mul(web3.utils.toWei("0.1"), 1),
       "treasury balance not true"
     );
 
@@ -557,19 +561,30 @@ contract("regularSell", (accounts) => {
 
     let requestTx2 = await regularSellInstance.requestTrees(1, {
       from: funder2,
-      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+      value: Math.mul(web3.utils.toWei("0.1"), 1),
     });
 
     const txFee2 = await Common.getTransactionFee(requestTx2);
 
     let funder2BalanceAfter = await web3.eth.getBalance(funder2);
+    console.log("funder2BalanceAfter", funder2BalanceAfter);
+    console.log("funder2BalanceBefore", funder2BalanceBefore);
+    console.log("txFee2", txFee2);
+    let x = Math.subtract(
+      Math.subtract(
+        Number(funder2BalanceBefore),
+        Math.mul(web3.utils.toWei("0.1"), 1)
+      ),
+      txFee2
+    );
+    console.log("x", x);
 
     assert.equal(
       Number(funder2BalanceAfter),
       Math.subtract(
         Math.subtract(
           Number(funder2BalanceBefore),
-          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+          Math.mul(web3.utils.toWei("0.1"), 1)
         ),
         txFee2
       ),
@@ -584,7 +599,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       Number(treasuryBalanceAfter),
-      Math.mul(web3.utils.toWei("0.00000000000000001"), 2),
+      Math.mul(web3.utils.toWei("0.1"), 2),
       "treasury balance not true"
     );
 
@@ -611,7 +626,7 @@ contract("regularSell", (accounts) => {
 
     let requestTx = await regularSellInstance.requestTrees(1, {
       from: funder3,
-      value: Math.mul(web3.utils.toWei("0.00000000000000001"), 1),
+      value: Math.mul(web3.utils.toWei("0.1"), 1),
     });
 
     const txFee = await Common.getTransactionFee(requestTx);
@@ -625,7 +640,7 @@ contract("regularSell", (accounts) => {
       Math.subtract(
         Math.subtract(
           Number(funder3BalanceBefore),
-          Math.mul(web3.utils.toWei("0.00000000000000001"), 1)
+          Math.mul(web3.utils.toWei("0.1"), 1)
         ),
         txFee
       ),
@@ -640,7 +655,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       Number(treasuryBalanceAfter),
-      Math.mul(web3.utils.toWei("0.00000000000000001"), 3),
+      Math.mul(web3.utils.toWei("0.1"), 3),
       "3.treasury balance not true"
     );
 
@@ -662,7 +677,7 @@ contract("regularSell", (accounts) => {
     );
   });
 
-  it("Should request trees rejece(The count must be greater than zero)", async () => {
+  it("Should request trees rejecet(The count must be greater than zero)", async () => {
     let funder = userAccount3;
 
     ////////////// ------------------- handle fund distribution model ----------------------
@@ -731,7 +746,7 @@ contract("regularSell", (accounts) => {
     await regularSellInstance
       .requestTrees(0, {
         from: funder,
-        value: Math.mul(web3.utils.toWei("0.00000000000000001"), 0),
+        value: Math.mul(web3.utils.toWei("0.1"), 0),
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
   });
@@ -805,7 +820,7 @@ contract("regularSell", (accounts) => {
     await regularSellInstance
       .requestTrees(3, {
         from: funder,
-        value: Math.mul(web3.utils.toWei("0.00000000000000001"), 2),
+        value: Math.mul(web3.utils.toWei("0.1"), 2),
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
   });

@@ -541,12 +541,6 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
-      .plantTree(treeId, ipfsHash, birthDate, countryCode, {
-        from: userAccount2,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ZERO_ADDRESS_PLANTER);
-
     await genesisTreeInstance.asignTreeToPlanter(
       treeId,
       userAccount2,
@@ -1119,7 +1113,7 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  //////////************************************ verify plant ****************************************//
+  // //////////************************************ verify plant ****************************************//
   it("should verify plant seccussfully", async () => {
     const treeId = 1;
     const treeId2 = 2;

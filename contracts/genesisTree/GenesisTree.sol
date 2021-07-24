@@ -175,8 +175,6 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(tempGenTree.treeStatus == 2, "invalid tree status for plant");
 
-        require(tempGenTree.planterId != address(0), "invalid planter address");
-
         bool _canPlant = planter.plantingPermission(
             _msgSender(),
             tempGenTree.planterId
@@ -216,7 +214,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(tempGenTree.planterId, _msgSender()),
+                planter.canVerify(tempGenTree.planterId, _msgSender()),
             "invalid access to verify"
         );
 
@@ -282,7 +280,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(genTrees[_treeId].planterId, _msgSender()),
+                planter.canVerify(genTrees[_treeId].planterId, _msgSender()),
             "invalid access to verify"
         );
 
@@ -439,7 +437,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isAdmin(_msgSender()) ||
-                _checkPlanter(regularTree.planterAddress, _msgSender()),
+                planter.canVerify(regularTree.planterAddress, _msgSender()),
             "invalid access to verify"
         );
 

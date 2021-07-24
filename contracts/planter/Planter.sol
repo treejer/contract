@@ -358,4 +358,27 @@ contract Planter is Initializable, RelayRecipient {
         }
         return false;
     }
+
+    function canVerify(address _planterAddress, address _verifier)
+        external
+        view
+        returns (bool)
+    {
+        uint8 _planterType = planters[_planterAddress].planterType;
+
+        uint8 _verifierStatus = planters[_verifier].status;
+
+        if (_planterType > 1) {
+            if (_verifierStatus == 1 || _verifierStatus == 2) {
+                if (_planterType == 2) {
+                    return memberOf[_verifier] == _planterAddress;
+                } else if (_planterType == 3) {
+                    return
+                        memberOf[_verifier] == memberOf[_planterAddress] ||
+                        memberOf[_planterAddress] == _verifier;
+                }
+            }
+        }
+        return false;
+    }
 }

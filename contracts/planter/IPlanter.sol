@@ -72,4 +72,9 @@ interface IPlanter {
     function reducePlantCount(address _planterAddress) external;
 
     function planterCheck(address _planterAddress) external returns (bool);
+
+    function canVerify(address _planterAddress, address _sender)
+        external
+        view
+        returns (bool);
 }

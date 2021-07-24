@@ -820,7 +820,7 @@ contract("Treasury", (accounts) => {
     }).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
-  //************************************ fund tree test ****************************************//
+  // ************************************ fund tree test ****************************************
 
   it("fundTree should be fail (invalid fund model)", async () => {
     await TreasuryInstance.addFundDistributionModel(
@@ -1657,6 +1657,10 @@ contract("Treasury", (accounts) => {
 
     truffleAssert.eventNotEmitted(tx0, "DistributionModelOfTreeNotExist");
 
+    let hasModel = await TreasuryInstance.distributionModelExistance(11);
+
+    assert(hasModel, true, "hasModel not true");
+
     let tx11 = await TreasuryInstance.fundTree(11, {
       from: userAccount3,
       value: amount,
@@ -1701,7 +1705,7 @@ contract("Treasury", (accounts) => {
     truffleAssert.eventNotEmitted(tx1000000, "DistributionModelOfTreeNotExist");
   });
 
-  //************************************ fund planter test ****************************************//
+  //----------------------- fund planter test ---------------------------------------//
   it("fund planter successfully", async () => {
     await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
 
@@ -3074,7 +3078,7 @@ contract("Treasury", (accounts) => {
     }).should.be.rejectedWith(TreesuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
   });
 
-  //*****************************************withdraw planter balance ************************************** */
+  //-----------------------------------------withdraw planter balance -----------------------------------
 
   it("should withdraw planter succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
@@ -4293,7 +4297,7 @@ contract("Treasury", (accounts) => {
     }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw tree research balance ************************************** */
+  //------------------------------------------withdraw tree research balance -------------------------------------/
   it("should withdraw tree research succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
@@ -4586,7 +4590,8 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw local develop balance ************************************** */
+  // *****************************************withdraw local develop balance **************************************
+
   it("should withdraw local develop succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
@@ -4878,7 +4883,7 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw rescue balance ************************************** */
+  // *****************************************withdraw rescue balance **************************************
   it("should withdraw rescue succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
@@ -5170,7 +5175,7 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw treejer develop balance ************************************** */
+  // *****************************************withdraw treejer develop balance **************************************
   it("should withdraw treejer develop succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
@@ -5471,7 +5476,7 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw other fund1 balance ************************************** */
+  // *****************************************withdraw other fund1 balance **************************************
   it("should withdraw other fund1 succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
@@ -5763,7 +5768,7 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  //*****************************************withdraw other fund2 balance ************************************** */
+  // *****************************************withdraw other fund2 balance **************************************
   it("should withdraw other fund2 succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
     await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);

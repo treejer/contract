@@ -508,9 +508,7 @@ contract Treasury is Initializable, RelayRecipient {
             return false;
         }
 
-        return
-            _treeId >= assignModels[0].startingTreeId &&
-            _treeId <= maxAssignedIndex;
+        return _treeId >= assignModels[0].startingTreeId;
     }
 
     /**

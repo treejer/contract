@@ -146,7 +146,11 @@ contract("regularSell", (accounts) => {
       "treePriceInvalid"
     );
 
-    await regularSellInstance.setPrice(100, { from: deployerAccount });
+    let tx = await regularSellInstance.setPrice(100, { from: deployerAccount });
+
+    truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
+      return Number(ev.price) == 100;
+    });
 
     const treePrice2 = await regularSellInstance.treePrice.call();
 
@@ -231,6 +235,14 @@ contract("regularSell", (accounts) => {
     let requestTx = await regularSellInstance.requestTrees(7, {
       from: funder,
       value: Math.mul(web3.utils.toWei("0.1"), 7),
+    });
+
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
+      return (
+        Number(ev.count) == 7 &&
+        ev.buyer == funder &&
+        Number(ev.amount) == Math.mul(web3.utils.toWei("0.1"), 7)
+      );
     });
 
     const treasuryBalanceAfter = await web3.eth.getBalance(
@@ -360,6 +372,14 @@ contract("regularSell", (accounts) => {
     let requestTx = await regularSellInstance.requestTrees(7, {
       from: funder,
       value: Math.mul(web3.utils.toWei("0.15"), 7),
+    });
+
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
+      return (
+        Number(ev.count) == 7 &&
+        ev.buyer == funder &&
+        Number(ev.amount) == Math.mul(web3.utils.toWei("0.15"), 7)
+      );
     });
 
     const treasuryBalanceAfter = await web3.eth.getBalance(
@@ -506,6 +526,14 @@ contract("regularSell", (accounts) => {
       value: Math.mul(web3.utils.toWei("0.1"), 1),
     });
 
+    truffleAssert.eventEmitted(requestTx1, "RegularTreeRequsted", (ev) => {
+      return (
+        Number(ev.count) == 1 &&
+        ev.buyer == funder1 &&
+        Number(ev.amount) == Math.mul(web3.utils.toWei("0.1"), 1)
+      );
+    });
+
     const txFee1 = await Common.getTransactionFee(requestTx1);
 
     let funder1BalanceAfter = await web3.eth.getBalance(funder1);
@@ -562,6 +590,14 @@ contract("regularSell", (accounts) => {
     let requestTx2 = await regularSellInstance.requestTrees(1, {
       from: funder2,
       value: Math.mul(web3.utils.toWei("0.1"), 1),
+    });
+
+    truffleAssert.eventEmitted(requestTx2, "RegularTreeRequsted", (ev) => {
+      return (
+        Number(ev.count) == 1 &&
+        ev.buyer == funder2 &&
+        Number(ev.amount) == Math.mul(web3.utils.toWei("0.1"), 1)
+      );
     });
 
     const txFee2 = await Common.getTransactionFee(requestTx2);
@@ -627,6 +663,14 @@ contract("regularSell", (accounts) => {
     let requestTx = await regularSellInstance.requestTrees(1, {
       from: funder3,
       value: Math.mul(web3.utils.toWei("0.1"), 1),
+    });
+
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
+      return (
+        Number(ev.count) == 1 &&
+        ev.buyer == funder3 &&
+        Number(ev.amount) == Math.mul(web3.utils.toWei("0.1"), 1)
+      );
     });
 
     const txFee = await Common.getTransactionFee(requestTx);
@@ -855,8 +899,13 @@ contract("regularSell", (accounts) => {
 
     ///////////////////// ------------------------- handle tree price ------------------------
 
-    await regularSellInstance.setPrice(treePrice, { from: deployerAccount });
+    let tx = await regularSellInstance.setPrice(treePrice, {
+      from: deployerAccount,
+    });
 
+    truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
+      return Number(ev.price) == Number(treePrice);
+    });
     /////////////////////////-------------------- deploy contracts --------------------------
 
     const planterInstance = await deployProxy(Planter, [arInstance.address], {
@@ -917,9 +966,17 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////////////////////////
 
-    await regularSellInstance.requestByTreeId(10001, {
+    let requestTx = await regularSellInstance.requestByTreeId(10001, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
+    });
+
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequstedById", (ev) => {
+      return (
+        Number(ev.treeId) == 10001 &&
+        ev.buyer == userAccount1 &&
+        Number(ev.amount) == Number(web3.utils.toWei("1"))
+      );
     });
   });
 
@@ -964,8 +1021,12 @@ contract("regularSell", (accounts) => {
 
     ///////////////////// ------------------------- handle tree price ------------------------
 
-    await regularSellInstance.setPrice(treePrice, {
+    let tx = await regularSellInstance.setPrice(treePrice, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
+      return Number(ev.price) == Number(treePrice);
     });
 
     ////////////// ---------------- handle deploy --------------------------
@@ -1120,6 +1181,14 @@ contract("regularSell", (accounts) => {
       value: web3.utils.toWei("1"),
     });
 
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequstedById", (ev) => {
+      return (
+        Number(ev.treeId) == treeId &&
+        ev.buyer == userAccount1 &&
+        Number(ev.amount) == Number(web3.utils.toWei("1"))
+      );
+    });
+
     ///////////////------------------ check user balace to be correct ---------------------
 
     const userBalanceAfter = await web3.eth.getBalance(userAccount1);
@@ -1236,7 +1305,13 @@ contract("regularSell", (accounts) => {
     const ipfsHash = "some ipfs hash here";
     const treeId = 10001;
 
-    await regularSellInstance.setPrice(price, { from: deployerAccount });
+    let tx = await regularSellInstance.setPrice(price, {
+      from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
+      return Number(ev.price) == Number(price);
+    });
 
     /////////////// ---------------- fail beacuuse of invalid tree id
 
@@ -1370,9 +1445,17 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await regularSellInstance.requestByTreeId(treeId, {
+    let requestTx = await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
       value: web3.utils.toWei("1"),
+    });
+
+    truffleAssert.eventEmitted(requestTx, "RegularTreeRequstedById", (ev) => {
+      return (
+        Number(ev.treeId) == treeId &&
+        ev.buyer == userAccount1 &&
+        Number(ev.amount) == Number(web3.utils.toWei("1"))
+      );
     });
   });
 });

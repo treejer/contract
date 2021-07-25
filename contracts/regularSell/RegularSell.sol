@@ -13,11 +13,19 @@ contract RegularSell is Initializable {
 
     uint256 public lastSoldRegularTree;
     uint256 public treePrice;
-
     bool public isRegularSell;
+
     IAccessRestriction public accessRestriction;
     IGenesisTree public treeFactory;
     ITreasury public treasury;
+
+    event TreePriceUpdated(uint256 price);
+    event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
+    event RegularTreeRequstedById(
+        uint256 treeId,
+        address buyer,
+        uint256 amount
+    );
 
     modifier onlyAdmin {
         accessRestriction.ifAdmin(msg.sender);
@@ -37,6 +45,7 @@ contract RegularSell is Initializable {
         isRegularSell = true;
         lastSoldRegularTree = 10000;
         treePrice = _price;
+        emit TreePriceUpdated(_price);
     }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -57,6 +66,7 @@ contract RegularSell is Initializable {
 
     function setPrice(uint256 _price) external onlyAdmin {
         treePrice = _price;
+        emit TreePriceUpdated(_price);
     }
 
     function requestTrees(uint256 _count) external payable {
@@ -78,6 +88,8 @@ contract RegularSell is Initializable {
         }
 
         lastSoldRegularTree = tempLastRegularSold;
+
+        RegularTreeRequsted(_count, msg.sender, msg.value);
     }
 
     function requestByTreeId(uint256 _treeId) external payable {
@@ -87,5 +99,7 @@ contract RegularSell is Initializable {
         treeFactory.requestRegularTree(_treeId, msg.sender);
 
         treasury.fundTree{value: msg.value}(_treeId);
+
+        RegularTreeRequstedById(_treeId, msg.sender, msg.value);
     }
 }

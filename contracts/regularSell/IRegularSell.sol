@@ -9,6 +9,10 @@ interface IRegularSell {
 
     function treePrice() external view returns (uint256);
 
+    function setTreeFactoryAddress(address _address) external;
+
+    function setTreasuryAddress(address _address) external;
+
     function setPrice(uint256 _price) external;
 
     function requestTrees(uint256 _count) external payable;

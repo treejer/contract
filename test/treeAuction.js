@@ -1692,7 +1692,7 @@ contract("TreeAuction", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount7, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount7, {
       from: deployerAccount,
     });
 
@@ -2899,7 +2899,7 @@ contract("TreeAuction", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId1, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId1, userAccount2, {
       from: deployerAccount,
     });
     await genesisTreeInstance.plantTree(treeId1, ipfsHash, 1, 1, {

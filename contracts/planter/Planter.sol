@@ -380,4 +380,14 @@ contract Planter is Initializable, RelayRecipient {
         }
         return false;
     }
+
+    function canAssignTreeToPlanter(address _planterAddress)
+        external
+        view
+        returns (bool)
+    {
+        PlanterData storage tempPlanter = planters[_planterAddress];
+
+        return tempPlanter.status == 1 || tempPlanter.planterType == 2;
+    }
 }

@@ -31,7 +31,6 @@ contract TreeAuction is Initializable {
     struct Auction {
         uint256 treeId;
         address payable bidder;
-        uint64 status;
         uint64 startDate;
         uint64 endDate;
         uint256 highestBid;
@@ -50,16 +49,18 @@ contract TreeAuction is Initializable {
         address bidder,
         uint256 amount
     );
-    event AuctionEnded(
+    event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
         uint256 amount
     );
-    event AuctionEndTimeIncreased(
+    event AuctionEnded(uint256 auctionId, uint256 treeId);
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+    event AuctionWithdrawFaild(
         uint256 auctionId,
-        uint256 newAuctionEndTime,
-        address bidder
+        address bidder,
+        uint256 amount
     );
 
     modifier onlyAdmin() {
@@ -137,7 +138,6 @@ contract TreeAuction is Initializable {
         Auction storage auction = auctions[auctionId.current()];
 
         auction.treeId = _treeId;
-        auction.status = 1;
         auction.startDate = _startDate;
         auction.endDate = _endDate;
         auction.highestBid = _intialPrice;
@@ -177,7 +177,7 @@ contract TreeAuction is Initializable {
         );
 
         _increaseAuctionEndTime(_auctionId);
-        _withdraw(oldBid, oldBidder);
+        _withdraw(oldBid, oldBidder, _auctionId);
     }
 
     /** @dev users can manually withdraw if its balance is more than 0.
@@ -206,18 +206,16 @@ contract TreeAuction is Initializable {
     function endAuction(uint256 _auctionId) external ifNotPaused {
         Auction storage auction = auctions[_auctionId];
 
+        require(auction.endDate > 0, "Auction is unavailable");
+
         require(now >= auction.endDate, "Auction not yet ended");
-
-        require(auction.status != 2, "endAuction has already been called");
-
-        auction.status = 2;
 
         if (auction.bidder != address(0)) {
             genesisTree.updateOwner(auction.treeId, auction.bidder);
 
             treasury.fundTree{value: auction.highestBid}(auction.treeId);
 
-            emit AuctionEnded(
+            emit AuctionSettled(
                 _auctionId,
                 auction.treeId,
                 auction.bidder,
@@ -225,7 +223,10 @@ contract TreeAuction is Initializable {
             );
         } else {
             genesisTree.updateAvailability(auction.treeId);
+            emit AuctionEnded(_auctionId, auction.treeId);
         }
+
+        delete auctions[_auctionId];
     }
 
     /** @dev if latest bid is less than 10 minutes to the end of auctionEndTime:
@@ -241,8 +242,7 @@ contract TreeAuction is Initializable {
 
             emit AuctionEndTimeIncreased(
                 _auctionId,
-                auctions[_auctionId].endDate,
-                msg.sender
+                auctions[_auctionId].endDate
             );
         }
     }
@@ -251,7 +251,11 @@ contract TreeAuction is Initializable {
      * much as paid before using this function
      */
 
-    function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
+    function _withdraw(
+        uint256 _oldBid,
+        address payable _oldBidder,
+        uint256 _auctionId
+    ) private {
         if (_oldBidder != address(0)) {
             uint32 size;
 
@@ -267,6 +271,8 @@ contract TreeAuction is Initializable {
                 pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
                     _oldBid
                 );
+
+                emit AuctionWithdrawFaild(_auctionId, _oldBidder, _oldBid);
             }
         }
     }

@@ -100,6 +100,7 @@ contract("GenesisTree", (accounts) => {
 
   afterEach(async () => {});
   /////////////------------------------------------ deploy successfully ----------------------------------------//
+
   it("deploys successfully", async () => {
     const address = genesisTreeInstance.address;
 
@@ -574,7 +575,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     truffleAssert.eventEmitted(tx, "TreePlanted", (ev) => {
-      return ev.planter == userAccount2 && Number(ev.treeId) == treeId;
+      return Number(ev.treeId) == treeId;
     });
   });
 
@@ -1355,7 +1356,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     truffleAssert.eventEmitted(tx1, "PlantVerified", (ev) => {
-      return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId;
+      return Number(ev.treeId) == treeId;
     });
 
     //////////////////---------------- assign to type 2 anad verify by org
@@ -1380,8 +1381,8 @@ contract("GenesisTree", (accounts) => {
       from: userAccount4,
     });
 
-    truffleAssert.eventEmitted(tx2, "PlantVerified", (ev) => {
-      return Number(ev.updateStatus) == 2 && Number(ev.treeId) == treeId2;
+    truffleAssert.eventEmitted(tx2, "PlantRejected", (ev) => {
+      return Number(ev.treeId) == treeId2;
     });
 
     ///////////////////////////---------------- assign to type 3 and  verify by org
@@ -1407,7 +1408,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     truffleAssert.eventEmitted(tx3, "PlantVerified", (ev) => {
-      return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId3;
+      return Number(ev.treeId) == treeId3;
     });
 
     ///////////////////////////---------------- assign to type 3 and  verify by other planters in org
@@ -1432,7 +1433,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     truffleAssert.eventEmitted(tx4, "PlantVerified", (ev) => {
-      return Number(ev.updateStatus) == 3 && Number(ev.treeId) == treeId4;
+      return Number(ev.treeId) == treeId4;
     });
   });
   it("check data to be correct after reject plant", async () => {
@@ -2892,7 +2893,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
     truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
-      return ev.treeId == treeId && ev.updateStatus == 3;
+      return ev.treeId == treeId;
     });
 
     assert.equal(Number(pFund), 0, "no fund beacuse tree fund did not call");
@@ -3031,7 +3032,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
     truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
-      return ev.treeId == treeId && ev.updateStatus == 3;
+      return ev.treeId == treeId;
     });
   });
 
@@ -3162,7 +3163,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
     truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
-      return ev.treeId == treeId && ev.updateStatus == 3;
+      return ev.treeId == treeId;
     });
 
     ////////////////////// update after 1 year and verify ///////////////////////////
@@ -3354,7 +3355,7 @@ contract("GenesisTree", (accounts) => {
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
     truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
-      return ev.treeId == treeId && ev.updateStatus == 3;
+      return ev.treeId == treeId;
     });
 
     /////////////////// verify 2 and set token owner ////////////////////////
@@ -3450,8 +3451,8 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
 
-    truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
-      return ev.treeId == treeId && ev.updateStatus == 2;
+    truffleAssert.eventEmitted(tx, "UpdateRejected", (ev) => {
+      return ev.treeId == treeId;
     });
   });
 
@@ -4647,7 +4648,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.regularPlantTree(
+    const eventTx = await genesisTreeInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -4690,6 +4691,10 @@ contract("GenesisTree", (accounts) => {
       1,
       "planter PlantedCount address not true"
     );
+
+    truffleAssert.eventEmitted(eventTx, "RegularTreePlanted", (ev) => {
+      return ev.treeId == 0;
+    });
   });
 
   it("regularPlantTree should be success (Planter of organization)", async () => {
@@ -4726,7 +4731,7 @@ contract("GenesisTree", (accounts) => {
       from: organizationAdmin,
     });
 
-    await genesisTreeInstance.regularPlantTree(
+    const eventTx = await genesisTreeInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -4769,6 +4774,10 @@ contract("GenesisTree", (accounts) => {
       1,
       "planter PlantedCount address not true"
     );
+
+    truffleAssert.eventEmitted(eventTx, "RegularTreePlanted", (ev) => {
+      return ev.treeId == 0;
+    });
   });
 
   it("regularPlantTree should be rejected (organizationAdmin not accepted planter)", async () => {
@@ -4841,7 +4850,7 @@ contract("GenesisTree", (accounts) => {
 
     let regularTree = await genesisTreeInstance.regularTrees.call(0);
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
@@ -4884,6 +4893,10 @@ contract("GenesisTree", (accounts) => {
       4,
       "provideStatus not true update"
     );
+
+    truffleAssert.eventEmitted(eventTx, "RegularPlantVerified", (ev) => {
+      return ev.treeId == 10001;
+    });
   });
 
   it("2.verifyRegularPlant should be success", async () => {
@@ -4916,7 +4929,7 @@ contract("GenesisTree", (accounts) => {
 
     let regularTree = await genesisTreeInstance.regularTrees.call(0);
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, true, {
       from: organizationAddress,
     });
 
@@ -4959,6 +4972,10 @@ contract("GenesisTree", (accounts) => {
       4,
       "provideStatus not true update"
     );
+
+    truffleAssert.eventEmitted(eventTx, "RegularPlantVerified", (ev) => {
+      return ev.treeId == 10001;
+    });
   });
 
   it("3.verifyRegularPlant should be success(isVerified is false)", async () => {
@@ -4989,7 +5006,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, false, {
+    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, false, {
       from: organizationAddress,
     });
 
@@ -5002,6 +5019,10 @@ contract("GenesisTree", (accounts) => {
       zeroAddress,
       "planterAddress not true update"
     );
+
+    truffleAssert.eventEmitted(eventTx, "RegularPlantRejected", (ev) => {
+      return ev.treeId == 0;
+    });
   });
 
   it("verifyRegularPlant should be success(tree has owner)", async () => {

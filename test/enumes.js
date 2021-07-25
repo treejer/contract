@@ -25,6 +25,7 @@ const TreeAuctionErrorMsg = {
   BID_AFTER_END: "auction already ended",
   END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
+  AUCTION_IS_UNAVAILABLE: "Auction is unavailable",
 };
 
 const GenesisTreeErrorMsg = {

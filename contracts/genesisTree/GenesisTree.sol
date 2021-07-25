@@ -62,10 +62,15 @@ contract GenesisTree is Initializable, RelayRecipient {
     mapping(uint256 => UpdateGenTree) public updateGenTrees; //tree id to UpdateGenesisTree struct
     mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
 
-    event TreePlanted(uint256 treeId, address planter);
-    event PlantVerified(uint256 treeId, uint256 updateStatus);
+    event TreePlanted(uint256 treeId);
+    event PlantVerified(uint256 treeId);
+    event PlantRejected(uint256 treeId);
     event TreeUpdated(uint256 treeId);
-    event UpdateVerified(uint256 treeId, uint64 updateStatus);
+    event UpdateVerified(uint256 treeId);
+    event UpdateRejected(uint256 treeId);
+    event RegularTreePlanted(uint256 treeId);
+    event RegularPlantVerified(uint256 treeId);
+    event RegularPlantRejected(uint256 treeId);
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -200,7 +205,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         tempGenTree.plantDate = now.toUint64();
         tempGenTree.treeStatus = 3;
 
-        emit TreePlanted(_treeId, tempGenTree.planterId);
+        emit TreePlanted(_treeId);
     }
 
     function verifyPlant(uint256 _treeId, bool _isVerified)
@@ -228,13 +233,15 @@ contract GenesisTree is Initializable, RelayRecipient {
             tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
             tempGenTree.treeStatus = 4;
             tempUpdateGenTree.updateStatus = 3;
+
+            emit PlantVerified(_treeId);
         } else {
             tempGenTree.treeStatus = 2;
             tempUpdateGenTree.updateStatus = 2;
             planter.reducePlantCount(tempGenTree.planterId);
-        }
 
-        emit PlantVerified(_treeId, tempUpdateGenTree.updateStatus);
+            emit PlantRejected(_treeId);
+        }
     }
 
     function updateTree(uint256 _treeId, string memory _treeSpecs) external {
@@ -311,11 +318,13 @@ contract GenesisTree is Initializable, RelayRecipient {
                     genTree.treeStatus
                 );
             }
+
+            emit UpdateVerified(_treeId);
         } else {
             updateGenTree.updateStatus = 2;
-        }
 
-        emit UpdateVerified(_treeId, updateGenTree.updateStatus);
+            emit UpdateRejected(_treeId);
+        }
     }
 
     function availability(uint256 _treeId, uint32 _provideType)
@@ -433,6 +442,8 @@ contract GenesisTree is Initializable, RelayRecipient {
             _treeSpecs
         );
 
+        emit RegularTreePlanted(regularTreeId.current());
+
         regularTreeId.increment();
     }
 
@@ -441,9 +452,9 @@ contract GenesisTree is Initializable, RelayRecipient {
      * After calling this function, if the tree is approved the tree information will be transferred to the {genTrees}
      *
      * @param _regularTreeId _regularTreeId
-     * @param isVerified Tree approved or not
+     * @param _isVerified Tree approved or not
      */
-    function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)
+    function verifyRegularPlant(uint256 _regularTreeId, bool _isVerified)
         external
     {
         RegularTree storage regularTree = regularTrees[_regularTreeId];
@@ -461,7 +472,7 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(regularTree.plantDate > 0, "regularTree not exist");
 
-        if (isVerified) {
+        if (_isVerified) {
             uint256 tempLastRegularPlantedTree = lastRegularPlantedTree.add(1);
 
             while (
@@ -485,6 +496,9 @@ contract GenesisTree is Initializable, RelayRecipient {
             if (!treeToken.exists(lastRegularPlantedTree)) {
                 genTree.provideStatus = 4;
             }
+            emit RegularPlantVerified(lastRegularPlantedTree);
+        } else {
+            emit RegularPlantRejected(_regularTreeId);
         }
 
         delete regularTrees[_regularTreeId];

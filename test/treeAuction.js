@@ -387,7 +387,6 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.bidInterval), bidInterval);
     assert.equal(Number(result.startDate), Number(startTime));
     assert.equal(Number(result.endDate), Number(endTime));
-    assert.equal(Number(result.status), 1);
   });
 
   it("bid auction and check highest bid set change correctly", async () => {
@@ -787,11 +786,11 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
-        ev.bidder == userAccount1 &&
         Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
   });
+
   it("should end auction and fail in invalid situations", async () => {
     await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
       from: deployerAccount,
@@ -846,27 +845,35 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("0.1"),
       { from: deployerAccount }
     );
+
     await treeAuctionInstance
       .endAuction(0, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
+
     await treeAuctionInstance.bid(0, {
       from: userAccount1,
       value: highestBid,
     });
+
     await Common.travelTime(TimeEnumes.seconds, 670);
+
     let successEnd = await treeAuctionInstance.endAuction(0, {
       from: deployerAccount,
     }); //succesfully end the auction
+
+    let result = await treeAuctionInstance.auctions.call(0);
+
+    assert.equal(Number(result.endDate), 0, "auction not true");
+
+    assert.equal(Number(result.startDate), 0, "auction not true");
 
     let failEnd = await treeAuctionInstance
       .endAuction(0, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(
-        TreeAuctionErrorMsg.END_AUCTION_WHEN_IT_HAS_BEEN_ENDED
-      ); //auction already ended and must be rejected
+      .should.be.rejectedWith(TreeAuctionErrorMsg.AUCTION_IS_UNAVAILABLE); //auction already ended and must be rejected
   });
 
   it("Check emit end auction event", async () => {
@@ -933,7 +940,7 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(addressGetToken, userAccount1, "token not true mint");
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
         Number(ev.treeId) == treeId &&
@@ -992,13 +999,13 @@ contract("TreeAuction", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 70);
 
-    await treeAuctionInstance.endAuction(0, {
+    let failEnd = await treeAuctionInstance.endAuction(0, {
       from: deployerAccount,
     });
 
-    let result = await treeAuctionInstance.auctions.call(0);
-
-    assert.equal(Number(result.status), 2);
+    truffleAssert.eventEmitted(failEnd, "AuctionEnded", (ev) => {
+      return Number(ev.auctionId) == 0 && Number(ev.treeId) == treeId;
+    });
   });
 
   it("Should automatic withdraw successfully", async () => {
@@ -2028,7 +2035,7 @@ contract("TreeAuction", (accounts) => {
       "Provide status not true update when auction success"
     );
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == 1 &&
         Number(ev.treeId) == treeId &&
@@ -2295,7 +2302,6 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
-        ev.bidder == userAccount4 &&
         Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
@@ -2343,7 +2349,7 @@ contract("TreeAuction", (accounts) => {
       "Treasury contract balance is not true"
     );
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == auctionId &&
         Number(ev.treeId) == treeId &&
@@ -2727,7 +2733,6 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(FinalBidTx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
-        ev.bidder == userAccount7 &&
         Number(ev.newAuctionEndTime) ==
           Math.add(Number(initailAuction.endDate), 600)
       );
@@ -2876,7 +2881,7 @@ contract("TreeAuction", (accounts) => {
       "treasury done charge correctly"
     );
 
-    truffleAssert.eventEmitted(endAuctionTx, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(endAuctionTx, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         Number(ev.treeId) == treeId1 &&

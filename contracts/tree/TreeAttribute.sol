@@ -161,10 +161,7 @@ contract TreeAttribute is Initializable {
             treeAttributes[treeId].exists == 0,
             "tree already has attributes"
         );
-        require(
-            genesisTree.checkMintStatus(treeId),
-            "no need to tree attributes"
-        );
+        //require(genesisTree.checkMintStatus(treeId);,"no need to tree attributes");
         bool flag = true;
         for (uint256 j = 0; j < 10000; j++) {
             uint256 rand = uint256(

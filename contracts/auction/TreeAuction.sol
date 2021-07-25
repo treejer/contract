@@ -31,7 +31,6 @@ contract TreeAuction is Initializable {
     struct Auction {
         uint256 treeId;
         address payable bidder;
-        uint64 status;
         uint64 startDate;
         uint64 endDate;
         uint256 highestBid;
@@ -137,7 +136,6 @@ contract TreeAuction is Initializable {
         Auction storage auction = auctions[auctionId.current()];
 
         auction.treeId = _treeId;
-        auction.status = 1;
         auction.startDate = _startDate;
         auction.endDate = _endDate;
         auction.highestBid = _intialPrice;
@@ -206,11 +204,9 @@ contract TreeAuction is Initializable {
     function endAuction(uint256 _auctionId) external ifNotPaused {
         Auction storage auction = auctions[_auctionId];
 
+        require(auction.endDate > 0, "Auction is unavailable");
+
         require(now >= auction.endDate, "Auction not yet ended");
-
-        require(auction.status != 2, "endAuction has already been called");
-
-        auction.status = 2;
 
         if (auction.bidder != address(0)) {
             genesisTree.updateOwner(auction.treeId, auction.bidder);
@@ -226,6 +222,8 @@ contract TreeAuction is Initializable {
         } else {
             genesisTree.updateAvailability(auction.treeId);
         }
+
+        delete auctions[_auctionId];
     }
 
     /** @dev if latest bid is less than 10 minutes to the end of auctionEndTime:

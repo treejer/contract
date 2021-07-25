@@ -115,7 +115,7 @@ Common.joinSimplePlanter = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await planterInstance.planterJoin(
+  const tx = await planterInstance.planterJoin(
     planterType,
     longitude,
     latitude,
@@ -124,6 +124,7 @@ Common.joinSimplePlanter = async (
     organizationAddress,
     { from: planterAddress }
   );
+  return tx;
 };
 
 Common.joinOrganizationPlanter = async (
@@ -136,7 +137,7 @@ Common.joinOrganizationPlanter = async (
   let latitude = 2;
   const countryCode = 10;
   const capcity = 1000;
-  await instance.organizationJoin(
+  const tx = await instance.organizationJoin(
     organizationAddress,
     longitude,
     latitude,
@@ -145,6 +146,7 @@ Common.joinOrganizationPlanter = async (
     refferedBy,
     { from: adminAccount }
   );
+  return tx;
 };
 Common.joinSimplePlanterFromGenesis = async (
   planterInstance,

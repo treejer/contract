@@ -33,6 +33,13 @@ contract Planter is Initializable, RelayRecipient {
     mapping(address => address) public memberOf;
     mapping(address => mapping(address => uint256)) public organizationRules;
 
+    event PlanterJoin(address planterId);
+    event OrganizationJoin(address organizationId);
+    event PlanterUpdated(address planterId);
+    event AcceptedByOrganization(address planterId);
+    event RejectedByOrganization(address planterId);
+    event PortionUpdated(address planterId);
+
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -129,10 +136,12 @@ contract Planter is Initializable, RelayRecipient {
         planter.capacity = 100;
         planter.longitude = _longitude;
         planter.latitude = _latitude;
+
+        emit PlanterJoin(_msgSender());
     }
 
     function organizationJoin(
-        address organizationAddress,
+        address _organizationAddress,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -140,8 +149,8 @@ contract Planter is Initializable, RelayRecipient {
         address _refferedBy
     ) external onlyAdmin {
         require(
-            planters[organizationAddress].planterType == 0 &&
-                accessRestriction.isPlanter(organizationAddress),
+            planters[_organizationAddress].planterType == 0 &&
+                accessRestriction.isPlanter(_organizationAddress),
             "User exist or not planter"
         );
 
@@ -152,10 +161,10 @@ contract Planter is Initializable, RelayRecipient {
                 "refferedBy not true"
             );
 
-            refferedBy[organizationAddress] = _refferedBy;
+            refferedBy[_organizationAddress] = _refferedBy;
         }
 
-        PlanterData storage planter = planters[organizationAddress];
+        PlanterData storage planter = planters[_organizationAddress];
 
         planter.planterType = 2;
         planter.status = 1;
@@ -163,6 +172,8 @@ contract Planter is Initializable, RelayRecipient {
         planter.capacity = _capacity;
         planter.longitude = _longitude;
         planter.latitude = _latitude;
+
+        emit OrganizationJoin(_organizationAddress);
     }
 
     //TODO:remove this function??
@@ -206,6 +217,8 @@ contract Planter is Initializable, RelayRecipient {
         }
 
         planter.planterType = _planterType;
+
+        PlanterUpdated(_msgSender());
     }
 
     function acceptPlanterFromOrganization(
@@ -222,10 +235,14 @@ contract Planter is Initializable, RelayRecipient {
 
         if (acceptance) {
             planter.status = 1;
+
+            emit AcceptedByOrganization(_planterAddress);
         } else {
             planter.status = 1;
             planter.planterType = 1;
             memberOf[_planterAddress] = address(0);
+
+            emit RejectedByOrganization(_planterAddress);
         }
     }
 
@@ -291,6 +308,8 @@ contract Planter is Initializable, RelayRecipient {
         organizationRules[_msgSender()][
             _planterAddress
         ] = _planterAutomaticPaymentPortion;
+
+        PortionUpdated(_planterAddress);
     }
 
     //TODO: remove existPlanter check?

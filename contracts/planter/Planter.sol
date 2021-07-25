@@ -177,6 +177,11 @@ contract Planter is Initializable, RelayRecipient {
 
         PlanterData storage planter = planters[_msgSender()];
 
+        require(
+            planter.status == 0 || planter.status == 1,
+            "invalid planter status"
+        );
+
         require(planter.planterType != 2, "Caller is organizationPlanter");
 
         if (_planterType == 3) {

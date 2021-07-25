@@ -616,6 +616,51 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER_TYPE);
   });
 
+  it("updatePlanterType should be fail because planter has invalid status", async () => {
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+
+    //organizationAddress join
+    await Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount4,
+      zeroAddress,
+      deployerAccount
+    );
+
+    await Common.joinSimplePlanter(
+      planterInstance,
+      3,
+      userAccount2,
+      zeroAddress,
+      userAccount4
+    );
+
+    await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+      from: userAccount4,
+    });
+
+    await planterInstance.updateCapacity(userAccount2, 1, {
+      from: deployerAccount,
+    });
+
+    await Common.addGenesisTreeRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+
+    await planterInstance.plantingPermission(userAccount2, userAccount2, {
+      from: deployerAccount,
+    });
+
+    await planterInstance
+      .updatePlanterType(1, zeroAddress, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER_STATUS);
+  });
+
   it("updatePlanterType should be fail because organizationAddress not access", async () => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -1594,7 +1639,7 @@ contract("GenesisTree", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PAYMENT_PORTION);
   });
-  //////////////***********************************************  get planter portion  *********************************************/
+  //////////////***********************************************  get planter portion  ********************************************
   it("should get correct data from planter payment portion", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount); //orgnaizer planter
@@ -1702,7 +1747,7 @@ contract("GenesisTree", (accounts) => {
       }
     );
   });
-  ///////////////////////***********************************************  reduce plant count  *********************************************/
+  ///////////////////////***********************************************  reduce plant count  ********************************************
   it("should reduce planted count and check data to be ok", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 

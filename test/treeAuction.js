@@ -1699,6 +1699,10 @@ contract("TreeAuction", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
+    await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      from: userAccount8,
+    });
+
     await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount7, {
       from: deployerAccount,
     });
@@ -1714,10 +1718,6 @@ contract("TreeAuction", (accounts) => {
         from: userAccount8,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANT_TREE_WITH_PLANTER);
-
-    await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
-      from: userAccount8,
-    });
 
     await genesisTreeInstance.plantTree(
       treeId,

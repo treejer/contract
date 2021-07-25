@@ -153,7 +153,7 @@ contract GenesisTree is Initializable, RelayRecipient {
         genTree.treeSpecs = _treeDescription;
     }
 
-    function asignTreeToPlanter(uint256 _treeId, address _planterId)
+    function assignTreeToPlanter(uint256 _treeId, address _planterId)
         external
         onlyAdmin
     {
@@ -161,11 +161,15 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(tempTree.treeStatus == 2, "invalid tree to assign");
 
-        require(_planterId != address(0), "invalid planter address");
+        // require(_planterId != address(0), "invalid planter address");
+        require(
+            planter.canAssignTreeToPlanter(_planterId),
+            "can't assign tree to planter"
+        );
 
-        (uint8 _planterType, , , , , , , ) = planter.planters(_planterId);
+        // (uint8 _planterType, , , , , , , ) = planter.planters(_planterId);
 
-        require(_planterType > 0, "planter not exist");
+        // require(_planterType > 0, "planter not exist");
 
         tempTree.planterId = _planterId;
     }

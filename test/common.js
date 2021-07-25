@@ -87,7 +87,7 @@ Common.successPlant = async (
     from: deployerAccount,
   });
 
-  await genesisTreeInstance.asignTreeToPlanter(treeId, planterAddress, {
+  await genesisTreeInstance.assignTreeToPlanter(treeId, planterAddress, {
     from: deployerAccount,
   });
 

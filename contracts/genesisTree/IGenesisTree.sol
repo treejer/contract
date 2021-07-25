@@ -16,7 +16,7 @@ interface IGenesisTree {
     function addTree(uint256 _treeId, string calldata _treeDescription)
         external;
 
-    function asignTreeToPlanter(uint256 _treeId, address _planterId) external;
+    function assignTreeToPlanter(uint256 _treeId, address _planterId) external;
 
     function plantTree(
         uint256 _treeId,

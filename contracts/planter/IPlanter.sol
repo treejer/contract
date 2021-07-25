@@ -77,4 +77,9 @@ interface IPlanter {
         external
         view
         returns (bool);
+
+    function canAssignTreeToPlanter(address _planterAddress)
+        external
+        view
+        returns (bool);
 }

@@ -213,7 +213,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
   });
@@ -248,7 +248,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     //asign to planter user2
-    let asign1 = await genesisTreeInstance.asignTreeToPlanter(
+    let asign1 = await genesisTreeInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
@@ -273,7 +273,7 @@ contract("GenesisTree", (accounts) => {
     ////////////////////////////////////////////////////
 
     //asign to planter user3
-    let asign2 = await genesisTreeInstance.asignTreeToPlanter(
+    let asign2 = await genesisTreeInstance.assignTreeToPlanter(
       treeId,
       userAccount3,
       { from: deployerAccount }
@@ -318,36 +318,18 @@ contract("GenesisTree", (accounts) => {
     });
 
     await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount2, {
+      .assignTreeToPlanter(treeId, userAccount2, {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
     await genesisTreeInstance
-      .asignTreeToPlanter(invalidTreeId, userAccount2, {
+      .assignTreeToPlanter(invalidTreeId, userAccount2, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
 
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, zeroAddress, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.ZERO_ADDRESS_PLANTER);
-
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount1, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
-
-    await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount3, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_PLANTER);
-
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -367,7 +349,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
+      .assignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
   });
   //////////////************************************ plant tree ****************************************//
@@ -398,7 +380,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(
+    await genesisTreeInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
@@ -445,7 +427,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -541,7 +523,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(
+    await genesisTreeInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
@@ -665,7 +647,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -782,7 +764,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -897,10 +879,10 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
-    await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
@@ -1038,7 +1020,11 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount4, {
+    await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      from: userAccount3,
+    });
+
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
@@ -1092,17 +1078,7 @@ contract("GenesisTree", (accounts) => {
       .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
     /////////////////////----------------- plant with assignee and fail becuase not accpted by org
 
-    await genesisTreeInstance
-      .plantTree(treeId, ipfsHash, birthDate, countryCode, {
-        from: userAccount4,
-      })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
-
-    //////////////////////// --------------------- accept and plant succusfully
-
-    await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
-      from: userAccount3,
-    });
+    //////////////////////// ---------------------  plant succusfully
 
     await genesisTreeInstance.plantTree(
       treeId,
@@ -1113,7 +1089,7 @@ contract("GenesisTree", (accounts) => {
     );
   });
 
-  // //////////************************************ verify plant ****************************************//
+  //////////************************************ verify plant ****************************************//
   it("should verify plant seccussfully", async () => {
     const treeId = 1;
     const treeId2 = 2;
@@ -1179,7 +1155,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(
+    await genesisTreeInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
@@ -1210,7 +1186,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
@@ -1236,7 +1212,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId3, userAccount4, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId3, userAccount4, {
       from: deployerAccount,
     });
 
@@ -1261,7 +1237,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId4, userAccount4, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId4, userAccount4, {
       from: deployerAccount,
     });
 
@@ -1308,7 +1284,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -1479,7 +1455,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -1656,7 +1632,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -1700,7 +1676,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId2, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
@@ -1801,7 +1777,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -1946,7 +1922,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -2083,7 +2059,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -2158,7 +2134,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -2177,7 +2153,7 @@ contract("GenesisTree", (accounts) => {
     });
 
     await genesisTreeInstance
-      .asignTreeToPlanter(treeId, userAccount2, {
+      .assignTreeToPlanter(treeId, userAccount2, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
@@ -2229,7 +2205,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -2263,7 +2239,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -2555,7 +2531,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -3391,7 +3367,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount3, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -3561,7 +3537,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount4, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
@@ -3723,7 +3699,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount4, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
@@ -3877,7 +3853,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -4093,7 +4069,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -5610,7 +5586,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.asignTreeToPlanter(treeId, userAccount2, {
+    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 

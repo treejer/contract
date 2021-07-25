@@ -38,9 +38,8 @@ const GenesisTreeErrorMsg = {
   PLANTING_PERMISSION_DENIED: "planting permission denied",
   INVALID_TREE_STATUS_FOR_PLANT: "invalid tree status for plant",
   INVALID_TREE_TO_ASSIGN: "invalid tree to assign",
-  ZERO_ADDRESS_PLANTER: "invalid planter address",
   INVALID_GB: "invalid gb",
-  INVALID_PLANTER: "planter not exist",
+  CANT_ASSIGN_TREE_TO_PLANTER: "can't assign tree to planter",
   INVALID_TREE: "invalid tree",
   UPDATE_TIME_NOT_REACH: "Update time not reach",
   UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS:

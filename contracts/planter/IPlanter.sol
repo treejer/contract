@@ -7,6 +7,16 @@ interface IPlanter {
 
     function memberOf(address _planterAddress) external view returns (address);
 
+    function refferedBy(address _planterAddress)
+        external
+        view
+        returns (address);
+
+    function organizationRules(
+        address _organizationAddress,
+        address _planterAddress
+    ) external view returns (uint256);
+
     function planters(address _planterAddress)
         external
         view
@@ -31,7 +41,7 @@ interface IPlanter {
     ) external;
 
     function organizationJoin(
-        address organizationAddress,
+        address _organizationAddress,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -73,7 +83,7 @@ interface IPlanter {
 
     function planterCheck(address _planterAddress) external returns (bool);
 
-    function canVerify(address _planterAddress, address _sender)
+    function canVerify(address _planterAddress, address _verifier)
         external
         view
         returns (bool);
@@ -82,4 +92,11 @@ interface IPlanter {
         external
         view
         returns (bool);
+
+    event PlanterJoin(address planterId);
+    event OrganizationJoin(address organizationId);
+    event PlanterUpdated(address planterId);
+    event AcceptedByOrganization(address planterId);
+    event RejectedByOrganization(address planterId);
+    event PortionUpdated(address planterId);
 }

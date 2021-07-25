@@ -5,7 +5,39 @@ pragma solidity ^0.6.9;
 interface IGenesisTree {
     function isGenesisTree() external view returns (bool);
 
-    function setGBFactoryAddress(address _address) external;
+    function lastRegularPlantedTree() external view returns (uint256);
+
+    function genTrees(uint256 _treeId)
+        external
+        view
+        returns (
+            address,
+            uint256,
+            uint16,
+            uint16,
+            uint32,
+            uint64,
+            uint64,
+            uint64,
+            string
+        );
+
+    function updateGenTrees(uint256 _treeId)
+        external
+        view
+        returns (string, uint64);
+
+    function regularTrees(uint256 _regularTreeId)
+        external
+        view
+        returns (
+            uint64,
+            uint64,
+            uint64,
+            uint64,
+            address,
+            string
+        );
 
     function setTreasuryAddress(address _address) external;
 
@@ -27,19 +59,19 @@ interface IGenesisTree {
 
     function verifyPlant(uint256 _treeId, bool _isVerified) external;
 
-    function updateTree(uint256 treeId, string calldata treeSpecs) external;
+    function updateTree(uint256 _treeId, string memory _treeSpecs) external;
 
-    function verifyUpdate(uint256 treeId, bool isVerified) external;
+    function verifyUpdate(uint256 _treeId, bool _isVerified) external;
 
-    function availability(uint256 treeId, uint32 provideType)
+    function availability(uint256 _treeId, uint32 _provideType)
         external
         returns (uint32);
 
-    function updateOwner(uint256 treeId, address ownerId) external;
+    function updateOwner(uint256 _treeId, address _ownerId) external;
 
     function updateOwnerIncremental(uint256 _treeId, address _ownerId) external;
 
-    function updateAvailability(uint256 treeId) external;
+    function updateAvailability(uint256 _treeId) external;
 
     function bulkAvailability(uint256 _startTreeId, uint256 _endTreeId)
         external
@@ -47,7 +79,7 @@ interface IGenesisTree {
 
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
 
-    function checkMintStatus(uint256 _treeId) external returns (bool);
+    function checkMintStatus(uint256 _treeId) external view returns (bool);
 
     // function updateTreefromOffer(
     //     uint256 _treeId,
@@ -79,7 +111,7 @@ interface IGenesisTree {
      * @param _regularTreeId _regularTreeId
      * @param isVerified Tree approved or not
      */
-    function verifyRegularPlant(uint256 _regularTreeId, bool isVerified)
+    function verifyRegularPlant(uint256 _regularTreeId, bool _isVerified)
         external;
 
     /**
@@ -92,7 +124,7 @@ interface IGenesisTree {
      *
      * @return The last tree sold after update
      */
-    function mintRegularTrees(uint256 lastSold, address _owner)
+    function mintRegularTrees(uint256 _lastSold, address _owner)
         external
         returns (uint256);
 
@@ -105,7 +137,12 @@ interface IGenesisTree {
     function requestRegularTree(uint256 _treeId, address _owner) external;
 
     event TreePlanted(uint256 treeId);
-    event PlantVerified(uint256 treeId, uint256 updateStatus);
+    event PlantVerified(uint256 treeId);
+    event PlantRejected(uint256 treeId);
     event TreeUpdated(uint256 treeId);
-    event UpdateVerified(uint256 treeId, uint64 updateStatus);
+    event UpdateVerified(uint256 treeId);
+    event UpdateRejected(uint256 treeId);
+    event RegularTreePlanted(uint256 treeId);
+    event RegularPlantVerified(uint256 treeId);
+    event RegularPlantRejected(uint256 treeId);
 }

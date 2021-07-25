@@ -5,11 +5,12 @@ pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-
+import "../genesisTree/IGenesisTree.sol";
 contract TreeAttribute is Initializable {
     using SafeCastUpgradeable for uint256;
     bool public isTreeAttribute;
     IAccessRestriction public accessRestriction;
+    IGenesisTree public genesisTree;
     //parameters of randomTreeGeneration
     struct Attributes {
         uint32 treeType;
@@ -19,6 +20,7 @@ contract TreeAttribute is Initializable {
         uint32 groundColor;
         uint32 specialEffects;
         uint32 universalCode;
+        uint32 exists;
     }
     //maping from buyer address to his/her rank
     mapping(address => uint8) public rankOf;
@@ -39,6 +41,12 @@ contract TreeAttribute is Initializable {
     modifier onlyIncrementalSellOrAuction() {
         accessRestriction.ifIncrementalSellOrAuction (msg.sender);
         _;
+    }
+
+    function setGenesisTreeAddress(address _address) external onlyAdmin {
+        IGenesisTree candidateContract = IGenesisTree(_address);
+        require(candidateContract.isGenesisTree());
+        genesisTree = candidateContract;
     }
 
     function initialize(address _accessRestrictionAddress) public initializer {
@@ -65,7 +73,7 @@ contract TreeAttribute is Initializable {
             results[i]=getFirstN32(generatedCode,bitCounts[i]);
             generatedCode=generatedCode / uint32(2)**bitCounts[i];
         }
-        treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode);
+        treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode,1);
     }
 
     function calcRandAttributes(address buyer,uint256 treeId,uint32 rand) private returns(bool){
@@ -90,7 +98,7 @@ contract TreeAttribute is Initializable {
         uint32 generatedCode=results[0]+results[1]*64+results[2]*512+results[3]*8192+results[4]*131072+results[5]*1048576;
         if (generatedAttributes[generatedCode]==0){
             generatedAttributes[generatedCode]=1;
-            treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode);
+            treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode,1);
             rankOf[buyer]=0;
             return true;
         }
@@ -100,13 +108,13 @@ contract TreeAttribute is Initializable {
     }
 
     //the function creates
-    function createTreeAttributes( address buyer, uint256 treeId, uint256 paidAmount, bytes32 sig ) 
-    external onlyIncrementalSellOrAuction returns(bool){
-        //todo
-        //onlyIncrementalSellOrAuction
+    function createTreeAttributes( address buyer, uint256 treeId, uint256 paidAmount ) 
+    external returns(bool){
+        require(treeAttributes[treeId].exists==0,"tree already has attributes");
+        require(genTree.checkMintStatus(treeId),"no need to tree attributes");
         bool flag=true;
         for(uint256 j = 0; j <10000; j++){
-            uint256 rand=uint256(keccak256(abi.encodePacked( buyer,keccak256(abi.encodePacked(block.number,sig,paidAmount)),treeId,j)));
+            uint256 rand=uint256(keccak256(abi.encodePacked( buyer,keccak256(abi.encodePacked(block.number,msg.sig,paidAmount)),treeId,j)));
             for(uint256 i = 0; i <9; i++){
                 flag=calcRandAttributes(buyer,treeId,getFirstN(rand,28));
                 if (flag){

@@ -36,6 +36,7 @@ interface IGenesisTree {
         returns (uint32);
 
     function updateOwner(uint256 treeId, address ownerId) external;
+    function updateOwnerIncremental(uint256 _treeId, address _ownerId) external;
 
     function updateAvailability(uint256 treeId) external;
 
@@ -44,6 +45,7 @@ interface IGenesisTree {
         returns (bool);
 
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
+    function checkMintStatus(uint256 _treeId) external returns(bool); 
 
     // function updateTreefromOffer(
     //     uint256 _treeId,

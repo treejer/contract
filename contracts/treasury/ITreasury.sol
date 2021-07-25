@@ -10,6 +10,73 @@ interface ITreasury {
      */
     function isTreasury() external view returns (bool);
 
+    function maxAssignedIndex() external view returns (bool);
+
+    /**
+     * @dev return totalFunds struct data containing {plnaterFund} {referralFund}
+     * {treeResearch} {localDevelop} {rescueFund} {treejerDevelop} {reserveFund1}
+     * {reserveFund2}
+     */
+    function totalFunds()
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        );
+
+    function treeResearchAddress() external view returns (address);
+
+    function localDevelopAddress() external view returns (address);
+
+    function rescueFundAddress() external view returns (address);
+
+    function treejerDevelopAddress() external view returns (address);
+
+    function reserveFundAddress1() external view returns (address);
+
+    function reserveFundAddress2() external view returns (address);
+
+    /**
+     * @dev returns assignModels data containing {stratingTreeId} and {distributionModelId}
+     * in index {_index}
+     */
+    function assignModels(uint256 _index)
+        external
+        view
+        returns (uint256, uint256);
+
+    function fundDistributions(uint256 _index)
+        external
+        view
+        returns (
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            uint16,
+            uint16
+        );
+
+    function planterFunds(uint256 _treeId) external view returns (uint256);
+
+    function referralFunds(uint256 _treeId) external view returns (uint256);
+
+    function plantersPaid(uint256 _treeId) external view returns (uint256);
+
+    function balances(address planterAddress) external view returns (uint256);
+
+    function setPlanterContractAddress(address _address) external;
+
     /**
      * @dev set {_address} to treeResearchAddress
      */
@@ -130,34 +197,6 @@ interface ITreasury {
      * @dev trnasfer {_amount} from  planters balances to caller's address
      */
     function withdrawPlanterBalance(uint256 _amount) external;
-
-    /**
-     * @dev returns assignModels data containing {stratingTreeId} and {distributionModelId}
-     * in index {_index}
-     */
-    function assignModels(uint256 _index)
-        external
-        view
-        returns (uint256 startingTreeId, uint256 distributionModelId);
-
-    /**
-     * @dev return totalFunds struct data containing {plnaterFund} {referralFund}
-     * {treeResearch} {localDevelop} {rescueFund} {treejerDevelop} {reserveFund1}
-     * {reserveFund2}
-     */
-    function totalFunds()
-        external
-        view
-        returns (
-            uint256 planterFund,
-            uint256 referralFund,
-            uint256 treeResearch,
-            uint256 localDevelop,
-            uint256 rescueFund,
-            uint256 treejerDevelop,
-            uint256 reserveFund1,
-            uint256 reserveFund2
-        );
 
     event DistributionModelOfTreeNotExist(string description);
 

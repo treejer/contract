@@ -49,16 +49,18 @@ contract TreeAuction is Initializable {
         address bidder,
         uint256 amount
     );
-    event AuctionEnded(
+    event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
         uint256 amount
     );
-    event AuctionEndTimeIncreased(
+    event AuctionEnded(uint256 auctionId, uint256 treeId);
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+    event AuctionWithdrawFaild(
         uint256 auctionId,
-        uint256 newAuctionEndTime,
-        address bidder
+        address bidder,
+        uint256 amount
     );
 
     modifier onlyAdmin() {
@@ -175,7 +177,7 @@ contract TreeAuction is Initializable {
         );
 
         _increaseAuctionEndTime(_auctionId);
-        _withdraw(oldBid, oldBidder);
+        _withdraw(oldBid, oldBidder, _auctionId);
     }
 
     /** @dev users can manually withdraw if its balance is more than 0.
@@ -213,7 +215,7 @@ contract TreeAuction is Initializable {
 
             treasury.fundTree{value: auction.highestBid}(auction.treeId);
 
-            emit AuctionEnded(
+            emit AuctionSettled(
                 _auctionId,
                 auction.treeId,
                 auction.bidder,
@@ -221,6 +223,7 @@ contract TreeAuction is Initializable {
             );
         } else {
             genesisTree.updateAvailability(auction.treeId);
+            emit AuctionEnded(_auctionId, auction.treeId);
         }
 
         delete auctions[_auctionId];
@@ -239,8 +242,7 @@ contract TreeAuction is Initializable {
 
             emit AuctionEndTimeIncreased(
                 _auctionId,
-                auctions[_auctionId].endDate,
-                msg.sender
+                auctions[_auctionId].endDate
             );
         }
     }
@@ -249,7 +251,11 @@ contract TreeAuction is Initializable {
      * much as paid before using this function
      */
 
-    function _withdraw(uint256 _oldBid, address payable _oldBidder) private {
+    function _withdraw(
+        uint256 _oldBid,
+        address payable _oldBidder,
+        uint256 _auctionId
+    ) private {
         if (_oldBidder != address(0)) {
             uint32 size;
 
@@ -265,6 +271,8 @@ contract TreeAuction is Initializable {
                 pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
                     _oldBid
                 );
+
+                emit AuctionWithdrawFaild(_auctionId, _oldBidder, _oldBid);
             }
         }
     }

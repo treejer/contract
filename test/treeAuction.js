@@ -786,7 +786,6 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
-        ev.bidder == userAccount1 &&
         Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
@@ -941,7 +940,7 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(addressGetToken, userAccount1, "token not true mint");
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
         Number(ev.treeId) == treeId &&
@@ -1000,8 +999,12 @@ contract("TreeAuction", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 70);
 
-    await treeAuctionInstance.endAuction(0, {
+    let failEnd = await treeAuctionInstance.endAuction(0, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(failEnd, "AuctionEnded", (ev) => {
+      return Number(ev.auctionId) == 0 && Number(ev.treeId) == treeId;
     });
   });
 
@@ -2032,7 +2035,7 @@ contract("TreeAuction", (accounts) => {
       "Provide status not true update when auction success"
     );
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == 1 &&
         Number(ev.treeId) == treeId &&
@@ -2299,7 +2302,6 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == 0 &&
-        ev.bidder == userAccount4 &&
         Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
       );
     });
@@ -2347,7 +2349,7 @@ contract("TreeAuction", (accounts) => {
       "Treasury contract balance is not true"
     );
 
-    truffleAssert.eventEmitted(successEnd, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == auctionId &&
         Number(ev.treeId) == treeId &&
@@ -2731,7 +2733,6 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(FinalBidTx, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
-        ev.bidder == userAccount7 &&
         Number(ev.newAuctionEndTime) ==
           Math.add(Number(initailAuction.endDate), 600)
       );
@@ -2880,7 +2881,7 @@ contract("TreeAuction", (accounts) => {
       "treasury done charge correctly"
     );
 
-    truffleAssert.eventEmitted(endAuctionTx, "AuctionEnded", (ev) => {
+    truffleAssert.eventEmitted(endAuctionTx, "AuctionSettled", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         Number(ev.treeId) == treeId1 &&

@@ -61,11 +61,7 @@ interface ITreeAuction {
         uint256 amount
     );
 
-    /**
-     * @dev emiited when auctions {auctionId} for tree {treeId} finisehd.
-     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
-     */
-    event AuctionEnded(
+    event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
@@ -73,12 +69,20 @@ interface ITreeAuction {
     );
 
     /**
+     * @dev emiited when auctions {auctionId} for tree {treeId} finisehd.
+     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     */
+    event AuctionEnded(uint256 auctionId, uint256 treeId);
+
+    /**
      * @dev emmited when a bid take apart less than 10 minutes to end of auction by {bidder}
      * {newAuctionEndTime} is old auction end time plus 10 minutes
      */
-    event AuctionEndTimeIncreased(
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+
+    event AuctionWithdrawFaild(
         uint256 auctionId,
-        uint256 newAuctionEndTime,
-        address bidder
+        address bidder,
+        uint256 amount
     );
 }

@@ -100,7 +100,7 @@ contract("GenesisTree", (accounts) => {
 
   afterEach(async () => {});
   /////////////------------------------------------ deploy successfully ----------------------------------------//
-  /* it("deploys successfully", async () => {
+  it("deploys successfully", async () => {
     const address = genesisTreeInstance.address;
 
     assert.notEqual(address, 0x0);
@@ -193,7 +193,7 @@ contract("GenesisTree", (accounts) => {
       .addTree(treeId, ipfsHash, { from: deployerAccount })
       .should.be.rejectedWith(GenesisTreeErrorMsg.DUPLICATE_TREE);
   });
-  
+
   ////////////////////////------------------------------------ asign tree ----------------------------------------//
   it("assign tree to planter succussfuly", async () => {
     let treeId = 1;
@@ -353,12 +353,13 @@ contract("GenesisTree", (accounts) => {
       .assignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
       .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
   });
-  */
+
   it("should fail to assign because of can't assign tree to planter", async () => {
     const treeId1 = 1;
     const treeId2 = 2;
     const treeId3 = 3;
     const treeId4 = 4;
+    const treeId5 = 5;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
@@ -379,6 +380,16 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
+    await genesisTreeInstance.addTree(treeId5, ipfsHash, {
+      from: deployerAccount,
+    });
+    ///////////////////////// -------------------- add genesis role
+    await Common.addGenesisTreeRole(
+      arInstance,
+      genesisTreeInstance.address,
+      deployerAccount
+    );
+
     /////////////////// --------------------------- add planters
 
     Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -398,10 +409,31 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
+    Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount2,
+      zeroAddress,
+      deployerAccount
+    );
+
+    Common.joinSimplePlanter(
+      planterInstance,
+      3,
+      userAccount3,
+      zeroAddress,
+      userAccount2
+    );
+
     /////////////////////////// ------------------ update planter (userAccount1) capacity to 1 and plant a tree to change planter status to 2
 
-    await planterInstance.updateCapacity(userAccount1, 1);
-    await genesisTreeInstance.assignTreeToPlanter(treeId1, userAccount1);
+    await planterInstance.updateCapacity(userAccount1, 1, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.assignTreeToPlanter(treeId1, userAccount1, {
+      from: deployerAccount,
+    });
+
     await genesisTreeInstance.plantTree(
       treeId1,
       ipfsHash,
@@ -410,10 +442,94 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount1 }
     );
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount1);
+    await genesisTreeInstance
+      .assignTreeToPlanter(treeId2, userAccount1, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+
+    ///////////////////////// test userAccount3 (orgizationPlanter) --------------
+    await genesisTreeInstance
+      .assignTreeToPlanter(treeId2, userAccount3, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+
+    await planterInstance.updateCapacity(userAccount3, 1, {
+      from: deployerAccount,
+    });
+
+    await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+      from: userAccount2,
+    });
+
+    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.plantTree(
+      treeId2,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      { from: userAccount3 }
+    );
+
+    await genesisTreeInstance
+      .assignTreeToPlanter(treeId3, userAccount3, { from: deployerAccount })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+
+    /////////////////---------------------- assign tree to userAccount2(orgnization) (unlimited assign)
+    await genesisTreeInstance.assignTreeToPlanter(treeId3, userAccount2, {
+      from: deployerAccount,
+    });
+
+    await planterInstance.updateCapacity(userAccount2, 1, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.plantTree(
+      treeId3,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      { from: userAccount2 }
+    );
+
+    await genesisTreeInstance.assignTreeToPlanter(treeId4, userAccount2, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.assignTreeToPlanter(treeId5, userAccount2, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance
+      .plantTree(treeId4, ipfsHash, birthDate, countryCode, {
+        from: userAccount2,
+      })
+
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+
+    await planterInstance.updateCapacity(userAccount3, 2, {
+      from: deployerAccount,
+    });
+
+    await genesisTreeInstance.plantTree(
+      treeId4,
+      ipfsHash,
+      birthDate,
+      countryCode,
+      { from: userAccount3 }
+    );
+
+    await genesisTreeInstance
+      .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
   });
 
-  /*
   //////////////------------------------------------ plant tree ----------------------------------------//
   it("should plant tree successfuly when have planter", async () => {
     const treeId = 1;
@@ -5675,8 +5791,5 @@ contract("GenesisTree", (accounts) => {
       ambassadorBeforeBalance,
       "ambassador balance not equal"
     );
-  }); 
-
-
-*/
+  });
 });

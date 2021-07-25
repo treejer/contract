@@ -161,15 +161,10 @@ contract GenesisTree is Initializable, RelayRecipient {
 
         require(tempTree.treeStatus == 2, "invalid tree to assign");
 
-        // require(_planterId != address(0), "invalid planter address");
         require(
             planter.canAssignTreeToPlanter(_planterId),
             "can't assign tree to planter"
         );
-
-        // (uint8 _planterType, , , , , , , ) = planter.planters(_planterId);
-
-        // require(_planterType > 0, "planter not exist");
 
         tempTree.planterId = _planterId;
     }
@@ -347,18 +342,17 @@ contract GenesisTree is Initializable, RelayRecipient {
         onlyIncremental
     {
         genTrees[_treeId].provideStatus = 0;
-        genTrees[_treeId].mintStatus=1;
+        genTrees[_treeId].mintStatus = 1;
         treeToken.safeMint(_ownerId, _treeId);
-
     }
-     function updateOwner(uint256 _treeId, address _ownerId)
+
+    function updateOwner(uint256 _treeId, address _ownerId)
         external
         onlyAuction
     {
         genTrees[_treeId].provideStatus = 0;
-        genTrees[_treeId].mintStatus=2;
+        genTrees[_treeId].mintStatus = 2;
         treeToken.safeMint(_ownerId, _treeId);
-
     }
 
     function updateAvailability(uint256 _treeId) external onlyAuction {
@@ -394,9 +388,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         }
         return true;
     }
-    function checkMintStatus(uint256 _treeId) external view returns(bool) {
-        uint16 minted =genTrees[_treeId].mintStatus;
-        return (minted==1 || minted==2);
+
+    function checkMintStatus(uint256 _treeId) external view returns (bool) {
+        uint16 minted = genTrees[_treeId].mintStatus;
+        return (minted == 1 || minted == 2);
     }
 
     // function updateTreefromOffer(

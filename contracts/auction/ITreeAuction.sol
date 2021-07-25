@@ -9,6 +9,20 @@ interface ITreeAuction {
      */
     function isTreeAuction() external view returns (bool);
 
+    function auctions(uint256 _auctionId)
+        external
+        view
+        returns (
+            uint256,
+            address,
+            uint64,
+            uint64,
+            uint256,
+            uint256
+        );
+
+    function pendingWithdraw(address _bidder) external view returns (uint256);
+
     /** @dev set {_address to GenesisTree contract address} */
     function setGenesisTreeAddress(address _address) external;
 

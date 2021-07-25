@@ -8,11 +8,11 @@ interface IIncrementalSell {
         external
         view
         returns (
-            uint256 startTree,
-            uint256 endTree,
-            uint256 initialPrice,
-            uint64 increaseStep,
-            uint64 increaseRatio
+            uint256,
+            uint256,
+            uint256,
+            uint64,
+            uint64
         );
 
     function lastBuy(address _buyer) external view returns (uint256);

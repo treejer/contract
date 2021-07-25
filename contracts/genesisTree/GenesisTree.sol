@@ -35,8 +35,9 @@ contract GenesisTree is Initializable, RelayRecipient {
     struct GenTree {
         address planterId;
         uint256 treeType;
+        uint16 mintStatus;
+        uint16 countryCode;
         uint32 provideStatus;
-        uint32 countryCode;
         uint64 treeStatus;
         uint64 plantDate;
         uint64 birthDate;
@@ -86,6 +87,10 @@ contract GenesisTree is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyIncrementalSellOrAuction {
+        accessRestriction.ifIncrementalSellOrAuction(_msgSender());
+        _;
+    }
     modifier validTree(uint256 _treeId) {
         require(genTrees[_treeId].treeStatus > 0, "invalid tree");
         _;
@@ -333,13 +338,23 @@ contract GenesisTree is Initializable, RelayRecipient {
         return nowProvideStatus;
     }
 
-    function updateOwner(uint256 _treeId, address _ownerId)
+    function updateOwnerIncremental(uint256 _treeId, address _ownerId)
+        external
+        onlyIncremental
+    {
+        genTrees[_treeId].provideStatus = 0;
+        genTrees[_treeId].mintStatus=1;
+        treeToken.safeMint(_ownerId, _treeId);
+
+    }
+     function updateOwner(uint256 _treeId, address _ownerId)
         external
         onlyAuction
     {
         genTrees[_treeId].provideStatus = 0;
-
+        genTrees[_treeId].mintStatus=2;
         treeToken.safeMint(_ownerId, _treeId);
+
     }
 
     function updateAvailability(uint256 _treeId) external onlyAuction {
@@ -374,6 +389,10 @@ contract GenesisTree is Initializable, RelayRecipient {
             genTrees[i].provideStatus = 2;
         }
         return true;
+    }
+    function checkMintStatus(uint256 _treeId) external view returns(bool) {
+        uint16 minted =genTrees[_treeId].mintStatus;
+        return (minted==1 || minted==2);
     }
 
     // function updateTreefromOffer(
@@ -458,7 +477,7 @@ contract GenesisTree is Initializable, RelayRecipient {
             GenTree storage genTree = genTrees[lastRegularPlantedTree];
 
             genTree.plantDate = regularTree.plantDate;
-            genTree.countryCode = uint32(regularTree.countryCode);
+            genTree.countryCode = uint16(regularTree.countryCode);
             genTree.birthDate = regularTree.birthDate;
             genTree.treeSpecs = regularTree.treeSpecs;
             genTree.planterId = regularTree.planterAddress;

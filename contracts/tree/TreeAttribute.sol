@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../genesisTree/IGenesisTree.sol";
+
 contract TreeAttribute is Initializable {
     using SafeCastUpgradeable for uint256;
     bool public isTreeAttribute;
@@ -34,12 +35,12 @@ contract TreeAttribute is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
-     modifier ifNotPaused() {
+    modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
     modifier onlyIncrementalSellOrAuction() {
-        accessRestriction.ifIncrementalSellOrAuction (msg.sender);
+        accessRestriction.ifIncrementalSellOrAuction(msg.sender);
         _;
     }
 
@@ -57,142 +58,292 @@ contract TreeAttribute is Initializable {
         isTreeAttribute = true;
         accessRestriction = candidateContract;
     }
-    function reserveTreeAttributes(uint32 generatedCode) external onlyAdmin{
-        require(generatedAttributes[generatedCode]==0,"the tree attributes are taken");
-        generatedAttributes[generatedCode]=1;
-        reservedAttributes[generatedCode]=1;
-    }
-    function setTreeAttributesByAdmin(uint256 treeId,uint32 generatedCode) external onlyAdmin{
-        require(generatedAttributes[generatedCode]==0 || reservedAttributes[generatedCode]==1,"the tree attributes are taken");
-        require(treeAttributes[treeId].universalCode==0,"tree attributes are set before");
-        generatedAttributes[generatedCode]=1;
-        reservedAttributes[generatedCode]==0;
-        uint8[6] memory bitCounts=[6,3,4,4,3,4];
-        uint32[] memory results = new uint32[](6);
-        for(uint32 i = 0; i < bitCounts.length; i++){
-            results[i]=getFirstN32(generatedCode,bitCounts[i]);
-            generatedCode=generatedCode / uint32(2)**bitCounts[i];
-        }
-        treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode,1);
+
+    function reserveTreeAttributes(uint32 generatedCode) external onlyAdmin {
+        require(
+            generatedAttributes[generatedCode] == 0,
+            "the tree attributes are taken"
+        );
+        generatedAttributes[generatedCode] = 1;
+        reservedAttributes[generatedCode] = 1;
     }
 
-    function calcRandAttributes(address buyer,uint256 treeId,uint32 rand) private returns(bool){
-        uint8[6] memory bitCounts=[6,3,4,4,3,8];
+    function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
+        external
+        onlyAdmin
+    {
+        require(
+            generatedAttributes[generatedCode] == 0 ||
+                reservedAttributes[generatedCode] == 1,
+            "the tree attributes are taken"
+        );
+        require(
+            treeAttributes[treeId].universalCode == 0,
+            "tree attributes are set before"
+        );
+        generatedAttributes[generatedCode] = 1;
+        reservedAttributes[generatedCode] == 0;
+        uint8[6] memory bitCounts = [6, 3, 4, 4, 3, 4];
         uint32[] memory results = new uint32[](6);
-        for(uint32 i = 0; i < bitCounts.length; i++){
-            results[i]=getFirstN32(rand,bitCounts[i]);
-            rand=rand / (uint32(2)**bitCounts[i]);
+        for (uint32 i = 0; i < bitCounts.length; i++) {
+            results[i] = getFirstN32(generatedCode, bitCounts[i]);
+            generatedCode = generatedCode / uint32(2)**bitCounts[i];
         }
-        if (treeId>100){
-            results[5]=getSpecialEffect(buyer,0,results[5]);
+        treeAttributes[treeId] = Attributes(
+            results[0],
+            results[1],
+            results[2],
+            results[3],
+            results[4],
+            results[5],
+            generatedCode,
+            1
+        );
+    }
+
+    function calcRandAttributes(
+        address buyer,
+        uint256 treeId,
+        uint32 rand
+    ) private returns (bool) {
+        uint8[6] memory bitCounts = [6, 3, 4, 4, 3, 8];
+        uint32[] memory results = new uint32[](6);
+        for (uint32 i = 0; i < bitCounts.length; i++) {
+            results[i] = getFirstN32(rand, bitCounts[i]);
+            rand = rand / (uint32(2)**bitCounts[i]);
         }
-        else if( treeId>50 ){
-            results[5]=getSpecialEffect(buyer,2,results[5]);
-        }
-        else{
-             results[5]=getSpecialEffect(buyer,3,results[5]);
+        if (treeId > 100) {
+            results[5] = getSpecialEffect(buyer, 0, results[5]);
+        } else if (treeId > 50) {
+            results[5] = getSpecialEffect(buyer, 2, results[5]);
+        } else {
+            results[5] = getSpecialEffect(buyer, 3, results[5]);
         }
 
-        
         //check Uniqueness
-        uint32 generatedCode=results[0]+results[1]*64+results[2]*512+results[3]*8192+results[4]*131072+results[5]*1048576;
-        if (generatedAttributes[generatedCode]==0){
-            generatedAttributes[generatedCode]=1;
-            treeAttributes[treeId]=Attributes(results[0],results[1],results[2],results[3],results[4],results[5],generatedCode,1);
-            rankOf[buyer]=0;
+        uint32 generatedCode = results[0] +
+            results[1] *
+            64 +
+            results[2] *
+            512 +
+            results[3] *
+            8192 +
+            results[4] *
+            131072 +
+            results[5] *
+            1048576;
+        if (generatedAttributes[generatedCode] == 0) {
+            generatedAttributes[generatedCode] = 1;
+            treeAttributes[treeId] = Attributes(
+                results[0],
+                results[1],
+                results[2],
+                results[3],
+                results[4],
+                results[5],
+                generatedCode,
+                1
+            );
+            rankOf[buyer] = 0;
             return true;
         }
-        generatedAttributes[generatedCode]+=1;
+        generatedAttributes[generatedCode] += 1;
         return false;
-
     }
 
     //the function creates
-    function createTreeAttributes( address buyer, uint256 treeId, uint256 paidAmount ) 
-    external returns(bool){
-        require(treeAttributes[treeId].exists==0,"tree already has attributes");
-        require(genTree.checkMintStatus(treeId),"no need to tree attributes");
-        bool flag=true;
-        for(uint256 j = 0; j <10000; j++){
-            uint256 rand=uint256(keccak256(abi.encodePacked( buyer,keccak256(abi.encodePacked(block.number,msg.sig,paidAmount)),treeId,j)));
-            for(uint256 i = 0; i <9; i++){
-                flag=calcRandAttributes(buyer,treeId,getFirstN(rand,28));
-                if (flag){
-                break;
-                }     
-                rand=rand / (uint256(2)**28);
+    function createTreeAttributes(
+        address buyer,
+        uint256 treeId,
+        uint256 paidAmount
+    ) external returns (bool) {
+        require(
+            treeAttributes[treeId].exists == 0,
+            "tree already has attributes"
+        );
+        require(genTree.checkMintStatus(treeId), "no need to tree attributes");
+        bool flag = true;
+        for (uint256 j = 0; j < 10000; j++) {
+            uint256 rand = uint256(
+                keccak256(
+                    abi.encodePacked(
+                        buyer,
+                        keccak256(
+                            abi.encodePacked(block.number, msg.sig, paidAmount)
+                        ),
+                        treeId,
+                        j
+                    )
+                )
+            );
+            for (uint256 i = 0; i < 9; i++) {
+                flag = calcRandAttributes(buyer, treeId, getFirstN(rand, 28));
+                if (flag) {
+                    break;
+                }
+                rand = rand / (uint256(2)**28);
             }
-            if(flag){
+            if (flag) {
                 break;
             }
-        } 
-        return flag;   
+        }
+        return flag;
     }
+
     //to get n lowest bits of a uint256
-    function getFirstN(uint256 rnd,uint16 n) private pure returns (uint32) {
-        uint256 x=rnd & ((uint256(2) ** n)-1 );
+    function getFirstN(uint256 rnd, uint16 n) private pure returns (uint32) {
+        uint256 x = rnd & ((uint256(2)**n) - 1);
 
         return x.toUint32();
     }
+
     //to get n lowest bits of a uint32
-    function getFirstN32(uint32 rnd,uint8 n) private pure returns (uint32) {
-        uint32 firN = (uint32(2) ** n)-1 ;
+    function getFirstN32(uint32 rnd, uint8 n) private pure returns (uint32) {
+        uint32 firN = (uint32(2)**n) - 1;
         return rnd & firN;
     }
+
     // the function Tries to Calculate the rank of buyer based on transaction statistics of his/her wallet
-    function setBuyerRank( address buyer, uint256 treejerSpent, uint256 walletSpent, uint64 treesOwned, uint64 walletSpentCount ) external onlyAdmin {
+    function setBuyerRank(
+        address buyer,
+        uint256 treejerSpent,
+        uint256 walletSpent,
+        uint64 treesOwned,
+        uint64 walletSpentCount
+    ) external onlyAdmin {
         uint256 points;
         //each 0.004 ether spent in treejer has 10 points
-        points+=(treejerSpent/( 4 * 1 finney ))*10;
+        points += (treejerSpent / (4 * 1 finney)) * 10;
         //each 1 ether spent of wallet(sent or withdraw) has 2 points
-        points+=(walletSpent/( 1 * 1 ether))*2;
+        points += (walletSpent / (1 * 1 ether)) * 2;
         // each 1 send or withdraw of wallet has 1 point
-        points+=walletSpentCount;
+        points += walletSpentCount;
         //each tree owned by buyer has 10 points
-        points+=treesOwned*10;
+        points += treesOwned * 10;
         //points under 31 is rank of zero
 
-        if( points>30 && points<61){
-            rankOf[buyer]=1; //points under 61  is rank 1
-        } 
-        else if( points<201){
-            rankOf[buyer]=2; //points under 201 is rank 2
+        if (points > 30 && points < 61) {
+            rankOf[buyer] = 1; //points under 61  is rank 1
+        } else if (points < 201) {
+            rankOf[buyer] = 2; //points under 201 is rank 2
+        } else if (points < 1001) {
+            rankOf[buyer] = 3; //points under 1001 is rank 3
+        } else {
+            rankOf[buyer] = 4; //points above 1000 is rank 4 or VIP
         }
-        else if( points<1001){
-            rankOf[buyer]=3; //points under 1001 is rank 3
-        }
-        else{
-            rankOf[buyer]=4; //points above 1000 is rank 4 or VIP
-        }
-        
     }
 
     // The function manipulates probability of rare special effects based on rank of buyer
-    function getSpecialEffect(address buyer,uint8 bonusRank,uint32 n) private view returns (uint32) {
-        uint16[16] memory specialEffectsRank0=[50,100,150,200,210,220,230,235,240,245,248,251,253,254,255,256];
-        uint16[16] memory specialEffectsRank1=[42,84,126,168,181,194,207,216,225,234,240,246,250,252,254,256];
-        uint16[16] memory specialEffectsRank2=[40,80,120,160,173,186,199,208,217,226,233,240,244,248,252,256];
-        uint16[16] memory specialEffectsRank3=[32,64,95,126,141,156,171,183,195,207,217,227,235,242,249,256];
-        uint16[16] memory specialEffectsVIP=[25,50,75,100,115,130,145,156,167,178,188,198,214,228,242,256];
+    function getSpecialEffect(
+        address buyer,
+        uint8 bonusRank,
+        uint32 n
+    ) private view returns (uint32) {
+        uint16[16] memory specialEffectsRank0 = [
+            50,
+            100,
+            150,
+            200,
+            210,
+            220,
+            230,
+            235,
+            240,
+            245,
+            248,
+            251,
+            253,
+            254,
+            255,
+            256
+        ];
+        uint16[16] memory specialEffectsRank1 = [
+            42,
+            84,
+            126,
+            168,
+            181,
+            194,
+            207,
+            216,
+            225,
+            234,
+            240,
+            246,
+            250,
+            252,
+            254,
+            256
+        ];
+        uint16[16] memory specialEffectsRank2 = [
+            40,
+            80,
+            120,
+            160,
+            173,
+            186,
+            199,
+            208,
+            217,
+            226,
+            233,
+            240,
+            244,
+            248,
+            252,
+            256
+        ];
+        uint16[16] memory specialEffectsRank3 = [
+            32,
+            64,
+            95,
+            126,
+            141,
+            156,
+            171,
+            183,
+            195,
+            207,
+            217,
+            227,
+            235,
+            242,
+            249,
+            256
+        ];
+        uint16[16] memory specialEffectsVIP = [
+            25,
+            50,
+            75,
+            100,
+            115,
+            130,
+            145,
+            156,
+            167,
+            178,
+            188,
+            198,
+            214,
+            228,
+            242,
+            256
+        ];
         uint16[16] memory suitedEffectStatistics;
-        uint8 rank=rankOf[buyer]+bonusRank; //bonus rank for special trees at auction 
-        if (rank==0){
-            suitedEffectStatistics=specialEffectsRank0;
-        }
-        else if (rank==1){
-            suitedEffectStatistics=specialEffectsRank1;
-        }
-        else if (rank==2){
-            suitedEffectStatistics=specialEffectsRank2;
-        }
-        else if (rank==3){
-            suitedEffectStatistics=specialEffectsRank3;
-        }
-        else {
-            suitedEffectStatistics=specialEffectsVIP;
+        uint8 rank = rankOf[buyer] + bonusRank; //bonus rank for special trees at auction
+        if (rank == 0) {
+            suitedEffectStatistics = specialEffectsRank0;
+        } else if (rank == 1) {
+            suitedEffectStatistics = specialEffectsRank1;
+        } else if (rank == 2) {
+            suitedEffectStatistics = specialEffectsRank2;
+        } else if (rank == 3) {
+            suitedEffectStatistics = specialEffectsRank3;
+        } else {
+            suitedEffectStatistics = specialEffectsVIP;
         }
         for (uint32 i = 0; i < suitedEffectStatistics.length; i++) {
-            if(n<suitedEffectStatistics[i]){
+            if (n < suitedEffectStatistics[i]) {
                 return i;
             }
         }

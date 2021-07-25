@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "../access/IAccessRestriction.sol";
-import "../genesisTree/IGenesisTree.sol";
+import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
 
 contract RegularSell is Initializable {
@@ -16,7 +16,7 @@ contract RegularSell is Initializable {
     bool public isRegularSell;
 
     IAccessRestriction public accessRestriction;
-    IGenesisTree public treeFactory;
+    ITreeFactory public treeFactory;
     ITreasury public treasury;
 
     event TreePriceUpdated(uint256 price);
@@ -49,9 +49,9 @@ contract RegularSell is Initializable {
     }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
-        IGenesisTree candidateContract = IGenesisTree(_address);
+        ITreeFactory candidateContract = ITreeFactory(_address);
 
-        require(candidateContract.isGenesisTree());
+        require(candidateContract.isTreeFactory());
 
         treeFactory = candidateContract;
     }

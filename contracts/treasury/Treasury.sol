@@ -123,8 +123,8 @@ contract Treasury is Initializable, RelayRecipient {
         accessRestriction.ifAuction(_msgSender());
         _;
     }
-    modifier onlyGenesisTree() {
-        accessRestriction.ifGenesisTree(_msgSender());
+    modifier onlyTreeFactory() {
+        accessRestriction.ifTreeFactory(_msgSender());
         _;
     }
     modifier validAddress(address _address) {
@@ -426,7 +426,7 @@ contract Treasury is Initializable, RelayRecipient {
         uint256 _treeId,
         address _planterId,
         uint64 _treeStatus
-    ) external onlyGenesisTree {
+    ) external onlyTreeFactory {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
 
         (

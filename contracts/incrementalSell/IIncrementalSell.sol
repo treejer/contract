@@ -19,9 +19,7 @@ interface IIncrementalSell {
 
     function setTreasuryAddress(address payable _treasuryAddress) external;
 
-    function setGenesisTreeAddress(address _address) external;
-
-    function setTreeAttributeAddress(address _address) external;
+    function setTreeFactoryAddress(address _address) external;
 
     function setTreeTokenAddress(address _address) external;
 

@@ -6,12 +6,10 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
+
 const {
-  TimeEnumes,
   CommonErrorMsg,
-  GenesisTreeErrorMsg,
-  TreeAuctionErrorMsg,
+
   PlanterErrorMsg,
 } = require("./enumes");
 
@@ -21,7 +19,7 @@ const Gsn = require("@opengsn/gsn");
 const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-contract("GenesisTree", (accounts) => {
+contract("Planter", (accounts) => {
   let planterInstance;
 
   let arInstance;
@@ -685,7 +683,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -970,7 +968,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should check data after update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1053,7 +1051,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should fail update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1100,7 +1098,7 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1132,7 +1130,7 @@ contract("GenesisTree", (accounts) => {
   });
   it("should check data after give planting permision to be correct 1 (checking capacity limit)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1190,7 +1188,7 @@ contract("GenesisTree", (accounts) => {
     );
   });
   it("should return false when there is no planter (planter type is not > 0)", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await planterInstance.plantingPermission.call(
       userAccount3,
@@ -1213,7 +1211,7 @@ contract("GenesisTree", (accounts) => {
   it("should return false when planter type is 1", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1248,7 +1246,7 @@ contract("GenesisTree", (accounts) => {
   it("should return false when planter type is 2", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1285,7 +1283,7 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1331,7 +1329,7 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1375,7 +1373,7 @@ contract("GenesisTree", (accounts) => {
   it("should check data after give planting permision to be correct 2", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount3, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount3, deployerAccount);
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1413,7 +1411,7 @@ contract("GenesisTree", (accounts) => {
 
   it("should fail to give planting permision", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1426,7 +1424,7 @@ contract("GenesisTree", (accounts) => {
       .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
   });
   /////// ********************************************** update organization planter payment  *************************************
 
@@ -1860,7 +1858,7 @@ contract("GenesisTree", (accounts) => {
   it("should reduce planted count and check data to be ok", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1918,7 +1916,7 @@ contract("GenesisTree", (accounts) => {
   it("should fail to reduce planted count", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1936,7 +1934,7 @@ contract("GenesisTree", (accounts) => {
       .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
     await planterInstance
       .reducePlantCount(userAccount4, { from: userAccount2 })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
@@ -1947,7 +1945,7 @@ contract("GenesisTree", (accounts) => {
   it("should planterCheck return true", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1972,7 +1970,7 @@ contract("GenesisTree", (accounts) => {
   it("should planterCheck return false", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2004,7 +2002,7 @@ contract("GenesisTree", (accounts) => {
   it("should check data to be correct when call planterCheck function", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2036,7 +2034,7 @@ contract("GenesisTree", (accounts) => {
   it("should fail planterCheck", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2052,7 +2050,7 @@ contract("GenesisTree", (accounts) => {
 
     await planterInstance
       .planterCheck(userAccount1, { from: userAccount3 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
   });
 
   ////////////////--------------------------------------------gsn------------------------------------------------

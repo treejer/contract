@@ -23,8 +23,8 @@ interface ITreeAuction {
 
     function pendingWithdraw(address _bidder) external view returns (uint256);
 
-    /** @dev set {_address to GenesisTree contract address} */
-    function setGenesisTreeAddress(address _address) external;
+    /** @dev set {_address to TreeFactory contract address} */
+    function setTreeFactoryAddress(address _address) external;
 
     /** @dev set {_address to Treasury contract address} */
     function setTreasuryAddress(address _address) external;

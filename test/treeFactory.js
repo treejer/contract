@@ -1,5 +1,5 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
-const GenesisTree = artifacts.require("GenesisTree.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const Treasury = artifacts.require("Treasury.sol");
@@ -13,7 +13,7 @@ const Common = require("./common");
 const {
   TimeEnumes,
   CommonErrorMsg,
-  GenesisTreeErrorMsg,
+  TreeFactoryErrorMsg,
   TreeAuctionErrorMsg,
   TreesuryManagerErrorMsg,
 } = require("./enumes");
@@ -26,8 +26,8 @@ const Gsn = require("@opengsn/gsn");
 const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-contract("GenesisTree", (accounts) => {
-  let genesisTreeInstance;
+contract("TreeFactory", (accounts) => {
+  let treeFactoryInstance;
   let treeTokenInstance;
 
   let arInstance;
@@ -63,7 +63,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    genesisTreeInstance = await deployProxy(GenesisTree, [arInstance.address], {
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -93,7 +93,7 @@ contract("GenesisTree", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    await genesisTreeInstance.setPlanterAddress(planterInstance.address, {
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
       from: deployerAccount,
     });
   });
@@ -102,7 +102,7 @@ contract("GenesisTree", (accounts) => {
   /////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
-    const address = genesisTreeInstance.address;
+    const address = treeFactoryInstance.address;
 
     assert.notEqual(address, 0x0);
     assert.notEqual(address, "");
@@ -113,50 +113,50 @@ contract("GenesisTree", (accounts) => {
   /////////////------------------------------------ treasury address ----------------------------------------//
 
   it("set treasury address", async () => {
-    let tx = await genesisTreeInstance.setTreasuryAddress(
+    let tx = await treeFactoryInstance.setTreasuryAddress(
       treasuryInstance.address,
       {
         from: deployerAccount,
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .setTreasuryAddress(treasuryInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
   ////////////------------------------------------ set planter address ----------------------------------------//
 
   it("set planter address", async () => {
-    let tx = await genesisTreeInstance.setPlanterAddress(
+    let tx = await treeFactoryInstance.setPlanterAddress(
       planterInstance.address,
       {
         from: deployerAccount,
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .setPlanterAddress(planterInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
   ////////////////////------------------------------------ tree token address ----------------------------------------//
   it("set tree token address", async () => {
-    let tx = await genesisTreeInstance.setTreeTokenAddress(
+    let tx = await treeFactoryInstance.setTreeTokenAddress(
       treeTokenInstance.address,
       { from: deployerAccount }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
   /////////////////------------------------------------ add tree ----------------------------------------//
 
   it("add tree succussfuly", async () => {
-    let tx = await genesisTreeInstance.addTree(1, ipfsHash, {
+    let tx = await treeFactoryInstance.addTree(1, ipfsHash, {
       from: deployerAccount,
     });
 
-    let tx2 = await genesisTreeInstance.addTree(2, ipfsHash, {
+    let tx2 = await treeFactoryInstance.addTree(2, ipfsHash, {
       from: deployerAccount,
     });
   });
@@ -164,11 +164,11 @@ contract("GenesisTree", (accounts) => {
   it("add tree successfuly and check data to insert correct", async () => {
     let treeId1 = 1;
 
-    await genesisTreeInstance.addTree(treeId1, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId1, ipfsHash, {
       from: deployerAccount,
     });
 
-    let result1 = await genesisTreeInstance.genTrees.call(treeId1);
+    let result1 = await treeFactoryInstance.treeData.call(treeId1);
 
     assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
     assert.equal(Number(result1.treeType), 0, "incorrect treeType");
@@ -182,81 +182,81 @@ contract("GenesisTree", (accounts) => {
   it("fail to add tree", async () => {
     let treeId = 1;
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .addTree(treeId, ipfsHash, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .addTree(treeId, ipfsHash, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.DUPLICATE_TREE);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
   });
 
   ////////////////////////------------------------------------ asign tree ----------------------------------------//
   it("assign tree to planter succussfuly", async () => {
     let treeId = 1;
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
   });
   it("check data to be correct after asigning tree to planter", async () => {
     let treeId = 1;
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount3,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
     //asign to planter user2
-    let asign1 = await genesisTreeInstance.assignTreeToPlanter(
+    let asign1 = await treeFactoryInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
       { from: deployerAccount }
     );
-    let result1 = await genesisTreeInstance.genTrees.call(treeId);
+    let result1 = await treeFactoryInstance.treeData.call(treeId);
     //////////////////////////////////////////////////////////////////////////
 
     assert.equal(
@@ -275,13 +275,13 @@ contract("GenesisTree", (accounts) => {
     ////////////////////////////////////////////////////
 
     //asign to planter user3
-    let asign2 = await genesisTreeInstance.assignTreeToPlanter(
+    let asign2 = await treeFactoryInstance.assignTreeToPlanter(
       treeId,
       userAccount3,
       { from: deployerAccount }
     );
 
-    let result2 = await genesisTreeInstance.genTrees.call(treeId);
+    let result2 = await treeFactoryInstance.treeData.call(treeId);
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -305,54 +305,54 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount); //add planter role but it is not join to planters
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    let tree1 = await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    let tree1 = await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId, userAccount2, {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(invalidTreeId, userAccount2, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
     ////////// try to plant tree and verify it to change staus to 2 and fail because it is planted
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.plantTree(treeId, ipfsHash, 2, 4, {
+    await treeFactoryInstance.plantTree(treeId, ipfsHash, 2, 4, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId, userAccount2, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
   });
 
   it("should fail to assign because of can't assign tree to planter", async () => {
@@ -365,29 +365,29 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     ///////////////// ------------------------- add trees
-    await genesisTreeInstance.addTree(treeId1, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId1, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId3, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId3, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId4, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId4, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId5, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId5, ipfsHash, {
       from: deployerAccount,
     });
-    ///////////////////////// -------------------- add genesis role
-    await Common.addGenesisTreeRole(
+    ///////////////////////// -------------------- add treeFactory role
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -431,11 +431,11 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId1, userAccount1, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId1, userAccount1, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId1,
       ipfsHash,
       birthDate,
@@ -443,18 +443,18 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount1 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId2, userAccount1, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
 
     ///////////////////////// test userAccount3 (orgizationPlanter) --------------
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId2, userAccount3, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
 
     await planterInstance.updateCapacity(userAccount3, 1, {
       from: deployerAccount,
@@ -464,11 +464,11 @@ contract("GenesisTree", (accounts) => {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId2,
       ipfsHash,
       birthDate,
@@ -476,12 +476,12 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId3, userAccount3, { from: deployerAccount })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER);
 
     /////////////////---------------------- assign tree to userAccount2(orgnization) (unlimited assign)
-    await genesisTreeInstance.assignTreeToPlanter(treeId3, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId3, userAccount2, {
       from: deployerAccount,
     });
 
@@ -489,7 +489,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId3,
       ipfsHash,
       birthDate,
@@ -497,26 +497,26 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount2 }
     );
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId4, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId4, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId5, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId5, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId4, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
 
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     await planterInstance.updateCapacity(userAccount3, 2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId4,
       ipfsHash,
       birthDate,
@@ -524,11 +524,11 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
   });
 
   //////////////------------------------------------ plant tree ----------------------------------------//
@@ -539,34 +539,34 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(
+    await treeFactoryInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
       { from: deployerAccount }
     );
 
-    let tx = await genesisTreeInstance.plantTree(
+    let tx = await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -586,31 +586,31 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -620,51 +620,51 @@ contract("GenesisTree", (accounts) => {
 
     const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
+    const treeFactoryResult = await treeFactoryInstance.treeData.call(treeId);
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     assert.equal(
-      genesisTreeResult.planterId,
+      treeFactoryResult.planterId,
       userAccount2,
       "invalid planter id in add tree"
     );
-    assert.equal(Number(genesisTreeResult.treeType), 0, "incorrect treeType");
+    assert.equal(Number(treeFactoryResult.treeType), 0, "incorrect treeType");
 
     assert.equal(
-      Number(genesisTreeResult.provideStatus),
+      Number(treeFactoryResult.provideStatus),
       0,
       "incorrect provide status"
     );
 
     assert.equal(
-      Number(genesisTreeResult.treeStatus),
+      Number(treeFactoryResult.treeStatus),
       3,
       "tree status is incorrect"
     ); //updated
 
     assert.equal(
-      Number(genesisTreeResult.countryCode),
+      Number(treeFactoryResult.countryCode),
       countryCode,
       "incorrect country code"
     );
 
     assert.equal(
-      Number(genesisTreeResult.plantDate),
+      Number(treeFactoryResult.plantDate),
       Number(plantDate),
       "incorrect plant date"
     );
 
     assert.equal(
-      Number(genesisTreeResult.birthDate),
+      Number(treeFactoryResult.birthDate),
       birthDate,
       "incorrect birth date"
     );
 
-    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
+    assert.equal(treeFactoryResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let updateGenResult = await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(
       updateGenResult.updateSpecs,
@@ -688,48 +688,48 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
-    await Common.joinSimplePlanterFromGenesis(
+    await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
       1,
       userAccount2,
       zeroAddress,
       zeroAddress,
-      genesisTreeInstance,
+      treeFactoryInstance,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(
+    await treeFactoryInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
       { from: deployerAccount }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(invlidTreeId, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
       );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -739,12 +739,12 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
       );
   });
 
@@ -762,9 +762,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -822,39 +822,39 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount4,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount8,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -879,9 +879,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -939,27 +939,27 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount6,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -985,9 +985,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -1050,47 +1050,47 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
-    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount7,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount8,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     ///////////////-------------- it must fail because planter status is not active
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount4,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
     //////////////------------------ accept user to organiztion
 
     await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
       from: userAccount3,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -1100,11 +1100,11 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId2, ipfsHash, birthDate, countryCode, {
         from: userAccount4,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     ////////////////------------- update capacity to 5 and now an plant
 
@@ -1112,7 +1112,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId2,
       ipfsHash,
       birthDate,
@@ -1135,9 +1135,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -1195,7 +1195,7 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
@@ -1203,28 +1203,28 @@ contract("GenesisTree", (accounts) => {
       from: userAccount3,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
     //////////////-------------- call with user5 in same orgnization but not assignee
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     /////////////-------------- accept user account5 as planter to organization 3 but it should be fail because tree asigned to userAccount4 in organization 3
 
@@ -1232,34 +1232,34 @@ contract("GenesisTree", (accounts) => {
       from: userAccount3,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     /////////////////////////////////------------ type 3 from other organization want to plant
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount7,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
     ///////////////////////////--------------------- accept user from other org and must be fail because not assignee
     await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
       from: userAccount6,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount7,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.PLANTING_PERMISSION_DENIED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
     /////////////////////----------------- plant with assignee and fail becuase not accpted by org
 
     //////////////////////// ---------------------  plant succusfully
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -1323,25 +1323,25 @@ contract("GenesisTree", (accounts) => {
       from: userAccount3,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
     //////////////////// verify type 1 by admin
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(
+    await treeFactoryInstance.assignTreeToPlanter(
       treeId,
       userAccount2,
 
       { from: deployerAccount }
     );
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -1351,7 +1351,7 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    const tx1 = await genesisTreeInstance.verifyPlant(treeId, true, {
+    const tx1 = await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
@@ -1361,15 +1361,15 @@ contract("GenesisTree", (accounts) => {
 
     //////////////////---------------- assign to type 2 anad verify by org
 
-    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId2,
       ipfsHash,
       birthDate,
@@ -1377,7 +1377,7 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    const tx2 = await genesisTreeInstance.verifyPlant(treeId2, false, {
+    const tx2 = await treeFactoryInstance.verifyPlant(treeId2, false, {
       from: userAccount4,
     });
 
@@ -1387,15 +1387,15 @@ contract("GenesisTree", (accounts) => {
 
     ///////////////////////////---------------- assign to type 3 and  verify by org
 
-    await genesisTreeInstance.addTree(treeId3, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId3, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId3, userAccount4, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId3, userAccount4, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId3,
       ipfsHash,
       birthDate,
@@ -1403,7 +1403,7 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount4 }
     );
 
-    const tx3 = await genesisTreeInstance.verifyPlant(treeId3, true, {
+    const tx3 = await treeFactoryInstance.verifyPlant(treeId3, true, {
       from: userAccount3,
     });
 
@@ -1412,15 +1412,15 @@ contract("GenesisTree", (accounts) => {
     });
 
     ///////////////////////////---------------- assign to type 3 and  verify by other planters in org
-    await genesisTreeInstance.addTree(treeId4, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId4, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId4, userAccount4, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId4, userAccount4, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId4,
       ipfsHash,
       birthDate,
@@ -1428,7 +1428,7 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount4 }
     );
 
-    const tx4 = await genesisTreeInstance.verifyPlant(treeId4, true, {
+    const tx4 = await treeFactoryInstance.verifyPlant(treeId4, true, {
       from: userAccount5,
     });
 
@@ -1453,21 +1453,21 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -1478,51 +1478,51 @@ contract("GenesisTree", (accounts) => {
     );
 
     const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-    let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
+    let treeFactoryResult = await treeFactoryInstance.treeData.call(treeId);
 
     ///////////////////////////////////////////////////////////////////////////////////
 
     assert.equal(
-      genesisTreeResult.planterId,
+      treeFactoryResult.planterId,
       userAccount2,
       "plnter id is incorrect"
     );
 
     assert.equal(
-      Number(genesisTreeResult.provideStatus),
+      Number(treeFactoryResult.provideStatus),
       0,
       "incorrect provide status"
     );
 
     assert.equal(
-      Number(genesisTreeResult.treeStatus),
+      Number(treeFactoryResult.treeStatus),
       3,
       "tree status is not ok"
     ); //updated
 
     assert.equal(
-      Number(genesisTreeResult.countryCode),
+      Number(treeFactoryResult.countryCode),
       countryCode,
       "country code set inccorectly"
     );
 
     assert.equal(
-      Number(genesisTreeResult.plantDate),
+      Number(treeFactoryResult.plantDate),
       Number(plantDate),
       "invalid plant date"
     );
 
     assert.equal(
-      Number(genesisTreeResult.birthDate),
+      Number(treeFactoryResult.birthDate),
       birthDate,
       "birthDate set inccorectly"
     );
 
-    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
+    assert.equal(treeFactoryResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     /////////////////////////////////////////////////////////////////////////////////////
 
-    let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let updateGenResult = await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(
       updateGenResult.updateSpecs,
@@ -1536,61 +1536,61 @@ contract("GenesisTree", (accounts) => {
       "invlid updateGen update status"
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, false, {
+    await treeFactoryInstance.verifyPlant(treeId, false, {
       from: deployerAccount,
     });
 
-    let genesisTreeResultAfterVerify = await genesisTreeInstance.genTrees.call(
+    let treeFactoryResultAfterVerify = await treeFactoryInstance.treeData.call(
       treeId
     );
 
     /////////////////////////////////////////////////////////////////////
 
     assert.equal(
-      genesisTreeResultAfterVerify.planterId,
+      treeFactoryResultAfterVerify.planterId,
       userAccount2,
       "plnter id is incorrect"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.provideStatus),
+      Number(treeFactoryResultAfterVerify.provideStatus),
       0,
       "incorrect provide status"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.treeStatus),
+      Number(treeFactoryResultAfterVerify.treeStatus),
       2,
       "tree status is not ok"
     ); //updated
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.countryCode),
+      Number(treeFactoryResultAfterVerify.countryCode),
       countryCode,
       "country code set inccorectly"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.plantDate),
+      Number(treeFactoryResultAfterVerify.plantDate),
       Number(plantDate),
       "invalid plant date"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.birthDate),
+      Number(treeFactoryResultAfterVerify.birthDate),
       birthDate,
       "birthDate set inccorectly"
     );
 
     assert.equal(
-      genesisTreeResultAfterVerify.treeSpecs,
+      treeFactoryResultAfterVerify.treeSpecs,
       ipfsHash,
       "incorrect ipfs hash"
     );
 
     /////////////////////////////////////////////////////////////////////
 
-    let updateGenResultAfterVerify = await genesisTreeInstance.updateGenTrees.call(
+    let updateGenResultAfterVerify = await treeFactoryInstance.updateTrees.call(
       treeId
     );
 
@@ -1624,21 +1624,21 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -1649,48 +1649,48 @@ contract("GenesisTree", (accounts) => {
     );
 
     const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-    let genesisTreeResult = await genesisTreeInstance.genTrees.call(treeId);
+    let treeFactoryResult = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
-      genesisTreeResult.planterId,
+      treeFactoryResult.planterId,
       userAccount2,
       "plnter id is incorrect"
     );
 
     assert.equal(
-      Number(genesisTreeResult.provideStatus),
+      Number(treeFactoryResult.provideStatus),
       0,
       "incorrect provide status"
     );
 
     assert.equal(
-      Number(genesisTreeResult.treeStatus),
+      Number(treeFactoryResult.treeStatus),
       3,
       "tree status is not ok"
     ); //updated
 
     assert.equal(
-      Number(genesisTreeResult.countryCode),
+      Number(treeFactoryResult.countryCode),
       countryCode,
       "country code set inccorectly"
     );
 
     assert.equal(
-      Number(genesisTreeResult.plantDate),
+      Number(treeFactoryResult.plantDate),
       Number(plantDate),
       "invalid plant date"
     );
 
     assert.equal(
-      Number(genesisTreeResult.birthDate),
+      Number(treeFactoryResult.birthDate),
       birthDate,
       "birthDate set inccorectly"
     );
 
-    assert.equal(genesisTreeResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
+    assert.equal(treeFactoryResult.treeSpecs, ipfsHash, "incorrect ipfs hash");
 
     //////////////////////////////
-    let updateGenResult = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let updateGenResult = await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(
       updateGenResult.updateSpecs,
@@ -1704,61 +1704,61 @@ contract("GenesisTree", (accounts) => {
       "invlid updateGen update status"
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
-    let genesisTreeResultAfterVerify = await genesisTreeInstance.genTrees.call(
+    let treeFactoryResultAfterVerify = await treeFactoryInstance.treeData.call(
       treeId
     );
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     assert.equal(
-      genesisTreeResultAfterVerify.planterId,
+      treeFactoryResultAfterVerify.planterId,
       userAccount2,
       "plnter id is incorrect"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.provideStatus),
+      Number(treeFactoryResultAfterVerify.provideStatus),
       0,
       "incorrect provide status"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.treeStatus),
+      Number(treeFactoryResultAfterVerify.treeStatus),
       4,
       "tree status is not ok"
     ); //updated
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.countryCode),
+      Number(treeFactoryResultAfterVerify.countryCode),
       countryCode,
       "country code set inccorectly"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.plantDate),
+      Number(treeFactoryResultAfterVerify.plantDate),
       Number(plantDate),
       "invalid plant date"
     );
 
     assert.equal(
-      Number(genesisTreeResultAfterVerify.birthDate),
+      Number(treeFactoryResultAfterVerify.birthDate),
       birthDate,
       "birthDate set inccorectly"
     );
 
     assert.equal(
-      genesisTreeResultAfterVerify.treeSpecs,
+      treeFactoryResultAfterVerify.treeSpecs,
       updateIpfsHash1,
       "incorrect ipfs hash"
     );
 
     ///////////////////////////////////////////////////////////////////////////////////
 
-    const updateGenResultAfterVerify = await genesisTreeInstance.updateGenTrees.call(
+    const updateGenResultAfterVerify = await treeFactoryInstance.updateTrees.call(
       treeId
     );
 
@@ -1801,27 +1801,27 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: deployerAccount })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
       );
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -1831,35 +1831,35 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(invalidTreeId, true, { from: deployerAccount })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
       );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
-    await genesisTreeInstance.verifyPlant(treeId, false, {
+    await treeFactoryInstance.verifyPlant(treeId, false, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, false, { from: userAccount1 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
       );
 
-    await genesisTreeInstance.addTree(treeId2, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId2, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId2,
       updateIpfsHash1,
       birthDate,
@@ -1867,14 +1867,14 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId2, true, {
+    await treeFactoryInstance.verifyPlant(treeId2, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId2, true, { from: userAccount4 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
       );
   });
 
@@ -1892,9 +1892,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -1952,11 +1952,11 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
@@ -1979,7 +1979,7 @@ contract("GenesisTree", (accounts) => {
     });
     ///////////////-------------------------- plant tree
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -1987,31 +1987,31 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount2 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount3 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount8 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
   });
@@ -2029,9 +2029,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -2097,11 +2097,11 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -2120,7 +2120,7 @@ contract("GenesisTree", (accounts) => {
     });
     ///////////////-------------------------- plant tree
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2128,29 +2128,29 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     //////////////--------------- verify successfully
 
-    await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount5 });
+    await treeFactoryInstance.verifyPlant(treeId, true, { from: userAccount5 });
   });
   it("should fail verify plant when planterType=3", async () => {
     const treeId = 1;
@@ -2166,9 +2166,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -2234,11 +2234,11 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
@@ -2256,7 +2256,7 @@ contract("GenesisTree", (accounts) => {
     });
     ///////////////-------------------------- plant tree
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2265,24 +2265,24 @@ contract("GenesisTree", (accounts) => {
     );
     //////////////////----------- try to verify:fail
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, true, { from: userAccount5 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     /////////////////------------- try to verify: success
-    await genesisTreeInstance.verifyPlant(treeId, true, { from: userAccount3 });
+    await treeFactoryInstance.verifyPlant(treeId, true, { from: userAccount3 });
   });
 
   /////////////------------------------------------ more complex test for function asign and plant ----------------------------------------//
@@ -2295,9 +2295,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -2309,15 +2309,15 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2327,22 +2327,22 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .assignTreeToPlanter(treeId, userAccount2, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE_TO_ASSIGN);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
         from: userAccount2,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
+        TreeFactoryErrorMsg.INVALID_TREE_STATUS_FOR_PLANT
       );
   });
 
@@ -2358,9 +2358,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount);
     await Common.addPlanter(arInstance, userAccount8, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -2380,15 +2380,15 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2398,15 +2398,15 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, false, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
-    await genesisTreeInstance.verifyPlant(treeId, false, {
+    await treeFactoryInstance.verifyPlant(treeId, false, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2414,15 +2414,15 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount2 }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, false, {
+    await treeFactoryInstance.verifyPlant(treeId, false, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       updateIpfsHash1,
       birthDate,
@@ -2430,13 +2430,13 @@ contract("GenesisTree", (accounts) => {
       { from: userAccount3 }
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyPlant(treeId, false, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.VERIFY_PLANT_BY_PLANTER);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
-    await genesisTreeInstance.verifyPlant(treeId, false, {
+    await treeFactoryInstance.verifyPlant(treeId, false, {
       from: deployerAccount,
     });
   });
@@ -2449,7 +2449,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2461,7 +2461,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.mul(
       Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
       2
@@ -2469,11 +2469,11 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
-    let tx = await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    let tx = await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let result = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let result = await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(
       result.updateStatus.toNumber(),
@@ -2494,7 +2494,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2508,11 +2508,11 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 2000);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
   });
   it("Should update tree do not work because update time does not reach (using update status)", async () => {
     const treeId = 1;
@@ -2520,7 +2520,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2532,7 +2532,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.subtract(
       Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
       100
@@ -2540,11 +2540,11 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
   });
 
   it("Should update tree reject (updateGen updateStaus is 1)", async () => {
@@ -2553,7 +2553,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2567,16 +2567,16 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS
+        TreeFactoryErrorMsg.UPDATE_TREE_FAIL_INVALID_UPDATE_TREE_STATUS
       );
   });
   it("should update successfully after reject update and fail update after verify update because update time does not reach", async () => {
@@ -2596,7 +2596,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("0.1");
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2608,24 +2608,24 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount1,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -2633,7 +2633,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.add(
       Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
       100
@@ -2641,27 +2641,27 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, false, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, false, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let tx2 = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx2 = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
   });
 
   it("Should be fail because invalid address try to update", async () => {
@@ -2670,7 +2670,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2684,19 +2684,19 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount3,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
+        TreeFactoryErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
       );
   });
 
   it("updateTree should be fail because tree not planted", async () => {
     let treeId = 1;
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
@@ -2710,15 +2710,15 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
   });
 
   it("should fail update after two time update and verify", async () => {
@@ -2738,7 +2738,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2750,24 +2750,24 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount1,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -2775,7 +2775,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    let tree = await genesisTreeInstance.genTrees.call(treeId);
+    let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.add(
       Math.mul(Number(tree.treeStatus), 3600),
       Math.mul(25, 3600)
@@ -2783,45 +2783,45 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
     await Common.travelTime(TimeEnumes.seconds, 86400);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, { from: userAccount2 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
     await Common.travelTime(TimeEnumes.seconds, 86300);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.UPDATE_TIME_NOT_REACH);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
     await Common.travelTime(TimeEnumes.seconds, 100);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
   });
@@ -2834,7 +2834,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2846,7 +2846,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -2856,24 +2856,24 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
+    let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
-    let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
+    let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
     let pFund = await treasuryInstance.planterFunds.call(treeId);
     let planterPaid = await treasuryInstance.plantersPaid.call(treeId);
 
@@ -2923,7 +2923,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -2935,11 +2935,11 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
@@ -2950,14 +2950,14 @@ contract("GenesisTree", (accounts) => {
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount7,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
     const pFund = await treasuryInstance.planterFunds.call(treeId);
@@ -2979,22 +2979,20 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
+    let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    const resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(
-      treeId
-    );
+    const resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
 
-    const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    const resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
 
     const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
@@ -3058,7 +3056,7 @@ contract("GenesisTree", (accounts) => {
       10000
     );
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -3070,7 +3068,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -3078,21 +3076,21 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount7,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
     const pFund = await treasuryInstance.planterFunds.call(treeId);
@@ -3117,22 +3115,20 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 31104000); //31104000 is equal to 1 year
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
+    let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    const resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(
-      treeId
-    );
+    const resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
 
-    const resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    const resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
 
     const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
@@ -3170,15 +3166,15 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 31104000); //31104000 is equal to 1 year
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    const resultAfterGT2 = await genesisTreeInstance.genTrees.call(treeId);
+    const resultAfterGT2 = await treeFactoryInstance.treeData.call(treeId);
 
     const nowAfterVerify = await Common.timeInitial(TimeEnumes.seconds, 0);
 
@@ -3229,7 +3225,7 @@ contract("GenesisTree", (accounts) => {
     );
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -3241,7 +3237,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -3249,14 +3245,14 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
     ///////////////////// fund tree without tree token owner ////////////////////////////////
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -3280,7 +3276,7 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.availability(treeId, 1, {
+    await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
@@ -3311,20 +3307,20 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    let resultBeforeUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
-    let resultBeforeGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
+    let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
 
-    let resultAfterGT = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
 
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
@@ -3360,21 +3356,21 @@ contract("GenesisTree", (accounts) => {
 
     /////////////////// verify 2 and set token owner ////////////////////////
 
-    await genesisTreeInstance.updateOwner(treeId, userAccount8, {
+    await treeFactoryInstance.updateOwner(treeId, userAccount8, {
       from: userAccount5,
     });
 
     await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    let resultAfterGT2 = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfterGT2 = await treeFactoryInstance.treeData.call(treeId);
 
     const nowAfterVerify2 = await Common.timeInitial(TimeEnumes.seconds, 0);
 
@@ -3417,7 +3413,7 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -3431,7 +3427,7 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
@@ -3439,15 +3435,15 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    let tx = await genesisTreeInstance.verifyUpdate(treeId, false, {
+    let tx = await treeFactoryInstance.verifyUpdate(treeId, false, {
       from: deployerAccount,
     });
 
-    let resultAfterUGT = await genesisTreeInstance.updateGenTrees.call(treeId);
+    let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
 
@@ -3470,9 +3466,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -3530,7 +3526,7 @@ contract("GenesisTree", (accounts) => {
       userAccount6
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -3538,19 +3534,19 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount3, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -3560,7 +3556,7 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
@@ -3583,29 +3579,29 @@ contract("GenesisTree", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 172800);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount3,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount3 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+        TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
       );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    const verifyTx = await genesisTreeInstance.verifyUpdate(treeId, true, {
+    const verifyTx = await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: userAccount4,
     });
 
@@ -3627,9 +3623,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -3700,7 +3696,7 @@ contract("GenesisTree", (accounts) => {
       from: userAccount6,
     });
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -3708,19 +3704,19 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -3730,43 +3726,43 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
     await Common.travelTime(TimeEnumes.seconds, 172800);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount4,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+        TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
       );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount5 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
     await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
       from: userAccount3,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: userAccount5,
     });
   });
@@ -3785,9 +3781,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -3862,7 +3858,7 @@ contract("GenesisTree", (accounts) => {
       from: userAccount6,
     });
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -3870,19 +3866,19 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount4, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount4, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -3892,35 +3888,35 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
     await Common.travelTime(TimeEnumes.seconds, 172800);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount4,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount7 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+        TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
       );
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: userAccount3,
     });
   });
@@ -3939,9 +3935,9 @@ contract("GenesisTree", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -4016,7 +4012,7 @@ contract("GenesisTree", (accounts) => {
       from: userAccount6,
     });
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -4024,19 +4020,19 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -4046,39 +4042,39 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyPlant(treeId, true, {
+    await treeFactoryInstance.verifyPlant(treeId, true, {
       from: deployerAccount,
     });
 
     await Common.travelTime(TimeEnumes.seconds, 172800);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount1 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount3 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount4 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount6 })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, { from: userAccount2 })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+        TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
       );
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
   });
@@ -4100,7 +4096,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4112,7 +4108,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -4120,39 +4116,39 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount7,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, true, {
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
+        TreeFactoryErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
       );
   });
 
@@ -4173,7 +4169,7 @@ contract("GenesisTree", (accounts) => {
     const fundTreeAmount = web3.utils.toWei("1");
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4185,7 +4181,7 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -4193,39 +4189,39 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       userAccount7,
       treasuryInstance,
       treeId,
       fundsPercent,
       fundTreeAmount,
       userAccount8,
-      genesisTreeInstance
+      treeFactoryInstance
     );
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
-    await genesisTreeInstance.updateTree(treeId, ipfsHash, {
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
     });
 
-    await genesisTreeInstance.verifyUpdate(treeId, false, {
+    await treeFactoryInstance.verifyUpdate(treeId, false, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, false, {
         from: deployerAccount,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
+        TreeFactoryErrorMsg.UPDATE_STATUS_MUST_BE_PENDING
       );
   });
 
@@ -4234,7 +4230,7 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
@@ -4248,17 +4244,17 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.plantTree(
+    await treeFactoryInstance.plantTree(
       treeId,
       ipfsHash,
       birthDate,
@@ -4268,7 +4264,7 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
@@ -4276,15 +4272,15 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(treeId, true, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_NOT_PLANTED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
   });
 
   it("Should be fail because function is pause", async () => {
@@ -4292,7 +4288,7 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyUpdate(1, true, {
         from: userAccount1,
       })
@@ -4306,12 +4302,12 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreasuryAddress(treasuryInstance.address, {
+    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
 
       arInstance,
       ipfsHash,
@@ -4326,17 +4322,17 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBefore = await treeFactoryInstance.treeData.call(treeId);
 
-    let lastProvideStatus = await genesisTreeInstance.availability(1, 1, {
+    let lastProvideStatus = await treeFactoryInstance.availability(1, 1, {
       from: userAccount5,
     });
 
-    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfter = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
       resultAfter.provideStatus.toNumber(),
@@ -4346,21 +4342,21 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("availability should be fail because invalid access(just auction access for this function)", async () => {
-    await genesisTreeInstance
+    await treeFactoryInstance
       .availability(1, 1, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
   });
 
   it("availability should be fail because invalid tree", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .availability(1, 1, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_TREE);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
   });
 
   it("availability should be fail because tree has owner", async () => {
@@ -4368,12 +4364,12 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4387,7 +4383,7 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -4399,7 +4395,7 @@ contract("GenesisTree", (accounts) => {
 
     let balance = await web3.eth.getBalance(userAccount1);
 
-    let resultBefore = await genesisTreeInstance.genTrees.call(treeId);
+    let resultBefore = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
       resultBefore.provideStatus.toNumber(),
@@ -4407,11 +4403,11 @@ contract("GenesisTree", (accounts) => {
       "provideStatus not true update"
     );
 
-    await genesisTreeInstance.availability(1, 3, {
+    await treeFactoryInstance.availability(1, 3, {
       from: userAccount1,
     });
 
-    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfter = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
       resultAfter.provideStatus.toNumber(),
@@ -4427,12 +4423,12 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4446,21 +4442,21 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.availability(1, 1, {
+    await treeFactoryInstance.availability(1, 1, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance.updateOwner(1, userAccount4, {
+    await treeFactoryInstance.updateOwner(1, userAccount4, {
       from: userAccount5,
     });
 
-    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfter = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
       resultAfter.provideStatus.toNumber(),
@@ -4478,16 +4474,16 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4499,11 +4495,11 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateOwner(1, userAccount4, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
   });
 
   it("updateOwner should be fail because token mint for another user", async () => {
@@ -4511,20 +4507,20 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4536,11 +4532,11 @@ contract("GenesisTree", (accounts) => {
       planterInstance
     );
 
-    await genesisTreeInstance.updateOwner(1, userAccount4, {
+    await treeFactoryInstance.updateOwner(1, userAccount4, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance.updateOwner(1, userAccount6, {
+    await treeFactoryInstance.updateOwner(1, userAccount6, {
       from: userAccount5,
     }).should.be.rejected;
   });
@@ -4552,12 +4548,12 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4571,15 +4567,15 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.availability(treeId, 1, {
+    await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance.updateAvailability(treeId, {
+    await treeFactoryInstance.updateAvailability(treeId, {
       from: userAccount5,
     });
 
-    let resultAfter = await genesisTreeInstance.genTrees.call(treeId);
+    let resultAfter = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(
       resultAfter.provideStatus.toNumber(),
@@ -4593,12 +4589,12 @@ contract("GenesisTree", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
     await Common.successPlant(
-      genesisTreeInstance,
+      treeFactoryInstance,
       arInstance,
       ipfsHash,
       treeId,
@@ -4612,15 +4608,15 @@ contract("GenesisTree", (accounts) => {
 
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
 
-    await genesisTreeInstance.availability(treeId, 1, {
+    await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .updateAvailability(treeId, {
         from: userAccount6,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
   });
 
   /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
@@ -4632,9 +4628,9 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -4648,7 +4644,7 @@ contract("GenesisTree", (accounts) => {
       zeroAddress
     );
 
-    const eventTx = await genesisTreeInstance.regularPlantTree(
+    const eventTx = await treeFactoryInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -4659,7 +4655,7 @@ contract("GenesisTree", (accounts) => {
 
     const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    let result = await genesisTreeInstance.regularTrees.call(0);
+    let result = await treeFactoryInstance.regularTrees.call(0);
 
     assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -4703,9 +4699,9 @@ contract("GenesisTree", (accounts) => {
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -4731,7 +4727,7 @@ contract("GenesisTree", (accounts) => {
       from: organizationAdmin,
     });
 
-    const eventTx = await genesisTreeInstance.regularPlantTree(
+    const eventTx = await treeFactoryInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -4742,7 +4738,7 @@ contract("GenesisTree", (accounts) => {
 
     const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    let result = await genesisTreeInstance.regularTrees.call(0);
+    let result = await treeFactoryInstance.regularTrees.call(0);
 
     assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -4786,9 +4782,9 @@ contract("GenesisTree", (accounts) => {
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -4810,7 +4806,7 @@ contract("GenesisTree", (accounts) => {
       organizationAdmin
     );
 
-    await genesisTreeInstance.regularPlantTree(
+    await treeFactoryInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -4827,19 +4823,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -4848,13 +4844,13 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let regularTree = await genesisTreeInstance.regularTrees.call(0);
+    let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
-    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, true, {
+    const eventTx = await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
-    let genTree = await genesisTreeInstance.genTrees.call(10001);
+    let genTree = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTree.birthDate),
@@ -4905,19 +4901,19 @@ contract("GenesisTree", (accounts) => {
     const planter = userAccount2;
     const organizationAddress = userAccount1;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccessOrganization(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -4927,13 +4923,13 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let regularTree = await genesisTreeInstance.regularTrees.call(0);
+    let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
-    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, true, {
+    const eventTx = await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: organizationAddress,
     });
 
-    let genTree = await genesisTreeInstance.genTrees.call(10001);
+    let genTree = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTree.birthDate),
@@ -4984,19 +4980,19 @@ contract("GenesisTree", (accounts) => {
     const planter = userAccount2;
     const organizationAddress = userAccount1;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccessOrganization(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5006,11 +5002,11 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    const eventTx = await genesisTreeInstance.verifyRegularPlant(0, false, {
+    const eventTx = await treeFactoryInstance.verifyRegularPlant(0, false, {
       from: organizationAddress,
     });
 
-    let genTree = await genesisTreeInstance.genTrees.call(10001);
+    let genTree = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(genTree.treeSpecs, "", "treeSpecs not true update");
 
@@ -5030,19 +5026,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5051,10 +5047,10 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let regularTree = await genesisTreeInstance.regularTrees.call(0);
+    let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
     // tree mint for userAccount4
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5063,11 +5059,11 @@ contract("GenesisTree", (accounts) => {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
-    let genTree = await genesisTreeInstance.genTrees.call(10001);
+    let genTree = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTree.birthDate),
@@ -5113,19 +5109,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5134,14 +5130,14 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let regularTree = await genesisTreeInstance.regularTrees.call(0);
+    let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyRegularPlant(0, true, {
         from: planter,
       })
       .should.be.rejectedWith(
-        GenesisTreeErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
+        TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
       );
   });
 
@@ -5150,19 +5146,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5171,11 +5167,11 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyRegularPlant(1, true, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.REGULAR_TREE_NOT_EXIST);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.REGULAR_TREE_NOT_EXIST);
   });
 
   it("verifyRegularPlant should be reject(Other planter can't verify update)", async () => {
@@ -5183,19 +5179,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5204,13 +5200,13 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let regularTree = await genesisTreeInstance.regularTrees.call(0);
+    let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .verifyRegularPlant(0, true, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.INVALID_ACCESS_TO_VERIFY);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
   });
 
   it("Check lastRegularPlantedTree count", async () => {
@@ -5223,26 +5219,26 @@ contract("GenesisTree", (accounts) => {
 
     const treeId = 10001;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setGenesisTreeAddress(
-      genesisTreeInstance.address,
+    await treeAuctionInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
       {
         from: deployerAccount,
       }
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5251,7 +5247,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(10001, ipfsHash, {
+    await treeFactoryInstance.addTree(10001, ipfsHash, {
       from: deployerAccount,
     });
 
@@ -5292,16 +5288,16 @@ contract("GenesisTree", (accounts) => {
       { from: deployerAccount }
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
-    let result1 = await genesisTreeInstance.lastRegularPlantedTree();
+    let result1 = await treeFactoryInstance.lastRegularPlantedTree();
 
     assert.equal(result1, 10002, "1-lastRegularPlantedTree not true");
 
     for (let i = 10003; i < 10006; i++) {
-      await genesisTreeInstance.addTree(i, ipfsHash, {
+      await treeFactoryInstance.addTree(i, ipfsHash, {
         from: deployerAccount,
       });
 
@@ -5315,7 +5311,7 @@ contract("GenesisTree", (accounts) => {
       );
     }
 
-    await genesisTreeInstance.regularPlantTree(
+    await treeFactoryInstance.regularPlantTree(
       ipfsHash,
       birthDate,
       countryCode,
@@ -5324,11 +5320,11 @@ contract("GenesisTree", (accounts) => {
       }
     );
 
-    await genesisTreeInstance.verifyRegularPlant(1, true, {
+    await treeFactoryInstance.verifyRegularPlant(1, true, {
       from: deployerAccount,
     });
 
-    let result2 = await genesisTreeInstance.lastRegularPlantedTree();
+    let result2 = await treeFactoryInstance.lastRegularPlantedTree();
 
     assert.equal(result2, 10006, "2-lastRegularPlantedTree not true");
   });
@@ -5340,13 +5336,13 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -5356,7 +5352,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.mintRegularTrees(15000, userAccount4, {
+    await treeFactoryInstance.mintRegularTrees(15000, userAccount4, {
       from: deployerAccount,
     });
 
@@ -5370,19 +5366,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5391,7 +5387,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
@@ -5401,7 +5397,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let genTreeBefore = await genesisTreeInstance.genTrees.call(10001);
+    let genTreeBefore = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTreeBefore.treeStatus),
@@ -5415,7 +5411,7 @@ contract("GenesisTree", (accounts) => {
       "provideStatusBefore not true update"
     );
 
-    await genesisTreeInstance.mintRegularTrees(10000, userAccount4, {
+    await treeFactoryInstance.mintRegularTrees(10000, userAccount4, {
       from: deployerAccount,
     });
 
@@ -5423,7 +5419,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(addressGetToken, userAccount4, "address not true");
 
-    let genTreeAfter = await genesisTreeInstance.genTrees.call(10001);
+    let genTreeAfter = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTreeAfter.treeStatus),
@@ -5443,19 +5439,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5464,7 +5460,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
@@ -5474,7 +5470,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.mintRegularTrees(10000, userAccount4, {
+    await treeFactoryInstance.mintRegularTrees(10000, userAccount4, {
       from: deployerAccount,
     });
 
@@ -5482,7 +5478,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(addressGetToken, userAccount4, "address not true");
 
-    await genesisTreeInstance.mintRegularTrees(10000, userAccount5, {
+    await treeFactoryInstance.mintRegularTrees(10000, userAccount5, {
       from: deployerAccount,
     });
 
@@ -5490,7 +5486,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(addressGetToken2, userAccount5, "2-address not true");
 
-    let genTreeBefore = await genesisTreeInstance.genTrees.call(10002);
+    let genTreeBefore = await treeFactoryInstance.treeData.call(10002);
 
     assert.equal(
       Number(genTreeBefore.treeStatus),
@@ -5504,7 +5500,7 @@ contract("GenesisTree", (accounts) => {
       "provideStatusBefore not true update"
     );
 
-    await genesisTreeInstance.mintRegularTrees(10002, userAccount6, {
+    await treeFactoryInstance.mintRegularTrees(10002, userAccount6, {
       from: deployerAccount,
     });
 
@@ -5518,19 +5514,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5539,11 +5535,11 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .mintRegularTrees(9999, userAccount4, {
         from: deployerAccount,
       })
@@ -5557,19 +5553,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5578,7 +5574,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
@@ -5588,7 +5584,7 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    let genTreeBefore = await genesisTreeInstance.genTrees.call(10001);
+    let genTreeBefore = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTreeBefore.treeStatus),
@@ -5602,7 +5598,7 @@ contract("GenesisTree", (accounts) => {
       "provideStatusBefore not true update"
     );
 
-    await genesisTreeInstance.requestRegularTree(10001, userAccount5, {
+    await treeFactoryInstance.requestRegularTree(10001, userAccount5, {
       from: deployerAccount,
     });
 
@@ -5610,7 +5606,7 @@ contract("GenesisTree", (accounts) => {
 
     assert.equal(addressGetToken2, userAccount5, "address not true");
 
-    let genTreeAfter = await genesisTreeInstance.genTrees.call(10001);
+    let genTreeAfter = await treeFactoryInstance.treeData.call(10001);
 
     assert.equal(
       Number(genTreeAfter.treeStatus),
@@ -5630,19 +5626,19 @@ contract("GenesisTree", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
     await Common.regularPlantTreeSuccess(
       arInstance,
-      genesisTreeInstance,
+      treeFactoryInstance,
       planterInstance,
       ipfsHash,
       birthDate,
@@ -5651,11 +5647,11 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance.verifyRegularPlant(0, true, {
+    await treeFactoryInstance.verifyRegularPlant(0, true, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .requestRegularTree(10000, userAccount5, {
         from: deployerAccount,
       })
@@ -5663,13 +5659,13 @@ contract("GenesisTree", (accounts) => {
   });
 
   it("requestRegularTree should be fail(tree must be planted)", async () => {
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
@@ -5679,11 +5675,11 @@ contract("GenesisTree", (accounts) => {
       deployerAccount
     );
 
-    await genesisTreeInstance
+    await treeFactoryInstance
       .requestRegularTree(10000, userAccount5, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_MUST_BE_PLANTED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_MUST_BE_PLANTED);
   });
 
   /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
@@ -5699,13 +5695,13 @@ contract("GenesisTree", (accounts) => {
       paymasterAddress,
     } = env.contractsDeployment;
 
-    await genesisTreeInstance.setTrustedForwarder(forwarderAddress, {
+    await treeFactoryInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,
     });
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(genesisTreeInstance.address, {
+    await paymaster.setWhitelistTarget(treeFactoryInstance.address, {
       from: deployerAccount,
     });
 
@@ -5738,14 +5734,14 @@ contract("GenesisTree", (accounts) => {
     let signerAmbassador = provider.getSigner(2);
 
     let contractPlanter = await new ethers.Contract(
-      genesisTreeInstance.address,
-      genesisTreeInstance.abi,
+      treeFactoryInstance.address,
+      treeFactoryInstance.abi,
       signerPlanter
     );
 
     let contractAmbassador = await new ethers.Contract(
-      genesisTreeInstance.address,
-      genesisTreeInstance.abi,
+      treeFactoryInstance.address,
+      treeFactoryInstance.abi,
       signerAmbassador
     );
 
@@ -5775,17 +5771,17 @@ contract("GenesisTree", (accounts) => {
       from: userAccount1,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
 
-    await genesisTreeInstance.addTree(treeId, ipfsHash, {
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await genesisTreeInstance.assignTreeToPlanter(treeId, userAccount2, {
+    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
       from: deployerAccount,
     });
 

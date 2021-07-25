@@ -5,13 +5,13 @@ pragma solidity ^0.6.9;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-import "../genesisTree/IGenesisTree.sol";
+import "../tree/ITreeFactory.sol";
 
 contract TreeAttribute is Initializable {
     using SafeCastUpgradeable for uint256;
     bool public isTreeAttribute;
     IAccessRestriction public accessRestriction;
-    IGenesisTree public genesisTree;
+    ITreeFactory public treeFactory;
     //parameters of randomTreeGeneration
     struct Attributes {
         uint32 treeType;
@@ -44,10 +44,10 @@ contract TreeAttribute is Initializable {
         _;
     }
 
-    function setGenesisTreeAddress(address _address) external onlyAdmin {
-        IGenesisTree candidateContract = IGenesisTree(_address);
-        require(candidateContract.isGenesisTree());
-        genesisTree = candidateContract;
+    function setTreeFactoryAddress(address _address) external onlyAdmin {
+        ITreeFactory candidateContract = ITreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
     }
 
     function initialize(address _accessRestrictionAddress) public initializer {
@@ -161,7 +161,12 @@ contract TreeAttribute is Initializable {
             treeAttributes[treeId].exists == 0,
             "tree already has attributes"
         );
-        //require(genesisTree.checkMintStatus(treeId);,"no need to tree attributes");
+
+        require(
+            treeFactory.checkMintStatus(treeId),
+            "no need to tree attributes"
+        );
+
         bool flag = true;
         for (uint256 j = 0; j < 10000; j++) {
             uint256 rand = uint256(

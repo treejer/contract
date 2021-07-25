@@ -10,7 +10,7 @@ const DEFAULT_ADMIN_ROLE =
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
-const GENESIS_TREE_ROLE = web3.utils.soliditySha3("GENESIS_TREE_ROLE");
+const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
 
 const Math = require("./math");
@@ -31,8 +31,8 @@ Common.addAuctionRole = async (instance, address, adminAccount) => {
   await instance.grantRole(AUCTION_ROLE, address, { from: adminAccount });
 };
 
-Common.addGenesisTreeRole = async (instance, address, adminAccount) => {
-  await instance.grantRole(GENESIS_TREE_ROLE, address, { from: adminAccount });
+Common.addTreeFactoryRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(TREE_FACTORY_ROLE, address, { from: adminAccount });
 };
 
 Common.addRegularSellRole = async (instance, address, adminAccount) => {
@@ -52,7 +52,7 @@ Common.getNow = async () => {
 };
 
 Common.successPlant = async (
-  genesisTreeInstance,
+  treeFactoryInstance,
   arInstance,
   ipfsHash,
   treeId,
@@ -63,9 +63,9 @@ Common.successPlant = async (
   deployerAccount,
   planterInstance
 ) => {
-  await Common.addGenesisTreeRole(
+  await Common.addTreeFactoryRole(
     arInstance,
-    genesisTreeInstance.address,
+    treeFactoryInstance.address,
     deployerAccount
   );
 
@@ -83,15 +83,15 @@ Common.successPlant = async (
     );
   });
 
-  await genesisTreeInstance.addTree(treeId, ipfsHash, {
+  await treeFactoryInstance.addTree(treeId, ipfsHash, {
     from: deployerAccount,
   });
 
-  await genesisTreeInstance.assignTreeToPlanter(treeId, planterAddress, {
+  await treeFactoryInstance.assignTreeToPlanter(treeId, planterAddress, {
     from: deployerAccount,
   });
 
-  await genesisTreeInstance.plantTree(
+  await treeFactoryInstance.plantTree(
     treeId,
     ipfsHash,
     birthDate,
@@ -100,7 +100,7 @@ Common.successPlant = async (
       from: planterAddress,
     }
   );
-  await genesisTreeInstance.verifyPlant(treeId, true, {
+  await treeFactoryInstance.verifyPlant(treeId, true, {
     from: deployerAccount,
   });
 };
@@ -148,13 +148,13 @@ Common.joinOrganizationPlanter = async (
   );
   return tx;
 };
-Common.joinSimplePlanterFromGenesis = async (
+Common.joinSimplePlanterFromTreeFactory = async (
   planterInstance,
   planterType,
   planterAddress,
   refferedBy,
   organizationAddress,
-  genesisTreeInstance,
+  treeFactoryInstance,
   adminAccount
 ) => {
   let longitude = 1;
@@ -241,18 +241,18 @@ Common.successOrganizationPlanterJoin = async (
 Common.successFundTree = async (
   arInstance,
   deployerAccount,
-  genesisTreeAddress,
+  treeFactoryAddress,
   auctionAddress,
   treasuryInstance,
   treeId,
   fundsPercent,
   fundAmount,
   tokenOwner,
-  genesisTreeInstance
+  treeFactoryInstance
 ) => {
-  await Common.addGenesisTreeRole(
+  await Common.addTreeFactoryRole(
     arInstance,
-    genesisTreeAddress,
+    treeFactoryAddress,
     deployerAccount
   );
 
@@ -275,17 +275,17 @@ Common.successFundTree = async (
 
   await Common.addAuctionRole(arInstance, auctionAddress, deployerAccount);
 
-  await Common.addGenesisTreeRole(
+  await Common.addTreeFactoryRole(
     arInstance,
-    genesisTreeAddress,
+    treeFactoryAddress,
     deployerAccount
   );
 
-  await genesisTreeInstance.availability(treeId, 1, {
+  await treeFactoryInstance.availability(treeId, 1, {
     from: auctionAddress,
   });
 
-  await genesisTreeInstance.updateOwner(treeId, tokenOwner, {
+  await treeFactoryInstance.updateOwner(treeId, tokenOwner, {
     from: auctionAddress,
   });
 
@@ -316,7 +316,7 @@ Common.acceptPlanterByOrganization = async (
 
 Common.regularPlantTreeSuccess = async (
   arInstance,
-  genesisTreeInstance,
+  treeFactoryInstance,
   planterInstance,
   ipfsHash,
   birthDate,
@@ -334,14 +334,14 @@ Common.regularPlantTreeSuccess = async (
     zeroAddress
   );
 
-  await genesisTreeInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };
 
 Common.regularPlantTreeSuccessOrganization = async (
   arInstance,
-  genesisTreeInstance,
+  treeFactoryInstance,
   planterInstance,
   ipfsHash,
   birthDate,
@@ -369,7 +369,7 @@ Common.regularPlantTreeSuccessOrganization = async (
     from: organizationAdmin,
   });
 
-  await genesisTreeInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };

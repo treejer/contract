@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-import "../genesisTree/IGenesisTree.sol";
+import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
 
 /** @title Tree Auction */
@@ -25,7 +25,7 @@ contract TreeAuction is Initializable {
     bool public isTreeAuction;
 
     IAccessRestriction public accessRestriction;
-    IGenesisTree public genesisTree;
+    ITreeFactory public treeFactory;
     ITreasury public treasury;
 
     struct Auction {
@@ -87,14 +87,14 @@ contract TreeAuction is Initializable {
     }
 
     /**
-     * @dev admin set GenesisTreeAddress
-     * @param _address set to the address of genesisTree
+     * @dev admin set TreeFactoryAddress
+     * @param _address set to the address of treeFactory
      */
 
-    function setGenesisTreeAddress(address _address) external onlyAdmin {
-        IGenesisTree candidateContract = IGenesisTree(_address);
-        require(candidateContract.isGenesisTree());
-        genesisTree = candidateContract;
+    function setTreeFactoryAddress(address _address) external onlyAdmin {
+        ITreeFactory candidateContract = ITreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
     }
 
     /**
@@ -131,7 +131,7 @@ contract TreeAuction is Initializable {
             "equivalant fund Model not exists"
         );
 
-        uint32 provideStatus = genesisTree.availability(_treeId, 1);
+        uint32 provideStatus = treeFactory.availability(_treeId, 1);
 
         require(provideStatus == 0, "not available for auction");
 
@@ -211,7 +211,7 @@ contract TreeAuction is Initializable {
         require(now >= auction.endDate, "Auction not yet ended");
 
         if (auction.bidder != address(0)) {
-            genesisTree.updateOwner(auction.treeId, auction.bidder);
+            treeFactory.updateOwner(auction.treeId, auction.bidder);
 
             treasury.fundTree{value: auction.highestBid}(auction.treeId);
 
@@ -222,7 +222,7 @@ contract TreeAuction is Initializable {
                 auction.highestBid
             );
         } else {
-            genesisTree.updateAvailability(auction.treeId);
+            treeFactory.updateAvailability(auction.treeId);
             emit AuctionEnded(_auctionId, auction.treeId);
         }
 

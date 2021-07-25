@@ -67,8 +67,8 @@ contract Planter is Initializable, RelayRecipient {
         );
         _;
     }
-    modifier onlyGenesisTree() {
-        accessRestriction.ifGenesisTree(_msgSender());
+    modifier onlyTreeFactory() {
+        accessRestriction.ifTreeFactory(_msgSender());
         _;
     }
 
@@ -263,7 +263,7 @@ contract Planter is Initializable, RelayRecipient {
         address _planterAddress,
         address _assignedPlanterAddress
     ) external returns (bool) {
-        accessRestriction.ifGenesisTree(_msgSender());
+        accessRestriction.ifTreeFactory(_msgSender());
 
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (tempPlanter.planterType > 0) {
@@ -349,7 +349,7 @@ contract Planter is Initializable, RelayRecipient {
     function reducePlantCount(address _planterAddress)
         external
         existPlanter(_planterAddress)
-        onlyGenesisTree
+        onlyTreeFactory
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
 
@@ -363,7 +363,7 @@ contract Planter is Initializable, RelayRecipient {
     function planterCheck(address _planterAddress)
         external
         existPlanter(_planterAddress)
-        onlyGenesisTree
+        onlyTreeFactory
         returns (bool)
     {
         PlanterData storage tempPlanter = planters[_planterAddress];

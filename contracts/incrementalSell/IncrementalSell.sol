@@ -3,12 +3,12 @@ pragma solidity ^0.6.9;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
-import "../genesisTree/IGenesisTree.sol";
+import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
 
 contract IncrementalSell is Initializable {
     IAccessRestriction public accessRestriction;
-    IGenesisTree public genesisTree;
+    ITreeFactory public treeFactory;
     ITreasury public treasury;
     bool public isIncrementalSell;
 
@@ -45,10 +45,10 @@ contract IncrementalSell is Initializable {
         accessRestriction = candidateContract;
     }
 
-    function setGenesisTreeAddress(address _address) external onlyAdmin {
-        IGenesisTree candidateContract = IGenesisTree(_address);
-        require(candidateContract.isGenesisTree());
-        genesisTree = candidateContract;
+    function setTreeFactoryAddress(address _address) external onlyAdmin {
+        ITreeFactory candidateContract = ITreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
     }
 
     function setTreasuryAddress(address _address) external onlyAdmin {
@@ -72,13 +72,13 @@ contract IncrementalSell is Initializable {
             "equivalant fund Model not exists"
         );
         if (incrementalPrice.increaseStep > 0) {
-            genesisTree.bulkRevert(
+            treeFactory.bulkRevert(
                 incrementalPrice.startTree,
                 incrementalPrice.endTree
             );
         }
 
-        bool success = genesisTree.bulkAvailability(
+        bool success = treeFactory.bulkAvailability(
             startTree,
             startTree + treeCount
         );
@@ -119,7 +119,7 @@ contract IncrementalSell is Initializable {
         }
 
         treasury.fundTree{value: amount}(treeId);
-        genesisTree.updateOwnerIncremental(treeId, buyer);
+        treeFactory.updateOwnerIncremental(treeId, buyer);
 
         emit IncrementalTreeSold(treeId, buyer, amount);
     }

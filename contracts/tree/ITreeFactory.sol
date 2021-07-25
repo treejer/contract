@@ -2,12 +2,12 @@
 
 pragma solidity ^0.6.9;
 
-interface IGenesisTree {
-    function isGenesisTree() external view returns (bool);
+interface ITreeFactory {
+    function isTreeFactory() external view returns (bool);
 
     function lastRegularPlantedTree() external view returns (uint256);
 
-    function genTrees(uint256 _treeId)
+    function treeData(uint256 _treeId)
         external
         view
         returns (
@@ -19,13 +19,13 @@ interface IGenesisTree {
             uint64,
             uint64,
             uint64,
-            string
+            string memory
         );
 
-    function updateGenTrees(uint256 _treeId)
+    function updateTrees(uint256 _treeId)
         external
         view
-        returns (string, uint64);
+        returns (string memory, uint64);
 
     function regularTrees(uint256 _regularTreeId)
         external
@@ -36,7 +36,7 @@ interface IGenesisTree {
             uint64,
             uint64,
             address,
-            string
+            string memory
         );
 
     function setTreasuryAddress(address _address) external;
@@ -106,10 +106,10 @@ interface IGenesisTree {
 
     /**
      * @dev In this function, the admin approves or rejects the pending trees
-     * After calling this function, if the tree is approved the tree information will be transferred to the {genTrees}
+     * After calling this function, if the tree is approved the tree information will be transferred to the {treeData}
      *
      * @param _regularTreeId _regularTreeId
-     * @param isVerified Tree approved or not
+     * @param _isVerified Tree approved or not
      */
     function verifyRegularPlant(uint256 _regularTreeId, bool _isVerified)
         external;
@@ -118,7 +118,7 @@ interface IGenesisTree {
      * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
      * This function is called only by the regularSell contract
      *
-     * @param lastSold The last tree sold in the regular
+     * @param _lastSold The last tree sold in the regular
      * @param _owner Owner of a new tree sold in Regular
      *
      *

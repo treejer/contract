@@ -5,7 +5,7 @@ const Units = require("ethereumjs-units");
 var AccessRestriction = artifacts.require("AccessRestriction.sol");
 var Tree = artifacts.require("Tree.sol");
 var TreeAuction = artifacts.require("TreeAuction.sol");
-var GenesisTree = artifacts.require("GenesisTree.sol");
+var TreeFactory = artifacts.require("TreeFactory.sol");
 var Treasury = artifacts.require("Treasury.sol");
 var Planter = artifacts.require("Planter.sol");
 var RegularSell = artifacts.require("RegularSell.sol");
@@ -23,7 +23,7 @@ module.exports = async function (deployer, network, accounts) {
   let accessRestrictionAddress;
   let treeAddress;
   let treeAuctionAddress;
-  let genesisTreeAddress;
+  let treeFactoryAddress;
   let treasuryAddress;
   let planterAddress;
   let regularSellAddress;
@@ -99,15 +99,15 @@ module.exports = async function (deployer, network, accounts) {
     IncrementalSell.deployed().then(async (instance) => {});
   });
 
-  console.log("Deploying GenesisTree...");
-  await deployProxy(GenesisTree, [accessRestrictionAddress], {
+  console.log("Deploying TreeFactory...");
+  await deployProxy(TreeFactory, [accessRestrictionAddress], {
     deployer,
     initializer: "initialize",
     unsafeAllowCustomTypes: true,
   }).then(() => {
-    genesisTreeAddress = GenesisTree.address;
+    treeFactoryAddress = TreeFactory.address;
 
-    GenesisTree.deployed().then(async (instance) => {
+    TreeFactory.deployed().then(async (instance) => {
       await instance.setTrustedForwarder(trustedForwarder);
     });
   });
@@ -181,7 +181,7 @@ module.exports = async function (deployer, network, accounts) {
   console.log(`CONTRACT_AR_ADDRESS=${accessRestrictionAddress}
 CONTRACT_TREE_ADDRESS=${treeAddress}
 CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
-CONTRACT_GENESIS_TREE_ADDRESS=${genesisTreeAddress}
+CONTRACT_TREE_FACTORY_ADDRESS=${treeFactoryAddress}
 CONTRACT_TREASURY_ADDRESS=${treasuryAddress}
 CONTRACT_PLANTER_ADDRESS=${planterAddress}
 CONTRACT_REGULAR_SELL_ADDRESS=${regularSellAddress}

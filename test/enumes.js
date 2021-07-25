@@ -11,7 +11,7 @@ const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
   CHECK_AUCTION: "Caller is not Auction",
-  CHECK_GENESIS_TREE: "Caller is not GenesisTree",
+  CHECK_TREE_FACTORY: "Caller is not TreeFactory",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_REGULAR_SELL: "Caller is not RegularSell",
   INVALID_ADDRESS: "invalid address",
@@ -28,7 +28,7 @@ const TreeAuctionErrorMsg = {
   AUCTION_IS_UNAVAILABLE: "Auction is unavailable",
 };
 
-const GenesisTreeErrorMsg = {
+const TreeFactoryErrorMsg = {
   PLANT_TREE_ACCESS_NO_PLANTER: "planter in gb can plant tree",
   INVALID_ACCESS_TO_VERIFY: "invalid access to verify",
   VERIFY_PLANT_ACCESS: "invalid access to verify",
@@ -43,8 +43,7 @@ const GenesisTreeErrorMsg = {
   CANT_ASSIGN_TREE_TO_PLANTER: "can't assign tree to planter",
   INVALID_TREE: "invalid tree",
   UPDATE_TIME_NOT_REACH: "Update time not reach",
-  UPDATE_TREE_FAIL_INVALID_GENESIS_TREE_STATUS:
-    "update genesis tree status is pending",
+  UPDATE_TREE_FAIL_INVALID_UPDATE_TREE_STATUS: "update tree status is pending",
   ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE: "Only Planter of tree can send update",
   TREE_NOT_PLANTED: "Tree not planted",
   ADMIN_ABBASSADOR_PLANTER: "Admin or ambassador or planter can accept updates",
@@ -102,7 +101,7 @@ module.exports = {
   TimeEnumes,
   CommonErrorMsg,
   TreeAuctionErrorMsg,
-  GenesisTreeErrorMsg,
+  TreeFactoryErrorMsg,
   TreeAuctionErrorMsg,
   TreesuryManagerErrorMsg,
   PlanterErrorMsg,

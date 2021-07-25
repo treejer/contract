@@ -140,7 +140,7 @@ interface ITreasury {
 
     /**
      * @dev  based on the treeStatus planter charged in every tree update verifying
-     * NOTE must call by GenesisTree
+     * NOTE must call by TreeFactory
      */
     function fundPlanter(
         uint256 _treeId,

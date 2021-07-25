@@ -1723,7 +1723,7 @@ contract("Treasury", (accounts) => {
 
   //----------------------- fund planter test ---------------------------------------//
   it("fund planter successfully", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
 
     await TreasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -1780,7 +1780,7 @@ contract("Treasury", (accounts) => {
   });
 
   it("fund planter successfully with organazationAddress", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
 
     await TreasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -1852,7 +1852,7 @@ contract("Treasury", (accounts) => {
   });
 
   it("check fund planter data to be ok1", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
     const treeId = 1;
     const amount = web3.utils.toWei("1");
     const planterFund = 5000;
@@ -2216,7 +2216,7 @@ contract("Treasury", (accounts) => {
   });
 
   it("check fund planter data to be ok1 with organizationAddress", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
 
     const treeId = 1;
     const amount = web3.utils.toWei("1");
@@ -2882,7 +2882,7 @@ contract("Treasury", (accounts) => {
   });
 
   it("check fund planter data to be ok1", async () => {
-    await Common.addGenesisTreeRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
 
     const treeId = 1;
     const treeId2 = 2;
@@ -3026,7 +3026,7 @@ contract("Treasury", (accounts) => {
 
   it("should fail fund planter", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     const treeId = 1;
     const treeId2 = 2;
     const amount = web3.utils.toWei("1");
@@ -3087,7 +3087,7 @@ contract("Treasury", (accounts) => {
       {
         from: userAccount1,
       }
-    ).should.be.rejectedWith(CommonErrorMsg.CHECK_GENESIS_TREE);
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
 
     await TreasuryInstance.fundPlanter(treeId2, userAccount2, treeStatus, {
       from: userAccount2,
@@ -3098,7 +3098,7 @@ contract("Treasury", (accounts) => {
 
   it("should withdraw planter succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -3192,7 +3192,7 @@ contract("Treasury", (accounts) => {
 
   it("should withdraw planter and organizationPlanter succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -3320,7 +3320,7 @@ contract("Treasury", (accounts) => {
 
   it("check planter withdraw balance to be correct", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -3561,7 +3561,7 @@ contract("Treasury", (accounts) => {
 
   it("check planter and organization withdraw balance to be correct", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -3930,7 +3930,7 @@ contract("Treasury", (accounts) => {
 
   it("organizationPlanter plant tree and withdraw successfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -4240,7 +4240,7 @@ contract("Treasury", (accounts) => {
 
   it("should fail withdraw planter", async () => {
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
 
@@ -4316,7 +4316,7 @@ contract("Treasury", (accounts) => {
   //------------------------------------------withdraw tree research balance -------------------------------------/
   it("should withdraw tree research succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreeResearchAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -4360,7 +4360,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw tree research data to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreeResearchAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -4515,7 +4515,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail tree research withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreeResearchAddress(zeroAddress, {
       from: deployerAccount,
     });
@@ -4610,7 +4610,7 @@ contract("Treasury", (accounts) => {
 
   it("should withdraw local develop succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setLocalDevelopAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -4654,7 +4654,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw local develop data to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setLocalDevelopAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -4804,7 +4804,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail local develop withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setLocalDevelopAddress(zeroAddress, {
       from: deployerAccount,
     });
@@ -4902,7 +4902,7 @@ contract("Treasury", (accounts) => {
   // *****************************************withdraw rescue balance **************************************
   it("should withdraw rescue succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setRescueFundAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -4946,7 +4946,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw rescue fund data to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setRescueFundAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -5096,7 +5096,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail rescue fund withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setRescueFundAddress(zeroAddress, {
       from: deployerAccount,
     });
@@ -5194,7 +5194,7 @@ contract("Treasury", (accounts) => {
   // *****************************************withdraw treejer develop balance **************************************
   it("should withdraw treejer develop succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreejerDevelopAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -5238,7 +5238,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw treejer develop data to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreejerDevelopAddress(userAccount3, {
       from: deployerAccount,
     });
@@ -5397,7 +5397,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail treejer develop withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setTreejerDevelopAddress(zeroAddress, {
       from: deployerAccount,
     });
@@ -5495,7 +5495,7 @@ contract("Treasury", (accounts) => {
   // *****************************************withdraw other fund1 balance **************************************
   it("should withdraw other fund1 succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund1Address(userAccount3, {
       from: deployerAccount,
     });
@@ -5539,7 +5539,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw treejer other fund 1 to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund1Address(userAccount3, {
       from: deployerAccount,
     });
@@ -5689,7 +5689,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail other fund 1 withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund1Address(zeroAddress, {
       from: deployerAccount,
     });
@@ -5787,7 +5787,7 @@ contract("Treasury", (accounts) => {
   // *****************************************withdraw other fund2 balance **************************************
   it("should withdraw other fund2 succussfully", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund2Address(userAccount3, {
       from: deployerAccount,
     });
@@ -5831,7 +5831,7 @@ contract("Treasury", (accounts) => {
   });
   it("check withdraw treejer other fund 1 to be ok", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund2Address(userAccount3, {
       from: deployerAccount,
     });
@@ -5981,7 +5981,7 @@ contract("Treasury", (accounts) => {
   });
   it("should fail other fund2 withdraw", async () => {
     await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await TreasuryInstance.setReserveFund2Address(zeroAddress, {
       from: deployerAccount,
     });
@@ -6151,7 +6151,7 @@ contract("Treasury", (accounts) => {
     });
 
     await Common.addAuctionRole(arInstance, userAccount8, deployerAccount);
-    await Common.addGenesisTreeRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
 

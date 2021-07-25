@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
-    bytes32 public constant GENESIS_TREE_ROLE = keccak256("GENESIS_TREE_ROLE");
+    bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
     bytes32 public constant REGULAR_SELL_ROLE = keccak256("REGULAR_SELL_ROLE");
 
@@ -101,12 +101,12 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         return hasRole(INCREMENTAL_SELL_ROLE, _address);
     }
 
-    function ifGenesisTree(address _address) public view {
-        require(isGenesisTree(_address), "Caller is not GenesisTree");
+    function ifTreeFactory(address _address) public view {
+        require(isTreeFactory(_address), "Caller is not TreeFactory");
     }
 
-    function isGenesisTree(address _address) public view returns (bool) {
-        return hasRole(GENESIS_TREE_ROLE, _address);
+    function isTreeFactory(address _address) public view returns (bool) {
+        return hasRole(TREE_FACTORY_ROLE, _address);
     }
 
     function ifTreasury(address _address) public view {

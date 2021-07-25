@@ -1,6 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const RegularSell = artifacts.require("RegularSell.sol");
-const GenesisTree = artifacts.require("GenesisTree.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const Treasury = artifacts.require("Treasury.sol");
@@ -15,7 +15,7 @@ const Math = require("./math");
 const {
   TimeEnumes,
   CommonErrorMsg,
-  GenesisTreeErrorMsg,
+  TreeFactoryErrorMsg,
   RegularSellErrors,
   TreesuryManagerErrorMsg,
 } = require("./enumes");
@@ -66,7 +66,7 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    treeFactoryInstance = await deployProxy(GenesisTree, [arInstance.address], {
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -222,7 +222,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -359,7 +359,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -511,7 +511,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -779,7 +779,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -853,7 +853,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -941,7 +941,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1064,7 +1064,7 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1138,7 +1138,7 @@ contract("regularSell", (accounts) => {
 
     ////////////////// ---------------- check tree before -----------------------
 
-    const treeBefore = await treeFactoryInstance.genTrees.call(treeId);
+    const treeBefore = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(Number(treeBefore.treeStatus), 4, "invalid tree status");
 
@@ -1234,7 +1234,7 @@ contract("regularSell", (accounts) => {
 
     ////////////////// ---------------- check tree after request-----------------------
 
-    const treeAfter = await treeFactoryInstance.genTrees.call(treeId);
+    const treeAfter = await treeFactoryInstance.treeData.call(treeId);
 
     assert.equal(Number(treeAfter.treeStatus), 4, "invalid tree status");
 
@@ -1366,7 +1366,7 @@ contract("regularSell", (accounts) => {
         from: userAccount1,
         value: web3.utils.toWei("1"),
       })
-      .should.be.rejectedWith(GenesisTreeErrorMsg.TREE_MUST_BE_PLANTED);
+      .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_MUST_BE_PLANTED);
 
     // ///////////////// -----------------------  plant regualar tree
 
@@ -1374,7 +1374,7 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addGenesisTreeRole(
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount

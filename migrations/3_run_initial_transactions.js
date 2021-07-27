@@ -1,18 +1,15 @@
 require("dotenv").config();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 
-var AccessRestriction = artifacts.require("AccessRestriction.sol");
-var GBFactory = artifacts.require("GBFactory.sol");
-var TreeType = artifacts.require("TreeType.sol");
-var Tree = artifacts.require("Tree.sol");
-var TreeFactory = artifacts.require("TreeFactory.sol");
-var UpdateFactory = artifacts.require("UpdateFactory.sol");
-var O2 = artifacts.require("O2.sol");
-var O2Factory = artifacts.require("O2Factory.sol");
-var Seed = artifacts.require("Seed.sol");
-var SeedFactory = artifacts.require("SeedFactory.sol");
-var ForestFactory = artifacts.require("ForestFactory.sol");
-var Dai = artifacts.require("Dai.sol");
+const AccessRestriction = artifacts.require("AccessRestriction.sol");
+const Tree = artifacts.require("Tree.sol");
+const TreeAuction = artifacts.require("TreeAuction.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
+const Treasury = artifacts.require("Treasury.sol");
+const Planter = artifacts.require("Planter.sol");
+const RegularSell = artifacts.require("RegularSell.sol");
+const IncrementalSell = artifacts.require("IncrementalSell.sol");
+const TreeAttribute = artifacts.require("TreeAttribute.sol");
 
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
@@ -25,17 +22,14 @@ module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
   let accessRestrictionAddress = AccessRestriction.address;
-  let treeTypeAddress = TreeType.address;
+  let treeAddressAddress = Tree.address;
+  let treeAuctionAddress = TreeAuction.address;
   let treeFactoryAddress = TreeFactory.address;
-  let updateFactoryAddress = UpdateFactory.address;
-  let gbFactoryAddress = GBFactory.address;
-  // let o2Address = O2Factory.address;
-  let treeAddress = Tree.address;
-  let seedAddress = Seed.address;
-  let seedFactoryAddress = SeedFactory.address;
-  // let o2FactoryAddress = O2Factory.address;
-  // let forestFactory = ForestFactory.address;
-  let daiTokenAddress;
+  let treasuryAddress = Treasury.address;
+  let planterAddress = Planter.address;
+  let regularSellAddress = RegularSell.address;
+  let incrementalSellAddress = IncrementalSell.address;
+  let treeAttributeAddress = TreeAttribute.address;
 
   //gsn
   let trustedForwarder;
@@ -45,14 +39,9 @@ module.exports = async function (deployer, network, accounts) {
   if (isLocal) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
     relayHub = require("../build/gsn/RelayHub.json").address;
-    console.log("Deploying Dai...");
-    await deployer.deploy(Dai, web3.utils.toWei("1000000")).then(() => {
-      daiTokenAddress = Dai.address;
-    });
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;
-    daiTokenAddress = process.env.DAI_ADDRESS;
   }
 
   console.log("Call UpdateFactory Methods...");

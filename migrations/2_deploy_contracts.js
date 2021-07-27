@@ -9,9 +9,9 @@ var TreeFactory = artifacts.require("TreeFactory.sol");
 var Treasury = artifacts.require("Treasury.sol");
 var Planter = artifacts.require("Planter.sol");
 var RegularSell = artifacts.require("RegularSell.sol");
-
 var IncrementalSell = artifacts.require("IncrementalSell.sol");
 var TreeAttribute = artifacts.require("TreeAttribute.sol");
+
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 

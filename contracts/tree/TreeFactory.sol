@@ -311,7 +311,9 @@ contract TreeFactory is Initializable, RelayRecipient {
             // .div(3600)
             // .toUint32();
 
-            uint32 age = (block.timestamp - treeData[_treeId].plantDate) / 3600;
+            uint32 age = ((block.timestamp - treeData[_treeId].plantDate) /
+                3600)
+            .toUint32();
 
             if (age > tree.treeStatus) {
                 tree.treeStatus = age;

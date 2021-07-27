@@ -226,7 +226,7 @@ contract Planter is Initializable, RelayRecipient {
 
         planter.planterType = _planterType;
 
-        PlanterUpdated(_msgSender());
+        emit PlanterUpdated(_msgSender());
     }
 
     /** @dev organization can accept planter to be it's member or reject
@@ -340,7 +340,7 @@ contract Planter is Initializable, RelayRecipient {
             _planterAddress
         ] = _planterAutomaticPaymentPortion;
 
-        PortionUpdated(_planterAddress);
+        emit PortionUpdated(_planterAddress);
     }
 
     /** @dev return planter paymentPortion for an accepted organizationPlanter

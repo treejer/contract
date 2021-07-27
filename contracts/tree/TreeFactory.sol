@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "../tree/ITree.sol";
@@ -16,10 +16,6 @@ contract TreeFactory is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
-    using SafeMathUpgradeable for uint256;
-    using SafeMathUpgradeable for uint64;
-    using SafeMathUpgradeable for uint32;
-    using SafeMathUpgradeable for uint16;
 
     CountersUpgradeable.Counter private regularTreeId;
 
@@ -256,12 +252,19 @@ contract TreeFactory is Initializable, RelayRecipient {
             updateTrees[_treeId].updateStatus != 1,
             "update tree status is pending"
         );
+        //TODO: mathUpdate
+        // require(
+        //     block.timestamp >=
+        //         treeData[_treeId].plantDate.add(
+        //             treeData[_treeId].treeStatus.mul(3600).add(86400)
+        //         ),
+        //     "Update time not reach"
+        // );
 
         require(
             block.timestamp >=
-                treeData[_treeId].plantDate.add(
-                    treeData[_treeId].treeStatus.mul(3600).add(86400)
-                ),
+                treeData[_treeId].plantDate +
+                    ((treeData[_treeId].treeStatus * 3600) + 86400),
             "Update time not reach"
         );
 
@@ -301,10 +304,15 @@ contract TreeFactory is Initializable, RelayRecipient {
             TreeStruct storage tree = treeData[_treeId];
 
             updateGenTree.updateStatus = 3;
-            uint32 age = block.timestamp
-            .sub(treeData[_treeId].plantDate)
-            .div(3600)
-            .toUint32();
+            //TODO: mathUpdate
+            // uint32 age = block
+            // .timestamp
+            // .sub(treeData[_treeId].plantDate)
+            // .div(3600)
+            // .toUint32();
+
+            uint32 age = (block.timestamp - treeData[_treeId].plantDate) / 3600;
+
             if (age > tree.treeStatus) {
                 tree.treeStatus = age;
             }
@@ -393,9 +401,14 @@ contract TreeFactory is Initializable, RelayRecipient {
         return true;
     }
 
-    function checkMintStatus(uint256 _treeId, address _buyer) external view returns (bool) {
+    function checkMintStatus(uint256 _treeId, address _buyer)
+        external
+        view
+        returns (bool)
+    {
         uint16 minted = treeData[_treeId].mintStatus;
-        return ((minted == 1 || minted == 2) && treeToken.ownerOf(_treeId)==_buyer);
+        return ((minted == 1 || minted == 2) &&
+            treeToken.ownerOf(_treeId) == _buyer);
     }
 
     // function updateTreefromOffer(
@@ -468,13 +481,19 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(regularTree.plantDate > 0, "regularTree not exist");
 
         if (_isVerified) {
-            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree.add(1);
+            //TODO: mathUpdate
+            // uint256 tempLastRegularPlantedTree = lastRegularPlantedTree.add(1);
+
+            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree + 1;
 
             while (
                 !(treeData[tempLastRegularPlantedTree].treeStatus == 0 &&
                     treeData[tempLastRegularPlantedTree].provideStatus == 0)
             ) {
-                tempLastRegularPlantedTree = tempLastRegularPlantedTree.add(1);
+                //TODO: mathUpdate
+                // tempLastRegularPlantedTree = tempLastRegularPlantedTree.add(1);
+
+                tempLastRegularPlantedTree = tempLastRegularPlantedTree + 1;
             }
 
             lastRegularPlantedTree = tempLastRegularPlantedTree;
@@ -514,7 +533,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         onlyRegularSellContract
         returns (uint256)
     {
-        uint256 localLastSold = _lastSold.add(1);
+        //TODO: mathUpdate
+        // uint256 localLastSold = _lastSold.add(1);
+        uint256 localLastSold = _lastSold + 1;
 
         bool flag = (treeData[localLastSold].treeStatus == 0 &&
             treeData[localLastSold].provideStatus == 0) ||
@@ -522,7 +543,9 @@ contract TreeFactory is Initializable, RelayRecipient {
                 treeData[localLastSold].provideStatus == 4);
 
         while (!flag) {
-            localLastSold = localLastSold.add(1);
+            //TODO: mathUpdate
+            // localLastSold = localLastSold.add(1);
+            localLastSold = localLastSold + 1;
 
             flag =
                 (treeData[localLastSold].treeStatus == 0 &&

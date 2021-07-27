@@ -1,17 +1,15 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
 /** @title Planter contract */
 contract Planter is Initializable, RelayRecipient {
-    using SafeMathUpgradeable for uint32;
-    using SafeMathUpgradeable for uint256;
     using SafeCastUpgradeable for uint256;
 
     bool public isPlanter;
@@ -300,10 +298,13 @@ contract Planter is Initializable, RelayRecipient {
                     tempPlanter.status == 1 &&
                     tempPlanter.plantedCount < tempPlanter.capacity
                 ) {
-                    tempPlanter.plantedCount = tempPlanter
-                    .plantedCount
-                    .add(1)
-                    .toUint32();
+                    tempPlanter.plantedCount += 1;
+
+                    //TODO: mathUpdate
+                    // tempPlanter.plantedCount = tempPlanter
+                    // .plantedCount
+                    // .add(1)
+                    // .toUint32();
                     if (tempPlanter.plantedCount >= tempPlanter.capacity) {
                         tempPlanter.status = 2;
                     }
@@ -393,7 +394,10 @@ contract Planter is Initializable, RelayRecipient {
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
 
-        tempPlanter.plantedCount = tempPlanter.plantedCount.sub(1).toUint32();
+        tempPlanter.plantedCount -= 1;
+
+        //TODO: mathUpdate
+        // tempPlanter.plantedCount = tempPlanter.plantedCount.sub(1).toUint32();
 
         if (tempPlanter.status == 2) {
             tempPlanter.status = 1;
@@ -417,10 +421,13 @@ contract Planter is Initializable, RelayRecipient {
         PlanterData storage tempPlanter = planters[_planterAddress];
 
         if (tempPlanter.status == 1) {
-            tempPlanter.plantedCount = tempPlanter
-            .plantedCount
-            .add(1)
-            .toUint32();
+            tempPlanter.plantedCount += 1;
+
+            //TODO: mathUpdate
+            // tempPlanter.plantedCount = tempPlanter
+            // .plantedCount
+            // .add(1)
+            // .toUint32();
 
             if (tempPlanter.plantedCount == tempPlanter.capacity) {
                 tempPlanter.status = 2;

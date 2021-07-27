@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 interface ITreeFactory {
     function isTreeFactory() external view returns (bool);
@@ -79,7 +79,10 @@ interface ITreeFactory {
 
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
 
-    function checkMintStatus(uint256 _treeId,address _buyer) external view returns (bool);
+    function checkMintStatus(uint256 _treeId, address _buyer)
+        external
+        view
+        returns (bool);
 
     // function updateTreefromOffer(
     //     uint256 _treeId,

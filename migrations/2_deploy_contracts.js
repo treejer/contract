@@ -15,11 +15,7 @@ var TreeAttribute = artifacts.require("TreeAttribute.sol");
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 
-const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
-
 module.exports = async function (deployer, network, accounts) {
-  const isLocal = network === "development";
-
   let accessRestrictionAddress;
   let treeAddress;
   let treeAuctionAddress;
@@ -29,25 +25,6 @@ module.exports = async function (deployer, network, accounts) {
   let regularSellAddress;
   let incrementalSellAddress;
   let treeAttributeAddress;
-
-  //gsn
-  let trustedForwarder;
-  let relayHub;
-  let paymasterAddress;
-
-  console.log(
-    "Deploying on network '" + network + "' by account '" + accounts[0] + "'"
-  );
-
-  if (isLocal) {
-    trustedForwarder = process.env.GSN_FORWARDER;
-    relayHub = process.env.GSN_RELAY_HUB;
-  } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
-    relayHub = process.env.GSN_RELAY_HUB;
-  }
-
-  console.log("Using forwarder: " + trustedForwarder + " RelyHub: " + relayHub);
 
   console.log("Deploying AccessRestriction...");
 
@@ -84,8 +61,6 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     treeAuctionAddress = TreeAuction.address;
-
-    TreeAuction.deployed().then(async (instance) => {});
   });
 
   console.log("Deploying IncrementalSell...");
@@ -95,8 +70,6 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     incrementalSellAddress = IncrementalSell.address;
-
-    IncrementalSell.deployed().then(async (instance) => {});
   });
 
   console.log("Deploying TreeFactory...");
@@ -106,10 +79,6 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     treeFactoryAddress = TreeFactory.address;
-
-    TreeFactory.deployed().then(async (instance) => {
-      await instance.setTrustedForwarder(trustedForwarder);
-    });
   });
 
   console.log("Deploying Treasury...");
@@ -119,9 +88,6 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     treasuryAddress = Treasury.address;
-    Treasury.deployed().then(async (instance) => {
-      await instance.setTrustedForwarder(trustedForwarder);
-    });
   });
   console.log("Deploying Planter ...");
   await deployProxy(Planter, [accessRestrictionAddress], {
@@ -130,9 +96,6 @@ module.exports = async function (deployer, network, accounts) {
     unsafeAllowCustomTypes: true,
   }).then(() => {
     planterAddress = Planter.address;
-    Planter.deployed().then(async (instance) => {
-      await instance.setTrustedForwarder(trustedForwarder);
-    });
   });
 
   console.log("Deploying RegularSell...");
@@ -148,11 +111,6 @@ module.exports = async function (deployer, network, accounts) {
     regularSellAddress = RegularSell.address;
   });
 
-  console.log("Call AccessRestriction Methods...");
-  await AccessRestriction.deployed().then(async (instance) => {
-    await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
-  });
-
   console.log("Deploying WhitelistPaymaster...");
   await deployer
     .deploy(WhitelistPaymaster, accessRestrictionAddress)
@@ -160,32 +118,14 @@ module.exports = async function (deployer, network, accounts) {
       paymasterAddress = WhitelistPaymaster.address;
     });
 
-  console.log("Running WhitelistPaymaster...");
-
-  await WhitelistPaymaster.deployed().then(async (instance) => {
-    await instance.setRelayHub(relayHub);
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
-
-  console.log("Fund Paymaster");
-  if (!isLocal) {
-    await web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymasterAddress,
-      value: web3.utils.toWei("1"),
-    });
-  }
-
-  console.log("Deployed");
-
   console.log(`CONTRACT_AR_ADDRESS=${accessRestrictionAddress}
-CONTRACT_TREE_ADDRESS=${treeAddress}
-CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
-CONTRACT_TREE_FACTORY_ADDRESS=${treeFactoryAddress}
-CONTRACT_TREASURY_ADDRESS=${treasuryAddress}
-CONTRACT_PLANTER_ADDRESS=${planterAddress}
-CONTRACT_REGULAR_SELL_ADDRESS=${regularSellAddress}
-CONTRACT_TREE_ATTRIBUTE_ADDRESS=${treeAttributeAddress}
-CONTRACT_INCREMENTAL_SELL_ADDRESS=${incrementalSellAddress}
-CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
+  CONTRACT_TREE_ADDRESS=${treeAddress}
+  CONTRACT_TREE_AUCTION_ADDRESS=${treeAuctionAddress}
+  CONTRACT_TREE_FACTORY_ADDRESS=${treeFactoryAddress}
+  CONTRACT_TREASURY_ADDRESS=${treasuryAddress}
+  CONTRACT_PLANTER_ADDRESS=${planterAddress}
+  CONTRACT_REGULAR_SELL_ADDRESS=${regularSellAddress}
+  CONTRACT_TREE_ATTRIBUTE_ADDRESS=${treeAttributeAddress}
+  CONTRACT_INCREMENTAL_SELL_ADDRESS=${incrementalSellAddress}
+  CONTRACT_PAYMASTER_ADDRESS=${paymasterAddress}`);
 };

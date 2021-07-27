@@ -44,12 +44,6 @@ contract TreeAttribute is Initializable {
         _;
     }
 
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
-        ITreeFactory candidateContract = ITreeFactory(_address);
-        require(candidateContract.isTreeFactory());
-        treeFactory = candidateContract;
-    }
-
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -57,6 +51,12 @@ contract TreeAttribute is Initializable {
         require(candidateContract.isAccessRestriction());
         isTreeAttribute = true;
         accessRestriction = candidateContract;
+    }
+
+    function setTreeFactoryAddress(address _address) external onlyAdmin {
+        ITreeFactory candidateContract = ITreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
     }
 
     function reserveTreeAttributes(uint32 generatedCode) external onlyAdmin {

@@ -71,6 +71,30 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   //------aliiiiiiiiiiiiiiiiiiiiiiiii
+  console.log("Call Planter Methods...");
+  await Planter.deployed().then(async (instance) => {
+    await instance.setTrustedForwarder(trustedForwarder);
+  });
+
+  console.log("Call Tree Methods...");
+
+  await Tree.deployed().then((instance) => {});
+
+  console.log("Call Tree Factory Methods...");
+
+  await TreeFactory.deployed().then((instance) => {
+    await instance.setTrustedForwarder(trustedForwarder);
+    await instance.setTreasuryAddress(Treasury.address);
+    await instance.setPlanterAddress(Planter.address);
+    await instance.setTreeTokenAddress(Tree.address);
+  });
+
+  console.log("Call Tree Attribute Methods...");
+  await TreeAttribute.deployed().then((instance) => {
+    console.log("TreeFactory.address", TreeFactory.address);
+
+    await instance.setTreeFactoryAddress(TreeFactory.address);
+  });
 
   console.log("Call UpdateFactory Methods...");
   await UpdateFactory.deployed().then(async (instance) => {

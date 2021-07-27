@@ -22,9 +22,9 @@ const Math = require("./math");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider")
-const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
-const ethers = require('ethers')
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("TreeFactory", (accounts) => {
   let treeFactoryInstance;
@@ -1758,9 +1758,8 @@ contract("TreeFactory", (accounts) => {
 
     ///////////////////////////////////////////////////////////////////////////////////
 
-    const updateGenResultAfterVerify = await treeFactoryInstance.updateTrees.call(
-      treeId
-    );
+    const updateGenResultAfterVerify =
+      await treeFactoryInstance.updateTrees.call(treeId);
 
     assert.equal(
       updateGenResultAfterVerify.updateSpecs,
@@ -5689,11 +5688,8 @@ contract("TreeFactory", (accounts) => {
   it("test gsn", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const {
-      forwarderAddress,
-      relayHubAddress,
-      paymasterAddress,
-    } = env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
 
     await treeFactoryInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,

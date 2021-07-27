@@ -62,7 +62,7 @@ module.exports = async function (deployer, network, accounts) {
   await WhitelistPaymaster.deployed().then(async (instance) => {
     await instance.setWhitelistTarget(planterAddress);
     await instance.setWhitelistTarget(treasuryAddress);
-    await instance.setWhitelistTarget(TreeFactory);
+    await instance.setWhitelistTarget(treeFactoryAddress);
 
     await instance.setRelayHub(relayHub);
     await instance.setTrustedForwarder(trustedForwarder);
@@ -116,8 +116,6 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call Tree Attribute Methods...");
   await TreeAttribute.deployed().then(async (instance) => {
-    console.log("TreeFactory.address", TreeFactory.address);
-
     await instance.setTreeFactoryAddress(TreeFactory.address);
   });
 

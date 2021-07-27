@@ -51,15 +51,6 @@ module.exports = async function (deployer, network, accounts) {
     // await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
   });
 
-  //------aliiiiiiiiiiiiiiiiiiiiiiiii
-
-  console.log("Call UpdateFactory Methods...");
-  await UpdateFactory.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setGBFactoryAddress(gbFactoryAddress);
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
-
   console.log("Call WhitelistPaymaster Methods...");
   await WhitelistPaymaster.deployed().then(async (instance) => {
     await instance.setWhitelistTarget(treeFactoryAddress);
@@ -78,4 +69,13 @@ module.exports = async function (deployer, network, accounts) {
       value: web3.utils.toWei("1"),
     });
   }
+
+  //------aliiiiiiiiiiiiiiiiiiiiiiiii
+
+  console.log("Call UpdateFactory Methods...");
+  await UpdateFactory.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setGBFactoryAddress(gbFactoryAddress);
+    await instance.setTrustedForwarder(trustedForwarder);
+  });
 };

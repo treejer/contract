@@ -145,13 +145,13 @@ contract("IncrementalSell", (accounts) => {
                 {
                     from: deployerAccount,
         });
-        await treeAttributeInstance.reserveTreeAttributes(
+        await treeAttributeInstance.setTreeAttributesByAdmin(
             101,
             13000000,
                 {
                     from: deployerAccount,
         });
-        await treeAttributeInstance.reserveTreeAttributes(
+        await treeAttributeInstance.setTreeAttributesByAdmin(
             102,
             13000000,
                 {
@@ -172,51 +172,198 @@ contract("IncrementalSell", (accounts) => {
                 {
                     from: deployerAccount,
         });
-        await treeAttributeInstance.reserveTreeAttributes(
+        await treeAttributeInstance.setTreeAttributesByAdmin(
             101,
             13000000,
                 {
                     from: deployerAccount,
         });
-        await treeAttributeInstance.reserveTreeAttributes(
+        await treeAttributeInstance.setTreeAttributesByAdmin(
             100,
             13000002,
                 {
                     from: deployerAccount,
-        }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
-        
-        
+        }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);   
     });
-    it("tree check for attribute assignment", async () => {
+    
+
+    it("tree has attributes before", async () => {
         await treeAttributeInstance.reserveTreeAttributes(
            13000000,
             {
                 from: deployerAccount,
         });
         await treeAttributeInstance.setTreeAttributesByAdmin(
-            100,
+            107,
             13000001,
                 {
                     from: deployerAccount,
         });
-        await treeAttributeInstance.reserveTreeAttributes(
-            101,
-            13000000,
-                {
-                    from: deployerAccount,
-        });
-        await treeAttributeInstance.reserveTreeAttributes(
-            100,
+        await treeAttributeInstance.createTreeAttributes(
+            107,
             13000002,
-                {
-                    from: deployerAccount,
-        }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
-        
-        
+            {
+              from: userAccount5,
+            }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);        
     });
 
 
+    it("tree check for attribute assignment", async () => {
+      iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
+      treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+      await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
+      await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+        from: deployerAccount,
+      });
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+      await Common.addIncrementalSellRole(
+        arInstance,
+        iSellInstance.address,
+        deployerAccount
+      );
+      await treasuryInstance.addFundDistributionModel(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: deployerAccount,
+      });
+      await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+        from: deployerAccount,
+      });
+  
+      await iSellInstance
+        .addTreeSells(101, web3.utils.toWei("0.005"), 100, 100, 1000, {
+          from: deployerAccount,
+      });
+      await iSellInstance
+      .buyTree(102, { value: web3.utils.toWei("0.01"), from: userAccount3 });
+
+
+    
+ 
+  
+  
+
+      
+      await treeAttributeInstance.reserveTreeAttributes(
+         13000000,
+          {
+              from: deployerAccount,
+      });
+      await treeAttributeInstance.setTreeAttributesByAdmin(
+          100,
+          13000001,
+              {
+                  from: deployerAccount,
+      });
+      await treeAttributeInstance.createTreeAttributes(
+        102,
+        web3.utils.toWei("0.01"),
+            {
+                from: userAccount3,
+    });
+      await treeAttributeInstance.createTreeAttributes(
+          103,
+          web3.utils.toWei("0.01"),
+              {
+                  from: userAccount5,
+      }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+    });
+      
+    it("tree check for attribute assignment", async () => {
+      iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+      await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
+      await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+        from: deployerAccount,
+      });
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+      await Common.addIncrementalSellRole(
+        arInstance,
+        iSellInstance.address,
+        deployerAccount
+      );
+      await treasuryInstance.addFundDistributionModel(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: deployerAccount,
+      });
+      await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+        from: deployerAccount,
+      });
+  
+      await iSellInstance
+        .addTreeSells(101, web3.utils.toWei("0.005"), 100, 100, 1000, {
+          from: deployerAccount,
+      });
+      await iSellInstance
+      .buyTree(102, { value: web3.utils.toWei("0.01"), from: userAccount3 });
+
+
+    
+ 
+  
+  
+
+      
+      await treeAttributeInstance.reserveTreeAttributes(
+         13000000,
+          {
+              from: deployerAccount,
+      });
+      await treeAttributeInstance.setTreeAttributesByAdmin(
+          100,
+          13000001,
+              {
+                  from: deployerAccount,
+      });
+      await treeAttributeInstance.createTreeAttributes(
+        102,
+        web3.utils.toWei("0.01"),
+            {
+                from: userAccount4,
+    }).should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+    });
+         
 
 
 

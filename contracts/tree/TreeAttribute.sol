@@ -152,17 +152,16 @@ contract TreeAttribute is Initializable {
 
     //the function creates
     function createTreeAttributes(
-        address buyer,
         uint256 treeId,
         uint256 paidAmount
     ) external returns (bool) {
         require(
             treeAttributes[treeId].exists == 0,
-            "tree already has attributes"
+            "tree attributes are set before"
         );
 
         require(
-            treeFactory.checkMintStatus(treeId),
+            treeFactory.checkMintStatus(treeId,msg.sender),
             "no need to tree attributes"
         );
 
@@ -171,7 +170,7 @@ contract TreeAttribute is Initializable {
             uint256 rand = uint256(
                 keccak256(
                     abi.encodePacked(
-                        buyer,
+                        msg.sender,
                         keccak256(
                             abi.encodePacked(block.number, msg.sig, paidAmount)
                         ),
@@ -181,7 +180,7 @@ contract TreeAttribute is Initializable {
                 )
             );
             for (uint256 i = 0; i < 9; i++) {
-                flag = calcRandAttributes(buyer, treeId, getFirstN(rand, 28));
+                flag = calcRandAttributes(msg.sender, treeId, getFirstN(rand, 28));
                 if (flag) {
                     break;
                 }

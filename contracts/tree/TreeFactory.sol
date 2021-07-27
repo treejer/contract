@@ -393,9 +393,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         return true;
     }
 
-    function checkMintStatus(uint256 _treeId) external view returns (bool) {
+    function checkMintStatus(uint256 _treeId, address _buyer) external view returns (bool) {
         uint16 minted = treeData[_treeId].mintStatus;
-        return (minted == 1 || minted == 2);
+        return ((minted == 1 || minted == 2) && treeToken.ownerOf(_treeId)==_buyer);
     }
 
     // function updateTreefromOffer(

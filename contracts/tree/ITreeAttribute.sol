@@ -7,7 +7,6 @@ interface ITreeAttribute {
     function isTreeAttribute() external view returns (bool);
 
     function createTreeAttributes(
-        address buyer,
         uint256 treeId,
         uint256 paidAmount
     ) external returns (bool);

@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 
+/** @title Planter contract */
 contract Planter is Initializable, RelayRecipient {
     using SafeMathUpgradeable for uint32;
     using SafeMathUpgradeable for uint256;
@@ -28,9 +29,18 @@ contract Planter is Initializable, RelayRecipient {
         uint64 latitude;
     }
 
+    /** NOTE mapping of planterAddress to PlanterData */
+
     mapping(address => PlanterData) public planters;
+
+    /** NOTE mapping of planterAddress to address of refferedBy */
+
     mapping(address => address) public refferedBy;
+
+    /** NOTE mapping of planterAddress to organizationAddress that planter is member of it */
     mapping(address => address) public memberOf;
+
+    /** NOTE mapping of organizationAddress to mapping of planterAddress to portionValue */
     mapping(address => mapping(address => uint256)) public organizationRules;
 
     event PlanterJoin(address planterId);
@@ -221,9 +231,14 @@ contract Planter is Initializable, RelayRecipient {
         PlanterUpdated(_msgSender());
     }
 
+    /** @dev organization can accept planter to be it's member or reject
+     * @param _planterAddress address of planter
+     * @param _acceptance accept or reject
+     */
+
     function acceptPlanterFromOrganization(
         address _planterAddress,
-        bool acceptance
+        bool _acceptance
     ) external onlyOrganization existPlanter(_planterAddress) {
         require(
             memberOf[_planterAddress] == _msgSender() &&
@@ -233,7 +248,7 @@ contract Planter is Initializable, RelayRecipient {
 
         PlanterData storage planter = planters[_planterAddress];
 
-        if (acceptance) {
+        if (_acceptance) {
             planter.status = 1;
 
             emit AcceptedByOrganization(_planterAddress);
@@ -246,6 +261,10 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
+    /** @dev admin update capacity of planter {_planterAddress}
+     * @param _planterAddress address of planter to update capacity
+     * @param _capacity capacity that set to planter capacity
+     */
     function updateCapacity(address _planterAddress, uint32 _capacity)
         external
         onlyAdmin
@@ -259,6 +278,11 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
+    /** @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
+     * @param _planterAddress address of planter who want to plant tree
+     * @param _assignedPlanterAddress address of planter that tree assigned to
+     * @return if a planter can plant a tree or not
+     */
     function plantingPermission(
         address _planterAddress,
         address _assignedPlanterAddress
@@ -291,6 +315,12 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
+    /** @dev oragnization can update planterPayment rules of it's members
+     * @param _planterAddress address of planter
+     * @param _planterAutomaticPaymentPortion payment portion value
+     * NOTE only organization (planterType = 2) can call this function
+     */
+
     function updateOrganizationPlanterPayment(
         address _planterAddress,
         uint256 _planterAutomaticPaymentPortion
@@ -312,7 +342,12 @@ contract Planter is Initializable, RelayRecipient {
         PortionUpdated(_planterAddress);
     }
 
-    //TODO: remove existPlanter check?
+    /** @dev return planter paymentPortion for an accepted organizationPlanter
+     * @param _planterAddress address of planter to get payment portion
+     * @return {true} as first param in valid planter case and seccond param is
+     * address of organization that {_planterAddress} is member of it.
+     * and third param is address of referral and the last one is portion value
+     */
     function getPlanterPaymentPortion(address _planterAddress)
         external
         view
@@ -346,6 +381,11 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
+    /** @dev when tree plant of {_planterAddress} rejected plantedCount of {_planterAddress}
+     * must reduce 1 time and if planter status is full capacity {2} udate it to active {1}
+     * @param _planterAddress address of planter
+     * NOTE only treeFactory contract can call this function
+     */
     function reducePlantCount(address _planterAddress)
         external
         existPlanter(_planterAddress)
@@ -359,6 +399,14 @@ contract Planter is Initializable, RelayRecipient {
             tempPlanter.status = 1;
         }
     }
+
+    /** @dev check that planter {_planterAddress} can plant regular tree
+     * @param _planterAddress address of planter
+     * NOTE treeFactory contract can call this function
+     * NOTE change status to full capacity if plantedCount be equal with
+     * planter capacity after increase plantedCount by 1
+     * @return true in case of planter status is active {1}
+     */
 
     function planterCheck(address _planterAddress)
         external
@@ -382,6 +430,11 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
+    /** @dev check that {_verifier} can verify plant or update requests of {_planterAddress}
+     * @param _planterAddress address of planter
+     * @param _verifier address of verifier
+     * @return true in case of {_verifier} can verify {_planterAddress} and false otherwise
+     */
     function canVerify(address _planterAddress, address _verifier)
         external
         view
@@ -405,6 +458,10 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
+    /** @dev check allowance to assign tree to planter {_planterAddress}
+     * @param _planterAddress address of assignee planter
+     * @return true in case of active planter or orgnization planter and false otherwise
+     */
     function canAssignTreeToPlanter(address _planterAddress)
         external
         view

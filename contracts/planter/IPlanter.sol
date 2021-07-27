@@ -54,7 +54,7 @@ interface IPlanter {
 
     function acceptPlanterFromOrganization(
         address _planterAddress,
-        bool acceptance
+        bool _acceptance
     ) external;
 
     function updateCapacity(address _planterAddress, uint32 _capacity) external;

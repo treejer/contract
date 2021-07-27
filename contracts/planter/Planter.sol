@@ -300,11 +300,6 @@ contract Planter is Initializable, RelayRecipient {
                 ) {
                     tempPlanter.plantedCount += 1;
 
-                    //TODO: mathUpdate
-                    // tempPlanter.plantedCount = tempPlanter
-                    // .plantedCount
-                    // .add(1)
-                    // .toUint32();
                     if (tempPlanter.plantedCount >= tempPlanter.capacity) {
                         tempPlanter.status = 2;
                     }
@@ -396,9 +391,6 @@ contract Planter is Initializable, RelayRecipient {
 
         tempPlanter.plantedCount -= 1;
 
-        //TODO: mathUpdate
-        // tempPlanter.plantedCount = tempPlanter.plantedCount.sub(1).toUint32();
-
         if (tempPlanter.status == 2) {
             tempPlanter.status = 1;
         }
@@ -422,12 +414,6 @@ contract Planter is Initializable, RelayRecipient {
 
         if (tempPlanter.status == 1) {
             tempPlanter.plantedCount += 1;
-
-            //TODO: mathUpdate
-            // tempPlanter.plantedCount = tempPlanter
-            // .plantedCount
-            // .add(1)
-            // .toUint32();
 
             if (tempPlanter.plantedCount == tempPlanter.capacity) {
                 tempPlanter.status = 2;

@@ -252,14 +252,6 @@ contract TreeFactory is Initializable, RelayRecipient {
             updateTrees[_treeId].updateStatus != 1,
             "update tree status is pending"
         );
-        //TODO: mathUpdate
-        // require(
-        //     block.timestamp >=
-        //         treeData[_treeId].plantDate.add(
-        //             treeData[_treeId].treeStatus.mul(3600).add(86400)
-        //         ),
-        //     "Update time not reach"
-        // );
 
         require(
             block.timestamp >=
@@ -304,12 +296,6 @@ contract TreeFactory is Initializable, RelayRecipient {
             TreeStruct storage tree = treeData[_treeId];
 
             updateGenTree.updateStatus = 3;
-            //TODO: mathUpdate
-            // uint32 age = block
-            // .timestamp
-            // .sub(treeData[_treeId].plantDate)
-            // .div(3600)
-            // .toUint32();
 
             uint32 age = ((block.timestamp - treeData[_treeId].plantDate) /
                 3600)
@@ -483,18 +469,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(regularTree.plantDate > 0, "regularTree not exist");
 
         if (_isVerified) {
-            //TODO: mathUpdate
-            // uint256 tempLastRegularPlantedTree = lastRegularPlantedTree.add(1);
-
             uint256 tempLastRegularPlantedTree = lastRegularPlantedTree + 1;
 
             while (
                 !(treeData[tempLastRegularPlantedTree].treeStatus == 0 &&
                     treeData[tempLastRegularPlantedTree].provideStatus == 0)
             ) {
-                //TODO: mathUpdate
-                // tempLastRegularPlantedTree = tempLastRegularPlantedTree.add(1);
-
                 tempLastRegularPlantedTree = tempLastRegularPlantedTree + 1;
             }
 
@@ -535,8 +515,6 @@ contract TreeFactory is Initializable, RelayRecipient {
         onlyRegularSellContract
         returns (uint256)
     {
-        //TODO: mathUpdate
-        // uint256 localLastSold = _lastSold.add(1);
         uint256 localLastSold = _lastSold + 1;
 
         bool flag = (treeData[localLastSold].treeStatus == 0 &&
@@ -545,8 +523,6 @@ contract TreeFactory is Initializable, RelayRecipient {
                 treeData[localLastSold].provideStatus == 4);
 
         while (!flag) {
-            //TODO: mathUpdate
-            // localLastSold = localLastSold.add(1);
             localLastSold = localLastSold + 1;
 
             flag =

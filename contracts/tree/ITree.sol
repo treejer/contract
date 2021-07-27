@@ -17,10 +17,10 @@ interface ITree is IERC721Upgradeable {
         view
         returns (uint256);
 
-    function getOwnerTokens(address _account)
-        external
-        view
-        returns (uint256[] memory);
+    // function getOwnerTokens(address _account)
+    //     external
+    //     view
+    //     returns (uint256[] memory);
 
     function safeMint(address _to, uint256 _tokenId) external;
 

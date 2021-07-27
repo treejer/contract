@@ -2,13 +2,15 @@
 
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+// import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 
-contract Tree is ERC721Upgradeable {
+contract Tree is ERC721URIStorageUpgradeable {
     bool public isTree;
     IAccessRestriction public accessRestriction;
+    string baseURI;
 
     function initialize(
         address _accessRestrictionAddress,
@@ -17,7 +19,7 @@ contract Tree is ERC721Upgradeable {
         isTree = true;
 
         __ERC721_init("Tree", "TREE");
-        _setBaseURI(_baseURI);
+        baseURI = _baseURI;
 
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -29,7 +31,7 @@ contract Tree is ERC721Upgradeable {
     function setBaseURI(string calldata _baseURI) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        _setBaseURI(_baseURI);
+        baseURI = _baseURI;
     }
 
     function setTokenURI(uint256 _tokenId, string calldata _tokenURI) external {
@@ -44,25 +46,25 @@ contract Tree is ERC721Upgradeable {
         _setTokenURI(_tokenId, _tokenURI);
     }
 
-    function getOwnerTokens(address _account)
-        public
-        view
-        returns (uint256[] memory)
-    {
-        uint256 tokenCount = balanceOf(_account);
+    // function getOwnerTokens(address _account)
+    //     public
+    //     view
+    //     returns (uint256[] memory)
+    // {
+    //     uint256 tokenCount = balanceOf(_account);
 
-        if (tokenCount == 0) {
-            return new uint256[](0);
-        }
+    //     if (tokenCount == 0) {
+    //         return new uint256[](0);
+    //     }
 
-        uint256[] memory result = new uint256[](tokenCount);
+    //     uint256[] memory result = new uint256[](tokenCount);
 
-        for (uint256 index = 0; index < tokenCount; index++) {
-            result[index] = tokenOfOwnerByIndex(_account, index);
-        }
+    //     for (uint256 index = 0; index < tokenCount; index++) {
+    //         result[index] = tokenOfOwnerByIndex(_account, index);
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
 
     function safeMint(address _to, uint256 _tokenId) external {
         require(
@@ -74,5 +76,9 @@ contract Tree is ERC721Upgradeable {
 
     function exists(uint256 _tokenId) external view returns (bool) {
         return _exists(_tokenId);
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
 }

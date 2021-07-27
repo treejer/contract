@@ -23,6 +23,7 @@ contract TreeAttribute is Initializable {
         uint32 universalCode;
         uint32 exists;
     }
+
     //maping from buyer address to his/her rank
     mapping(address => uint8) public rankOf;
     // mapping from treeId to tree attributes
@@ -81,12 +82,16 @@ contract TreeAttribute is Initializable {
             "tree attributes are set before"
         );
         generatedAttributes[generatedCode] = 1;
-        reservedAttributes[generatedCode] == 0;
+        reservedAttributes[generatedCode] = 0;
         uint8[6] memory bitCounts = [6, 3, 4, 4, 3, 4];
         uint32[] memory results = new uint32[](6);
+
+        uint32 tempGeneratedCode = generatedCode;
+
         for (uint32 i = 0; i < bitCounts.length; i++) {
-            results[i] = getFirstN32(generatedCode, bitCounts[i]);
-            generatedCode = generatedCode / uint32(2)**bitCounts[i];
+            results[i] = getFirstN32(tempGeneratedCode, bitCounts[i]);
+
+            tempGeneratedCode = tempGeneratedCode / uint32(2)**bitCounts[i];
         }
         treeAttributes[treeId] = Attributes(
             results[0],
@@ -151,17 +156,17 @@ contract TreeAttribute is Initializable {
     }
 
     //the function creates
-    function createTreeAttributes(
-        uint256 treeId,
-        uint256 paidAmount
-    ) external returns (bool) {
+    function createTreeAttributes(uint256 treeId, uint256 paidAmount)
+        external
+        returns (bool)
+    {
         require(
             treeAttributes[treeId].exists == 0,
             "tree attributes are set before"
         );
 
         require(
-            treeFactory.checkMintStatus(treeId,msg.sender),
+            treeFactory.checkMintStatus(treeId, msg.sender),
             "no need to tree attributes"
         );
 
@@ -180,7 +185,11 @@ contract TreeAttribute is Initializable {
                 )
             );
             for (uint256 i = 0; i < 9; i++) {
-                flag = calcRandAttributes(msg.sender, treeId, getFirstN(rand, 28));
+                flag = calcRandAttributes(
+                    msg.sender,
+                    treeId,
+                    getFirstN(rand, 28)
+                );
                 if (flag) {
                     break;
                 }
@@ -190,13 +199,12 @@ contract TreeAttribute is Initializable {
                 break;
             }
         }
-        if(flag){
+        if (flag) {
             emit TreeAttributesGenerated(treeId);
-        }
-        else{
+        } else {
             emit TreeAttributesNotGenerated(treeId);
         }
-        
+
         return flag;
     }
 

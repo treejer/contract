@@ -22,9 +22,9 @@ const {
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider")
-const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
-const ethers = require('ethers')
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("regularSell", (accounts) => {
   let regularSellInstance;
@@ -603,17 +603,6 @@ contract("regularSell", (accounts) => {
     const txFee2 = await Common.getTransactionFee(requestTx2);
 
     let funder2BalanceAfter = await web3.eth.getBalance(funder2);
-    console.log("funder2BalanceAfter", funder2BalanceAfter);
-    console.log("funder2BalanceBefore", funder2BalanceBefore);
-    console.log("txFee2", txFee2);
-    let x = Math.subtract(
-      Math.subtract(
-        Number(funder2BalanceBefore),
-        Math.mul(web3.utils.toWei("0.1"), 1)
-      ),
-      txFee2
-    );
-    console.log("x", x);
 
     assert.equal(
       Number(funder2BalanceAfter),

@@ -813,6 +813,7 @@ contract Treasury is Initializable, RelayRecipient {
             if (assignModels[i].startingTreeId > _treeId) {
                 //TODO: mathUpdate
                 // return i.sub(1, "invalid fund model");
+                require(i > 0, "invalid fund model");
                 return i - 1;
             }
         }
@@ -824,6 +825,7 @@ contract Treasury is Initializable, RelayRecipient {
         }
         //TODO: mathUpdate
         // return i.sub(1, "invalid fund model");
+        require(i > 0, "invalid fund model");
         return i - 1;
     }
 

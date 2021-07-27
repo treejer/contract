@@ -382,14 +382,13 @@ contract TreeFactory is Initializable, RelayRecipient {
         onlyIncremental
         returns (bool)
     {
-        uint256 i;
-        for (i = _startTreeId; i < _endTreeId; i++) {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (treeData[i].provideStatus > 0) {
                 return false;
             }
         }
-        for (i = _startTreeId; i < _endTreeId; i++) {
-            treeData[i].provideStatus = 2;
+        for (uint256 j = _startTreeId; j < _endTreeId; j++) {
+            treeData[j].provideStatus = 2;
         }
         return true;
     }

@@ -15,7 +15,7 @@ const {
   CommonErrorMsg,
   TreeAuctionErrorMsg,
   TreeFactoryErrorMsg,
-  TreesuryManagerErrorMsg,
+  TreasuryManagerErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -296,7 +296,7 @@ contract("TreeAuction", (accounts) => {
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
       )
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
     await TreasuryInstance.addFundDistributionModel(
       3000,
@@ -327,7 +327,7 @@ contract("TreeAuction", (accounts) => {
         web3.utils.toWei("0.1"),
         { from: deployerAccount }
       )
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
   });
 
   it("Check auction data insert conrrectly", async () => {
@@ -1784,13 +1784,13 @@ contract("TreeAuction", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
     await treeAuctionInstance
       .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
     await TreasuryInstance.addFundDistributionModel(
       3000,
@@ -2473,7 +2473,7 @@ contract("TreeAuction", (accounts) => {
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("1"), {
       from: userAccount2,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei(".001"), {
       from: userAccount2,
@@ -2620,7 +2620,7 @@ contract("TreeAuction", (accounts) => {
       .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
     await Common.addAuctionRole(
       arInstance,
       treeAuctionInstance.address,
@@ -2650,7 +2650,7 @@ contract("TreeAuction", (accounts) => {
       1000,
       1000,
       { from: deployerAccount }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
     ///////// ----- add fund dm
     await TreasuryInstance.addFundDistributionModel(

@@ -10,7 +10,7 @@ const Common = require("./common");
 
 const Math = require("./math");
 
-const { CommonErrorMsg, TreesuryManagerErrorMsg } = require("./enumes");
+const { CommonErrorMsg, TreasuryManagerErrorMsg } = require("./enumes");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
@@ -302,7 +302,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
     await TreasuryInstance.addFundDistributionModel(
       3000,
@@ -316,7 +316,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.SUM_INVALID);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
   });
 
   //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
@@ -832,7 +832,7 @@ contract("Treasury", (accounts) => {
     await TreasuryInstance.assignTreeFundDistributionModel(0, 0, 0, {
       from: deployerAccount,
     }).should.be.rejectedWith(
-      TreesuryManagerErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
+      TreasuryManagerErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
     );
   });
 
@@ -862,7 +862,7 @@ contract("Treasury", (accounts) => {
     await TreasuryInstance.fundTree(1, {
       from: userAccount3,
       value: web3.utils.toWei("1", "Ether"),
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_FUND_MODEL);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_FUND_MODEL);
   });
 
   it("fundTree should be fail (invalid access)", async () => {
@@ -888,7 +888,7 @@ contract("Treasury", (accounts) => {
       from: userAccount1,
       value: web3.utils.toWei("1", "Ether"),
     }).should.be.rejectedWith(
-      TreesuryManagerErrorMsg.ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL
+      TreasuryManagerErrorMsg.ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL
     );
   });
 
@@ -3091,7 +3091,7 @@ contract("Treasury", (accounts) => {
 
     await TreasuryInstance.fundPlanter(treeId2, userAccount2, treeStatus, {
       from: userAccount2,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
   });
 
   //-----------------------------------------withdraw planter balance -----------------------------------
@@ -4298,19 +4298,19 @@ contract("Treasury", (accounts) => {
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("0"), {
       from: userAccount3,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("1.5"), {
       from: userAccount3,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("0.5"), {
       from: userAccount4,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
 
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("0.5"), {
       from: userAccount5,
-    }).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    }).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   //------------------------------------------withdraw tree research balance -------------------------------------/
@@ -4580,14 +4580,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawTreeResearch(
       web3.utils.toWei("3"),
       "reason to withdraw",
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw  some balance and then try to withdraw
     await TreasuryInstance.withdrawTreeResearch(
@@ -4603,7 +4603,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // *****************************************withdraw local develop balance **************************************
@@ -4872,14 +4872,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawLocalDevelop(
       web3.utils.toWei("3"),
       withdrawReason,
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw some balance and then try to withdraw
     await TreasuryInstance.withdrawLocalDevelop(
@@ -4896,7 +4896,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // *****************************************withdraw rescue balance **************************************
@@ -5164,14 +5164,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawRescueFund(
       web3.utils.toWei("3"),
       withdrawReason,
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw some balance and then try to withdraw
     await TreasuryInstance.withdrawRescueFund(
@@ -5188,7 +5188,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // *****************************************withdraw treejer develop balance **************************************
@@ -5465,14 +5465,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawTreejerDevelop(
       web3.utils.toWei("3"),
       withdrawReason,
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw some balance and then try to withdraw
     await TreasuryInstance.withdrawTreejerDevelop(
@@ -5489,7 +5489,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // *****************************************withdraw other fund1 balance **************************************
@@ -5757,14 +5757,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawReserveFund1(
       web3.utils.toWei("3"),
       withdrawReason,
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw some balance and then try to withdraw
     await TreasuryInstance.withdrawReserveFund1(
@@ -5781,7 +5781,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // *****************************************withdraw other fund2 balance **************************************
@@ -6049,14 +6049,14 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
     await TreasuryInstance.withdrawReserveFund2(
       web3.utils.toWei("3"),
       withdrawReason,
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     //withdraw some balance and then try to withdraw
     await TreasuryInstance.withdrawReserveFund2(
@@ -6073,7 +6073,7 @@ contract("Treasury", (accounts) => {
       {
         from: deployerAccount,
       }
-    ).should.be.rejectedWith(TreesuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   // //----------------------------------------------gsn test-------------------------------------------

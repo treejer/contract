@@ -71,26 +71,26 @@ contract IncrementalSell is Initializable {
             treasury.distributionModelExistance(startTree),
             "equivalant fund Model not exists"
         );
-        if (incrementalPrice.increaseStep > 0) {
+        IncrementalPrice storage incrPrice=incrementalPrice;
+
+        if (incrPrice.increaseStep > 0) {
             treeFactory.bulkRevert(
-                incrementalPrice.startTree,
-                incrementalPrice.endTree
+                incrPrice.startTree,
+                incrPrice.endTree
             );
         }
 
-        bool success = treeFactory.bulkAvailability(
+      
+        require(treeFactory.bulkAvailability(
             startTree,
             startTree + treeCount
-        );
-        require(success, "trees are not available for sell");
+        ), "trees are not available for sell");
 
-        incrementalPrice = IncrementalPrice(
-            startTree,
-            startTree + treeCount,
-            initialPrice,
-            steps,
-            incrementRate
-        );
+        incrPrice.startTree =startTree;
+        incrPrice.endTree =startTree + treeCount;
+        incrPrice.initialPrice =initialPrice;
+        incrPrice.increaseStep =steps;
+        incrPrice.increaseRatio =incrementRate;
     }
 
     function buyTree(uint256 treeId) external payable ifNotPaused {
@@ -110,12 +110,12 @@ contract IncrementalSell is Initializable {
             10000;
 
         //checking price paid is enough for buying the treeId checking discounts
-        if (lastBuy[buyer] > block.timestamp - 700 seconds) {
+        if (lastBuy[buyer] > now - 700 seconds) {
             require(amount >= (treePrice * 90) / 100, "low price paid");
             lastBuy[buyer] = 0;
         } else {
             require(amount >= treePrice, "low price paid");
-            lastBuy[buyer] = block.timestamp;
+            lastBuy[buyer] = now;
         }
 
         treasury.fundTree{value: amount}(treeId);

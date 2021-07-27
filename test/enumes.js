@@ -53,7 +53,7 @@ const TreeFactoryErrorMsg = {
   TREE_MUST_BE_PLANTED: "tree must be planted",
   REGULAR_TREE_NOT_EXIST: "regularTree not exist",
 };
-const TreesuryManagerErrorMsg = {
+const TreasuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
@@ -103,7 +103,7 @@ module.exports = {
   TreeAuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreeAuctionErrorMsg,
-  TreesuryManagerErrorMsg,
+  TreasuryManagerErrorMsg,
   PlanterErrorMsg,
   RegularSellErrors,
   IncrementalSellErrorMsg,

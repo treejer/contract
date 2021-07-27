@@ -15,7 +15,7 @@ const {
   CommonErrorMsg,
   TreeFactoryErrorMsg,
   TreeAuctionErrorMsg,
-  TreesuryManagerErrorMsg,
+  TreasuryManagerErrorMsg,
 } = require("./enumes");
 
 const Math = require("./math");

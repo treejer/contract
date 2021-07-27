@@ -31,6 +31,9 @@ contract TreeAttribute is Initializable {
     mapping(uint32 => uint32) public generatedAttributes;
     mapping(uint32 => uint8) public reservedAttributes;
 
+    event BuyerRankSet(address buyer, uint8 rank);
+    event TreeAttributesGenerated(uint256 treeId);
+    event TreeAttributesNotGenerated(uint256 treeId);
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
@@ -192,6 +195,13 @@ contract TreeAttribute is Initializable {
                 break;
             }
         }
+        if(flag){
+            emit TreeAttributesGenerated(treeId);
+        }
+        else{
+            emit TreeAttributesNotGenerated(treeId);
+        }
+        
         return flag;
     }
 

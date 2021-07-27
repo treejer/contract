@@ -10,6 +10,7 @@ const DEFAULT_ADMIN_ROLE =
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 
 const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
+const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
 
@@ -29,6 +30,9 @@ Common.addAdmin = async (instance, account, adminAccount) => {
 
 Common.addAuctionRole = async (instance, address, adminAccount) => {
   await instance.grantRole(AUCTION_ROLE, address, { from: adminAccount });
+};
+Common.addIncrementalSellRole = async (instance, address, adminAccount) => {
+  await instance.grantRole(INCREMENTAL_SELL_ROLE, address, { from: adminAccount });
 };
 
 Common.addTreeFactoryRole = async (instance, address, adminAccount) => {

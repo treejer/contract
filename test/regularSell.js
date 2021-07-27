@@ -17,7 +17,7 @@ const {
   CommonErrorMsg,
   TreeFactoryErrorMsg,
   RegularSellErrors,
-  TreesuryManagerErrorMsg,
+  TreasuryManagerErrorMsg,
 } = require("./enumes");
 
 //gsn
@@ -1423,7 +1423,7 @@ contract("regularSell", (accounts) => {
         from: userAccount1,
         value: web3.utils.toWei("1"),
       })
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_FUND_MODEL);
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_FUND_MODEL);
 
     ////////////// ------------------- handle fund distribution model ----------------------
 

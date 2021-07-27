@@ -1,7 +1,7 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const IncrementalSell = artifacts.require("IncrementalSell.sol");
-const GenesisTree = artifacts.require("GenesisTree.sol");
-const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
+const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -13,17 +13,17 @@ const {
   TimeEnumes,
   CommonErrorMsg,
   IncrementalSellErrorMsg,
-  GenesisTreeErrorMsg,
-  TreesuryManagerErrorMsg,
+  TreeFactoryErrorMsg,
+  TreasuryManagerErrorMsg,
 } = require("./enumes");
 
 contract("IncrementalSell", (accounts) => {
   let iSellInstance;
   let arInstance;
-  let genesisTreeInstance;
-  let treeAttributeInstance;
+  let TreeFactoryInstance;
   let startTime;
   let endTime;
+  let treasuryInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -49,42 +49,46 @@ contract("IncrementalSell", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-    genesisTreeInstance = await deployProxy(GenesisTree, [arInstance.address], {
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-    treeAttributeInstance = await deployProxy(
-      TreeAttribute,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+
     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    await iSellInstance.setGenesisTreeAddress(genesisTreeInstance.address, {
+    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await iSellInstance.setTreeAttributeAddress(treeAttributeInstance.address, {
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
     });
-    await genesisTreeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
-    await Common.addGenesisTreeRole(
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    // await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
+    //   from: deployerAccount,
+    // });
+    await Common.addRegularSellRole(
       arInstance,
-      genesisTreeInstance.address,
+      treeFactoryInstance.address,
       deployerAccount
     );
-    await TreasuryInstance.addFundDistributionModel(
+    await Common.addIncrementalSellRole(
+      arInstance,
+      iSellInstance.address,
+      deployerAccount
+    );
+    await treasuryInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -107,15 +111,15 @@ contract("IncrementalSell", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-  it("should set genesis tree address with admin access or fail otherwise", async () => {
-    let tx = await iSellInstance.setGenesisTreeAddress(
-      genesisTreeInstance.address,
+  it("should set tree factory address with admin access or fail otherwise", async () => {
+    let tx = await iSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
       {
         from: deployerAccount,
       }
     );
     await iSellInstance
-      .setTreeAttributeAddress(treeAttributeInstance.address, {
+      .setTreeFactoryAddress(treeFactoryInstance.address, {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
@@ -130,17 +134,6 @@ contract("IncrementalSell", (accounts) => {
   });
 
   it("added incrementalSell should has startTreeId>100", async () => {
-    await iSellInstance.addTreeSells(
-      101,
-      web3.utils.toWei("0.005"),
-      9900,
-      100,
-      400,
-      {
-        from: deployerAccount,
-      }
-    );
-
     await iSellInstance
       .addTreeSells(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
         from: deployerAccount,
@@ -156,50 +149,170 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS); // steps of price change should be >0
   });
   it("added incrementalSell should have equivalant fund distribution model", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(105, 10000, 0, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(105, 10000, 0, {
       from: deployerAccount,
     });
 
     await iSellInstance
-      .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 0, 400, {
+      .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 400, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
   });
 
   it("added incrementalSell should have equivalant fund distribution model", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
-
-    await iSellInstance
-      .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 0, 400, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(TreesuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
-  });
-
-  it("buyed Tree should be in incremental sell", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
-    });
-    await iSellInstance.addTreeSells(
-      101,
-      web3.utils.toWei("0.01"),
-      9900,
-      100,
-      1000,
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
       {
         from: deployerAccount,
       }
     );
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(110, 10000, 1, {
+      from: deployerAccount,
+    });
+
     await iSellInstance
-      .buyTree(90, { value: web3.utils.toWei("1.15") })
+      .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 1000, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
+  });
+  it("incrementalSell all trees should be availabe to sell", async () => {
+    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address,{
+      from: deployerAccount,
+    });
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 1, {
+      from: deployerAccount,
+    });
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    await treeAuctionInstance.createAuction(
+      107,
+      Number(startTime),
+      Number(endTime),
+      web3.utils.toWei("1"),
+      web3.utils.toWei("0.1"),
+      { from: deployerAccount }
+    );
+    await iSellInstance
+      .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 1000, {
+        from: deployerAccount,
+      }).should.be.rejectedWith(IncrementalSellErrorMsg.OCCUPIED_TREES); // trees shouldnot be on other provides
+  });
+  it("buyed Tree should be in incremental sell", async () => {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address,{
+      from: deployerAccount,
+    });
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 1, {
+      from: deployerAccount,
+    });
+    await iSellInstance.addTreeSells(105, web3.utils.toWei("0.01"), 9900, 100, 1000, {
+      from: deployerAccount,
+    });
+    await iSellInstance
+      .buyTree(102, { value: web3.utils.toWei("1.15") , from : userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
   });
 
   it("low price paid for the tree", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
       from: deployerAccount,
     });
     await iSellInstance.addTreeSells(
@@ -218,7 +331,10 @@ contract("IncrementalSell", (accounts) => {
   });
 
   it("check discount timeout", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
       from: deployerAccount,
     });
     await iSellInstance.addTreeSells(
@@ -250,7 +366,10 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
   it("check discount usage", async () => {
-    await TreasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
       from: deployerAccount,
     });
     await iSellInstance.addTreeSells(
@@ -264,6 +383,16 @@ contract("IncrementalSell", (accounts) => {
       }
     );
     await iSellInstance.buyTree(110, {
+      value: web3.utils.toWei("0.01"),
+      from: userAccount3,
+    });
+    await Common.travelTime(TimeEnumes.minutes, 1);
+    await iSellInstance.buyTree(119, {
+      value: web3.utils.toWei("0.009"),
+      from: userAccount3,
+    });
+    await Common.travelTime(TimeEnumes.minutes, 5);
+    await iSellInstance.buyTree(145, {
       value: web3.utils.toWei("0.009"),
       from: userAccount3,
     });

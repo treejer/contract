@@ -95,7 +95,6 @@ module.exports = async function (deployer, network, accounts) {
     });
   }
 
-  //------aliiiiiiiiiiiiiiiiiiiiiiiii
   console.log("Call Planter Methods...");
   await Planter.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);

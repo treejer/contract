@@ -44,18 +44,20 @@ module.exports = async function (deployer, network, accounts) {
     relayHub = process.env.GSN_RELAY_HUB;
   }
 
-  console.log("Call UpdateFactory Methods...");
-  await UpdateFactory.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setGBFactoryAddress(gbFactoryAddress);
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
-
   console.log("Call AccessRestriction Methods...");
   await AccessRestriction.deployed().then(async (instance) => {
     await instance.grantRole(SEED_FACTORY_ROLE, seedFactoryAddress);
     await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
     // await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
+  });
+
+  //------aliiiiiiiiiiiiiiiiiiiiiiiii
+
+  console.log("Call UpdateFactory Methods...");
+  await UpdateFactory.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setGBFactoryAddress(gbFactoryAddress);
+    await instance.setTrustedForwarder(trustedForwarder);
   });
 
   console.log("Call WhitelistPaymaster Methods...");

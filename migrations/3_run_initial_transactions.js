@@ -14,9 +14,13 @@ const TreeAttribute = artifacts.require("TreeAttribute.sol");
 //gsn
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 
-const SEED_FACTORY_ROLE = web3.utils.soliditySha3("SEED_FACTORY_ROLE");
+//role
+const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
+const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
-const O2_FACTORY_ROLE = web3.utils.soliditySha3("O2_FACTORY_ROLE");
+const TREASURY_ROLE = web3.utils.soliditySha3("TREASURY_ROLE");
+const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
+const INCREMENTAL_SELL_ROLE = keccak256("INCREMENTAL_SELL_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -46,19 +50,40 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call AccessRestriction Methods...");
   await AccessRestriction.deployed().then(async (instance) => {
-    await instance.grantRole(SEED_FACTORY_ROLE, seedFactoryAddress);
+    await instance.grantRole(PLANTER_ROLE, planterAddress);
+    await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
     await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
-    // await instance.grantRole(O2_FACTORY_ROLE, o2FactoryAddress);
+    await instance.grantRole(TREASURY_ROLE, treasuryAddress);
+    await instance.grantRole(REGULAR_SELL_ROLE, regularSellAddress);
+    await instance.grantRole(INCREMENTAL_SELL_ROLE, incrementalSellAddress);
   });
 
   console.log("Call WhitelistPaymaster Methods...");
   await WhitelistPaymaster.deployed().then(async (instance) => {
-    await instance.setWhitelistTarget(treeFactoryAddress);
-    await instance.setWhitelistTarget(gbFactoryAddress);
-    await instance.setWhitelistTarget(updateFactoryAddress);
+    await instance.setWhitelistTarget(planterAddress);
+    await instance.setWhitelistTarget(treasuryAddress);
+    await instance.setWhitelistTarget(TreeFactory);
 
     await instance.setRelayHub(relayHub);
     await instance.setTrustedForwarder(trustedForwarder);
+  });
+
+  console.log("Call TreeAuction Methods...");
+  await TreeAuction.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setTreasuryAddress(treasuryAddress);
+  });
+
+  console.log("Call RegularSell Methods...");
+  await RegularSell.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setTreasuryAddress(treasuryAddress);
+  });
+
+  console.log("Call IncrementalSell Methods...");
+  await IncrementalSell.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setTreasuryAddress(treasuryAddress);
   });
 
   console.log("Fund Paymaster");

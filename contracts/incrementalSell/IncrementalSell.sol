@@ -93,6 +93,16 @@ contract IncrementalSell is Initializable {
         incrPrice.increaseRatio =incrementRate;
     }
 
+    function updateIncrementalEnd(uint256 treeCount) external onlyAdmin{
+        IncrementalPrice storage incrPrice=incrementalPrice;
+        require(incrPrice.increaseStep > 0 , "incremental period should be positive");
+        require(treeFactory.bulkAvailability(
+            incrPrice.endTree,
+            incrPrice.endTree+ treeCount
+        ), "trees are not available for sell");
+        incrPrice.endTree =incrPrice.endTree + treeCount;
+    }
+
     function buyTree(uint256 treeId) external payable ifNotPaused {
         //check if treeId is in this incrementalSell
         IncrementalPrice memory incPrice = incrementalPrice;

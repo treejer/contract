@@ -213,12 +213,21 @@ contract("IncrementalSell", (accounts) => {
     await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
+
+    await treeAuctionInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
     await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
-    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address,{
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
     });
+
     await treasuryInstance.addFundDistributionModel(
       4000,
       1200,
@@ -249,8 +258,18 @@ contract("IncrementalSell", (accounts) => {
     await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 1, {
       from: deployerAccount,
     });
+
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await Common.addAuctionRole(
+      arInstance,
+      treeAuctionInstance.address,
+      deployerAccount
+    );
+
+    await treeFactoryInstance.addTree(107, ipfsHash, { from: deployerAccount });
+
     await treeAuctionInstance.createAuction(
       107,
       Number(startTime),
@@ -262,7 +281,8 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 1000, {
         from: deployerAccount,
-      }).should.be.rejectedWith(IncrementalSellErrorMsg.OCCUPIED_TREES); // trees shouldnot be on other provides
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE); // trees shouldnot be on other provides
   });
   it("buyed Tree should be in incremental sell", async () => {
     await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
@@ -300,11 +320,11 @@ contract("IncrementalSell", (accounts) => {
     await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 1, {
       from: deployerAccount,
     });
-    await iSellInstance.addTreeSells(105, web3.utils.toWei("0.01"), 9900, 100, 1000, {
+    await iSellInstance.addTreeSells(105, web3.utils.toWei("0.01"), 250, 100, 1000, {
       from: deployerAccount,
     });
     await iSellInstance
-      .buyTree(102, { value: web3.utils.toWei("1.15") , from : userAccount3 })
+      .buyTree(102, { value: web3.utils.toWei("0.01") , from : userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
   });
 
@@ -318,7 +338,7 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.addTreeSells(
       101,
       web3.utils.toWei("0.01"),
-      9900,
+      250,
       100,
       1000,
       {
@@ -340,7 +360,7 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.addTreeSells(
       101,
       web3.utils.toWei("0.01"),
-      9900,
+      100,
       100,
       1000,
       {
@@ -352,17 +372,17 @@ contract("IncrementalSell", (accounts) => {
       from: userAccount3,
     });
     await Common.travelTime(TimeEnumes.minutes, 7);
-    await iSellInstance.buyTree(203, {
+    await iSellInstance.buyTree(150, {
       value: web3.utils.toWei("0.0099"),
       from: userAccount3,
     });
-    await iSellInstance.buyTree(226, {
+    await iSellInstance.buyTree(180, {
       value: web3.utils.toWei("0.011"),
       from: userAccount3,
     });
     await Common.travelTime(TimeEnumes.minutes, 12);
     await iSellInstance
-      .buyTree(292, { value: web3.utils.toWei("0.0099"), from: userAccount3 })
+      .buyTree(192, { value: web3.utils.toWei("0.0099"), from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
   it("check discount usage", async () => {
@@ -375,7 +395,7 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.addTreeSells(
       101,
       web3.utils.toWei("0.01"),
-      9900,
+      100,
       100,
       1000,
       {
@@ -395,6 +415,6 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.buyTree(145, {
       value: web3.utils.toWei("0.009"),
       from: userAccount3,
-    });
+    }).should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
 });

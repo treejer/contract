@@ -25,6 +25,8 @@ interface IIncrementalSell {
 
     function buyTree(uint256 treeId) external payable;
 
+    function updateIncrementalEnd(uint treeCount) external;
+
     function addTreeSells(
         uint256 startTree,
         uint256 initialPrice,

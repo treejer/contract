@@ -2,10 +2,8 @@
 
 pragma solidity >=0.7.6;
 
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
@@ -14,8 +12,6 @@ import "../gsn/RelayRecipient.sol";
 
 contract Treasury is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeCastUpgradeable for uint256;
-    using SafeMathUpgradeable for uint256;
 
     CountersUpgradeable.Counter private fundDistributionCount;
 
@@ -312,13 +308,17 @@ contract Treasury is Initializable, RelayRecipient {
                         break;
                     }
                     if (
-                        i > 0 &&
-                        _endTreeId.add(1) < localAssigns[i].startingTreeId
+                        i > 0 && _endTreeId + 1 < localAssigns[i].startingTreeId
+                        //TODO mathUpdate _endTreeId.add(1) < localAssigns[i].startingTreeId
                     ) {
+                        //TODO: mathUpdate AssignModel(
+                        //     _endTreeId.add(1),
+                        //     localAssigns[i.sub(1)].distributionModelId
+                        // )
                         assignModels.push(
                             AssignModel(
-                                _endTreeId.add(1),
-                                localAssigns[i.sub(1)].distributionModelId
+                                _endTreeId + 1,
+                                localAssigns[i - 1].distributionModelId
                             )
                         );
                         checkFlag = 2;
@@ -347,10 +347,15 @@ contract Treasury is Initializable, RelayRecipient {
             if (maxAssignedIndex < _endTreeId) {
                 maxAssignedIndex = _endTreeId;
             } else if (localAssigns.length > 0) {
+                //TODO: mathUpdate AssignModel(
+                //     _endTreeId.add(1),
+                //     localAssigns[localAssigns.length.sub(1)]
+                //         .distributionModelId
+                // )
                 assignModels.push(
                     AssignModel(
-                        _endTreeId.add(1),
-                        localAssigns[localAssigns.length.sub(1)]
+                        _endTreeId + 1,
+                        localAssigns[localAssigns.length - 1]
                             .distributionModelId
                     )
                 );
@@ -377,41 +382,58 @@ contract Treasury is Initializable, RelayRecipient {
             .distributionModelId
         ];
 
-        planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
+        //TODO: mathUpdate planterFunds[_treeId] = msg.value.mul(dm.planterFund).div(10000);
+        planterFunds[_treeId] = (msg.value * dm.planterFund) / 10000;
 
-        referralFunds[_treeId] = msg.value.mul(dm.referralFund).div(10000);
+        //TODO: mathUpdate referralFunds[_treeId] = msg.value.mul(dm.referralFund).div(10000);
+        referralFunds[_treeId] = (msg.value * dm.referralFund) / 10000;
 
-        totalFunds.referralFund = totalFunds.referralFund.add(
-            msg.value.mul(dm.referralFund).div(10000)
-        );
+        //TODO: mathUpdate totalFunds.referralFund = totalFunds.referralFund.add(
+        //     msg.value.mul(dm.referralFund).div(10000)
+        // );
+        totalFunds.referralFund += (msg.value * dm.referralFund) / 10000;
 
-        totalFunds.localDevelop = totalFunds.localDevelop.add(
-            msg.value.mul(dm.localDevelop).div(10000)
-        );
+        //TODO: mathUpdate totalFunds.localDevelop = totalFunds.localDevelop.add(
+        //     msg.value.mul(dm.localDevelop).div(10000)
+        // );
 
-        totalFunds.reserveFund1 = totalFunds.reserveFund1.add(
-            msg.value.mul(dm.reserveFund1).div(10000)
-        );
+        totalFunds.localDevelop += (msg.value * dm.localDevelop) / 10000;
 
-        totalFunds.reserveFund2 = totalFunds.reserveFund2.add(
-            msg.value.mul(dm.reserveFund2).div(10000)
-        );
+        //TODO: mathUpdate totalFunds.reserveFund1 = totalFunds.reserveFund1.add(
+        //     msg.value.mul(dm.reserveFund1).div(10000)
+        // );
 
-        totalFunds.planterFund = totalFunds.planterFund.add(
-            msg.value.mul(dm.planterFund).div(10000)
-        );
+        totalFunds.reserveFund1 += (msg.value * dm.reserveFund1) / 10000;
 
-        totalFunds.rescueFund = totalFunds.rescueFund.add(
-            msg.value.mul(dm.rescueFund).div(10000)
-        );
+        //TODO: mathUpdate totalFunds.reserveFund2 = totalFunds.reserveFund2.add(
+        //     msg.value.mul(dm.reserveFund2).div(10000)
+        // );
 
-        totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(
-            msg.value.mul(dm.treejerDevelop).div(10000)
-        );
+        totalFunds.reserveFund2 += (msg.value * dm.reserveFund2) / 10000;
 
-        totalFunds.treeResearch = totalFunds.treeResearch.add(
-            msg.value.mul(dm.treeResearch).div(10000)
-        );
+        //TODO: mathUpdate totalFunds.planterFund = totalFunds.planterFund.add(
+        //     msg.value.mul(dm.planterFund).div(10000)
+        // );
+
+        totalFunds.planterFund += (msg.value * dm.planterFund) / 10000;
+
+        //TODO: mathUpdate totalFunds.rescueFund = totalFunds.rescueFund.add(
+        //     msg.value.mul(dm.rescueFund).div(10000)
+        // );
+
+        totalFunds.rescueFund += (msg.value * dm.rescueFund) / 10000;
+
+        //TODO: mathUpdate totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(
+        //     msg.value.mul(dm.treejerDevelop).div(10000)
+        // );
+
+        totalFunds.treejerDevelop += (msg.value * dm.treejerDevelop) / 10000;
+
+        //TODO: mathUpdate totalFunds.treeResearch = totalFunds.treeResearch.add(
+        //     msg.value.mul(dm.treeResearch).div(10000)
+        // );
+
+        totalFunds.treeResearch += ((msg.value * dm.treeResearch) / 10000);
     }
 
     /**
@@ -441,60 +463,97 @@ contract Treasury is Initializable, RelayRecipient {
 
             if (_treeStatus > 25920) {
                 //25920 = 30 * 24 * 36
-                totalPayablePlanter = planterFunds[_treeId].sub(
-                    plantersPaid[_treeId]
-                );
+
+                //TODO: mathUpdate totalPayablePlanter = planterFunds[_treeId].sub(
+                //     plantersPaid[_treeId]
+                // );
+
+                totalPayablePlanter =
+                    planterFunds[_treeId] -
+                    plantersPaid[_treeId];
             } else {
-                totalPayablePlanter = planterFunds[_treeId]
-                .mul(_treeStatus)
-                .div(25920)
-                .sub(plantersPaid[_treeId]);
+                //TODO: mathUpdate totalPayablePlanter = planterFunds[_treeId]
+                // .mul(_treeStatus)
+                // .div(25920)
+                // .sub(plantersPaid[_treeId]);
+
+                totalPayablePlanter =
+                    ((planterFunds[_treeId] * _treeStatus) / 25920) -
+                    plantersPaid[_treeId];
             }
 
             if (totalPayablePlanter > 0) {
-                uint256 totalPayableRefferal = referralFunds[_treeId]
-                .mul(totalPayablePlanter)
-                .div(planterFunds[_treeId]);
+                //TODO: mathUpdate uint256 totalPayableRefferal = referralFunds[_treeId]
+                // .mul(totalPayablePlanter)
+                // .div(planterFunds[_treeId]);
+
+                uint256 totalPayableRefferal = (referralFunds[_treeId] *
+                    totalPayablePlanter) / planterFunds[_treeId];
 
                 //referral calculation section
-                totalFunds.referralFund = totalFunds.referralFund.sub(
-                    totalPayableRefferal
-                );
+
+                //TODO: mathUpdate
+                //totalFunds.referralFund = totalFunds.referralFund.sub(
+                //     totalPayableRefferal
+                // );
+                totalFunds.referralFund -= totalPayableRefferal;
 
                 if (gottenReferralAddress == address(0)) {
-                    totalFunds.localDevelop = totalFunds.localDevelop.add(
-                        totalPayableRefferal
-                    );
+                    //TODO: mathUpdate
+                    // totalFunds.localDevelop = totalFunds.localDevelop.add(
+                    //     totalPayableRefferal
+                    // );
+                    totalFunds.localDevelop += totalPayableRefferal;
                 } else {
-                    balances[gottenReferralAddress] = balances[
-                        gottenReferralAddress
-                    ]
-                    .add(totalPayableRefferal);
+                    //TODO: mathUpdate
+                    // balances[gottenReferralAddress] = balances[
+                    //     gottenReferralAddress
+                    // ]
+                    // .add(totalPayableRefferal);
+                    balances[gottenReferralAddress] += totalPayableRefferal;
                 }
 
-                totalFunds.planterFund = totalFunds.planterFund.sub(
-                    totalPayablePlanter
-                );
+                //TODO: mathUpdate
+                // totalFunds.planterFund = totalFunds.planterFund.sub(
+                //     totalPayablePlanter
+                // );
+
+                totalFunds.planterFund -= totalPayablePlanter;
 
                 //Organization calculation section
                 uint256 fullPortion = 10000;
-                balances[gottenOrganizationAddress] = balances[
-                    gottenOrganizationAddress
-                ]
-                .add(
-                    totalPayablePlanter.mul(fullPortion.sub(gottenPortion)).div(
-                        fullPortion
-                    )
-                );
+
+                //TODO: mathUpdate
+                // balances[gottenOrganizationAddress] = balances[
+                //     gottenOrganizationAddress
+                // ]
+                // .add(
+                //     totalPayablePlanter.mul(fullPortion.sub(gottenPortion)).div(
+                //         fullPortion
+                //     )
+                // );
+
+                balances[gottenOrganizationAddress] +=
+                    (totalPayablePlanter * (fullPortion - gottenPortion)) /
+                    fullPortion;
 
                 //planter calculation section
-                plantersPaid[_treeId] = plantersPaid[_treeId].add(
-                    totalPayablePlanter
-                );
 
-                balances[_planterId] = balances[_planterId].add(
-                    totalPayablePlanter.mul(gottenPortion).div(fullPortion)
-                );
+                //TODO: mathUpdate
+                // plantersPaid[_treeId] = plantersPaid[_treeId].add(
+                //     totalPayablePlanter
+                // );
+
+                plantersPaid[_treeId] += totalPayablePlanter;
+
+                //TODO: mathUpdate
+                // balances[_planterId] = balances[_planterId].add(
+                //     totalPayablePlanter.mul(gottenPortion).div(fullPortion)
+                // );
+
+                balances[_planterId] +=
+                    (totalPayablePlanter * gottenPortion) /
+                    fullPortion;
 
                 emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
             }
@@ -536,7 +595,10 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.treeResearch = totalFunds.treeResearch.sub(_amount);
+        //TODO: mathUpdate
+        //totalFunds.treeResearch = totalFunds.treeResearch.sub(_amount);
+
+        totalFunds.treeResearch -= _amount;
 
         if (treeResearchAddress.send(_amount)) {
             emit TreeResearchBalanceWithdrawn(
@@ -545,7 +607,9 @@ contract Treasury is Initializable, RelayRecipient {
                 _reason
             );
         } else {
-            totalFunds.treeResearch = totalFunds.treeResearch.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.treeResearch = totalFunds.treeResearch.add(_amount);
+            totalFunds.treeResearch += _amount;
         }
     }
 
@@ -566,7 +630,10 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.localDevelop = totalFunds.localDevelop.sub(_amount);
+        //TODO: mathUpdate
+        // totalFunds.localDevelop = totalFunds.localDevelop.sub(_amount);
+
+        totalFunds.localDevelop -= _amount;
 
         if (localDevelopAddress.send(_amount)) {
             emit LocalDevelopBalanceWithdrawn(
@@ -575,7 +642,9 @@ contract Treasury is Initializable, RelayRecipient {
                 _reason
             );
         } else {
-            totalFunds.localDevelop = totalFunds.localDevelop.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.localDevelop = totalFunds.localDevelop.add(_amount);
+            totalFunds.localDevelop += _amount;
         }
     }
 
@@ -596,12 +665,16 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.rescueFund = totalFunds.rescueFund.sub(_amount);
+        //TODO: mathUpdate
+        // totalFunds.rescueFund = totalFunds.rescueFund.sub(_amount);
+        totalFunds.rescueFund -= _amount;
 
         if (rescueFundAddress.send(_amount)) {
             emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
         } else {
-            totalFunds.rescueFund = totalFunds.rescueFund.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.rescueFund = totalFunds.rescueFund.add(_amount);
+            totalFunds.rescueFund += _amount;
         }
     }
 
@@ -622,7 +695,10 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+        //TODO: mathUpdate
+        //totalFunds.treejerDevelop = totalFunds.treejerDevelop.sub(_amount);
+
+        totalFunds.treejerDevelop -= _amount;
 
         if (treejerDevelopAddress.send(_amount)) {
             emit TreejerDevelopBalanceWithdrawn(
@@ -631,7 +707,9 @@ contract Treasury is Initializable, RelayRecipient {
                 _reason
             );
         } else {
-            totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.treejerDevelop = totalFunds.treejerDevelop.add(_amount);
+            totalFunds.treejerDevelop += _amount;
         }
     }
 
@@ -652,12 +730,17 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.reserveFund1 = totalFunds.reserveFund1.sub(_amount);
+        //TODO: mathUpdate
+        //totalFunds.reserveFund1 = totalFunds.reserveFund1.sub(_amount);
+
+        totalFunds.reserveFund1 -= _amount;
 
         if (reserveFundAddress1.send(_amount)) {
             emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
         } else {
-            totalFunds.reserveFund1 = totalFunds.reserveFund1.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.reserveFund1 = totalFunds.reserveFund1.add(_amount);
+            totalFunds.reserveFund1 += _amount;
         }
     }
 
@@ -678,12 +761,17 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        totalFunds.reserveFund2 = totalFunds.reserveFund2.sub(_amount);
+        //TODO: mathUpdate
+        //totalFunds.reserveFund2 = totalFunds.reserveFund2.sub(_amount);
+
+        totalFunds.reserveFund2 -= _amount;
 
         if (reserveFundAddress2.send(_amount)) {
             emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
         } else {
-            totalFunds.reserveFund2 = totalFunds.reserveFund2.add(_amount);
+            //TODO: mathUpdate
+            //totalFunds.reserveFund2 = totalFunds.reserveFund2.add(_amount);
+            totalFunds.reserveFund2 += _amount;
         }
     }
 
@@ -698,12 +786,16 @@ contract Treasury is Initializable, RelayRecipient {
             "insufficient amount"
         );
 
-        balances[_msgSender()] = balances[_msgSender()].sub(_amount);
+        //TODO: mathUpdate
+        //balances[_msgSender()] = balances[_msgSender()].sub(_amount);
+        balances[_msgSender()] -= _amount;
 
-        if (_msgSender().send(_amount)) {
+        if (payable(_msgSender()).send(_amount)) {
             emit PlanterBalanceWithdrawn(_amount, _msgSender());
         } else {
-            balances[_msgSender()] = balances[_msgSender()].add(_amount);
+            //TODO: mathUpdate
+            //balances[_msgSender()] = balances[_msgSender()].add(_amount);
+            balances[_msgSender()] += _amount;
         }
     }
 
@@ -719,7 +811,9 @@ contract Treasury is Initializable, RelayRecipient {
 
         for (i; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
-                return i.sub(1, "invalid fund model");
+                //TODO: mathUpdate
+                // return i.sub(1, "invalid fund model");
+                return i - 1;
             }
         }
 
@@ -728,8 +822,9 @@ contract Treasury is Initializable, RelayRecipient {
                 "there is no assigned values for this treeId"
             );
         }
-
-        return i.sub(1, "invalid fund model");
+        //TODO: mathUpdate
+        // return i.sub(1, "invalid fund model");
+        return i - 1;
     }
 
     /**

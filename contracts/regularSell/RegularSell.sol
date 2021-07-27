@@ -1,8 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
@@ -10,8 +9,6 @@ import "../treasury/ITreasury.sol";
 
 /** @title RegularSell contract */
 contract RegularSell is Initializable {
-    using SafeMathUpgradeable for uint256;
-
     uint256 public lastSoldRegularTree;
     uint256 public treePrice;
     bool public isRegularSell;
@@ -86,7 +83,8 @@ contract RegularSell is Initializable {
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
-        require(msg.value >= treePrice.mul(_count), "invalid amount");
+        // require(msg.value >= treePrice.mul(_count), "invalid amount");
+        require(msg.value >= treePrice * _count, "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
@@ -103,7 +101,7 @@ contract RegularSell is Initializable {
 
         lastSoldRegularTree = tempLastRegularSold;
 
-        RegularTreeRequsted(_count, msg.sender, msg.value);
+        emit RegularTreeRequsted(_count, msg.sender, msg.value);
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
@@ -119,6 +117,6 @@ contract RegularSell is Initializable {
 
         treasury.fundTree{value: msg.value}(_treeId);
 
-        RegularTreeRequstedById(_treeId, msg.sender, msg.value);
+        emit RegularTreeRequstedById(_treeId, msg.sender, msg.value);
     }
 }

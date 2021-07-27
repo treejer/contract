@@ -1,7 +1,7 @@
 // // SPDX-License-Identifier: MIT
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
@@ -71,36 +71,38 @@ contract IncrementalSell is Initializable {
             treasury.distributionModelExistance(startTree),
             "equivalant fund Model not exists"
         );
-        IncrementalPrice storage incrPrice=incrementalPrice;
+        IncrementalPrice storage incrPrice = incrementalPrice;
 
         if (incrPrice.increaseStep > 0) {
-            treeFactory.bulkRevert(
-                incrPrice.startTree,
-                incrPrice.endTree
-            );
+            treeFactory.bulkRevert(incrPrice.startTree, incrPrice.endTree);
         }
 
-      
-        require(treeFactory.bulkAvailability(
-            startTree,
-            startTree + treeCount
-        ), "trees are not available for sell");
+        require(
+            treeFactory.bulkAvailability(startTree, startTree + treeCount),
+            "trees are not available for sell"
+        );
 
-        incrPrice.startTree =startTree;
-        incrPrice.endTree =startTree + treeCount;
-        incrPrice.initialPrice =initialPrice;
-        incrPrice.increaseStep =steps;
-        incrPrice.increaseRatio =incrementRate;
+        incrPrice.startTree = startTree;
+        incrPrice.endTree = startTree + treeCount;
+        incrPrice.initialPrice = initialPrice;
+        incrPrice.increaseStep = steps;
+        incrPrice.increaseRatio = incrementRate;
     }
 
-    function updateIncrementalEnd(uint256 treeCount) external onlyAdmin{
-        IncrementalPrice storage incrPrice=incrementalPrice;
-        require(incrPrice.increaseStep > 0 , "incremental period should be positive");
-        require(treeFactory.bulkAvailability(
-            incrPrice.endTree,
-            incrPrice.endTree+ treeCount
-        ), "trees are not available for sell");
-        incrPrice.endTree =incrPrice.endTree + treeCount;
+    function updateIncrementalEnd(uint256 treeCount) external onlyAdmin {
+        IncrementalPrice storage incrPrice = incrementalPrice;
+        require(
+            incrPrice.increaseStep > 0,
+            "incremental period should be positive"
+        );
+        require(
+            treeFactory.bulkAvailability(
+                incrPrice.endTree,
+                incrPrice.endTree + treeCount
+            ),
+            "trees are not available for sell"
+        );
+        incrPrice.endTree = incrPrice.endTree + treeCount;
     }
 
     function buyTree(uint256 treeId) external payable ifNotPaused {
@@ -111,7 +113,7 @@ contract IncrementalSell is Initializable {
             "tree is not in incremental sell"
         );
 
-        address payable buyer = msg.sender;
+        address buyer = msg.sender;
         uint256 amount = msg.value;
         //calc tree price based on treeId
         uint256 steps = (treeId - incPrice.startTree) / incPrice.increaseStep;

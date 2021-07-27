@@ -1,11 +1,9 @@
 // // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
@@ -14,9 +12,6 @@ import "../treasury/ITreasury.sol";
 
 contract TreeAuction is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeMathUpgradeable for uint256;
-    using SafeMathUpgradeable for uint64;
-    using SafeCastUpgradeable for uint256;
 
     CountersUpgradeable.Counter private auctionId;
 
@@ -30,7 +25,7 @@ contract TreeAuction is Initializable {
 
     struct Auction {
         uint256 treeId;
-        address payable bidder;
+        address bidder;
         uint64 startDate;
         uint64 endDate;
         uint256 highestBid;
@@ -155,15 +150,21 @@ contract TreeAuction is Initializable {
     function bid(uint256 _auctionId) external payable ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
-        require(block.timestamp <= _storageAuction.endDate, "auction already ended");
-        require(block.timestamp >= _storageAuction.startDate, "auction not started");
+        require(
+            block.timestamp <= _storageAuction.endDate,
+            "auction already ended"
+        );
+        require(
+            block.timestamp >= _storageAuction.startDate,
+            "auction not started"
+        );
         require(
             msg.value >=
-                _storageAuction.highestBid.add(_storageAuction.bidInterval),
+                _storageAuction.highestBid + _storageAuction.bidInterval,
             "invalid amount"
         );
 
-        address payable oldBidder = _storageAuction.bidder;
+        address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
         _storageAuction.highestBid = msg.value;
@@ -191,7 +192,7 @@ contract TreeAuction is Initializable {
 
         pendingWithdraw[msg.sender] = 0;
 
-        if (!msg.sender.send(amount)) {
+        if (!payable(msg.sender).send(amount)) {
             pendingWithdraw[msg.sender] = amount;
             return false;
         }
@@ -234,12 +235,8 @@ contract TreeAuction is Initializable {
      * @param _auctionId id of auction that increase end time of it.
      */
     function _increaseAuctionEndTime(uint256 _auctionId) private {
-        if (auctions[_auctionId].endDate.sub(block.timestamp).toUint64() <= 600) {
-            auctions[_auctionId].endDate = auctions[_auctionId]
-            .endDate
-            .add(600)
-            .toUint64();
-
+        if (auctions[_auctionId].endDate - block.timestamp <= 600) {
+            auctions[_auctionId].endDate += 600;
             emit AuctionEndTimeIncreased(
                 _auctionId,
                 auctions[_auctionId].endDate
@@ -253,7 +250,7 @@ contract TreeAuction is Initializable {
 
     function _withdraw(
         uint256 _oldBid,
-        address payable _oldBidder,
+        address _oldBidder,
         uint256 _auctionId
     ) private {
         if (_oldBidder != address(0)) {
@@ -264,14 +261,9 @@ contract TreeAuction is Initializable {
             }
 
             if (size > 0) {
-                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                    _oldBid
-                );
-            } else if (!_oldBidder.send(_oldBid)) {
-                pendingWithdraw[_oldBidder] = pendingWithdraw[_oldBidder].add(
-                    _oldBid
-                );
-
+                pendingWithdraw[_oldBidder] += _oldBid;
+            } else if (!payable(_oldBidder).send(_oldBid)) {
+                pendingWithdraw[_oldBidder] += _oldBid;
                 emit AuctionWithdrawFaild(_auctionId, _oldBidder, _oldBid);
             }
         }

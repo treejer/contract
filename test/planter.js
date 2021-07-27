@@ -15,9 +15,9 @@ const {
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider")
-const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
-const ethers = require('ethers')
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("Planter", (accounts) => {
   let planterInstance;
@@ -2056,11 +2056,12 @@ contract("Planter", (accounts) => {
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
-    const {
-      forwarderAddress,
-      relayHubAddress,
-      paymasterAddress,
-    } = env.contractsDeployment;
+
+    // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
+    // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
+    // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
 
     await planterInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,

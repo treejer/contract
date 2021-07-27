@@ -25,7 +25,7 @@ contract RegularSell is Initializable {
         uint256 amount
     );
 
-    modifier onlyAdmin {
+    modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
@@ -83,6 +83,7 @@ contract RegularSell is Initializable {
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
+        //TODO: amathUpdate
         // require(msg.value >= treePrice.mul(_count), "invalid amount");
         require(msg.value >= treePrice * _count, "invalid amount");
 

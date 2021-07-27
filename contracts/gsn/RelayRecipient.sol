@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.6;
 
-import "@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "./externalFile/BaseRelayRecipient.sol";
 
 contract RelayRecipient is BaseRelayRecipient {
     function versionRecipient() external pure override returns (string memory) {

@@ -40,8 +40,8 @@ module.exports = async function (deployer, network, accounts) {
   );
 
   if (isLocal) {
-    trustedForwarder = require("../build/gsn/Forwarder.json").address;
-    relayHub = require("../build/gsn/RelayHub.json").address;
+    trustedForwarder = process.env.GSN_FORWARDER;
+    relayHub = process.env.GSN_RELAY_HUB;
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;

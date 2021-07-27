@@ -83,8 +83,6 @@ contract RegularSell is Initializable {
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
-        //TODO: amathUpdate
-        // require(msg.value >= treePrice.mul(_count), "invalid amount");
         require(msg.value >= treePrice * _count, "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;

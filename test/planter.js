@@ -15,9 +15,9 @@ const {
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/gsn");
-const { GsnTestEnvironment } = require("@opengsn/gsn/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+const Gsn = require("@opengsn/provider")
+const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
+const ethers = require('ethers')
 
 contract("Planter", (accounts) => {
   let planterInstance;

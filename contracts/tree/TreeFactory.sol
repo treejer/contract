@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.9;
+pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
@@ -202,7 +202,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         tempGenTree.countryCode = _countryCode;
         tempGenTree.birthDate = _birthDate;
-        tempGenTree.plantDate = now.toUint64();
+        tempGenTree.plantDate = block.timestamp.toUint64();
         tempGenTree.treeStatus = 3;
 
         emit TreePlanted(_treeId);
@@ -258,7 +258,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         );
 
         require(
-            now >=
+            block.timestamp >=
                 treeData[_treeId].plantDate.add(
                     treeData[_treeId].treeStatus.mul(3600).add(86400)
                 ),
@@ -301,7 +301,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             TreeStruct storage tree = treeData[_treeId];
 
             updateGenTree.updateStatus = 3;
-            uint32 age = now
+            uint32 age = block.timestamp
             .sub(treeData[_treeId].plantDate)
             .div(3600)
             .toUint32();
@@ -430,7 +430,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         regularTrees[regularTreeId.current()] = RegularTree(
             _birthDate,
-            now.toUint64(),
+            block.timestamp.toUint64(),
             _countryCode,
             0,
             _msgSender(),

@@ -1,6 +1,6 @@
 // // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.9;
+pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
@@ -231,7 +231,7 @@ contract TreeAttribute is Initializable {
     ) external onlyAdmin {
         uint256 points;
         //each 0.004 ether spent in treejer has 10 points
-        points += (treejerSpent / (4 * 1 finney)) * 10;
+        points += (treejerSpent / (4 * 1 wei)) * 10;
         //each 1 ether spent of wallet(sent or withdraw) has 2 points
         points += (walletSpent / (1 * 1 ether)) * 2;
         // each 1 send or withdraw of wallet has 1 point

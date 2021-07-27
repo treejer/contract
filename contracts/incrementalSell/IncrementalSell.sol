@@ -1,5 +1,5 @@
 // // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.9;
+pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "../access/IAccessRestriction.sol";
@@ -120,12 +120,12 @@ contract IncrementalSell is Initializable {
             10000;
 
         //checking price paid is enough for buying the treeId checking discounts
-        if (lastBuy[buyer] > now - 700 seconds) {
+        if (lastBuy[buyer] > block.timestamp - 700 seconds) {
             require(amount >= (treePrice * 90) / 100, "low price paid");
             lastBuy[buyer] = 0;
         } else {
             require(amount >= treePrice, "low price paid");
-            lastBuy[buyer] = now;
+            lastBuy[buyer] = block.timestamp;
         }
 
         treasury.fundTree{value: amount}(treeId);

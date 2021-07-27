@@ -7,7 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "@opengsn/gsn": "^2.1.0",
+    "@opengsn/cli": "^2.2.2",
+    "@opengsn/contracts": "^2.2.2",
     "@openzeppelin/contracts": "^3.1.0",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "@openzeppelin/contracts-upgradeable": "^3.3.0",
@@ -15,7 +16,7 @@
     "arb-ethers-web3-bridge": "^0.7.3",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
-    "truffle": "^5.2.6"
+    "truffle": "^5.4.0"
   },
   "devDependencies": {
     "@codechecks/client": "^0.1.10",

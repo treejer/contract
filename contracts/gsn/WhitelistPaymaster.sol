@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.6.10;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.7.6;
+pragma abicoder v2;
 
-import "@opengsn/gsn/contracts/forwarder/IForwarder.sol";
-import "@opengsn/gsn/contracts/BasePaymaster.sol";
+import "@opengsn/contracts/src/forwarder/IForwarder.sol";
+import "@opengsn/contracts/src/BasePaymaster.sol";
 
 import "../access/IAccessRestriction.sol";
 
@@ -14,7 +14,7 @@ contract WhitelistPaymaster is BasePaymaster {
     //related contracts
     IAccessRestriction public accessRestriction;
 
-    constructor(address _accessRestrictionAddress) public {
+    constructor(address _accessRestrictionAddress) {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -22,8 +22,13 @@ contract WhitelistPaymaster is BasePaymaster {
         accessRestriction = candidateContract;
     }
 
-
     function setWhitelistTarget(address target) external {
+        accessRestriction.ifAdmin(msg.sender);
+
+        targetWhitelist[target] = true;
+    }
+
+    function setPaymasterVersion(address target) external {
         accessRestriction.ifAdmin(msg.sender);
 
         targetWhitelist[target] = true;
@@ -40,10 +45,12 @@ contract WhitelistPaymaster is BasePaymaster {
         override
         returns (bytes memory context, bool revertOnRecipientRevert)
     {
+        (relayRequest, signature, approvalData, maxPossibleGas);
+
         _verifyForwarder(relayRequest);
 
         (relayRequest, signature, approvalData, maxPossibleGas);
-        //TODO: isPlanterOrAmbassedor change to isPlanter
+
         accessRestriction.ifPlanter(relayRequest.request.from);
 
         require(
@@ -70,7 +77,7 @@ contract WhitelistPaymaster is BasePaymaster {
         override
         returns (string memory)
     {
-        return "2.0.3";
+        return "2.2.0+treejer.whitelist.ipaymaster";
     }
 
     //withdraw

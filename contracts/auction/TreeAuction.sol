@@ -1,6 +1,6 @@
 // // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.6.9;
+pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
@@ -155,8 +155,8 @@ contract TreeAuction is Initializable {
     function bid(uint256 _auctionId) external payable ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
-        require(now <= _storageAuction.endDate, "auction already ended");
-        require(now >= _storageAuction.startDate, "auction not started");
+        require(block.timestamp <= _storageAuction.endDate, "auction already ended");
+        require(block.timestamp >= _storageAuction.startDate, "auction not started");
         require(
             msg.value >=
                 _storageAuction.highestBid.add(_storageAuction.bidInterval),
@@ -208,7 +208,7 @@ contract TreeAuction is Initializable {
 
         require(auction.endDate > 0, "Auction is unavailable");
 
-        require(now >= auction.endDate, "Auction not yet ended");
+        require(block.timestamp >= auction.endDate, "Auction not yet ended");
 
         if (auction.bidder != address(0)) {
             treeFactory.updateOwner(auction.treeId, auction.bidder);
@@ -234,7 +234,7 @@ contract TreeAuction is Initializable {
      * @param _auctionId id of auction that increase end time of it.
      */
     function _increaseAuctionEndTime(uint256 _auctionId) private {
-        if (auctions[_auctionId].endDate.sub(now).toUint64() <= 600) {
+        if (auctions[_auctionId].endDate.sub(block.timestamp).toUint64() <= 600) {
             auctions[_auctionId].endDate = auctions[_auctionId]
             .endDate
             .add(600)

@@ -8,6 +8,7 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
 
+/** @title RegularSell contract */
 contract RegularSell is Initializable {
     using SafeMathUpgradeable for uint256;
 
@@ -48,6 +49,9 @@ contract RegularSell is Initializable {
         emit TreePriceUpdated(_price);
     }
 
+    /** @dev set treeFactory contract address
+     * @param _address treeFactory contract address
+     */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
 
@@ -56,6 +60,9 @@ contract RegularSell is Initializable {
         treeFactory = candidateContract;
     }
 
+    /** @dev set treasury contract address
+     * @param _address treasury contract address
+     */
     function setTreasuryAddress(address _address) external onlyAdmin {
         ITreasury candidateContract = ITreasury(_address);
 
@@ -64,11 +71,18 @@ contract RegularSell is Initializable {
         treasury = candidateContract;
     }
 
+    /** @dev admin set the price of trees that are sold regular
+     * @param _price price of tree
+     */
     function setPrice(uint256 _price) external onlyAdmin {
         treePrice = _price;
         emit TreePriceUpdated(_price);
     }
 
+    /** @dev request {_count} trees and the paid amount must be more than
+     * {_count * treePrice }
+     * @param _count is the number of trees requested by user
+     */
     function requestTrees(uint256 _count) external payable {
         require(_count > 0, "invalid count");
 
@@ -92,6 +106,11 @@ contract RegularSell is Initializable {
         RegularTreeRequsted(_count, msg.sender, msg.value);
     }
 
+    /** @dev request  tree with id {_treeId} and the paid amount must be more than
+     * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to make sure that
+     * has not been sold before
+     * @param _treeId is the id of tree requested by user
+     */
     function requestByTreeId(uint256 _treeId) external payable {
         require(_treeId > lastSoldRegularTree, "invalid tree");
         require(msg.value >= treePrice, "invalid amount");

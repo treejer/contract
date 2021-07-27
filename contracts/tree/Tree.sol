@@ -10,7 +10,7 @@ import "../access/IAccessRestriction.sol";
 contract Tree is ERC721URIStorageUpgradeable {
     bool public isTree;
     IAccessRestriction public accessRestriction;
-    string baseURI;
+    string private baseURI;
 
     function initialize(
         address _accessRestrictionAddress,

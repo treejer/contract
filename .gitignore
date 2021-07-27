@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+.history
 
 # Directories used by tools like mocha & istanbul & openzeplinn
 coverage

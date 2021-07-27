@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");

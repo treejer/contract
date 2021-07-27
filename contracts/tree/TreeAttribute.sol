@@ -1,9 +1,9 @@
 // // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/SafeCastUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 

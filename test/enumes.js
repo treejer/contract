@@ -96,6 +96,7 @@ const IncrementalSellErrorMsg = {
 const TreeAttributeErrorMsg = {
   DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
   TREE_HAS_ATTRIBUTES: "tree attributes are set before",
+  TREE_WITH_NO_ATTRIBUTES:"no need to tree attributes"
 };
 module.exports = {
   TimeEnumes,

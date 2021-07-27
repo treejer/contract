@@ -42,10 +42,6 @@ contract TreeAttribute is Initializable {
         accessRestriction.ifNotPaused();
         _;
     }
-    modifier onlyIncrementalSellOrAuction() {
-        accessRestriction.ifIncrementalSellOrAuction(msg.sender);
-        _;
-    }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);

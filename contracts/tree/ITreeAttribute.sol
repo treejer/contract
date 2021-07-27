@@ -24,7 +24,7 @@ interface ITreeAttribute {
         external;
 
     function reserveTreeAttributes(uint32 generatedCode) external;
-
+    function rankOf(address _buyer) external view returns (uint8);
     event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);
     event TreeAttributesNotGenerated(uint256 treeId);

@@ -20,7 +20,7 @@ const AUCTION_ROLE = web3.utils.soliditySha3("AUCTION_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const TREASURY_ROLE = web3.utils.soliditySha3("TREASURY_ROLE");
 const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
-const INCREMENTAL_SELL_ROLE = keccak256("INCREMENTAL_SELL_ROLE");
+const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -107,7 +107,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call Tree Factory Methods...");
 
-  await TreeFactory.deployed().then((instance) => {
+  await TreeFactory.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setTreasuryAddress(Treasury.address);
     await instance.setPlanterAddress(Planter.address);
@@ -115,7 +115,7 @@ module.exports = async function (deployer, network, accounts) {
   });
 
   console.log("Call Tree Attribute Methods...");
-  await TreeAttribute.deployed().then((instance) => {
+  await TreeAttribute.deployed().then(async (instance) => {
     console.log("TreeFactory.address", TreeFactory.address);
 
     await instance.setTreeFactoryAddress(TreeFactory.address);
@@ -126,5 +126,19 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTreeFactoryAddress(treeFactoryAddress);
     await instance.setGBFactoryAddress(gbFactoryAddress);
     await instance.setTrustedForwarder(trustedForwarder);
+  });
+  console.log("Call Treasury Methods...");
+
+  await Treasury.deployed().then(async (instance) => {
+    await instance.setTrustedForwarder(trustedForwarder);
+    await instance.setPlanterContractAddress(Planter.address);
+    await instance.setTreeResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
+    await instance.setLocalDevelopAddress(process.env.LOCAL_DEVELOP_ADDRESS);
+    await instance.setRescueFundAddress(process.env.RESCUE_FUND_ADDRESS);
+    await instance.setTreejerDevelopAddress(
+      process.env.TREEJER_DEVELOP_ADDRESS
+    );
+    await instance.setReserveFund1Address(process.env.RESERVE_FUND_ADDRESS1);
+    await instance.setReserveFund2Address(process.env.RESERVE_FUND_ADDRESS2);
   });
 };

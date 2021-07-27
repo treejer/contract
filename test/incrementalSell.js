@@ -113,6 +113,7 @@ contract("IncrementalSell", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+
   it("should set tree factory address with admin access or fail otherwise", async () => {
     let tx = await iSellInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,
@@ -446,5 +447,116 @@ contract("IncrementalSell", (accounts) => {
         from: userAccount3,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+  });
+
+  it("Should updateIncrementalEnd succesfully", async () => {
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: deployerAccount,
+    });
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      100,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let incrementalPrice = await iSellInstance.incrementalPrice();
+
+    assert.equal(Number(incrementalPrice.startTree), 101, "startTree not true");
+    assert.equal(Number(incrementalPrice.endTree), 201, "startTree not true");
+    assert.equal(
+      Number(incrementalPrice.initialPrice),
+      Number(web3.utils.toWei("0.01")),
+      "initialPrice not true"
+    );
+    assert.equal(
+      Number(incrementalPrice.increaseStep),
+      100,
+      "increaseStep not true"
+    );
+    assert.equal(
+      Number(incrementalPrice.increaseRatio),
+      1000,
+      "increaseRatio not true"
+    );
+
+    await iSellInstance.updateIncrementalEnd(100, {
+      from: deployerAccount,
+    });
+
+    let incrementalPrice1 = await iSellInstance.incrementalPrice();
+
+    assert.equal(Number(incrementalPrice1.endTree), 301, "startTree not true");
+  });
+
+  it("Should updateIncrementalEnd reject()", async () => {
+    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+    await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      100,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await Common.addAuctionRole(
+      arInstance,
+      treeAuctionInstance.address,
+      deployerAccount
+    );
+
+    await treeFactoryInstance.addTree(217, ipfsHash, {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.createAuction(
+      217,
+      Number(startTime),
+      Number(endTime),
+      web3.utils.toWei("1"),
+      web3.utils.toWei("0.1"),
+      { from: deployerAccount }
+    );
+
+    await iSellInstance
+      .updateIncrementalEnd(100, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE);
   });
 });

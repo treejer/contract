@@ -121,12 +121,6 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTreeFactoryAddress(TreeFactory.address);
   });
 
-  console.log("Call UpdateFactory Methods...");
-  await UpdateFactory.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setGBFactoryAddress(gbFactoryAddress);
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
   console.log("Call Treasury Methods...");
 
   await Treasury.deployed().then(async (instance) => {

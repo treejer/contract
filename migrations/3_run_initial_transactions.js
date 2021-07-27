@@ -162,7 +162,7 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTreeFactoryAddress(treeFactoryAddress);
     await instance.setTreasuryAddress(treasuryAddress);
 
-    await instance.addTreeSells(101, web3.utils.toWei("0.01"), 101, 10, 1000, {
+    await instance.addTreeSells(101, web3.utils.toWei("0.01"), 100, 10, 1000, {
       from: accounts[0],
     });
   });

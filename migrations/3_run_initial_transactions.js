@@ -80,12 +80,6 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTreasuryAddress(treasuryAddress);
   });
 
-  console.log("Call IncrementalSell Methods...");
-  await IncrementalSell.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setTreasuryAddress(treasuryAddress);
-  });
-
   console.log("Fund Paymaster");
   if (!isLocal) {
     await web3.eth.sendTransaction({
@@ -131,5 +125,45 @@ module.exports = async function (deployer, network, accounts) {
     );
     await instance.setReserveFund1Address(process.env.RESERVE_FUND_ADDRESS1);
     await instance.setReserveFund2Address(process.env.RESERVE_FUND_ADDRESS2);
+
+    await instance.addFundDistributionModel(
+      4500,
+      500,
+      500,
+      1000,
+      1000,
+      2500,
+      0,
+      0,
+      {
+        from: accounts[0],
+      }
+    );
+
+    await instance.assignTreeFundDistributionModel(0, 0, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(1, 9, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(10, 99, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: accounts[0],
+    });
+  });
+
+  console.log("Call IncrementalSell Methods...");
+  await IncrementalSell.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setTreasuryAddress(treasuryAddress);
+
+    await instance.addTreeSells(101, web3.utils.toWei("0.01"), 101, 10, 1000, {
+      from: accounts[0],
+    });
   });
 };

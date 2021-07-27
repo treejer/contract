@@ -14,12 +14,12 @@ contract Tree is ERC721URIStorageUpgradeable {
 
     function initialize(
         address _accessRestrictionAddress,
-        string calldata _baseURI
+        string calldata baseURI_
     ) public initializer {
         isTree = true;
 
         __ERC721_init("Tree", "TREE");
-        baseURI = _baseURI;
+        baseURI = baseURI_;
 
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -28,10 +28,10 @@ contract Tree is ERC721URIStorageUpgradeable {
         accessRestriction = candidateContract;
     }
 
-    function setBaseURI(string calldata _baseURI) external {
+    function setBaseURI(string calldata baseURI_) external {
         accessRestriction.ifAdmin(msg.sender);
 
-        baseURI = _baseURI;
+        baseURI = baseURI_;
     }
 
     function setTokenURI(uint256 _tokenId, string calldata _tokenURI) external {

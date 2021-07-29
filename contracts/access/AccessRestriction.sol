@@ -11,6 +11,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
     bytes32 public constant REGULAR_SELL_ROLE = keccak256("REGULAR_SELL_ROLE");
+    bytes32 public constant FUNDS_ROLE = keccak256("FUNDS_ROLE");
 
     bytes32 public constant INCREMENTAL_SELL_ROLE =
         keccak256("INCREMENTAL_SELL_ROLE");
@@ -123,5 +124,13 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
 
     function isRegularSell(address _address) public view returns (bool) {
         return hasRole(REGULAR_SELL_ROLE, _address);
+    }
+
+    function ifFunds(address _address) public view {
+        require(isFunds(_address), "Caller is not Funds");
+    }
+
+    function isFunds(address _address) public view returns (bool) {
+        return hasRole(FUNDS_ROLE, _address);
     }
 }

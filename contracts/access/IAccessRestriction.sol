@@ -70,6 +70,10 @@ interface IAccessRestriction {
 
     function isRegularSell(address _address) external view returns (bool);
 
+    function ifFunds(address _address) external view;
+
+    function isFunds(address _address) external view returns (bool);
+
     function paused() external view returns (bool);
 
     function ifNotPaused() external view;

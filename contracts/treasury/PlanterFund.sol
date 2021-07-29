@@ -8,16 +8,10 @@ import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
 
-/** @title Treasury Contract */
+/** @title PlanterFund Contract */
 
-contract Treasury is Initializable, RelayRecipient {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    CountersUpgradeable.Counter private fundDistributionCount;
-
-    uint256 constant MAX_UINT256 = 2**256 - 1;
-    bool public isTreasury;
-    uint256 public maxAssignedIndex;
+contract PlanterFund is Initializable, RelayRecipient {
+    bool public isPlanterFund;
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
@@ -33,12 +27,6 @@ contract Treasury is Initializable, RelayRecipient {
     mapping(uint256 => uint256) public plantersPaid;
     mapping(address => uint256) public balances;
 
-    event DistributionModelOfTreeNotExist(string description);
-    event FundDistributionModelAssigned(
-        uint256 startingTreeId,
-        uint256 endingTreeId,
-        uint256 distributionModelId
-    );
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
 
@@ -50,16 +38,9 @@ contract Treasury is Initializable, RelayRecipient {
         accessRestriction.ifNotPaused();
         _;
     }
-    modifier onlyAuction() {
-        accessRestriction.ifAuction(_msgSender());
-        _;
-    }
+
     modifier onlyTreeFactory() {
         accessRestriction.ifTreeFactory(_msgSender());
-        _;
-    }
-    modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
         _;
     }
 
@@ -70,7 +51,7 @@ contract Treasury is Initializable, RelayRecipient {
 
         require(candidateContract.isAccessRestriction());
 
-        isTreasury = true;
+        isPlanterFund = true;
         accessRestriction = candidateContract;
     }
 

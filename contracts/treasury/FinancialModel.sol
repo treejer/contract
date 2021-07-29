@@ -90,16 +90,16 @@ contract FinancialModel is Initializable {
         uint16 _reserveFund1,
         uint16 _reserveFund2
     ) external onlyAdmin {
-        uint16 totalSum = _add(
-            _rescueFund,
-            _add(_localDevelop, _add(_treeResearch, _add(_planter, _referral)))
-        );
-
         require(
-            _add(
-                _reserveFund2,
-                _add(_reserveFund1, _add(_treejerDevelop, totalSum))
-            ) == 10000,
+            _planter +
+                _referral +
+                _treeResearch +
+                _localDevelop +
+                _rescueFund +
+                _treejerDevelop +
+                _reserveFund1 +
+                _reserveFund2 ==
+                10000,
             "sum must be 10000"
         );
 
@@ -290,20 +290,5 @@ contract FinancialModel is Initializable {
             fundDistribution.reserveFund1,
             fundDistribution.reserveFund2
         );
-    }
-
-    /**
-     * @dev privte function to calculate sum of two number safely
-     * @param a input 1
-     * @param b input 2
-     * @return sum of inputs thar is uint256
-     */
-
-    function _add(uint16 a, uint16 b) private pure returns (uint16) {
-        uint16 c = a + b;
-
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
     }
 }

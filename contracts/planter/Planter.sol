@@ -56,6 +56,7 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction.ifNotPaused();
         _;
     }
+
     modifier existPlanter(address _planterAddress) {
         require(
             planters[_planterAddress].planterType > 0,

@@ -4,6 +4,8 @@ pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
@@ -15,11 +17,14 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
+    IERC20 public daiToken;
 
     struct TotalFunds {
         uint256 planterFund;
         uint256 referralFund;
+        uint256 localDevelop;
     }
+
     TotalFunds public totalFunds;
 
     mapping(uint256 => uint256) public planterFunds;
@@ -80,12 +85,13 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     function setPlanterFunds(
         uint256 _treeId,
-        uint256 _referralFund,
-        uint256 _planterFund
+        uint256 _planterFund,
+        uint256 _referralFund
     ) external onlyFunds {
         planterFunds[_treeId] = _planterFund;
         referralFunds[_treeId] = _referralFund;
-        totalFunds.planterFund = _planterFund;
+
+        totalFunds.planterFund += _planterFund;
         totalFunds.referralFund += _referralFund;
     }
 
@@ -127,14 +133,16 @@ contract PlanterFund is Initializable, RelayRecipient {
             }
 
             if (totalPayablePlanter > 0) {
-                if (gottenReferralAddress != address(0)) {
-                    uint256 totalPayableRefferal = (referralFunds[_treeId] *
-                        totalPayablePlanter) / planterFunds[_treeId];
+                uint256 totalPayableRefferal = (referralFunds[_treeId] *
+                    totalPayablePlanter) / planterFunds[_treeId];
 
-                    //referral calculation section
+                //referral calculation section
 
-                    totalFunds.referralFund -= totalPayableRefferal;
+                totalFunds.referralFund -= totalPayableRefferal;
 
+                if (gottenReferralAddress == address(0)) {
+                    totalFunds.localDevelop += totalPayableRefferal;
+                } else {
                     balances[gottenReferralAddress] += totalPayableRefferal;
                 }
 
@@ -173,7 +181,7 @@ contract PlanterFund is Initializable, RelayRecipient {
 
         balances[_msgSender()] -= _amount;
 
-        if (payable(_msgSender()).send(_amount)) {
+        if (daiToken.transfer(_msgSender(), _amount)) {
             emit PlanterBalanceWithdrawn(_amount, _msgSender());
         } else {
             balances[_msgSender()] += _amount;

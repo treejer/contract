@@ -14,9 +14,9 @@ const { CommonErrorMsg, TreasuryManagerErrorMsg } = require("./enumes");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider")
-const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
-const ethers = require('ethers')
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("Treasury", (accounts) => {
   let TreasuryInstance;
@@ -6079,11 +6079,8 @@ contract("Treasury", (accounts) => {
   // //----------------------------------------------gsn test-------------------------------------------
   it("Test gsn in Treasury", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
-    const {
-      forwarderAddress,
-      relayHubAddress,
-      paymasterAddress,
-    } = env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
 
     await TreasuryInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,

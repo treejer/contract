@@ -14,8 +14,8 @@ interface IPlanterFund {
 
     function setPlanterFunds(
         uint256 _treeId,
-        uint256 _referralFund,
-        uint256 _planterFund
+        uint256 _planterFund,
+        uint256 _referralFund
     ) external;
 
     function fundPlanter(

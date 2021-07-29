@@ -4,6 +4,7 @@ pragma solidity >=0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 
 /** @title Funds Contract */
@@ -13,6 +14,7 @@ contract Funds is Initializable {
     bytes32 public tokenName;
 
     IAccessRestriction public accessRestriction;
+    IERC20Upgradeable public token;
 
     TotalFunds public totalFunds;
 
@@ -48,6 +50,11 @@ contract Funds is Initializable {
 
         isFunds = true;
         accessRestriction = candidateContract;
+    }
+
+    function setTokenAddress(address _address) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
+        token = candidateContract;
     }
 
     function setToken(bytes32 _tokenName) external onlyAdmin {

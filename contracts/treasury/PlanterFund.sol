@@ -44,6 +44,11 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyFunds() {
+        accessRestriction.ifFunds(_msgSender());
+        _;
+    }
+
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -77,7 +82,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         uint256 _referralFund,
         uint256 _planterFund
-    ) external {
+    ) external onlyFunds {
         planterFunds[_treeId] = _planterFund;
         referralFunds[_treeId] = _referralFund;
         totalFunds.planterFund = _planterFund;

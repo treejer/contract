@@ -83,6 +83,12 @@ contract PlanterFund is Initializable, RelayRecipient {
         planterContract = candidateContract;
     }
 
+    function setDaiTokenAddress(address _address) external {
+        accessRestriction.ifAdmin(_msgSender());
+        IERC20 candidateContract = IERC20(_address);
+        daiToken = candidateContract;
+    }
+
     function setPlanterFunds(
         uint256 _treeId,
         uint256 _planterFund,

@@ -12,7 +12,7 @@ import "./IPlanterFund.sol";
 
 contract Funds is Initializable {
     bool public isFunds;
-    bytes32 public tokenName;
+    bytes32 public symbol;
 
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
@@ -90,7 +90,7 @@ contract Funds is Initializable {
         totalFunds.treeResearch += ((_amount * _treeResearch) / 10000);
 
         if (
-            keccak256(abi.encodePacked((tokenName))) ==
+            keccak256(abi.encodePacked((symbol))) ==
             keccak256(abi.encodePacked(("DAI")))
         ) {
             uint256 planterFund = (_amount * _planterFund) / 10000;
@@ -116,7 +116,7 @@ contract Funds is Initializable {
         token = candidateContract;
     }
 
-    function setToken(bytes32 _tokenName) external onlyAdmin {
-        tokenName = _tokenName;
+    function setToken(bytes32 _symbol) external onlyAdmin {
+        symbol = _symbol;
     }
 }

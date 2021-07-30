@@ -1502,7 +1502,7 @@ contract("PlanterFund", (accounts) => {
       planterFundInstance.address
     );
 
-    console.log("planterFundDaiBalance", planterFundDaiBalance);
+    console.log("planterFundDaiBalance", planterFundDaiBalance.toString());
 
     await planterFundInstance.setPlanterFunds(
       treeId,
@@ -1521,12 +1521,15 @@ contract("PlanterFund", (accounts) => {
 
     // let referralBalance = await web3.eth.getBalance(userAccount4);
 
-    // let txPlanter = await TreasuryInstance.withdrawPlanterBalance(
-    //   web3.utils.toWei("0.5"),
+    // let txPlanter = await planterFundInstance.withdrawPlanterBalance(
+    //   Units.convert("100", "eth", "wei"),
     //   {
     //     from: userAccount3,
     //   }
     // );
+    // let planterDaiBalance = await daiInstance.balanceOf.call(userAccount3);
+
+    // console.log("planterDaiBalance.toString()", planterDaiBalance.toString());
 
     // let txReferral = await TreasuryInstance.withdrawPlanterBalance(
     //   web3.utils.toWei("0.1"),

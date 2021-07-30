@@ -2,13 +2,14 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 
 const Planter = artifacts.require("Planter.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
-const ERC20 = artifact.require("ERC20.sol");
+const Erc20 = artifacts.require("Erc20.sol");
 const Funds = artifacts.require("Funds.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
+const Units = require("ethereumjs-units");
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const Math = require("./math");
@@ -26,6 +27,7 @@ contract("PlanterFund", (accounts) => {
   let planterFundInstance;
   let fundsInstance;
   let arInstance;
+  let daiInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -36,7 +38,7 @@ contract("PlanterFund", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const treasuryAddress = accounts[9];
+  const userAccount8 = accounts[9];
 
   const ipfsHash = "some ipfs hash here";
 
@@ -64,6 +66,21 @@ contract("PlanterFund", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+
+    // let y = await daiInstance.balanceOf.call(deployerAccount);
+    // console.log("y.toString()", y.toString());
+
+    daiInstance = await Erc20.new(
+      Units.convert("1000000", "eth", "wei"),
+      "Dai",
+      "DAI",
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let x = await daiInstance.balanceOf.call(deployerAccount);
+    console.log("x", x.toString());
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -1453,8 +1470,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = 5000;
-    const referralFund = 1000;
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -1473,7 +1490,21 @@ contract("PlanterFund", (accounts) => {
       zeroAddress
     );
 
-    await planterFundInstance.setPlanterFund(
+    await Common.approveAndTransfer(
+      daiInstance,
+      planterFundInstance.address,
+      deployerAccount,
+      deployerAccount,
+      "150"
+    );
+
+    const planterFundDaiBalance = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    console.log("planterFundDaiBalance", planterFundDaiBalance);
+
+    await planterFundInstance.setPlanterFunds(
       treeId,
       planterFund,
       referralFund,
@@ -1481,47 +1512,48 @@ contract("PlanterFund", (accounts) => {
         from: userAccount8,
       }
     );
+
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
       from: userAccount2,
     });
 
-    let planterBalance = await web3.eth.getBalance(userAccount3);
+    // let planterBalance = await web3.eth.getBalance(userAccount3);
 
-    let referralBalance = await web3.eth.getBalance(userAccount4);
+    // let referralBalance = await web3.eth.getBalance(userAccount4);
 
-    let txPlanter = await TreasuryInstance.withdrawPlanterBalance(
-      web3.utils.toWei("0.5"),
-      {
-        from: userAccount3,
-      }
-    );
+    // let txPlanter = await TreasuryInstance.withdrawPlanterBalance(
+    //   web3.utils.toWei("0.5"),
+    //   {
+    //     from: userAccount3,
+    //   }
+    // );
 
-    let txReferral = await TreasuryInstance.withdrawPlanterBalance(
-      web3.utils.toWei("0.1"),
-      {
-        from: userAccount4,
-      }
-    );
+    // let txReferral = await TreasuryInstance.withdrawPlanterBalance(
+    //   web3.utils.toWei("0.1"),
+    //   {
+    //     from: userAccount4,
+    //   }
+    // );
 
-    let planterGas = await Common.getTransactionFee(txPlanter);
+    // let planterGas = await Common.getTransactionFee(txPlanter);
 
-    let referralGas = await Common.getTransactionFee(txReferral);
+    // let referralGas = await Common.getTransactionFee(txReferral);
 
-    assert.equal(
-      await web3.eth.getBalance(userAccount3),
-      Math.subtract(
-        Math.add(Number(planterBalance), Number(web3.utils.toWei("0.5"))),
-        planterGas
-      )
-    );
+    // assert.equal(
+    //   await web3.eth.getBalance(userAccount3),
+    //   Math.subtract(
+    //     Math.add(Number(planterBalance), Number(web3.utils.toWei("0.5"))),
+    //     planterGas
+    //   )
+    // );
 
-    assert.equal(
-      await web3.eth.getBalance(userAccount4),
-      Math.subtract(
-        Math.add(Number(referralBalance), Number(web3.utils.toWei("0.1"))),
-        referralGas
-      )
-    );
+    // assert.equal(
+    //   await web3.eth.getBalance(userAccount4),
+    //   Math.subtract(
+    //     Math.add(Number(referralBalance), Number(web3.utils.toWei("0.1"))),
+    //     referralGas
+    //   )
+    // );
   });
 
   // it("should withdraw planter and organizationPlanter succussfully", async () => {

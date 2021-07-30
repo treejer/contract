@@ -50,6 +50,24 @@ Common.addRegularSellRole = async (instance, address, adminAccount) => {
   await instance.grantRole(REGULAR_SELL_ROLE, address, { from: adminAccount });
 };
 
+Common.approveAndTransfer = async (
+  instance,
+  account,
+  spender,
+  from,
+  amount = "1000"
+) => {
+  await instance.transfer(account, Units.convert(amount, "eth", "wei"), {
+    from: from,
+  });
+
+  // await instance.approve(
+  //   spender,
+  //   Units.convert("999999999999999999999", "eth", "wei"),
+  //   { from: account }
+  // );
+};
+
 Common.travelTime = async (timeFormat, timeDuration) => {
   await time.increase(time.duration[timeFormat](timeDuration));
 };

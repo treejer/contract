@@ -24,6 +24,8 @@ const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
+  const deployerAccount =
+    network === "development" ? accounts[0] : process.env.DEPLOYER;
 
   let accessRestrictionAddress = AccessRestriction.address;
   let treeAddressAddress = Tree.address;
@@ -47,65 +49,6 @@ module.exports = async function (deployer, network, accounts) {
     trustedForwarder = process.env.GSN_FORWARDER;
     relayHub = process.env.GSN_RELAY_HUB;
   }
-
-  console.log("Call AccessRestriction Methods...");
-  await AccessRestriction.deployed().then(async (instance) => {
-    await instance.grantRole(PLANTER_ROLE, planterAddress);
-    await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
-    await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
-    await instance.grantRole(TREASURY_ROLE, treasuryAddress);
-    await instance.grantRole(REGULAR_SELL_ROLE, regularSellAddress);
-    await instance.grantRole(INCREMENTAL_SELL_ROLE, incrementalSellAddress);
-  });
-
-  console.log("Call WhitelistPaymaster Methods...");
-  await WhitelistPaymaster.deployed().then(async (instance) => {
-    await instance.setWhitelistTarget(planterAddress);
-    await instance.setWhitelistTarget(treasuryAddress);
-    await instance.setWhitelistTarget(treeFactoryAddress);
-
-    await instance.setRelayHub(relayHub);
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
-
-  console.log("Call TreeAuction Methods...");
-  await TreeAuction.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setTreasuryAddress(treasuryAddress);
-  });
-
-  console.log("Call RegularSell Methods...");
-  await RegularSell.deployed().then(async (instance) => {
-    await instance.setTreeFactoryAddress(treeFactoryAddress);
-    await instance.setTreasuryAddress(treasuryAddress);
-  });
-
-  console.log("Fund Paymaster");
-  if (!isLocal) {
-    await web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymasterAddress,
-      value: web3.utils.toWei("1"),
-    });
-  }
-
-  console.log("Call Planter Methods...");
-  await Planter.deployed().then(async (instance) => {
-    await instance.setTrustedForwarder(trustedForwarder);
-  });
-
-  console.log("Call Tree Methods...");
-
-  await Tree.deployed().then((instance) => {});
-
-  console.log("Call Tree Factory Methods...");
-
-  await TreeFactory.deployed().then(async (instance) => {
-    await instance.setTrustedForwarder(trustedForwarder);
-    await instance.setTreasuryAddress(Treasury.address);
-    await instance.setPlanterAddress(Planter.address);
-    await instance.setTreeTokenAddress(Tree.address);
-  });
 
   console.log("Call Tree Attribute Methods...");
   await TreeAttribute.deployed().then(async (instance) => {

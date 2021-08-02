@@ -24,8 +24,6 @@ const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
-  const deployerAccount =
-    network === "development" ? accounts[0] : process.env.DEPLOYER;
 
   let accessRestrictionAddress = AccessRestriction.address;
   let treeAddressAddress = Tree.address;
@@ -50,15 +48,15 @@ module.exports = async function (deployer, network, accounts) {
     relayHub = process.env.GSN_RELAY_HUB;
   }
 
-  // console.log("Call AccessRestriction Methods...");
-  // await AccessRestriction.deployed().then(async (instance) => {
-  //   await instance.grantRole(PLANTER_ROLE, planterAddress);
-  //   await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
-  //   await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
-  //   await instance.grantRole(TREASURY_ROLE, treasuryAddress);
-  //   await instance.grantRole(REGULAR_SELL_ROLE, regularSellAddress);
-  //   await instance.grantRole(INCREMENTAL_SELL_ROLE, incrementalSellAddress);
-  // });
+  console.log("Call AccessRestriction Methods...");
+  await AccessRestriction.deployed().then(async (instance) => {
+    await instance.grantRole(PLANTER_ROLE, planterAddress);
+    await instance.grantRole(AUCTION_ROLE, treeAuctionAddress);
+    await instance.grantRole(TREE_FACTORY_ROLE, treeFactoryAddress);
+    await instance.grantRole(TREASURY_ROLE, treasuryAddress);
+    await instance.grantRole(REGULAR_SELL_ROLE, regularSellAddress);
+    await instance.grantRole(INCREMENTAL_SELL_ROLE, incrementalSellAddress);
+  });
 
   console.log("Call WhitelistPaymaster Methods...");
   await WhitelistPaymaster.deployed().then(async (instance) => {

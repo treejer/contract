@@ -16,12 +16,7 @@ var TreeAttribute = artifacts.require("TreeAttribute.sol");
 var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  console.log("accounts[0]", accounts[0]);
-
   let accessRestrictionAddress = AccessRestriction.address;
-
-  const deployerAccount =
-    network === "development" ? accounts[0] : process.env.DEPLOYER;
 
   console.log("Deploying IncrementalSell...");
   await deployProxy(IncrementalSell, [accessRestrictionAddress], {

@@ -4,12 +4,7 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 var AccessRestriction = artifacts.require("AccessRestriction.sol");
 var Tree = artifacts.require("Tree.sol");
 
-//gsn
-var WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
-
 module.exports = async function (deployer, network, accounts) {
-  console.log("accounts[0]", accounts[0]);
-
   let accessRestrictionAddress;
 
   console.log("Deploying AccessRestriction...");

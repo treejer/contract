@@ -14,9 +14,9 @@ const { CommonErrorMsg, TreasuryManagerErrorMsg } = require("./enumes");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider")
-const { GsnTestEnvironment } = require('@opengsn/cli/dist/GsnTestEnvironment')
-const ethers = require('ethers')
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 contract("Treasury", (accounts) => {
   let TreasuryInstance;
@@ -208,7 +208,7 @@ contract("Treasury", (accounts) => {
 
   //--------------------------------addFundDistributionModel test-----------------------------------------------
   it("addFundDistributionModel should be success", async () => {
-    await TreasuryInstance.addFundDistributionModel(
+    const eventTx1 = await TreasuryInstance.addFundDistributionModel(
       4000,
       1200,
       1200,
@@ -221,6 +221,10 @@ contract("Treasury", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 0;
+    });
 
     let result = await TreasuryInstance.fundDistributions.call(0);
 
@@ -921,6 +925,14 @@ contract("Treasury", (accounts) => {
       value: amount,
     });
 
+    truffleAssert.eventEmitted(tx, "TreeFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        Number(ev.amount) == Number(amount) &&
+        ev.modelId == 0
+      );
+    });
+
     assert.equal(
       await web3.eth.getBalance(TreasuryInstance.address),
       amount,
@@ -1002,7 +1014,6 @@ contract("Treasury", (accounts) => {
       "reserveFund2 funds invalid"
     );
   });
-
   it("2.fundTree should be success", async () => {
     let treeId1 = 0;
     let treeId2 = 20;
@@ -1047,9 +1058,17 @@ contract("Treasury", (accounts) => {
       from: deployerAccount,
     });
 
-    await TreasuryInstance.fundTree(treeId2, {
+    const eventTx1 = await TreasuryInstance.fundTree(treeId2, {
       from: userAccount3,
       value: amount2,
+    });
+
+    truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
+      return (
+        ev.treeId == treeId2 &&
+        Number(ev.amount) == Number(amount2) &&
+        ev.modelId == 1
+      );
     });
 
     assert.equal(
@@ -1135,9 +1154,17 @@ contract("Treasury", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    await TreasuryInstance.fundTree(treeId1, {
+    const eventTx2 = await TreasuryInstance.fundTree(treeId1, {
       from: userAccount3,
       value: amount1,
+    });
+
+    truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
+      return (
+        ev.treeId == treeId1 &&
+        Number(ev.amount) == Number(amount1) &&
+        ev.modelId == 0
+      );
     });
 
     assert.equal(
@@ -6079,11 +6106,8 @@ contract("Treasury", (accounts) => {
   // //----------------------------------------------gsn test-------------------------------------------
   it("Test gsn in Treasury", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
-    const {
-      forwarderAddress,
-      relayHubAddress,
-      paymasterAddress,
-    } = env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
 
     await TreasuryInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,

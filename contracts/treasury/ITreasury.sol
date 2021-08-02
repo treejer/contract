@@ -198,6 +198,8 @@ interface ITreasury {
      */
     function withdrawPlanterBalance(uint256 _amount) external;
 
+    event DistributionModelAdded(uint256 modelId);
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 modelId);
     event DistributionModelOfTreeNotExist(string description);
 
     event FundDistributionModelAssigned(

@@ -63,4 +63,6 @@ interface IRegularSell {
         address buyer,
         uint256 amount
     );
+    /** @dev emitted when each Regular Tree minted by {buyer} */
+    event RegularMint(address buyer, uint256 treeId);
 }

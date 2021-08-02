@@ -19,6 +19,7 @@ contract RegularSell is Initializable {
 
     event TreePriceUpdated(uint256 price);
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
+    event RegularMint(address buyer, uint256 treeId);
     event RegularTreeRequstedById(
         uint256 treeId,
         address buyer,
@@ -89,18 +90,20 @@ contract RegularSell is Initializable {
 
         uint256 transferAmount = msg.value / _count;
 
+        emit RegularTreeRequsted(_count, msg.sender, msg.value);
+
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
                 msg.sender
             );
 
+            emit RegularMint(msg.sender, tempLastRegularSold);
+
             treasury.fundTree{value: transferAmount}(tempLastRegularSold);
         }
 
         lastSoldRegularTree = tempLastRegularSold;
-
-        emit RegularTreeRequsted(_count, msg.sender, msg.value);
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than

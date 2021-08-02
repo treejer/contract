@@ -94,6 +94,17 @@ interface ITreeAuction {
      */
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 
+    /**
+     * @dev emitted when an auction created
+     * {auctionId} is the number of auction
+     */
+    event AuctionCreated(uint256 auctionId);
+
+    /**
+     * @dev emitted when automatic withdraw of older bid fail
+     * {auctionId} is id of auction and {bidder} is the old bidder to charge automatically with
+     *  amount {amount}
+     */
     event AuctionWithdrawFaild(
         uint256 auctionId,
         address bidder,

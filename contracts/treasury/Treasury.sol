@@ -67,6 +67,8 @@ contract Treasury is Initializable, RelayRecipient {
     mapping(uint256 => uint256) public plantersPaid;
     mapping(address => uint256) public balances;
 
+    event DistributionModelAdded(uint256 modelId);
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 modelId);
     event DistributionModelOfTreeNotExist(string description);
     event FundDistributionModelAssigned(
         uint256 startingTreeId,
@@ -266,6 +268,8 @@ contract Treasury is Initializable, RelayRecipient {
             1
         );
 
+        emit DistributionModelAdded(fundDistributionCount.current());
+
         fundDistributionCount.increment();
     }
 
@@ -367,10 +371,10 @@ contract Treasury is Initializable, RelayRecipient {
     function fundTree(uint256 _treeId) external payable {
         accessRestriction.ifIncrementalSellOrAuctionOrRegularSell(_msgSender());
 
-        FundDistribution memory dm = fundDistributions[
-            assignModels[_findTreeDistributionModelId(_treeId)]
-            .distributionModelId
-        ];
+        uint256 _modelId = assignModels[_findTreeDistributionModelId(_treeId)]
+            .distributionModelId;
+
+        FundDistribution memory dm = fundDistributions[_modelId];
 
         planterFunds[_treeId] = (msg.value * dm.planterFund) / 10000;
 
@@ -390,6 +394,8 @@ contract Treasury is Initializable, RelayRecipient {
         totalFunds.treejerDevelop += (msg.value * dm.treejerDevelop) / 10000;
 
         totalFunds.treeResearch += ((msg.value * dm.treeResearch) / 10000);
+
+        emit TreeFunded(_treeId, msg.value, _modelId);
     }
 
     /**

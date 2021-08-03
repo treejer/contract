@@ -50,6 +50,7 @@ contract TreeAuction is Initializable {
         address winner,
         uint256 amount
     );
+    event AuctionCreated(uint256 auctionId);
     event AuctionEnded(uint256 auctionId, uint256 treeId);
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
     event AuctionWithdrawFaild(
@@ -137,6 +138,8 @@ contract TreeAuction is Initializable {
         auction.endDate = _endDate;
         auction.highestBid = _intialPrice;
         auction.bidInterval = _bidInterval;
+
+        emit AuctionCreated(auctionId.current());
 
         auctionId.increment();
     }

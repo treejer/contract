@@ -87,6 +87,7 @@ contract("regularSell", (accounts) => {
 
   afterEach(async () => {});
   //////////////////************************************ deploy successfully ****************************************//
+
   it("deploys successfully", async () => {
     const address = regularSellInstance.address;
     assert.notEqual(address, 0x0);
@@ -236,6 +237,12 @@ contract("regularSell", (accounts) => {
       from: funder,
       value: Math.mul(web3.utils.toWei("0.1"), 7),
     });
+
+    for (let i = 10001; i <= 10007; i++) {
+      truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
+        return ev.buyer == funder && ev.treeId == i;
+      });
+    }
 
     truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
       return (

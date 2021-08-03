@@ -371,7 +371,7 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.createAuction(
+    const eventTx = await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime),
       Number(endTime),
@@ -387,6 +387,10 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.bidInterval), bidInterval);
     assert.equal(Number(result.startDate), Number(startTime));
     assert.equal(Number(result.endDate), Number(endTime));
+
+    truffleAssert.eventEmitted(eventTx, "AuctionCreated", (ev) => {
+      return ev.auctionId == 0;
+    });
   });
 
   it("bid auction and check highest bid set change correctly", async () => {
@@ -2958,9 +2962,8 @@ contract("TreeAuction", (accounts) => {
     );
     /////////////---------------------- check planter balance before withdraw
 
-    const planterPaidBeforeWithdrawTotalAmount = await TreasuryInstance.balances.call(
-      userAccount2
-    );
+    const planterPaidBeforeWithdrawTotalAmount =
+      await TreasuryInstance.balances.call(userAccount2);
 
     assert.equal(
       Number(planterPaidBeforeWithdrawTotalAmount),
@@ -2976,9 +2979,8 @@ contract("TreeAuction", (accounts) => {
       }
     );
     ////////////////--------------- check planter balance after withdraw
-    const planterPaidAfterWithdrawTotalAmount = await TreasuryInstance.balances.call(
-      userAccount2
-    );
+    const planterPaidAfterWithdrawTotalAmount =
+      await TreasuryInstance.balances.call(userAccount2);
     assert.equal(
       Number(planterPaidAfterWithdrawTotalAmount),
       0,

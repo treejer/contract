@@ -29,8 +29,9 @@ contract CommunityGifts is Initializable {
     /** NOTE mapping of funder address to CommunityGift struct */
     mapping(address => CommunityGift) public communityGifts;
 
-    uint256 claimedCount;
-    uint256 expireDate;
+    uint256 public claimedCount;
+    uint256 public expireDate;
+    uint256 public giftCount;
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -95,9 +96,27 @@ contract CommunityGifts is Initializable {
         treasury = candidateContract;
     }
 
+    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        onlyAdmin
+    {
+        bool check = treeFactory.setGiftsRange(_startTreeId, _endTreeId);
+        require(check, "not true");
+    }
+
     function updateGiftees(address _giftee, uint32 _symbol) external onlyAdmin {
-        require(!communityGifts[_giftee].claimed, "Claimed before");
-        communityGifts[_giftee].symbol = _symbol;
+        CommunityGift storage communityGift = communityGifts[_giftee];
+
+        require(!communityGift.claimed, "Claimed before");
+        require(giftCount < 90, "giftCount not true");
+
+        communityGift.symbol = _symbol;
+
+        if (!communityGift.exist) {
+            giftCount += 1;
+            communityGift.exist = true;
+        }
+
         treeAttribute.reserveTreeAttributes(_symbol);
     }
 
@@ -116,15 +135,16 @@ contract CommunityGifts is Initializable {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
         treeFactory.updateOwner(treeId, msg.sender);
+        //call planter contract
     }
 
     function setExpireDate(uint256 _expireDate) external onlyAdmin {
         expireDate = _expireDate;
     }
 
-    //TODO:_symbol is true???
-
     function transferTree(address _giftee, uint32 _symbol) external onlyAdmin {
+        require(block.timestamp > expireDate, "CommunityGift not yet ended");
+
         require(claimedCount < 89, "claimedCount not true");
 
         uint256 treeId = 11 + claimedCount;
@@ -133,5 +153,6 @@ contract CommunityGifts is Initializable {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
         treeFactory.updateOwner(treeId, _giftee);
+        //call planter contract
     }
 }

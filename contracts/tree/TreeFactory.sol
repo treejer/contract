@@ -85,6 +85,10 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyCommunityGifts() {
+        accessRestriction.ifCommunityGifts(_msgSender());
+        _;
+    }
     modifier onlyIncremental() {
         accessRestriction.ifIncrementalSell(_msgSender());
         _;
@@ -375,6 +379,23 @@ contract TreeFactory is Initializable, RelayRecipient {
                 treeData[i].provideStatus = 0;
             }
         }
+    }
+
+    //set communityGifts sell for trees
+    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        onlyCommunityGifts
+        returns (bool)
+    {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
+            if (treeData[i].provideStatus > 0) {
+                return false;
+            }
+        }
+        for (uint256 j = _startTreeId; j < _endTreeId; j++) {
+            treeData[j].provideStatus = 5;
+        }
+        return true;
     }
 
     //set incremental sell for trees

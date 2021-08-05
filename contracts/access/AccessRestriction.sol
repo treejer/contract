@@ -10,6 +10,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
     bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
+    bytes32 public constant COMMUNITY_GIFTS = keccak256("COMMUNITY_GIFTS");
     bytes32 public constant REGULAR_SELL_ROLE = keccak256("REGULAR_SELL_ROLE");
 
     bytes32 public constant INCREMENTAL_SELL_ROLE =
@@ -123,5 +124,20 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
 
     function isRegularSell(address _address) public view returns (bool) {
         return hasRole(REGULAR_SELL_ROLE, _address);
+    }
+
+    function ifCommunityGifts(address _address) public view {
+        require(isCommunityGifts(_address), "Caller is not CommunityGifts");
+    }
+
+    function isCommunityGifts(address _address) public view returns (bool) {
+        return hasRole(COMMUNITY_GIFTS, _address);
+    }
+
+    function ifAdminOrCommunityGifts(address _address) public view {
+        require(
+            isAdmin(_address) || isCommunityGifts(_address),
+            "not Admin or CommunityGifts"
+        );
     }
 }

@@ -164,8 +164,12 @@ contract("TreeFactory", (accounts) => {
   it("add tree successfuly and check data to insert correct", async () => {
     let treeId1 = 1;
 
-    await treeFactoryInstance.addTree(treeId1, ipfsHash, {
+    const eventTx = await treeFactoryInstance.addTree(treeId1, ipfsHash, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(eventTx, "TreeAdded", (ev) => {
+      return ev.treeId == treeId1;
     });
 
     let result1 = await treeFactoryInstance.treeData.call(treeId1);
@@ -256,6 +260,11 @@ contract("TreeFactory", (accounts) => {
 
       { from: deployerAccount }
     );
+
+    truffleAssert.eventEmitted(asign1, "TreeAssigned", (ev) => {
+      return ev.treeId == treeId;
+    });
+
     let result1 = await treeFactoryInstance.treeData.call(treeId);
     //////////////////////////////////////////////////////////////////////////
 
@@ -281,6 +290,10 @@ contract("TreeFactory", (accounts) => {
       { from: deployerAccount }
     );
 
+    truffleAssert.eventEmitted(asign2, "TreeAssigned", (ev) => {
+      return ev.treeId == treeId;
+    });
+
     let result2 = await treeFactoryInstance.treeData.call(treeId);
 
     ///////////////////////////////////////////////////////////////////////////
@@ -298,6 +311,7 @@ contract("TreeFactory", (accounts) => {
     assert.equal(Number(result2.birthDate), 0, "incorrect birth date");
     assert.equal(result2.treeSpecs, ipfsHash, "incorrect ipfs hash");
   });
+
   it("should fail asign tree to planter", async () => {
     const treeId = 1;
     const invalidTreeId = 10;

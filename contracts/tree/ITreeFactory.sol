@@ -139,6 +139,8 @@ interface ITreeFactory {
      */
     function requestRegularTree(uint256 _treeId, address _owner) external;
 
+    event TreeAdded(uint256 treeId);
+    event TreeAssigned(uint256 treeId);
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);

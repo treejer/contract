@@ -58,6 +58,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     mapping(uint256 => UpdateTree) public updateTrees; //tree id to UpdateTree struct
     mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
 
+    event TreeAdded(uint256 treeId);
+    event TreeAssigned(uint256 treeId);
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);
@@ -88,7 +90,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
-    modifier onlyIncrementalSellOrAuction {
+    modifier onlyIncrementalSellOrAuction() {
         accessRestriction.ifIncrementalSellOrAuction(_msgSender());
         _;
     }
@@ -152,6 +154,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         tree.treeStatus = 2;
         tree.treeSpecs = _treeDescription;
+
+        emit TreeAdded(_treeId);
     }
 
     function assignTreeToPlanter(uint256 _treeId, address _planterId)
@@ -168,6 +172,8 @@ contract TreeFactory is Initializable, RelayRecipient {
         );
 
         tempTree.planterId = _planterId;
+
+        emit TreeAssigned(_treeId);
     }
 
     function plantTree(
@@ -298,8 +304,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             updateGenTree.updateStatus = 3;
 
             uint32 age = ((block.timestamp - treeData[_treeId].plantDate) /
-                3600)
-            .toUint32();
+                3600).toUint32();
 
             if (age > tree.treeStatus) {
                 tree.treeStatus = age;

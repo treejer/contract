@@ -14,6 +14,8 @@ contract CommunityGifts is Initializable {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
 
     bool public isCommunityGifts;
+    uint256 private planterFund;
+    uint256 private referralFund;
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
@@ -154,5 +156,13 @@ contract CommunityGifts is Initializable {
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
         treeFactory.updateOwner(treeId, _giftee);
         //call planter contract
+    }
+
+    function setPrice(uint256 _planterFund, uint256 _referralFund)
+        external
+        onlyAdmin
+    {
+        planterFund = _planterFund;
+        referralFund = _referralFund;
     }
 }

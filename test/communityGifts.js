@@ -192,12 +192,6 @@ contract("CommunityGifts", (accounts) => {
     const startTree = 11;
     const endTree = 101;
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
-
     await communityGiftsInstance.setGiftsRange(startTree, endTree, {
       from: deployerAccount,
     });

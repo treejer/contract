@@ -20,4 +20,8 @@ interface ICommunityGifts {
     function setExpireDate(uint256 _expireDate) external;
 
     function transferTree(address _giftee, uint32 _symbol) external;
+
+    event gifteeUpdated(address giftee);
+    event treeClaimed(address owner);
+    event treeTransfered(address owner);
 }

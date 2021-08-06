@@ -76,6 +76,19 @@ contract TreeAttribute is Initializable {
         reservedAttributes[generatedCode] = 1;
     }
 
+    function freeReserveTreeAttributes(uint32 generatedCode)
+        external
+        onlyAdminOrCommunityGifts
+    {
+        require(
+            reservedAttributes[generatedCode] == 1,
+            "the tree attributes not reserved"
+        );
+
+        generatedAttributes[generatedCode] = 0;
+        reservedAttributes[generatedCode] = 0;
+    }
+
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external
         onlyAdminOrCommunityGifts

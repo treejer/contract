@@ -140,4 +140,11 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
             "not Admin or CommunityGifts"
         );
     }
+
+    function ifAuctionOrCommunityGifts(address _address) public view {
+        require(
+            isAuction(_address) || isCommunityGifts(_address),
+            "not Auction or CommunityGifts"
+        );
+    }
 }

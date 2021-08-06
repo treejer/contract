@@ -506,19 +506,17 @@ contract("CommunityGifts", (accounts) => {
 
 */
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
-  it("should claimTree succesfully and check data to be ok", async () => {
-    const giftee1 = userAccount1;
+  // it("should claimTree succesfully and check data to be ok", async () => {
+  //   const giftee1 = userAccount1;
 
-    const symbol1 = 1234554321;
+  //   const symbol1 = 1234554321;
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
 
-    await communityGiftsInstance.claimTree({
-      from: giftee1,
-    });
-  });
-
-  it("should fail to update giftees", async () => {});
+  //   await communityGiftsInstance.claimTree({
+  //     from: giftee1,
+  //   });
+  // });
 });

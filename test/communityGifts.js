@@ -30,6 +30,7 @@ contract("CommunityGifts", (accounts) => {
   let treeAttributeInstance;
   let treeFactoryInstance;
   let treasuryInstance;
+  let treeTokenInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -88,6 +89,12 @@ contract("CommunityGifts", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
     //----------------- set cntrac addresses
 
     await communityGiftsInstance.setTreeFactoryAddress(
@@ -107,6 +114,17 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setTreasuryAddress(treasuryInstance.address, {
       from: deployerAccount,
     });
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    //----------------add role to treeFactory
+    await Common.addTreeFactoryRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
 
     //---------------- add role to communityGist
     await Common.addCommunityGiftRole(
@@ -506,17 +524,47 @@ contract("CommunityGifts", (accounts) => {
 
 */
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
-  // it("should claimTree succesfully and check data to be ok", async () => {
-  //   const giftee1 = userAccount1;
+  it("should claimTree succesfully and check data to be ok", async () => {
+    const giftee1 = userAccount1;
+    const symbol1 = 1234554321;
 
-  //   const symbol1 = 1234554321;
+    await communityGiftsInstance.setGiftsRange(11, 13, {
+      from: deployerAccount,
+    });
 
-  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-  //     from: deployerAccount,
-  //   });
+    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+      from: deployerAccount,
+    });
 
-  //   await communityGiftsInstance.claimTree({
-  //     from: giftee1,
-  //   });
-  // });
+    let claimedCountBefore = await communityGiftsInstance.claimedCount();
+
+    await communityGiftsInstance.claimTree({
+      from: giftee1,
+    });
+
+    let claimedCountAfter = await communityGiftsInstance.claimedCount();
+
+    let giftee = await communityGiftsInstance.communityGifts(giftee1);
+
+    assert.equal(Number(giftee.symbol), symbol1, "1.symbol not true updated");
+    assert.equal(giftee.claimed, true, "1.claimed not true updated");
+
+    assert.equal(
+      Number(claimedCountAfter),
+      Number(claimedCountBefore) + 1,
+      "1.claimedCount not true updated"
+    );
+
+    let addressGetToken = await treeTokenInstance.ownerOf(11);
+
+    assert.equal(addressGetToken, giftee1, "1.mint not true");
+
+    let genTree = await treeFactoryInstance.treeData.call(11);
+
+    assert.equal(
+      Number(genTree.provideStatus),
+      0,
+      "provideStatus is not correct"
+    );
+  });
 });

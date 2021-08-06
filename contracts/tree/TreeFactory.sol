@@ -89,7 +89,6 @@ contract TreeFactory is Initializable, RelayRecipient {
         accessRestriction.ifAuctionOrCommunityGifts(_msgSender());
         _;
     }
-
     modifier onlyCommunityGifts() {
         accessRestriction.ifCommunityGifts(_msgSender());
         _;
@@ -363,10 +362,19 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     function updateOwner(uint256 _treeId, address _ownerId)
         external
-        onlyAuctionOrCommunityGifts
+        onlyAuction
     {
         treeData[_treeId].provideStatus = 0;
         treeData[_treeId].mintStatus = 2;
+        treeToken.safeMint(_ownerId, _treeId);
+    }
+
+    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
+        external
+        onlyCommunityGifts
+    {
+        treeData[_treeId].provideStatus = 0;
+        treeData[_treeId].mintStatus = 3;
         treeToken.safeMint(_ownerId, _treeId);
     }
 

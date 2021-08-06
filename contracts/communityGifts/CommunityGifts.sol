@@ -35,9 +35,9 @@ contract CommunityGifts is Initializable {
     uint256 public expireDate;
     uint256 public giftCount;
 
-    event gifteeUpdated(address giftee);
-    event treeClaimed(uint256 treeId);
-    event treeTransfered(uint256 treeId);
+    event GifteeUpdated(address giftee);
+    event TreeClaimed(uint256 treeId);
+    event TreeTransfered(uint256 treeId);
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -116,18 +116,18 @@ contract CommunityGifts is Initializable {
         require(!communityGift.claimed, "Claimed before");
         require(giftCount < 90, "giftCount not true");
 
-        communityGift.symbol = _symbol;
-
         if (!communityGift.exist) {
             giftCount += 1;
             communityGift.exist = true;
         } else {
-            treeAttribute.freeReserveTreeAttributes(_symbol);
+            treeAttribute.freeReserveTreeAttributes(communityGift.symbol);
         }
+
+        communityGift.symbol = _symbol;
 
         treeAttribute.reserveTreeAttributes(_symbol);
 
-        emit gifteeUpdated(_giftee);
+        emit GifteeUpdated(_giftee);
     }
 
     function claimTree() external {
@@ -147,7 +147,7 @@ contract CommunityGifts is Initializable {
         treeFactory.updateOwner(treeId, msg.sender);
         //call planter contract
 
-        emit treeClaimed(treeId);
+        emit TreeClaimed(treeId);
     }
 
     function setExpireDate(uint256 _expireDate) external onlyAdmin {
@@ -172,7 +172,7 @@ contract CommunityGifts is Initializable {
         treeFactory.updateOwner(treeId, _giftee);
         //call planter contract
 
-        emit treeTransfered(treeId);
+        emit TreeTransfered(treeId);
     }
 
     function setPrice(uint256 _planterFund, uint256 _referralFund)

@@ -389,11 +389,17 @@ contract("CommunityGifts", (accounts) => {
   });
   */
   ////////////////////// -------------------------------- update giftees ----------------------------------------
+
+  /*
   it("should update giftees succesfully and check data to be ok", async () => {
     const giftee1 = userAccount1;
     const giftee2 = userAccount2;
     const symbol1 = 1234554321;
     const symbol2 = 1357997531;
+
+    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+      from: deployerAccount,
+    });
 
     const giftCountBefore = await communityGiftsInstance.giftCount.call();
 
@@ -422,6 +428,7 @@ contract("CommunityGifts", (accounts) => {
     truffleAssert.eventEmitted(eventTx, "gifteeUpdated", (ev) => {
       return ev.giftee == giftee1;
     });
+
 
     const giftCountAfter = await communityGiftsInstance.giftCount.call();
 
@@ -495,7 +502,23 @@ contract("CommunityGifts", (accounts) => {
       "reserved code is not correct"
     );
   });
+  it("should fail to update giftees", async () => {});
+
+*/
+  //////////////////////////////// ------------------------------- mahdi ------------------------------------
+  it("should claimTree succesfully and check data to be ok", async () => {
+    const giftee1 = userAccount1;
+
+    const symbol1 = 1234554321;
+
+    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+      from: deployerAccount,
+    });
+
+    await communityGiftsInstance.claimTree({
+      from: giftee1,
+    });
+  });
 
   it("should fail to update giftees", async () => {});
-  //////////////////////////////// ------------------------------- mahdi ------------------------------------
 });

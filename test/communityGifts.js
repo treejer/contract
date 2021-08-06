@@ -16,6 +16,7 @@ const {
   CommonErrorMsg,
   TimeEnumes,
   CommunityGiftErrorMsg,
+  TreeAttributeErrorMsg,
 } = require("./enumes");
 
 //gsn
@@ -249,7 +250,6 @@ contract("CommunityGifts", (accounts) => {
       "provideStatus is not correct"
     );
   });
-  //TODO: ask if we must add tree and then gift it?
 
   it("fail to set gift range", async () => {
     //------------------initial data
@@ -278,16 +278,6 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    const treeTokenInstance = await deployProxy(
-      Tree,
-      [arInstance.address, ""],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
-
     //----------------- add tree and create auction for it
 
     await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
@@ -304,10 +294,6 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       }
     );
-
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
 
     await Common.addAuctionRole(
       arInstance,
@@ -405,23 +391,20 @@ contract("CommunityGifts", (accounts) => {
       .setPrice(100, 200, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
-  */
+
   ////////////////////// -------------------------------- update giftees ----------------------------------------
 
-  /*
   it("should update giftees succesfully and check data to be ok", async () => {
     const giftee1 = userAccount1;
     const giftee2 = userAccount2;
     const symbol1 = 1234554321;
     const symbol2 = 1357997531;
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
-    });
-
     const giftCountBefore = await communityGiftsInstance.giftCount.call();
 
-    const eventTx = await communityGiftsInstance.updateGiftees(
+    //////////---------------------- give symbol1 to giftee1
+
+    const eventTx1 = await communityGiftsInstance.updateGiftees(
       giftee1,
       symbol1,
       {
@@ -429,26 +412,45 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    const communityGift = await communityGiftsInstance.communityGifts.call(
+    //////////-------------- check event emitted
+
+    truffleAssert.eventEmitted(eventTx1, "GifteeUpdated", (ev) => {
+      return ev.giftee == giftee1;
+    });
+
+    //////////---------------- check communityGift data
+
+    const communityGift1 = await communityGiftsInstance.communityGifts.call(
       giftee1
     );
 
     assert.equal(
-      Number(communityGift.symbol),
+      Number(communityGift1.symbol),
       symbol1,
       "symbol is not correct"
     );
 
-    assert.equal(communityGift.exist, true, "exist is not correct");
+    assert.equal(communityGift1.exist, true, "exist is not correct");
 
-    assert.equal(communityGift.claimed, false, "claimed is not correct");
+    assert.equal(communityGift1.claimed, false, "claimed is not correct");
 
-    truffleAssert.eventEmitted(eventTx, "gifteeUpdated", (ev) => {
-      return ev.giftee == giftee1;
-    });
+    //////////-------------- check gift count
 
+    const giftCountAfter1 = await communityGiftsInstance.giftCount.call();
 
-    const giftCountAfter = await communityGiftsInstance.giftCount.call();
+    assert.equal(
+      Number(giftCountBefore),
+      0,
+      "gift count before update giftee is not correct"
+    );
+
+    assert.equal(
+      Number(giftCountAfter1),
+      1,
+      "gift count after update giftee is not correct"
+    );
+
+    ///////////---------------- check attribute code
 
     const generatedAttr1Symbol1 =
       await treeAttributeInstance.generatedAttributes.call(symbol1);
@@ -468,21 +470,49 @@ contract("CommunityGifts", (accounts) => {
       "reserved code is not correct"
     );
 
-    assert.equal(
-      Number(giftCountBefore),
-      0,
-      "gift count before update giftee is not correct"
+    ///////////---------------------- give symbol2 to giftee1
+
+    const eventTx2 = await communityGiftsInstance.updateGiftees(
+      giftee1,
+      symbol2,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //-------------- check event emitted
+
+    truffleAssert.eventEmitted(eventTx2, "GifteeUpdated", (ev) => {
+      return ev.giftee == giftee1;
+    });
+
+    //////////---------------- check communityGift data
+
+    const communityGift2 = await communityGiftsInstance.communityGifts.call(
+      giftee1
     );
 
     assert.equal(
-      Number(giftCountAfter),
+      Number(communityGift2.symbol),
+      symbol2,
+      "symbol is not correct"
+    );
+
+    assert.equal(communityGift2.exist, true, "exist is not correct");
+
+    assert.equal(communityGift2.claimed, false, "claimed is not correct");
+
+    //////////-------------- check gift count
+
+    const giftCountAfter2 = await communityGiftsInstance.giftCount.call();
+
+    assert.equal(
+      Number(giftCountAfter2),
       1,
       "gift count after update giftee is not correct"
     );
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol2, {
-      from: deployerAccount,
-    });
+    ///////////---------------- check attribute code for symbol 1 that must be free
 
     const generatedAttr2Symbol1 =
       await treeAttributeInstance.generatedAttributes.call(symbol1);
@@ -502,6 +532,8 @@ contract("CommunityGifts", (accounts) => {
       "reserved code is not correct"
     );
 
+    ///////////---------------- check attribute code for symbol 2 that must be reserved
+
     const generatedAttr1Symbol2 =
       await treeAttributeInstance.generatedAttributes.call(symbol2);
 
@@ -519,10 +551,125 @@ contract("CommunityGifts", (accounts) => {
       1,
       "reserved code is not correct"
     );
-  });
-  it("should fail to update giftees", async () => {});
 
-*/
+    ///////------------------ give symbol1 to giftee2
+
+    const eventTx3 = await communityGiftsInstance.updateGiftees(
+      giftee2,
+      symbol1,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //-------------- check event emitted
+
+    truffleAssert.eventEmitted(eventTx3, "GifteeUpdated", (ev) => {
+      return ev.giftee == giftee2;
+    });
+
+    //////////---------------- check communityGift data
+
+    const communityGift3 = await communityGiftsInstance.communityGifts.call(
+      giftee2
+    );
+
+    assert.equal(
+      Number(communityGift3.symbol),
+      symbol1,
+      "symbol is not correct"
+    );
+
+    assert.equal(communityGift3.exist, true, "exist is not correct");
+
+    assert.equal(communityGift3.claimed, false, "claimed is not correct");
+
+    //////////-------------- check gift count
+
+    const giftCountAfter3 = await communityGiftsInstance.giftCount.call();
+
+    assert.equal(
+      Number(giftCountAfter3),
+      2,
+      "gift count after update giftee is not correct"
+    );
+
+    ///////////---------------- check attribute code for symbol 1 that must be reserved
+
+    const generatedAttr3Symbol1 =
+      await treeAttributeInstance.generatedAttributes.call(symbol1);
+
+    const reservedAttr3Symbol1 =
+      await treeAttributeInstance.reservedAttributes.call(symbol1);
+
+    assert.equal(
+      Number(generatedAttr3Symbol1),
+      1,
+      "generated code is not correct"
+    );
+
+    assert.equal(
+      Number(reservedAttr3Symbol1),
+      1,
+      "reserved code is not correct"
+    );
+  });
+
+  it("should fail to update giftees", async () => {
+    const giftee1 = userAccount1;
+    const giftee2 = userAccount2;
+    const symbol1 = 1234554321;
+    const symbol2 = 1357997531;
+    const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
+
+    //////////////////---------------- set expire date
+
+    await communityGiftsInstance.setExpireDate(Number(expireDate), {
+      from: deployerAccount,
+    });
+
+    /////// ---------------should fail admin access
+    await communityGiftsInstance
+      .updateGiftees(giftee1, symbol1, { from: userAccount3 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    ///////////////// ------------ should fail becuse giftee claimed before
+    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+      from: deployerAccount,
+    });
+
+    await communityGiftsInstance.claimTree({
+      from: giftee1,
+    });
+
+    await communityGiftsInstance
+      .updateGiftees(giftee1, symbol2, { from: deployerAccount })
+      .should.be.rejectedWith(CommunityGiftErrorMsg.CLAIMED_BEFORE);
+
+    /////////------------------------- should fail because of cuplicate symbol
+
+    await communityGiftsInstance
+      .updateGiftees(giftee2, symbol1, { from: deployerAccount })
+      .should.be.rejectedWith(TreeAttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES);
+  });
+
+  it("should fail because gift count is not less than 90", async () => {
+    const symbol = 123456789;
+
+    for (i = 0; i < 90; i++) {
+      let address = await Common.getNewAccountPublicKey();
+      await communityGiftsInstance.updateGiftees(address, i, {
+        from: deployerAccount,
+      });
+    }
+
+    await communityGiftsInstance
+      .updateGiftees(userAccount1, symbol, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommunityGiftErrorMsg.MAX_GIFT_AMOUNT_REACHED);
+  });
+  */
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
   it("should claimTree succesfully and check data to be ok", async () => {
     const giftee1 = userAccount1;

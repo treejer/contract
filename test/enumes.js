@@ -96,12 +96,14 @@ const IncrementalSellErrorMsg = {
 const TreeAttributeErrorMsg = {
   DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
   TREE_HAS_ATTRIBUTES: "tree attributes are set before",
-  TREE_WITH_NO_ATTRIBUTES:"no need to tree attributes"
+  TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
 };
 
-const CommunityGiftErrorMsg={
-  NOT_AVAILABLE_TREE_EXIST:"not available tree exist"
-}
+const CommunityGiftErrorMsg = {
+  CLAIMED_BEFORE: "Claimed before",
+  MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
+  NOT_AVAILABLE_TREE_EXIST: "not available tree exist",
+};
 
 module.exports = {
   TimeEnumes,
@@ -114,5 +116,5 @@ module.exports = {
   RegularSellErrors,
   IncrementalSellErrorMsg,
   TreeAttributeErrorMsg,
-  CommunityGiftErrorMsg
+  CommunityGiftErrorMsg,
 };

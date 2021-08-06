@@ -2,12 +2,14 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 
 const Planter = artifacts.require("Planter.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
+const Erc20 = artifacts.require("Erc20.sol");
 const Funds = artifacts.require("Funds.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
+const Units = require("ethereumjs-units");
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 const Math = require("./math");
@@ -25,6 +27,7 @@ contract("PlanterFund", (accounts) => {
   let planterFundInstance;
   let fundsInstance;
   let arInstance;
+  let daiInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -35,7 +38,7 @@ contract("PlanterFund", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const treasuryAddress = accounts[9];
+  const userAccount8 = accounts[9];
 
   const ipfsHash = "some ipfs hash here";
 
@@ -64,6 +67,15 @@ contract("PlanterFund", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
+    daiInstance = await Erc20.new(
+      Units.convert("1000000", "eth", "wei"),
+      "Dai",
+      "DAI",
+      {
+        from: deployerAccount,
+      }
+    );
+
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
       {
@@ -80,7 +92,8 @@ contract("PlanterFund", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-  it("should set planter contrct address successfully", async () => {
+
+  it("should set planter contract address successfully", async () => {
     planterFundInstance
       .setPlanterContractAddress(planterInstance.address, {
         from: userAccount1,
@@ -91,14 +104,29 @@ contract("PlanterFund", (accounts) => {
       from: deployerAccount,
     });
   });
+
+  it("should set dai token address successfully", async () => {
+    planterFundInstance
+      .setDaiTokenAddress(daiInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+  });
+
   it("set planter funds successfully and check data", async () => {
     const treeId1 = 1;
     const treeId2 = 2;
     const planterFund1 = 1000;
     const referralFund1 = 500;
-
     const planterFund2 = 2000;
     const referralFund2 = 1000;
+
+    ////////////////////////----------- handle role
+
     await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
 
     const planterFundsBefore = await planterFundInstance.planterFunds.call(
@@ -211,7 +239,15 @@ contract("PlanterFund", (accounts) => {
   });
   //----------------------- fund planter test ---------------------------------------//ali
   it("fund planter successfully", async () => {
+    const treeId = 1;
+    const planterFund = 5000;
+    const referralFund = 1000;
+
+    ////////////////////////----------- handle role
     await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
+    await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
+
+    ////////////////////////----------- handle address
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -230,13 +266,6 @@ contract("PlanterFund", (accounts) => {
       zeroAddress
     );
 
-    const treeId = 1;
-
-    const planterFund = 5000;
-    const referralFund = 1000;
-
-    await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
-
     let tx = await planterFundInstance.setPlanterFunds(
       treeId,
       planterFund,
@@ -252,8 +281,16 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("fund planter successfully with organazationAddress", async () => {
+    const treeId = 1;
+    const planterFund = 5000;
+    const referralFund = 1000;
+
+    ////////////////////////----------- handle role
+
     await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
+
+    ////////////////////////----------- handle address
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -287,11 +324,6 @@ contract("PlanterFund", (accounts) => {
       7000
     );
 
-    const treeId = 1;
-
-    const planterFund = 5000;
-    const referralFund = 1000;
-
     let tx = await planterFundInstance.setPlanterFunds(
       treeId,
       planterFund,
@@ -307,13 +339,9 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("check fund planter data to be ok1", async () => {
-    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
-
     const treeId = 1;
-
     const planterFund = 5000;
     const referralFund = 1000;
-
     const treeStatus1 = 2592;
     const treeStatus2 = 5184;
     const treeStatus3 = 12960;
@@ -321,6 +349,12 @@ contract("PlanterFund", (accounts) => {
     const treeStatus5 = 65535; //2^16-1
     const finalStatus = 25920;
 
+    ////////////////////////----------- handle role
+
+    await Common.addTreeFactoryRole(arInstance, userAccount1, deployerAccount);
+    await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
+
+    ////////////////////////----------- handle address
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
       {
@@ -337,8 +371,6 @@ contract("PlanterFund", (accounts) => {
       userAccount3,
       zeroAddress
     );
-
-    await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
 
     await planterFundInstance.setPlanterFunds(
       treeId,
@@ -1443,5 +1475,1247 @@ contract("PlanterFund", (accounts) => {
         from: userAccount2,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
+  });
+  ///////// -------------------------------  withdraw planter ----------------------------------------
+  it("should withdraw planter succussfully", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
+
+    const planterWithdrawAmount = Units.convert("100", "eth", "wei");
+    const referralWithdrawAmount = Units.convert("30", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      treeId,
+      userAccount3,
+      userAccount4,
+      zeroAddress
+    );
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("150", "eth", "wei"),
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const planterFundDaiBalance = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+    const planterDaiBalanceBefore = await daiInstance.balanceOf.call(
+      userAccount3
+    );
+
+    const referralDaiBlanceBefore = await daiInstance.balanceOf.call(
+      userAccount4
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    let txPlanter = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount,
+      {
+        from: userAccount3,
+      }
+    );
+
+    let txReferral = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrawAmount,
+      {
+        from: userAccount4,
+      }
+    );
+
+    let planterDaiBalanceAfter = await daiInstance.balanceOf.call(userAccount3);
+    let referralDaiBalanceAfter = await daiInstance.balanceOf.call(
+      userAccount4
+    );
+
+    assert.equal(
+      Number(planterDaiBalanceAfter),
+      Math.add(Number(planterDaiBalanceBefore), planterWithdrawAmount)
+    );
+
+    assert.equal(
+      referralDaiBalanceAfter,
+      Math.add(referralDaiBlanceBefore, referralWithdrawAmount)
+    );
+
+    const referralBalanceLeft = await planterFundInstance.balances.call(
+      userAccount4
+    );
+
+    const planterBalanceLeft = await planterFundInstance.balances.call(
+      userAccount3
+    );
+
+    assert.equal(
+      Number(referralBalanceLeft),
+      Math.subtract(referralFund, Number(referralDaiBalanceAfter))
+    );
+
+    assert.equal(
+      Number(planterBalanceLeft),
+      Math.subtract(planterFund, Number(planterDaiBalanceAfter))
+    );
+  });
+
+  it("check planter withdraw balance to be correct", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("10", "eth", "wei");
+    const referralFund = Units.convert("5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      treeId,
+      userAccount3,
+      userAccount4,
+      zeroAddress
+    );
+
+    const totalPlanterFund = planterFund;
+
+    const totalReferralFund = referralFund;
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("15", "eth", "wei"),
+      { from: deployerAccount }
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    const contractBalanceAfterFund = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Number(contractBalanceAfterFund),
+
+      Units.convert("15", "eth", "wei"),
+      "contract balance charged inconrrectly"
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    const planterBalance1 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const accountBalance1 = await web3.eth.getBalance(userAccount3);
+
+    const referralBalance1 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+    const accountReferralBalance1 = await web3.eth.getBalance(userAccount4);
+
+    assert.equal(
+      Number(planterBalance1),
+      totalPlanterFund,
+      "planter balance is not ok 1"
+    );
+    assert.equal(
+      Number(referralBalance1),
+      totalReferralFund,
+      "referral balance is not ok 1"
+    );
+    const planterWithdrawAmount1 = Units.convert("1", "eth", "wei");
+    const referralWithdrwAmount1 = Units.convert("1", "eth", "wei");
+    const tx = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount1,
+      { from: userAccount3 }
+    );
+
+    truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount1 &&
+        ev.account == userAccount3
+      );
+    });
+
+    const txReferral = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrwAmount1,
+      { from: userAccount4 }
+    );
+
+    truffleAssert.eventEmitted(txReferral, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == referralWithdrwAmount1 &&
+        ev.account == userAccount4
+      );
+    });
+
+    const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(contractBalanceAfterFund),
+        Math.add(planterWithdrawAmount1, referralWithdrwAmount1)
+      ),
+      Number(contractBalanceAfterWithdraw1),
+      "contract balance is not ok after withdraw 1"
+    );
+
+    const planterBalance2 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const planterDaiBalance2 = await daiInstance.balanceOf.call(userAccount3);
+
+    const referralBalance2 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+    const referralDaiBalance2 = await daiInstance.balanceOf.call(userAccount4);
+
+    assert.equal(
+      Math.subtract(totalPlanterFund, planterWithdrawAmount1),
+      Number(planterBalance2),
+      "planter blance is not ok 2"
+    );
+    assert.equal(
+      Math.subtract(totalReferralFund, referralWithdrwAmount1),
+      Number(referralBalance2),
+      "referral blance is not ok 2"
+    );
+
+    assert.equal(
+      Number(planterDaiBalance2),
+      planterWithdrawAmount1,
+      "planter balance is not ok 2"
+    );
+
+    //////////////////////
+    const planterWithdrawAmount2 = Units.convert("2", "eth", "wei");
+    const referralWithdrawAmount2 = Units.convert("4", "eth", "wei");
+
+    const tx2 = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount2,
+      { from: userAccount3 }
+    );
+
+    const txReferral2 = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrawAmount2,
+      { from: userAccount4 }
+    );
+
+    truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount2 &&
+        ev.account == userAccount3
+      );
+    });
+
+    truffleAssert.eventEmitted(txReferral2, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == referralWithdrawAmount2 &&
+        ev.account == userAccount4
+      );
+    });
+
+    const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(contractBalanceAfterFund),
+        Math.add(
+          planterWithdrawAmount1,
+          planterWithdrawAmount2,
+          referralWithdrwAmount1,
+          referralWithdrawAmount2
+        )
+      ),
+      Number(contractBalanceAfterWithdraw2),
+      "contract balance is not ok after withdraw 2"
+    );
+
+    const planterBalance3 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const referralBalance4 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+
+    assert.equal(
+      Math.subtract(
+        totalPlanterFund,
+        Math.add(planterWithdrawAmount1, planterWithdrawAmount2)
+      ),
+      Number(planterBalance3),
+      "planter blance is not ok 3"
+    );
+
+    assert.equal(0, Number(referralBalance4), "referral blance is not ok 3");
+
+    const totalFunds = await planterFundInstance.totalFunds();
+
+    assert.equal(
+      0,
+      Number(totalFunds.referralFund),
+      "totalReferralFund is not ok 3"
+    );
+
+    const planterDaiBalance3 = await daiInstance.balanceOf.call(userAccount3);
+
+    assert.equal(
+      Number(planterDaiBalance3),
+      Math.add(Number(planterDaiBalance2), planterWithdrawAmount2),
+
+      "planter balance is not ok 3"
+    );
+  });
+
+  it("should withdraw planter and organizationPlanter succussfully", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("1", "eth", "wei");
+    const referralFund = Units.convert("0.5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successOrganizationPlanterJoin(
+      arInstance,
+      planterInstance,
+      userAccount5,
+      zeroAddress,
+      deployerAccount
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      3,
+      userAccount3,
+      userAccount4,
+      userAccount5
+    );
+
+    let planterPortion = 2000;
+
+    await Common.acceptPlanterByOrganization(
+      planterInstance,
+      userAccount5,
+      userAccount3,
+      planterPortion
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    let planterBalance = await web3.eth.getBalance(userAccount3);
+
+    let referralBalance = await web3.eth.getBalance(userAccount4);
+
+    let organizationBalance = await web3.eth.getBalance(userAccount5);
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("1.5", "eth", "wei"),
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const planterWithdrawAmount = Units.convert("0.20", "eth", "wei");
+    const organizationWithdrawAmount = Units.convert("0.8", "eth", "wei");
+    const referralWithdrawAmount = Units.convert("0.1", "eth", "wei");
+
+    let txPlanter = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount,
+      {
+        from: userAccount3,
+      }
+    );
+
+    let txOrganization = await planterFundInstance.withdrawPlanterBalance(
+      organizationWithdrawAmount,
+      {
+        from: userAccount5,
+      }
+    );
+
+    let txReferral = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrawAmount,
+      {
+        from: userAccount4,
+      }
+    );
+
+    assert.equal(
+      Number(await daiInstance.balanceOf.call(userAccount3)),
+      planterWithdrawAmount
+    );
+
+    assert.equal(
+      Number(await daiInstance.balanceOf.call(userAccount5)),
+      organizationWithdrawAmount
+    );
+
+    assert.equal(
+      Number(await daiInstance.balanceOf.call(userAccount4)),
+      referralWithdrawAmount
+    );
+  });
+
+  it("should fail of insufficient amount", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("1", "eth", "wei");
+    const referralFund = Units.convert("0.5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successOrganizationPlanterJoin(
+      arInstance,
+      planterInstance,
+      userAccount5,
+      zeroAddress,
+      deployerAccount
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      3,
+      userAccount3,
+      userAccount4,
+      userAccount5
+    );
+
+    let planterPortion = 2000;
+
+    await Common.acceptPlanterByOrganization(
+      planterInstance,
+      userAccount5,
+      userAccount3,
+      planterPortion
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("1.5", "eth", "wei"),
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const planterWithdrawAmount = Units.convert("0.21", "eth", "wei");
+    const organizationWithdrawAmount = Units.convert("0.81", "eth", "wei");
+    const referralWithdrawAmount = Units.convert("0.51", "eth", "wei");
+
+    let txPlanter = await planterFundInstance
+      .withdrawPlanterBalance(planterWithdrawAmount, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    let txOrganization = await planterFundInstance
+      .withdrawPlanterBalance(organizationWithdrawAmount, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    let txReferral = await planterFundInstance
+      .withdrawPlanterBalance(referralWithdrawAmount, {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  it("check planter and organization withdraw balance to be correct", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("1", "eth", "wei");
+    const referralFund = Units.convert("0.5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successOrganizationPlanterJoin(
+      arInstance,
+      planterInstance,
+      userAccount5,
+      zeroAddress,
+      deployerAccount
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      3,
+      userAccount3,
+      userAccount4,
+      userAccount5
+    );
+
+    let planterPortion = 6300;
+
+    await Common.acceptPlanterByOrganization(
+      planterInstance,
+      userAccount5,
+      userAccount3,
+      planterPortion
+    );
+
+    const totalPlanterFund = planterFund;
+
+    const totalReferralFund = referralFund;
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("1.5", "eth", "wei"),
+      { from: deployerAccount }
+    );
+
+    const contractBalanceAfterFund = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Math.add(planterFund, referralFund),
+      "contrct balance charged inconrrectly"
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    const planterBalance1 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const accountBalance1 = await web3.eth.getBalance(userAccount3);
+
+    const referralBalance1 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+
+    const OrganizationBalance1 = await planterFundInstance.balances.call(
+      userAccount5
+    );
+
+    assert.equal(
+      Number(planterBalance1),
+      Math.divide(Math.mul(totalPlanterFund, planterPortion), 10000),
+      "planter balance is not ok 1"
+    );
+
+    assert.equal(
+      Number(OrganizationBalance1),
+      Math.divide(
+        Math.mul(totalPlanterFund, Math.subtract(10000, planterPortion)),
+        10000
+      ),
+      "organization balance is not ok 1"
+    );
+
+    assert.equal(
+      Number(referralBalance1),
+      totalReferralFund,
+      "referral balance is not ok 1"
+    );
+
+    const planterWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+    const referralWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+    const organizationWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+    const tx = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount1,
+      { from: userAccount3 }
+    );
+
+    truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount1 &&
+        ev.account == userAccount3
+      );
+    });
+
+    const txReferral = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrawAmount1,
+      { from: userAccount4 }
+    );
+
+    truffleAssert.eventEmitted(txReferral, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == referralWithdrawAmount1 &&
+        ev.account == userAccount4
+      );
+    });
+
+    const txOrganization = await planterFundInstance.withdrawPlanterBalance(
+      organizationWithdrawAmount1,
+      { from: userAccount5 }
+    );
+
+    truffleAssert.eventEmitted(
+      txOrganization,
+      "PlanterBalanceWithdrawn",
+      (ev) => {
+        return (
+          Number(ev.amount) == organizationWithdrawAmount1 &&
+          ev.account == userAccount5
+        );
+      }
+    );
+
+    const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(contractBalanceAfterFund),
+        Math.add(
+          planterWithdrawAmount1,
+          referralWithdrawAmount1,
+          organizationWithdrawAmount1
+        )
+      ),
+      Number(contractBalanceAfterWithdraw1),
+      "contract balance is not ok after withdraw 1"
+    );
+
+    const planterBalance2 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const accountBalance2 = await daiInstance.balanceOf.call(userAccount3);
+
+    const referralBalance2 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+    const accountReferralBalance2 = await daiInstance.balanceOf.call(
+      userAccount4
+    );
+
+    const organizationBalance2 = await planterFundInstance.balances.call(
+      userAccount5
+    );
+    const accountOrganizationBalance2 = await daiInstance.balanceOf.call(
+      userAccount5
+    );
+
+    assert.equal(
+      Math.subtract(
+        Math.divide(Math.mul(totalPlanterFund, planterPortion), 10000),
+        planterWithdrawAmount1
+      ),
+      Number(planterBalance2),
+      "planter blance is not ok 2"
+    );
+
+    assert.equal(
+      Math.subtract(
+        Math.divide(
+          Math.mul(totalPlanterFund, Math.subtract(10000, planterPortion)),
+          10000
+        ),
+        organizationWithdrawAmount1
+      ),
+      Number(organizationBalance2),
+      "organization blance is not ok 2"
+    );
+
+    assert.equal(
+      Math.subtract(totalReferralFund, referralWithdrawAmount1),
+      Number(referralBalance2),
+      "referral blance is not ok 2"
+    );
+
+    // const txFee = await Common.getTransactionFee(tx);
+
+    // const txOrganizationFee = await Common.getTransactionFee(txOrganization);
+
+    assert.equal(
+      Number(accountBalance2),
+      planterWithdrawAmount1,
+      "planter balance is not ok 2"
+    );
+
+    assert.equal(
+      Number(accountOrganizationBalance2),
+      organizationWithdrawAmount1,
+      "organization balance is not ok 2"
+    );
+
+    //////////////////////
+    const planterWithdrawAmount2 = Units.convert("0.53", "eth", "wei");
+    const organizationWithdrawAmount2 = Units.convert("0.27", "eth", "wei");
+    const referralWithdrawAmount2 = Units.convert("0.1", "eth", "wei");
+    const tx2 = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount2,
+      { from: userAccount3 }
+    );
+
+    const txOrganization2 = await planterFundInstance.withdrawPlanterBalance(
+      organizationWithdrawAmount2,
+      { from: userAccount5 }
+    );
+
+    const txReferral2 = await planterFundInstance.withdrawPlanterBalance(
+      referralWithdrawAmount2,
+      { from: userAccount4 }
+    );
+
+    truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount2 &&
+        ev.account == userAccount3
+      );
+    });
+
+    truffleAssert.eventEmitted(
+      txOrganization2,
+      "PlanterBalanceWithdrawn",
+      (ev) => {
+        return (
+          Number(ev.amount) == organizationWithdrawAmount2 &&
+          ev.account == userAccount5
+        );
+      }
+    );
+
+    truffleAssert.eventEmitted(txReferral2, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == referralWithdrawAmount2 &&
+        ev.account == userAccount4
+      );
+    });
+
+    const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(contractBalanceAfterFund),
+        Math.add(
+          planterWithdrawAmount1,
+          planterWithdrawAmount2,
+          organizationWithdrawAmount1,
+          organizationWithdrawAmount2,
+          referralWithdrawAmount1,
+          referralWithdrawAmount2
+        )
+      ),
+      Number(contractBalanceAfterWithdraw2),
+      "contract balance is not ok after withdraw 2"
+    );
+
+    const planterBalance3 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const referralBalance4 = await planterFundInstance.balances.call(
+      userAccount4
+    );
+    const organizationBalance3 = await planterFundInstance.balances.call(
+      userAccount5
+    );
+
+    assert.equal(0, Number(planterBalance3), "planter blance is not ok 3");
+
+    assert.equal(
+      0,
+      Number(organizationBalance3),
+      "organization blance is not ok 3"
+    );
+
+    assert.equal(
+      Math.subtract(
+        totalReferralFund,
+        Math.add(referralWithdrawAmount2, referralWithdrawAmount1)
+      ),
+      Number(referralBalance4),
+      "referral blance is not ok 3"
+    );
+
+    const totalFunds = await planterFundInstance.totalFunds();
+
+    assert.equal(
+      0,
+      Number(totalFunds.referralFund),
+      "totalReferralFund is not ok 3"
+    );
+
+    assert.equal(
+      0,
+      Number(totalFunds.planterFund),
+      "totalPalnterFund is not ok 3"
+    );
+
+    const accountBalance3 = await daiInstance.balanceOf.call(userAccount3);
+    const accountOrganizationBalance3 = await daiInstance.balanceOf.call(
+      userAccount5
+    );
+
+    assert.equal(
+      Number(accountBalance3),
+      Math.add(Number(accountBalance2), planterWithdrawAmount2),
+
+      "planter balance is not ok 3"
+    );
+
+    assert.equal(
+      Number(accountOrganizationBalance3),
+      Math.add(
+        Number(accountOrganizationBalance2),
+        organizationWithdrawAmount2
+      ),
+      "organization balance is not ok 3"
+    );
+  });
+
+  it("organizationPlanter plant tree and withdraw successfully", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    const treeId = 1;
+    const planterFund = Units.convert("1", "eth", "wei");
+    const referralFund = Units.convert("0.5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successOrganizationPlanterJoin(
+      arInstance,
+      planterInstance,
+      userAccount3,
+      zeroAddress,
+      deployerAccount
+    );
+
+    const totalPlanterFund = planterFund;
+
+    const totalReferralFund = referralFund;
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("1.5", "eth", "wei"),
+      { from: deployerAccount }
+    );
+
+    const contractBalanceAfterFund = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    const OrganizationPlanterBalance1 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+
+    const totalFunds = await planterFundInstance.totalFunds();
+
+    assert.equal(
+      Number(OrganizationPlanterBalance1),
+      Number(totalPlanterFund),
+      "Organization planter balance is not ok 1"
+    );
+
+    assert.equal(
+      Number(totalFunds.localDevelop),
+      totalReferralFund,
+      "localDevelop balance is not ok 1"
+    );
+
+    assert.equal(
+      Number(totalFunds.referralFund),
+      0,
+      "total referrar fund is not ok"
+    );
+
+    const planterWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+
+    const tx = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount1,
+      { from: userAccount3 }
+    );
+
+    truffleAssert.eventEmitted(tx, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount1 &&
+        ev.account == userAccount3
+      );
+    });
+
+    //TODO: we can check here transfer local develop fund and check total funds
+
+    // const txLocalDevelop = await planterFundInstance.withdrawLocalDevelop(
+    //   web3.utils.toWei("0.1"),
+    //   "some reason",
+    //   { from: deployerAccount }
+    // );
+
+    // truffleAssert.eventEmitted(
+    //   txLocalDevelop,
+    //   "LocalDevelopBalanceWithdrawn",
+    //   (ev) => {
+    //     return (
+    //       Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+    //       ev.account == userAccount6 &&
+    //       ev.reason == "some reason"
+    //     );
+    //   }
+    // );
+
+    const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(Number(contractBalanceAfterFund), planterWithdrawAmount1),
+      Number(contractBalanceAfterWithdraw1),
+      "contract balance is not ok after withdraw 1"
+    );
+
+    const organizationPlanterBalance2 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+    const accountOrganizationPlanterBalance2 = await daiInstance.balanceOf.call(
+      userAccount3
+    );
+
+    const totalFunds2 = await planterFundInstance.totalFunds();
+
+    const accountlocalDevelopBalance2 = await daiInstance.balanceOf.call(
+      userAccount6
+    );
+
+    assert.equal(
+      Math.subtract(Number(totalPlanterFund), planterWithdrawAmount1),
+      Number(organizationPlanterBalance2),
+      "organization planter blance is not ok 2"
+    );
+    //TODO: we can check here transfer local develop fund and check total funds
+    assert.equal(
+      totalReferralFund,
+      Number(totalFunds2.localDevelop),
+      "localDevelop blance is not ok 2"
+    );
+
+    const txFee = await Common.getTransactionFee(tx);
+
+    assert.equal(
+      Number(accountOrganizationPlanterBalance2),
+      planterWithdrawAmount1,
+      "organization planter balance is not ok 2"
+    );
+
+    // //////////////////////
+    const planterWithdrawAmount2 = Units.convert("0.9", "eth", "wei");
+
+    const tx2 = await planterFundInstance.withdrawPlanterBalance(
+      planterWithdrawAmount2,
+      { from: userAccount3 }
+    );
+
+    // const txLocalDevelop2 = await planterFundInstance.withdrawLocalDevelop(
+    //   web3.utils.toWei("0.3"),
+    //   "some reason",
+    //   { from: deployerAccount }
+    // );
+
+    truffleAssert.eventEmitted(tx2, "PlanterBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == planterWithdrawAmount2 &&
+        ev.account == userAccount3
+      );
+    });
+
+    // truffleAssert.eventEmitted(
+    //   txLocalDevelop2,
+    //   "LocalDevelopBalanceWithdrawn",
+    //   (ev) => {
+    //     return (
+    //       Number(ev.amount) == Number(web3.utils.toWei("0.3")) &&
+    //       ev.account == userAccount6 &&
+    //       ev.reason == "some reason"
+    //     );
+    //   }
+    // );
+
+    const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(contractBalanceAfterFund),
+        Math.add(planterWithdrawAmount1, planterWithdrawAmount2)
+      ),
+      Number(contractBalanceAfterWithdraw2),
+      "contract balance is not ok after withdraw 2"
+    );
+
+    const organizationPlanterBalance3 = await planterFundInstance.balances.call(
+      userAccount3
+    );
+
+    const totalFunds3 = await planterFundInstance.totalFunds();
+
+    assert.equal(
+      0,
+      Number(organizationPlanterBalance3),
+      "planter blance is not ok 3"
+    );
+
+    assert.equal(
+      0,
+      Number(totalFunds3.referralFund),
+      "totalReferralFund is not ok 3"
+    );
+
+    assert.equal(
+      0,
+      Number(totalFunds3.planterFund),
+      "totalPalnterFund is not ok 3"
+    );
+
+    assert.equal(
+      totalReferralFund,
+      Number(totalFunds3.localDevelop),
+      "totallocalDevelop is not ok 3"
+    );
+
+    const accountOrganizationPlanterBalance3 = await daiInstance.balanceOf.call(
+      userAccount3
+    );
+    // const accountlocalDevelopBalance3 = await web3.eth.getBalance(userAccount6);
+
+    const txFee2 = await Common.getTransactionFee(tx2);
+
+    assert.equal(
+      Number(accountOrganizationPlanterBalance3),
+
+      Math.add(
+        Number(accountOrganizationPlanterBalance2),
+        planterWithdrawAmount2
+      ),
+
+      "planter balance is not ok 3"
+    );
+
+    // assert.equal(
+    //   Number(accountlocalDevelopBalance3),
+    //   Math.add(
+    //     Number(accountlocalDevelopBalance2),
+    //     Number(web3.utils.toWei("0.3"))
+    //   ),
+    //   "localDevelop balance is not ok 3"
+    // );
+  });
+
+  it("should fail withdraw planter", async () => {
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("1", "eth", "wei");
+    const referralFund = Units.convert("0.5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      treeId,
+      userAccount3,
+      zeroAddress,
+      zeroAddress
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    await planterFundInstance
+      .withdrawPlanterBalance(0, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance
+      .withdrawPlanterBalance(Units.convert("1.5", "eth", "wei"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance
+      .withdrawPlanterBalance(Units.convert("0.75", "eth", "wei"), {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
+
+    await planterFundInstance
+      .withdrawPlanterBalance(Units.convert("0.5", "eth", "wei"), {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 });

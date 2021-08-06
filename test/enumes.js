@@ -103,6 +103,10 @@ const CommunityGiftErrorMsg = {
   CLAIMED_BEFORE: "Claimed before",
   MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
   NOT_AVAILABLE_TREE_EXIST: "not available tree exist",
+  EXPIREDATE_REACHED: "CommunityGift ended",
+  USER_NOT_EXIST: "User not exist",
+  EXPIREDATE_NOT_REACHED: "CommunityGift Time not yet ended",
+  SYMBOL_NOT_RESERVED: "Symbol not reserved",
 };
 
 module.exports = {

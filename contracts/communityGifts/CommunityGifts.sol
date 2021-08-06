@@ -133,9 +133,9 @@ contract CommunityGifts is Initializable {
     function claimTree() external {
         CommunityGift storage communityGift = communityGifts[msg.sender];
 
-        require(block.timestamp < expireDate, "CommunityGift ended");
+        require(block.timestamp <= expireDate, "CommunityGift ended");
         require(communityGifts[msg.sender].exist, "User not exist");
-        require(!communityGifts[msg.sender].claimed, "claimed before");
+        require(!communityGifts[msg.sender].claimed, "Claimed before");
 
         uint256 treeId = 11 + claimedCount;
 
@@ -155,13 +155,16 @@ contract CommunityGifts is Initializable {
     }
 
     function transferTree(address _giftee, uint32 _symbol) external onlyAdmin {
-        require(block.timestamp > expireDate, "CommunityGift not yet ended");
-        //check symbol reserve
+        require(
+            block.timestamp > expireDate,
+            "CommunityGift Time not yet ended"
+        );
+
         require(claimedCount < 89, "claimedCount not true");
 
         require(
             treeAttribute.reservedAttributes(_symbol) == 1,
-            "attribute no reserved"
+            "Symbol not reserved"
         );
 
         uint256 treeId = 11 + claimedCount;

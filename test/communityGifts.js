@@ -47,8 +47,7 @@ contract("CommunityGifts", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   beforeEach(async () => {
-    const expireDate =
-      parseInt(new Date().getTime() / 1000) + 30 * 24 * 60 * 60; //one month after now
+    const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
 
     //------------------ deploy contracts
 
@@ -671,9 +670,322 @@ contract("CommunityGifts", (accounts) => {
   });
   */
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
-  it("should claimTree succesfully and check data to be ok", async () => {
+
+  ////////////////////// -------------------------------- claim tree ----------------------------------------
+
+  // it("1-should claimTree succesfully and check data to be ok", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let claimedCountBefore = await communityGiftsInstance.claimedCount();
+
+  //   //////////--------------claim tree by giftee1
+
+  //   let eventTx1 = await communityGiftsInstance.claimTree({
+  //     from: giftee1,
+  //   });
+
+  //   let claimedCountAfter = await communityGiftsInstance.claimedCount();
+
+  //   let giftee = await communityGiftsInstance.communityGifts(giftee1);
+
+  //   assert.equal(Number(giftee.symbol), symbol1, "1.symbol not true updated");
+  //   assert.equal(giftee.claimed, true, "1.claimed not true updated");
+
+  //   assert.equal(
+  //     Number(claimedCountAfter),
+  //     Number(claimedCountBefore) + 1,
+  //     "1.claimedCount not true updated"
+  //   );
+
+  //   //////////--------------check tree owner
+  //   let addressGetToken = await treeTokenInstance.ownerOf(11);
+
+  //   assert.equal(addressGetToken, giftee1, "1.mint not true");
+
+  //   //////////--------------check provide status
+
+  //   let genTree = await treeFactoryInstance.treeData.call(11);
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     0,
+  //     "provideStatus is not correct"
+  //   );
+
+  //   //////////--------------check treeAttribute
+  //   let treeAttribute = await treeAttributeInstance.treeAttributes(11);
+  //   assert.equal(treeAttribute.exists, 1, "treeAttribute is not true update");
+
+  //   //////////-------------- check event emitted
+
+  //   truffleAssert.eventEmitted(eventTx1, "TreeClaimed", (ev) => {
+  //     return Number(ev.treeId) == 11;
+  //   });
+  // });
+
+  // it("2-should claimTree succesfully and check data to be ok", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   const giftee2 = userAccount2;
+  //   const symbol2 = 1234554322;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee2, symbol2, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let claimedCountBefore = await communityGiftsInstance.claimedCount();
+
+  //   //////////--------------claim tree by giftee1
+
+  //   let eventTx1 = await communityGiftsInstance.claimTree({
+  //     from: giftee1,
+  //   });
+
+  //   //////////--------------claim tree by giftee2
+  //   let eventTx2 = await communityGiftsInstance.claimTree({
+  //     from: giftee2,
+  //   });
+
+  //   let claimedCountAfter = await communityGiftsInstance.claimedCount();
+
+  //   //////////-------------- check claimed tree data
+  //   let giftee1Data = await communityGiftsInstance.communityGifts(giftee1);
+
+  //   let giftee2Data = await communityGiftsInstance.communityGifts(giftee2);
+
+  //   assert.equal(
+  //     Number(giftee1Data.symbol),
+  //     symbol1,
+  //     "1.symbol not true updated"
+  //   );
+  //   assert.equal(giftee1Data.claimed, true, "1.claimed not true updated");
+
+  //   assert.equal(
+  //     Number(giftee2Data.symbol),
+  //     symbol2,
+  //     "2.symbol not true updated"
+  //   );
+  //   assert.equal(giftee2Data.claimed, true, "2.claimed not true updated");
+
+  //   assert.equal(
+  //     Number(claimedCountAfter),
+  //     Number(claimedCountBefore) + 2,
+  //     "claimedCount not true updated"
+  //   );
+
+  //   //////////--------------check tree owner
+  //   let addressGetToken = await treeTokenInstance.ownerOf(11);
+
+  //   assert.equal(addressGetToken, giftee1, "1.mint not true");
+
+  //   let addressGetToken2 = await treeTokenInstance.ownerOf(12);
+
+  //   assert.equal(addressGetToken2, giftee2, "2.mint not true");
+
+  //   //////////--------------check provide status
+
+  //   let genTree = await treeFactoryInstance.treeData.call(11);
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     0,
+  //     "provideStatus is not correct"
+  //   );
+
+  //   let genTree2 = await treeFactoryInstance.treeData.call(12);
+
+  //   assert.equal(
+  //     Number(genTree2.provideStatus),
+  //     0,
+  //     "provideStatus is not correct"
+  //   );
+
+  //   //////////--------------check treeAttribute
+  //   let treeAttribute = await treeAttributeInstance.treeAttributes(11);
+  //   assert.equal(treeAttribute.exists, 1, "treeAttribute is not true update");
+
+  //   let treeAttribute2 = await treeAttributeInstance.treeAttributes(12);
+  //   assert.equal(treeAttribute2.exists, 1, "treeAttribute is not true update");
+
+  //   //////////-------------- check event emitted
+
+  //   truffleAssert.eventEmitted(eventTx1, "TreeClaimed", (ev) => {
+  //     return Number(ev.treeId) == 11;
+  //   });
+
+  //   truffleAssert.eventEmitted(eventTx2, "TreeClaimed", (ev) => {
+  //     return Number(ev.treeId) == 12;
+  //   });
+  // });
+
+  // it("Should claimTree reject(expireDate reach)", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////////--------------time travel
+  //   await Common.travelTime(TimeEnumes.days, 31);
+
+  //   //////////--------------claim with expire date error
+
+  //   await communityGiftsInstance
+  //     .claimTree({
+  //       from: giftee1,
+  //     })
+  //     .should.be.rejectedWith(CommunityGiftErrorMsg.EXPIREDATE_REACHED);
+  // });
+
+  // it("Should claimTree reject(User not exist)", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////////--------------claim with error
+  //   await communityGiftsInstance
+  //     .claimTree({
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(CommunityGiftErrorMsg.USER_NOT_EXIST);
+  // });
+
+  // it("Should claimTree reject(Claimed before)", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////////--------------claim tree by giftee1 for first time and it's not problem
+
+  //   await communityGiftsInstance.claimTree({
+  //     from: giftee1,
+  //   });
+
+  //   //////////--------------claim with error
+  //   await communityGiftsInstance
+  //     .claimTree({
+  //       from: giftee1,
+  //     })
+  //     .should.be.rejectedWith(CommunityGiftErrorMsg.CLAIMED_BEFORE);
+  // });
+
+  ////////////////////// -------------------------------- transfer tree ----------------------------------------
+
+  // it("1-should transferTree succesfully and check data to be ok", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
+
+  //   //////////--------------add giftee by admin
+
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
+
+  //   let claimedCountBefore = await communityGiftsInstance.claimedCount();
+
+  //   //////////--------------time travel
+  //   await Common.travelTime(TimeEnumes.days, 31);
+
+  //   //////////--------------call transferTree by admin(owner=>userAccount3)
+
+  //   let eventTx1 = await communityGiftsInstance.transferTree(
+  //     userAccount3,
+  //     1234554321,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   let claimedCountAfter = await communityGiftsInstance.claimedCount();
+
+  //   assert.equal(
+  //     Number(claimedCountAfter),
+  //     Number(claimedCountBefore) + 1,
+  //     "1.claimedCount not true updated"
+  //   );
+
+  //   //////////--------------check tree owner
+  //   let addressGetToken = await treeTokenInstance.ownerOf(11);
+
+  //   assert.equal(addressGetToken, userAccount3, "1.mint not true");
+
+  //   //////////--------------check provide status
+
+  //   let genTree = await treeFactoryInstance.treeData.call(11);
+
+  //   assert.equal(
+  //     Number(genTree.provideStatus),
+  //     0,
+  //     "provideStatus is not correct"
+  //   );
+
+  //   //////////--------------check treeAttribute
+  //   let treeAttribute = await treeAttributeInstance.treeAttributes(11);
+  //   assert.equal(treeAttribute.exists, 1, "treeAttribute is not true update");
+
+  //   //////////-------------- check event emitted
+
+  //   truffleAssert.eventEmitted(eventTx1, "TreeTransfered", (ev) => {
+  //     return Number(ev.treeId) == 11;
+  //   });
+  // });
+
+  it("Should transferTree reject (only admin call)", async () => {
     const giftee1 = userAccount1;
     const symbol1 = 1234554321;
+
+    //////////--------------add giftee by admin
 
     await communityGiftsInstance.setGiftsRange(11, 13, {
       from: deployerAccount,
@@ -683,41 +995,22 @@ contract("CommunityGifts", (accounts) => {
       from: deployerAccount,
     });
 
-    let claimedCountBefore = await communityGiftsInstance.claimedCount();
+    //////////--------------time travel
+    await Common.travelTime(TimeEnumes.days, 31);
 
-    await communityGiftsInstance.claimTree({
-      from: giftee1,
-    });
-
-    let claimedCountAfter = await communityGiftsInstance.claimedCount();
-
-    let giftee = await communityGiftsInstance.communityGifts(giftee1);
-
-    assert.equal(Number(giftee.symbol), symbol1, "1.symbol not true updated");
-    assert.equal(giftee.claimed, true, "1.claimed not true updated");
-
-    assert.equal(
-      Number(claimedCountAfter),
-      Number(claimedCountBefore) + 1,
-      "1.claimedCount not true updated"
-    );
-
-    let addressGetToken = await treeTokenInstance.ownerOf(11);
-
-    assert.equal(addressGetToken, giftee1, "1.mint not true");
-
-    let genTree = await treeFactoryInstance.treeData.call(11);
-
-    assert.equal(
-      Number(genTree.provideStatus),
-      0,
-      "provideStatus is not correct"
-    );
+    //////////--------------call transferTree by user
+    await communityGiftsInstance
+      .transferTree(userAccount3, 1234554321, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
-  it("should claimTree succesfully and check data to be ok", async () => {
+  it("Should transferTree reject (expireDate not reach)", async () => {
     const giftee1 = userAccount1;
     const symbol1 = 1234554321;
+
+    //////////--------------add giftee by admin
 
     await communityGiftsInstance.setGiftsRange(11, 13, {
       from: deployerAccount,
@@ -727,35 +1020,29 @@ contract("CommunityGifts", (accounts) => {
       from: deployerAccount,
     });
 
-    let claimedCountBefore = await communityGiftsInstance.claimedCount();
+    //////////--------------call transferTree by user
+    await communityGiftsInstance
+      .transferTree(userAccount3, 1234554321, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommunityGiftErrorMsg.EXPIREDATE_NOT_REACHED);
+  });
 
-    await communityGiftsInstance.claimTree({
-      from: giftee1,
+  it("Should transferTree reject (symbol not reserved)", async () => {
+    //////////--------------add giftee by admin
+
+    await communityGiftsInstance.setGiftsRange(11, 13, {
+      from: deployerAccount,
     });
 
-    let claimedCountAfter = await communityGiftsInstance.claimedCount();
+    //////////--------------time travel
+    await Common.travelTime(TimeEnumes.days, 31);
 
-    let giftee = await communityGiftsInstance.communityGifts(giftee1);
-
-    assert.equal(Number(giftee.symbol), symbol1, "1.symbol not true updated");
-    assert.equal(giftee.claimed, true, "1.claimed not true updated");
-
-    assert.equal(
-      Number(claimedCountAfter),
-      Number(claimedCountBefore) + 1,
-      "1.claimedCount not true updated"
-    );
-
-    let addressGetToken = await treeTokenInstance.ownerOf(11);
-
-    assert.equal(addressGetToken, giftee1, "1.mint not true");
-
-    let genTree = await treeFactoryInstance.treeData.call(11);
-
-    assert.equal(
-      Number(genTree.provideStatus),
-      0,
-      "provideStatus is not correct"
-    );
+    //////////--------------call transferTree by user
+    await communityGiftsInstance
+      .transferTree(userAccount3, 1234554321, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_RESERVED);
   });
 });

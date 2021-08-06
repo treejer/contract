@@ -143,6 +143,9 @@ interface ITreeFactory {
         external
         returns (bool);
 
+    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
+        external;
+
     event TreeAdded(uint256 treeId);
     event TreeAssigned(uint256 treeId);
     event TreePlanted(uint256 treeId);

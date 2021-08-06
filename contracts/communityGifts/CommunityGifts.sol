@@ -144,7 +144,7 @@ contract CommunityGifts is Initializable {
         communityGift.claimed = true;
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
-        treeFactory.updateOwner(treeId, msg.sender);
+        treeFactory.updateOwnerCommunityGifts(treeId, msg.sender);
         //call planter contract
 
         emit TreeClaimed(treeId);
@@ -169,7 +169,7 @@ contract CommunityGifts is Initializable {
         claimedCount += 1;
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
-        treeFactory.updateOwner(treeId, _giftee);
+        treeFactory.updateOwnerCommunityGifts(treeId, _giftee);
         //call planter contract
 
         emit TreeTransfered(treeId);

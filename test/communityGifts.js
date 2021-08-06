@@ -4,8 +4,10 @@ const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
+const Tree = artifacts.require("Tree.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
+const Units = require("ethereumjs-units");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
@@ -258,9 +260,58 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
+    const treeTokenInstance = await deployProxy(
+      Tree,
+      [arInstance.address, ""],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
     //----------------- add tree and create auction for it
 
     await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await Common.addAuctionRole(
+      arInstance,
+      treeAuctionInstance.address,
+      deployerAccount
+    );
+
+    await treasuryInstance.addFundDistributionModel(
+      3000,
+      1200,
+      1200,
+      1200,
+      1200,
+      2200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await treasuryInstance.assignTreeFundDistributionModel(0, 150, 0, {
       from: deployerAccount,
     });
 
@@ -280,5 +331,60 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.NOT_AVAILABLE_TREE_EXIST);
+  });
+
+  /////////////////---------------------------------set expire date--------------------------------------------------------
+  it("should set expire date successfully and check data to be ok", async () => {
+    const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
+
+    await communityGiftsInstance.setExpireDate(Number(expireDate), {
+      from: deployerAccount,
+    });
+
+    let settedExpireDate = await communityGiftsInstance.expireDate.call();
+
+    assert.equal(
+      Number(settedExpireDate),
+      Number(expireDate),
+      "expire date is not correct"
+    );
+  });
+
+  it("should fail to set expire date", async () => {
+    await communityGiftsInstance
+      .setExpireDate(100, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  /////////////////-------------------------------------- set price ------------------------------------------------
+
+  it("should set price successfully and check data to be ok", async () => {
+    const planterFund = Units.convert("0.5", "eth", "wei");
+    const referralFund = Units.convert("0.1", "eth", "wei");
+
+    await communityGiftsInstance.setPrice(planterFund, referralFund, {
+      from: deployerAccount,
+    });
+
+    const settedPlanterFund = await communityGiftsInstance.planterFund.call();
+    const settedReferralFund = await communityGiftsInstance.referralFund.call();
+
+    assert.equal(
+      Number(settedPlanterFund),
+      planterFund,
+      "planter fund is not correct"
+    );
+
+    assert.equal(
+      Number(settedReferralFund),
+      referralFund,
+      "referral fund is not correct"
+    );
+  });
+
+  it("should fail to set price", async () => {
+    await communityGiftsInstance
+      .setPrice(100, 200, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 });

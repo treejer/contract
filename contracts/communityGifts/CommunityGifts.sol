@@ -14,8 +14,8 @@ contract CommunityGifts is Initializable {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
 
     bool public isCommunityGifts;
-    uint256 private planterFund;
-    uint256 private referralFund;
+    uint256 public planterFund;
+    uint256 public referralFund;
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;

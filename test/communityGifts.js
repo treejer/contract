@@ -981,68 +981,68 @@ contract("CommunityGifts", (accounts) => {
   //   });
   // });
 
-  it("Should transferTree reject (only admin call)", async () => {
-    const giftee1 = userAccount1;
-    const symbol1 = 1234554321;
+  // it("Should transferTree reject (only admin call)", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
 
-    //////////--------------add giftee by admin
+  //   //////////--------------add giftee by admin
 
-    await communityGiftsInstance.setGiftsRange(11, 13, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
 
-    //////////--------------time travel
-    await Common.travelTime(TimeEnumes.days, 31);
+  //   //////////--------------time travel
+  //   await Common.travelTime(TimeEnumes.days, 31);
 
-    //////////--------------call transferTree by user
-    await communityGiftsInstance
-      .transferTree(userAccount3, 1234554321, {
-        from: userAccount3,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-  });
+  //   //////////--------------call transferTree by user
+  //   await communityGiftsInstance
+  //     .transferTree(userAccount3, 1234554321, {
+  //       from: userAccount3,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  // });
 
-  it("Should transferTree reject (expireDate not reach)", async () => {
-    const giftee1 = userAccount1;
-    const symbol1 = 1234554321;
+  // it("Should transferTree reject (expireDate not reach)", async () => {
+  //   const giftee1 = userAccount1;
+  //   const symbol1 = 1234554321;
 
-    //////////--------------add giftee by admin
+  //   //////////--------------add giftee by admin
 
-    await communityGiftsInstance.setGiftsRange(11, 13, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+  //     from: deployerAccount,
+  //   });
 
-    //////////--------------call transferTree by user
-    await communityGiftsInstance
-      .transferTree(userAccount3, 1234554321, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommunityGiftErrorMsg.EXPIREDATE_NOT_REACHED);
-  });
+  //   //////////--------------call transferTree by user
+  //   await communityGiftsInstance
+  //     .transferTree(userAccount3, 1234554321, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(CommunityGiftErrorMsg.EXPIREDATE_NOT_REACHED);
+  // });
 
-  it("Should transferTree reject (symbol not reserved)", async () => {
-    //////////--------------add giftee by admin
+  // it("Should transferTree reject (symbol not reserved)", async () => {
+  //   //////////--------------add giftee by admin
 
-    await communityGiftsInstance.setGiftsRange(11, 13, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.setGiftsRange(11, 13, {
+  //     from: deployerAccount,
+  //   });
 
-    //////////--------------time travel
-    await Common.travelTime(TimeEnumes.days, 31);
+  //   //////////--------------time travel
+  //   await Common.travelTime(TimeEnumes.days, 31);
 
-    //////////--------------call transferTree by user
-    await communityGiftsInstance
-      .transferTree(userAccount3, 1234554321, {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_RESERVED);
-  });
+  //   //////////--------------call transferTree by user
+  //   await communityGiftsInstance
+  //     .transferTree(userAccount3, 1234554321, {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_RESERVED);
+  // });
 });

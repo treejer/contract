@@ -395,10 +395,107 @@ contract("CommunityGifts", (accounts) => {
     const symbol1 = 1234554321;
     const symbol2 = 1357997531;
 
-    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+    const giftCountBefore = await communityGiftsInstance.giftCount.call();
+
+    const eventTx = await communityGiftsInstance.updateGiftees(
+      giftee1,
+      symbol1,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const communityGift = await communityGiftsInstance.communityGifts.call(
+      giftee1
+    );
+
+    assert.equal(
+      Number(communityGift.symbol),
+      symbol1,
+      "symbol is not correct"
+    );
+
+    assert.equal(communityGift.exist, true, "exist is not correct");
+
+    assert.equal(communityGift.claimed, false, "claimed is not correct");
+
+    truffleAssert.eventEmitted(eventTx, "gifteeUpdated", (ev) => {
+      return ev.giftee == giftee1;
+    });
+
+    const giftCountAfter = await communityGiftsInstance.giftCount.call();
+
+    const generatedAttr1Symbol1 =
+      await treeAttributeInstance.generatedAttributes.call(symbol1);
+
+    const reservedAttr1Symbol1 =
+      await treeAttributeInstance.reservedAttributes.call(symbol1);
+
+    assert.equal(
+      Number(generatedAttr1Symbol1),
+      1,
+      "generated code is not correct"
+    );
+
+    assert.equal(
+      Number(reservedAttr1Symbol1),
+      1,
+      "reserved code is not correct"
+    );
+
+    assert.equal(
+      Number(giftCountBefore),
+      0,
+      "gift count before update giftee is not correct"
+    );
+
+    assert.equal(
+      Number(giftCountAfter),
+      1,
+      "gift count after update giftee is not correct"
+    );
+
+    await communityGiftsInstance.updateGiftees(giftee1, symbol2, {
       from: deployerAccount,
     });
+
+    const generatedAttr2Symbol1 =
+      await treeAttributeInstance.generatedAttributes.call(symbol1);
+
+    const reservedAttr2Symbol1 =
+      await treeAttributeInstance.reservedAttributes.call(symbol1);
+
+    assert.equal(
+      Number(generatedAttr2Symbol1),
+      0,
+      "generated code is not correct"
+    );
+
+    assert.equal(
+      Number(reservedAttr2Symbol1),
+      0,
+      "reserved code is not correct"
+    );
+
+    const generatedAttr1Symbol2 =
+      await treeAttributeInstance.generatedAttributes.call(symbol2);
+
+    const reservedAttr1Symbol2 =
+      await treeAttributeInstance.reservedAttributes.call(symbol2);
+
+    assert.equal(
+      Number(generatedAttr1Symbol2),
+      1,
+      "generated code is not correct"
+    );
+
+    assert.equal(
+      Number(reservedAttr1Symbol2),
+      1,
+      "reserved code is not correct"
+    );
   });
+
   it("should fail to update giftees", async () => {});
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
 });

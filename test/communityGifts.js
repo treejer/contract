@@ -118,7 +118,7 @@ contract("CommunityGifts", (accounts) => {
 
   afterEach(async () => {});
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
-
+  /*
   it("deploys successfully", async () => {
     const address = communityGiftsInstance.address;
     assert.notEqual(address, 0x0);
@@ -387,4 +387,18 @@ contract("CommunityGifts", (accounts) => {
       .setPrice(100, 200, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
+  */
+  ////////////////////// -------------------------------- update giftees ----------------------------------------
+  it("should update giftees succesfully and check data to be ok", async () => {
+    const giftee1 = userAccount1;
+    const giftee2 = userAccount2;
+    const symbol1 = 1234554321;
+    const symbol2 = 1357997531;
+
+    await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
+      from: deployerAccount,
+    });
+  });
+  it("should fail to update giftees", async () => {});
+  //////////////////////////////// ------------------------------- mahdi ------------------------------------
 });

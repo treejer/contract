@@ -98,6 +98,11 @@ const TreeAttributeErrorMsg = {
   TREE_HAS_ATTRIBUTES: "tree attributes are set before",
   TREE_WITH_NO_ATTRIBUTES:"no need to tree attributes"
 };
+
+const CommunityGiftErrorMsg={
+  NOT_AVAILABLE_TREE_EXIST:"not available tree exist"
+}
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -109,4 +114,5 @@ module.exports = {
   RegularSellErrors,
   IncrementalSellErrorMsg,
   TreeAttributeErrorMsg,
+  CommunityGiftErrorMsg
 };

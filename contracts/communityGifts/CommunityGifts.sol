@@ -103,7 +103,7 @@ contract CommunityGifts is Initializable {
         onlyAdmin
     {
         bool check = treeFactory.setGiftsRange(_startTreeId, _endTreeId);
-        require(check, "not true");
+        require(check, "not available tree exist");
     }
 
     function updateGiftees(address _giftee, uint32 _symbol) external onlyAdmin {

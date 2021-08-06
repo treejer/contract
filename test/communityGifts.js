@@ -3,6 +3,7 @@ const CommunityGifts = artifacts.require("CommunityGifts.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Treasury = artifacts.require("Treasury.sol");
+const TreeAuction = artifacts.require("TreeAuction.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -11,8 +12,8 @@ const Common = require("./common");
 
 const {
   CommonErrorMsg,
-
-  PlanterErrorMsg,
+  TimeEnumes,
+  CommunityGiftErrorMsg,
 } = require("./enumes");
 
 //gsn
@@ -230,5 +231,54 @@ contract("CommunityGifts", (accounts) => {
   });
   //TODO: ask if we must add tree and then gift it?
 
-  it("fail to set gift range", async () => {});
+  it("fail to set gift range", async () => {
+    //------------------initial data
+
+    const startTree = 11;
+    const endTree = 101;
+    const treeIdInAuction = 16;
+    const startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+    const endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+    await communityGiftsInstance
+      .setGiftsRange(startTree, endTree, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    ////------------------ deploy tree auction
+
+    const treeAuctionInstance = await deployProxy(
+      TreeAuction,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    //----------------- add tree and create auction for it
+
+    await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.createAuction(
+      treeIdInAuction,
+      Number(startTime),
+      Number(endTime),
+      web3.utils.toWei("1"),
+      web3.utils.toWei("0.1"),
+      { from: deployerAccount }
+    );
+
+    //----------------- fail setGiftsRange because a tree is in auction
+
+    await communityGiftsInstance
+      .setGiftsRange(startTree, endTree, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommunityGiftErrorMsg.NOT_AVAILABLE_TREE_EXIST);
+  });
 });

@@ -156,8 +156,13 @@ contract CommunityGifts is Initializable {
 
     function transferTree(address _giftee, uint32 _symbol) external onlyAdmin {
         require(block.timestamp > expireDate, "CommunityGift not yet ended");
-
+        //check symbol reserve
         require(claimedCount < 89, "claimedCount not true");
+
+        require(
+            treeAttribute.reservedAttributes(_symbol) == 1,
+            "attribute no reserved"
+        );
 
         uint256 treeId = 11 + claimedCount;
 

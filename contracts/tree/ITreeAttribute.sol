@@ -6,6 +6,8 @@ interface ITreeAttribute {
 
     function isTreeAttribute() external view returns (bool);
 
+    function reservedAttributes(uint32) external view returns (uint8);
+
     function createTreeAttributes(uint256 treeId, uint256 paidAmount)
         external
         returns (bool);

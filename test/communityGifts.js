@@ -251,7 +251,6 @@ contract("CommunityGifts", (accounts) => {
     );
   });
 
-
   it("fail to set gift range", async () => {
     //------------------initial data
 
@@ -279,16 +278,6 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    const treeTokenInstance = await deployProxy(
-      Tree,
-      [arInstance.address, ""],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
-
     //----------------- add tree and create auction for it
 
     await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
@@ -305,10 +294,6 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       }
     );
-
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
 
     await Common.addAuctionRole(
       arInstance,
@@ -629,38 +614,13 @@ contract("CommunityGifts", (accounts) => {
       "reserved code is not correct"
     );
   });
+
   it("should fail to update giftees", async () => {
     const giftee1 = userAccount1;
     const giftee2 = userAccount2;
     const symbol1 = 1234554321;
     const symbol2 = 1357997531;
     const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
-
-    /////////////////----------------- deploy contract
-
-    const treeTokenInstance = await deployProxy(
-      Tree,
-      [arInstance.address, ""],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
-
-    //////////////----------------set address
-
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
-
-    ///////////////-------------- add role
-
-    await Common.addTreeFactoryRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
 
     //////////////////---------------- set expire date
 
@@ -709,7 +669,7 @@ contract("CommunityGifts", (accounts) => {
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.MAX_GIFT_AMOUNT_REACHED);
   });
-*/
+  */
   //////////////////////////////// ------------------------------- mahdi ------------------------------------
   // it("should claimTree succesfully and check data to be ok", async () => {
   //   const giftee1 = userAccount1;

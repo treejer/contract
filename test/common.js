@@ -24,6 +24,10 @@ Common.sleep = (ms) => {
 Common.addPlanter = async (instance, account, adminAccount) => {
   await instance.grantRole(PLANTER_ROLE, account, { from: adminAccount });
 };
+Common.getNewAccountPublicKey = async () => {
+  const account = web3.eth.accounts.create();
+  return account.address;
+};
 
 Common.addAdmin = async (instance, account, adminAccount) => {
   await instance.grantRole(DEFAULT_ADMIN_ROLE, account, { from: adminAccount });

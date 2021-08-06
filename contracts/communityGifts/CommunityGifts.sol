@@ -114,7 +114,7 @@ contract CommunityGifts is Initializable {
         CommunityGift storage communityGift = communityGifts[_giftee];
 
         require(!communityGift.claimed, "Claimed before");
-        require(giftCount < 90, "giftCount not true");
+        require(giftCount < 90, "max giftCount reached");
 
         if (!communityGift.exist) {
             giftCount += 1;

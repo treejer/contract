@@ -108,6 +108,69 @@ contract DaiFunds is Initializable {
         planterFundContract = candidateContract;
     }
 
+    /**
+     * @dev admin set treeResearch  address to fund
+     * @param _address tree research address
+     */
+    function setTreeResearchAddress(address payable _address)
+        external
+        onlyAdmin
+    {
+        treeResearchAddress = _address;
+    }
+
+    /**
+     * @dev admin set localDevelop  address to fund
+     * @param _address local develop address
+     */
+    function setLocalDevelopAddress(address payable _address)
+        external
+        onlyAdmin
+    {
+        localDevelopAddress = _address;
+    }
+
+    /**
+     * @dev admin set rescue address to fund
+     * @param _address rescue fund address
+     */
+    function setRescueFundAddress(address payable _address) external onlyAdmin {
+        rescueFundAddress = _address;
+    }
+
+    /**
+     * @dev admin set treejerDevelop  address to fund
+     * @param _address treejer develop address
+     */
+    function setTreejerDevelopAddress(address payable _address)
+        external
+        onlyAdmin
+    {
+        treejerDevelopAddress = _address;
+    }
+
+    /**
+     * @dev admin set reserveFund1  address to fund
+     * @param _address reserveFund1 address
+     */
+    function setReserveFund1Address(address payable _address)
+        external
+        onlyAdmin
+    {
+        reserveFundAddress1 = _address;
+    }
+
+    /**
+     * @dev admin set reserveFund2  address to fund
+     * @param _address reserveFund2 address
+     */
+    function setReserveFund2Address(address payable _address)
+        external
+        onlyAdmin
+    {
+        reserveFundAddress2 = _address;
+    }
+
     function fundTree(
         uint256 _treeId,
         uint256 _amount,

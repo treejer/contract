@@ -16,7 +16,7 @@ contract Weth is ERC20 {
         approve(_address, 10000 * (10**18));
     }
 
-    function setMint(address _address) external {
-        _mint(_address, 10000 * (10**18));
+    function setMint(address _address, uint256 _amount) external {
+        _mint(_address, _amount);
     }
 }

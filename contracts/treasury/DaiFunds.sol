@@ -27,8 +27,6 @@ contract DaiFunds is Initializable {
     address payable public reserveFundAddress2;
 
     struct TotalFunds {
-        uint256 planterFund;
-        uint256 referralFund;
         uint256 treeResearch;
         uint256 localDevelop;
         uint256 rescueFund;

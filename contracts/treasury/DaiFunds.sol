@@ -15,7 +15,7 @@ contract DaiFunds is Initializable {
 
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
-    IERC20Upgradeable public DaiToken;
+    IERC20Upgradeable public daiToken;
 
     TotalFunds public totalFunds;
 
@@ -35,8 +35,49 @@ contract DaiFunds is Initializable {
         uint256 reserveFund2;
     }
 
+    event TreeResearchBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event LocalDevelopBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event RescueBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event TreejerDevelopBalanceWithdrawn(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event OtherBalanceWithdrawn1(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    event OtherBalanceWithdrawn2(
+        uint256 amount,
+        address account,
+        string reason
+    );
+
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
+        _;
+    }
+
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
         _;
     }
 
@@ -55,7 +96,7 @@ contract DaiFunds is Initializable {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(
             _daiTokenAddress
         );
-        DaiToken = candidateContract;
+        daiToken = candidateContract;
     }
 
     function setPlanterFundContractAddress(address _address)
@@ -96,11 +137,179 @@ contract DaiFunds is Initializable {
         uint256 planterFund = (_amount * _planterFund) / 10000;
         uint256 referralFund = (_amount * _referralFund) / 10000;
 
-        DaiToken.transfer(
+        daiToken.transfer(
             address(planterFundContract),
             planterFund + referralFund
         );
 
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from treeResearch totalFund in case of valid {_amount}
+     * and money transfer to {treeResearchAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawTreeResearch(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(treeResearchAddress)
+    {
+        require(
+            _amount <= totalFunds.treeResearch && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.treeResearch -= _amount;
+
+        if (daiToken.transfer(treeResearchAddress, _amount)) {
+            emit TreeResearchBalanceWithdrawn(
+                _amount,
+                treeResearchAddress,
+                _reason
+            );
+        } else {
+            totalFunds.treeResearch += _amount;
+        }
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from localDevelop totalFund in case of valid {_amount}
+     * and money transfer to {localDevelopAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawLocalDevelop(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(localDevelopAddress)
+    {
+        require(
+            _amount <= totalFunds.localDevelop && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.localDevelop -= _amount;
+
+        if (daiToken.transfer(localDevelopAddress, _amount)) {
+            emit LocalDevelopBalanceWithdrawn(
+                _amount,
+                localDevelopAddress,
+                _reason
+            );
+        } else {
+            totalFunds.localDevelop += _amount;
+        }
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from rescueFund totalFund in case of valid {_amount}
+     * and money transfer to {rescueFundAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawRescueFund(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(rescueFundAddress)
+    {
+        require(
+            _amount <= totalFunds.rescueFund && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.rescueFund -= _amount;
+
+        if (daiToken.transfer(rescueFundAddress, _amount)) {
+            emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
+        } else {
+            totalFunds.rescueFund += _amount;
+        }
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of valid {_amount}
+     * and money transfer to {treejerDevelopAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawTreejerDevelop(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(treejerDevelopAddress)
+    {
+        require(
+            _amount <= totalFunds.treejerDevelop && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.treejerDevelop -= _amount;
+
+        if (daiToken.transfer(treejerDevelopAddress, _amount)) {
+            emit TreejerDevelopBalanceWithdrawn(
+                _amount,
+                treejerDevelopAddress,
+                _reason
+            );
+        } else {
+            totalFunds.treejerDevelop += _amount;
+        }
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of valid {_amount}
+     * and money transfer to {reserveFundAddress1}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawReserveFund1(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(reserveFundAddress1)
+    {
+        require(
+            _amount <= totalFunds.reserveFund1 && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.reserveFund1 -= _amount;
+
+        if (daiToken.transfer(reserveFundAddress1, _amount)) {
+            emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+        } else {
+            totalFunds.reserveFund1 += _amount;
+        }
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of valid {_amount}
+     * and money transfer to {reserveFundAddress2}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawReserveFund2(uint256 _amount, string calldata _reason)
+        external
+        ifNotPaused
+        onlyAdmin
+        validAddress(reserveFundAddress2)
+    {
+        require(
+            _amount <= totalFunds.reserveFund2 && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalFunds.reserveFund2 -= _amount;
+
+        if (daiToken.transfer(reserveFundAddress2, _amount)) {
+            emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        } else {
+            totalFunds.reserveFund2 += _amount;
+        }
     }
 }

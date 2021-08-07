@@ -67,7 +67,7 @@ contract("Treasury", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-
+  
   //-------------------------------setTreeResearchAddress test-------------------------------------------------------
   it("setTreeResearchAddress should be success", async () => {
     let treeResearchAddress = userAccount4;
@@ -6103,72 +6103,7 @@ contract("Treasury", (accounts) => {
     ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  // //----------------------------------------------gsn test-------------------------------------------
-  it("Test gsn in Treasury", async () => {
-    let env = await GsnTestEnvironment.startGsn("localhost");
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
-
-    await TreasuryInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
-
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-    await paymaster.setWhitelistTarget(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
-
-    origProvider = web3.currentProvider;
-
-    conf = { paymasterAddress: paymaster.address };
-
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
-
-    provider = new ethers.providers.Web3Provider(gsnProvider);
-
-    await Common.addPlanter(arInstance, deployerAccount, deployerAccount);
-
-    let signer = provider.getSigner(1);
-
-    let contract = await new ethers.Contract(
-      TreasuryInstance.address,
-      TreasuryInstance.abi,
-      signer
-    );
-
-    let balanceBefore = await web3.eth.getBalance(deployerAccount);
-
-    await await contract.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0
-    );
-
-    let balanceAfter = await web3.eth.getBalance(deployerAccount);
-
-    assert.equal(
-      Number(balanceAfter),
-      Number(balanceBefore),
-      "Set reserveFundAddress1 address not true"
-    );
-  });
-
+  
   it("Should be fail withdraw planter beacuse function is pause", async () => {
     await arInstance.pause({
       from: deployerAccount,
@@ -6233,5 +6168,74 @@ contract("Treasury", (accounts) => {
     await TreasuryInstance.withdrawPlanterBalance(web3.utils.toWei("0.2"), {
       from: userAccount3,
     }).should.be.rejectedWith(CommonErrorMsg.PAUSE);
+
   });
+  
+  // //----------------------------------------------gsn test-------------------------------------------
+  it("Test gsn in Treasury [ @skip-on-coverage ]", async () => {
+    let env = await GsnTestEnvironment.startGsn("localhost");
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await TreasuryInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(TreasuryInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    await Common.addPlanter(arInstance, deployerAccount, deployerAccount);
+
+    let signer = provider.getSigner(1);
+
+    let contract = await new ethers.Contract(
+      TreasuryInstance.address,
+      TreasuryInstance.abi,
+      signer
+    );
+
+    let balanceBefore = await web3.eth.getBalance(deployerAccount);
+
+    await await contract.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0
+    );
+
+    let balanceAfter = await web3.eth.getBalance(deployerAccount);
+
+    assert.equal(
+      Number(balanceAfter),
+      Number(balanceBefore),
+      "Set reserveFundAddress1 address not true"
+    );
+    await GsnTestEnvironment.stopGsn();
+  });
+  
 });

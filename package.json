@@ -35,8 +35,9 @@
   },
   "scripts": {
     "test": "bash ./scripts/run_tests.sh",
-    "ganache": "ganache-cli --networkId 1337 --chainId 1337",
-    "gsn": "node_modules/.bin/gsn start"
+    "ganache": "node_modules/.bin/ganache-cli --networkId 1337 --chainId 1337",
+    "gsn": "node_modules/.bin/gsn start",
+    "coverage": "node_modules/.bin/truffle run coverage --network development --solcoverjs .solcover.js"
   },
   "keywords": [
     "Treejer",

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
@@ -17,7 +17,7 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
-    IERC20 public daiToken;
+    IERC20Upgradeable public daiToken;
 
     struct TotalFunds {
         uint256 planterFund;
@@ -85,7 +85,7 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     function setDaiTokenAddress(address _address) external {
         accessRestriction.ifAdmin(_msgSender());
-        IERC20 candidateContract = IERC20(_address);
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         daiToken = candidateContract;
     }
 

@@ -132,6 +132,9 @@ contract WethFunds is Initializable {
 
         path[0] = address(wethToken);
         path[1] = DaiAddress;
+        // wethToken.transfer(recipient, amount);
+
+        wethToken.approve(address(uniswapRouter), sumFund);
 
         uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
             sumFund,

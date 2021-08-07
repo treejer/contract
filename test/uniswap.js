@@ -2,13 +2,21 @@ const { DAI, WBTC, WBTC_WHALE, WETH_WHALE, WETH } = require("./config");
 
 const IERC20 = artifacts.require("IERC20");
 const WethFunds = artifacts.require("WethFunds");
+const Factory = artifacts.require("Factory.sol");
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const FinancialModel = artifacts.require("FinancialModel.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
+var Dai = artifacts.require("Dai.sol");
+var Weth = artifacts.require("Weth.sol");
+var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+var TestUniswap = artifacts.require("TestUniswap.sol");
+
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const Common = require("./common");
+const Units = require("ethereumjs-units");
 contract("WethFunds", (accounts) => {
   const WHALE = WETH_WHALE;
-  const AMOUNT_IN = 100000000;
+  const AMOUNT_IN = web3.utils.toWei("1");
   const AMOUNT_OUT_MIN = 1;
   const TOKEN_IN = WETH;
   const TOKEN_OUT = DAI;
@@ -26,10 +34,13 @@ contract("WethFunds", (accounts) => {
   let arInstance;
   let wethFunds;
   let fModel;
+  let factoryInstance;
+  let wethInstance;
+  let daiInstance;
+  let uniswapRouterInstance;
+  let testUniswapInstance;
+  let planterFundsInstnce;
   beforeEach(async () => {
-    tokenIn = await IERC20.at(TOKEN_IN);
-    tokenOut = await IERC20.at(TOKEN_OUT);
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       unsafeAllowCustomTypes: true,
@@ -47,24 +58,63 @@ contract("WethFunds", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    // make sure WHALE has enough ETH to send tx
-    // await sendEther(web3, accounts[0], WHALE, 1);
-    await tokenIn.approve(wethFunds.address, AMOUNT_IN, { from: WHALE });
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
+    const factoryAddress = factoryInstance.address;
+
+    factoryInstance.INIT_CODE_PAIR_HASH();
+
+    wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
+    const WETHAddress = wethInstance.address;
+
+    daiInstance = await Weth.new("DAI", "dai", { from: accounts[0] });
+    const DAIAddress = daiInstance.address;
+    console.log("DAIAddress", DAIAddress);
+
+    uniswapRouterInstance = await UniswapV2Router02New.new(
+      factoryAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    testUniswapInstance = await TestUniswap.new(
+      uniswapV2Router02NewAddress,
+      DAIAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+
+    const testUniswapAddress = testUniswapInstance.address;
+
+    await wethInstance.setMint(testUniswapAddress);
+
+    await daiInstance.setMint(testUniswapAddress);
+
+    await testUniswapInstance.addLiquidity();
+
+    await wethFunds.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
+      from: deployerAccount,
+    });
+    await wethFunds.setWethTokenAddress(WETHAddress, { from: deployerAccount });
+
+    await wethFunds.setDaiAddress(DAIAddress, { from: deployerAccount });
+    console.log("planterFundsInstnce.address", planterFundsInstnce.address);
+
+    await wethFunds.setPlanterFundContractAddress(planterFundsInstnce.address, {
+      from: deployerAccount,
+    });
   });
 
   it("should pass", async () => {
-    await wethFunds.setUniswapRouterAddress(
-      "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-      { from: deployerAccount }
-    );
-
-    await wethFunds.setWethTokenAddress(
-      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      { from: deployerAccount }
-    );
-
+    const x = await wethFunds.uniswapRouter.call();
+    console.log("x", x);
     const treeId = 1;
-
     await fModel.addFundDistributionModel(
       4000,
       2000,
@@ -79,10 +129,12 @@ contract("WethFunds", (accounts) => {
       }
     );
     await Common.addAuctionRole(arInstance, planter1Account, deployerAccount);
-
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
+
+    await wethInstance.setMint(wethFunds.address);
+    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
 
     await wethFunds.fundTree(
       treeId,
@@ -94,10 +146,24 @@ contract("WethFunds", (accounts) => {
       1000,
       1000,
       0,
-      0
+      0,
+      { from: planter1Account }
     );
 
-    console.log(`in ${AMOUNT_IN}`);
-    console.log(`out ${await tokenOut.balanceOf(TO)}`);
+    let contractBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+    console.log(`in ${web3.utils.fromWei(AMOUNT_IN.toString())}`);
+    console.log(`out ${web3.utils.fromWei(contractBalance.toString())}`);
+
+    let totalFund = await planterFundsInstnce.totalFunds.call();
+    let planterFund = totalFund.planterFund;
+    let referralFund = totalFund.referralFund;
+
+    let total = Number(planterFund) + Number(referralFund);
+
+    console.log("total", total);
+    console.log("planterFund", web3.utils.fromWei(planterFund.toString()));
+    console.log("referal", web3.utils.fromWei(referralFund.toString()));
   });
 });

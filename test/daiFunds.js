@@ -7,6 +7,8 @@ const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
+const truffleAssert = require("truffle-assertions");
+const Math = require("./math");
 
 var Dai = artifacts.require("Dai.sol");
 var Weth = artifacts.require("Weth.sol");
@@ -43,7 +45,12 @@ contract("DaiFunds", (accounts) => {
   let daiInstance;
   let planterFundsInstnce;
 
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+  const withdrawReason = "reason to withdraw";
+
   beforeEach(async () => {
+    /////////////---------------------- deploy contracts ------------------- //////////////
+
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       unsafeAllowCustomTypes: true,
@@ -69,8 +76,18 @@ contract("DaiFunds", (accounts) => {
     });
 
     daiInstance = await Weth.new("DAI", "dai", { from: accounts[0] });
-  });
 
+    /////////////---------------------- set address ------------------- //////////////
+    await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await daiFundsInstance.setPlanterFundContractAddress(
+      planterFundsInstnce.address,
+      { from: deployerAccount }
+    );
+  });
+  /*
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
 
   it("set dai token address", async () => {
@@ -98,17 +115,175 @@ contract("DaiFunds", (accounts) => {
       }
     );
   });
-  /*
-        
-        /////////////------------------------------------ fundTree function test ----------------------------------------//
-        
-        it("Should fundTree work successfully", async () => {
-            const treeId = 1;
-            let amount = web3.utils.toWei("1", "Ether");
-            
-            ////--------------check set role----------------
-            await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
-            
+
+  //-------------------------------setTreeResearchAddress test-------------------------------------------------------
+  it("setTreeResearchAddress should be success", async () => {
+    let treeResearchAddress = userAccount4;
+
+    await daiFundsInstance.setTreeResearchAddress(treeResearchAddress, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.treeResearchAddress(),
+      treeResearchAddress,
+      "Set treeResearchAddress address not true"
+    );
+  });
+
+  it("setTreeResearchAddress should be fail (invalid access)", async () => {
+    let treeResearchAddress = userAccount4;
+
+    await daiFundsInstance
+      .setTreeResearchAddress(treeResearchAddress, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
+  it("setLocalDevelopAddress should be success", async () => {
+    let localDevelopAddress = userAccount4;
+
+    await daiFundsInstance.setLocalDevelopAddress(localDevelopAddress, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.localDevelopAddress(),
+      localDevelopAddress,
+      "Set localDevelopAddress address not true"
+    );
+  });
+
+  it("setLocalDevelopAddress should be fail (invalid access)", async () => {
+    let localDevelopAddress = userAccount4;
+
+    await daiFundsInstance
+      .setLocalDevelopAddress(localDevelopAddress, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  //-------------------------------setRescueFundAddress test-------------------------------------------------------
+  it("setRescueFundAddress should be success", async () => {
+    let rescueFundAddress = userAccount4;
+
+    await daiFundsInstance.setRescueFundAddress(rescueFundAddress, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.rescueFundAddress(),
+      rescueFundAddress,
+      "Set rescueFundAddress address not true"
+    );
+  });
+
+  it("setRescueFundAddress should be fail (invalid access)", async () => {
+    let rescueFundAddress = userAccount4;
+
+    await daiFundsInstance
+      .setRescueFundAddress(rescueFundAddress, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  //-------------------------------setTreejerDevelopAddress test-------------------------------------------------------
+  it("setTreejerDevelopAddress should be success", async () => {
+    let treejerDevelopAddress = userAccount4;
+
+    await daiFundsInstance.setTreejerDevelopAddress(treejerDevelopAddress, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.treejerDevelopAddress(),
+      treejerDevelopAddress,
+      "Set treejerDevelopAddress address not true"
+    );
+  });
+
+  it("setTreejerDevelopAddress should be fail (invalid access)", async () => {
+    let treejerDevelopAddress = userAccount4;
+
+    await daiFundsInstance
+      .setTreejerDevelopAddress(treejerDevelopAddress, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  //-------------------------------setReserveFund1Address test-------------------------------------------------------
+  it("setReserveFund1Address should be success", async () => {
+    let reserveFundAddress1 = userAccount4;
+
+    await daiFundsInstance.setReserveFund1Address(reserveFundAddress1, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.reserveFundAddress1(),
+      reserveFundAddress1,
+      "Set reserveFundAddress1 address not true"
+    );
+  });
+
+  it("setReserveFund1Address should be fail (invalid access)", async () => {
+    let reserveFundAddress1 = userAccount4;
+
+    await daiFundsInstance
+      .setReserveFund1Address(reserveFundAddress1, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  //-------------------------------setReserveFund2Address test-------------------------------------------------------
+  it("setReserveFund2Address should be success", async () => {
+    let reserveFundAddress2 = userAccount4;
+
+    await daiFundsInstance.setReserveFund2Address(reserveFundAddress2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      await daiFundsInstance.reserveFundAddress2(),
+      reserveFundAddress2,
+      "Set reserveFundAddress2 address not true"
+    );
+  });
+
+  it("setReserveFund2Address should be fail (invalid access)", async () => {
+    let reserveFundAddress2 = userAccount4;
+
+    await daiFundsInstance
+      .setReserveFund2Address(reserveFundAddress2, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  /////////////------------------------------------ fundTree function test ----------------------------------------//
+
+  it("Should fundTree work successfully for 1 tree fund", async () => {
+    const treeId = 1;
+    let amount = web3.utils.toWei("1", "Ether");
+
+    const planterFund = 4000;
+    const referralFund = 2000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    ////--------------check set role----------------
+    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+
     await Common.addFundsRole(
       arInstance,
       daiFundsInstance.address,
@@ -117,14 +292,14 @@ contract("DaiFunds", (accounts) => {
 
     ////--------------add and assign DistributionModel for tree
     await fModel.addFundDistributionModel(
-      4000,
-      2000,
-      1000,
-      1000,
-      1000,
-      1000,
-      0,
-      0,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
       {
         from: deployerAccount,
       }
@@ -135,96 +310,2691 @@ contract("DaiFunds", (accounts) => {
     });
 
     ////---------------transfer weth for daiFundsInstance-------------------
-    await wethInstance.setMint(daiFundsInstance.address, amount);
+    await daiInstance.setMint(daiFundsInstance.address, amount);
 
     ////--------------------call fund tree by auction----------------
     await daiFundsInstance.fundTree(
       treeId,
       amount,
-      4000,
-      2000,
-      1000,
-      1000,
-      1000,
-      1000,
-      0,
-      0,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
       { from: userAccount3 }
     );
 
     let expected = {
-      planterFund: (40 * amount) / 100,
-      referralFund: (20 * amount) / 100,
-      treeResearch: (10 * amount) / 100,
-      localDevelop: (10 * amount) / 100,
-      rescueFund: (10 * amount) / 100,
-      treejerDevelop: (10 * amount) / 100,
+      planterFund: (planterFund * amount) / 10000,
+      referralFund: (referralFund * amount) / 10000,
+      treeResearch: (treeResearch * amount) / 10000,
+      localDevelop: (localDevelop * amount) / 10000,
+      rescueFund: (rescueFund * amount) / 10000,
+      treejerDevelop: (treejerDevelop * amount) / 10000,
       reserveFund1: 0,
       reserveFund2: 0,
     };
 
-    //check wethFund totalFunds
-    let totalFunds = await daiFundsInstance.totalFunds();
+    let daiFundBalance = await daiInstance.balanceOf(daiFundsInstance.address);
+
+    const planterFundBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
 
     assert.equal(
-      Number(totalFunds.treeResearch),
+      Number(daiFundBalance),
+      Math.add(
+        expected.localDevelop,
+        expected.rescueFund,
+        expected.reserveFund1,
+        expected.reserveFund1,
+        expected.reserveFund2,
+        expected.treeResearch,
+        expected.treejerDevelop
+      )
+    );
+
+    assert.equal(
+      Number(planterFundBalance),
+      Math.add(expected.planterFund, expected.referralFund)
+    );
+
+    //check daiFund totalFunds
+    let totalFundsDaiFunds = await daiFundsInstance.totalFunds();
+
+    assert.equal(
+      Number(totalFundsDaiFunds.treeResearch),
       expected.treeResearch,
       "treeResearch funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.localDevelop),
+      Number(totalFundsDaiFunds.localDevelop),
       expected.localDevelop,
       "localDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.rescueFund),
+      Number(totalFundsDaiFunds.rescueFund),
       expected.rescueFund,
       "rescueFund funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.treejerDevelop),
+      Number(totalFundsDaiFunds.treejerDevelop),
       expected.treejerDevelop,
       "treejerDevelop funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.reserveFund1),
+      Number(totalFundsDaiFunds.reserveFund1),
       expected.reserveFund1,
       "reserveFund1 funds invalid"
     );
 
     assert.equal(
-      Number(totalFunds.reserveFund2),
+      Number(totalFundsDaiFunds.reserveFund2),
       expected.reserveFund2,
       "reserveFund2 funds invalid"
     );
 
-    //check fund planter
+    // check planterFunds and referralFunds in planterFund
 
-    let totalFund = await planterFundsInstnce.totalFunds.call();
+    let pFund = await planterFundsInstnce.planterFunds.call(treeId);
+    let rFund = await planterFundsInstnce.referralFunds.call(treeId);
 
-    let planterFund = totalFund.planterFund;
-    let referralFund = totalFund.referralFund;
+    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
 
-    // let contractBalance = await daiInstance.balanceOf(
-    //   planterFundsInstnce.address
-    // );
+    assert.equal(
+      Number(rFund),
+      expected.referralFund,
+      "referral funds invalid"
+    );
 
-    // console.log(`out ${web3.utils.fromWei(contractBalance.toString())}`);
+    //check fund planter totalFunds
 
-    // let totalFund = await planterFundsInstnce.totalFunds.call();
-    // let planterFund = totalFund.planterFund;
-    // let referralFund = totalFund.referralFund;
+    let totalFundsPlanterFund = await planterFundsInstnce.totalFunds.call();
 
-    // let total = Number(planterFund) + Number(referralFund);
+    assert.equal(
+      Number(totalFundsPlanterFund.planterFund),
+      expected.planterFund,
+      "planter funds invalid"
+    );
 
-    // console.log("total", total);
-    // console.log("planterFund", web3.utils.fromWei(planterFund.toString()));
-    // console.log("referal", web3.utils.fromWei(referralFund.toString()));
+    assert.equal(
+      Number(totalFundsPlanterFund.referralFund),
+      expected.referralFund,
+      "referral funds invalid"
+    );
+  });
+  it("Should fundTree work successfully for 2 tree fund", async () => {
+    const treeId1 = 1;
+    const treeId2 = 15;
+    let amount1 = web3.utils.toWei("1", "Ether");
+    let amount2 = web3.utils.toWei("0.5", "Ether");
+
+    const planterFund1 = 4000;
+    const referralFund1 = 2000;
+    const treeResearch1 = 1000;
+    const localDevelop1 = 1000;
+    const rescueFund1 = 1000;
+    const treejerDevelop1 = 1000;
+    const reserveFund1_1 = 0;
+    const reserveFund2_1 = 0;
+
+    const planterFund2 = 4000;
+    const referralFund2 = 2000;
+    const treeResearch2 = 1000;
+    const localDevelop2 = 1000;
+    const rescueFund2 = 1000;
+    const treejerDevelop2 = 1000;
+    const reserveFund1_2 = 0;
+    const reserveFund2_2 = 0;
+
+    ////--------------check set role----------------
+    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+
+    await Common.addFundsRole(
+      arInstance,
+      daiFundsInstance.address,
+      deployerAccount
+    );
+
+    ////--------------add and assign DistributionModel for tree
+    await fModel.addFundDistributionModel(
+      planterFund1,
+      referralFund1,
+      treeResearch1,
+      localDevelop1,
+      rescueFund1,
+      treejerDevelop1,
+      reserveFund1_1,
+      reserveFund2_1,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.addFundDistributionModel(
+      planterFund2,
+      referralFund2,
+      treeResearch2,
+      localDevelop2,
+      rescueFund2,
+      treejerDevelop2,
+      reserveFund1_2,
+      reserveFund2_2,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    await fModel.assignTreeFundDistributionModel(11, 20, 1, {
+      from: deployerAccount,
+    });
+
+    ////---------------transfer weth for daiFundsInstance-------------------
+    await daiInstance.setMint(daiFundsInstance.address, amount1);
+    await daiInstance.setMint(daiFundsInstance.address, amount2);
+
+    ////--------------------call fund tree by auction----------------
+    await daiFundsInstance.fundTree(
+      treeId1,
+      amount1,
+      planterFund1,
+      referralFund1,
+      treeResearch1,
+      localDevelop1,
+      rescueFund1,
+      treejerDevelop1,
+      reserveFund1_1,
+      reserveFund2_1,
+      { from: userAccount3 }
+    );
+
+    await daiFundsInstance.fundTree(
+      treeId2,
+      amount2,
+      planterFund2,
+      referralFund2,
+      treeResearch2,
+      localDevelop2,
+      rescueFund2,
+      treejerDevelop2,
+      reserveFund1_2,
+      reserveFund2_2,
+      { from: userAccount3 }
+    );
+
+    let expected1 = {
+      planterFund: (planterFund1 * amount1) / 10000,
+      referralFund: (referralFund1 * amount1) / 10000,
+      treeResearch: (treeResearch1 * amount1) / 10000,
+      localDevelop: (localDevelop1 * amount1) / 10000,
+      rescueFund: (rescueFund1 * amount1) / 10000,
+      treejerDevelop: (treejerDevelop1 * amount1) / 10000,
+      reserveFund1: 0,
+      reserveFund2: 0,
+    };
+
+    let expected2 = {
+      planterFund: (planterFund2 * amount2) / 10000,
+      referralFund: (referralFund2 * amount2) / 10000,
+      treeResearch: (treeResearch2 * amount2) / 10000,
+      localDevelop: (localDevelop2 * amount2) / 10000,
+      rescueFund: (rescueFund2 * amount2) / 10000,
+      treejerDevelop: (treejerDevelop2 * amount2) / 10000,
+      reserveFund1: 0,
+      reserveFund2: 0,
+    };
+
+    let daiFundBalance = await daiInstance.balanceOf(daiFundsInstance.address);
+
+    const planterFundBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(daiFundBalance),
+      Math.add(
+        expected1.localDevelop,
+        expected1.rescueFund,
+        expected1.reserveFund1,
+        expected1.reserveFund1,
+        expected1.reserveFund2,
+        expected1.treeResearch,
+        expected1.treejerDevelop,
+        expected2.localDevelop,
+        expected2.rescueFund,
+        expected2.reserveFund1,
+        expected2.reserveFund1,
+        expected2.reserveFund2,
+        expected2.treeResearch,
+        expected2.treejerDevelop
+      ),
+      "daiFund balance is not correct"
+    );
+
+    assert.equal(
+      Number(planterFundBalance),
+      Math.add(
+        expected1.planterFund,
+        expected1.referralFund,
+        expected2.planterFund,
+        expected2.referralFund
+      ),
+      "planterFund balance is not correct"
+    );
+
+    //check daiFund totalFunds
+    let totalFundsDaiFunds = await daiFundsInstance.totalFunds();
+
+    assert.equal(
+      Number(totalFundsDaiFunds.treeResearch),
+      Math.add(expected1.treeResearch, expected2.treeResearch),
+      "treeResearch funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsDaiFunds.localDevelop),
+      Math.add(expected1.localDevelop, expected2.localDevelop),
+      "localDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsDaiFunds.rescueFund),
+      Math.add(expected1.rescueFund, expected2.rescueFund),
+      "rescueFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsDaiFunds.treejerDevelop),
+      Math.add(expected1.treejerDevelop, expected2.treejerDevelop),
+      "treejerDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsDaiFunds.reserveFund1),
+      Math.add(expected1.reserveFund1, expected2.reserveFund1),
+      "reserveFund1 funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsDaiFunds.reserveFund2),
+      Math.add(expected1.reserveFund2, expected2.reserveFund2),
+      "reserveFund2 funds invalid"
+    );
+
+    // check planterFunds and referralFunds in planterFund
+
+    let pFund1 = await planterFundsInstnce.planterFunds.call(treeId1);
+    let rFund1 = await planterFundsInstnce.referralFunds.call(treeId1);
+    let pFund2 = await planterFundsInstnce.planterFunds.call(treeId2);
+    let rFund2 = await planterFundsInstnce.referralFunds.call(treeId2);
+
+    assert.equal(
+      Number(pFund1),
+      expected1.planterFund,
+      "planter funds invalid"
+    );
+
+    assert.equal(
+      Number(rFund1),
+      expected1.referralFund,
+      "referral funds invalid"
+    );
+
+    assert.equal(
+      Number(pFund2),
+      expected2.planterFund,
+      "planter funds invalid"
+    );
+
+    assert.equal(
+      Number(rFund2),
+      expected2.referralFund,
+      "referral funds invalid"
+    );
+
+    //check fund planter totalFunds
+
+    let totalFundsPlanterFund = await planterFundsInstnce.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsPlanterFund.planterFund),
+      Math.add(expected1.planterFund, expected2.planterFund),
+      "planter funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFundsPlanterFund.referralFund),
+      Math.add(expected1.referralFund, expected2.referralFund),
+      "referral funds invalid"
+    );
+  });
+  */
+
+  // //------------------------------------------withdraw tree research balance -------------------------------------/
+  // it("should withdraw tree research succussfully", async () => {
+  //   const treeId = 1;
+  //   const amount = web3.utils.toWei("2");
+  //   const planterFund = 5000;
+  //   const referralFund = 500;
+  //   const treeResearch = 2000;
+  //   const localDevelop = 500;
+  //   const rescueFund = 1000;
+  //   const treejerDevelop = 1000;
+  //   const reserveFund1 = 0;
+  //   const reserveFund2 = 0;
+
+  //   //////// -------------------- add roles
+  //   await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+
+  //   await Common.addFundsRole(
+  //     arInstance,
+  //     daiFundsInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   ////////////------------------- set addresses
+  //   await daiFundsInstance.setTreeResearchAddress(userAccount3, {
+  //     from: deployerAccount,
+  //   });
+
+  //   ////////------------------- handle dm models
+
+  //   await fModel.addFundDistributionModel(
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   ////---------------transfer weth for daiFundsInstance-------------------
+  //   await daiInstance.setMint(daiFundsInstance.address, amount);
+
+  //   ////--------------------call fund tree by auction----------------
+  //   await daiFundsInstance.fundTree(
+  //     treeId,
+  //     amount,
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     { from: userAccount6 }
+  //   );
+  //   /////////// ------------withdraw balance
+
+  //   const tx = await daiFundsInstance.withdrawTreeResearch(
+  //     web3.utils.toWei("0.4"),
+  //     "reason to withdraw",
+  //     { from: deployerAccount }
+  //   );
+  // });
+
+  // it("check withdraw tree research data to be ok", async () => {
+  //   const treeId = 1;
+  //   const treeId2 = 2;
+  //   const amount = web3.utils.toWei("2");
+  //   const amount1 = web3.utils.toWei("3");
+  //   const planterFund = 5000;
+  //   const referralFund = 500;
+  //   const treeResearch = 2000;
+  //   const localDevelop = 500;
+  //   const rescueFund = 1000;
+  //   const treejerDevelop = 1000;
+  //   const reserveFund1 = 0;
+  //   const reserveFund2 = 0;
+  //   const treeResearchAddress = userAccount3;
+
+  //   const totalTreeResearchFunded = Math.divide(
+  //     Math.mul(Math.add(Number(amount), Number(amount1)), treeResearch),
+  //     10000
+  //   );
+
+  //   const daiFundContractShare = Math.divide(
+  //     Math.mul(
+  //       Math.add(Number(amount), Number(amount1)),
+  //       Math.add(
+  //         treeResearch,
+  //         localDevelop,
+  //         rescueFund,
+  //         treejerDevelop,
+  //         reserveFund1,
+  //         reserveFund2
+  //       )
+  //     ),
+  //     10000
+  //   );
+
+  //   ///////----------------------add roles
+  //   await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+
+  //   await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+
+  //   await Common.addFundsRole(
+  //     arInstance,
+  //     daiFundsInstance.address,
+  //     deployerAccount
+  //   );
+
+  //   /////////// ------------------ set addresses
+  //   await daiFundsInstance.setTreeResearchAddress(treeResearchAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   ///////// ------------------ handle dm model
+  //   await fModel.addFundDistributionModel(
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+  //   await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////////---------------transfer weth for daiFundsInstance-------------------
+
+  //   await daiInstance.setMint(daiFundsInstance.address, amount);
+
+  //   await daiInstance.setMint(daiFundsInstance.address, amount1);
+
+  //   ////////---------------fund trees-------------------
+
+  //   await daiFundsInstance.fundTree(
+  //     treeId,
+  //     amount,
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: userAccount6,
+  //     }
+  //   );
+  //   await daiFundsInstance.fundTree(
+  //     treeId2,
+  //     amount1,
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: userAccount6,
+  //     }
+  //   );
+
+  //   // -------------------------- check data before withdraw -----------------
+  //   const contractBalanceAfterFund = await daiInstance.balanceOf(
+  //     daiFundsInstance.address
+  //   );
+
+  //   const totalFunds1 = await daiFundsInstance.totalFunds();
+
+  //   assert.equal(
+  //     Number(contractBalanceAfterFund),
+  //     daiFundContractShare,
+  //     "contract balance after fund is not ok"
+  //   );
+
+  //   assert.equal(
+  //     totalTreeResearchFunded,
+  //     Number(totalFunds1.treeResearch),
+  //     "treeResearch total fund1 is not ok"
+  //   );
+
+  //   const treeResearchBalnance1 = await daiInstance.balanceOf(
+  //     treeResearchAddress
+  //   );
+
+  //   // --------------------- first withdraw and check data ------------------
+  //   const withdrawBalance1 = web3.utils.toWei("0.2");
+
+  //   const tx = await daiFundsInstance.withdrawTreeResearch(
+  //     withdrawBalance1,
+  //     withdrawReason,
+  //     { from: deployerAccount }
+  //   );
+
+  //   truffleAssert.eventEmitted(tx, "TreeResearchBalanceWithdrawn", (ev) => {
+  //     return (
+  //       Number(ev.amount) == Number(withdrawBalance1) &&
+  //       ev.account == treeResearchAddress &&
+  //       ev.reason == withdrawReason
+  //     );
+  //   });
+  //   const totalFunds2 = await daiFundsInstance.totalFunds();
+
+  //   const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
+  //     daiFundsInstance.address
+  //   );
+
+  //   const treeResearchBalnance2 = await daiInstance.balanceOf(
+  //     treeResearchAddress
+  //   );
+
+  //   assert.equal(
+  //     Number(contractBalanceAfterWithdraw1),
+  //     Math.subtract(daiFundContractShare, Number(withdrawBalance1)),
+  //     "contract balance after withdraw1 is not ok"
+  //   );
+
+  //   assert.equal(
+  //     Math.subtract(
+  //       Number(totalFunds1.treeResearch),
+  //       Number(totalFunds2.treeResearch)
+  //     ),
+  //     Number(withdrawBalance1),
+  //     "tree research total fund is not ok after withdraw1"
+  //   );
+
+  //   assert.equal(
+  //     Number(treeResearchBalnance2),
+  //     Math.add(Number(treeResearchBalnance1), Number(withdrawBalance1)),
+  //     "tree research account balance is not ok after withdraw1"
+  //   );
+
+  //   // -------------------- seccond withdraw and check data ------------------------------
+
+  //   const withdrawBalance2 = web3.utils.toWei("0.3");
+
+  //   const tx2 = await daiFundsInstance.withdrawTreeResearch(
+  //     withdrawBalance2,
+  //     "reason to withdraw",
+  //     { from: deployerAccount }
+  //   );
+
+  //   truffleAssert.eventEmitted(tx2, "TreeResearchBalanceWithdrawn", (ev) => {
+  //     return (
+  //       Number(ev.amount) == Number(withdrawBalance2) &&
+  //       ev.account == treeResearchAddress &&
+  //       ev.reason == withdrawReason
+  //     );
+  //   });
+
+  //   const totalFunds3 = await daiFundsInstance.totalFunds();
+
+  //   const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
+  //     daiFundsInstance.address
+  //   );
+
+  //   const treeResearchBalnance3 = await daiInstance.balanceOf(
+  //     treeResearchAddress
+  //   );
+
+  //   assert.equal(
+  //     Number(contractBalanceAfterWithdraw2),
+  //     Math.subtract(
+  //       daiFundContractShare,
+  //       Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
+  //     ),
+  //     "contract balance after withdraw2 is not ok"
+  //   );
+
+  //   assert.equal(
+  //     Math.subtract(
+  //       Number(totalFunds1.treeResearch),
+  //       Number(totalFunds3.treeResearch)
+  //     ),
+  //     Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
+  //     "tree research total fund is not ok after withdraw1"
+  //   );
+
+  //   assert.equal(
+  //     Math.subtract(
+  //       totalTreeResearchFunded,
+  //       Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
+  //     ),
+  //     Number(totalFunds3.treeResearch),
+  //     "tree research total fund3 is not ok"
+  //   );
+
+  //   assert.equal(
+  //     Number(treeResearchBalnance3),
+  //     Math.add(Number(treeResearchBalnance2), Number(withdrawBalance2)),
+  //     "tree research account balance is not ok after withdraw2"
+  //   );
+  // });
+
+  // it("should fail tree research withdraw", async () => {
+  //   const treeId = 1;
+  //   const treeId2 = 2;
+  //   const amount = web3.utils.toWei("2");
+  //   const amount1 = web3.utils.toWei("1");
+  //   const planterFund = 5000;
+  //   const referralFund = 1000;
+  //   const treeResearch = 1000;
+  //   const localDevelop = 1000;
+  //   const rescueFund = 1000;
+  //   const treejerDevelop = 1000;
+  //   const reserveFund1 = 0;
+  //   const reserveFund2 = 0;
+
+  //   ///////////--------------------- add roles
+  //   await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+  //   await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+  //   await Common.addFundsRole(
+  //     arInstance,
+  //     daiFundsInstance.address,
+  //     deployerAccount
+  //   );
+  //   /////////////////------------------- set addresses
+  //   await daiFundsInstance.setTreeResearchAddress(zeroAddress, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////-------------------- handle dm model
+
+  //   await fModel.addFundDistributionModel(
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+  //     from: deployerAccount,
+  //   });
+
+  //   //////////---------------transfer weth for daiFundsInstance-------------------
+
+  //   await daiInstance.setMint(daiFundsInstance.address, amount);
+
+  //   await daiInstance.setMint(daiFundsInstance.address, amount1);
+
+  //   //////////--------------- fund tree -------------------
+
+  //   await daiFundsInstance.fundTree(
+  //     treeId,
+  //     amount,
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: userAccount6,
+  //     }
+  //   );
+  //   await daiFundsInstance.fundTree(
+  //     treeId2,
+  //     amount1,
+  //     planterFund,
+  //     referralFund,
+  //     treeResearch,
+  //     localDevelop,
+  //     rescueFund,
+  //     treejerDevelop,
+  //     reserveFund1,
+  //     reserveFund2,
+  //     {
+  //       from: userAccount6,
+  //     }
+  //   );
+
+  //   ///////////////////// should fail
+  //   await daiFundsInstance
+  //     .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+  //   await daiFundsInstance.setTreeResearchAddress(userAccount3, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await daiFundsInstance
+  //     .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
+  //       from: userAccount7,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+  //   await daiFundsInstance
+  //     .withdrawTreeResearch(web3.utils.toWei("0"), "reason to withdraw", {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+  //   await daiFundsInstance
+  //     .withdrawTreeResearch(web3.utils.toWei("3"), "reason to withdraw", {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+  //   //////////////// ------------------ withdraw  some balance and then try to withdraw
+  //   await daiFundsInstance.withdrawTreeResearch(
+  //     web3.utils.toWei("0.2"),
+  //     "reason to withdraw",
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   ////////////------------- should fail
+  //   await daiFundsInstance
+  //     .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
+  //       from: deployerAccount,
+  //     })
+  //     .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  // });
+
+  // *****************************************withdraw local develop balance **************************************
+  it("should withdraw local develop succussfully", async () => {
+    const treeId = 1;
+    const amount = web3.utils.toWei("2");
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 2000;
+    const localDevelop = 500;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    //////// -------------------- add roles
+    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+
+    await Common.addFundsRole(
+      arInstance,
+      daiFundsInstance.address,
+      deployerAccount
+    );
+
+    ////////////------------------- set addresses
+    await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+
+    ////////------------------- handle dm models
+
+    await fModel.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    ////---------------transfer weth for daiFundsInstance-------------------
+    await daiInstance.setMint(daiFundsInstance.address, amount);
+
+    ////--------------------call fund tree by auction----------------
+    await daiFundsInstance.fundTree(
+      treeId,
+      amount,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      { from: userAccount6 }
+    );
+    /////////// ------------withdraw balance
+
+    const tx = await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.05"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
   });
 
+  it("check withdraw tree research data to be ok", async () => {
+    const treeId = 1;
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("3");
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1500;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+    const localDevelopAddress = userAccount3;
+
+    const totalLocalDevelopFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), localDevelop),
+      10000
+    );
+
+    const daiFundContractShare = Math.divide(
+      Math.mul(
+        Math.add(Number(amount), Number(amount1)),
+        Math.add(
+          treeResearch,
+          localDevelop,
+          rescueFund,
+          treejerDevelop,
+          reserveFund1,
+          reserveFund2
+        )
+      ),
+      10000
+    );
+
+    ///////----------------------add roles
+    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+
+    await Common.addFundsRole(
+      arInstance,
+      daiFundsInstance.address,
+      deployerAccount
+    );
+
+    /////////// ------------------ set addresses
+    await daiFundsInstance.setLocalDevelopAddress(localDevelopAddress, {
+      from: deployerAccount,
+    });
+
+    ///////// ------------------ handle dm model
+    await fModel.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    //////////---------------transfer weth for daiFundsInstance-------------------
+
+    await daiInstance.setMint(daiFundsInstance.address, amount);
+
+    await daiInstance.setMint(daiFundsInstance.address, amount1);
+
+    ////////---------------fund trees-------------------
+
+    await daiFundsInstance.fundTree(
+      treeId,
+      amount,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: userAccount6,
+      }
+    );
+    await daiFundsInstance.fundTree(
+      treeId2,
+      amount1,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: userAccount6,
+      }
+    );
+
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await daiInstance.balanceOf(
+      daiFundsInstance.address
+    );
+
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      daiFundContractShare,
+      "contract balance after fund is not ok"
+    );
+
+    assert.equal(
+      totalLocalDevelopFunded,
+      Number(totalFunds1.localDevelop),
+      "localDevelop total fund1 is not ok"
+    );
+
+    const localDevelopBalnance1 = await daiInstance.balanceOf(
+      localDevelopAddress
+    );
+
+    // --------------------- first withdraw and check data ------------------
+    const withdrawBalance1 = web3.utils.toWei("0.1");
+
+    const tx = await daiFundsInstance.withdrawLocalDevelop(
+      withdrawBalance1,
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance1) &&
+        ev.account == localDevelopAddress &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+
+    const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
+      daiFundsInstance.address
+    );
+
+    const localDevelopBalnance2 = await daiInstance.balanceOf(
+      localDevelopAddress
+    );
+
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Math.subtract(daiFundContractShare, Number(withdrawBalance1)),
+      "contract balance after withdraw1 is not ok"
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds2.localDevelop)
+      ),
+      Number(withdrawBalance1),
+      "tree research total fund is not ok after withdraw1"
+    );
+
+    assert.equal(
+      Number(localDevelopBalnance2),
+      Math.add(Number(localDevelopBalnance1), Number(withdrawBalance1)),
+      "tree research account balance is not ok after withdraw1"
+    );
+
+    // -------------------- seccond withdraw and check data ------------------------------
+
+    const withdrawBalance2 = web3.utils.toWei("0.2");
+
+    const tx2 = await daiFundsInstance.withdrawLocalDevelop(
+      withdrawBalance2,
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance2) &&
+        ev.account == localDevelopAddress &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+
+    const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
+      daiFundsInstance.address
+    );
+
+    const localDevelopBalnance3 = await daiInstance.balanceOf(
+      localDevelopAddress
+    );
+
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Math.subtract(
+        daiFundContractShare,
+        Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
+      ),
+      "contract balance after withdraw2 is not ok"
+    );
+
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds3.localDevelop)
+      ),
+      Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
+      "tree research total fund is not ok after withdraw1"
+    );
+
+    assert.equal(
+      Math.subtract(
+        totalLocalDevelopFunded,
+        Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
+      ),
+      Number(totalFunds3.localDevelop),
+      "tree research total fund3 is not ok"
+    );
+
+    assert.equal(
+      Number(localDevelopBalnance3),
+      Math.add(Number(localDevelopBalnance2), Number(withdrawBalance2)),
+      "tree research account balance is not ok after withdraw2"
+    );
+  });
+
+  it("should fail tree research withdraw", async () => {
+    const treeId = 1;
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    ///////////--------------------- add roles
+    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addFundsRole(
+      arInstance,
+      daiFundsInstance.address,
+      deployerAccount
+    );
+    /////////////////------------------- set addresses
+    await daiFundsInstance.setLocalDevelopAddress(zeroAddress, {
+      from: deployerAccount,
+    });
+
+    //////-------------------- handle dm model
+
+    await fModel.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+
+    //////////---------------transfer weth for daiFundsInstance-------------------
+
+    await daiInstance.setMint(daiFundsInstance.address, amount);
+
+    await daiInstance.setMint(daiFundsInstance.address, amount1);
+
+    //////////--------------- fund tree -------------------
+
+    await daiFundsInstance.fundTree(
+      treeId,
+      amount,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: userAccount6,
+      }
+    );
+    await daiFundsInstance.fundTree(
+      treeId2,
+      amount1,
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: userAccount6,
+      }
+    );
+
+    ///////////////////// should fail
+    await daiFundsInstance
+      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+
+    await daiFundsInstance
+      .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
+        from: userAccount7,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .withdrawLocalDevelop(web3.utils.toWei("0"), "reason to withdraw", {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await daiFundsInstance
+      .withdrawLocalDevelop(web3.utils.toWei("3"), "reason to withdraw", {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //////////////// ------------------ withdraw  some balance and then try to withdraw
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      {
+        from: deployerAccount,
+      }
+    );
+
+    ////////////------------- should fail
+    await daiFundsInstance
+      .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  /*
+
+  it("check withdraw local develop data to be ok", async () => {
+    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1500;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+    const totalLocalDevelopFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), localDevelop),
+      10000
+    );
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount6,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount6,
+      value: amount1,
+    });
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
+      "contract balance after fund is not ok"
+    );
+    assert.equal(
+      totalLocalDevelopFunded,
+      Number(totalFunds1.localDevelop),
+      "local develop total fund1 is not ok"
+    );
+    const localDevelopBalnance1 = await web3.eth.getBalance(userAccount3);
+    // --------------------- first withdraw and check data ------------------
+    const tx = await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.1"),
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw1 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const localDevelopBalnance2 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Number(web3.utils.toWei("2.9")),
+      "contract balance after withdraw1 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds2.localDevelop)
+      ),
+      Number(web3.utils.toWei("0.1")),
+      "local develop total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(localDevelopBalnance2),
+      Math.add(Number(localDevelopBalnance1), Number(web3.utils.toWei("0.1"))),
+      "local develop account balance is not ok after withdraw1"
+    );
+    // -------------------- seccond withdraw and check data ------------------------------
+    const tx2 = await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+    truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw2 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const localDevelopBalnance3 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Number(web3.utils.toWei("2.7")),
+      "contract balance after withdraw2 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.localDevelop),
+        Number(totalFunds3.localDevelop)
+      ),
+      Number(web3.utils.toWei("0.3")),
+      "localDevelop total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(totalFunds3.localDevelop),
+      0,
+      "local develop total fund must be zero"
+    ); //total value of localDevelop has withdrawn
+    assert.equal(
+      Number(localDevelopBalnance3),
+      Math.add(Number(localDevelopBalnance1), Number(web3.utils.toWei("0.3"))),
+      "local develop account balance  is not ok after withdraw2 ( checking with localDevelopBalance1 )"
+    );
+    assert.equal(
+      Number(localDevelopBalnance3),
+      Math.add(Number(localDevelopBalnance2), Number(web3.utils.toWei("0.2"))),
+      "local develop account balance is not ok after withdraw2"
+    );
+  });
+  it("should fail local develop withdraw", async () => {
+    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setLocalDevelopAddress(zeroAddress, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount6,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount6,
+      value: amount1,
+    });
+
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: userAccount7,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("3"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //withdraw some balance and then try to withdraw
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await daiFundsInstance.withdrawLocalDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  // *****************************************withdraw rescue balance **************************************
+  it("should withdraw rescue succussfully", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setRescueFundAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+    const amount = web3.utils.toWei("2");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+
+    const tx = await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+  });
+  it("check withdraw rescue fund data to be ok", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setRescueFundAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1000;
+    const localDevelop = 1500;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+    const totalRescueFundFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), rescueFund),
+      10000
+    );
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount1,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount1,
+      value: amount1,
+    });
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
+      "contract balance after fund is not ok"
+    );
+    assert.equal(
+      totalRescueFundFunded,
+      Number(totalFunds1.rescueFund),
+      "rescue total fund1 is not ok"
+    );
+    const rescueFundBalnance1 = await web3.eth.getBalance(userAccount3);
+    // --------------------- first withdraw and check data ------------------
+    const tx = await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.1"),
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "RescueBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw1 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const rescueFundBalnance2 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Number(web3.utils.toWei("2.9")),
+      "contract balance after withdraw1 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.rescueFund),
+        Number(totalFunds2.rescueFund)
+      ),
+      Number(web3.utils.toWei("0.1")),
+      "rescue fund total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(rescueFundBalnance2),
+      Math.add(Number(rescueFundBalnance1), Number(web3.utils.toWei("0.1"))),
+      "rescue fund account balance is not ok after withdraw1"
+    );
+    // -------------------- seccond withdraw and check data ------------------------------
+    const tx2 = await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+    truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw2 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const rescueFundBalnance3 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Number(web3.utils.toWei("2.7")),
+      "contract balance after withdraw2 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.rescueFund),
+        Number(totalFunds3.rescueFund)
+      ),
+      Number(web3.utils.toWei("0.3")),
+      "rescue fund total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(totalFunds3.rescueFund),
+      0,
+      "rescueFund total fund must be zero"
+    ); //total value of rescueFund has withdrawn
+    assert.equal(
+      Number(rescueFundBalnance3),
+      Math.add(Number(rescueFundBalnance1), Number(web3.utils.toWei("0.3"))),
+      "rescueFund account balance  is not ok after withdraw2 ( checking with rescueFundBalance1 )"
+    );
+    assert.equal(
+      Number(rescueFundBalnance3),
+      Math.add(Number(rescueFundBalnance2), Number(web3.utils.toWei("0.2"))),
+      "rescueFund account balance is not ok after withdraw2"
+    );
+  });
+  it("should fail rescue fund withdraw", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setRescueFundAddress(zeroAddress, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount1,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount1,
+      value: amount1,
+    });
+
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setRescueFundAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: userAccount7,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("3"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //withdraw some balance and then try to withdraw
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await daiFundsInstance.withdrawRescueFund(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  // *****************************************withdraw treejer develop balance **************************************
+  it("should withdraw treejer develop succussfully", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+    const amount = web3.utils.toWei("2");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+
+    const tx = await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+  });
+  it("check withdraw treejer develop data to be ok", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1500;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+    const totalTreejerDevelopFunded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), treejerDevelop),
+      10000
+    );
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount5,
+      value: amount1,
+    });
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
+      "contract balance after fund is not ok"
+    );
+    assert.equal(
+      totalTreejerDevelopFunded,
+      Number(totalFunds1.treejerDevelop),
+      "treejerDevelop total fund1 is not ok"
+    );
+    const treejerDevelopBalnance1 = await web3.eth.getBalance(userAccount3);
+    // --------------------- first withdraw and check data ------------------
+    const tx = await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.1"),
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw1 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const treejerDevelopBalnance2 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Number(web3.utils.toWei("2.9")),
+      "contract balance after withdraw1 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.treejerDevelop),
+        Number(totalFunds2.treejerDevelop)
+      ),
+      Number(web3.utils.toWei("0.1")),
+      "treejerDevelop total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(treejerDevelopBalnance2),
+      Math.add(
+        Number(treejerDevelopBalnance1),
+        Number(web3.utils.toWei("0.1"))
+      ),
+      "treejer develop account balance is not ok after withdraw1"
+    );
+    // -------------------- seccond withdraw and check data ------------------------------
+    const tx2 = await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+    truffleAssert.eventEmitted(tx2, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw2 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const treejerDevelopBalnance3 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Number(web3.utils.toWei("2.7")),
+      "contract balance after withdraw2 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.treejerDevelop),
+        Number(totalFunds3.treejerDevelop)
+      ),
+      Number(web3.utils.toWei("0.3")),
+      "treejer develop total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(totalFunds3.treejerDevelop),
+      0,
+      "treejerDevelop total fund must be zero"
+    ); //total value of treejerDevelop has withdrawn
+    assert.equal(
+      Number(treejerDevelopBalnance3),
+      Math.add(
+        Number(treejerDevelopBalnance1),
+        Number(web3.utils.toWei("0.3"))
+      ),
+      "treejer develop account balance  is not ok after withdraw2 ( checking with treejerDevelopBalance1 )"
+    );
+    assert.equal(
+      Number(treejerDevelopBalnance3),
+      Math.add(
+        Number(treejerDevelopBalnance2),
+        Number(web3.utils.toWei("0.2"))
+      ),
+      "treejer develop account balance is not ok after withdraw2"
+    );
+  });
+  it("should fail treejer develop withdraw", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setTreejerDevelopAddress(zeroAddress, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 1000;
+    const reserveFund1 = 0;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount5,
+      value: amount1,
+    });
+
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: userAccount7,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("3"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //withdraw some balance and then try to withdraw
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await daiFundsInstance.withdrawTreejerDevelop(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  // *****************************************withdraw other fund1 balance **************************************
+  it("should withdraw other fund1 succussfully", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund1Address(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+    const amount = web3.utils.toWei("2");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 0;
+    const reserveFund1 = 1000;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+
+    const tx = await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+  });
+  it("check withdraw treejer other fund 1 to be ok", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund1Address(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1500;
+    const treejerDevelop = 0;
+    const reserveFund1 = 1000;
+    const reserveFund2 = 0;
+    const totalReserveFund1Funded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund1),
+      10000
+    );
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount5,
+      value: amount1,
+    });
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
+      "contract balance after fund is not ok"
+    );
+    assert.equal(
+      totalReserveFund1Funded,
+      Number(totalFunds1.reserveFund1),
+      "reserveFund1 total fund1 is not ok"
+    );
+    const reserveFund1Balnance1 = await web3.eth.getBalance(userAccount3);
+    // --------------------- first withdraw and check data ------------------
+    const tx = await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.1"),
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn1", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw1 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const reserveFund1Balnance2 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Number(web3.utils.toWei("2.9")),
+      "contract balance after withdraw1 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.reserveFund1),
+        Number(totalFunds2.reserveFund1)
+      ),
+      Number(web3.utils.toWei("0.1")),
+      "reserveFund1 total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(reserveFund1Balnance2),
+      Math.add(Number(reserveFund1Balnance1), Number(web3.utils.toWei("0.1"))),
+      "other fund1 account balance is not ok after withdraw1"
+    );
+    // -------------------- seccond withdraw and check data ------------------------------
+    const tx2 = await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+    truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn1", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw2 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const reserveFund1Balnance3 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Number(web3.utils.toWei("2.7")),
+      "contract balance after withdraw2 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.reserveFund1),
+        Number(totalFunds3.reserveFund1)
+      ),
+      Number(web3.utils.toWei("0.3")),
+      "other fund1 total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(totalFunds3.reserveFund1),
+      0,
+      "other fund1 total fund must be zero"
+    ); //total value of reserveFund1 has withdrawn
+    assert.equal(
+      Number(reserveFund1Balnance3),
+      Math.add(Number(reserveFund1Balnance1), Number(web3.utils.toWei("0.3"))),
+      "other fund1 account balance is not ok after withdraw2 ( checking with reserveFund1Balance1 )"
+    );
+    assert.equal(
+      Number(reserveFund1Balnance3),
+      Math.add(Number(reserveFund1Balnance2), Number(web3.utils.toWei("0.2"))),
+      "other fund1 account balance is not ok after withdraw2"
+    );
+  });
+  it("should fail other fund 1 withdraw", async () => {
+    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund1Address(zeroAddress, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 0;
+    const reserveFund1 = 1000;
+    const reserveFund2 = 0;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount5,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount5,
+      value: amount1,
+    });
+
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setReserveFund1Address(userAccount3, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: userAccount7,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("3"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //withdraw some balance and then try to withdraw
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await daiFundsInstance.withdrawReserveFund1(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  // *****************************************withdraw other fund2 balance **************************************
+  it("should withdraw other fund2 succussfully", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund2Address(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+    const amount = web3.utils.toWei("2");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 0;
+    const reserveFund1 = 0;
+    const reserveFund2 = 1000;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount1,
+      value: amount,
+    });
+
+    const tx = await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+  });
+  it("check withdraw treejer other fund 1 to be ok", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund2Address(userAccount3, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+
+    const planterFund = 5000;
+    const referralFund = 500;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1500;
+    const treejerDevelop = 0;
+    const reserveFund1 = 0;
+    const reserveFund2 = 1000;
+    const totalReserveFund2Funded = Math.divide(
+      Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund2),
+      10000
+    );
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount1,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount1,
+      value: amount1,
+    });
+    // -------------------------- check data before withdraw -----------------
+    const contractBalanceAfterFund = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const totalFunds1 = await daiFundsInstance.totalFunds();
+    assert.equal(
+      Number(contractBalanceAfterFund),
+      Number(web3.utils.toWei("3")),
+      "contract balance after fund is not ok"
+    );
+    assert.equal(
+      totalReserveFund2Funded,
+      Number(totalFunds1.reserveFund2),
+      "reserveFund2 total fund1 is not ok"
+    );
+    const reserveFund2Balnance1 = await web3.eth.getBalance(userAccount3);
+    // --------------------- first withdraw and check data ------------------
+    const tx = await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.1"),
+      withdrawReason,
+      { from: deployerAccount }
+    );
+
+    truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn2", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+    const totalFunds2 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw1 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const reserveFund2Balnance2 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw1),
+      Number(web3.utils.toWei("2.9")),
+      "contract balance after withdraw1 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.reserveFund2),
+        Number(totalFunds2.reserveFund2)
+      ),
+      Number(web3.utils.toWei("0.1")),
+      "reserveFund2 total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(reserveFund2Balnance2),
+      Math.add(Number(reserveFund2Balnance1), Number(web3.utils.toWei("0.1"))),
+      "other fund2 account balance is not ok after withdraw1"
+    );
+    // -------------------- seccond withdraw and check data ------------------------------
+    const tx2 = await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      "reason to withdraw",
+      { from: deployerAccount }
+    );
+    truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn2", (ev) => {
+      return (
+        Number(ev.amount) == Number(web3.utils.toWei("0.2")) &&
+        ev.account == userAccount3 &&
+        ev.reason == withdrawReason
+      );
+    });
+
+    const totalFunds3 = await daiFundsInstance.totalFunds();
+    const contractBalanceAfterWithdraw2 = await web3.eth.getBalance(
+      daiFundsInstance.address
+    );
+    const reserveFund2Balnance3 = await web3.eth.getBalance(userAccount3);
+    assert.equal(
+      Number(contractBalanceAfterWithdraw2),
+      Number(web3.utils.toWei("2.7")),
+      "contract balance after withdraw2 is not ok"
+    );
+    assert.equal(
+      Math.subtract(
+        Number(totalFunds1.reserveFund2),
+        Number(totalFunds3.reserveFund2)
+      ),
+      Number(web3.utils.toWei("0.3")),
+      "other fund2 total fund is not ok after withdraw1"
+    );
+    assert.equal(
+      Number(totalFunds3.reserveFund2),
+      0,
+      "other fund2 total fund must be zero"
+    ); //total value of reserveFund2 has withdrawn
+    assert.equal(
+      Number(reserveFund2Balnance3),
+      Math.add(Number(reserveFund2Balnance1), Number(web3.utils.toWei("0.3"))),
+      "other fund2 account balance is not ok after withdraw2 ( checking with reserveFund2Balance1 )"
+    );
+    assert.equal(
+      Number(reserveFund2Balnance3),
+      Math.add(Number(reserveFund2Balnance2), Number(web3.utils.toWei("0.2"))),
+      "other fund2 account balance is not ok after withdraw2"
+    );
+  });
+  it("should fail other fund2 withdraw", async () => {
+    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await daiFundsInstance.setReserveFund2Address(zeroAddress, {
+      from: deployerAccount,
+    });
+    const treeId = 1;
+
+    const treeId2 = 2;
+    const amount = web3.utils.toWei("2");
+    const amount1 = web3.utils.toWei("1");
+    const planterFund = 5000;
+    const referralFund = 1000;
+    const treeResearch = 1000;
+    const localDevelop = 1000;
+    const rescueFund = 1000;
+    const treejerDevelop = 0;
+    const reserveFund1 = 0;
+    const reserveFund2 = 1000;
+
+    await daiFundsInstance.addFundDistributionModel(
+      planterFund,
+      referralFund,
+      treeResearch,
+      localDevelop,
+      rescueFund,
+      treejerDevelop,
+      reserveFund1,
+      reserveFund2,
+      {
+        from: deployerAccount,
+      }
+    );
+    await daiFundsInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.fundTree(treeId, {
+      from: userAccount1,
+      value: amount,
+    });
+    await daiFundsInstance.fundTree(treeId2, {
+      from: userAccount1,
+      value: amount1,
+    });
+
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await daiFundsInstance.setReserveFund2Address(userAccount3, {
+      from: deployerAccount,
+    });
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: userAccount7,
+      }
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("3"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //withdraw some balance and then try to withdraw
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await daiFundsInstance.withdrawReserveFund2(
+      web3.utils.toWei("0.2"),
+      withdrawReason,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
   */
 });

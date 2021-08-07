@@ -195,15 +195,17 @@ contract DaiFunds is Initializable {
 
         totalFunds.treejerDevelop += (_amount * _treejerDevelop) / 10000;
 
-        totalFunds.treeResearch += ((_amount * _treeResearch) / 10000);
+        totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
 
         uint256 planterFund = (_amount * _planterFund) / 10000;
         uint256 referralFund = (_amount * _referralFund) / 10000;
 
-        daiToken.transfer(
+        bool success = daiToken.transfer(
             address(planterFundContract),
             planterFund + referralFund
         );
+
+        require(success, "not transfered");
 
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
     }

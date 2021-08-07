@@ -233,14 +233,14 @@ contract FinancialModel is Initializable {
     function findTreeDistribution(uint256 _treeId)
         external
         returns (
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            uint16,
-            uint16
+            uint16 planterFund,
+            uint16 referralFund,
+            uint16 treeResearch,
+            uint16 localDevelop,
+            uint16 rescueFund,
+            uint16 treejerDevelop,
+            uint16 reserveFund1,
+            uint16 reserveFund2
         )
     {
         uint256 i = 0;

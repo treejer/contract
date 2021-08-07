@@ -893,335 +893,278 @@ contract("Treasury", (accounts) => {
   });
 
   it("1.fundTree should be success", async () => {
-    let treeId = 10;
-    let amount = web3.utils.toWei(".18", "Ether");
-
-    await TreasuryInstance.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
-
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
-    });
-
-    let tx = await TreasuryInstance.fundTree(treeId, {
-      from: userAccount3,
-      value: amount,
-    });
-
-    assert.equal(
-      await web3.eth.getBalance(TreasuryInstance.address),
-      amount,
-      "1.Contract balance is not true"
-    );
-
-    truffleAssert.eventNotEmitted(tx, "DistributionModelOfTreeNotExist");
-
-    let pFund = await TreasuryInstance.planterFunds.call(treeId);
-
-    let rFund = await TreasuryInstance.referralFunds.call(treeId);
-
-    let totalFunds = await TreasuryInstance.totalFunds();
-
-    let expected = {
-      planterFund: (40 * amount) / 100,
-      referralFund: (12 * amount) / 100,
-      treeResearch: (12 * amount) / 100,
-      localDevelop: (12 * amount) / 100,
-      rescueFund: (12 * amount) / 100,
-      treejerDevelop: (12 * amount) / 100,
-      reserveFund1: 0,
-      reserveFund2: 0,
-    };
-
-    assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
-
-    assert.equal(
-      Number(rFund),
-      expected.referralFund,
-      "referral funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.planterFund),
-      expected.planterFund,
-      "planterFund totalFunds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.referralFund),
-      expected.referralFund,
-      "referralFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.treeResearch),
-      expected.treeResearch,
-      "treeResearch funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.localDevelop),
-      expected.localDevelop,
-      "localDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.rescueFund),
-      expected.rescueFund,
-      "rescueFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.treejerDevelop),
-      expected.treejerDevelop,
-      "treejerDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.reserveFund1),
-      expected.reserveFund1,
-      "reserveFund1 funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.reserveFund2),
-      expected.reserveFund2,
-      "reserveFund2 funds invalid"
-    );
+    // let treeId = 10;
+    // let amount = web3.utils.toWei(".18", "Ether");
+    // await TreasuryInstance.addFundDistributionModel(
+    //   4000,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   0,
+    //   0,
+    //   {
+    //     from: deployerAccount,
+    //   }
+    // );
+    // await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    // await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    //   from: deployerAccount,
+    // });
+    // let tx = await TreasuryInstance.fundTree(treeId, {
+    //   from: userAccount3,
+    //   value: amount,
+    // });
+    // assert.equal(
+    //   await web3.eth.getBalance(TreasuryInstance.address),
+    //   amount,
+    //   "1.Contract balance is not true"
+    // );
+    // truffleAssert.eventNotEmitted(tx, "DistributionModelOfTreeNotExist");
+    // let pFund = await TreasuryInstance.planterFunds.call(treeId);
+    // let rFund = await TreasuryInstance.referralFunds.call(treeId);
+    // let totalFunds = await TreasuryInstance.totalFunds();
+    // let expected = {
+    //   planterFund: (40 * amount) / 100,
+    //   referralFund: (12 * amount) / 100,
+    //   treeResearch: (12 * amount) / 100,
+    //   localDevelop: (12 * amount) / 100,
+    //   rescueFund: (12 * amount) / 100,
+    //   treejerDevelop: (12 * amount) / 100,
+    //   reserveFund1: 0,
+    //   reserveFund2: 0,
+    // };
+    // assert.equal(Number(pFund), expected.planterFund, "planter funds invalid");
+    // assert.equal(
+    //   Number(rFund),
+    //   expected.referralFund,
+    //   "referral funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.planterFund),
+    //   expected.planterFund,
+    //   "planterFund totalFunds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.referralFund),
+    //   expected.referralFund,
+    //   "referralFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.treeResearch),
+    //   expected.treeResearch,
+    //   "treeResearch funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.localDevelop),
+    //   expected.localDevelop,
+    //   "localDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.rescueFund),
+    //   expected.rescueFund,
+    //   "rescueFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.treejerDevelop),
+    //   expected.treejerDevelop,
+    //   "treejerDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.reserveFund1),
+    //   expected.reserveFund1,
+    //   "reserveFund1 funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.reserveFund2),
+    //   expected.reserveFund2,
+    //   "reserveFund2 funds invalid"
+    // );
   });
 
   it("2.fundTree should be success", async () => {
-    let treeId1 = 0;
-    let treeId2 = 20;
-    let amount1 = web3.utils.toWei(".23", "Ether");
-    let amount2 = web3.utils.toWei(".28", "Ether");
-
-    await TreasuryInstance.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await TreasuryInstance.addFundDistributionModel(
-      3000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      500,
-      500,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
-
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
-    });
-
-    await TreasuryInstance.assignTreeFundDistributionModel(1, 20, 1, {
-      from: deployerAccount,
-    });
-
-    await TreasuryInstance.fundTree(treeId2, {
-      from: userAccount3,
-      value: amount2,
-    });
-
-    assert.equal(
-      await web3.eth.getBalance(TreasuryInstance.address),
-      web3.utils.toWei(".28", "Ether"),
-      "1.Contract balance is not true"
-    );
-
-    let pFund2 = await TreasuryInstance.planterFunds.call(treeId2);
-
-    let rFund2 = await TreasuryInstance.referralFunds.call(treeId2);
-
-    let totalFunds2 = await TreasuryInstance.totalFunds();
-
-    let expected2 = {
-      planterFund: (30 * amount2) / 100,
-      referralFund: (12 * amount2) / 100,
-      treeResearch: (12 * amount2) / 100,
-      localDevelop: (12 * amount2) / 100,
-      rescueFund: (12 * amount2) / 100,
-      treejerDevelop: (12 * amount2) / 100,
-      reserveFund1: (5 * amount2) / 100,
-      reserveFund2: (5 * amount2) / 100,
-    };
-
-    assert.equal(
-      Number(pFund2),
-      expected2.planterFund,
-      "planter funds invalid"
-    );
-
-    assert.equal(
-      Number(rFund2),
-      expected2.referralFund,
-      "referral funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.planterFund),
-      expected2.planterFund,
-      "planterFund totalFunds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.referralFund),
-      expected2.referralFund,
-      "referralFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.treeResearch),
-      expected2.treeResearch,
-      "treeResearch funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.localDevelop),
-      expected2.localDevelop,
-      "localDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.rescueFund),
-      expected2.rescueFund,
-      "rescueFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.treejerDevelop),
-      expected2.treejerDevelop,
-      "treejerDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.reserveFund1),
-      expected2.reserveFund1,
-      "reserveFund1 funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds2.reserveFund2),
-      expected2.reserveFund2,
-      "reserveFund2 funds invalid"
-    );
-
-    await TreasuryInstance.fundTree(treeId1, {
-      from: userAccount3,
-      value: amount1,
-    });
-
-    assert.equal(
-      await web3.eth.getBalance(TreasuryInstance.address),
-      web3.utils.toWei(".51", "Ether"),
-      "2.Contract balance is not true"
-    );
-
-    let expected = {
-      planterFund: (40 * amount1) / 100,
-      referralFund: (12 * amount1) / 100,
-      treeResearch: (12 * amount1) / 100,
-      localDevelop: (12 * amount1) / 100,
-      rescueFund: (12 * amount1) / 100,
-      treejerDevelop: (12 * amount1) / 100,
-      reserveFund1: 0,
-      reserveFund2: 0,
-    };
-
-    let pFund = await TreasuryInstance.planterFunds.call(treeId1);
-
-    let rFund = await TreasuryInstance.referralFunds.call(treeId1);
-
-    let totalFunds = await TreasuryInstance.totalFunds();
-
-    assert.equal(
-      Number(pFund),
-      expected.planterFund,
-      "2.planter funds invalid"
-    );
-
-    assert.equal(
-      Number(rFund),
-      expected.referralFund,
-      "2.referral funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.planterFund),
-      Math.add(expected.planterFund, expected2.planterFund),
-      "2.planterFund totalFunds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.referralFund),
-      Math.add(expected.referralFund, expected2.referralFund),
-      "2.referralFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.treeResearch),
-      Math.add(expected.treeResearch, expected2.treeResearch),
-      "2.treeResearch funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.localDevelop),
-      Math.add(expected.localDevelop, expected2.localDevelop),
-      "2.localDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.rescueFund),
-      Math.add(expected.rescueFund, expected2.rescueFund),
-      "2.rescueFund funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.treejerDevelop),
-      Math.add(expected.treejerDevelop, expected2.treejerDevelop),
-      "2.treejerDevelop funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.reserveFund1),
-      Math.add(expected.reserveFund1, expected2.reserveFund1),
-      "2.reserveFund1 funds invalid"
-    );
-
-    assert.equal(
-      Number(totalFunds.reserveFund2),
-      Math.add(expected.reserveFund2, expected2.reserveFund2),
-      "2.reserveFund2 funds invalid"
-    );
+    // let treeId1 = 0;
+    // let treeId2 = 20;
+    // let amount1 = web3.utils.toWei(".23", "Ether");
+    // let amount2 = web3.utils.toWei(".28", "Ether");
+    // await TreasuryInstance.addFundDistributionModel(
+    //   4000,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   0,
+    //   0,
+    //   {
+    //     from: deployerAccount,
+    //   }
+    // );
+    // await TreasuryInstance.addFundDistributionModel(
+    //   3000,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   1200,
+    //   500,
+    //   500,
+    //   {
+    //     from: deployerAccount,
+    //   }
+    // );
+    // await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    // await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    //   from: deployerAccount,
+    // });
+    // await TreasuryInstance.assignTreeFundDistributionModel(1, 20, 1, {
+    //   from: deployerAccount,
+    // });
+    // await TreasuryInstance.fundTree(treeId2, {
+    //   from: userAccount3,
+    //   value: amount2,
+    // });
+    // assert.equal(
+    //   await web3.eth.getBalance(TreasuryInstance.address),
+    //   web3.utils.toWei(".28", "Ether"),
+    //   "1.Contract balance is not true"
+    // );
+    // let pFund2 = await TreasuryInstance.planterFunds.call(treeId2);
+    // let rFund2 = await TreasuryInstance.referralFunds.call(treeId2);
+    // let totalFunds2 = await TreasuryInstance.totalFunds();
+    // let expected2 = {
+    //   planterFund: (30 * amount2) / 100,
+    //   referralFund: (12 * amount2) / 100,
+    //   treeResearch: (12 * amount2) / 100,
+    //   localDevelop: (12 * amount2) / 100,
+    //   rescueFund: (12 * amount2) / 100,
+    //   treejerDevelop: (12 * amount2) / 100,
+    //   reserveFund1: (5 * amount2) / 100,
+    //   reserveFund2: (5 * amount2) / 100,
+    // };
+    // assert.equal(
+    //   Number(pFund2),
+    //   expected2.planterFund,
+    //   "planter funds invalid"
+    // );
+    // assert.equal(
+    //   Number(rFund2),
+    //   expected2.referralFund,
+    //   "referral funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.planterFund),
+    //   expected2.planterFund,
+    //   "planterFund totalFunds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.referralFund),
+    //   expected2.referralFund,
+    //   "referralFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.treeResearch),
+    //   expected2.treeResearch,
+    //   "treeResearch funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.localDevelop),
+    //   expected2.localDevelop,
+    //   "localDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.rescueFund),
+    //   expected2.rescueFund,
+    //   "rescueFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.treejerDevelop),
+    //   expected2.treejerDevelop,
+    //   "treejerDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.reserveFund1),
+    //   expected2.reserveFund1,
+    //   "reserveFund1 funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds2.reserveFund2),
+    //   expected2.reserveFund2,
+    //   "reserveFund2 funds invalid"
+    // );
+    // await TreasuryInstance.fundTree(treeId1, {
+    //   from: userAccount3,
+    //   value: amount1,
+    // });
+    // assert.equal(
+    //   await web3.eth.getBalance(TreasuryInstance.address),
+    //   web3.utils.toWei(".51", "Ether"),
+    //   "2.Contract balance is not true"
+    // );
+    // let expected = {
+    //   planterFund: (40 * amount1) / 100,
+    //   referralFund: (12 * amount1) / 100,
+    //   treeResearch: (12 * amount1) / 100,
+    //   localDevelop: (12 * amount1) / 100,
+    //   rescueFund: (12 * amount1) / 100,
+    //   treejerDevelop: (12 * amount1) / 100,
+    //   reserveFund1: 0,
+    //   reserveFund2: 0,
+    // };
+    // let pFund = await TreasuryInstance.planterFunds.call(treeId1);
+    // let rFund = await TreasuryInstance.referralFunds.call(treeId1);
+    // let totalFunds = await TreasuryInstance.totalFunds();
+    // assert.equal(
+    //   Number(pFund),
+    //   expected.planterFund,
+    //   "2.planter funds invalid"
+    // );
+    // assert.equal(
+    //   Number(rFund),
+    //   expected.referralFund,
+    //   "2.referral funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.planterFund),
+    //   Math.add(expected.planterFund, expected2.planterFund),
+    //   "2.planterFund totalFunds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.referralFund),
+    //   Math.add(expected.referralFund, expected2.referralFund),
+    //   "2.referralFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.treeResearch),
+    //   Math.add(expected.treeResearch, expected2.treeResearch),
+    //   "2.treeResearch funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.localDevelop),
+    //   Math.add(expected.localDevelop, expected2.localDevelop),
+    //   "2.localDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.rescueFund),
+    //   Math.add(expected.rescueFund, expected2.rescueFund),
+    //   "2.rescueFund funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.treejerDevelop),
+    //   Math.add(expected.treejerDevelop, expected2.treejerDevelop),
+    //   "2.treejerDevelop funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.reserveFund1),
+    //   Math.add(expected.reserveFund1, expected2.reserveFund1),
+    //   "2.reserveFund1 funds invalid"
+    // );
+    // assert.equal(
+    //   Number(totalFunds.reserveFund2),
+    //   Math.add(expected.reserveFund2, expected2.reserveFund2),
+    //   "2.reserveFund2 funds invalid"
+    // );
   });
 
   it("3.fundTree should be success", async () => {

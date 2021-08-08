@@ -13,6 +13,8 @@ var Weth = artifacts.require("Weth.sol");
 var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var TestUniswap = artifacts.require("TestUniswap.sol");
 
+const Math = require("./math");
+
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -214,6 +216,13 @@ contract("WethFunds", (accounts) => {
     await wethInstance.setMint(wethFunds.address, amount);
 
     ////--------------------call fund tree by auction----------------
+
+    let expectedSwapTokenAmount =
+      await uniswapRouterInstance.getAmountsOut.call(
+        web3.utils.toWei(".6", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
     await wethFunds.fundTree(
       treeId,
       amount,
@@ -278,27 +287,46 @@ contract("WethFunds", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    //check fund planter
+    ////--------------------------check fund planter
 
     let totalFund = await planterFundsInstnce.totalFunds.call();
 
-    let planterFund = totalFund.planterFund;
-    let referralFund = totalFund.referralFund;
+    let planterFunds = await planterFundsInstnce.planterFunds.call(1);
+    let referralFunds = await planterFundsInstnce.referralFunds.call(1);
 
-    // let contractBalance = await daiInstance.balanceOf(
-    //   planterFundsInstnce.address
-    // );
+    assert.equal(
+      Number(totalFund.planterFund),
+      Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
+      "totalFund planterFund funds invalid"
+    );
 
-    // console.log(`out ${web3.utils.fromWei(contractBalance.toString())}`);
+    assert.equal(
+      Number(totalFund.referralFund),
+      Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
+      "totalFund referralFund funds invalid"
+    );
 
-    // let totalFund = await planterFundsInstnce.totalFunds.call();
-    // let planterFund = totalFund.planterFund;
-    // let referralFund = totalFund.referralFund;
+    assert.equal(
+      Number(planterFunds),
+      Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
+      "planterFund funds invalid"
+    );
 
-    // let total = Number(planterFund) + Number(referralFund);
+    assert.equal(
+      Number(referralFunds),
+      Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
+      "referralFund funds invalid"
+    );
 
-    // console.log("total", total);
-    // console.log("planterFund", web3.utils.fromWei(planterFund.toString()));
-    // console.log("referal", web3.utils.fromWei(referralFund.toString()));
+    ////------------check planter fund contract balance
+    let contractBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(contractBalance),
+      Number(expectedSwapTokenAmount[1]),
+      "Contract balance not true"
+    );
   });
 });

@@ -115,22 +115,24 @@ contract WethFunds is Initializable {
         uint256 planterFund = (_amount * _planterFund) / 10000;
         uint256 referralFund = (_amount * _referralFund) / 10000;
 
-        _swap(_treeId, planterFund, referralFund);
+        uint256 sumFund = planterFund + referralFund;
+
+        _swap(_treeId, sumFund, _planterFund, _referralFund);
     }
 
     function _swap(
         uint256 _treeId,
-        uint256 _planterFund,
-        uint256 _referralFund
+        uint256 sumFund,
+        uint16 _planterFund,
+        uint16 _referralFund
     ) private {
-        uint256 sumFund = _planterFund + _referralFund;
+        uint16 sum = _planterFund + _referralFund;
 
         address[] memory path;
         path = new address[](2);
 
         path[0] = address(wethToken);
         path[1] = DaiAddress;
-        // wethToken.transfer(recipient, amount);
 
         wethToken.approve(address(uniswapRouter), sumFund);
 
@@ -144,8 +146,8 @@ contract WethFunds is Initializable {
 
         planterFundContract.setPlanterFunds(
             _treeId,
-            (_planterFund * amounts[amounts.length - 1]) / sumFund,
-            (_referralFund * amounts[amounts.length - 1]) / sumFund
+            (_planterFund * amounts[amounts.length - 1]) / sum,
+            (_referralFund * amounts[amounts.length - 1]) / sum
         );
     }
 }

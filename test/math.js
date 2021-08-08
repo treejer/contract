@@ -34,4 +34,5 @@ module.exports = {
   mul,
   subtract,
   divide,
+  Big,
 };

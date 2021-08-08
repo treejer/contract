@@ -4,6 +4,7 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
@@ -22,6 +23,7 @@ contract TreeAuction is Initializable {
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     ITreasury public treasury;
+    IERC20Upgradeable public wethToken;
 
     struct Auction {
         uint256 treeId;
@@ -103,6 +105,13 @@ contract TreeAuction is Initializable {
         treasury = candidateContract;
     }
 
+    function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(
+            _wethTokenAddress
+        );
+        wethToken = candidateContract;
+    }
+
     /**
      * @dev admin create auction to a tree with provideStatus of '0' and push that auction
      * to {auctions[auctionId]} and increament auctionId by 1.
@@ -147,7 +156,11 @@ contract TreeAuction is Initializable {
      * @param _auctionId auctionId that user bid for it.
      */
 
-    function bid(uint256 _auctionId) external payable ifNotPaused {
+    function bid(uint256 _auctionId, uint256 _amount)
+        external
+        payable
+        ifNotPaused
+    {
         Auction storage _storageAuction = auctions[_auctionId];
 
         require(
@@ -159,16 +172,21 @@ contract TreeAuction is Initializable {
             "auction not started"
         );
         require(
-            msg.value >=
-                _storageAuction.highestBid + _storageAuction.bidInterval,
+            _amount >= _storageAuction.highestBid + _storageAuction.bidInterval,
             "invalid amount"
         );
+
+        uint256 _senderBalance = wethToken.balanceOf(msg.sender);
+
+        require(_senderBalance >= _amount, "insufficient balance");
 
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
-        _storageAuction.highestBid = msg.value;
+        _storageAuction.highestBid = _amount;
         _storageAuction.bidder = msg.sender;
+
+        wethToken.transfer(address(this), _amount);
 
         emit HighestBidIncreased(
             _auctionId,

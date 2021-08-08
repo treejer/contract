@@ -1,30 +1,16 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const FinancialModel = artifacts.require("FinancialModel.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Treasury = artifacts.require("Treasury.sol");
-const Tree = artifacts.require("Tree.sol");
-const TreeAuction = artifacts.require("TreeAuction.sol");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
-const Common = require("./common");
 
-const {
-  TimeEnumes,
-  CommonErrorMsg,
-  IncrementalSellErrorMsg,
-  TreeFactoryErrorMsg,
-  TreasuryManagerErrorMsg,
-} = require("./enumes");
+const { CommonErrorMsg, FinancialModelErrorMsg } = require("./enumes");
 
 contract("FinancialModel", (accounts) => {
   let arInstance;
-  let TreeFactoryInstance;
-  let startTime;
-  let endTime;
   let financialModelInstance;
-  let treeTokenInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -145,13 +131,13 @@ contract("FinancialModel", (accounts) => {
       .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
+      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
 
     await financialModelInstance
       .addFundDistributionModel(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
+      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
   });
 
   //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
@@ -696,7 +682,7 @@ contract("FinancialModel", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(
-        TreasuryManagerErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
+        FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
       );
   });
 
@@ -752,7 +738,7 @@ contract("FinancialModel", (accounts) => {
     );
     await financialModelInstance
       .findTreeDistribution(1)
-      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_FUND_MODEL);
+      .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
 
     await financialModelInstance.assignTreeFundDistributionModel(3, 10, 0, {
       from: deployerAccount,
@@ -760,7 +746,7 @@ contract("FinancialModel", (accounts) => {
 
     await financialModelInstance
       .findTreeDistribution(1)
-      .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_FUND_MODEL);
+      .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
   });
   it("should findTreeDistribution successfully1", async () => {
     let treeId = 10;

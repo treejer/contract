@@ -63,6 +63,16 @@ const TreasuryManagerErrorMsg = {
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
   DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
 };
+
+const DaiFundsErrorMsg = {
+  INSUFFICIENT_AMOUNT: "insufficient amount",
+};
+const FinancialModelErrorMsg = {
+  SUM_INVALID: "sum must be 10000",
+  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
+  INVALID_FUND_MODEL: "invalid fund model",
+};
+
 const PlanterErrorMsg = {
   ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
   ONLY_PLANTER: "User exist or not planter",
@@ -96,7 +106,7 @@ const IncrementalSellErrorMsg = {
 const TreeAttributeErrorMsg = {
   DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
   TREE_HAS_ATTRIBUTES: "tree attributes are set before",
-  TREE_WITH_NO_ATTRIBUTES:"no need to tree attributes"
+  TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
 };
 module.exports = {
   TimeEnumes,
@@ -109,4 +119,6 @@ module.exports = {
   RegularSellErrors,
   IncrementalSellErrorMsg,
   TreeAttributeErrorMsg,
+  DaiFundsErrorMsg,
+  FinancialModelErrorMsg,
 };

@@ -200,12 +200,10 @@ contract DaiFunds is Initializable {
         uint256 planterFund = (_amount * _planterFund) / 10000;
         uint256 referralFund = (_amount * _referralFund) / 10000;
 
-        bool success = daiToken.transfer(
+        daiToken.transfer(
             address(planterFundContract),
             planterFund + referralFund
         );
-
-        require(success, "not transfered");
 
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
     }

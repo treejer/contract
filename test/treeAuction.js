@@ -4,6 +4,9 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
+const FinancialModel = artifacts.require("FinancialModel.sol");
+const WethFunds = artifacts.require("WethFunds.sol");
+var Weth = artifacts.require("Weth.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -27,6 +30,9 @@ contract("TreeAuction", (accounts) => {
   let startTime;
   let endTime;
   let planterInstance;
+  let financialModelInstance;
+  let wethFundsInstance;
+  let wethInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -55,6 +61,22 @@ contract("TreeAuction", (accounts) => {
     });
 
     TreasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -93,6 +115,8 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
+    wethInstance = await Weth.new("WETH", "weth", { from: deployerAccount });
+
     await TreasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
     });
@@ -111,7 +135,8 @@ contract("TreeAuction", (accounts) => {
   });
 
   afterEach(async () => {});
-
+  /*
+  ////////////// ---------------------------------- deploy ----------------------------
   it("deploys successfully", async () => {
     const address = treeAuctionInstance.address;
     assert.notEqual(address, 0x0);
@@ -120,33 +145,55 @@ contract("TreeAuction", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
-  it("should set tresury address with admin access or fail otherwise", async () => {
-    let tx = await treeAuctionInstance.setTreasuryAddress(
-      TreasuryInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
+  ////////////// ---------------------------------- set tree factory contract address ----------------------------
+
+  it("should set tree factory address with admin access or fail otherwise", async () => {
     await treeAuctionInstance
-      .setTreasuryAddress(TreasuryInstance.address, {
+      .setTreeFactoryAddress(treeFactoryInstance.address, {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
-  });
-  it("should set tree factory address with admin access or fail otherwise", async () => {
+
     let tx = await treeAuctionInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,
       {
         from: deployerAccount,
       }
     );
+  });
+
+  ////////////// ---------------------------------- set financial model contract address ----------------------------
+  it("should set financial model address with admin access or fail otherwise", async () => {
     await treeAuctionInstance
-      .setTreasuryAddress(TreasuryInstance.address, {
+      .setFinancialModelAddress(financialModelInstance.address, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
+
+    let tx = await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+  });
+  ////////////// ---------------------------------- set weth funds contract address ----------------------------
+
+  it("should set weth funds address with admin access or fail otherwise", async () => {
+    let tx = await treeAuctionInstance.setWethFundsAddress(
+      wethFundsInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+    await treeAuctionInstance
+      .setWethFundsAddress(wethFundsInstance.address, {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
   });
 
+  ///////////////// ----------------------------- add auction -------------------------------
   it("auction call by admin access or fail otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -158,11 +205,14 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-    await TreasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -182,7 +232,7 @@ contract("TreeAuction", (accounts) => {
       deployerAccount
     );
 
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
 
@@ -224,11 +274,14 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-    await TreasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -248,7 +301,7 @@ contract("TreeAuction", (accounts) => {
       deployerAccount
     );
 
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
 
@@ -279,9 +332,12 @@ contract("TreeAuction", (accounts) => {
 
     let treeId = 1;
 
-    await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
@@ -298,7 +354,7 @@ contract("TreeAuction", (accounts) => {
       )
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-    await TreasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -332,7 +388,6 @@ contract("TreeAuction", (accounts) => {
 
   it("Check auction data insert conrrectly", async () => {
     let treeId = 1;
-
     let initialValue = web3.utils.toWei("1");
     let bidInterval = web3.utils.toWei("0.1");
 
@@ -343,11 +398,14 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-    await TreasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -367,7 +425,7 @@ contract("TreeAuction", (accounts) => {
       deployerAccount
     );
 
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
 
@@ -389,19 +447,25 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.endDate), Number(endTime));
   });
 
+  */
   it("bid auction and check highest bid set change correctly", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+    const bidderAccount = userAccount1;
+
     const treeId = 1;
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setTreasuryAddress(TreasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-    await TreasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -421,7 +485,7 @@ contract("TreeAuction", (accounts) => {
       deployerAccount
     );
 
-    await TreasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
 
@@ -435,8 +499,17 @@ contract("TreeAuction", (accounts) => {
     );
     const resultBefore = await treeAuctionInstance.auctions.call(0);
 
-    await treeAuctionInstance.bid(0, {
-      value: web3.utils.toWei("1.15"),
+    wethInstance.setMint(bidderAccount, web3.utils.toWei("1.15"));
+
+    treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+    await wethInstance.approve(wethInstance.address, web3.utils.toWei("1.15"), {
+      from: bidderAccount,
+    });
+
+    await treeAuctionInstance.bid(0, web3.utils.toWei("1.15"), {
+      from: bidderAccount,
     });
     const resultAfter = await treeAuctionInstance.auctions.call(0);
     assert.equal(
@@ -447,7 +520,7 @@ contract("TreeAuction", (accounts) => {
       web3.utils.toWei("0.15")
     );
   });
-
+  /*
   it("must offer suitable value for auction or rejected otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -2958,9 +3031,8 @@ contract("TreeAuction", (accounts) => {
     );
     /////////////---------------------- check planter balance before withdraw
 
-    const planterPaidBeforeWithdrawTotalAmount = await TreasuryInstance.balances.call(
-      userAccount2
-    );
+    const planterPaidBeforeWithdrawTotalAmount =
+      await TreasuryInstance.balances.call(userAccount2);
 
     assert.equal(
       Number(planterPaidBeforeWithdrawTotalAmount),
@@ -2976,13 +3048,13 @@ contract("TreeAuction", (accounts) => {
       }
     );
     ////////////////--------------- check planter balance after withdraw
-    const planterPaidAfterWithdrawTotalAmount = await TreasuryInstance.balances.call(
-      userAccount2
-    );
+    const planterPaidAfterWithdrawTotalAmount =
+      await TreasuryInstance.balances.call(userAccount2);
     assert.equal(
       Number(planterPaidAfterWithdrawTotalAmount),
       0,
       "planter fund is not ok after withdraw total amount"
     );
   });
+  */
 });

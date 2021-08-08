@@ -15,7 +15,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     CountersUpgradeable.Counter private fundDistributionCount;
 
-    uint256 constant MAX_UINT256 = 2**256 - 1;
+    uint256 constant MAX_UINT256 = type(uint256).max;
     bool public isTreasury;
     uint256 public maxAssignedIndex;
 
@@ -369,7 +369,7 @@ contract Treasury is Initializable, RelayRecipient {
 
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
-            .distributionModelId
+                .distributionModelId
         ];
 
         planterFunds[_treeId] = (msg.value * dm.planterFund) / 10000;

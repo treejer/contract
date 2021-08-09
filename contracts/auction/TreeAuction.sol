@@ -108,6 +108,11 @@ contract TreeAuction is Initializable {
         financialModel = candidateContract;
     }
 
+    /**
+     * @dev admin set TreasuryAddress
+     * @param _address set to the address of treasury
+     */
+
     function setWethFundsAddress(address _address) external onlyAdmin {
         IWethFunds candidateContract = IWethFunds(_address);
         require(candidateContract.isWethFunds());
@@ -204,7 +209,7 @@ contract TreeAuction is Initializable {
         );
 
         _increaseAuctionEndTime(_auctionId);
-        _withdraw(oldBid, oldBidder, _auctionId);
+        _withdraw(oldBid, oldBidder);
     }
 
     /** @dev users can manually withdraw if its balance is more than 0.
@@ -212,22 +217,22 @@ contract TreeAuction is Initializable {
      */
 
     //TODO: no need for this function
-    function manualWithdraw() external ifNotPaused returns (bool) {
-        uint256 amount = pendingWithdraw[msg.sender];
+    // function manualWithdraw() external ifNotPaused returns (bool) {
+    //     uint256 amount = pendingWithdraw[msg.sender];
 
-        require(amount > 0, "User balance is not enough");
+    //     require(amount > 0, "User balance is not enough");
 
-        pendingWithdraw[msg.sender] = 0;
+    //     pendingWithdraw[msg.sender] = 0;
 
-        wethToken.transfer(msg.sender, amount);
+    //     wethToken.transfer(msg.sender, amount);
 
-        // if (!payable(msg.sender).send(amount)) {
-        //     pendingWithdraw[msg.sender] = amount;
-        //     return false;
-        // }
+    //     // if (!payable(msg.sender).send(amount)) {
+    //     //     pendingWithdraw[msg.sender] = amount;
+    //     //     return false;
+    //     // }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     /** @dev everyone can call this method  including the winner of auction after
      * auction end time and if auction have bidder transfer owner of tree to bidder and fund tree.
@@ -303,19 +308,9 @@ contract TreeAuction is Initializable {
      * much as paid before using this function
      */
 
-    function _withdraw(
-        uint256 _oldBid,
-        address _oldBidder,
-        uint256 _auctionId
-    ) private {
+    function _withdraw(uint256 _oldBid, address _oldBidder) private {
         if (_oldBidder != address(0)) {
             wethToken.transfer(_oldBidder, _oldBid);
-            emit AuctionWithdrawFaild(_auctionId, _oldBidder, _oldBid);
         }
     }
 }
-
-//                pendingWithdraw[_oldBidder] += _oldBid;
-// } else if (!payable(_oldBidder).send(_oldBid)) {
-//     pendingWithdraw[_oldBidder] += _oldBid;
-// }

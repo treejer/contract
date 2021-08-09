@@ -55,12 +55,12 @@ contract DaiFunds is Initializable {
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn1(
+    event ReserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn2(
+    event ReserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -337,7 +337,7 @@ contract DaiFunds is Initializable {
 
         daiToken.transfer(reserveFundAddress1, _amount);
 
-        emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
 
     /**
@@ -361,6 +361,6 @@ contract DaiFunds is Initializable {
 
         daiToken.transfer(reserveFundAddress2, _amount);
 
-        emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 }

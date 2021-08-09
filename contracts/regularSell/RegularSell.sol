@@ -2,10 +2,11 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/ITreasury.sol";
+import "../treasury/IDaiFunds.sol";
+import "../treasury/IFinancialModel.sol";
 
 /** @title RegularSell contract */
 contract RegularSell is Initializable {
@@ -15,7 +16,9 @@ contract RegularSell is Initializable {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    ITreasury public treasury;
+    IDaiFunds public daiFunds;
+    IFinancialModel public financialModel;
+    IERC20Upgradeable public daiToken;
 
     event TreePriceUpdated(uint256 price);
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
@@ -57,15 +60,24 @@ contract RegularSell is Initializable {
         treeFactory = candidateContract;
     }
 
-    /** @dev set treasury contract address
-     * @param _address treasury contract address
+    /** @dev set daiFunds contract address
+     * @param _address daiFunds contract address
      */
-    function setTreasuryAddress(address _address) external onlyAdmin {
-        ITreasury candidateContract = ITreasury(_address);
+    function setDaiFundsAddress(address _address) external onlyAdmin {
+        IDaiFunds candidateContract = IDaiFunds(_address);
 
-        require(candidateContract.isTreasury());
+        require(candidateContract.isDaiFunds());
 
-        treasury = candidateContract;
+        daiFunds = candidateContract;
+    }
+
+    /** @dev set daiToken contract address
+     * @param _address daiToken contract address
+     */
+    function setDaiTokenAddress(address _address) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
+
+        daiToken = candidateContract;
     }
 
     /** @dev admin set the price of trees that are sold regular
@@ -80,14 +92,18 @@ contract RegularSell is Initializable {
      * {_count * treePrice }
      * @param _count is the number of trees requested by user
      */
-    function requestTrees(uint256 _count) external payable {
+    function requestTrees(uint256 _count, uint256 _amount) external {
         require(_count > 0, "invalid count");
 
-        require(msg.value >= treePrice * _count, "invalid amount");
+        require(
+            daiToken.balanceOf(msg.sender) >= treePrice * _count &&
+                _amount >= treePrice * _count,
+            "invalid amount"
+        );
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
-        uint256 transferAmount = msg.value / _count;
+        uint256 transferAmount = _amount / _count;
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
@@ -95,12 +111,34 @@ contract RegularSell is Initializable {
                 msg.sender
             );
 
-            treasury.fundTree{value: transferAmount}(tempLastRegularSold);
+            (
+                uint16 planterFund,
+                uint16 referralFund,
+                uint16 treeResearch,
+                uint16 localDevelop,
+                uint16 rescueFund,
+                uint16 treejerDevelop,
+                uint16 reserveFund1,
+                uint16 reserveFund2
+            ) = financialModel.findTreeDistribution(tempLastRegularSold);
+
+            daiFunds.fundTree(
+                tempLastRegularSold,
+                transferAmount,
+                planterFund,
+                referralFund,
+                treeResearch,
+                localDevelop,
+                rescueFund,
+                treejerDevelop,
+                reserveFund1,
+                reserveFund2
+            );
         }
 
         lastSoldRegularTree = tempLastRegularSold;
 
-        emit RegularTreeRequsted(_count, msg.sender, msg.value);
+        emit RegularTreeRequsted(_count, msg.sender, _amount);
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
@@ -108,14 +146,40 @@ contract RegularSell is Initializable {
      * has not been sold before
      * @param _treeId is the id of tree requested by user
      */
-    function requestByTreeId(uint256 _treeId) external payable {
+    function requestByTreeId(uint256 _treeId, uint256 _amount) external {
         require(_treeId > lastSoldRegularTree, "invalid tree");
-        require(msg.value >= treePrice, "invalid amount");
+
+        require(
+            daiToken.balanceOf(msg.sender) >= treePrice && _amount >= treePrice,
+            "invalid amount"
+        );
 
         treeFactory.requestRegularTree(_treeId, msg.sender);
 
-        treasury.fundTree{value: msg.value}(_treeId);
+        (
+            uint16 planterFund,
+            uint16 referralFund,
+            uint16 treeResearch,
+            uint16 localDevelop,
+            uint16 rescueFund,
+            uint16 treejerDevelop,
+            uint16 reserveFund1,
+            uint16 reserveFund2
+        ) = financialModel.findTreeDistribution(_treeId);
 
-        emit RegularTreeRequstedById(_treeId, msg.sender, msg.value);
+        daiFunds.fundTree(
+            _treeId,
+            _amount,
+            planterFund,
+            referralFund,
+            treeResearch,
+            localDevelop,
+            rescueFund,
+            treejerDevelop,
+            reserveFund1,
+            reserveFund2
+        );
+
+        emit RegularTreeRequstedById(_treeId, msg.sender, _amount);
     }
 }

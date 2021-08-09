@@ -215,12 +215,7 @@ contract WethFunds is Initializable {
 
         totalFunds.treeResearch += ((_amount * _treeResearch) / 10000);
 
-        uint256 planterFund = (_amount * _planterFund) / 10000;
-        uint256 referralFund = (_amount * _referralFund) / 10000;
-
-        uint256 sumFund = planterFund + referralFund;
-
-        _swap(_treeId, sumFund, _planterFund, _referralFund);
+        _swap(_treeId, _amount, _planterFund, _referralFund);
     }
 
     /**
@@ -389,11 +384,15 @@ contract WethFunds is Initializable {
 
     function _swap(
         uint256 _treeId,
-        uint256 sumFund,
+        uint256 _amount,
         uint16 _planterFund,
         uint16 _referralFund
     ) private {
-        uint16 sum = _planterFund + _referralFund;
+        uint256 planterFund = (_amount * _planterFund) / 10000;
+        uint256 referralFund = (_amount * _referralFund) / 10000;
+
+        uint256 sumFund = planterFund + referralFund;
+        uint16 sumPercent = _planterFund + _referralFund;
 
         address[] memory path;
         path = new address[](2);
@@ -408,13 +407,13 @@ contract WethFunds is Initializable {
             1,
             path,
             address(planterFundContract),
-            block.timestamp + 15
+            block.timestamp + 1800 // 30 * 60 (30 min)
         );
 
         planterFundContract.setPlanterFunds(
             _treeId,
-            (_planterFund * amounts[amounts.length - 1]) / sum,
-            (_referralFund * amounts[amounts.length - 1]) / sum
+            (_planterFund * amounts[amounts.length - 1]) / sumPercent,
+            (_referralFund * amounts[amounts.length - 1]) / sumPercent
         );
     }
 }

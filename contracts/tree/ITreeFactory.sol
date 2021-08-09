@@ -39,7 +39,7 @@ interface ITreeFactory {
             string memory
         );
 
-    function setTreasuryAddress(address _address) external;
+    function setPlanterFundAddress(address _address) external;
 
     function setPlanterAddress(address _address) external;
 

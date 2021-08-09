@@ -4,6 +4,7 @@ const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const Treasury = artifacts.require("Treasury.sol");
 const Planter = artifacts.require("Planter.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -33,6 +34,7 @@ contract("TreeFactory", (accounts) => {
   let arInstance;
   let treasuryInstance;
   let planterInstance;
+  let planterFundInstnce;
   let startTime;
   let endTime;
 
@@ -74,6 +76,11 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+    planterFundInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
 
     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
       initializer: "initialize",
@@ -110,18 +117,18 @@ contract("TreeFactory", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
-  /////////////------------------------------------ treasury address ----------------------------------------//
+  /////////////------------------------------------ setPlanterFund address ----------------------------------------//
 
-  it("set treasury address", async () => {
-    let tx = await treeFactoryInstance.setTreasuryAddress(
-      treasuryInstance.address,
+  it("set planter fund address", async () => {
+    let tx = await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
       {
         from: deployerAccount,
       }
     );
 
     await treeFactoryInstance
-      .setTreasuryAddress(treasuryInstance.address, { from: userAccount1 })
+      .setPlanterFundAddress(planterFundInstnce.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
   ////////////------------------------------------ set planter address ----------------------------------------//
@@ -2624,9 +2631,12 @@ contract("TreeFactory", (accounts) => {
       treeFactoryInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -2766,9 +2776,12 @@ contract("TreeFactory", (accounts) => {
       treeFactoryInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -2845,9 +2858,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -2934,9 +2950,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3067,9 +3086,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -3236,9 +3258,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -3525,9 +3550,12 @@ contract("TreeFactory", (accounts) => {
       userAccount6
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -3695,9 +3723,12 @@ contract("TreeFactory", (accounts) => {
       from: userAccount6,
     });
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -3857,9 +3888,12 @@ contract("TreeFactory", (accounts) => {
       from: userAccount6,
     });
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -4011,9 +4045,12 @@ contract("TreeFactory", (accounts) => {
       from: userAccount6,
     });
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -4107,9 +4144,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -4180,9 +4220,12 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -4263,9 +4306,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
       from: deployerAccount,
@@ -4301,9 +4347,12 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await treeFactoryInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await Common.successPlant(
       treeFactoryInstance,

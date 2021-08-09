@@ -34,7 +34,7 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
-
+    event Status(uint256 status);
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

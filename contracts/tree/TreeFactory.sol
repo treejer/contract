@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "../tree/ITree.sol";
-import "../treasury/ITreasury.sol";
+import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanter.sol";
 
 contract TreeFactory is Initializable, RelayRecipient {
@@ -23,7 +23,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
-    ITreasury public treasury;
+    IPlanterFund public planterFund;
     IPlanter public planter;
 
     uint256 public lastRegularPlantedTree;
@@ -57,7 +57,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     mapping(uint256 => TreeStruct) public treeData; //tree id to TreeStruct struct
     mapping(uint256 => UpdateTree) public updateTrees; //tree id to UpdateTree struct
     mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
-
+    event Status(uint256 status);
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);
@@ -88,7 +88,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
-    modifier onlyIncrementalSellOrAuction {
+    modifier onlyIncrementalSellOrAuction() {
         accessRestriction.ifIncrementalSellOrAuction(_msgSender());
         _;
     }
@@ -118,12 +118,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
-    function setTreasuryAddress(address _address) external onlyAdmin {
-        ITreasury candidateContract = ITreasury(_address);
+    function setPlanterFundAddress(address _address) external onlyAdmin {
+        IPlanterFund candidateContract = IPlanterFund(_address);
 
-        require(candidateContract.isTreasury());
+        require(candidateContract.isPlanterFund());
 
-        treasury = candidateContract;
+        planterFund = candidateContract;
     }
 
     function setPlanterAddress(address _address) external onlyAdmin {
@@ -298,8 +298,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             updateGenTree.updateStatus = 3;
 
             uint32 age = ((block.timestamp - treeData[_treeId].plantDate) /
-                3600)
-            .toUint32();
+                3600).toUint32();
 
             if (age > tree.treeStatus) {
                 tree.treeStatus = age;
@@ -308,7 +307,12 @@ contract TreeFactory is Initializable, RelayRecipient {
             tree.treeSpecs = updateGenTree.updateSpecs;
 
             if (treeToken.exists(_treeId)) {
-                treasury.fundPlanter(_treeId, tree.planterId, tree.treeStatus);
+                emit Status(tree.treeStatus);
+                planterFund.fundPlanter(
+                    _treeId,
+                    tree.planterId,
+                    tree.treeStatus
+                );
             }
 
             emit UpdateVerified(_treeId);

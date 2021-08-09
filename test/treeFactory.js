@@ -2,9 +2,12 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
-const Treasury = artifacts.require("Treasury.sol");
+
 const Planter = artifacts.require("Planter.sol");
+const Dai = artifacts.require("Dai.sol");
+const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
+const DaiFunds = artifacts.require("DaiFunds.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -32,9 +35,12 @@ contract("TreeFactory", (accounts) => {
   let treeTokenInstance;
 
   let arInstance;
-  let treasuryInstance;
+
   let planterInstance;
+  let financialModelInstance;
   let planterFundInstnce;
+  let daiFundInstance;
+  let daiInstance;
   let startTime;
   let endTime;
 
@@ -76,19 +82,32 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
     planterFundInstnce = await deployProxy(PlanterFund, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
 
-    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
-    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -2585,10 +2604,12 @@ contract("TreeFactory", (accounts) => {
         TreeFactoryErrorMsg.UPDATE_TREE_FAIL_INVALID_UPDATE_TREE_STATUS
       );
   });
+
   it("should update successfully after reject update and fail update after verify update because update time does not reach", async () => {
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
+
     const fundsPercent = {
       planterFund: 5000,
       referralFund: 1000,
@@ -2599,6 +2620,7 @@ contract("TreeFactory", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
+
     const fundTreeAmount = web3.utils.toWei("0.1");
 
     await Common.successPlant(
@@ -2623,7 +2645,10 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       treeFactoryInstance.address,
       userAccount1,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -2638,9 +2663,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.add(
@@ -2768,7 +2796,10 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       treeFactoryInstance.address,
       userAccount1,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -2783,9 +2814,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.add(
@@ -2865,9 +2899,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await Common.travelTime(TimeEnumes.seconds, 2592000);
 
@@ -2889,8 +2926,10 @@ contract("TreeFactory", (accounts) => {
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
     let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
     let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
-    let pFund = await treasuryInstance.planterFunds.call(treeId);
-    let planterPaid = await treasuryInstance.plantersPaid.call(treeId);
+
+    let pFund = await planterFundInstnce.planterFunds.call(treeId);
+    let rFund = await planterFundInstnce.referralFunds.call(treeId);
+    let planterPaid = await planterFundInstnce.plantersPaid.call(treeId);
 
     assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
 
@@ -2913,6 +2952,8 @@ contract("TreeFactory", (accounts) => {
 
     assert.equal(Number(pFund), 0, "no fund beacuse tree fund did not call");
 
+    assert.equal(Number(rFund), 0, "no fund beacuse tree fund did not call");
+
     assert.equal(planterPaid, 0, "planter fund did not call");
   });
 
@@ -2930,10 +2971,15 @@ contract("TreeFactory", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
-    const fundTreeAmount = web3.utils.toWei("1");
+    const fundTreeAmount = web3.utils.toWei("0.219");
 
     const planterTotalFund = Math.divide(
       Math.mul(Number(fundTreeAmount), fundsPercent.planterFund),
+      10000
+    );
+
+    const referralTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.referralFund),
       10000
     );
 
@@ -2961,16 +3007,22 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
       deployerAccount,
       treeFactoryInstance.address,
       userAccount7,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -2978,8 +3030,10 @@ contract("TreeFactory", (accounts) => {
       treeFactoryInstance
     );
 
-    const pFund = await treasuryInstance.planterFunds.call(treeId);
-    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+    const pFund = await planterFundInstnce.planterFunds.call(treeId);
+    const rFund = await planterFundInstnce.referralFunds.call(treeId);
+
+    const planterPaidBeforeVerify = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -2987,6 +3041,12 @@ contract("TreeFactory", (accounts) => {
       Number(pFund),
       planterTotalFund,
       "planter total fund is not ok"
+    );
+
+    assert.equal(
+      Number(rFund),
+      referralTotalFund,
+      "referral total fund is not ok"
     );
 
     assert.equal(
@@ -3014,7 +3074,7 @@ contract("TreeFactory", (accounts) => {
 
     const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const planterPaidAfterVerify = await treasuryInstance.plantersPaid.call(
+    const planterPaidAfterVerify = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3073,6 +3133,12 @@ contract("TreeFactory", (accounts) => {
       Math.mul(Number(fundTreeAmount), fundsPercent.planterFund),
       10000
     );
+
+    const referralTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.referralFund),
+      10000
+    );
+
     await Common.successPlant(
       treeFactoryInstance,
       arInstance,
@@ -3093,9 +3159,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3106,7 +3175,10 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       treeFactoryInstance.address,
       userAccount7,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -3114,9 +3186,10 @@ contract("TreeFactory", (accounts) => {
       treeFactoryInstance
     );
 
-    const pFund = await treasuryInstance.planterFunds.call(treeId);
+    const pFund = await planterFundInstnce.planterFunds.call(treeId);
+    const rFund = await planterFundInstnce.referralFunds.call(treeId);
 
-    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+    const planterPaidBeforeVerify = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3124,6 +3197,12 @@ contract("TreeFactory", (accounts) => {
       Number(pFund),
       planterTotalFund,
       "planter total fund is not ok"
+    );
+
+    assert.equal(
+      Number(rFund),
+      referralTotalFund,
+      "referral total fund is not ok"
     );
 
     assert.equal(
@@ -3153,7 +3232,7 @@ contract("TreeFactory", (accounts) => {
 
     const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const planterPaidAfterVerify = await treasuryInstance.plantersPaid.call(
+    const planterPaidAfterVerify = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3199,7 +3278,7 @@ contract("TreeFactory", (accounts) => {
 
     const nowAfterVerify = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const planterPaidAfterVerify2 = await treasuryInstance.plantersPaid.call(
+    const planterPaidAfterVerify2 = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3245,6 +3324,11 @@ contract("TreeFactory", (accounts) => {
       10000
     );
 
+    const referralTotalFund = Math.divide(
+      Math.mul(Number(fundTreeAmount), fundsPercent.referralFund),
+      10000
+    );
+
     await Common.successPlant(
       treeFactoryInstance,
       arInstance,
@@ -3265,9 +3349,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3280,7 +3367,7 @@ contract("TreeFactory", (accounts) => {
       deployerAccount
     );
 
-    await treasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       fundsPercent.planterFund,
       fundsPercent.referralFund,
       fundsPercent.treeResearch,
@@ -3294,7 +3381,7 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
 
@@ -3304,16 +3391,47 @@ contract("TreeFactory", (accounts) => {
       from: userAccount5,
     });
 
-    await treasuryInstance.fundTree(treeId, {
-      from: userAccount5,
-      value: fundTreeAmount,
+    await daiInstance.setMint(daiFundInstance.address, fundTreeAmount);
+
+    await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
     });
+
+    await daiFundInstance.setPlanterFundContractAddress(
+      planterFundInstnce.address,
+      { from: deployerAccount }
+    );
+
+    await Common.addFundsRole(
+      arInstance,
+      daiFundInstance.address,
+      deployerAccount
+    );
+
+    await daiFundInstance.fundTree(
+      treeId,
+      fundTreeAmount,
+      fundsPercent.planterFund,
+      fundsPercent.referralFund,
+      fundsPercent.treeResearch,
+      fundsPercent.localDevelop,
+      fundsPercent.rescueFund,
+      fundsPercent.treejerDevelop,
+      fundsPercent.reserveFund1,
+      fundsPercent.reserveFund2,
+      {
+        from: userAccount5,
+      }
+    );
 
     /////////////////////////////////////////////////////////
 
-    const pFund = await treasuryInstance.planterFunds.call(treeId);
+    const pFund = await planterFundInstnce.planterFunds.call(treeId);
+    const rFund = await planterFundInstnce.referralFunds.call(treeId);
 
-    const planterPaidBeforeVerify = await treasuryInstance.plantersPaid.call(
+    const totalFunds1 = await planterFundInstnce.totalFunds.call();
+
+    const planterPaidBeforeVerify = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3322,7 +3440,29 @@ contract("TreeFactory", (accounts) => {
       planterTotalFund,
       "planter total fund is not ok"
     );
+    assert.equal(
+      Number(rFund),
+      referralTotalFund,
+      "planter total fund is not ok"
+    );
+    ////////////////// ------------ check total funds
 
+    assert.equal(
+      Number(totalFunds1.planterFund),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFunds1.referralFund),
+      referralTotalFund,
+      "referral total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFunds1.localDevelop),
+      0,
+      "local develop total fund is not ok"
+    );
+    /////////// ------------------ check planter paid
     assert.equal(
       Number(planterPaidBeforeVerify),
       0,
@@ -3342,13 +3482,33 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    const totalFunds2 = await planterFundInstnce.totalFunds.call();
+
+    ////////////////// ------------ check total funds
+
+    assert.equal(
+      Number(totalFunds2.planterFund),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFunds2.referralFund),
+      referralTotalFund,
+      "planter total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFunds2.localDevelop),
+      0,
+      "planter total fund is not ok"
+    );
+
     let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
 
     let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
 
     let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const planterPaidAfterVerify1 = await treasuryInstance.plantersPaid.call(
+    const planterPaidAfterVerify1 = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3398,7 +3558,7 @@ contract("TreeFactory", (accounts) => {
 
     const nowAfterVerify2 = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-    const planterPaidAfterVerify2 = await treasuryInstance.plantersPaid.call(
+    const planterPaidAfterVerify2 = await planterFundInstnce.plantersPaid.call(
       treeId
     );
 
@@ -3423,6 +3583,35 @@ contract("TreeFactory", (accounts) => {
       )
     );
 
+    let expectedReferralPaid = parseInt(
+      Math.divide(
+        Math.mul(referralTotalFund, Number(resultAfterGT2.treeStatus)),
+        25920
+      )
+    );
+
+    const totalFunds3 = await planterFundInstnce.totalFunds.call();
+
+    const planterBalance = await planterFundInstnce.balances.call(userAccount2);
+
+    assert.equal(
+      Number(planterBalance),
+      expectedPaid,
+      "planter balance is not ok"
+    );
+    //// because there is no refferal , referral share added to totalFunds.localDevelop
+    assert.equal(
+      Number(totalFunds3.localDevelop),
+      expectedReferralPaid,
+      "local develop total fund is not correct"
+    );
+
+    assert.equal(
+      Math.add(Number(totalFunds3.planterFund), expectedPaid),
+      planterTotalFund,
+      "local develop total fund is not correct"
+    );
+
     assert.equal(
       Number(planterPaidAfterVerify2),
       expectedPaid,
@@ -3432,6 +3621,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   it("Should verify update work seccussfully when verify false by Admin", async () => {
+    // no fund planter happen
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -3455,9 +3645,12 @@ contract("TreeFactory", (accounts) => {
       from: userAccount2,
     });
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3477,6 +3670,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   it("should verify by planter in organization where organiation is planter (planterType=2) and fail otherwise", async () => {
+    // no fund planter happen
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -3557,9 +3751,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3637,6 +3834,7 @@ contract("TreeFactory", (accounts) => {
     });
   });
   it("should verify by planter in organization where organiation is planter in organization (planterType=3)", async () => {
+    // no fund planter happen
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -3730,9 +3928,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3798,6 +3999,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   it("should verify by organization where organiation is planter in organization (planterType=3)", async () => {
+    // no fund planter happen
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -3895,9 +4097,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -3955,6 +4160,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   it("should verify by admin where planter is individual (planterType=1)", async () => {
+    // no fund planter happen
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -4052,9 +4258,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4151,9 +4360,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4164,7 +4376,10 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       treeFactoryInstance.address,
       userAccount7,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -4227,9 +4442,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4240,7 +4458,10 @@ contract("TreeFactory", (accounts) => {
       deployerAccount,
       treeFactoryInstance.address,
       userAccount7,
-      treasuryInstance,
+      financialModelInstance,
+      daiFundInstance,
+      daiInstance,
+      planterFundInstnce,
       treeId,
       fundsPercent,
       fundTreeAmount,
@@ -4313,9 +4534,12 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
+    await planterFundInstnce.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4440,8 +4664,6 @@ contract("TreeFactory", (accounts) => {
     await treeTokenInstance.safeMint(userAccount2, treeId, {
       from: deployerAccount,
     });
-
-    let balance = await web3.eth.getBalance(userAccount1);
 
     let resultBefore = await treeFactoryInstance.treeData.call(treeId);
 
@@ -5299,11 +5521,14 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await treeAuctionInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
-    await treasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -5323,7 +5548,7 @@ contract("TreeFactory", (accounts) => {
       deployerAccount
     );
 
-    await treasuryInstance.assignTreeFundDistributionModel(0, 100000, 0, {
+    await financialModelInstance.assignTreeFundDistributionModel(0, 100000, 0, {
       from: deployerAccount,
     });
 

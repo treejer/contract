@@ -272,7 +272,10 @@ Common.successFundTree = async (
   deployerAccount,
   treeFactoryAddress,
   auctionAddress,
-  treasuryInstance,
+  financialModelInstance,
+  daiFundInstance,
+  daiInstance,
+  planterFundInstnce,
   treeId,
   fundsPercent,
   fundAmount,
@@ -285,7 +288,7 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await treasuryInstance.addFundDistributionModel(
+  await financialModelInstance.addFundDistributionModel(
     fundsPercent.planterFund,
     fundsPercent.referralFund,
     fundsPercent.treeResearch,
@@ -298,7 +301,7 @@ Common.successFundTree = async (
       from: deployerAccount,
     }
   );
-  await treasuryInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
     from: deployerAccount,
   });
 
@@ -318,10 +321,38 @@ Common.successFundTree = async (
     from: auctionAddress,
   });
 
-  let tx = await treasuryInstance.fundTree(treeId, {
-    from: auctionAddress,
-    value: fundAmount,
+  await daiInstance.setMint(daiFundInstance.address, fundAmount);
+
+  await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+    from: deployerAccount,
   });
+
+  await daiFundInstance.setPlanterFundContractAddress(
+    planterFundInstnce.address,
+    { from: deployerAccount }
+  );
+
+  await Common.addFundsRole(
+    arInstance,
+    daiFundInstance.address,
+    deployerAccount
+  );
+
+  let tx = await daiFundInstance.fundTree(
+    treeId,
+    fundAmount,
+    fundsPercent.planterFund,
+    fundsPercent.referralFund,
+    fundsPercent.treeResearch,
+    fundsPercent.localDevelop,
+    fundsPercent.rescueFund,
+    fundsPercent.treejerDevelop,
+    fundsPercent.reserveFund1,
+    fundsPercent.reserveFund2,
+    {
+      from: auctionAddress,
+    }
+  );
 };
 
 Common.acceptPlanterByOrganization = async (

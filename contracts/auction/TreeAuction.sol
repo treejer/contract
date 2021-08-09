@@ -4,9 +4,11 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/ITreasury.sol";
+import "../treasury/IFinancialModel.sol";
+import "../treasury/IWethFunds.sol";
 
 /** @title Tree Auction */
 
@@ -21,7 +23,10 @@ contract TreeAuction is Initializable {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    ITreasury public treasury;
+    // ITreasury public treasury;
+    IWethFunds public wethFunds;
+    IFinancialModel public financialModel;
+    IERC20Upgradeable public wethToken;
 
     struct Auction {
         uint256 treeId;
@@ -97,10 +102,28 @@ contract TreeAuction is Initializable {
      * @param _address set to the address of treasury
      */
 
-    function setTreasuryAddress(address _address) external onlyAdmin {
-        ITreasury candidateContract = ITreasury(_address);
-        require(candidateContract.isTreasury());
-        treasury = candidateContract;
+    function setFinancialModelAddress(address _address) external onlyAdmin {
+        IFinancialModel candidateContract = IFinancialModel(_address);
+        require(candidateContract.isFinancialModel());
+        financialModel = candidateContract;
+    }
+
+    /**
+     * @dev admin set TreasuryAddress
+     * @param _address set to the address of treasury
+     */
+
+    function setWethFundsAddress(address _address) external onlyAdmin {
+        IWethFunds candidateContract = IWethFunds(_address);
+        require(candidateContract.isWethFunds());
+        wethFunds = candidateContract;
+    }
+
+    function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(
+            _wethTokenAddress
+        );
+        wethToken = candidateContract;
     }
 
     /**
@@ -122,7 +145,7 @@ contract TreeAuction is Initializable {
         uint256 _bidInterval
     ) external ifNotPaused onlyAdmin {
         require(
-            treasury.distributionModelExistance(_treeId),
+            financialModel.distributionModelExistance(_treeId),
             "equivalant fund Model not exists"
         );
 
@@ -147,58 +170,69 @@ contract TreeAuction is Initializable {
      * @param _auctionId auctionId that user bid for it.
      */
 
-    function bid(uint256 _auctionId) external payable ifNotPaused {
+    function bid(uint256 _auctionId, uint256 _amount) external ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
         require(
             block.timestamp <= _storageAuction.endDate,
             "auction already ended"
         );
+
         require(
             block.timestamp >= _storageAuction.startDate,
             "auction not started"
         );
+
         require(
-            msg.value >=
-                _storageAuction.highestBid + _storageAuction.bidInterval,
+            _amount >= _storageAuction.highestBid + _storageAuction.bidInterval,
             "invalid amount"
+        );
+
+        require(
+            wethToken.balanceOf(msg.sender) >= _amount,
+            "insufficient balance"
         );
 
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
-        _storageAuction.highestBid = msg.value;
+        _storageAuction.highestBid = _amount;
         _storageAuction.bidder = msg.sender;
+
+        wethToken.transferFrom(msg.sender, address(this), _amount);
 
         emit HighestBidIncreased(
             _auctionId,
             _storageAuction.treeId,
             msg.sender,
-            msg.value
+            _amount
         );
 
         _increaseAuctionEndTime(_auctionId);
-        _withdraw(oldBid, oldBidder, _auctionId);
+        _withdraw(oldBid, oldBidder);
     }
 
     /** @dev users can manually withdraw if its balance is more than 0.
      * @return true in case of successfull withdraw and false otherwise.
      */
 
-    function manualWithdraw() external ifNotPaused returns (bool) {
-        uint256 amount = pendingWithdraw[msg.sender];
+    //TODO: no need for this function
+    // function manualWithdraw() external ifNotPaused returns (bool) {
+    //     uint256 amount = pendingWithdraw[msg.sender];
 
-        require(amount > 0, "User balance is not enough");
+    //     require(amount > 0, "User balance is not enough");
 
-        pendingWithdraw[msg.sender] = 0;
+    //     pendingWithdraw[msg.sender] = 0;
 
-        if (!payable(msg.sender).send(amount)) {
-            pendingWithdraw[msg.sender] = amount;
-            return false;
-        }
+    //     wethToken.transfer(msg.sender, amount);
 
-        return true;
-    }
+    //     // if (!payable(msg.sender).send(amount)) {
+    //     //     pendingWithdraw[msg.sender] = amount;
+    //     //     return false;
+    //     // }
+
+    //     return true;
+    // }
 
     /** @dev everyone can call this method  including the winner of auction after
      * auction end time and if auction have bidder transfer owner of tree to bidder and fund tree.
@@ -214,7 +248,33 @@ contract TreeAuction is Initializable {
         if (auction.bidder != address(0)) {
             treeFactory.updateOwner(auction.treeId, auction.bidder);
 
-            treasury.fundTree{value: auction.highestBid}(auction.treeId);
+            wethToken.transfer(address(wethFunds), auction.highestBid);
+
+            (
+                uint16 planterFund,
+                uint16 referralFund,
+                uint16 treeResearch,
+                uint16 localDevelop,
+                uint16 rescueFund,
+                uint16 treejerDevelop,
+                uint16 reserveFund1,
+                uint16 reserveFund2
+            ) = financialModel.findTreeDistribution(auction.treeId);
+
+            wethFunds.fundTree(
+                auction.treeId,
+                auction.highestBid,
+                planterFund,
+                referralFund,
+                treeResearch,
+                localDevelop,
+                rescueFund,
+                treejerDevelop,
+                reserveFund1,
+                reserveFund2
+            );
+
+            // wethFunds.fundTree{value: auction.highestBid}(auction.treeId);
 
             emit AuctionSettled(
                 _auctionId,
@@ -248,24 +308,9 @@ contract TreeAuction is Initializable {
      * much as paid before using this function
      */
 
-    function _withdraw(
-        uint256 _oldBid,
-        address _oldBidder,
-        uint256 _auctionId
-    ) private {
+    function _withdraw(uint256 _oldBid, address _oldBidder) private {
         if (_oldBidder != address(0)) {
-            uint32 size;
-
-            assembly {
-                size := extcodesize(_oldBidder)
-            }
-
-            if (size > 0) {
-                pendingWithdraw[_oldBidder] += _oldBid;
-            } else if (!payable(_oldBidder).send(_oldBid)) {
-                pendingWithdraw[_oldBidder] += _oldBid;
-                emit AuctionWithdrawFaild(_auctionId, _oldBidder, _oldBid);
-            }
+            wethToken.transfer(_oldBidder, _oldBid);
         }
     }
 }

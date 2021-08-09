@@ -2659,7 +2659,7 @@ contract("DaiFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund1Address &&
@@ -2707,7 +2707,7 @@ contract("DaiFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund1Address &&
@@ -3105,7 +3105,7 @@ contract("DaiFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "OtherBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund2Address &&
@@ -3153,7 +3153,7 @@ contract("DaiFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "OtherBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund2Address &&

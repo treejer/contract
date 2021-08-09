@@ -15,7 +15,7 @@ contract FinancialModel is Initializable {
 
     CountersUpgradeable.Counter private fundDistributionCount;
 
-    uint256 constant MAX_UINT256 = 2**256 - 1;
+    uint256 constant MAX_UINT256 = type(uint256).max;
     bool public isFinancialModel;
     uint256 public maxAssignedIndex;
 

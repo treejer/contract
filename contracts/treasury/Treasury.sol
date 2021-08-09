@@ -15,7 +15,7 @@ contract Treasury is Initializable, RelayRecipient {
 
     CountersUpgradeable.Counter private fundDistributionCount;
 
-    uint256 constant MAX_UINT256 = 2**256 - 1;
+    uint256 constant MAX_UINT256 = type(uint256).max;
     bool public isTreasury;
     uint256 public maxAssignedIndex;
 
@@ -96,12 +96,12 @@ contract Treasury is Initializable, RelayRecipient {
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn1(
+    event ReserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn2(
+    event ReserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -369,7 +369,7 @@ contract Treasury is Initializable, RelayRecipient {
 
         FundDistribution memory dm = fundDistributions[
             assignModels[_findTreeDistributionModelId(_treeId)]
-            .distributionModelId
+                .distributionModelId
         ];
 
         planterFunds[_treeId] = (msg.value * dm.planterFund) / 10000;
@@ -619,7 +619,11 @@ contract Treasury is Initializable, RelayRecipient {
         totalFunds.reserveFund1 -= _amount;
 
         if (reserveFundAddress1.send(_amount)) {
-            emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+            emit ReserveBalanceWithdrawn1(
+                _amount,
+                reserveFundAddress1,
+                _reason
+            );
         } else {
             totalFunds.reserveFund1 += _amount;
         }
@@ -645,7 +649,11 @@ contract Treasury is Initializable, RelayRecipient {
         totalFunds.reserveFund2 -= _amount;
 
         if (reserveFundAddress2.send(_amount)) {
-            emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+            emit ReserveBalanceWithdrawn2(
+                _amount,
+                reserveFundAddress2,
+                _reason
+            );
         } else {
             totalFunds.reserveFund2 += _amount;
         }

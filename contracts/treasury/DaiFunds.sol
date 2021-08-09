@@ -19,12 +19,12 @@ contract DaiFunds is Initializable {
 
     TotalFunds public totalFunds;
 
-    address payable public treeResearchAddress;
-    address payable public localDevelopAddress;
-    address payable public rescueFundAddress;
-    address payable public treejerDevelopAddress;
-    address payable public reserveFundAddress1;
-    address payable public reserveFundAddress2;
+    address public treeResearchAddress;
+    address public localDevelopAddress;
+    address public rescueFundAddress;
+    address public treejerDevelopAddress;
+    address public reserveFundAddress1;
+    address public reserveFundAddress2;
 
     struct TotalFunds {
         uint256 treeResearch;
@@ -55,12 +55,12 @@ contract DaiFunds is Initializable {
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn1(
+    event ReserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event OtherBalanceWithdrawn2(
+    event ReserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -227,15 +227,13 @@ contract DaiFunds is Initializable {
 
         totalFunds.treeResearch -= _amount;
 
-        if (daiToken.transfer(treeResearchAddress, _amount)) {
-            emit TreeResearchBalanceWithdrawn(
-                _amount,
-                treeResearchAddress,
-                _reason
-            );
-        } else {
-            totalFunds.treeResearch += _amount;
-        }
+        daiToken.transfer(treeResearchAddress, _amount);
+
+        emit TreeResearchBalanceWithdrawn(
+            _amount,
+            treeResearchAddress,
+            _reason
+        );
     }
 
     /**
@@ -257,15 +255,13 @@ contract DaiFunds is Initializable {
 
         totalFunds.localDevelop -= _amount;
 
-        if (daiToken.transfer(localDevelopAddress, _amount)) {
-            emit LocalDevelopBalanceWithdrawn(
-                _amount,
-                localDevelopAddress,
-                _reason
-            );
-        } else {
-            totalFunds.localDevelop += _amount;
-        }
+        daiToken.transfer(localDevelopAddress, _amount);
+
+        emit LocalDevelopBalanceWithdrawn(
+            _amount,
+            localDevelopAddress,
+            _reason
+        );
     }
 
     /**
@@ -287,11 +283,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.rescueFund -= _amount;
 
-        if (daiToken.transfer(rescueFundAddress, _amount)) {
-            emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
-        } else {
-            totalFunds.rescueFund += _amount;
-        }
+        daiToken.transfer(rescueFundAddress, _amount);
+
+        emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
     }
 
     /**
@@ -313,15 +307,13 @@ contract DaiFunds is Initializable {
 
         totalFunds.treejerDevelop -= _amount;
 
-        if (daiToken.transfer(treejerDevelopAddress, _amount)) {
-            emit TreejerDevelopBalanceWithdrawn(
-                _amount,
-                treejerDevelopAddress,
-                _reason
-            );
-        } else {
-            totalFunds.treejerDevelop += _amount;
-        }
+        daiToken.transfer(treejerDevelopAddress, _amount);
+
+        emit TreejerDevelopBalanceWithdrawn(
+            _amount,
+            treejerDevelopAddress,
+            _reason
+        );
     }
 
     /**
@@ -343,11 +335,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.reserveFund1 -= _amount;
 
-        if (daiToken.transfer(reserveFundAddress1, _amount)) {
-            emit OtherBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
-        } else {
-            totalFunds.reserveFund1 += _amount;
-        }
+        daiToken.transfer(reserveFundAddress1, _amount);
+
+        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
 
     /**
@@ -369,10 +359,8 @@ contract DaiFunds is Initializable {
 
         totalFunds.reserveFund2 -= _amount;
 
-        if (daiToken.transfer(reserveFundAddress2, _amount)) {
-            emit OtherBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
-        } else {
-            totalFunds.reserveFund2 += _amount;
-        }
+        daiToken.transfer(reserveFundAddress2, _amount);
+
+        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 }

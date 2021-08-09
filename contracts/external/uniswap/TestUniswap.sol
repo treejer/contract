@@ -18,7 +18,7 @@ contract TestUniswap {
         address _uniswapRouterAddress,
         address _daiAddress,
         address _wethAddress
-    ) public {
+    ) {
         uniswapRouter = IUniswapV2Router02(_uniswapRouterAddress);
 
         daiToken = IERC20(_daiAddress);
@@ -32,19 +32,18 @@ contract TestUniswap {
         // daiToken.transferFrom(msg.sender, address(this), 10000 * (10**18));
         // wethToken.transferFrom(msg.sender, address(this), 5 * (10**18));
 
-        daiToken.approve(address(uniswapRouter), 10000 * (10**18));
-        wethToken.approve(address(uniswapRouter), 5 * (10**18));
+        daiToken.approve(address(uniswapRouter), 250000000 * (10**18));
+        wethToken.approve(address(uniswapRouter), 125000 * (10**18));
 
-        (uint256 amountA, uint256 amountB, uint256 liquidity) = uniswapRouter
-            .addLiquidity(
-                daiAddress,
-                wethAddress,
-                10000 * (10**18),
-                5 * (10**18),
-                1,
-                1,
-                address(this),
-                block.timestamp + 15
-            );
+        uniswapRouter.addLiquidity(
+            daiAddress,
+            wethAddress,
+            250000000 * (10**18),
+            125000 * (10**18),
+            1,
+            1,
+            address(this),
+            block.timestamp + 15
+        );
     }
 }

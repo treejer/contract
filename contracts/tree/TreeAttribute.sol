@@ -35,8 +35,13 @@ contract TreeAttribute is Initializable {
     event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);
     event TreeAttributesNotGenerated(uint256 treeId);
+
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
+        _;
+    }
+    modifier onlyAdminOrCommunityGifts() {
+        accessRestriction.ifAdminOrCommunityGifts(msg.sender);
         _;
     }
     modifier ifNotPaused() {
@@ -59,7 +64,10 @@ contract TreeAttribute is Initializable {
         treeFactory = candidateContract;
     }
 
-    function reserveTreeAttributes(uint32 generatedCode) external onlyAdmin {
+    function reserveTreeAttributes(uint32 generatedCode)
+        external
+        onlyAdminOrCommunityGifts
+    {
         require(
             generatedAttributes[generatedCode] == 0,
             "the tree attributes are taken"
@@ -68,9 +76,22 @@ contract TreeAttribute is Initializable {
         reservedAttributes[generatedCode] = 1;
     }
 
+    function freeReserveTreeAttributes(uint32 generatedCode)
+        external
+        onlyAdminOrCommunityGifts
+    {
+        require(
+            reservedAttributes[generatedCode] == 1,
+            "the tree attributes not reserved"
+        );
+
+        generatedAttributes[generatedCode] = 0;
+        reservedAttributes[generatedCode] = 0;
+    }
+
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external
-        onlyAdmin
+        onlyAdminOrCommunityGifts
     {
         require(
             generatedAttributes[generatedCode] == 0 ||

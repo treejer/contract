@@ -275,6 +275,7 @@ contract Planter is Initializable, RelayRecipient {
         if (tempPlanter.status == 2) {
             tempPlanter.status = 1;
         }
+        emit PlanterUpdated(_planterAddress);
     }
 
     /** @dev return if a planter can plant a tree and increase planter plantedCount 1 time.

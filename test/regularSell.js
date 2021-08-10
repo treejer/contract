@@ -339,6 +339,12 @@ contract("regularSell", (accounts) => {
       }
     );
 
+    for (let i = 10001; i <= 10007; i++) {
+      truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
+        return ev.buyer == funder && ev.treeId == i;
+      });
+    }
+
     truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
       return (
         Number(ev.count) == 7 &&

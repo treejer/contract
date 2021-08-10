@@ -52,7 +52,7 @@ contract("Planter", (accounts) => {
   });
 
   afterEach(async () => {});
-  //////////////////************************************ deploy successfully ****************************************//
+  //////////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
     const address = planterInstance.address;
@@ -765,7 +765,7 @@ contract("Planter", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.ORGANIZATION_NOT_VALID);
   });
 
-  ////// *********************************************  accept planter from organization  **************************************************
+  ////// ---------------------------------------------  accept planter from organization  --------------------------------------------------
   it("should accept planter from organization", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
@@ -964,7 +964,7 @@ contract("Planter", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
   });
 
-  ///////////// ********************************************** update capacity *************************************
+  ///////////// ---------------------------------------------- update capacity -------------------------------------
 
   it("should check data after update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -987,8 +987,12 @@ contract("Planter", (accounts) => {
       "planter capacity is incorrect"
     );
 
-    await planterInstance.updateCapacity(userAccount1, 2, {
+    const eventTx1 = await planterInstance.updateCapacity(userAccount1, 2, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(eventTx1, "PlanterUpdated", (ev) => {
+      return ev.planterId == userAccount1;
     });
 
     const planterAfterUpdate = await planterInstance.planters.call(
@@ -1029,8 +1033,12 @@ contract("Planter", (accounts) => {
       "planter after plant 2 status is not ok"
     );
 
-    await planterInstance.updateCapacity(userAccount1, 5, {
+    const eventTx2 = await planterInstance.updateCapacity(userAccount1, 5, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(eventTx2, "PlanterUpdated", (ev) => {
+      return ev.planterId == userAccount1;
     });
 
     const planterAfterFinalUpdate = await planterInstance.planters.call(
@@ -1049,6 +1057,7 @@ contract("Planter", (accounts) => {
       "planter status after final update capacity is not ok"
     );
   });
+
   it("should fail update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
@@ -1092,7 +1101,7 @@ contract("Planter", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_CAPACITY);
   });
 
-  ////////// ********************************************** give planting permission *************************************
+  ////////// ---------------------------------------------- give planting permission -------------------------------------
 
   it("should give planting permision successfully", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -1426,7 +1435,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
   });
-  /////// ********************************************** update organization planter payment  *************************************
+  /////// ---------------------------------------------- update organization planter payment  -------------------------------------
 
   it("should update organization planter payment succussfully done", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -1738,7 +1747,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PAYMENT_PORTION);
   });
-  //////////////***********************************************  get planter portion  ********************************************
+  //////////////-----------------------------------------------  get planter portion  --------------------------------------------
   it("should get correct data from planter payment portion", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount); //orgnaizer planter
@@ -1854,7 +1863,7 @@ contract("Planter", (accounts) => {
       }
     );
   });
-  ///////////////////////***********************************************  reduce plant count  ********************************************
+  ///////////////////////-----------------------------------------------  reduce plant count  --------------------------------------------
   it("should reduce planted count and check data to be ok", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 

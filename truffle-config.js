@@ -88,7 +88,7 @@ module.exports = {
       network_id: 4,
       gas: 6700000,
       gasPrice: 10000000000,
-      timeoutBlocks: 300,
+      timeoutBlocks: 200,
       skipDryRun: true,
     },
     goerli: {

@@ -31,6 +31,7 @@ contract IncrementalSell is Initializable {
     mapping(address => uint256) public lastBuy;
 
     event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
+    event IncrementalSellUpdated();
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -117,6 +118,8 @@ contract IncrementalSell is Initializable {
         incrPrice.initialPrice = initialPrice;
         incrPrice.increaseStep = steps;
         incrPrice.increaseRatio = incrementRate;
+
+        emit IncrementalSellUpdated();
     }
 
     function updateIncrementalEnd(uint256 treeCount) external onlyAdmin {
@@ -133,6 +136,8 @@ contract IncrementalSell is Initializable {
             "trees are not available for sell"
         );
         incrPrice.endTree = incrPrice.endTree + treeCount;
+
+        emit IncrementalSellUpdated();
     }
 
     function buyTree(uint256 treeId) external payable ifNotPaused {

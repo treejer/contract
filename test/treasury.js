@@ -208,7 +208,7 @@ contract("Treasury", (accounts) => {
 
   //--------------------------------addFundDistributionModel test-----------------------------------------------
   it("addFundDistributionModel should be success", async () => {
-    await TreasuryInstance.addFundDistributionModel(
+    const eventTx1 = await TreasuryInstance.addFundDistributionModel(
       4000,
       1200,
       1200,
@@ -221,6 +221,10 @@ contract("Treasury", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 0;
+    });
 
     let result = await TreasuryInstance.fundDistributions.call(0);
 
@@ -982,7 +986,6 @@ contract("Treasury", (accounts) => {
       "reserveFund2 funds invalid"
     );
   });
-
   it("2.fundTree should be success", async () => {
     // let treeId1 = 0;
     // let treeId2 = 20;

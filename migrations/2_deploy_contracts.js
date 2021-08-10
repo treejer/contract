@@ -1,6 +1,5 @@
 require("dotenv").config();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const Units = require("ethereumjs-units");
 
 var AccessRestriction = artifacts.require("AccessRestriction.sol");
 var Tree = artifacts.require("Tree.sol");

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../tree/ITreeAttribute.sol";
-import "../treasury/ITreasury.sol";
+import "../treasury/IPlanterFund.sol";
 
 /** @title CommunityGifts */
 
@@ -19,7 +19,7 @@ contract CommunityGifts is Initializable {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    ITreasury public treasury;
+    IPlanterFund public planterFundContract;
     ITreeAttribute public treeAttribute;
 
     struct CommunityGift {
@@ -92,14 +92,14 @@ contract CommunityGifts is Initializable {
     }
 
     /**
-     * @dev admin set TreasuryAddress
-     * @param _address set to the address of treasury
+     * @dev admin set PlanterFundAddress
+     * @param _address set to the address of PlanterFund
      */
 
-    function setTreasuryAddress(address _address) external onlyAdmin {
-        ITreasury candidateContract = ITreasury(_address);
-        require(candidateContract.isTreasury());
-        treasury = candidateContract;
+    function setPlanterFundAddress(address _address) external onlyAdmin {
+        IPlanterFund candidateContract = IPlanterFund(_address);
+        require(candidateContract.isPlanterFund());
+        planterFundContract = candidateContract;
     }
 
     function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
@@ -144,8 +144,11 @@ contract CommunityGifts is Initializable {
         communityGift.claimed = true;
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
+
         treeFactory.updateOwnerCommunityGifts(treeId, msg.sender);
+
         //call planter contract
+        planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
 
         emit TreeClaimed(treeId);
     }
@@ -172,8 +175,11 @@ contract CommunityGifts is Initializable {
         claimedCount += 1;
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
+
         treeFactory.updateOwnerCommunityGifts(treeId, _giftee);
+
         //call planter contract
+        planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
 
         emit TreeTransfered(treeId);
     }

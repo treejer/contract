@@ -1,11 +1,11 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
-const Treasury = artifacts.require("Treasury.sol");
+
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
 const WethFunds = artifacts.require("WethFunds.sol");
+const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var Dai = artifacts.require("Dai.sol");
@@ -35,10 +35,10 @@ contract("TreeAuction", (accounts) => {
   let startTime;
   let endTime;
   let planterInstance;
+  let planterFundsInstnce;
   let financialModelInstance;
   let wethFundsInstance;
   let uniswapRouterInstance;
-  let planterFundsInstnce;
   let factoryInstance;
   let wethInstance;
   let daiInstance;

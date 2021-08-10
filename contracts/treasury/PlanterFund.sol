@@ -49,8 +49,8 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
-    modifier onlyFunds() {
-        accessRestriction.ifFunds(_msgSender());
+    modifier onlyFundsOrCommunityGifts() {
+        accessRestriction.ifFundsOrCommunityGifts(_msgSender());
         _;
     }
 
@@ -93,7 +93,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         uint256 _planterFund,
         uint256 _referralFund
-    ) external onlyFunds {
+    ) external onlyFundsOrCommunityGifts {
         planterFunds[_treeId] = _planterFund;
         referralFunds[_treeId] = _referralFund;
 

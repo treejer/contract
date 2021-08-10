@@ -3055,6 +3055,24 @@ contract("TreeFactory", (accounts) => {
       "planter paid before verify update is not ok"
     );
 
+    const totalFundsBefore = await planterFundInstnce.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsBefore.planterFund),
+      planterTotalFund,
+      "planter total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFundsBefore.referralFund),
+      referralTotalFund,
+      "referral total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFundsBefore.localDevelop),
+      0,
+      "local develop total fund is not ok"
+    );
+
     await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
@@ -3085,11 +3103,39 @@ contract("TreeFactory", (accounts) => {
       )
     );
 
+    const expectedReferralPaid = parseInt(
+      Math.divide(
+        Math.mul(referralTotalFund, Number(resultAfterGT.treeStatus)),
+        25920
+      )
+    );
+
     assert.equal(
       Number(planterPaidAfterVerify),
       expectedPaid,
 
       "planter paid after verify is not ok"
+    );
+
+    const totalFundsAfterVerify = await planterFundInstnce.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsAfterVerify.planterFund),
+      Math.subtract(Number(totalFundsBefore.planterFund), expectedPaid),
+      "planter total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFundsAfterVerify.referralFund),
+      Math.subtract(
+        Number(totalFundsBefore.referralFund),
+        expectedReferralPaid
+      ),
+      "referral total fund is not ok"
+    );
+    assert.equal(
+      Number(totalFundsAfterVerify.localDevelop),
+      expectedReferralPaid,
+      "local develop total fund is not ok"
     );
 
     assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
@@ -3599,6 +3645,7 @@ contract("TreeFactory", (accounts) => {
       expectedPaid,
       "planter balance is not ok"
     );
+
     //// because there is no refferal , referral share added to totalFunds.localDevelop
     assert.equal(
       Number(totalFunds3.localDevelop),
@@ -3609,7 +3656,12 @@ contract("TreeFactory", (accounts) => {
     assert.equal(
       Math.add(Number(totalFunds3.planterFund), expectedPaid),
       planterTotalFund,
-      "local develop total fund is not correct"
+      "planter total fund is not correct"
+    );
+    assert.equal(
+      Math.add(Number(totalFunds3.referralFund), expectedReferralPaid),
+      referralTotalFund,
+      "referral total fund is not correct"
     );
 
     assert.equal(

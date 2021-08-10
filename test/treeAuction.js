@@ -1399,8 +1399,6 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("end auction when there is no bidder", async () => {
-    //TODO: check tree provide status in this test
-
     const treeId = 2;
     const bidAmount = web3.utils.toWei("1.15");
     const bidderInitialBalance = web3.utils.toWei("2");
@@ -1480,6 +1478,10 @@ contract("TreeAuction", (accounts) => {
     let failEnd = await treeAuctionInstance.endAuction(0, {
       from: deployerAccount,
     });
+
+    const treeData = await treeFactoryInstance.treeData.call(treeId);
+
+    assert.equal(Number(treeData.provideStatus), 0, "provide status is not ok");
 
     truffleAssert.eventEmitted(failEnd, "AuctionEnded", (ev) => {
       return Number(ev.auctionId) == 0 && Number(ev.treeId) == treeId;
@@ -1616,8 +1618,6 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("Check contract balance when user call bid function and Balance should be ok", async () => {
-    //TODO:add user balance check here
-
     let auctionId = 0;
     const treeId = 0;
 
@@ -1701,13 +1701,31 @@ contract("TreeAuction", (accounts) => {
       { from: deployerAccount }
     );
 
-    ////////////////// charge bidder account
+    //////////////////  --------------charge bidder account
 
     await wethInstance.setMint(bidderAccount1, bidderInitialBalance1);
     await wethInstance.setMint(bidderAccount2, bidderInitialBalance2);
     await wethInstance.setMint(bidderAccount3, bidderInitialBalance3);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////// ----------------- check user balnce
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Number(bidderInitialBalance1),
+      "bidder balance 1 is not correct"
+    );
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount2)),
+      Number(bidderInitialBalance2),
+      "bidder balance 2 is not correct"
+    );
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount3)),
+      Number(bidderInitialBalance3),
+      "bidder balance 3 is not correct"
+    );
 
     //userAccount1 take part in auction
     await treeAuctionInstance.bid(auctionId, bidAmount1, {
@@ -1721,10 +1739,33 @@ contract("TreeAuction", (accounts) => {
       "1.Contract balance is not true"
     );
 
+    //check bidderAccount1 balance
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Math.subtract(Number(bidderInitialBalance1), Number(bidAmount1)),
+      "bidder balance 1 is not correct"
+    );
+
     //userAccount2 take part in auction
     await treeAuctionInstance.bid(auctionId, bidAmount2, {
       from: bidderAccount2,
     });
+
+    //check bidderAccount1 balance to refund
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Number(bidderInitialBalance1),
+      "bidder balance 1 is not correct"
+    );
+
+    //check bidderAccount2 balance
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount2)),
+      Math.subtract(Number(bidderInitialBalance2), Number(bidAmount2)),
+      "bidder balance 2 is not correct"
+    );
 
     //check contract balance
     assert.equal(
@@ -1737,6 +1778,22 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.bid(auctionId, bidAmount3, {
       from: bidderAccount3,
     });
+
+    //check bidderAccount2 balance to refund
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount2)),
+      Number(bidderInitialBalance2),
+      "bidder balance 2 is not correct"
+    );
+
+    //check bidderAccount3 balance
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount3)),
+      Math.subtract(Number(bidderInitialBalance3), Number(bidAmount3)),
+      "bidder balance 3 is not correct"
+    );
 
     //check contract balance
     assert.equal(
@@ -2856,7 +2913,6 @@ contract("TreeAuction", (accounts) => {
 
   // check hold auction
   it("complex test 2", async () => {
-    //TODO: check bidder balance after bid
     const treeId = 0;
     const auctionId = 0;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -2999,7 +3055,25 @@ contract("TreeAuction", (accounts) => {
 
     await wethInstance.setMint(bidderAccount3, bidderInitialBalance3);
 
-    /////////////////////////////////////////////////////////////////////////////////
+    /////////////////// ---------------- check bidders balance
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Number(bidderInitialBalance1),
+      "bidder amount 1 is not ok"
+    );
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount2)),
+      Number(bidderInitialBalance2),
+      "bidder amount 2 is not ok"
+    );
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount3)),
+      Number(bidderInitialBalance3),
+      "bidder amount 3 is not ok"
+    );
 
     ////////////// --------------- check tree data
 
@@ -3031,9 +3105,19 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
+    ///////////////////// --------------- bid for auction
+
     await treeAuctionInstance.bid(auctionId, bidAmount1_1, {
       from: bidderAccount1,
     });
+
+    ////////////////// check bidderAccount1 balance after bid
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Math.subtract(Number(bidderInitialBalance1), Number(bidAmount1_1)),
+      "bidder balance 1 is not ok"
+    );
 
     await Common.travelTime(TimeEnumes.days, 1);
 
@@ -3047,6 +3131,7 @@ contract("TreeAuction", (accounts) => {
       bidderAccount1
     );
 
+    /////////////------------- fail to bid
     await treeAuctionInstance
       .bid(auctionId, invalidBidAmount2, {
         from: bidderAccount2,
@@ -3059,6 +3144,8 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
+    /////////////////// ------------ bid for auction
+
     await treeAuctionInstance.bid(auctionId, bidAmount2_1, {
       from: bidderAccount2,
     });
@@ -3066,11 +3153,14 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount1BalanceAfterAutomaticWithdraw1 =
       await wethInstance.balanceOf(bidderAccount1);
 
+    //////////// ---------------- check contract balance
     assert.equal(
       Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
       Number(bidAmount2_1),
       "2.Contract balance is not true"
     );
+
+    ////////////// ----------- check bidder account1 balance refunded
 
     assert.equal(
       Number(bidderAccount1BalanceAfterAutomaticWithdraw1),
@@ -3081,6 +3171,14 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount2AfterBid1 = await wethInstance.balanceOf(
       bidderAccount2
     );
+    ////////////////// check bidderAccount2 balance after bid
+
+    assert.equal(
+      Number(bidderAccount2AfterBid1),
+      Math.subtract(Number(bidderInitialBalance2), Number(bidAmount2_1)),
+      "bidder balance 1 is not ok"
+    );
+    ///////////////// -------------- bid for auction
 
     await treeAuctionInstance.bid(auctionId, bidAmount3_1, {
       from: bidderAccount3,
@@ -3089,23 +3187,32 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount2BalanceAfterAutomaticWithdraw1 =
       await wethInstance.balanceOf(bidderAccount2);
 
+    ////////////// ----------- check bidder account 2 balance refunded
     assert.equal(
       Number(bidderAccount2BalanceAfterAutomaticWithdraw1),
       Math.add(Number(bidderAccount2AfterBid1), Number(bidAmount2_1)),
       "2.automatic withdraw not true work"
     );
-
+    ////////// ----------- check contract balance
     assert.equal(
       Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
       Number(bidAmount3_1),
       "3.Contract balance is not true"
     );
 
-    await Common.travelTime(TimeEnumes.days, 2);
-
     const bidderAccount3AfterBid1 = await wethInstance.balanceOf(
       bidderAccount3
     );
+
+    ////////////////// check bidderAccount3 balance after bid
+
+    assert.equal(
+      Number(bidderAccount3AfterBid1),
+      Math.subtract(Number(bidderInitialBalance3), Number(bidAmount3_1)),
+      "bidder balance 3 is not ok"
+    );
+
+    await Common.travelTime(TimeEnumes.days, 2);
 
     /////////////--------------------------- give approve from bidderAccount1 for seccend bid
     await wethInstance.approve(treeAuctionInstance.address, bidAmount1_2, {
@@ -3119,12 +3226,22 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount3BalanceAfterAutomaticWithdraw1 =
       await wethInstance.balanceOf(bidderAccount3);
 
+    /////////// ------------- check bidder account 3 balance refunded
     assert.equal(
       Number(bidderAccount3BalanceAfterAutomaticWithdraw1),
       Math.add(Number(bidderAccount3AfterBid1), Number(bidAmount3_1)),
       "3.automatic withdraw not true work"
     );
 
+    ////////////////// check bidderAccount1 balance after bid
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount1)),
+      Math.subtract(Number(bidderInitialBalance1), Number(bidAmount1_2)),
+      "bidder balance 1 is not ok"
+    );
+
+    ///////////////----------- check contract balance after bid
     assert.equal(
       Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
       Number(bidAmount1_2),
@@ -3139,6 +3256,16 @@ contract("TreeAuction", (accounts) => {
     await treeFactoryInstance.verifyUpdate(treeId, true, {
       from: deployerAccount,
     });
+
+    const treeDataAfterVerifyUpdate1 = await treeFactoryInstance.treeData.call(
+      treeId
+    );
+
+    assert.equal(
+      Number(treeDataAfterVerifyUpdate1.treeStatus),
+      72,
+      "tree status is not ok"
+    ); //its 72 because 3 days and 5 minutes left after tree planting that is equal to 72 hours
 
     const planterBalance = await planterFundsInstnce.balances.call(
       userAccount2
@@ -3181,12 +3308,22 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount1BalanceAfterAutomaticWithdraw2 =
       await wethInstance.balanceOf(bidderAccount1);
 
+    //////////// ---------------- check bidder acccount 1 balance refunded
     assert.equal(
       Number(bidderAccount1BalanceAfterAutomaticWithdraw2),
       Math.add(Number(bidderAccount1AfterBid2), Number(bidAmount1_2)),
       "4.automatic withdraw not true work"
     );
 
+    ////////////////// -------------------  check bidderAccount2 balance after bid
+
+    assert.equal(
+      Number(await wethInstance.balanceOf(bidderAccount2)),
+      Math.subtract(Number(bidderInitialBalance2), Number(bidAmount2_2)),
+      "bidder balance 2 is not ok"
+    );
+
+    //////////////////////// -------------------- check contract balance
     assert.equal(
       Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
       Number(bidAmount2_2),

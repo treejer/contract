@@ -193,13 +193,13 @@ contract TreeAuction is Initializable {
             "insufficient balance"
         );
 
+        wethToken.transferFrom(msg.sender, address(this), _amount);
+
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
         _storageAuction.highestBid = _amount;
         _storageAuction.bidder = msg.sender;
-
-        wethToken.transferFrom(msg.sender, address(this), _amount);
 
         emit HighestBidIncreased(
             _auctionId,

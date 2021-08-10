@@ -76,8 +76,18 @@ contract RegularSell is Initializable {
      */
     function setDaiTokenAddress(address _address) external onlyAdmin {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
-
         daiToken = candidateContract;
+    }
+
+    /**
+     * @dev admin set FinancialModelAddress
+     * @param _address set to the address of financialModel
+     */
+
+    function setFinancialModelAddress(address _address) external onlyAdmin {
+        IFinancialModel candidateContract = IFinancialModel(_address);
+        require(candidateContract.isFinancialModel());
+        financialModel = candidateContract;
     }
 
     /** @dev admin set the price of trees that are sold regular
@@ -96,14 +106,16 @@ contract RegularSell is Initializable {
         require(_count > 0, "invalid count");
 
         require(
-            daiToken.balanceOf(msg.sender) >= treePrice * _count &&
-                _amount >= treePrice * _count,
+            _amount >= treePrice * _count &&
+                daiToken.balanceOf(msg.sender) >= _amount,
             "invalid amount"
         );
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
         uint256 transferAmount = _amount / _count;
+
+        daiToken.transferFrom(msg.sender, address(daiFunds), _amount);
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
@@ -150,9 +162,11 @@ contract RegularSell is Initializable {
         require(_treeId > lastSoldRegularTree, "invalid tree");
 
         require(
-            daiToken.balanceOf(msg.sender) >= treePrice && _amount >= treePrice,
+            _amount >= treePrice && daiToken.balanceOf(msg.sender) >= _amount,
             "invalid amount"
         );
+
+        daiToken.transferFrom(msg.sender, address(daiFunds), _amount);
 
         treeFactory.requestRegularTree(_treeId, msg.sender);
 

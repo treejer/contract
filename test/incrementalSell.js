@@ -514,7 +514,7 @@ contract("IncrementalSell", (accounts) => {
     await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 1, {
       from: deployerAccount,
     });
-    await iSellInstance.addTreeSells(
+    let eventTx = await iSellInstance.addTreeSells(
       105,
       web3.utils.toWei("0.01"),
       250,
@@ -524,6 +524,11 @@ contract("IncrementalSell", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx, "IncrementalSellUpdated", (ev) => {
+      return true;
+    });
+
     await iSellInstance
       .buyTree(102, { value: web3.utils.toWei("0.01"), from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
@@ -678,8 +683,12 @@ contract("IncrementalSell", (accounts) => {
       "increaseRatio not true"
     );
 
-    await iSellInstance.updateIncrementalEnd(100, {
+    const eventTx = await iSellInstance.updateIncrementalEnd(100, {
       from: deployerAccount,
+    });
+
+    truffleAssert.eventEmitted(eventTx, "IncrementalSellUpdated", (ev) => {
+      return true;
     });
 
     let incrementalPrice1 = await iSellInstance.incrementalPrice();

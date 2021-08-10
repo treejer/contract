@@ -22,6 +22,7 @@ contract RegularSell is Initializable {
 
     event TreePriceUpdated(uint256 price);
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
+    event RegularMint(address buyer, uint256 treeId);
     event RegularTreeRequstedById(
         uint256 treeId,
         address buyer,

@@ -74,6 +74,14 @@ interface IAccessRestriction {
 
     function isFunds(address _address) external view returns (bool);
 
+    function ifCommunityGifts(address _address) external view;
+
+    function isCommunityGifts(address _address) external view returns (bool);
+
+    function ifAdminOrCommunityGifts(address _address) external view;
+
+    function ifAuctionOrCommunityGifts(address _address) external view;
+
     function paused() external view returns (bool);
 
     function ifNotPaused() external view;

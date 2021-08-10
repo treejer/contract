@@ -14,6 +14,7 @@ const INCREMENTAL_SELL_ROLE = web3.utils.soliditySha3("INCREMENTAL_SELL_ROLE");
 const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
 const FUNDS_ROLE = web3.utils.soliditySha3("FUNDS_ROLE");
+const COMMUNITY_GIFTS = web3.utils.soliditySha3("COMMUNITY_GIFTS");
 
 const Math = require("./math");
 
@@ -24,6 +25,10 @@ Common.sleep = (ms) => {
 Common.addPlanter = async (instance, account, adminAccount) => {
   await instance.grantRole(PLANTER_ROLE, account, { from: adminAccount });
 };
+Common.getNewAccountPublicKey = async () => {
+  const account = web3.eth.accounts.create();
+  return account.address;
+};
 
 Common.addFundsRole = async (instance, account, adminAccount) => {
   await instance.grantRole(FUNDS_ROLE, account, { from: adminAccount });
@@ -31,6 +36,10 @@ Common.addFundsRole = async (instance, account, adminAccount) => {
 
 Common.addAdmin = async (instance, account, adminAccount) => {
   await instance.grantRole(DEFAULT_ADMIN_ROLE, account, { from: adminAccount });
+};
+
+Common.addCommunityGiftRole = async (instance, account, adminAccount) => {
+  await instance.grantRole(COMMUNITY_GIFTS, account, { from: adminAccount });
 };
 
 Common.addAuctionRole = async (instance, address, adminAccount) => {

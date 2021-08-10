@@ -488,7 +488,7 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await treeAuctionInstance.createAuction(
+    const eventTx = await treeAuctionInstance.createAuction(
       treeId,
       Number(startTime),
       Number(endTime),
@@ -504,6 +504,10 @@ contract("TreeAuction", (accounts) => {
     assert.equal(Number(result.bidInterval), bidInterval);
     assert.equal(Number(result.startDate), Number(startTime));
     assert.equal(Number(result.endDate), Number(endTime));
+
+    truffleAssert.eventEmitted(eventTx, "AuctionCreated", (ev) => {
+      return ev.auctionId == 0;
+    });
   });
 
   it("bid auction and check highest bid set change correctly and check bidder balance and contract balance", async () => {

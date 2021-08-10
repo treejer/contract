@@ -58,6 +58,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     mapping(uint256 => UpdateTree) public updateTrees; //tree id to UpdateTree struct
     mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
 
+    event TreeAdded(uint256 treeId);
+    event TreeAssigned(uint256 treeId);
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);
@@ -83,6 +85,14 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyAuctionOrCommunityGifts() {
+        accessRestriction.ifAuctionOrCommunityGifts(_msgSender());
+        _;
+    }
+    modifier onlyCommunityGifts() {
+        accessRestriction.ifCommunityGifts(_msgSender());
+        _;
+    }
     modifier onlyIncremental() {
         accessRestriction.ifIncrementalSell(_msgSender());
         _;
@@ -152,6 +162,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         tree.treeStatus = 2;
         tree.treeSpecs = _treeDescription;
+
+        emit TreeAdded(_treeId);
     }
 
     function assignTreeToPlanter(uint256 _treeId, address _planterId)
@@ -168,6 +180,8 @@ contract TreeFactory is Initializable, RelayRecipient {
         );
 
         tempTree.planterId = _planterId;
+
+        emit TreeAssigned(_treeId);
     }
 
     function plantTree(
@@ -359,6 +373,15 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken.safeMint(_ownerId, _treeId);
     }
 
+    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
+        external
+        onlyCommunityGifts
+    {
+        treeData[_treeId].provideStatus = 0;
+        treeData[_treeId].mintStatus = 3;
+        treeToken.safeMint(_ownerId, _treeId);
+    }
+
     function updateAvailability(uint256 _treeId) external onlyAuction {
         treeData[_treeId].provideStatus = 0;
     }
@@ -373,6 +396,23 @@ contract TreeFactory is Initializable, RelayRecipient {
                 treeData[i].provideStatus = 0;
             }
         }
+    }
+
+    //set communityGifts sell for trees
+    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        onlyCommunityGifts
+        returns (bool)
+    {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
+            if (treeData[i].provideStatus > 0) {
+                return false;
+            }
+        }
+        for (uint256 j = _startTreeId; j < _endTreeId; j++) {
+            treeData[j].provideStatus = 5;
+        }
+        return true;
     }
 
     //set incremental sell for trees

@@ -139,6 +139,15 @@ interface ITreeFactory {
      */
     function requestRegularTree(uint256 _treeId, address _owner) external;
 
+    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        returns (bool);
+
+    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
+        external;
+
+    event TreeAdded(uint256 treeId);
+    event TreeAssigned(uint256 treeId);
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);

@@ -143,26 +143,33 @@ contract IncrementalSell is Initializable {
             "tree is not in incremental sell"
         );
 
-        address buyer = msg.sender;
-        uint256 amount = msg.value;
         //calc tree price based on treeId
         uint256 steps = (treeId - incPrice.startTree) / incPrice.increaseStep;
         uint256 treePrice = incPrice.initialPrice +
             (steps * incPrice.initialPrice * incPrice.increaseRatio) /
             10000;
 
+        uint256 amount;
         //checking price paid is enough for buying the treeId checking discounts
-        if (lastBuy[buyer] > block.timestamp - 700 seconds) {
-            require(amount >= (treePrice * 90) / 100, "low price paid");
-            lastBuy[buyer] = 0;
+        if (lastBuy[msg.sender] > block.timestamp - 700 seconds) {
+            require(
+                wethToken.balanceOf(msg.sender) >= (treePrice * 90) / 100,
+                "low price paid"
+            );
+            amount = (treePrice * 90) / 100;
+            lastBuy[msg.sender] = 0;
         } else {
-            require(amount >= treePrice, "low price paid");
-            lastBuy[buyer] = block.timestamp;
+            require(
+                wethToken.balanceOf(msg.sender) >= treePrice,
+                "low price paid"
+            );
+            amount = treePrice;
+            lastBuy[msg.sender] = block.timestamp;
         }
 
         // treasury.fundTree{value: amount}(treeId);
-        treeFactory.updateOwnerIncremental(treeId, buyer);
+        treeFactory.updateOwnerIncremental(treeId, msg.sender);
 
-        emit IncrementalTreeSold(treeId, buyer, amount);
+        emit IncrementalTreeSold(treeId, msg.sender, amount);
     }
 }

@@ -142,7 +142,8 @@ contract IncrementalSell is Initializable {
 
     function buyTree(uint256 treeId) external payable ifNotPaused {
         //check if treeId is in this incrementalSell
-        IncrementalPrice memory incPrice = incrementalPrice;
+        IncrementalPrice storage incPrice = incrementalPrice;
+
         require(
             treeId < incPrice.endTree && treeId >= incPrice.startTree,
             "tree is not in incremental sell"
@@ -155,20 +156,29 @@ contract IncrementalSell is Initializable {
             10000;
 
         uint256 amount;
+
         //checking price paid is enough for buying the treeId checking discounts
         if (lastBuy[msg.sender] > block.timestamp - 700 seconds) {
             require(
                 wethToken.balanceOf(msg.sender) >= (treePrice * 90) / 100,
                 "low price paid"
             );
+
             amount = (treePrice * 90) / 100;
+
+            wethToken.transferFrom(msg.sender, address(wethFunds), amount);
+
             lastBuy[msg.sender] = 0;
         } else {
             require(
                 wethToken.balanceOf(msg.sender) >= treePrice,
                 "low price paid"
             );
+
             amount = treePrice;
+
+            wethToken.transferFrom(msg.sender, address(wethFunds), amount);
+
             lastBuy[msg.sender] = block.timestamp;
         }
 

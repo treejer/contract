@@ -172,7 +172,30 @@ contract IncrementalSell is Initializable {
             lastBuy[msg.sender] = block.timestamp;
         }
 
-        // treasury.fundTree{value: amount}(treeId);
+        (
+            uint16 planterFund,
+            uint16 referralFund,
+            uint16 treeResearch,
+            uint16 localDevelop,
+            uint16 rescueFund,
+            uint16 treejerDevelop,
+            uint16 reserveFund1,
+            uint16 reserveFund2
+        ) = financialModel.findTreeDistribution(treeId);
+
+        wethFunds.fundTree(
+            treeId,
+            amount,
+            planterFund,
+            referralFund,
+            treeResearch,
+            localDevelop,
+            rescueFund,
+            treejerDevelop,
+            reserveFund1,
+            reserveFund2
+        );
+
         treeFactory.updateOwnerIncremental(treeId, msg.sender);
 
         emit IncrementalTreeSold(treeId, msg.sender, amount);

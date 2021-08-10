@@ -67,9 +67,11 @@ interface ITreeFactory {
         external
         returns (uint32);
 
-    function updateOwner(uint256 _treeId, address _ownerId) external;
-
-    function updateOwnerIncremental(uint256 _treeId, address _ownerId) external;
+    function updateOwner(
+        uint256 _treeId,
+        address _ownerId,
+        uint16 _mintStatus
+    ) external;
 
     function updateAvailability(uint256 _treeId) external;
 
@@ -142,9 +144,6 @@ interface ITreeFactory {
     function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
         external
         returns (bool);
-
-    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
-        external;
 
     event TreeAdded(uint256 treeId);
     event TreeAssigned(uint256 treeId);

@@ -326,7 +326,7 @@ Common.successFundTree = async (
     from: auctionAddress,
   });
 
-  await treeFactoryInstance.updateOwner(treeId, tokenOwner, {
+  await treeFactoryInstance.updateOwner(treeId, tokenOwner, 2, {
     from: auctionAddress,
   });
 

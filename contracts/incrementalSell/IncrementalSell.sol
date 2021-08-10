@@ -206,7 +206,7 @@ contract IncrementalSell is Initializable {
             reserveFund2
         );
 
-        treeFactory.updateOwnerIncremental(treeId, msg.sender);
+        treeFactory.updateOwner(treeId, msg.sender, 1);
 
         emit IncrementalTreeSold(treeId, msg.sender, amount);
     }

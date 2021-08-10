@@ -3600,7 +3600,7 @@ contract("TreeFactory", (accounts) => {
 
     /////////////////// verify 2 and set token owner ////////////////////////
 
-    await treeFactoryInstance.updateOwner(treeId, userAccount8, {
+    await treeFactoryInstance.updateOwner(treeId, userAccount8, 2, {
       from: userAccount5,
     });
 
@@ -4788,7 +4788,7 @@ contract("TreeFactory", (accounts) => {
       from: userAccount5,
     });
 
-    await treeFactoryInstance.updateOwner(1, userAccount4, {
+    await treeFactoryInstance.updateOwner(1, userAccount4, 2, {
       from: userAccount5,
     });
 
@@ -4832,7 +4832,7 @@ contract("TreeFactory", (accounts) => {
     );
 
     await treeFactoryInstance
-      .updateOwner(1, userAccount4, {
+      .updateOwner(1, userAccount4, 2, {
         from: userAccount5,
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
@@ -4868,11 +4868,11 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await treeFactoryInstance.updateOwner(1, userAccount4, {
+    await treeFactoryInstance.updateOwner(1, userAccount4, 2, {
       from: userAccount5,
     });
 
-    await treeFactoryInstance.updateOwner(1, userAccount6, {
+    await treeFactoryInstance.updateOwner(1, userAccount6, 2, {
       from: userAccount5,
     }).should.be.rejected;
   });

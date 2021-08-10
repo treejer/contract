@@ -145,7 +145,7 @@ contract CommunityGifts is Initializable {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
 
-        treeFactory.updateOwnerCommunityGifts(treeId, msg.sender);
+        treeFactory.updateOwner(treeId, msg.sender, 3);
 
         //call planter contract
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
@@ -176,7 +176,7 @@ contract CommunityGifts is Initializable {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
 
-        treeFactory.updateOwnerCommunityGifts(treeId, _giftee);
+        treeFactory.updateOwner(treeId, _giftee, 3);
 
         //call planter contract
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);

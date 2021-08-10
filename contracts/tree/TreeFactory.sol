@@ -102,6 +102,14 @@ contract TreeFactory is Initializable, RelayRecipient {
         accessRestriction.ifIncrementalSellOrAuction(_msgSender());
         _;
     }
+
+    modifier onlyIncrementalSellOrAuctionOrCommunityGifts() {
+        accessRestriction.ifIncrementalSellOrAuctionOrCommunityGifts(
+            _msgSender()
+        );
+        _;
+    }
+
     modifier validTree(uint256 _treeId) {
         require(treeData[_treeId].treeStatus > 0, "invalid tree");
         _;
@@ -355,30 +363,13 @@ contract TreeFactory is Initializable, RelayRecipient {
         return nowProvideStatus;
     }
 
-    function updateOwnerIncremental(uint256 _treeId, address _ownerId)
-        external
-        onlyIncremental
-    {
+    function updateOwner(
+        uint256 _treeId,
+        address _ownerId,
+        uint16 _mintStatus
+    ) external onlyIncrementalSellOrAuctionOrCommunityGifts {
         treeData[_treeId].provideStatus = 0;
-        treeData[_treeId].mintStatus = 1;
-        treeToken.safeMint(_ownerId, _treeId);
-    }
-
-    function updateOwner(uint256 _treeId, address _ownerId)
-        external
-        onlyAuction
-    {
-        treeData[_treeId].provideStatus = 0;
-        treeData[_treeId].mintStatus = 2;
-        treeToken.safeMint(_ownerId, _treeId);
-    }
-
-    function updateOwnerCommunityGifts(uint256 _treeId, address _ownerId)
-        external
-        onlyCommunityGifts
-    {
-        treeData[_treeId].provideStatus = 0;
-        treeData[_treeId].mintStatus = 3;
+        treeData[_treeId].mintStatus = _mintStatus;
         treeToken.safeMint(_ownerId, _treeId);
     }
 

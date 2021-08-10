@@ -76,8 +76,6 @@ contract("WethFunds", (accounts) => {
     factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
     const factoryAddress = factoryInstance.address;
 
-    factoryInstance.INIT_CODE_PAIR_HASH();
-
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
     const WETHAddress = wethInstance.address;
 

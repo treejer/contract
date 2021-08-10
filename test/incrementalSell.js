@@ -10,6 +10,18 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
+//treasury section
+const WethFunds = artifacts.require("WethFunds.sol");
+const FinancialModel = artifacts.require("FinancialModel.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
+const Weth = artifacts.require("Weth.sol");
+
+//uniswap
+var Factory = artifacts.require("Factory.sol");
+var Dai = artifacts.require("Dai.sol");
+var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+var TestUniswap = artifacts.require("TestUniswap.sol");
+
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -62,25 +74,121 @@ contract("IncrementalSell", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
+
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
 
+    fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ////--------------------------uniswap deploy
+
+    factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
+    const factoryAddress = factoryInstance.address;
+
+    wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
+    const WETHAddress = wethInstance.address;
+
+    daiInstance = await Weth.new("DAI", "dai", { from: accounts[0] });
+    const DAIAddress = daiInstance.address;
+
+    uniswapRouterInstance = await UniswapV2Router02New.new(
+      factoryAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    testUniswapInstance = await TestUniswap.new(
+      uniswapV2Router02NewAddress,
+      DAIAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+
+    /////---------------------------addLiquidity-------------------------
+
+    const testUniswapAddress = testUniswapInstance.address;
+
+    await wethInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("125000", "Ether")
+    );
+
+    await daiInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("250000000", "Ether")
+    );
+
+    await testUniswapInstance.addLiquidity();
+
+    /////-------------------------handle address here-----------------
+
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
     });
-    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
+
+    await iSellInstance.setWethFundsAddress(wethFundsInstance.address, {
       from: deployerAccount,
     });
+
+    await iSellInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.setFinancialModelAddress(fModel.address, {
+      from: deployerAccount,
+    });
+
+    //-------------wethFundsInstance
+
+    await wethFundsInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+
+    await wethFundsInstance.setPlanterFundContractAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await wethFundsInstance.setUniswapRouterAddress(
+      uniswapV2Router02NewAddress,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await wethFundsInstance.setWethTokenAddress(WETHAddress, {
+      from: deployerAccount,
+    });
+
+    await wethFundsInstance.setDaiAddress(DAIAddress, {
+      from: deployerAccount,
+    });
+
+    //-------------treeFactoryInstance
+
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
-    // await treasuryInstance.setPlanterContractAddress(planterInstance.address, {
-    //   from: deployerAccount,
-    // });
-    await Common.addRegularSellRole(
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -90,7 +198,12 @@ contract("IncrementalSell", (accounts) => {
       iSellInstance.address,
       deployerAccount
     );
-    await treasuryInstance.addFundDistributionModel(
+
+    await Common.addFundsRole(arInstance, WethFunds.address, deployerAccount);
+
+    /////----------------add distributionModel
+
+    await fModel.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -113,6 +226,84 @@ contract("IncrementalSell", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+
+  ///////////////---------------------------------set tree factory address--------------------------------------------------------
+  it("set tree factory address", async () => {
+    await iSellInstance
+      .setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      treeFactoryInstance.address,
+      await iSellInstance.treeFactory.call(),
+      "address set incorect"
+    );
+  });
+
+  /////////////////---------------------------------set weth funds address--------------------------------------------------------
+  it("Set weth funds address", async () => {
+    await iSellInstance
+      .setWethFundsAddress(wethFundsInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      wethFundsInstance.address,
+      await iSellInstance.wethFunds.call(),
+      "weth funds address set incorect"
+    );
+  });
+
+  /////////////////---------------------------------set weth token address--------------------------------------------------------
+  it("Set weth token address", async () => {
+    await iSellInstance
+      .setWethTokenAddress(wethInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      wethInstance.address,
+      await iSellInstance.wethToken.call(),
+      "weth token address set incorect"
+    );
+  });
+
+  /////////////////---------------------------------set financialModel address--------------------------------------------------------
+  it("Set financial Model address", async () => {
+    await iSellInstance
+      .setFinancialModelAddress(fModel.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setFinancialModelAddress(fModel.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      fModel.address,
+      await iSellInstance.financialModel.call(),
+      "financial model address set incorect"
+    );
+  });
+
+  /* ssss
 
   it("should set tree factory address with admin access or fail otherwise", async () => {
     let tx = await iSellInstance.setTreeFactoryAddress(
@@ -559,4 +750,5 @@ contract("IncrementalSell", (accounts) => {
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE);
   });
+  ssss */
 });

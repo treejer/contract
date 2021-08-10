@@ -2,15 +2,21 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/ITreasury.sol";
+import "../treasury/IWethFunds.sol";
+import "../treasury/IFinancialModel.sol";
 
 contract IncrementalSell is Initializable {
+    bool public isIncrementalSell;
+
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    ITreasury public treasury;
-    bool public isIncrementalSell;
+    IWethFunds public wethFunds;
+    IFinancialModel public financialModel;
+    IERC20Upgradeable public wethToken;
 
     struct IncrementalPrice {
         uint256 startTree;
@@ -51,10 +57,34 @@ contract IncrementalSell is Initializable {
         treeFactory = candidateContract;
     }
 
-    function setTreasuryAddress(address _address) external onlyAdmin {
-        ITreasury candidateContract = ITreasury(_address);
-        require(candidateContract.isTreasury());
-        treasury = candidateContract;
+    /** @dev set wethFunds contract address
+     * @param _address wethFunds contract address
+     */
+    function setWethFundsAddress(address _address) external onlyAdmin {
+        IWethFunds candidateContract = IWethFunds(_address);
+
+        require(candidateContract.isWethFunds());
+
+        wethFunds = candidateContract;
+    }
+
+    /** @dev set wethToken contract address
+     * @param _address wethToken contract address
+     */
+    function setWethTokenAddress(address _address) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
+        wethToken = candidateContract;
+    }
+
+    /**
+     * @dev admin set FinancialModelAddress
+     * @param _address set to the address of financialModel
+     */
+
+    function setFinancialModelAddress(address _address) external onlyAdmin {
+        IFinancialModel candidateContract = IFinancialModel(_address);
+        require(candidateContract.isFinancialModel());
+        financialModel = candidateContract;
     }
 
     function addTreeSells(
@@ -68,7 +98,7 @@ contract IncrementalSell is Initializable {
         require(startTree > 100, "trees are under Auction");
         require(steps > 0, "incremental period should be positive");
         require(
-            treasury.distributionModelExistance(startTree),
+            financialModel.distributionModelExistance(startTree),
             "equivalant fund Model not exists"
         );
         IncrementalPrice storage incrPrice = incrementalPrice;
@@ -130,7 +160,7 @@ contract IncrementalSell is Initializable {
             lastBuy[buyer] = block.timestamp;
         }
 
-        treasury.fundTree{value: amount}(treeId);
+        // treasury.fundTree{value: amount}(treeId);
         treeFactory.updateOwnerIncremental(treeId, buyer);
 
         emit IncrementalTreeSold(treeId, buyer, amount);

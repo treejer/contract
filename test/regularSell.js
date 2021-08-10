@@ -174,6 +174,25 @@ contract("regularSell", (accounts) => {
     );
   });
 
+  /////////////////---------------------------------set financialModel address--------------------------------------------------------
+  it("Set financial Model address", async () => {
+    await regularSellInstance
+      .setFinancialModelAddress(fModel.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      fModel.address,
+      await regularSellInstance.financialModel.call(),
+      "financial model address set incorect"
+    );
+  });
+
   /////////////////------------------------------------- set price ------------------------------------------
   it("set price and check data", async () => {
     let treePrice1 = await regularSellInstance.treePrice.call();
@@ -236,7 +255,7 @@ contract("regularSell", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    ///////////////////// ------------------- handle addresses here --------------------------
+    ///////////////////// ------------------- handle address here --------------------------
 
     await regularSellInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,

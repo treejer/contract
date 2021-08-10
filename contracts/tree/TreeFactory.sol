@@ -57,7 +57,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     mapping(uint256 => TreeStruct) public treeData; //tree id to TreeStruct struct
     mapping(uint256 => UpdateTree) public updateTrees; //tree id to UpdateTree struct
     mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
-    event Status(uint256 status);
+
     event TreePlanted(uint256 treeId);
     event PlantVerified(uint256 treeId);
     event PlantRejected(uint256 treeId);
@@ -307,7 +307,6 @@ contract TreeFactory is Initializable, RelayRecipient {
             tree.treeSpecs = updateGenTree.updateSpecs;
 
             if (treeToken.exists(_treeId)) {
-                emit Status(tree.treeStatus);
                 planterFund.fundPlanter(
                     _treeId,
                     tree.planterId,

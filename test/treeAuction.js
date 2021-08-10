@@ -31,7 +31,6 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 contract("TreeAuction", (accounts) => {
   let treeAuctionInstance;
   let arInstance;
-  let TreasuryInstance;
   let treeFactoryInstance;
   let startTime;
   let endTime;
@@ -66,12 +65,6 @@ contract("TreeAuction", (accounts) => {
     });
 
     treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    TreasuryInstance = await deployProxy(Treasury, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
@@ -211,10 +204,6 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await TreasuryInstance.setPlanterContractAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
-
     await Common.addAuctionRole(
       arInstance,
       treeAuctionInstance.address,
@@ -320,12 +309,6 @@ contract("TreeAuction", (accounts) => {
       }
     );
 
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
@@ -387,12 +370,6 @@ contract("TreeAuction", (accounts) => {
       {
         from: deployerAccount,
       }
-    );
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
@@ -462,12 +439,6 @@ contract("TreeAuction", (accounts) => {
       }
     );
 
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     await treeAuctionInstance
       .createAuction(
         treeId,
@@ -513,12 +484,6 @@ contract("TreeAuction", (accounts) => {
       }
     );
 
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
@@ -549,14 +514,6 @@ contract("TreeAuction", (accounts) => {
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
-    /////////// -------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
 
     ////////////// ------------------ handle address
 
@@ -684,14 +641,6 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     /////////////////// ---------------give approve to auction contract
 
     await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
@@ -772,14 +721,6 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     /////////////////// ---------------give approve to auction contract
 
     await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
@@ -856,14 +797,6 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,
     });
-
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
 
     /////////////////// ---------------give approve to auction contract
 
@@ -952,14 +885,6 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
     /////////////////// ---------------give approve to auction contract
 
     await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
@@ -1039,14 +964,6 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,
     });
-
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
 
     /////////////////// ---------------give approve to auction contract
 
@@ -1134,14 +1051,6 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,
     });
-
-    ////////////////// --------------------- handle roles
-
-    await Common.addAuctionRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
 
     /////////////////// ---------------give approve to auction contract
 
@@ -3874,10 +3783,6 @@ contract("TreeAuction", (accounts) => {
 
     const endAuctionTx = await treeAuctionInstance.endAuction(auctionId1);
 
-    const treasuryBalanceAfterAuctionEnd = await web3.eth.getBalance(
-      TreasuryInstance.address
-    );
-
     const wethFundsBalanceAfterAuctionEnd = await wethInstance.balanceOf(
       wethFundsInstance.address
     );
@@ -3894,8 +3799,6 @@ contract("TreeAuction", (accounts) => {
       Math.mul(Number(web3.utils.toWei("2")), 5000),
       10000
     );
-
-    const totalFundAfterAuctionEnd = await TreasuryInstance.totalFunds();
 
     const totalFundPlanterFundAfterAuctionEnd =
       await planterFundsInstnce.totalFunds();

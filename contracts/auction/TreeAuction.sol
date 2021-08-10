@@ -249,7 +249,7 @@ contract TreeAuction is Initializable {
         require(block.timestamp >= auction.endDate, "Auction not yet ended");
 
         if (auction.bidder != address(0)) {
-            treeFactory.updateOwner(auction.treeId, auction.bidder);
+            treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
             wethToken.transfer(address(wethFunds), auction.highestBid);
 

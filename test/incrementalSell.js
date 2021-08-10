@@ -1,7 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const IncrementalSell = artifacts.require("IncrementalSell.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
-const Treasury = artifacts.require("Treasury.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const assert = require("chai").assert;
@@ -37,7 +36,6 @@ contract("IncrementalSell", (accounts) => {
   let TreeFactoryInstance;
   let startTime;
   let endTime;
-  let treasuryInstance;
   let treeTokenInstance;
 
   const ownerAccount = accounts[0];

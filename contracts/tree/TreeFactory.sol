@@ -103,6 +103,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    modifier onlyIncrementalOrCommunityGifts() {
+        accessRestriction.ifIncrementalOrCommunityGifts(_msgSender());
+        _;
+    }
+
     modifier onlyIncrementalSellOrAuctionOrCommunityGifts() {
         accessRestriction.ifIncrementalSellOrAuctionOrCommunityGifts(
             _msgSender()
@@ -389,36 +394,19 @@ contract TreeFactory is Initializable, RelayRecipient {
         }
     }
 
-    //set communityGifts sell for trees
-    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        onlyCommunityGifts
-        returns (bool)
-    {
+    //set incremental and communityGifts sell for trees
+    function manageProvideStatus(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint32 _provideStatus
+    ) external onlyIncrementalOrCommunityGifts returns (bool) {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (treeData[i].provideStatus > 0) {
                 return false;
             }
         }
         for (uint256 j = _startTreeId; j < _endTreeId; j++) {
-            treeData[j].provideStatus = 5;
-        }
-        return true;
-    }
-
-    //set incremental sell for trees
-    function bulkAvailability(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        onlyIncremental
-        returns (bool)
-    {
-        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (treeData[i].provideStatus > 0) {
-                return false;
-            }
-        }
-        for (uint256 j = _startTreeId; j < _endTreeId; j++) {
-            treeData[j].provideStatus = 2;
+            treeData[j].provideStatus = _provideStatus;
         }
         return true;
     }

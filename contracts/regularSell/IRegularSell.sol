@@ -24,11 +24,6 @@ interface IRegularSell {
      */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set treasury contract address
-     * @param _address treasury contract address
-     */
-    function setTreasuryAddress(address _address) external;
-
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      * NOTE emit a {TreePriceUpdated} event

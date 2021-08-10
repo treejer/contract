@@ -106,7 +106,11 @@ contract CommunityGifts is Initializable {
         external
         onlyAdmin
     {
-        bool check = treeFactory.setGiftsRange(_startTreeId, _endTreeId);
+        bool check = treeFactory.manageProvideStatus(
+            _startTreeId,
+            _endTreeId,
+            5
+        );
         require(check, "not available tree exist");
     }
 

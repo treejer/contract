@@ -73,11 +73,13 @@ interface ITreeFactory {
         uint16 _mintStatus
     ) external;
 
-    function updateAvailability(uint256 _treeId) external;
+    function manageProvideStatus(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint32 _provideStatus
+    ) external returns (bool);
 
-    function bulkAvailability(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        returns (bool);
+    function updateAvailability(uint256 _treeId) external;
 
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
 
@@ -140,10 +142,6 @@ interface ITreeFactory {
      * @param _owner Owner of a new tree sold in Regular
      */
     function requestRegularTree(uint256 _treeId, address _owner) external;
-
-    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        returns (bool);
 
     event TreeAdded(uint256 treeId);
     event TreeAssigned(uint256 treeId);

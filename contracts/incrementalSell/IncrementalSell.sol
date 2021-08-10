@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/ITreasury.sol";
 import "../treasury/IWethFunds.sol";
 import "../treasury/IFinancialModel.sol";
 
@@ -109,7 +108,11 @@ contract IncrementalSell is Initializable {
         }
 
         require(
-            treeFactory.bulkAvailability(startTree, startTree + treeCount),
+            treeFactory.manageProvideStatus(
+                startTree,
+                startTree + treeCount,
+                2
+            ),
             "trees are not available for sell"
         );
 
@@ -129,9 +132,10 @@ contract IncrementalSell is Initializable {
             "incremental period should be positive"
         );
         require(
-            treeFactory.bulkAvailability(
+            treeFactory.manageProvideStatus(
                 incrPrice.endTree,
-                incrPrice.endTree + treeCount
+                incrPrice.endTree + treeCount,
+                2
             ),
             "trees are not available for sell"
         );

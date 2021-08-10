@@ -175,4 +175,11 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
             "not auction or community gifts or incrementalSell"
         );
     }
+
+    function ifIncrementalOrCommunityGifts(address _address) public view {
+        require(
+            isIncrementalSell(_address) || isCommunityGifts(_address),
+            "not community gifts or incrementalSell"
+        );
+    }
 }

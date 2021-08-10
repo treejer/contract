@@ -17,8 +17,6 @@ interface IIncrementalSell {
 
     function lastBuy(address _buyer) external view returns (uint256);
 
-    function setTreasuryAddress(address payable _treasuryAddress) external;
-
     function setTreeFactoryAddress(address _address) external;
 
     function setTreeTokenAddress(address _address) external;

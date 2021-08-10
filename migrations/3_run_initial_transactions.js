@@ -5,7 +5,6 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
-const Treasury = artifacts.require("Treasury.sol");
 const Planter = artifacts.require("Planter.sol");
 const RegularSell = artifacts.require("RegularSell.sol");
 const IncrementalSell = artifacts.require("IncrementalSell.sol");

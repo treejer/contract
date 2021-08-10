@@ -11,8 +11,6 @@ interface ICommunityGifts {
 
     function setTreeFactoryAddress(address _address) external;
 
-    function setTreasuryAddress(address _address) external;
-
     function updateGiftees(address _giftee, uint32 _symbol) external;
 
     function claimTree() external;

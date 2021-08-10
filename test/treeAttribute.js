@@ -2,31 +2,41 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const IncrementalSell = artifacts.require("IncrementalSell.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
-const Treasury = artifacts.require("Treasury.sol");
+
 const Tree = artifacts.require("Tree.sol");
+//treasury section
+const WethFunds = artifacts.require("WethFunds.sol");
+const FinancialModel = artifacts.require("FinancialModel.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
+const Weth = artifacts.require("Weth.sol");
+
+//uniswap
+var Factory = artifacts.require("Factory.sol");
+var Dai = artifacts.require("Dai.sol");
+var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+var TestUniswap = artifacts.require("TestUniswap.sol");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
-const {
-  TimeEnumes,
-  CommonErrorMsg,
-  IncrementalSellErrorMsg,
-  TreeFactoryErrorMsg,
-  TreasuryManagerErrorMsg,
-  TreeAttributeErrorMsg,
-} = require("./enumes");
+const { CommonErrorMsg, TreeAttributeErrorMsg } = require("./enumes");
 
 contract("IncrementalSell", (accounts) => {
   let iSellInstance;
   let arInstance;
-  let TreeFactoryInstance;
-  let startTime;
-  let endTime;
-  let treasuryInstance;
+
   let treeAttributeInstance;
+  let financialModelInstance;
+  let wethFundsInstance;
+  let planterFundsInstnce;
+  let wethInstance;
+  let daiInstance;
+  let factoryInstance;
+  let uniswapRouterInstance;
+  let testUniswapInstance;
 
   const ownerAccount = accounts[0];
   const deployerAccount = accounts[1];
@@ -37,9 +47,6 @@ contract("IncrementalSell", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const treasuryAddress = accounts[9];
-
-  const ipfsHash = "some ipfs hash here";
 
   beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
@@ -47,6 +54,7 @@ contract("IncrementalSell", (accounts) => {
       unsafeAllowCustomTypes: true,
       from: deployerAccount,
     });
+
     treeAttributeInstance = await deployProxy(
       TreeAttribute,
       [arInstance.address],
@@ -56,6 +64,7 @@ contract("IncrementalSell", (accounts) => {
         unsafeAllowCustomTypes: true,
       }
     );
+
     treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
@@ -68,6 +77,67 @@ contract("IncrementalSell", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
+    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ////--------------------------uniswap deploy
+
+    factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
+    const factoryAddress = factoryInstance.address;
+
+    wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
+    const WETHAddress = wethInstance.address;
+
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+    const DAIAddress = daiInstance.address;
+
+    uniswapRouterInstance = await UniswapV2Router02New.new(
+      factoryAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    testUniswapInstance = await TestUniswap.new(
+      uniswapV2Router02NewAddress,
+      DAIAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+
+    /////---------------------------addLiquidity-------------------------
+
+    const testUniswapAddress = testUniswapInstance.address;
+
+    await wethInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("125000", "Ether")
+    );
+
+    await daiInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("250000000", "Ether")
+    );
+
+    await testUniswapInstance.addLiquidity();
+
+    /////////////////////////////////////////////////////////////////////////////////
+
     await treeAttributeInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,
       {
@@ -75,6 +145,37 @@ contract("IncrementalSell", (accounts) => {
       }
     );
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+    ////////////////////////// set weth funds address
+
+    await wethFundsInstance.setPlanterFundContractAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await wethFundsInstance.setUniswapRouterAddress(
+      uniswapV2Router02NewAddress,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await wethFundsInstance.setWethTokenAddress(WETHAddress, {
+      from: deployerAccount,
+    });
+
+    await wethFundsInstance.setDaiAddress(DAIAddress, {
       from: deployerAccount,
     });
   });
@@ -143,16 +244,6 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    let x1 = await treeAttributeInstance.reservedAttributes.call(
-      treeAttributeGenerateCode
-    );
-    let y1 = await treeAttributeInstance.generatedAttributes.call(
-      treeAttributeGenerateCode
-    );
-
-    console.log("x1", x1.toString());
-    console.log("y1", y1.toString());
-
     await treeAttributeInstance.setTreeAttributesByAdmin(100, 13000001, {
       from: deployerAccount,
     });
@@ -164,16 +255,6 @@ contract("IncrementalSell", (accounts) => {
         from: deployerAccount,
       }
     );
-
-    let x2 = await treeAttributeInstance.reservedAttributes.call(
-      treeAttributeGenerateCode
-    );
-    let y2 = await treeAttributeInstance.generatedAttributes.call(
-      treeAttributeGenerateCode
-    );
-
-    console.log("x2", x2.toString());
-    console.log("y2", y2.toString());
 
     await treeAttributeInstance
       .setTreeAttributesByAdmin(102, treeAttributeGenerateCode, {
@@ -214,25 +295,26 @@ contract("IncrementalSell", (accounts) => {
   });
 
   it("tree check for attribute assignment", async () => {
-    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
     });
 
-    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await iSellInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -244,7 +326,7 @@ contract("IncrementalSell", (accounts) => {
       deployerAccount
     );
 
-    await treasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -258,9 +340,14 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
-    });
+    await financialModelInstance.assignTreeFundDistributionModel(
+      100,
+      10000,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await iSellInstance.addTreeSells(
       101,
@@ -276,6 +363,23 @@ contract("IncrementalSell", (accounts) => {
     await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await Common.addFundsRole(
+      arInstance,
+      wethFundsInstance.address,
       deployerAccount
     );
 
@@ -308,25 +412,26 @@ contract("IncrementalSell", (accounts) => {
   });
 
   it("tree check for attribute assignment", async () => {
-    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    treasuryInstance = await deployProxy(Treasury, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
     });
 
-    await iSellInstance.setTreasuryAddress(treasuryInstance.address, {
-      from: deployerAccount,
-    });
+    await iSellInstance.setFinancialModelAddress(
+      financialModelInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -338,7 +443,7 @@ contract("IncrementalSell", (accounts) => {
       deployerAccount
     );
 
-    await treasuryInstance.addFundDistributionModel(
+    await financialModelInstance.addFundDistributionModel(
       3000,
       1200,
       1200,
@@ -352,9 +457,14 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await treasuryInstance.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
-    });
+    await financialModelInstance.assignTreeFundDistributionModel(
+      100,
+      10000,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await iSellInstance.addTreeSells(
       101,
@@ -370,6 +480,23 @@ contract("IncrementalSell", (accounts) => {
     await Common.addTreeFactoryRole(
       arInstance,
       treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await Common.addFundsRole(
+      arInstance,
+      wethFundsInstance.address,
       deployerAccount
     );
 

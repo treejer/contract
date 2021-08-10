@@ -40,9 +40,6 @@ contract TreeAuction is Initializable {
     /** NOTE mapping of auctionId to Auction struct */
     mapping(uint256 => Auction) public auctions;
 
-    /** NOTE mapping of address to amount */
-    mapping(address => uint256) public pendingWithdraw;
-
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
@@ -99,8 +96,8 @@ contract TreeAuction is Initializable {
     }
 
     /**
-     * @dev admin set TreasuryAddress
-     * @param _address set to the address of treasury
+     * @dev admin set FinancialModel
+     * @param _address set to the address of financialModel
      */
 
     function setFinancialModelAddress(address _address) external onlyAdmin {
@@ -110,8 +107,8 @@ contract TreeAuction is Initializable {
     }
 
     /**
-     * @dev admin set TreasuryAddress
-     * @param _address set to the address of treasury
+     * @dev admin set WethFunds
+     * @param _address set to the address of wethFunds
      */
 
     function setWethFundsAddress(address _address) external onlyAdmin {
@@ -120,10 +117,13 @@ contract TreeAuction is Initializable {
         wethFunds = candidateContract;
     }
 
-    function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
-        IERC20Upgradeable candidateContract = IERC20Upgradeable(
-            _wethTokenAddress
-        );
+    /**
+     * @dev admin set WethToken
+     * @param _address set to the address of wethToken
+     */
+
+    function setWethTokenAddress(address _address) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         wethToken = candidateContract;
     }
 
@@ -214,28 +214,6 @@ contract TreeAuction is Initializable {
         _increaseAuctionEndTime(_auctionId);
         _withdraw(oldBid, oldBidder);
     }
-
-    /** @dev users can manually withdraw if its balance is more than 0.
-     * @return true in case of successfull withdraw and false otherwise.
-     */
-
-    //TODO: no need for this function
-    // function manualWithdraw() external ifNotPaused returns (bool) {
-    //     uint256 amount = pendingWithdraw[msg.sender];
-
-    //     require(amount > 0, "User balance is not enough");
-
-    //     pendingWithdraw[msg.sender] = 0;
-
-    //     wethToken.transfer(msg.sender, amount);
-
-    //     // if (!payable(msg.sender).send(amount)) {
-    //     //     pendingWithdraw[msg.sender] = amount;
-    //     //     return false;
-    //     // }
-
-    //     return true;
-    // }
 
     /** @dev everyone can call this method  including the winner of auction after
      * auction end time and if auction have bidder transfer owner of tree to bidder and fund tree.

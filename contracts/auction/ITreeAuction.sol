@@ -21,13 +21,17 @@ interface ITreeAuction {
             uint256
         );
 
-    function pendingWithdraw(address _bidder) external view returns (uint256);
-
     /** @dev set {_address to TreeFactory contract address} */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set {_address to Treasury contract address} */
-    function setTreasuryAddress(address _address) external;
+    /** @dev set {_address to FinancialModel contract address} */
+    function setFinancialModelAddress(address _address) external;
+
+    /** @dev set {_address to WethFunds contract address} */
+    function setWethFundsAddress(address _address) external;
+
+    /** @dev set {_address to WethToken contract address} */
+    function setWethTokenAddress(address _address) external;
 
     /** @dev create an auction for {_treeId} with strating date of {_startDate} and ending date of
      * {_endDate} and initialPrice of {_initialPrice} and bidInterval of {_bidInterval}
@@ -50,12 +54,6 @@ interface ITreeAuction {
      * emit a {HighestBidIncreased} event
      */
     function bid(uint256 _auctionId) external payable;
-
-    /** @dev accounts that not funded while automatic withdraw in bid can manually
-     * withdraw
-     * @return true in case of seccussful withdraw and false otherwise
-     */
-    function manualWithdraw() external returns (bool);
 
     /** @dev everyone can call this method after
      * auction end time and if auction have bidder , transfer owner of tree to bidder and fund tree.

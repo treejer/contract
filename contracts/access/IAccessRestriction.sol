@@ -62,10 +62,6 @@ interface IAccessRestriction {
 
     function isTreeFactory(address _address) external view returns (bool);
 
-    function ifTreasury(address _address) external view;
-
-    function isTreasury(address _address) external view returns (bool);
-
     function ifRegularSell(address _address) external view;
 
     function isRegularSell(address _address) external view returns (bool);

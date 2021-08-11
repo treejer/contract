@@ -2,8 +2,6 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 
 const Planter = artifacts.require("Planter.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
-const Erc20 = artifacts.require("Erc20.sol");
-const Funds = artifacts.require("Funds.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -11,6 +9,13 @@ const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Units = require("ethereumjs-units");
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+var Dai = artifacts.require("Dai.sol");
+
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
 
 const Math = require("./math");
 
@@ -25,7 +30,7 @@ const {
 contract("PlanterFund", (accounts) => {
   let planterInstance;
   let planterFundInstance;
-  let fundsInstance;
+
   let arInstance;
   let daiInstance;
 
@@ -61,20 +66,7 @@ contract("PlanterFund", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    fundsInstance = await deployProxy(Funds, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    daiInstance = await Erc20.new(
-      Units.convert("1000000", "eth", "wei"),
-      "Dai",
-      "DAI",
-      {
-        from: deployerAccount,
-      }
-    );
+    daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2717,5 +2709,125 @@ contract("PlanterFund", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+
+  ////////////////--------------------------------------------gsn------------------------------------------------
+  it("test gsn", async () => {
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
+    // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
+    // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await planterFundInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(planterFundInstance.address, {
+      from: deployerAccount,
+    });
+
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerPlanterFund = provider.getSigner(4);
+
+    let contractPlanterFund = await new ethers.Contract(
+      planterFundInstance.address,
+      planterFundInstance.abi,
+      signerPlanterFund
+    );
+
+    //////////---------------------------------------------------------------------------------
+
+    const planterAddress = userAccount3;
+
+    await Common.addFundsRole(arInstance, userAccount8, deployerAccount);
+    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    const treeId = 1;
+
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
+
+    const planterWithdrawAmount = Units.convert("100", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      treeId,
+      planterAddress,
+      userAccount4,
+      zeroAddress
+    );
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("150", "eth", "wei"),
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    await planterFundInstance.fundPlanter(treeId, planterAddress, 25920, {
+      from: userAccount2,
+    });
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    let balanceAccountBefore = await web3.eth.getBalance(planterAddress);
+
+    await contractPlanterFund.withdrawPlanterBalance(planterWithdrawAmount, {
+      from: planterAddress,
+    });
+
+    let balanceAccountAfter = await web3.eth.getBalance(planterAddress);
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "gsn not true work"
+    );
   });
 });

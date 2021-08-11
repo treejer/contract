@@ -64,10 +64,6 @@ contract Planter is Initializable, RelayRecipient {
         );
         _;
     }
-    modifier onlyTreasury() {
-        accessRestriction.ifTreasury(_msgSender());
-        _;
-    }
 
     modifier onlyOrganization() {
         require(

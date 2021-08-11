@@ -18,6 +18,12 @@ const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
+
 const {
   CommonErrorMsg,
   TreeFactoryErrorMsg,
@@ -113,6 +119,24 @@ contract("regularSell", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await regularSellInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await regularSellInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await regularSellInstance.trustedForwarder(),
+      "address set incorect"
+    );
+  });
 
   ///////////////---------------------------------set tree factory address--------------------------------------------------------
   it("set tree factory address", async () => {
@@ -131,7 +155,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       treeFactoryInstance.address,
-      await regularSellInstance.treeFactory.call(),
+      await regularSellInstance.treeFactory(),
       "address set incorect"
     );
   });
@@ -150,7 +174,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       daiFundsInstance.address,
-      await regularSellInstance.daiFunds.call(),
+      await regularSellInstance.daiFunds(),
       "dai funds address set incorect"
     );
   });
@@ -169,7 +193,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       daiInstance.address,
-      await regularSellInstance.daiToken.call(),
+      await regularSellInstance.daiToken(),
       "dai token address set incorect"
     );
   });
@@ -188,7 +212,7 @@ contract("regularSell", (accounts) => {
 
     assert.equal(
       fModel.address,
-      await regularSellInstance.financialModel.call(),
+      await regularSellInstance.financialModel(),
       "financial model address set incorect"
     );
   });
@@ -2085,5 +2109,168 @@ contract("regularSell", (accounts) => {
     await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
       from: deployerAccount,
     });
+  });
+
+  ////////////////--------------------------------------------gsn------------------------------------------------
+  it("test gsn", async () => {
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await fModel.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
+      from: deployerAccount,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle address here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      from: deployerAccount,
+    });
+
+    await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      from: deployerAccount,
+    });
+
+    //-------------daiFundsInstance
+
+    await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await daiFundsInstance.setPlanterFundContractAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //-------------treeFactoryInstance
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addRegularSellRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addTreeFactoryRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+
+    ///////------------------------------handle gsn---------------------------------
+
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await regularSellInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(regularSellInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerFunder = provider.getSigner(3);
+
+    let contractFunder = await new ethers.Contract(
+      regularSellInstance.address,
+      regularSellInstance.abi,
+      signerFunder
+    );
+
+    //mint dai for funder
+    await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
+
+    await daiInstance.balanceOf(userAccount2);
+
+    await daiInstance.approve(
+      regularSellInstance.address,
+      web3.utils.toWei("7"),
+      {
+        from: userAccount2,
+      }
+    );
+
+    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await contractFunder.requestTrees(1, web3.utils.toWei("7"), {
+      from: userAccount2,
+    });
+
+    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+
+    console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    console.log("balanceAccountAfter", Number(balanceAccountAfter));
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "Gsn not true work"
+    );
   });
 });

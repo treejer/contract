@@ -7,8 +7,9 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFunds.sol";
 import "../treasury/IFinancialModel.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract IncrementalSell is Initializable {
+contract IncrementalSell is Initializable, RelayRecipient {
     bool public isIncrementalSell;
 
     IAccessRestriction public accessRestriction;
@@ -33,7 +34,7 @@ contract IncrementalSell is Initializable {
     event IncrementalSellUpdated();
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
@@ -49,6 +50,10 @@ contract IncrementalSell is Initializable {
         require(candidateContract.isAccessRestriction());
         isIncrementalSell = true;
         accessRestriction = candidateContract;
+    }
+
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
     }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -162,28 +167,28 @@ contract IncrementalSell is Initializable {
         uint256 amount;
 
         //checking price paid is enough for buying the treeId checking discounts
-        if (lastBuy[msg.sender] > block.timestamp - 700 seconds) {
+        if (lastBuy[_msgSender()] > block.timestamp - 700 seconds) {
             require(
-                wethToken.balanceOf(msg.sender) >= (treePrice * 90) / 100,
+                wethToken.balanceOf(_msgSender()) >= (treePrice * 90) / 100,
                 "low price paid"
             );
 
             amount = (treePrice * 90) / 100;
 
-            wethToken.transferFrom(msg.sender, address(wethFunds), amount);
+            wethToken.transferFrom(_msgSender(), address(wethFunds), amount);
 
-            lastBuy[msg.sender] = 0;
+            lastBuy[_msgSender()] = 0;
         } else {
             require(
-                wethToken.balanceOf(msg.sender) >= treePrice,
+                wethToken.balanceOf(_msgSender()) >= treePrice,
                 "low price paid"
             );
 
             amount = treePrice;
 
-            wethToken.transferFrom(msg.sender, address(wethFunds), amount);
+            wethToken.transferFrom(_msgSender(), address(wethFunds), amount);
 
-            lastBuy[msg.sender] = block.timestamp;
+            lastBuy[_msgSender()] = block.timestamp;
         }
 
         (
@@ -210,8 +215,8 @@ contract IncrementalSell is Initializable {
             reserveFund2
         );
 
-        treeFactory.updateOwner(treeId, msg.sender, 1);
+        treeFactory.updateOwner(treeId, _msgSender(), 1);
 
-        emit IncrementalTreeSold(treeId, msg.sender, amount);
+        emit IncrementalTreeSold(treeId, _msgSender(), amount);
     }
 }

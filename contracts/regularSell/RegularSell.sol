@@ -7,9 +7,10 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFunds.sol";
 import "../treasury/IFinancialModel.sol";
+import "../gsn/RelayRecipient.sol";
 
 /** @title RegularSell contract */
-contract RegularSell is Initializable {
+contract RegularSell is Initializable, RelayRecipient {
     uint256 public lastSoldRegularTree;
     uint256 public treePrice;
     bool public isRegularSell;
@@ -30,7 +31,7 @@ contract RegularSell is Initializable {
     );
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
@@ -48,6 +49,10 @@ contract RegularSell is Initializable {
         lastSoldRegularTree = 10000;
         treePrice = _price;
         emit TreePriceUpdated(_price);
+    }
+
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
     }
 
     /** @dev set treeFactory contract address
@@ -108,7 +113,7 @@ contract RegularSell is Initializable {
 
         require(
             _amount >= treePrice * _count &&
-                daiToken.balanceOf(msg.sender) >= _amount,
+                daiToken.balanceOf(_msgSender()) >= _amount,
             "invalid amount"
         );
 
@@ -116,12 +121,12 @@ contract RegularSell is Initializable {
 
         uint256 transferAmount = _amount / _count;
 
-        daiToken.transferFrom(msg.sender, address(daiFunds), _amount);
+        daiToken.transferFrom(_msgSender(), address(daiFunds), _amount);
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
-                msg.sender
+                _msgSender()
             );
 
             (
@@ -147,11 +152,13 @@ contract RegularSell is Initializable {
                 reserveFund1,
                 reserveFund2
             );
+
+            emit RegularMint(_msgSender(), tempLastRegularSold);
         }
 
         lastSoldRegularTree = tempLastRegularSold;
 
-        emit RegularTreeRequsted(_count, msg.sender, _amount);
+        emit RegularTreeRequsted(_count, _msgSender(), _amount);
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
@@ -163,13 +170,13 @@ contract RegularSell is Initializable {
         require(_treeId > lastSoldRegularTree, "invalid tree");
 
         require(
-            _amount >= treePrice && daiToken.balanceOf(msg.sender) >= _amount,
+            _amount >= treePrice && daiToken.balanceOf(_msgSender()) >= _amount,
             "invalid amount"
         );
 
-        daiToken.transferFrom(msg.sender, address(daiFunds), _amount);
+        daiToken.transferFrom(_msgSender(), address(daiFunds), _amount);
 
-        treeFactory.requestRegularTree(_treeId, msg.sender);
+        treeFactory.requestRegularTree(_treeId, _msgSender());
 
         (
             uint16 planterFund,
@@ -195,6 +202,6 @@ contract RegularSell is Initializable {
             reserveFund2
         );
 
-        emit RegularTreeRequstedById(_treeId, msg.sender, _amount);
+        emit RegularTreeRequstedById(_treeId, _msgSender(), _amount);
     }
 }

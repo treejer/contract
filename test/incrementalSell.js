@@ -22,6 +22,12 @@ var Dai = artifacts.require("Dai.sol");
 var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var TestUniswap = artifacts.require("TestUniswap.sol");
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
+
 const {
   TimeEnumes,
   CommonErrorMsg,
@@ -216,6 +222,7 @@ contract("IncrementalSell", (accounts) => {
       }
     );
   });
+
   afterEach(async () => {});
 
   it("deploys successfully", async () => {
@@ -224,6 +231,26 @@ contract("IncrementalSell", (accounts) => {
     assert.notEqual(address, "");
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
+  });
+
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+
+  it("set trust forwarder address", async () => {
+    await iSellInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await iSellInstance.trustedForwarder(),
+      "address set incorect"
+    );
   });
 
   ///////////////---------------------------------set tree factory address--------------------------------------------------------
@@ -453,6 +480,90 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE); // trees shouldnot be on other provides
   });
 
+  it("addTreeSells should be work successfully", async () => {
+    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+      from: deployerAccount,
+    });
+
+    await fModel.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: deployerAccount,
+    });
+
+    let eventTx = await iSellInstance.addTreeSells(
+      105,
+      web3.utils.toWei("0.01"),
+      150,
+      100,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    truffleAssert.eventEmitted(eventTx, "IncrementalSellUpdated", (ev) => {
+      return true;
+    });
+
+    //check tree data
+
+    let tree105 = await treeFactoryInstance.treeData(105);
+
+    assert.equal(Number(tree105.provideStatus), 2);
+
+    let tree150 = await treeFactoryInstance.treeData(254);
+
+    assert.equal(Number(tree150.provideStatus), 2);
+
+    let tree151 = await treeFactoryInstance.treeData(255);
+
+    assert.equal(Number(tree151.provideStatus), 0);
+
+    await iSellInstance.addTreeSells(
+      135,
+      web3.utils.toWei("0.01"),
+      150,
+      100,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let tree105_2 = await treeFactoryInstance.treeData(105);
+
+    assert.equal(Number(tree105_2.provideStatus), 0);
+
+    let tree134 = await treeFactoryInstance.treeData(134);
+
+    assert.equal(Number(tree134.provideStatus), 0);
+
+    let tree135 = await treeFactoryInstance.treeData(135);
+
+    assert.equal(Number(tree135.provideStatus), 2);
+
+    let tree284 = await treeFactoryInstance.treeData(284);
+
+    assert.equal(Number(tree284.provideStatus), 2);
+
+    let tree285 = await treeFactoryInstance.treeData(285);
+
+    assert.equal(Number(tree285.provideStatus), 0);
+  });
+
   it("buyed Tree should be in incremental sell", async () => {
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
@@ -588,6 +699,15 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.buyTree(101, {
       from: userAccount3,
     });
+
+    //////////--------------check tree owner
+    let addressGetToken101 = await treeTokenInstance.ownerOf(101);
+
+    assert.equal(addressGetToken101, userAccount3, "1.mint not true");
+
+    let tree101 = await treeFactoryInstance.treeData(101);
+
+    assert.equal(Number(tree101.provideStatus), 0);
 
     ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==101)
 
@@ -752,6 +872,17 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.buyTree(120, {
       from: userAccount3,
     });
+
+    //////////--------------check tree owner
+    let addressGetToken120 = await treeTokenInstance.ownerOf(120);
+
+    assert.equal(addressGetToken120, userAccount3, "2.mint not true");
+
+    let tree120 = await treeFactoryInstance.treeData(120);
+
+    assert.equal(Number(tree120.provideStatus), 0);
+
+    ///////////////////
 
     let funderBalance3 = await wethInstance.balanceOf(userAccount3);
 
@@ -1222,5 +1353,104 @@ contract("IncrementalSell", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE);
+  });
+
+  ////////////////--------------------------------------------gsn------------------------------------------------
+  it("test gsn", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      20,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.addTreeFactoryRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////------------------------------handle gsn---------------------------------
+
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await iSellInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(iSellInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerFunder = provider.getSigner(3);
+
+    let contractFunder = await new ethers.Contract(
+      iSellInstance.address,
+      iSellInstance.abi,
+      signerFunder
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount2,
+      }
+    );
+
+    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await contractFunder.buyTree(101);
+
+    //////////--------------check tree owner
+    let addressGetToken = await treeTokenInstance.ownerOf(101);
+
+    assert.equal(addressGetToken, userAccount2, "1.mint not true");
+
+    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+
+    console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    console.log("balanceAccountAfter", Number(balanceAccountAfter));
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "Gsn not true work"
+    );
   });
 });

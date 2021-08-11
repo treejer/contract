@@ -149,7 +149,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalSellUpdated();
     }
 
-    function buyTree(uint256 treeId) external payable ifNotPaused {
+    function buyTree(uint256 treeId) external ifNotPaused {
         //check if treeId is in this incrementalSell
         IncrementalPrice storage incPrice = incrementalPrice;
 

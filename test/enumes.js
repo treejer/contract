@@ -14,6 +14,7 @@ const CommonErrorMsg = {
   CHECK_TREE_FACTORY: "Caller is not TreeFactory",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_REGULAR_SELL: "Caller is not RegularSell",
+  CHECk_FUNDS_OR_COMMUNITY_GIFTS: "not funds or community gifts",
   INVALID_ADDRESS: "invalid address",
 };
 

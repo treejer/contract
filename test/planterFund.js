@@ -229,6 +229,56 @@ contract("PlanterFund", (accounts) => {
       "total referral fund is not ok"
     );
   });
+  it("should fail to set planter funds in invalid access1", async () => {
+    const treeId = 1;
+    const planterFund = 1000;
+    const referralFund = 500;
+
+    await planterFundInstance
+      .setPlanterFunds(treeId, planterFund, referralFund, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECk_FUNDS_OR_COMMUNITY_GIFTS);
+
+    await Common.addFundsRole(arInstance, userAccount1, deployerAccount);
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount1,
+      }
+    );
+  });
+
+  it("should fail to set planter funds in invalid access2", async () => {
+    const treeId = 1;
+    const planterFund = 1000;
+    const referralFund = 500;
+
+    await planterFundInstance
+      .setPlanterFunds(treeId, planterFund, referralFund, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECk_FUNDS_OR_COMMUNITY_GIFTS);
+
+    await Common.addCommunityGiftRole(
+      arInstance,
+      userAccount1,
+      deployerAccount
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount1,
+      }
+    );
+  });
+
   //----------------------- fund planter test ---------------------------------------//ali
   it("fund planter successfully", async () => {
     const treeId = 1;

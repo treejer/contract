@@ -783,7 +783,6 @@ contract("FinancialModel", (accounts) => {
     );
 
     const eventTx1 = await financialModelInstance.findTreeDistribution(treeId);
-    truffleAssert.eventNotEmitted(eventTx1, "DistributionModelOfTreeNotExist");
 
     assert.equal(
       Number(dmModel.planterFund),
@@ -837,7 +836,6 @@ contract("FinancialModel", (accounts) => {
       100
     );
     let eventTx2 = await financialModelInstance.findTreeDistribution(100);
-    truffleAssert.eventEmitted(eventTx2, "DistributionModelOfTreeNotExist");
 
     assert.equal(
       Number(dmModel100.planterFund),

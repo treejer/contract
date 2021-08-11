@@ -123,6 +123,8 @@ contract RegularSell is Initializable, RelayRecipient {
 
         daiToken.transferFrom(_msgSender(), address(daiFunds), _amount);
 
+        emit RegularTreeRequsted(_count, _msgSender(), _amount);
+
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
@@ -157,8 +159,6 @@ contract RegularSell is Initializable, RelayRecipient {
         }
 
         lastSoldRegularTree = tempLastRegularSold;
-
-        emit RegularTreeRequsted(_count, _msgSender(), _amount);
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than

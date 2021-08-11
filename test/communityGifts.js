@@ -52,6 +52,8 @@ contract("CommunityGifts", (accounts) => {
 
   beforeEach(async () => {
     const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
+    const initialPlanterFund = web3.utils.toWei("0.5");
+    const initialReferralFund = web3.utils.toWei("0.1");
 
     //------------------ deploy contracts
 
@@ -63,7 +65,7 @@ contract("CommunityGifts", (accounts) => {
 
     communityGiftsInstance = await deployProxy(
       CommunityGifts,
-      [arInstance.address, expireDate],
+      [arInstance.address, expireDate, initialPlanterFund, initialReferralFund],
       {
         initializer: "initialize",
         from: deployerAccount,

@@ -42,7 +42,6 @@ contract FinancialModel is Initializable {
 
     mapping(uint256 => FundDistribution) public fundDistributions;
 
-    event DistributionModelOfTreeNotExist(string description);
     event FundDistributionModelAssigned(
         uint256 startingTreeId,
         uint256 endingTreeId,
@@ -232,6 +231,7 @@ contract FinancialModel is Initializable {
      */
     function findTreeDistribution(uint256 _treeId)
         external
+        view
         returns (
             uint16 planterFund,
             uint16 referralFund,
@@ -266,12 +266,6 @@ contract FinancialModel is Initializable {
                     fundDistribution.reserveFund2
                 );
             }
-        }
-
-        if (_treeId > maxAssignedIndex) {
-            emit DistributionModelOfTreeNotExist(
-                "there is no assigned values for this treeId"
-            );
         }
 
         require(i > 0, "invalid fund model");

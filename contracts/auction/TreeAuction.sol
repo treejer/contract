@@ -237,8 +237,6 @@ contract TreeAuction is Initializable, RelayRecipient {
         require(block.timestamp >= auction.endDate, "Auction not yet ended");
 
         if (auction.bidder != address(0)) {
-            treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
-
             wethToken.transfer(address(wethFunds), auction.highestBid);
 
             (
@@ -265,7 +263,7 @@ contract TreeAuction is Initializable, RelayRecipient {
                 reserveFund2
             );
 
-            // wethFunds.fundTree{value: auction.highestBid}(auction.treeId);
+            treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
             emit AuctionSettled(
                 _auctionId,

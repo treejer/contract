@@ -54,10 +54,12 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * @dev initialize accessRestriction contract and set true for isTreeAuction
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress, uint256 _expireDate)
-        public
-        initializer
-    {
+    function initialize(
+        address _accessRestrictionAddress,
+        uint256 _expireDate,
+        uint256 _planterFund,
+        uint256 _referralFund
+    ) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -68,6 +70,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
 
         expireDate = _expireDate;
+        planterFund = _planterFund;
+        referralFund = _referralFund;
     }
 
     /**
@@ -159,10 +163,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
 
-        treeFactory.updateOwner(treeId, _msgSender(), 3);
-
-        //call planter contract
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
+
+        treeFactory.updateOwner(treeId, _msgSender(), 3);
 
         emit TreeClaimed(treeId);
     }
@@ -190,10 +193,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
 
-        treeFactory.updateOwner(treeId, _giftee, 3);
-
-        //call planter contract
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
+
+        treeFactory.updateOwner(treeId, _giftee, 3);
 
         emit TreeTransfered(treeId);
     }

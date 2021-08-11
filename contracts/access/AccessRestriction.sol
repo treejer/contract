@@ -9,13 +9,13 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
     bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
-    bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
-    bytes32 public constant COMMUNITY_GIFTS = keccak256("COMMUNITY_GIFTS");
+    bytes32 public constant COMMUNITY_GIFTS_ROLE =
+        keccak256("COMMUNITY_GIFTS_ROLE");
     bytes32 public constant REGULAR_SELL_ROLE = keccak256("REGULAR_SELL_ROLE");
     bytes32 public constant FUNDS_ROLE = keccak256("FUNDS_ROLE");
-
     bytes32 public constant INCREMENTAL_SELL_ROLE =
         keccak256("INCREMENTAL_SELL_ROLE");
+
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right contract in our setUpdateFactoryAddress() call.
     bool public isAccessRestriction;
@@ -111,14 +111,6 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         return hasRole(TREE_FACTORY_ROLE, _address);
     }
 
-    function ifTreasury(address _address) public view {
-        require(isTreasury(_address), "Caller is not Treasury");
-    }
-
-    function isTreasury(address _address) public view returns (bool) {
-        return hasRole(TREASURY_ROLE, _address);
-    }
-
     function ifRegularSell(address _address) public view {
         require(isRegularSell(_address), "Caller is not RegularSell");
     }
@@ -140,7 +132,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     }
 
     function isCommunityGifts(address _address) public view returns (bool) {
-        return hasRole(COMMUNITY_GIFTS, _address);
+        return hasRole(COMMUNITY_GIFTS_ROLE, _address);
     }
 
     function ifAdminOrCommunityGifts(address _address) public view {

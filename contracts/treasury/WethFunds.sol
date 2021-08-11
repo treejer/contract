@@ -21,7 +21,7 @@ contract WethFunds is Initializable {
 
     TotalFunds public totalFunds;
 
-    address public DaiAddress;
+    address public daiAddress;
 
     address public treeResearchAddress;
     address public localDevelopAddress;
@@ -96,7 +96,7 @@ contract WethFunds is Initializable {
     }
 
     function setDaiAddress(address _daiAddress) external onlyAdmin {
-        DaiAddress = _daiAddress;
+        daiAddress = _daiAddress;
     }
 
     function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
@@ -203,17 +203,17 @@ contract WethFunds is Initializable {
     ) external {
         accessRestriction.ifIncrementalSellOrAuctionOrRegularSell(msg.sender);
 
-        totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
+        totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
 
         totalFunds.localDevelop += (_amount * _localDevelop) / 10000;
+
+        totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
+
+        totalFunds.treejerDevelop += (_amount * _treejerDevelop) / 10000;
 
         totalFunds.reserveFund1 += (_amount * _reserveFund1) / 10000;
 
         totalFunds.reserveFund2 += (_amount * _reserveFund2) / 10000;
-
-        totalFunds.treejerDevelop += (_amount * _treejerDevelop) / 10000;
-
-        totalFunds.treeResearch += ((_amount * _treeResearch) / 10000);
 
         _swap(_treeId, _amount, _planterFund, _referralFund);
     }
@@ -398,7 +398,7 @@ contract WethFunds is Initializable {
         path = new address[](2);
 
         path[0] = address(wethToken);
-        path[1] = DaiAddress;
+        path[1] = daiAddress;
 
         wethToken.approve(address(uniswapRouter), sumFund);
 

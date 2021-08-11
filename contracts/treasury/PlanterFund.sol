@@ -187,10 +187,8 @@ contract PlanterFund is Initializable, RelayRecipient {
 
         balances[_msgSender()] -= _amount;
 
-        if (daiToken.transfer(_msgSender(), _amount)) {
-            emit PlanterBalanceWithdrawn(_amount, _msgSender());
-        } else {
-            balances[_msgSender()] += _amount;
-        }
+        daiToken.transfer(_msgSender(), _amount);
+
+        emit PlanterBalanceWithdrawn(_amount, _msgSender());
     }
 }

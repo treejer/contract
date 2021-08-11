@@ -7,10 +7,11 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../tree/ITreeAttribute.sol";
 import "../treasury/IPlanterFund.sol";
+import "../gsn/RelayRecipient.sol";
 
 /** @title CommunityGifts */
 
-contract CommunityGifts is Initializable {
+contract CommunityGifts is Initializable, RelayRecipient {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
 
     bool public isCommunityGifts;
@@ -40,7 +41,7 @@ contract CommunityGifts is Initializable {
     event TreeTransfered(uint256 treeId);
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
@@ -67,6 +68,15 @@ contract CommunityGifts is Initializable {
         accessRestriction = candidateContract;
 
         expireDate = _expireDate;
+    }
+
+    /**
+     * @dev admin set the trustedForwarder adress
+     * @param _address is the address of trusted forwarder
+     */
+
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
     }
 
     /**
@@ -135,11 +145,11 @@ contract CommunityGifts is Initializable {
     }
 
     function claimTree() external {
-        CommunityGift storage communityGift = communityGifts[msg.sender];
+        CommunityGift storage communityGift = communityGifts[_msgSender()];
 
         require(block.timestamp <= expireDate, "CommunityGift ended");
-        require(communityGifts[msg.sender].exist, "User not exist");
-        require(!communityGifts[msg.sender].claimed, "Claimed before");
+        require(communityGifts[_msgSender()].exist, "User not exist");
+        require(!communityGifts[_msgSender()].claimed, "Claimed before");
 
         uint256 treeId = 11 + claimedCount;
 
@@ -149,7 +159,7 @@ contract CommunityGifts is Initializable {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
 
-        treeFactory.updateOwner(treeId, msg.sender, 3);
+        treeFactory.updateOwner(treeId, _msgSender(), 3);
 
         //call planter contract
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);

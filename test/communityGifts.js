@@ -14,18 +14,18 @@ const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
+
 const {
   CommonErrorMsg,
   TimeEnumes,
   CommunityGiftErrorMsg,
   TreeAttributeErrorMsg,
 } = require("./enumes");
-
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
 
 contract("CommunityGifts", (accounts) => {
   let communityGiftsInstance;
@@ -152,7 +152,7 @@ contract("CommunityGifts", (accounts) => {
   });
 
   afterEach(async () => {});
-  // //////////////////------------------------------------ deploy successfully ----------------------------------------//
+  //////////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
     const address = communityGiftsInstance.address;
@@ -701,6 +701,7 @@ contract("CommunityGifts", (accounts) => {
   ////////////////////// -------------------------------- claim tree ----------------------------------------
 
   it("1-should claimTree succesfully and check data to be ok", async () => {
+    //TODO:
     const giftee1 = userAccount1;
     const symbol1 = 1234554321;
 
@@ -1840,5 +1841,92 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_RESERVED);
+  });
+
+  ////////////////--------------------------------------------gsn------------------------------------------------
+  it("test gsn", async () => {
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
+    // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
+    // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await communityGiftsInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setWhitelistTarget(communityGiftsInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerGiftee = provider.getSigner(3);
+
+    let contractCommunityGift = await new ethers.Contract(
+      communityGiftsInstance.address,
+      communityGiftsInstance.abi,
+      signerGiftee
+    );
+
+    const giftee = userAccount2;
+    const symbol = 1234554321;
+
+    //////////--------------add giftee by admin
+
+    await communityGiftsInstance.setGiftsRange(11, 13, {
+      from: deployerAccount,
+    });
+
+    await communityGiftsInstance.updateGiftees(giftee, symbol, {
+      from: deployerAccount,
+    });
+
+    await communityGiftsInstance.setPrice(
+      web3.utils.toWei("4.9"), //planter share
+      web3.utils.toWei("2.1"), //referral share
+      { from: deployerAccount }
+    );
+
+    await Common.addCommunityGiftRole(
+      arInstance,
+      communityGiftsInstance.address,
+      deployerAccount
+    );
+
+    let balanceAccountBefore = await web3.eth.getBalance(giftee);
+
+    await contractCommunityGift.claimTree({
+      from: giftee,
+    });
+
+    let balanceAccountAfter = await web3.eth.getBalance(giftee);
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "gsn not true work"
+    );
   });
 });

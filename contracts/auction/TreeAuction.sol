@@ -9,10 +9,11 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IFinancialModel.sol";
 import "../treasury/IWethFunds.sol";
+import "../gsn/RelayRecipient.sol";
 
 /** @title Tree Auction */
 
-contract TreeAuction is Initializable {
+contract TreeAuction is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private auctionId;
@@ -62,7 +63,7 @@ contract TreeAuction is Initializable {
     );
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
@@ -82,6 +83,15 @@ contract TreeAuction is Initializable {
         require(candidateContract.isAccessRestriction());
         isTreeAuction = true;
         accessRestriction = candidateContract;
+    }
+
+    /**
+     * @dev admin set the trustedForwarder adress
+     * @param _address is the address of trusted forwarder
+     */
+
+    function setTrustedForwarder(address _address) external onlyAdmin {
+        trustedForwarder = _address;
     }
 
     /**
@@ -192,22 +202,22 @@ contract TreeAuction is Initializable {
         );
 
         require(
-            wethToken.balanceOf(msg.sender) >= _amount,
+            wethToken.balanceOf(_msgSender()) >= _amount,
             "insufficient balance"
         );
 
-        wethToken.transferFrom(msg.sender, address(this), _amount);
+        wethToken.transferFrom(_msgSender(), address(this), _amount);
 
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
         _storageAuction.highestBid = _amount;
-        _storageAuction.bidder = msg.sender;
+        _storageAuction.bidder = _msgSender();
 
         emit HighestBidIncreased(
             _auctionId,
             _storageAuction.treeId,
-            msg.sender,
+            _msgSender(),
             _amount
         );
 

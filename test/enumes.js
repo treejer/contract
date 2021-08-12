@@ -15,6 +15,8 @@ const CommonErrorMsg = {
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_REGULAR_SELL: "Caller is not RegularSell",
   CHECk_FUNDS_OR_COMMUNITY_GIFTS: "not funds or community gifts",
+  CHECK_AUCTION_OR_COMMUNITY_GIFTS_OR_INCREMENTAL_SELL:
+    "not auction or community gifts or incrementalSell",
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",

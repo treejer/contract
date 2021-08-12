@@ -4835,7 +4835,9 @@ contract("TreeFactory", (accounts) => {
       .updateOwner(1, userAccount4, 2, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(
+        CommonErrorMsg.CHECK_AUCTION_OR_COMMUNITY_GIFTS_OR_INCREMENTAL_SELL
+      );
   });
 
   it("updateOwner should be fail because token mint for another user", async () => {

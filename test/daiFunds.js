@@ -301,7 +301,7 @@ contract("DaiFunds", (accounts) => {
     await daiInstance.setMint(daiFundsInstance.address, amount);
 
     ////--------------------call fund tree by auction----------------
-    await daiFundsInstance.fundTree(
+    const eventTx = await daiFundsInstance.fundTree(
       treeId,
       amount,
       planterFund,
@@ -314,6 +314,10 @@ contract("DaiFunds", (accounts) => {
       reserveFund2,
       { from: userAccount3 }
     );
+
+    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
+      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
+    });
 
     let expected = {
       planterFund: (planterFund * amount) / 10000,
@@ -493,7 +497,7 @@ contract("DaiFunds", (accounts) => {
     await daiInstance.setMint(daiFundsInstance.address, amount2);
 
     ////--------------------call fund tree by auction----------------
-    await daiFundsInstance.fundTree(
+    const eventTx1 = await daiFundsInstance.fundTree(
       treeId1,
       amount1,
       planterFund1,
@@ -507,7 +511,7 @@ contract("DaiFunds", (accounts) => {
       { from: userAccount3 }
     );
 
-    await daiFundsInstance.fundTree(
+    const eventTx2 = await daiFundsInstance.fundTree(
       treeId2,
       amount2,
       planterFund2,
@@ -520,6 +524,18 @@ contract("DaiFunds", (accounts) => {
       reserveFund2_2,
       { from: userAccount3 }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId1 && Number(ev.amount) == Number(amount1)
+      );
+    });
+
+    truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId2 && Number(ev.amount) == Number(amount2)
+      );
+    });
 
     let expected1 = {
       planterFund: (planterFund1 * amount1) / 10000,

@@ -66,6 +66,8 @@ contract DaiFunds is Initializable {
         string reason
     );
 
+    event TreeFunded(uint256 treeId, uint256 amount);
+
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
@@ -206,6 +208,8 @@ contract DaiFunds is Initializable {
         );
 
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
+
+        emit TreeFunded(_treeId, _amount);
     }
 
     /**

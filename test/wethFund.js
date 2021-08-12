@@ -379,10 +379,6 @@ contract("WethFunds", (accounts) => {
       { from: userAccount3 }
     );
 
-    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
-      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
-    });
-
     let expected = {
       planterFund: (40 * amount) / 100,
       referralFund: (20 * amount) / 100,
@@ -393,6 +389,14 @@ contract("WethFunds", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
+    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId &&
+        Number(ev.amount) == Number(amount) &&
+        Number(ev.planterPart) ==
+          Math.add(Number(expected.planterFund), Number(expected.referralFund))
+      );
+    });
 
     //check wethFund totalFunds
     let totalFunds = await wethFunds.totalFunds();
@@ -978,13 +982,49 @@ contract("WethFunds", (accounts) => {
       }
     );
 
+    let expected1 = {
+      planterFund: (planterFund * amount) / 10000,
+      referralFund: (referralFund * amount) / 10000,
+      treeResearch: (treeResearch * amount) / 10000,
+      localDevelop: (localDevelop * amount) / 10000,
+      rescueFund: (rescueFund * amount) / 10000,
+      treejerDevelop: (treejerDevelop * amount) / 10000,
+      reserveFund1: (reserveFund1 * amount) / 10000,
+      reserveFund2: (reserveFund2 * amount) / 10000,
+    };
+
+    let expected2 = {
+      planterFund: (planterFund * amount1) / 10000,
+      referralFund: (referralFund * amount1) / 10000,
+      treeResearch: (treeResearch * amount1) / 10000,
+      localDevelop: (localDevelop * amount1) / 10000,
+      rescueFund: (rescueFund * amount1) / 10000,
+      treejerDevelop: (treejerDevelop * amount1) / 10000,
+      reserveFund1: (reserveFund1 * amount1) / 10000,
+      reserveFund2: (reserveFund2 * amount1) / 10000,
+    };
+
     truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
-      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
+      return (
+        Number(ev.treeId) == treeId &&
+        Number(ev.amount) == Number(amount) &&
+        Number(ev.planterPart) ==
+          Math.add(
+            Number(expected1.planterFund),
+            Number(expected1.referralFund)
+          )
+      );
     });
 
     truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
       return (
-        Number(ev.treeId) == treeId2 && Number(ev.amount) == Number(amount1)
+        Number(ev.treeId) == treeId2 &&
+        Number(ev.amount) == Number(amount1) &&
+        Number(ev.planterPart) ==
+          Math.add(
+            Number(expected2.planterFund),
+            Number(expected2.referralFund)
+          )
       );
     });
 

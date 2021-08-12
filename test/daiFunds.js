@@ -315,10 +315,6 @@ contract("DaiFunds", (accounts) => {
       { from: userAccount3 }
     );
 
-    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
-      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
-    });
-
     let expected = {
       planterFund: (planterFund * amount) / 10000,
       referralFund: (referralFund * amount) / 10000,
@@ -329,6 +325,15 @@ contract("DaiFunds", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
+
+    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId &&
+        Number(ev.amount) == Number(amount) &&
+        Number(ev.planterPart) ==
+          Math.add(Number(expected.planterFund), Number(expected.referralFund))
+      );
+    });
 
     let daiFundBalance = await daiInstance.balanceOf(daiFundsInstance.address);
 
@@ -525,18 +530,6 @@ contract("DaiFunds", (accounts) => {
       { from: userAccount3 }
     );
 
-    truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
-      return (
-        Number(ev.treeId) == treeId1 && Number(ev.amount) == Number(amount1)
-      );
-    });
-
-    truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
-      return (
-        Number(ev.treeId) == treeId2 && Number(ev.amount) == Number(amount2)
-      );
-    });
-
     let expected1 = {
       planterFund: (planterFund1 * amount1) / 10000,
       referralFund: (referralFund1 * amount1) / 10000,
@@ -558,6 +551,30 @@ contract("DaiFunds", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
+
+    truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId1 &&
+        Number(ev.amount) == Number(amount1) &&
+        Number(ev.planterPart) ==
+          Math.add(
+            Number(expected1.planterFund),
+            Number(expected1.referralFund)
+          )
+      );
+    });
+
+    truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId2 &&
+        Number(ev.amount) == Number(amount2) &&
+        Number(ev.planterPart) ==
+          Math.add(
+            Number(expected2.planterFund),
+            Number(expected2.referralFund)
+          )
+      );
+    });
 
     let daiFundBalance = await daiInstance.balanceOf(daiFundsInstance.address);
 

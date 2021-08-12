@@ -163,5 +163,5 @@ interface IDaiFunds {
         string reason
     );
 
-    event TreeFunded(uint256 treeId, uint256 amount);
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 }

@@ -24,7 +24,7 @@ const Common = require("./common");
 
 const { CommonErrorMsg, TreeAttributeErrorMsg } = require("./enumes");
 
-contract("IncrementalSell", (accounts) => {
+contract("TreeAttribute", (accounts) => {
   let iSellInstance;
   let arInstance;
 
@@ -384,7 +384,6 @@ contract("IncrementalSell", (accounts) => {
     );
 
     await iSellInstance.buyTree(102, {
-      value: web3.utils.toWei("0.01"),
       from: userAccount3,
     });
 
@@ -501,7 +500,6 @@ contract("IncrementalSell", (accounts) => {
     );
 
     await iSellInstance.buyTree(102, {
-      value: web3.utils.toWei("0.01"),
       from: userAccount3,
     });
 

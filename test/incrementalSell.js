@@ -1158,8 +1158,19 @@ contract("IncrementalSell", (accounts) => {
 
     ////--------------------step5------------------------
 
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
     await iSellInstance
-      .buyTree(201, { value: web3.utils.toWei("0.0099"), from: userAccount3 })
+      .buyTree(201, { from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
   });
 

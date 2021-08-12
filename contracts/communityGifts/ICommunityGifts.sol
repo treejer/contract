@@ -11,6 +11,14 @@ interface ICommunityGifts {
 
     function referralFund() external view returns (uint256);
 
+    function accessRestriction() external view returns (address);
+
+    function treeFactory() external view returns (address);
+
+    function planterFundContract() external view returns (address);
+
+    function treeAttribute() external view returns (address);
+
     function communityGifts(address _address)
         external
         view
@@ -25,6 +33,8 @@ interface ICommunityGifts {
     function expireDate() external view returns (uint256);
 
     function giftCount() external view returns (uint256);
+
+    function setTrustedForwarder(address _address) external;
 
     function setTreeAttributesAddress(address _address) external;
 

@@ -10,7 +10,38 @@ interface IPlanterFund {
      */
     function isPlanterFund() external view returns (bool);
 
+    function accessRestriction() external view returns (address);
+
+    function planterContract() external view returns (address);
+
+    function daiToken() external view returns (address);
+
+    /**
+     * @dev return totalFunds struct data containing {plnaterFund} {referralFund}
+     * {localDevelop}
+     */
+    function totalFunds()
+        external
+        view
+        returns (
+            uint256 planterFund,
+            uint256 referralFund,
+            uint256 localDevelop
+        );
+
+    function planterFunds(uint256 _treeId) external view returns (uint256);
+
+    function referralFunds(uint256 _treeId) external view returns (uint256);
+
+    function plantersPaid(uint256 _treeId) external view returns (uint256);
+
+    function balances(address _planterAddress) external view returns (uint256);
+
+    function setTrustedForwarder(address _address) external;
+
     function setPlanterContractAddress(address _address) external;
+
+    function setDaiTokenAddress(address _address) external;
 
     function setPlanterFunds(
         uint256 _treeId,
@@ -25,4 +56,12 @@ interface IPlanterFund {
     ) external;
 
     function withdrawPlanterBalance(uint256 _amount) external;
+
+    event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
+    event PlanterBalanceWithdrawn(uint256 amount, address account);
+    event PlanterFundSet(
+        uint256 treeId,
+        uint256 planterAmount,
+        uint256 referralAmount
+    );
 }

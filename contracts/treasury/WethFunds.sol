@@ -19,9 +19,9 @@ contract WethFunds is Initializable {
     IERC20Upgradeable public wethToken;
     IUniswapV2Router02 public uniswapRouter;
 
-    TotalFunds public totalFunds;
-
     address public daiAddress;
+
+    TotalFunds public totalFunds;
 
     address public treeResearchAddress;
     address public localDevelopAddress;

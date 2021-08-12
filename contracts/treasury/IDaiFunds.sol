@@ -10,7 +10,11 @@ interface IDaiFunds {
      */
     function isDaiFunds() external view returns (bool);
 
-    function maxAssignedIndex() external view returns (bool);
+    function accessRestriction() external view returns (address);
+
+    function planterFundContract() external view returns (address);
+
+    function daiToken() external view returns (address);
 
     /**
      * @dev return totalFunds struct data containing {plnaterFund} {referralFund}
@@ -158,4 +162,6 @@ interface IDaiFunds {
         address account,
         string reason
     );
+
+    event TreeFunded(uint256 treeId, uint256 amount);
 }

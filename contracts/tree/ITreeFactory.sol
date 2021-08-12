@@ -5,6 +5,14 @@ pragma solidity ^0.8.6;
 interface ITreeFactory {
     function isTreeFactory() external view returns (bool);
 
+    function accessRestriction() external view returns (address);
+
+    function treeToken() external view returns (address);
+
+    function planterFund() external view returns (address);
+
+    function planter() external view returns (address);
+
     function lastRegularPlantedTree() external view returns (uint256);
 
     function treeData(uint256 _treeId)
@@ -38,6 +46,8 @@ interface ITreeFactory {
             address,
             string memory
         );
+
+    function setTrustedForwarder(address _address) external;
 
     function setPlanterFundAddress(address _address) external;
 
@@ -73,15 +83,15 @@ interface ITreeFactory {
         uint16 _mintStatus
     ) external;
 
+    function updateAvailability(uint256 _treeId) external;
+
+    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
+
     function manageProvideStatus(
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint32 _provideStatus
     ) external returns (bool);
-
-    function updateAvailability(uint256 _treeId) external;
-
-    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
 
     function checkMintStatus(uint256 _treeId, address _buyer)
         external

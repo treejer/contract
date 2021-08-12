@@ -5,31 +5,35 @@ pragma solidity ^0.8.6;
 interface IPlanter {
     function isPlanter() external view returns (bool);
 
-    function memberOf(address _planterAddress) external view returns (address);
+    function accessRestriction() external view returns (address);
+
+    function planters(address _planterAddress)
+        external
+        view
+        returns (
+            uint8 planterType,
+            uint8 status,
+            uint16 countryCode,
+            uint32 score,
+            uint32 capacity,
+            uint32 plantedCount,
+            uint64 longitude,
+            uint64 latitude
+        );
 
     function refferedBy(address _planterAddress)
         external
         view
         returns (address);
 
+    function memberOf(address _planterAddress) external view returns (address);
+
     function organizationRules(
         address _organizationAddress,
         address _planterAddress
     ) external view returns (uint256);
 
-    function planters(address _planterAddress)
-        external
-        view
-        returns (
-            uint8,
-            uint8,
-            uint16,
-            uint32,
-            uint32,
-            uint32,
-            uint64,
-            uint64
-        );
+    function setTrustedForwarder(address _address) external;
 
     function planterJoin(
         uint8 _planterType,

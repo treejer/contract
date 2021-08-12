@@ -4,6 +4,16 @@ pragma solidity >=0.7.6;
 interface IIncrementalSell {
     function isIncrementalSell() external view returns (bool);
 
+    function accessRestriction() external view returns (address);
+
+    function treeFactory() external view returns (address);
+
+    function wethFunds() external view returns (address);
+
+    function financialModel() external view returns (address);
+
+    function wethToken() external view returns (address);
+
     function incrementalPrice()
         external
         view
@@ -16,6 +26,8 @@ interface IIncrementalSell {
         );
 
     function lastBuy(address _buyer) external view returns (uint256);
+
+    function setTrustedForwarder(address _address) external;
 
     function setTreeFactoryAddress(address _address) external;
 

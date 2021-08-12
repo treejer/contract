@@ -9,6 +9,16 @@ interface ITreeAuction {
      */
     function isTreeAuction() external view returns (bool);
 
+    function accessRestriction() external view returns (address);
+
+    function treeFactory() external view returns (address);
+
+    function wethFunds() external view returns (address);
+
+    function financialModel() external view returns (address);
+
+    function wethToken() external view returns (address);
+
     function auctions(uint256 _auctionId)
         external
         view
@@ -20,6 +30,8 @@ interface ITreeAuction {
             uint256,
             uint256
         );
+
+    function setTrustedForwarder(address _address) external;
 
     /** @dev set {_address to TreeFactory contract address} */
     function setTreeFactoryAddress(address _address) external;

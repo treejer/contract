@@ -9,6 +9,18 @@ interface IRegularSell {
      */
     function isRegularSell() external view returns (bool);
 
+    function accessRestriction() external view returns (address);
+
+    function treeFactory() external view returns (address);
+
+    function daiFunds() external view returns (address);
+
+    function financialModel() external view returns (address);
+
+    function daiToken() external view returns (address);
+
+    function setTrustedForwarder(address _address) external;
+
     /** @dev return last sold regular tree
      * @return last sold regular tree
      */

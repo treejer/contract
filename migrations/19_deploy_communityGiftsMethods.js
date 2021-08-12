@@ -1,29 +1,33 @@
 require("dotenv").config();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
+
 const CommunityGifts = artifacts.require("CommunityGifts.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
+const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  let accessRestrictionAddress = AccessRestriction.address;
+  const isLocal = network === "development";
 
-  const now = parseInt(new Date().getTime() / 1000);
-  const expireDate = now + 30 * 24 * 60 * 60; //one month after now
-  const initialPlanterFund = web3.utils.toWei("0.5");
-  const initialReferralFund = web3.utils.toWei("0.1");
+  let treeFactoryAddress = TreeFactory.address;
+  let planterFundsAddress = PlanterFund.address;
+  let treeAttributeAddress = TreeAttribute.address;
 
-  console.log("Deploying Community Gifts...");
-  await deployProxy(
-    CommunityGifts,
-    [
-      accessRestrictionAddress,
-      expireDate,
-      initialPlanterFund,
-      initialReferralFund,
-    ],
-    {
-      deployer,
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
-    }
-  ).then(() => {});
+  let trustedForwarder;
+  let relayHub;
+
+  if (isLocal) {
+    trustedForwarder = require("../build/gsn/Forwarder.json").address;
+    relayHub = require("../build/gsn/RelayHub.json").address;
+  } else {
+    trustedForwarder = process.env.GSN_FORWARDER;
+    relayHub = process.env.GSN_RELAY_HUB;
+  }
+
+  console.log("Call CommunityGifts Methods...");
+  await CommunityGifts.deployed().then(async (instance) => {
+    await instance.setTrustedForwarder(trustedForwarder);
+    await instance.setTreeAttributesAddress(treeAttributeAddress);
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
+    await instance.setPlanterFundAddress(planterFundsAddress);
+  });
 };

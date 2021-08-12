@@ -19,11 +19,11 @@ interface IIncrementalSell {
 
     function setTreeFactoryAddress(address _address) external;
 
-    function setTreeTokenAddress(address _address) external;
+    function setWethFundsAddress(address _address) external;
 
-    function buyTree(uint256 treeId) external payable;
+    function setWethTokenAddress(address _address) external;
 
-    function updateIncrementalEnd(uint256 treeCount) external;
+    function setFinancialModelAddress(address _address) external;
 
     function addTreeSells(
         uint256 startTree,
@@ -32,6 +32,10 @@ interface IIncrementalSell {
         uint64 steps,
         uint64 incrementRate
     ) external;
+
+    function updateIncrementalEnd(uint256 treeCount) external;
+
+    function buyTree(uint256 treeId) external;
 
     event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
     event IncrementalSellUpdated();

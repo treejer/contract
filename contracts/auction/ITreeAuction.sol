@@ -49,11 +49,11 @@ interface ITreeAuction {
 
     /** @dev bid to auctions {_auctionId}  by user in a time beetwen start time and end time of auction
      * and return the old bidder's amount to account
-     * NOTE its require to send at least {higestBid + bidInterval } value.
+     * NOTE its require that {_amount} be at least {higestBid + bidInterval }.
      * NOTE check if less than 10 minutes left to end of auction add 10 minutes to the end date of auction
      * emit a {HighestBidIncreased} event
      */
-    function bid(uint256 _auctionId) external payable;
+    function bid(uint256 _auctionId, uint256 _amount) external;
 
     /** @dev everyone can call this method after
      * auction end time and if auction have bidder , transfer owner of tree to bidder and fund tree.
@@ -97,15 +97,4 @@ interface ITreeAuction {
      * {auctionId} is the number of auction
      */
     event AuctionCreated(uint256 auctionId);
-
-    /**
-     * @dev emitted when automatic withdraw of older bid fail
-     * {auctionId} is id of auction and {bidder} is the old bidder to charge automatically with
-     *  amount {amount}
-     */
-    event AuctionWithdrawFaild(
-        uint256 auctionId,
-        address bidder,
-        uint256 amount
-    );
 }

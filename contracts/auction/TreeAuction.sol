@@ -56,11 +56,6 @@ contract TreeAuction is Initializable, RelayRecipient {
     event AuctionCreated(uint256 auctionId);
     event AuctionEnded(uint256 auctionId, uint256 treeId);
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
-    event AuctionWithdrawFaild(
-        uint256 auctionId,
-        address bidder,
-        uint256 amount
-    );
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());

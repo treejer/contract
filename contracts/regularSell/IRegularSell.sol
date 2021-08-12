@@ -24,10 +24,28 @@ interface IRegularSell {
      */
     function setTreeFactoryAddress(address _address) external;
 
+    /** @dev set daiFunds contract address
+     * @param _address daiFunds contract address
+     */
+
+    function setDaiFundsAddress(address _address) external;
+
+    /** @dev set daiToken address
+     * @param _address  daiToken  address
+     */
+    function setDaiTokenAddress(address _address) external;
+
+    /** @dev set financialModel contract address
+     * @param _address financialModel contract address
+     */
+
+    function setFinancialModelAddress(address _address) external;
+
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      * NOTE emit a {TreePriceUpdated} event
      */
+
     function setPrice(uint256 _price) external;
 
     /** @dev request {_count} trees and the paid amount must be more than
@@ -36,7 +54,7 @@ interface IRegularSell {
      * NOTE emit a {RegularTreeRequsted} event
     
      */
-    function requestTrees(uint256 _count) external payable;
+    function requestTrees(uint256 _count) external;
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
      * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to make sure that
@@ -44,7 +62,7 @@ interface IRegularSell {
      * @param _treeId is the id of tree requested by user
      * NOTE emit a {RegularTreeRequstedById} event
      */
-    function requestByTreeId(uint256 _treeId) external payable;
+    function requestByTreeId(uint256 _treeId) external;
 
     /** @dev emited when price of tree change */
     event TreePriceUpdated(uint256 price);
@@ -52,12 +70,13 @@ interface IRegularSell {
     /** @dev emited when {count} trees requsted by {buyer} with amount of {amount} */
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
 
+    /** @dev emitted when each Regular Tree minted by {buyer} */
+    event RegularMint(address buyer, uint256 treeId);
+
     /** @dev emitted when tree with id {treeId} requsted by {buyer} with amount of {amount} */
     event RegularTreeRequstedById(
         uint256 treeId,
         address buyer,
         uint256 amount
     );
-    /** @dev emitted when each Regular Tree minted by {buyer} */
-    event RegularMint(address buyer, uint256 treeId);
 }

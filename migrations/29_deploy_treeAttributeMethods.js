@@ -1,18 +1,13 @@
 require("dotenv").config();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
+const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  let accessRestrictionAddress = AccessRestriction.address;
+  let treeFactoryAddress = TreeFactory.address;
 
-  console.log("Deploying TreeAttribute ...");
-  await deployProxy(TreeAttribute, [accessRestrictionAddress], {
-    deployer,
-    initializer: "initialize",
-    unsafeAllowCustomTypes: true,
-  }).then(() => {
-    treeAttributeAddress = TreeAttribute.address;
+  console.log("Call Tree Attribute Methods...");
+  await TreeAttribute.deployed().then(async (instance) => {
+    await instance.setTreeFactoryAddress(treeFactoryAddress);
   });
 };

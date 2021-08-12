@@ -1,17 +1,39 @@
 require("dotenv").config();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const FinancialModel = artifacts.require("FinancialModel.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  let accessRestrictionAddress = AccessRestriction.address;
+  console.log("Call Treasury Methods...");
 
-  console.log("Deploying FinancialModel...");
+  await FinancialModel.deployed().then(async (instance) => {
+    await instance.addFundDistributionModel(
+      4500,
+      500,
+      500,
+      1000,
+      1000,
+      2500,
+      0,
+      0,
+      {
+        from: accounts[0],
+      }
+    );
 
-  await deployProxy(FinancialModel, [accessRestrictionAddress], {
-    deployer,
-    initializer: "initialize",
-    unsafeAllowCustomTypes: true,
-  }).then(() => {});
+    await instance.assignTreeFundDistributionModel(0, 0, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(1, 9, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(10, 99, 0, {
+      from: accounts[0],
+    });
+
+    await instance.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: accounts[0],
+    });
+  });
 };

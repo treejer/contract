@@ -64,8 +64,7 @@ const TreasuryManagerErrorMsg = {
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
   INVALID_FUND_MODEL: "invalid fund model",
-  ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL:
-    "not IncrementalSell or Auction or RegularSell",
+  ONLY_AUCTION_OR_INCREAMENTAL: "not IncrementalSell or Auction",
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
   DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
 };

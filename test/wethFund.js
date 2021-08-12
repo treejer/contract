@@ -79,7 +79,7 @@ contract("WethFunds", (accounts) => {
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
     const WETHAddress = wethInstance.address;
 
-    daiInstance = await Weth.new("DAI", "dai", { from: accounts[0] });
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
     const DAIAddress = daiInstance.address;
 
     uniswapRouterInstance = await UniswapV2Router02New.new(
@@ -800,7 +800,7 @@ contract("WethFunds", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(
-        TreasuryManagerErrorMsg.ONLY_AUCTION_OR_INCREAMENTAL_OR_REGULAR_SELL
+        TreasuryManagerErrorMsg.ONLY_AUCTION_OR_INCREAMENTAL
       );
   });
 

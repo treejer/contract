@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
-import "./../uniswap/interfaces/Uniswap.sol";
+import "./interfaces/IUniswapV2Router02.sol";
 
 /** @title WethFunds Contract */
 
@@ -17,7 +17,7 @@ contract WethFunds is Initializable {
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public wethToken;
-    IUniswapV2Router public uniswapRouter;
+    IUniswapV2Router02 public uniswapRouter;
 
     TotalFunds public totalFunds;
 
@@ -75,6 +75,11 @@ contract WethFunds is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
+
+    modifier onlyIncrementalSellOrAuction() {
+        accessRestriction.ifIncrementalSellOrAuction(msg.sender);
+        _;
+    }
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -111,7 +116,7 @@ contract WethFunds is Initializable {
         external
         onlyAdmin
     {
-        IUniswapV2Router candidateContract = IUniswapV2Router(
+        IUniswapV2Router02 candidateContract = IUniswapV2Router02(
             _uniswapRouterAddress
         );
 
@@ -201,9 +206,7 @@ contract WethFunds is Initializable {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
-    ) external {
-        accessRestriction.ifIncrementalSellOrAuctionOrRegularSell(msg.sender);
-
+    ) external onlyIncrementalSellOrAuction {
         totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
 
         totalFunds.localDevelop += (_amount * _localDevelop) / 10000;

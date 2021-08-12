@@ -78,6 +78,11 @@ contract DaiFunds is Initializable {
         _;
     }
 
+    modifier onlyRegularSell() {
+        accessRestriction.ifRegularSell(msg.sender);
+        _;
+    }
+
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
         _;
@@ -184,9 +189,7 @@ contract DaiFunds is Initializable {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
-    ) external {
-        accessRestriction.ifIncrementalSellOrAuctionOrRegularSell(msg.sender);
-
+    ) external onlyRegularSell {
         totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
 
         totalFunds.localDevelop += (_amount * _localDevelop) / 10000;

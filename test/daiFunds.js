@@ -270,7 +270,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ////--------------check set role----------------
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount3, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -447,7 +447,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2_2 = 0;
 
     ////--------------check set role----------------
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount3, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -698,7 +698,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -793,7 +793,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -1012,7 +1012,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,
@@ -1143,7 +1143,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -1238,7 +1238,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -1457,7 +1457,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,
@@ -1588,7 +1588,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -1684,7 +1684,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -1897,7 +1897,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,
@@ -2028,7 +2028,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -2124,7 +2124,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -2343,7 +2343,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,
@@ -2475,7 +2475,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -2571,7 +2571,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -2789,7 +2789,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund1 = 1000;
     const reserveFund2 = 0;
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,
@@ -2921,7 +2921,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addFundsRole(
       arInstance,
@@ -3017,7 +3017,7 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
 
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
 
@@ -3236,7 +3236,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addRegularSellRole(arInstance, userAccount6, deployerAccount);
     await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
     await Common.addFundsRole(
       arInstance,

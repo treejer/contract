@@ -87,18 +87,6 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         );
     }
 
-    function ifIncrementalSellOrAuctionOrRegularSell(address _address)
-        public
-        view
-    {
-        require(
-            isIncrementalSell(_address) ||
-                isAuction(_address) ||
-                isRegularSell(_address),
-            "not IncrementalSell or Auction or RegularSell"
-        );
-    }
-
     function isIncrementalSell(address _address) public view returns (bool) {
         return hasRole(INCREMENTAL_SELL_ROLE, _address);
     }

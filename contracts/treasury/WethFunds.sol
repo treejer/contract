@@ -69,6 +69,7 @@ contract WethFunds is Initializable {
         address account,
         string reason
     );
+    event TreeFunded(uint256 treeId, uint256 amount);
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -216,6 +217,8 @@ contract WethFunds is Initializable {
         totalFunds.reserveFund2 += (_amount * _reserveFund2) / 10000;
 
         _swap(_treeId, _amount, _planterFund, _referralFund);
+
+        emit TreeFunded(_treeId, _amount);
     }
 
     /**

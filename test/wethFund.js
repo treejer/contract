@@ -365,7 +365,7 @@ contract("WethFunds", (accounts) => {
         [wethInstance.address, daiInstance.address]
       );
 
-    await wethFunds.fundTree(
+    const eventTx = await wethFunds.fundTree(
       treeId,
       amount,
       4000,
@@ -378,6 +378,10 @@ contract("WethFunds", (accounts) => {
       0,
       { from: userAccount3 }
     );
+
+    truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
+      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
+    });
 
     let expected = {
       planterFund: (40 * amount) / 100,
@@ -943,7 +947,7 @@ contract("WethFunds", (accounts) => {
 
     ////////---------------fund trees-------------------
 
-    await wethFunds.fundTree(
+    const eventTx1 = await wethFunds.fundTree(
       treeId,
       amount,
       planterFund,
@@ -958,7 +962,7 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-    await wethFunds.fundTree(
+    const eventTx2 = await wethFunds.fundTree(
       treeId2,
       amount1,
       planterFund,
@@ -973,6 +977,16 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
+      return Number(ev.treeId) == treeId && Number(ev.amount) == Number(amount);
+    });
+
+    truffleAssert.eventEmitted(eventTx2, "TreeFunded", (ev) => {
+      return (
+        Number(ev.treeId) == treeId2 && Number(ev.amount) == Number(amount1)
+      );
+    });
 
     // -------------------------- check data before withdraw -----------------
     const contractBalanceAfterFund = await wethInstance.balanceOf(

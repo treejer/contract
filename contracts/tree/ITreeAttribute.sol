@@ -2,11 +2,46 @@
 pragma solidity ^0.8.6;
 
 interface ITreeAttribute {
-    function setTreeFactoryAddress(address _address) external;
-
     function isTreeAttribute() external view returns (bool);
 
-    function reservedAttributes(uint32) external view returns (uint8);
+    function accessRestriction() external view returns (address);
+
+    function treeFactory() external view returns (address);
+
+    function rankOf(address _buyer) external view returns (uint8);
+
+    function treeAttributes(uint256 _treeId)
+        external
+        view
+        returns (
+            uint32,
+            uint32,
+            uint32,
+            uint32,
+            uint32,
+            uint32,
+            uint32,
+            uint32
+        );
+
+    function generatedAttributes(uint32 attributeId)
+        external
+        view
+        returns (uint32);
+
+    function reservedAttributes(uint32 attributeId)
+        external
+        view
+        returns (uint8);
+
+    function setTreeFactoryAddress(address _address) external;
+
+    function reserveTreeAttributes(uint32 generatedCode) external;
+
+    function freeReserveTreeAttributes(uint32 generatedCode) external;
+
+    function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
+        external;
 
     function createTreeAttributes(uint256 treeId, uint256 paidAmount)
         external
@@ -19,15 +54,6 @@ interface ITreeAttribute {
         uint64 treesOwned,
         uint64 walletSpentCount
     ) external;
-
-    function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
-        external;
-
-    function reserveTreeAttributes(uint32 generatedCode) external;
-
-    function freeReserveTreeAttributes(uint32 generatedCode) external;
-
-    function rankOf(address _buyer) external view returns (uint8);
 
     event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);

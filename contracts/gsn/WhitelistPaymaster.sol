@@ -3,8 +3,8 @@
 pragma solidity >=0.7.6;
 pragma abicoder v2;
 
-import "./externalFile/forwarder/IForwarder.sol";
-import "./externalFile/BasePaymaster.sol";
+import "./../external/gsn/forwarder/IForwarder.sol";
+import "./../external/gsn/BasePaymaster.sol";
 
 import "../access/IAccessRestriction.sol";
 

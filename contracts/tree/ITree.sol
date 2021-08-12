@@ -10,9 +10,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
 interface ITree is IERC721Upgradeable {
     function isTree() external view returns (bool);
 
-    function safeMint(address _to, uint256 _tokenId) external;
+    function accessRestriction() external view returns (address);
 
     function setBaseURI(string calldata baseURI_) external;
+
+    function safeMint(address _to, uint256 _tokenId) external;
 
     function exists(uint256 _tokenId) external view returns (bool);
 }

@@ -42,9 +42,6 @@ contract("FinancialModel", (accounts) => {
   });
   afterEach(async () => {});
 
-  /* ssss
-
-
   // //----------------------------------------- deploy successfully -----------------------------------------//
 
   it("deploys successfully", async () => {
@@ -2291,9 +2288,6 @@ contract("FinancialModel", (accounts) => {
     //   "maxAssignedIndex1 not tTrue"
     // );
   });
-
-
- ssss */
 
   ////////--------------------------- test getFindDistributionModelId --------------------------
   it("1.getFindDistributionModelId should be success", async () => {

@@ -8,7 +8,9 @@ module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
   let planterFundAddress = PlanterFund.address;
-  let daiTokenAddress = isLocal ? Dai.address : process.env.DAI_ADDRESS;
+  let daiTokenAddress = isLocal
+    ? Dai.address
+    : eval(`process.env.DAI_TOKEN_ADDRESS_${network.toUpperCase()}`);
 
   console.log("Call DaiFunds Methods...");
 

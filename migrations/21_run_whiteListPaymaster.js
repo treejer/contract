@@ -23,7 +23,6 @@ module.exports = async function (deployer, network, accounts) {
   //gsn
   let trustedForwarder;
   let relayHub;
-  let paymasterAddress = WhitelistPaymaster.address;
 
   if (isLocal) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;

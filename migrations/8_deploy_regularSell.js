@@ -11,7 +11,7 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Deploying RegularSell...");
   await deployProxy(
     RegularSell,
-    [accessRestrictionAddress, Units.convert("0.001", "eth", "wei")],
+    [accessRestrictionAddress, Units.convert("7", "eth", "wei")],
     {
       deployer,
       initializer: "initialize",

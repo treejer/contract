@@ -74,6 +74,22 @@ module.exports = async function (deployer, network, accounts) {
         testUniswapAddress = TestUniswap.address;
       });
 
+    let testUniswapInstance = await TestUniswap.deployed();
+    let wethInstance = await Weth.deployed();
+    let daiInstance = await Dai.deployed();
+
+    await wethInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("125000", "Ether")
+    );
+
+    await daiInstance.setMint(
+      testUniswapAddress,
+      web3.utils.toWei("250000000", "Ether")
+    );
+
+    await testUniswapInstance.addLiquidity();
+
     console.log("daiAddress", daiAddress);
     console.log("wethAddress", wethAddress);
     console.log("testUniswapAddress", testUniswapAddress);

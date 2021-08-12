@@ -10,7 +10,6 @@ module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
   let treeFactoryAddress = TreeFactory.address;
-  let treeFactoryAddress = TreeFactory.address;
   let financialModelAddress = FinancialModel.address;
   let wethFundsAddress = WethFunds.address;
   let wethTokenAddress;

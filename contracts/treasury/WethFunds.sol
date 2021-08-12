@@ -39,32 +39,32 @@ contract WethFunds is Initializable {
         uint256 reserveFund2;
     }
 
-    event TreeResearchWethBalanceWithdrawn(
+    event TreeResearchBalanceWithdrawn(
         uint256 amount,
         address account,
         string reason
     );
-    event LocalDevelopWethBalanceWithdrawn(
+    event LocalDevelopBalanceWithdrawn(
         uint256 amount,
         address account,
         string reason
     );
-    event RescueWethBalanceWithdrawn(
+    event RescueBalanceWithdrawn(
         uint256 amount,
         address account,
         string reason
     );
-    event TreejerDevelopWethBalanceWithdrawn(
+    event TreejerDevelopBalanceWithdrawn(
         uint256 amount,
         address account,
         string reason
     );
-    event reserveWethBalanceWithdrawn1(
+    event reserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event reserveWethBalanceWithdrawn2(
+    event reserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -239,7 +239,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(treeResearchAddress, _amount);
 
-        emit TreeResearchWethBalanceWithdrawn(
+        emit TreeResearchBalanceWithdrawn(
             _amount,
             treeResearchAddress,
             _reason
@@ -267,7 +267,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(localDevelopAddress, _amount);
 
-        emit LocalDevelopWethBalanceWithdrawn(
+        emit LocalDevelopBalanceWithdrawn(
             _amount,
             localDevelopAddress,
             _reason
@@ -295,7 +295,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(rescueFundAddress, _amount);
 
-        emit RescueWethBalanceWithdrawn(_amount, rescueFundAddress, _reason);
+        emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
     }
 
     /**
@@ -319,7 +319,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(treejerDevelopAddress, _amount);
 
-        emit TreejerDevelopWethBalanceWithdrawn(
+        emit TreejerDevelopBalanceWithdrawn(
             _amount,
             treejerDevelopAddress,
             _reason
@@ -347,11 +347,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(reserveFundAddress1, _amount);
 
-        emit reserveWethBalanceWithdrawn1(
-            _amount,
-            reserveFundAddress1,
-            _reason
-        );
+        emit reserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
 
     /**
@@ -375,11 +371,7 @@ contract WethFunds is Initializable {
 
         wethToken.transfer(reserveFundAddress2, _amount);
 
-        emit reserveWethBalanceWithdrawn2(
-            _amount,
-            reserveFundAddress2,
-            _reason
-        );
+        emit reserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 
     function _swap(
@@ -412,8 +404,8 @@ contract WethFunds is Initializable {
 
         planterFundContract.setPlanterFunds(
             _treeId,
-            (_planterFund * amounts[amounts.length - 1]) / sumPercent,
-            (_referralFund * amounts[amounts.length - 1]) / sumPercent
+            (_planterFund * amounts[1]) / sumPercent,
+            (_referralFund * amounts[1]) / sumPercent
         );
     }
 }

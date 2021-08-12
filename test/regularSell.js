@@ -355,13 +355,9 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    let requestTx = await regularSellInstance.requestTrees(
-      7,
-      web3.utils.toWei("49"),
-      {
-        from: funder,
-      }
-    );
+    let requestTx = await regularSellInstance.requestTrees(7, {
+      from: funder,
+    });
 
     for (let i = 10001; i <= 10007; i++) {
       truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
@@ -614,6 +610,10 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////--------------------- requestTrees --------------------------
 
+    await regularSellInstance.setPrice(web3.utils.toWei("8"), {
+      from: deployerAccount,
+    });
+
     let funderBalanceBefore = await daiInstance.balanceOf(funder);
 
     assert.equal(
@@ -630,13 +630,9 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    let requestTx = await regularSellInstance.requestTrees(
-      7,
-      web3.utils.toWei("56"),
-      {
-        from: funder,
-      }
-    );
+    let requestTx = await regularSellInstance.requestTrees(7, {
+      from: funder,
+    });
 
     truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
       return (
@@ -901,13 +897,9 @@ contract("regularSell", (accounts) => {
       "1-funder balance not true"
     );
 
-    let requestTx1 = await regularSellInstance.requestTrees(
-      1,
-      web3.utils.toWei("7"),
-      {
-        from: funder1,
-      }
-    );
+    let requestTx1 = await regularSellInstance.requestTrees(1, {
+      from: funder1,
+    });
 
     truffleAssert.eventEmitted(requestTx1, "RegularTreeRequsted", (ev) => {
       return (
@@ -989,13 +981,9 @@ contract("regularSell", (accounts) => {
       "3-funder balance not true"
     );
 
-    let requestTx2 = await regularSellInstance.requestTrees(
-      1,
-      web3.utils.toWei("7"),
-      {
-        from: funder2,
-      }
-    );
+    let requestTx2 = await regularSellInstance.requestTrees(1, {
+      from: funder2,
+    });
 
     truffleAssert.eventEmitted(requestTx2, "RegularTreeRequsted", (ev) => {
       return (
@@ -1075,13 +1063,9 @@ contract("regularSell", (accounts) => {
       "3-funder balance not true"
     );
 
-    let requestTx = await regularSellInstance.requestTrees(
-      1,
-      web3.utils.toWei("7"),
-      {
-        from: funder3,
-      }
-    );
+    let requestTx = await regularSellInstance.requestTrees(1, {
+      from: funder3,
+    });
 
     truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
       return (
@@ -1248,7 +1232,7 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestTrees(0, web3.utils.toWei("7"), {
+      .requestTrees(0, {
         from: funder,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
@@ -1357,7 +1341,7 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestTrees(3, web3.utils.toWei("14"), {
+      .requestTrees(3, {
         from: funder,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
@@ -1369,17 +1353,17 @@ contract("regularSell", (accounts) => {
 
     await daiInstance.approve(
       regularSellInstance.address,
-      web3.utils.toWei("32"),
+      web3.utils.toWei("14"),
       {
         from: userAccount4,
       }
     );
 
     await regularSellInstance
-      .requestTrees(3, web3.utils.toWei("14"), {
+      .requestTrees(3, {
         from: userAccount4,
       })
-      .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
+      .should.be.rejectedWith(RegularSellErrors.INVALID_APPROVE); // ssss
   });
 
   ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
@@ -1523,13 +1507,9 @@ contract("regularSell", (accounts) => {
       "1-funder balance not true"
     );
 
-    let requestTx = await regularSellInstance.requestByTreeId(
-      10001,
-      web3.utils.toWei("7"),
-      {
-        from: userAccount1,
-      }
-    );
+    let requestTx = await regularSellInstance.requestByTreeId(10001, {
+      from: userAccount1,
+    });
 
     let funder1BalanceAfter = await daiInstance.balanceOf(userAccount1);
 
@@ -1773,6 +1753,12 @@ contract("regularSell", (accounts) => {
 
     ///////////////// ----------------- request tree -------------------------------------------
 
+    await regularSellInstance.setPrice(web3.utils.toWei("10"), {
+      from: deployerAccount,
+    });
+
+    ///////////////////// ------------------------- handle tree price ------------------------
+
     //mint dai for funder
     await daiInstance.setMint(userAccount1, web3.utils.toWei("40"));
 
@@ -1792,13 +1778,9 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    const requestTx = await regularSellInstance.requestByTreeId(
-      treeId,
-      web3.utils.toWei("10"),
-      {
-        from: userAccount1,
-      }
-    );
+    const requestTx = await regularSellInstance.requestByTreeId(treeId, {
+      from: userAccount1,
+    });
 
     truffleAssert.eventEmitted(requestTx, "RegularTreeRequstedById", (ev) => {
       return (
@@ -1953,10 +1935,14 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestByTreeId(2, web3.utils.toWei("14"), { from: userAccount1 })
+      .requestByTreeId(2, { from: userAccount1 })
       .should.be.rejectedWith(RegularSellErrors.INVALID_TREE);
 
     /////////////////// ------------------ fail because of invalid amount -----------------
+
+    await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
 
     //mint dai for funder
     await daiInstance.setMint(userAccount1, web3.utils.toWei("5"));
@@ -1970,10 +1956,10 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestByTreeId(treeId, web3.utils.toWei("5"), {
+      .requestByTreeId(treeId, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
+      .should.be.rejectedWith(RegularSellErrors.ZERO_ADDRESS);
 
     ////--------------test2
     //mint dai for funder
@@ -1981,21 +1967,21 @@ contract("regularSell", (accounts) => {
 
     await daiInstance.approve(
       regularSellInstance.address,
-      web3.utils.toWei("10"),
+      web3.utils.toWei("2"),
       {
         from: userAccount1,
       }
     );
 
     await regularSellInstance
-      .requestByTreeId(treeId, web3.utils.toWei("3"), {
+      .requestByTreeId(treeId, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
+      .should.be.rejectedWith(RegularSellErrors.ZERO_ADDRESS);
 
     ////////////////////////// ----------------- fail because treeFactory address not set
 
-    await regularSellInstance.requestByTreeId(treeId, web3.utils.toWei("7"), {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
     }).should.be.rejected;
 
@@ -2019,7 +2005,7 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    await regularSellInstance.requestByTreeId(treeId, web3.utils.toWei("7"), {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
     }).should.be.rejected;
 
@@ -2033,7 +2019,7 @@ contract("regularSell", (accounts) => {
 
     ////////////////// ----------------- fail because tree is not planted -------------------
 
-    await regularSellInstance.requestByTreeId(treeId, web3.utils.toWei("7"), {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
     }).should.be.rejected;
 
@@ -2078,7 +2064,7 @@ contract("regularSell", (accounts) => {
 
     //////////--------------------------- fail because daiFunds address not set
 
-    await regularSellInstance.requestByTreeId(treeId, web3.utils.toWei("7"), {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
     }).should.be.rejected;
 
@@ -2086,7 +2072,7 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await regularSellInstance.requestByTreeId(treeId, web3.utils.toWei("7"), {
+    await regularSellInstance.requestByTreeId(treeId, {
       from: userAccount1,
     }).should.be.rejected;
 
@@ -2258,7 +2244,7 @@ contract("regularSell", (accounts) => {
 
     let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-    await contractFunder.requestTrees(1, web3.utils.toWei("7"), {
+    await contractFunder.requestTrees(1, {
       from: userAccount2,
     });
 

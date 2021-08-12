@@ -1006,7 +1006,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "TreeResearchWethBalanceWithdrawn", (ev) => {
+    truffleAssert.eventEmitted(tx, "TreeResearchBalanceWithdrawn", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == treeResearchAddress &&
@@ -1054,17 +1054,13 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(
-      tx2,
-      "TreeResearchWethBalanceWithdrawn",
-      (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == treeResearchAddress &&
-          ev.reason == withdrawReason
-        );
-      }
-    );
+    truffleAssert.eventEmitted(tx2, "TreeResearchBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance2) &&
+        ev.account == treeResearchAddress &&
+        ev.reason == withdrawReason
+      );
+    });
 
     const totalFunds3 = await wethFunds.totalFunds();
 
@@ -1444,7 +1440,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "LocalDevelopWethBalanceWithdrawn", (ev) => {
+    truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == localDevelopAddress &&
@@ -1492,17 +1488,13 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(
-      tx2,
-      "LocalDevelopWethBalanceWithdrawn",
-      (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == localDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      }
-    );
+    truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance2) &&
+        ev.account == localDevelopAddress &&
+        ev.reason == withdrawReason
+      );
+    });
 
     const totalFunds3 = await wethFunds.totalFunds();
 
@@ -1880,7 +1872,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "RescueWethBalanceWithdrawn", (ev) => {
+    truffleAssert.eventEmitted(tx, "RescueBalanceWithdrawn", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == rescueFundAddress &&
@@ -1926,7 +1918,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "RescueWethBalanceWithdrawn", (ev) => {
+    truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrawn", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == rescueFundAddress &&
@@ -2310,17 +2302,13 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(
-      tx,
-      "TreejerDevelopWethBalanceWithdrawn",
-      (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == treejerDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      }
-    );
+    truffleAssert.eventEmitted(tx, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance1) &&
+        ev.account == treejerDevelopAddress &&
+        ev.reason == withdrawReason
+      );
+    });
     const totalFunds2 = await wethFunds.totalFunds();
 
     const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
@@ -2362,17 +2350,13 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(
-      tx2,
-      "TreejerDevelopWethBalanceWithdrawn",
-      (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == treejerDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      }
-    );
+    truffleAssert.eventEmitted(tx2, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      return (
+        Number(ev.amount) == Number(withdrawBalance2) &&
+        ev.account == treejerDevelopAddress &&
+        ev.reason == withdrawReason
+      );
+    });
 
     const totalFunds3 = await wethFunds.totalFunds();
 
@@ -2752,7 +2736,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "reserveWethBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx, "reserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund1Address &&
@@ -2800,7 +2784,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "reserveWethBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx2, "reserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund1Address &&
@@ -3186,7 +3170,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "reserveWethBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx, "reserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund2Address &&
@@ -3234,7 +3218,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "reserveWethBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx2, "reserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund2Address &&

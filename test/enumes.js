@@ -16,6 +16,8 @@ const CommonErrorMsg = {
   CHECK_REGULAR_SELL: "Caller is not RegularSell",
   CHECk_FUNDS_OR_COMMUNITY_GIFTS: "not funds or community gifts",
   INVALID_ADDRESS: "invalid address",
+  INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
+  ZERO_ADDRESS: "ERC20: transfer to the zero address.",
 };
 
 const TreeAuctionErrorMsg = {

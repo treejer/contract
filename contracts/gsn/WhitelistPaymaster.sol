@@ -51,8 +51,6 @@ contract WhitelistPaymaster is BasePaymaster {
 
         (relayRequest, signature, approvalData, maxPossibleGas);
 
-        // accessRestriction.ifPlanter(relayRequest.request.from);
-
         require(
             targetWhitelist[relayRequest.request.to],
             "target not whitelisted"

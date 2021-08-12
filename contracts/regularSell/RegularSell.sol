@@ -108,22 +108,18 @@ contract RegularSell is Initializable, RelayRecipient {
      * {_count * treePrice }
      * @param _count is the number of trees requested by user
      */
-    function requestTrees(uint256 _count, uint256 _amount) external {
+    function requestTrees(uint256 _count) external {
         require(_count > 0, "invalid count");
 
-        require(
-            _amount >= treePrice * _count &&
-                daiToken.balanceOf(_msgSender()) >= _amount,
-            "invalid amount"
-        );
+        uint256 amount = treePrice * _count;
+
+        require(daiToken.balanceOf(_msgSender()) >= amount, "invalid amount");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
-        uint256 transferAmount = _amount / _count;
+        daiToken.transferFrom(_msgSender(), address(daiFunds), amount);
 
-        daiToken.transferFrom(_msgSender(), address(daiFunds), _amount);
-
-        emit RegularTreeRequsted(_count, _msgSender(), _amount);
+        emit RegularTreeRequsted(_count, _msgSender(), amount);
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
@@ -144,7 +140,7 @@ contract RegularSell is Initializable, RelayRecipient {
 
             daiFunds.fundTree(
                 tempLastRegularSold,
-                transferAmount,
+                treePrice,
                 planterFund,
                 referralFund,
                 treeResearch,
@@ -166,15 +162,15 @@ contract RegularSell is Initializable, RelayRecipient {
      * has not been sold before
      * @param _treeId is the id of tree requested by user
      */
-    function requestByTreeId(uint256 _treeId, uint256 _amount) external {
+    function requestByTreeId(uint256 _treeId) external {
         require(_treeId > lastSoldRegularTree, "invalid tree");
 
         require(
-            _amount >= treePrice && daiToken.balanceOf(_msgSender()) >= _amount,
+            daiToken.balanceOf(_msgSender()) >= treePrice,
             "invalid amount"
         );
 
-        daiToken.transferFrom(_msgSender(), address(daiFunds), _amount);
+        daiToken.transferFrom(_msgSender(), address(daiFunds), treePrice);
 
         treeFactory.requestRegularTree(_treeId, _msgSender());
 
@@ -191,7 +187,7 @@ contract RegularSell is Initializable, RelayRecipient {
 
         daiFunds.fundTree(
             _treeId,
-            _amount,
+            treePrice,
             planterFund,
             referralFund,
             treeResearch,
@@ -202,6 +198,6 @@ contract RegularSell is Initializable, RelayRecipient {
             reserveFund2
         );
 
-        emit RegularTreeRequstedById(_treeId, _msgSender(), _amount);
+        emit RegularTreeRequstedById(_treeId, _msgSender(), treePrice);
     }
 }

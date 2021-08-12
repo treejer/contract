@@ -3,7 +3,7 @@ require("dotenv").config();
 const FinancialModel = artifacts.require("FinancialModel.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  console.log("Call Treasury Methods...");
+  console.log("Call FinnacialModel Methods...");
 
   await FinancialModel.deployed().then(async (instance) => {
     await instance.addFundDistributionModel(

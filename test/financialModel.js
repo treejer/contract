@@ -42,6 +42,9 @@ contract("FinancialModel", (accounts) => {
   });
   afterEach(async () => {});
 
+  /* ssss
+
+
   // //----------------------------------------- deploy successfully -----------------------------------------//
 
   it("deploys successfully", async () => {
@@ -2287,5 +2290,81 @@ contract("FinancialModel", (accounts) => {
     //   1000000,
     //   "maxAssignedIndex1 not tTrue"
     // );
+  });
+
+
+ ssss */
+
+  ////////--------------------------- test getFindDistributionModelId --------------------------
+  it("1.getFindDistributionModelId should be success", async () => {
+    const addTx1 = await financialModelInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const addTx2 = await financialModelInstance.addFundDistributionModel(
+      3000,
+      2200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const addTx3 = await financialModelInstance.addFundDistributionModel(
+      2000,
+      2200,
+      2200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+      from: deployerAccount,
+    });
+
+    let modelId = await financialModelInstance.getFindDistributionModelId(0);
+
+    assert.equal(modelId, 0, "1.modelId not true");
+
+    ///////////////
+
+    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 2, {
+      from: deployerAccount,
+    });
+
+    let modelId2 = await financialModelInstance.getFindDistributionModelId(2);
+
+    assert.equal(modelId2, 2, "2.modelId not true");
+
+    ///////////////
+
+    await financialModelInstance.assignTreeFundDistributionModel(10, 100, 1, {
+      from: deployerAccount,
+    });
+
+    let modelId3 = await financialModelInstance.getFindDistributionModelId(15);
+
+    assert.equal(modelId3, 1, "3.modelId not true");
   });
 });

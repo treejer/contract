@@ -281,4 +281,27 @@ contract FinancialModel is Initializable {
             fundDistribution.reserveFund2
         );
     }
+
+    /**
+     * @dev private function to find index of assignModels to {_treeId}
+     * @param _treeId id of tree to find assignModels of it
+     */
+    function getFindDistributionModelId(uint256 _treeId)
+        external
+        view
+        returns (uint256)
+    {
+        uint256 i = 0;
+
+        for (i; i < assignModels.length; i++) {
+            if (assignModels[i].startingTreeId > _treeId) {
+                require(i > 0, "invalid fund model");
+                return (assignModels[i - 1].distributionModelId);
+            }
+        }
+
+        require(i > 0, "invalid fund model");
+
+        return (assignModels[i - 1].distributionModelId);
+    }
 }

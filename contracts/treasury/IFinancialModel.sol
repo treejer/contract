@@ -44,4 +44,9 @@ interface IFinancialModel {
             uint16 reserveFund1,
             uint16 reserveFund2
         );
+
+    function getFindDistributionModelId(uint256 _treeId)
+        external
+        view
+        returns (uint256);
 }

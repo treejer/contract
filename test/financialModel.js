@@ -53,7 +53,7 @@ contract("FinancialModel", (accounts) => {
   });
   //--------------------------------addFundDistributionModel test-----------------------------------------------
   it("addFundDistributionModel should be success", async () => {
-    await financialModelInstance.addFundDistributionModel(
+    const eventTx = await financialModelInstance.addFundDistributionModel(
       4000,
       1200,
       1200,
@@ -66,6 +66,10 @@ contract("FinancialModel", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 0;
+    });
 
     let result = await financialModelInstance.fundDistributions.call(0);
 
@@ -142,7 +146,7 @@ contract("FinancialModel", (accounts) => {
 
   //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
   it("1.assignTreeFundDistributionModel should be success", async () => {
-    await financialModelInstance.addFundDistributionModel(
+    const addTx1 = await financialModelInstance.addFundDistributionModel(
       4000,
       1200,
       1200,
@@ -156,7 +160,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addFundDistributionModel(
+    const addTx2 = await financialModelInstance.addFundDistributionModel(
       3000,
       2200,
       1200,
@@ -170,7 +174,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addFundDistributionModel(
+    const addTx3 = await financialModelInstance.addFundDistributionModel(
       2000,
       2200,
       2200,
@@ -184,7 +188,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addFundDistributionModel(
+    const addTx4 = await financialModelInstance.addFundDistributionModel(
       1000,
       2200,
       2200,
@@ -198,24 +202,76 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+    truffleAssert.eventEmitted(addTx1, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 0;
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
-      from: deployerAccount,
+    truffleAssert.eventEmitted(addTx2, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 1;
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
-      from: deployerAccount,
+    truffleAssert.eventEmitted(addTx3, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 2;
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      101,
-      1000000,
-      3,
-      {
+    truffleAssert.eventEmitted(addTx4, "DistributionModelAdded", (ev) => {
+      return ev.modelId == 3;
+    });
+
+    const assignTx1 =
+      await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
         from: deployerAccount,
+      });
+
+    const assignTx2 =
+      await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
+        from: deployerAccount,
+      });
+
+    const assignTx3 =
+      await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
+        from: deployerAccount,
+      });
+
+    const assignTx4 =
+      await financialModelInstance.assignTreeFundDistributionModel(
+        101,
+        1000000,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+    truffleAssert.eventEmitted(
+      assignTx1,
+      "FundDistributionModelAssigned",
+      (ev) => {
+        return ev.assignModelsLength == 1;
+      }
+    );
+
+    truffleAssert.eventEmitted(
+      assignTx2,
+      "FundDistributionModelAssigned",
+      (ev) => {
+        return ev.assignModelsLength == 2;
+      }
+    );
+
+    truffleAssert.eventEmitted(
+      assignTx3,
+      "FundDistributionModelAssigned",
+      (ev) => {
+        return ev.assignModelsLength == 3;
+      }
+    );
+
+    truffleAssert.eventEmitted(
+      assignTx4,
+      "FundDistributionModelAssigned",
+      (ev) => {
+        return ev.assignModelsLength == 4;
       }
     );
 

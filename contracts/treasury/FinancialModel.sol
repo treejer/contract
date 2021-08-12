@@ -42,11 +42,9 @@ contract FinancialModel is Initializable {
 
     mapping(uint256 => FundDistribution) public fundDistributions;
 
-    event FundDistributionModelAssigned(
-        uint256 startingTreeId,
-        uint256 endingTreeId,
-        uint256 distributionModelId
-    );
+    event DistributionModelAdded(uint256 modelId);
+
+    event FundDistributionModelAssigned(uint256 assignModelsLength);
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -113,6 +111,8 @@ contract FinancialModel is Initializable {
             _reserveFund2,
             1
         );
+
+        emit DistributionModelAdded(fundDistributionCount.current());
 
         fundDistributionCount.increment();
     }
@@ -200,11 +200,7 @@ contract FinancialModel is Initializable {
             }
         }
 
-        emit FundDistributionModelAssigned(
-            _startTreeId,
-            _endTreeId,
-            _distributionModelId
-        );
+        emit FundDistributionModelAssigned(assignModels.length);
     }
 
     /**

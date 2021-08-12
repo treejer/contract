@@ -36,12 +36,9 @@ module.exports = async function (deployer, network, accounts) {
 
   await WethFunds.deployed().then(async (instance) => {
     await instance.setDaiAddress(daiAddress);
-
     await instance.setWethTokenAddress(wethAddress);
-
     await instance.setUniswapRouterAddress(UniswapV2RouterAddress);
-
-    await instance.setPlanterFundAddress(planterFundAddress);
+    await instance.setPlanterFundContractAddress(planterFundAddress);
 
     await instance.setTreeResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
     await instance.setLocalDevelopAddress(process.env.LOCAL_DEVELOP_ADDRESS);

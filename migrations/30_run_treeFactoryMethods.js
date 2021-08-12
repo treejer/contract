@@ -11,17 +11,11 @@ module.exports = async function (deployer, network, accounts) {
   const treeTokenAddress = Tree.address;
   const planterAddress = Planter.address;
   const planterFundAddress = PlanterFund.address;
-  //gsn
-  let trustedForwarder;
-  let relayHub;
 
-  if (isLocal) {
-    trustedForwarder = require("../build/gsn/Forwarder.json").address;
-    relayHub = require("../build/gsn/RelayHub.json").address;
-  } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
-    relayHub = process.env.GSN_RELAY_HUB;
-  }
+  //gsn
+  const trustedForwarder = isLocal
+    ? require("../build/gsn/Forwarder.json").address
+    : process.env.GSN_FORWARDER;
 
   console.log("Call Tree Factory Methods...");
 

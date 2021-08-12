@@ -34,6 +34,11 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
     event PlanterBalanceWithdrawn(uint256 amount, address account);
+    event PlanterFundSet(
+        uint256 treeId,
+        uint256 planterAmount,
+        uint256 referralAmount
+    );
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -99,6 +104,8 @@ contract PlanterFund is Initializable, RelayRecipient {
 
         totalFunds.planterFund += _planterFund;
         totalFunds.referralFund += _referralFund;
+
+        emit PlanterFundSet(_treeId, _planterFund, _referralFund);
     }
 
     /**

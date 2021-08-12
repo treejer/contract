@@ -146,12 +146,20 @@ contract("PlanterFund", (accounts) => {
       "total referral fund is not ok"
     );
 
-    await planterFundInstance.setPlanterFunds(
+    const eventTx1 = await planterFundInstance.setPlanterFunds(
       treeId1,
       planterFund1,
       referralFund1,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "PlanterFundSet", (ev) => {
+      return (
+        Number(ev.treeId) == treeId1 &&
+        Number(ev.planterAmount) == Number(planterFund1) &&
+        Number(ev.referralAmount) == Number(referralFund1)
+      );
+    });
 
     const planterFundsAfter = await planterFundInstance.planterFunds.call(
       treeId1
@@ -186,7 +194,7 @@ contract("PlanterFund", (accounts) => {
       "total referral fund is not ok"
     );
 
-    await planterFundInstance.setPlanterFunds(
+    const eventTx2 = await planterFundInstance.setPlanterFunds(
       treeId2,
       planterFund2,
       referralFund2,
@@ -194,6 +202,14 @@ contract("PlanterFund", (accounts) => {
         from: userAccount1,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx2, "PlanterFundSet", (ev) => {
+      return (
+        Number(ev.treeId) == treeId2 &&
+        Number(ev.planterAmount) == Number(planterFund2) &&
+        Number(ev.referralAmount) == Number(referralFund2)
+      );
+    });
 
     const planterFundsAfter2 = await planterFundInstance.planterFunds.call(
       treeId2
@@ -229,6 +245,7 @@ contract("PlanterFund", (accounts) => {
       "total referral fund is not ok"
     );
   });
+
   it("should fail to set planter funds in invalid access1", async () => {
     const treeId = 1;
     const planterFund = 1000;

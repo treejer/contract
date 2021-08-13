@@ -252,7 +252,7 @@ contract TreeAttribute is Initializable {
     ) external onlyAdmin {
         uint256 points;
         //each 0.004 ether spent in treejer has 10 points
-        points += (treejerSpent / (4000000 gwei)) * 10;
+        points += (treejerSpent / (400000 gwei)) ;
         //each 1 ether spent of wallet(sent or withdraw) has 2 points
         points += (walletSpent* 2) / (1 ether);
         // each 1 send or withdraw of wallet has 1 point

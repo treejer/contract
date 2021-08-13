@@ -252,23 +252,23 @@ contract TreeAttribute is Initializable {
     ) external onlyAdmin {
         uint256 points;
         //each 0.004 ether spent in treejer has 10 points
-        points += (treejerSpent / (4 * 1 wei)) * 10;
+        points += (treejerSpent / (4000000 gwei)) * 10;
         //each 1 ether spent of wallet(sent or withdraw) has 2 points
-        points += (walletSpent / (1 * 1 ether)) * 2;
+        points += (walletSpent* 2) / (1 ether);
         // each 1 send or withdraw of wallet has 1 point
         points += walletSpentCount;
         //each tree owned by buyer has 10 points
         points += treesOwned * 10;
         //points under 31 is rank of zero
 
-        if (points > 30 && points < 61) {
-            rankOf[buyer] = 1; //points under 61  is rank 1
-        } else if (points < 201) {
+        if ( points >1000) {
+            rankOf[buyer] = 4; //points under 61  is rank 1
+        } else if ( points >200) {
+            rankOf[buyer] = 3; //points under 61  is rank 1
+        } else if (points >60) {
             rankOf[buyer] = 2; //points under 201 is rank 2
-        } else if (points < 1001) {
-            rankOf[buyer] = 3; //points under 1001 is rank 3
-        } else {
-            rankOf[buyer] = 4; //points above 1000 is rank 4 or VIP
+        } else if (points > 30) {
+            rankOf[buyer] =1; //points under 1001 is rank 3
         }
     }
 

@@ -198,7 +198,7 @@ contract TreeAttribute is Initializable {
                     abi.encodePacked(
                         msg.sender,
                         keccak256(
-                            abi.encodePacked(block.number, msg.sig, paidAmount)
+                            abi.encodePacked( msg.sig, paidAmount)
                         ),
                         treeId,
                         j

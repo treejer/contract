@@ -5,8 +5,10 @@ logs
 
 # Directories used by tools like mocha & istanbul & openzeplinn
 coverage
+coverage.json
 shippable
 .openzeppelin/
+eth-gas-reporter.log
 
 # Dependency directory
 node_modules

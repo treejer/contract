@@ -1367,7 +1367,7 @@ contract("IncrementalSell", (accounts) => {
   });
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn", async () => {
+  it("test gsn [ @skip-on-coverage ]", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
       from: deployerAccount,
     });

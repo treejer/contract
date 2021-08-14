@@ -2098,7 +2098,7 @@ contract("regularSell", (accounts) => {
   });
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn", async () => {
+  it("test gsn [ @skip-on-coverage ]", async () => {
     ////////////// ------------------- handle fund distribution model ----------------------
 
     await fModel.addFundDistributionModel(

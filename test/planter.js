@@ -61,7 +61,7 @@ contract("Planter", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-
+  
   /////////////////---------------------------------planterJoin--------------------------------------------------------
 
   it("planterJoin should be work successfully without refferedBy and organizationAddress", async () => {
@@ -2061,9 +2061,9 @@ contract("Planter", (accounts) => {
       .planterCheck(userAccount1, { from: userAccount3 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
   });
-
+  
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn", async () => {
+  it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
     // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
@@ -2134,5 +2134,7 @@ contract("Planter", (accounts) => {
       balanceAccountBefore,
       "gsn not true work"
     );
+
+    await GsnTestEnvironment.stopGsn();
   });
 });

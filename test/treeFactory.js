@@ -6027,7 +6027,7 @@ contract("TreeFactory", (accounts) => {
 
   // ////////////////////////////////////////////////////////////////////////////////////////////////
 
-  it("test gsn", async () => {
+  it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
     const { forwarderAddress, relayHubAddress, paymasterAddress } =
@@ -6146,5 +6146,6 @@ contract("TreeFactory", (accounts) => {
       ambassadorBeforeBalance,
       "ambassador balance not equal"
     );
+    await GsnTestEnvironment.stopGsn();
   });
 });

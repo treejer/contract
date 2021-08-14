@@ -4137,7 +4137,7 @@ contract("TreeAuction", (accounts) => {
   });
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn", async () => {
+  it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
     // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";

@@ -6,10 +6,10 @@ import "../../../v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 import "../../../v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 
-import "./SafeMath.sol";
+import "./SafeMath2.sol";
 
 library UniswapV2Library {
-    using SafeMath for uint256;
+    using SafeMath2 for uint256;
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
     function sortTokens(address tokenA, address tokenB)

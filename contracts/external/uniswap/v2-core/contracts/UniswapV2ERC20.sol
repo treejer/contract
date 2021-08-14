@@ -3,10 +3,10 @@
 pragma solidity =0.8.6;
 
 import "./interfaces/IUniswapV2ERC20.sol";
-import "./libraries/SafeMath.sol";
+import "./libraries/SafeMath1.sol";
 
 contract UniswapV2ERC20 {
-    using SafeMath for uint256;
+    using SafeMath1 for uint256;
 
     string public constant name = "Uniswap V2";
     string public constant symbol = "UNI-V2";

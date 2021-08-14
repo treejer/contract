@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
-import "./interfaces/IUniswapV2Router02.sol";
+import "./interfaces/IUniswapV2Router02New.sol";
 
 /** @title WethFunds Contract */
 
@@ -17,7 +17,7 @@ contract WethFunds is Initializable {
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public wethToken;
-    IUniswapV2Router02 public uniswapRouter;
+    IUniswapV2Router02New public uniswapRouter;
 
     address public daiAddress;
 
@@ -116,7 +116,7 @@ contract WethFunds is Initializable {
         external
         onlyAdmin
     {
-        IUniswapV2Router02 candidateContract = IUniswapV2Router02(
+        IUniswapV2Router02New candidateContract = IUniswapV2Router02New(
             _uniswapRouterAddress
         );
 

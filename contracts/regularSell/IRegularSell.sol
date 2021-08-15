@@ -4,67 +4,67 @@ pragma solidity >=0.7.6;
 
 /** @title RegularSell interfce */
 interface IRegularSell {
-    /** @dev return if RegularSell contract initialize
+    /**
      * @return true if RegularSell contract have been initialized
      */
     function isRegularSell() external view returns (bool);
 
+    /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
 
+    /** @return TreeFactory contract address */
     function treeFactory() external view returns (address);
 
+    /** @return DaiFunds contract address */
     function daiFunds() external view returns (address);
 
+    /** @return FinancialModel contract address */
     function financialModel() external view returns (address);
 
+    /** @return DaiToken contract address */
     function daiToken() external view returns (address);
 
-    function setTrustedForwarder(address _address) external;
-
-    /** @dev return last sold regular tree
-     * @return last sold regular tree
-     */
+    /** @return last sold regular tree */
     function lastSoldRegularTree() external view returns (uint256);
 
-    /** @dev return price of the tree
-     * @return price of tree
-     */
+    /** @return price of tree */
     function treePrice() external view returns (uint256);
 
-    /** @dev set treeFactory contract address
+    /** @dev admin set trusted forwarder address */
+    function setTrustedForwarder(address _address) external;
+
+    /** @dev admin set treeFactory contract address
      * @param _address treeFactory contract address
      */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set daiFunds contract address
+    /** @dev admin set daiFunds contract address
      * @param _address daiFunds contract address
      */
 
     function setDaiFundsAddress(address _address) external;
 
-    /** @dev set daiToken address
+    /** @dev admin set daiToken address
      * @param _address  daiToken  address
      */
     function setDaiTokenAddress(address _address) external;
 
-    /** @dev set financialModel contract address
+    /** @dev admin set financialModel contract address
      * @param _address financialModel contract address
      */
-
     function setFinancialModelAddress(address _address) external;
 
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      * NOTE emit a {TreePriceUpdated} event
      */
-
     function setPrice(uint256 _price) external;
 
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * treePrice }
      * @param _count is the number of trees requested by user
      * NOTE emit a {RegularTreeRequsted} event
-    
+     * NOTE emit {RegularMint} event for {_count} time
      */
     function requestTrees(uint256 _count) external;
 

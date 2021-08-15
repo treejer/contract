@@ -13,6 +13,8 @@ import "../gsn/RelayRecipient.sol";
 contract RegularSell is Initializable, RelayRecipient {
     uint256 public lastSoldRegularTree;
     uint256 public treePrice;
+
+    /** NOTE {isRegularSell} set inside the initialize to {true} */
     bool public isRegularSell;
 
     IAccessRestriction public accessRestriction;
@@ -30,11 +32,18 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 amount
     );
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isRegularSell
+     * set {_price} to tree price and set 10000 to lastSoldRegularTree
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @param _price initial tree price
+     */
     function initialize(address _accessRestrictionAddress, uint256 _price)
         public
         initializer
@@ -51,11 +60,15 @@ contract RegularSell is Initializable, RelayRecipient {
         emit TreePriceUpdated(_price);
     }
 
+    /**
+     * @dev admin set trusted forwarder address
+     * @param _address set to {trustedForwarder}
+     */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
-    /** @dev set treeFactory contract address
+    /** @dev admin set treeFactory contract address
      * @param _address treeFactory contract address
      */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -66,7 +79,7 @@ contract RegularSell is Initializable, RelayRecipient {
         treeFactory = candidateContract;
     }
 
-    /** @dev set daiFunds contract address
+    /** @dev admin set daiFunds contract address
      * @param _address daiFunds contract address
      */
     function setDaiFundsAddress(address _address) external onlyAdmin {
@@ -77,7 +90,7 @@ contract RegularSell is Initializable, RelayRecipient {
         daiFunds = candidateContract;
     }
 
-    /** @dev set daiToken contract address
+    /** @dev admin set daiToken contract address
      * @param _address daiToken contract address
      */
     function setDaiTokenAddress(address _address) external onlyAdmin {
@@ -86,10 +99,9 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set FinancialModelAddress
+     * @dev admin set FinancialModel contract address
      * @param _address set to the address of financialModel
      */
-
     function setFinancialModelAddress(address _address) external onlyAdmin {
         IFinancialModel candidateContract = IFinancialModel(_address);
         require(candidateContract.isFinancialModel());
@@ -158,8 +170,8 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
-     * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to make sure that
-     * has not been sold before
+     * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to
+     * make sure that has not been sold before
      * @param _treeId is the id of tree requested by user
      */
     function requestByTreeId(uint256 _treeId) external {

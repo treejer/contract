@@ -24,7 +24,6 @@ contract TreeAuction is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    // ITreasury public treasury;
     IWethFunds public wethFunds;
     IFinancialModel public financialModel;
     IERC20Upgradeable public wethToken;
@@ -57,11 +56,13 @@ contract TreeAuction is Initializable, RelayRecipient {
     event AuctionEnded(uint256 auctionId, uint256 treeId);
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -174,7 +175,8 @@ contract TreeAuction is Initializable, RelayRecipient {
 
     /**
      * @dev bid to {auctions[_auctionId]} by user in a time beetwen start time and end time
-     * its require to send at least {higestBid + bidInterval } value.
+     * its require to send at least {higestBid + bidInterval } {_amount}.
+     * if new bid done old bidder refund automatically.
      * @param _auctionId auctionId that user bid for it.
      */
 
@@ -221,7 +223,8 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     /** @dev everyone can call this method  including the winner of auction after
-     * auction end time and if auction have bidder transfer owner of tree to bidder and fund tree.
+     * auction end time and if auction have bidder transfer owner of tree to bidder
+     * and tree funded.
      * @param _auctionId id of auction that want to finish.
      */
     function endAuction(uint256 _auctionId) external ifNotPaused {
@@ -288,7 +291,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev when new bid take apart we charge the previous bidder as
+    /** @dev when new bid done we charge the previous bidder as
      * much as paid before using this function
      */
 

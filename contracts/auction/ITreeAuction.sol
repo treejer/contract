@@ -4,21 +4,44 @@ pragma solidity >=0.7.6;
 /** @title TreeAuction interface */
 interface ITreeAuction {
     /**
-     * @dev return if TreeAuction contract initialize
      * @return true in case of TreeAuction contract have been initialized
      */
     function isTreeAuction() external view returns (bool);
 
+    /**
+     * @return AccessRestriction contract address
+     */
     function accessRestriction() external view returns (address);
 
+    /**
+     * @return TreeFactory contract address
+     */
     function treeFactory() external view returns (address);
 
+    /**
+     * @return WethFunds contract address
+     */
     function wethFunds() external view returns (address);
 
+    /**
+     * @return FinancialModel contract address
+     */
     function financialModel() external view returns (address);
 
+    /**
+     * @return WethToken contract address
+     */
     function wethToken() external view returns (address);
 
+    /**
+     *@dev return data of an auction with auction id
+     *@return  treeId
+     *@return bidder
+     *@return startDate of auction
+     *@return endDate of auction
+     *@return highestBid
+     *@return bidInterval
+     */
     function auctions(uint256 _auctionId)
         external
         view
@@ -31,18 +54,19 @@ interface ITreeAuction {
             uint256
         );
 
+    /** @dev set {_address} to trustedForwarder */
     function setTrustedForwarder(address _address) external;
 
-    /** @dev set {_address to TreeFactory contract address} */
+    /** @dev set {_address} to TreeFactory contract address */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set {_address to FinancialModel contract address} */
+    /** @dev set {_address} to FinancialModel contract address */
     function setFinancialModelAddress(address _address) external;
 
-    /** @dev set {_address to WethFunds contract address} */
+    /** @dev set {_address} to WethFunds contract address */
     function setWethFundsAddress(address _address) external;
 
-    /** @dev set {_address to WethToken contract address} */
+    /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;
 
     /** @dev create an auction for {_treeId} with strating date of {_startDate} and ending date of
@@ -63,12 +87,15 @@ interface ITreeAuction {
      * and return the old bidder's amount to account
      * NOTE its require that {_amount} be at least {higestBid + bidInterval }.
      * NOTE check if less than 10 minutes left to end of auction add 10 minutes to the end date of auction
+     * NOTE when new bid done previous bidder refunded automatically
      * emit a {HighestBidIncreased} event
+
      */
     function bid(uint256 _auctionId, uint256 _amount) external;
 
     /** @dev everyone can call this method after
-     * auction end time and if auction have bidder , transfer owner of tree to bidder and fund tree.
+     * auction end time and if auction have bidder , transfer owner of tree to bidder
+     * and tree funded.
      * NOTE auction status set to end here
      * emit a {AuctionEnded} event
      */
@@ -84,6 +111,10 @@ interface ITreeAuction {
         address bidder,
         uint256 amount
     );
+    /**
+     * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
+     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     */
 
     event AuctionSettled(
         uint256 auctionId,
@@ -93,13 +124,15 @@ interface ITreeAuction {
     );
 
     /**
-     * @dev emiited when auctions {auctionId} for tree {treeId} finisehd.
-     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
+     * and there is no bidder
+     *
      */
     event AuctionEnded(uint256 auctionId, uint256 treeId);
 
     /**
-     * @dev emmited when a bid take apart less than 10 minutes to end of auction by {bidder}
+     * @dev emmited when a bid take apart less than 10 minutes to end of auction
+     * by {bidder}
      * {newAuctionEndTime} is old auction end time plus 10 minutes
      */
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);

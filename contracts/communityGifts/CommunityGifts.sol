@@ -15,7 +15,12 @@ contract CommunityGifts is Initializable, RelayRecipient {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
 
     bool public isCommunityGifts;
+
+    /**NOTE {planterFund} is share of plater when a tree claimed or transfered to someone*/
     uint256 public planterFund;
+
+    /**NOTE {referralFund} is share of referral when a tree claimed or transfered to someone*/
+
     uint256 public referralFund;
 
     IAccessRestriction public accessRestriction;
@@ -29,30 +34,38 @@ contract CommunityGifts is Initializable, RelayRecipient {
         bool exist;
     }
 
-    /** NOTE mapping of funder address to CommunityGift struct */
+    /** NOTE mapping of giftee address to CommunityGift struct */
     mapping(address => CommunityGift) public communityGifts;
 
+    /**NOTE {claimedCount} is total number of cliamed or transfered trees */
     uint256 public claimedCount;
+    /**NOTE {expireDate} is the maximum time that giftee can claim tree */
     uint256 public expireDate;
+    /**NOTE {giftCount} is total number of trees that are gifted to someone */
     uint256 public giftCount;
 
     event GifteeUpdated(address giftee);
     event TreeClaimed(uint256 treeId);
     event TreeTransfered(uint256 treeId);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
-
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTreeAuction
+     * @dev initialize accessRestriction contract and set true for isCommunityGifts
+     * set expire date and planterFund and referralFund initial value
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @param _expireDate initial expire date
+     * @param _planterFund initial planter fund
+     * @param _referralFund initial referral fund
      */
     function initialize(
         address _accessRestrictionAddress,
@@ -84,7 +97,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeFactoryAddress
+     * @dev admin set TreeAttributesAddress
      * @param _address set to the address of treeAttribute
      */
 
@@ -116,6 +129,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
+    /** @dev admin set the gift range from {_startTreeId} to {_endTreeId}
+     * @param _startTreeId stating tree id for gifts range
+     * @param _endTreeId ending tree id for gifts range
+     */
     function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
         external
         onlyAdmin
@@ -128,6 +145,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
         require(check, "not available tree exist");
     }
 
+    /** @dev admin assign an unique symbol to a giftee
+     * @param _giftee address of giftee
+     * @param _symbol unique symbol assigned to a giftee
+     */
     function updateGiftees(address _giftee, uint32 _symbol) external onlyAdmin {
         CommunityGift storage communityGift = communityGifts[_giftee];
 
@@ -148,6 +169,11 @@ contract CommunityGifts is Initializable, RelayRecipient {
         emit GifteeUpdated(_giftee);
     }
 
+    /** @dev giftee can claim assigned tree before communityGift expireDate
+     * and ownership of tree transfered to giftee
+     * NOTE giftees that claim their gift soon get low tree id
+     * NOTE planter and referral share transfer to planterFund contract
+     */
     function claimTree() external {
         CommunityGift storage communityGift = communityGifts[_msgSender()];
 
@@ -170,9 +196,21 @@ contract CommunityGifts is Initializable, RelayRecipient {
         emit TreeClaimed(treeId);
     }
 
+    /** @dev admin can set the maximun time that giftees can claim their gift
+     * @param _expireDate is the maximum time to claim tree
+     *
+     */
     function setExpireDate(uint256 _expireDate) external onlyAdmin {
         expireDate = _expireDate;
     }
+
+    /** @dev if giftee did not claim gift admin can transfer reserved symbol to
+     * another giftee
+     * @param _giftee is the address of new giftee to transfer gift
+     * @param _symbol is the reserved symbol is transfering to new giftee
+     * NOTE ownership of tree transfer to giftee
+     * NOTE planter and referral share transfer to planterFund contract
+     */
 
     function transferTree(address _giftee, uint32 _symbol) external onlyAdmin {
         require(
@@ -199,6 +237,11 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         emit TreeTransfered(treeId);
     }
+
+    /** @dev admin can set planter and referral share
+     * @param _planterFund is the share of planter
+     * @param _referralFund is the share of referral
+     */
 
     function setPrice(uint256 _planterFund, uint256 _referralFund)
         external

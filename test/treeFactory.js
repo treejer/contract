@@ -3468,6 +3468,8 @@ contract("TreeFactory", (accounts) => {
       deployerAccount
     );
 
+    await Common.addRegularSellRole(arInstance, userAccount5, deployerAccount);
+
     await daiFundInstance.fundTree(
       treeId,
       fundTreeAmount,

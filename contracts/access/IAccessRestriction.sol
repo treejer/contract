@@ -2,18 +2,9 @@
 
 pragma solidity ^0.8.6;
 
-interface IAccessRestriction {
-    event RoleGranted(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
-    event RoleRevoked(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
+/** @title AccessRestriction */
 
+interface IAccessRestriction {
     function isAccessRestriction() external view returns (bool);
 
     function hasRole(bytes32 role, address account)
@@ -87,4 +78,15 @@ interface IAccessRestriction {
     function ifNotPaused() external view;
 
     function ifPaused() external view;
+
+    event RoleGranted(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
+    event RoleRevoked(
+        bytes32 indexed role,
+        address indexed account,
+        address indexed sender
+    );
 }

@@ -343,6 +343,15 @@ Common.successFundTree = async (
     { from: deployerAccount }
   );
 
+  await Common.addRegularSellRole(
+    arInstance,
+    treeFactoryAddress,
+    deployerAccount
+  );
+  // for simply test (without weth and uniswap because there is no need for teseting it here)
+  //give regular role to auction (for checking share of planter and referral and .....)
+  await Common.addRegularSellRole(arInstance, auctionAddress, deployerAccount);
+
   await Common.addFundsRole(
     arInstance,
     daiFundInstance.address,

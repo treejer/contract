@@ -12,6 +12,7 @@ import "../gsn/RelayRecipient.sol";
 contract Planter is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
 
+    /** NOTE {isPlanter} set inside the initialize to {true} */
     bool public isPlanter;
 
     IAccessRestriction public accessRestriction;
@@ -28,11 +29,9 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /** NOTE mapping of planterAddress to PlanterData */
-
     mapping(address => PlanterData) public planters;
 
     /** NOTE mapping of planterAddress to address of refferedBy */
-
     mapping(address => address) public refferedBy;
 
     /** NOTE mapping of planterAddress to organizationAddress that planter is member of it */
@@ -48,15 +47,19 @@ contract Planter is Initializable, RelayRecipient {
     event RejectedByOrganization(address planterId);
     event PortionUpdated(address planterId);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
+
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check _planterAddress is exist*/
     modifier existPlanter(address _planterAddress) {
         require(
             planters[_planterAddress].planterType > 0,
@@ -65,6 +68,7 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check msg.sender planterType is organization*/
     modifier onlyOrganization() {
         require(
             planters[_msgSender()].planterType == 2,
@@ -72,11 +76,17 @@ contract Planter is Initializable, RelayRecipient {
         );
         _;
     }
+
+    /** NOTE modifier for check msg.sender has TreeFactory role*/
     modifier onlyTreeFactory() {
         accessRestriction.ifTreeFactory(_msgSender());
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isPlanter
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -86,10 +96,26 @@ contract Planter is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev set trusted forwarder address
+     * @param _address set to {trustedForwarder}
+     */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
+    /**
+     * @dev based on {_planterType} a planter can join as individual planter or
+     * member of an organization
+     * @param _planterType 1 for individual and 3 for member of organization
+     * @param _longitude longitude value
+     * @param _latitude latitude value
+     * @param _countryCode country code
+     * @param _refferedBy address of referral
+     * @param _organizationAddress address of organization to be member of
+     * NOTE if join as a member of an organization, when that organization
+     * accept planter, planter status set to active
+     */
     function planterJoin(
         uint8 _planterType,
         uint64 _longitude,
@@ -145,6 +171,16 @@ contract Planter is Initializable, RelayRecipient {
         emit PlanterJoin(_msgSender());
     }
 
+    /**
+     * @dev admin add a plater as organization (planterType 2) so planterType 3
+     * can be member of these planters.
+     * @param _organizationAddress address of organization planter
+     * @param _longitude longitude value
+     * @param _latitude latitude value
+     * @param _countryCode country code
+     * @param _capacity plant capacity of organization planter
+     * @param _refferedBy address of referral
+     */
     function organizationJoin(
         address _organizationAddress,
         uint64 _longitude,
@@ -182,6 +218,21 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     //TODO:remove this function??
+
+    /**
+     * @dev planter with type 1 , 3 can update their planterType using this
+     * function.
+     * planterType 3 (member of organization) can change to
+     * planterType 1 (individual planter) with input value {_planterType}
+     * of 1 and zeroAddress as {_organizationAddress}
+     * or choose other organization to be member of with
+     * input value {_planterType} of 3 and {_organizationAddress}.
+     * planterType 1 can only change to planterType 3 with input value
+     * {_planterAddress} of 3 and {_organizationAddress}
+     * if planter type 3 choose another oraganization
+     * or planterType 1 chage to planterType 3, they must be accepted by the
+     * organization to be an active planter
+     */
     function updatePlanterType(uint8 _planterType, address _organizationAddress)
         external
         existPlanter(_msgSender())
@@ -230,7 +281,6 @@ contract Planter is Initializable, RelayRecipient {
      * @param _planterAddress address of planter
      * @param _acceptance accept or reject
      */
-
     function acceptPlanterFromOrganization(
         address _planterAddress,
         bool _acceptance
@@ -314,7 +364,6 @@ contract Planter is Initializable, RelayRecipient {
      * @param _planterAutomaticPaymentPortion payment portion value
      * NOTE only organization (planterType = 2) can call this function
      */
-
     function updateOrganizationPlanterPayment(
         address _planterAddress,
         uint256 _planterAutomaticPaymentPortion
@@ -375,8 +424,8 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev when tree plant of {_planterAddress} rejected plantedCount of {_planterAddress}
-     * must reduce 1 time and if planter status is full capacity {2} udate it to active {1}
+    /** @dev when tree plant of {_planterAddress} rejected, plantedCount of {_planterAddress}
+     * must reduce 1 time and if planter status is full capacity {2} update it to active {1}
      * @param _planterAddress address of planter
      * NOTE only treeFactory contract can call this function
      */
@@ -401,7 +450,6 @@ contract Planter is Initializable, RelayRecipient {
      * planter capacity after increase plantedCount by 1
      * @return true in case of planter status is active {1}
      */
-
     function planterCheck(address _planterAddress)
         external
         existPlanter(_planterAddress)

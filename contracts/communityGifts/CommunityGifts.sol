@@ -13,7 +13,6 @@ import "../gsn/RelayRecipient.sol";
 
 contract CommunityGifts is Initializable, RelayRecipient {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
-
     bool public isCommunityGifts;
 
     /**NOTE {planterFund} is share of plater when a tree claimed or transfered to someone*/
@@ -53,6 +52,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();

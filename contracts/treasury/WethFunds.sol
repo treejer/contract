@@ -12,6 +12,7 @@ import "./interfaces/IUniswapV2Router02New.sol";
 /** @title WethFunds Contract */
 
 contract WethFunds is Initializable {
+    /** NOTE {isWethFunds} set inside the initialize to {true} */
     bool public isWethFunds;
 
     IAccessRestriction public accessRestriction;
@@ -19,8 +20,13 @@ contract WethFunds is Initializable {
     IERC20Upgradeable public wethToken;
     IUniswapV2Router02New public uniswapRouter;
 
+    /** NOTE daiToken address */
     address public daiAddress;
 
+    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
+     * treeResearch, localDevelop,rescueFund,treejerDeveop,reserveFund1
+     * and reserveFund2
+     */
     TotalFunds public totalFunds;
 
     address public treeResearchAddress;
@@ -71,25 +77,34 @@ contract WethFunds is Initializable {
     );
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
+    /** NOTE modifier for check msg.sender has incrementalSell or auction role */
     modifier onlyIncrementalSellOrAuction() {
         accessRestriction.ifIncrementalSellOrAuction(msg.sender);
         _;
     }
+
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isWethFunds
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -101,10 +116,18 @@ contract WethFunds is Initializable {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev admin set DaiToken address
+     * @param _daiAddress set to the address of DaiToken
+     */
     function setDaiAddress(address _daiAddress) external onlyAdmin {
         daiAddress = _daiAddress;
     }
 
+    /**
+     * @dev admin set WethToken contract address
+     * @param _wethTokenAddress set to the address of WethToken contract
+     */
     function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(
             _wethTokenAddress
@@ -112,6 +135,10 @@ contract WethFunds is Initializable {
         wethToken = candidateContract;
     }
 
+    /**
+     * @dev admin set UniswapRouter contract address
+     * @param _uniswapRouterAddress set to the address of UniswapRouter contract
+     */
     function setUniswapRouterAddress(address _uniswapRouterAddress)
         external
         onlyAdmin
@@ -123,6 +150,10 @@ contract WethFunds is Initializable {
         uniswapRouter = candidateContract;
     }
 
+    /**
+     * @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
+     */
     function setPlanterFundContractAddress(address _address)
         external
         onlyAdmin
@@ -195,6 +226,15 @@ contract WethFunds is Initializable {
         reserveFundAddress2 = _address;
     }
 
+    /**
+     * @dev fund a tree by IncrementalSell or Auction contract and based on distribution
+     * model of tree, shares divide beetwen (planter, referral, treeResearch,
+     * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
+     * and added to the totalFunds of each part,
+     * @param _treeId id of a tree to fund
+     * NOTE planterFund and referralFund share first swap to daiToken and then
+     * transfer to PlanterFund contract and add to totalFund section there
+     */
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
@@ -223,8 +263,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treeResearch totalFund in case of valid {_amount}
-     * and money transfer to {treeResearchAddress}
+     * @dev admin withdraw {_amount} from treeResearch totalFund in case of
+     * valid {_amount}  and wethToken transfer to {treeResearchAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -251,8 +291,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelop totalFund in case of valid {_amount}
-     * and money transfer to {localDevelopAddress}
+     * @dev admin withdraw {_amount} from localDevelop totalFund in case of
+     * valid {_amount} and wethToken transfer to {localDevelopAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -279,8 +319,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from rescueFund totalFund in case of valid {_amount}
-     * and money transfer to {rescueFundAddress}
+     * @dev admin withdraw {_amount} from rescueFund totalFund in case of
+     * valid {_amount} and wethToken transfer to {rescueFundAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -303,8 +343,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of valid {_amount}
-     * and money transfer to {treejerDevelopAddress}
+     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of
+     * valid {_amount} and wethToken transfer to {treejerDevelopAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -331,8 +371,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of valid {_amount}
-     * and money transfer to {reserveFundAddress1}
+     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of
+     * valid {_amount} and wethToken transfer to {reserveFundAddress1}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -355,8 +395,8 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of valid {_amount}
-     * and money transfer to {reserveFundAddress2}
+     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of
+     * valid {_amount} and wethToken transfer to {reserveFundAddress2}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -378,6 +418,12 @@ contract WethFunds is Initializable {
         emit reserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 
+    /** @dev private function to swap {_amount} wethToken to daiToken
+     * @param _treeId id of tree that funded
+     * @param _amount amount to swap
+     * @param _planterFund planter share
+     * @param _referralFund referral share
+     */
     function _swap(
         uint256 _treeId,
         uint256 _amount,

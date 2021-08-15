@@ -16,7 +16,10 @@ contract FinancialModel is Initializable {
     CountersUpgradeable.Counter private fundDistributionCount;
 
     uint256 constant MAX_UINT256 = type(uint256).max;
+
+    /** NOTE {isFinancialModel} set inside the initialize to {true} */
     bool public isFinancialModel;
+
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;
@@ -40,21 +43,29 @@ contract FinancialModel is Initializable {
 
     AssignModel[] public assignModels;
 
+    /** NOTE mapping of model id to FundDistribution*/
     mapping(uint256 => FundDistribution) public fundDistributions;
 
     event DistributionModelAdded(uint256 modelId);
 
     event FundDistributionModelAssigned(uint256 assignModelsLength);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
+
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isFinancialModel
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -67,15 +78,16 @@ contract FinancialModel is Initializable {
     }
 
     /**
-     * @dev admin add a model for funding distribution that sum of the inputs must be 10000
+     * @dev admin add a model for funding distribution that sum of the
+     * inputs must be 10000
      * @param _planter planter share
      * @param _referral referral share
      * @param _treeResearch tree research share
      * @param _localDevelop local develop share
      * @param _rescueFund rescue share
      * @param _treejerDevelop treejer develop share
-     * @param _reserveFund1 other fund1 share
-     * @param _reserveFund2 other fund2 share
+     * @param _reserveFund1 reserve fund1 share
+     * @param _reserveFund2 reserve fund2 share
      */
     function addFundDistributionModel(
         uint16 _planter,
@@ -118,7 +130,7 @@ contract FinancialModel is Initializable {
     }
 
     /**
-     * @dev admin assgign a funding distribution model to trees start from
+     * @dev admin assign a funding distribution model to trees starting from
      * {_startTreeId} and end at {_endTreeId}
      * @param _startTreeId strating tree id to assign distribution model to
      * @param _endTreeId ending tree id to assign distribution model to
@@ -222,8 +234,16 @@ contract FinancialModel is Initializable {
     }
 
     /**
-     * @dev private function to find index of assignModels to {_treeId}
-     * @param _treeId id of tree to find assignModels of it
+     * @dev return fundDistribution data of {_treeId}
+     * @param _treeId id of tree to find fundDistribution data
+     * @return planterFund share
+     * @return referralFund share
+     * @return treeResearch share
+     * @return localDevelop share
+     * @return rescueFund share
+     * @return treejerDevelop share
+     * @return reserveFund1 share
+     * @return reserveFund2 share
      */
     function findTreeDistribution(uint256 _treeId)
         external
@@ -283,8 +303,9 @@ contract FinancialModel is Initializable {
     }
 
     /**
-     * @dev private function to find index of assignModels to {_treeId}
+     * @dev return fundDistribution id of {_treeId}
      * @param _treeId id of tree to find assignModels of it
+     * @return id of fundDistiubution
      */
     function getFindDistributionModelId(uint256 _treeId)
         external

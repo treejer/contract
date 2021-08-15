@@ -11,12 +11,17 @@ import "./IPlanterFund.sol";
 /** @title DaiFunds Contract */
 
 contract DaiFunds is Initializable {
+    /** NOTE {isDaiFunds} set inside the initialize to {true} */
     bool public isDaiFunds;
 
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public daiToken;
 
+    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
+     * treeResearch, localDevelop,rescueFund,treejerDeveop,reserveFund1
+     * and reserveFund2
+     */
     TotalFunds public totalFunds;
 
     address public treeResearchAddress;
@@ -68,26 +73,33 @@ contract DaiFunds is Initializable {
 
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check msg.sender has regularSell role */
     modifier onlyRegularSell() {
         accessRestriction.ifRegularSell(msg.sender);
         _;
     }
-
+    /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isDaiFunds
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -99,6 +111,10 @@ contract DaiFunds is Initializable {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev admin set DaiToken address
+     * @param _daiTokenAddress set to the address of DaiToken
+     */
     function setDaiTokenAddress(address _daiTokenAddress) external onlyAdmin {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(
             _daiTokenAddress
@@ -106,6 +122,10 @@ contract DaiFunds is Initializable {
         daiToken = candidateContract;
     }
 
+    /**
+     * @dev admin set PlanterFund address
+     * @param _address set to the address of PlanterFund
+     */
     function setPlanterFundContractAddress(address _address)
         external
         onlyAdmin
@@ -116,7 +136,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set treeResearch  address to fund
+     * @dev admin set treeResearch address to fund
      * @param _address tree research address
      */
     function setTreeResearchAddress(address payable _address)
@@ -127,7 +147,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set localDevelop  address to fund
+     * @dev admin set localDevelop address to fund
      * @param _address local develop address
      */
     function setLocalDevelopAddress(address payable _address)
@@ -146,7 +166,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set treejerDevelop  address to fund
+     * @dev admin set treejerDevelop address to fund
      * @param _address treejer develop address
      */
     function setTreejerDevelopAddress(address payable _address)
@@ -157,7 +177,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set reserveFund1  address to fund
+     * @dev admin set reserveFund1 address to fund
      * @param _address reserveFund1 address
      */
     function setReserveFund1Address(address payable _address)
@@ -168,7 +188,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set reserveFund2  address to fund
+     * @dev admin set reserveFund2 address to fund
      * @param _address reserveFund2 address
      */
     function setReserveFund2Address(address payable _address)
@@ -178,6 +198,15 @@ contract DaiFunds is Initializable {
         reserveFundAddress2 = _address;
     }
 
+    /**
+     * @dev fund a tree by RegularSell contract and based on distribution
+     * model of tree, shares divide beetwen (planter, referral, treeResearch,
+     * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
+     * and added to the totalFunds of each part,
+     * @param _treeId id of a tree to fund
+     * NOTE planterFund and referralFund share transfer to PlanterFund contract
+     * and add to totalFund section there
+     */
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
@@ -216,8 +245,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treeResearch totalFund in case of valid {_amount}
-     * and money transfer to {treeResearchAddress}
+     * @dev admin withdraw {_amount} from treeResearch totalFund in case of
+     * valid {_amount}  and daiToken transfer to {treeResearchAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -244,8 +273,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelop totalFund in case of valid {_amount}
-     * and money transfer to {localDevelopAddress}
+     * @dev admin withdraw {_amount} from localDevelop totalFund in case of
+     * valid {_amount} and daiToken transfer to {localDevelopAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -272,8 +301,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from rescueFund totalFund in case of valid {_amount}
-     * and money transfer to {rescueFundAddress}
+     * @dev admin withdraw {_amount} from rescueFund totalFund in case of
+     * valid {_amount} and daiToken transfer to {rescueFundAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -296,8 +325,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of valid {_amount}
-     * and money transfer to {treejerDevelopAddress}
+     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of
+     * valid {_amount} and daiToken transfer to {treejerDevelopAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -324,8 +353,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of valid {_amount}
-     * and money transfer to {reserveFundAddress1}
+     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of
+     * valid {_amount} and daiToken transfer to {reserveFundAddress1}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -348,8 +377,8 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of valid {_amount}
-     * and money transfer to {reserveFundAddress2}
+     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of
+     * valid {_amount} and daiToken transfer to {reserveFundAddress2}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */

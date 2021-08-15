@@ -13,6 +13,7 @@ import "../gsn/RelayRecipient.sol";
 /** @title PlanterFund Contract */
 
 contract PlanterFund is Initializable, RelayRecipient {
+    /** NOTE {isPlanterFund} set inside the initialize to {true} */
     bool public isPlanterFund;
 
     IAccessRestriction public accessRestriction;
@@ -25,11 +26,21 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 localDevelop;
     }
 
+    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
+     * planterFund, referralFund, localDevelop
+     */
     TotalFunds public totalFunds;
 
+    /** NOTE mapping of treeId to planterFunds*/
     mapping(uint256 => uint256) public planterFunds;
+
+    /** NOTE mapping of treeId to referralFunds*/
     mapping(uint256 => uint256) public referralFunds;
+
+    /** NOTE  mpping of treeId to planterPaid balance*/
     mapping(uint256 => uint256) public plantersPaid;
+
+    /** NOTE mapping of planter address to planter balance*/
     mapping(address => uint256) public balances;
 
     event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
@@ -40,25 +51,34 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 referralAmount
     );
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
+
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check msg.sender has treeFactory role */
     modifier onlyTreeFactory() {
         accessRestriction.ifTreeFactory(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check msg.sender has funds or communityGifts role */
     modifier onlyFundsOrCommunityGifts() {
         accessRestriction.ifFundsOrCommunityGifts(_msgSender());
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isPlanterFund
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -79,8 +99,8 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set planter contract address
-     * @param _address set to the address of planter contract
+     * @dev admin set Planter contract address
+     * @param _address set to the address of Planter contract
      */
     function setPlanterContractAddress(address _address) external onlyAdmin {
         IPlanter candidateContract = IPlanter(_address);
@@ -88,12 +108,21 @@ contract PlanterFund is Initializable, RelayRecipient {
         planterContract = candidateContract;
     }
 
+    /**
+     * @dev admin set DaiToken contract address
+     * @param _address set to the address of DaiToken contract
+     */
     function setDaiTokenAddress(address _address) external {
         accessRestriction.ifAdmin(_msgSender());
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         daiToken = candidateContract;
     }
 
+    /**
+     * @dev set planterFunds and refferalFunds of a tree with id {_treeId}
+     * and add {_planterFund} to planterFund part of totalFunds and add
+     * {_referralFund} to referralFund part of totalFunds
+     */
     function setPlanterFunds(
         uint256 _treeId,
         uint256 _planterFund,
@@ -109,8 +138,7 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev based on the treeStatus planter charged in every tree update verifying
-     *
+     * @dev based on the {_treeStatus} planter charged in every tree update verifying
      * @param _treeId id of a tree to fund
      * @param _planterId  address of planter to fund
      * @param _treeStatus status of tree
@@ -182,8 +210,8 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev planter withdraw {_amount} from planter's balances in case of valid {_amount}
-     * and money transfer to planters address (to msgSender())
+     * @dev planter withdraw {_amount} from planter's balances in case of
+     * valid {_amount} and daiToken transfer to planters address (to msgSender())
      * @param _amount amount to withdraw
      */
     function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {

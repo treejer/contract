@@ -81,7 +81,7 @@ interface IFinancialModel {
 
     /**
      * @dev admin assgign a funding distribution model to trees starting from
-     * {_startTreeId} and ending at {_endTreeId}
+     * {_startTreeId} and end at {_endTreeId}
      * @param _startTreeId strating tree id to assign distribution model to
      * @param _endTreeId ending tree id to assign distribution model to
      * @param _distributionModelId distribution model id to assign

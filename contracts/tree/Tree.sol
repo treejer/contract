@@ -43,7 +43,7 @@ contract Tree is ERC721Upgradeable {
 
     /**
      * @dev admin set baseURI
-     * @param _daiTokenAddress baseURI value
+     * @param baseURI_ baseURI value
      */
     function setBaseURI(string calldata baseURI_) external onlyAdmin {
         baseURI = baseURI_;

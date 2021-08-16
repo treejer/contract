@@ -12,6 +12,7 @@ import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanter.sol";
 
+/** @title TreeFactory Contract */
 contract TreeFactory is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
@@ -19,6 +20,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     CountersUpgradeable.Counter private regularTreeId;
 
+    /** NOTE {isTreeFactory} set inside the initialize to {true} */
     bool public isTreeFactory;
 
     IAccessRestriction public accessRestriction;
@@ -53,10 +55,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         address planterAddress;
         string treeSpecs;
     }
-
-    mapping(uint256 => TreeStruct) public treeData; //tree id to TreeStruct struct
-    mapping(uint256 => UpdateTree) public updateTrees; //tree id to UpdateTree struct
-    mapping(uint256 => RegularTree) public regularTrees; //tree id to RegularTree struct
+    /** NOTE mapping of treeId to Tree Struct */
+    mapping(uint256 => TreeStruct) public treeData;
+    /** NOTE mapping of treeId to UpdateTree struct */
+    mapping(uint256 => UpdateTree) public updateTrees;
+    /** NOTE mapping of treeId to RegularTree struct */
+    mapping(uint256 => RegularTree) public regularTrees;
 
     event TreeAdded(uint256 treeId);
     event TreeAssigned(uint256 treeId);
@@ -70,44 +74,55 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularPlantVerified(uint256 treeId);
     event RegularPlantRejected(uint256 treeId);
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check msg.sender has Auction role */
     modifier onlyAuction() {
         accessRestriction.ifAuction(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check msg.sender has Auction or CommunityGifts role */
     modifier onlyAuctionOrCommunityGifts() {
         accessRestriction.ifAuctionOrCommunityGifts(_msgSender());
         _;
     }
+
+    /** NOTE modifier for check msg.sender has CommunityGifts role */
     modifier onlyCommunityGifts() {
         accessRestriction.ifCommunityGifts(_msgSender());
         _;
     }
+
+    /** NOTE modifier for check msg.sender has IncrementalSell role */
     modifier onlyIncremental() {
         accessRestriction.ifIncrementalSell(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check msg.sender has IncrementalSell or Auction role */
     modifier onlyIncrementalSellOrAuction() {
         accessRestriction.ifIncrementalSellOrAuction(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check msg.sender has IncrementalSell or CommunityGifts role */
     modifier onlyIncrementalOrCommunityGifts() {
         accessRestriction.ifIncrementalOrCommunityGifts(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check msg.sender has IncrementalSell or Auction or CommunityGifts role */
     modifier onlyIncrementalSellOrAuctionOrCommunityGifts() {
         accessRestriction.ifIncrementalSellOrAuctionOrCommunityGifts(
             _msgSender()
@@ -115,16 +130,23 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check treeId to be valid tree */
     modifier validTree(uint256 _treeId) {
         require(treeData[_treeId].treeStatus > 0, "invalid tree");
         _;
     }
 
+    /** NOTE modifier for check msg.sender has RegularSell role */
     modifier onlyRegularSellContract() {
         accessRestriction.ifRegularSell(_msgSender());
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isTreeFactory
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * NOTE set lastRegularPlantedTree to 10000
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -137,10 +159,18 @@ contract TreeFactory is Initializable, RelayRecipient {
         lastRegularPlantedTree = 10000;
     }
 
+    /**
+     * @dev set trusted forwarder address
+     * @param _address set to {trustedForwarder}
+     */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
+    /**
+     * @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
+     */
     function setPlanterFundAddress(address _address) external onlyAdmin {
         IPlanterFund candidateContract = IPlanterFund(_address);
 
@@ -149,6 +179,10 @@ contract TreeFactory is Initializable, RelayRecipient {
         planterFund = candidateContract;
     }
 
+    /**
+     * @dev admin set Planter contract address
+     * @param _address set to the address of Planter contract
+     */
     function setPlanterAddress(address _address) external onlyAdmin {
         IPlanter candidateContract = IPlanter(_address);
 
@@ -157,6 +191,10 @@ contract TreeFactory is Initializable, RelayRecipient {
         planter = candidateContract;
     }
 
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _address set to the address of TreeToken contract
+     */
     function setTreeTokenAddress(address _address) external onlyAdmin {
         ITree candidateContract = ITree(_address);
 
@@ -165,6 +203,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken = candidateContract;
     }
 
+    /**
+     * @dev admin add tree
+     * @param _treeId id of tree to add
+     * @param _treeDescription tree description
+     */
     function addTree(uint256 _treeId, string calldata _treeDescription)
         external
         onlyAdmin
@@ -179,6 +222,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         emit TreeAdded(_treeId);
     }
 
+    /**
+     * @dev admin assign an existing tree to planter
+     * @param _treeId id of tree to assign
+     * @param _planterId assignee planter
+     * NOTE tree must be not planted
+     */
     function assignTreeToPlanter(uint256 _treeId, address _planterId)
         external
         onlyAdmin
@@ -197,6 +246,13 @@ contract TreeFactory is Initializable, RelayRecipient {
         emit TreeAssigned(_treeId);
     }
 
+    /**
+     * @dev planter with permission to plant, can plan their trees
+     * @param _treeId id of tree to plant
+     * @param _treeSpecs tree specs
+     * @param _birthDate birth date of tree
+     * @param _countryCode country code of tree
+     */
     function plantTree(
         uint256 _treeId,
         string calldata _treeSpecs,
@@ -231,6 +287,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         emit TreePlanted(_treeId);
     }
 
+    /**
+     * @dev admin or allowed verifier can verify a plant or reject.
+     * @param _treeId id of tree to verifiy
+     * @param _isVerified true for verify and false for reject
+     */
     function verifyPlant(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
@@ -267,6 +328,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev planter of  tree send update request for tree
+     * @param _treeId id of tree to update
+     * @param _treeSpecs tree specs
+     */
     function updateTree(uint256 _treeId, string memory _treeSpecs) external {
         require(
             treeData[_treeId].planterId == _msgSender(),
@@ -295,6 +361,15 @@ contract TreeFactory is Initializable, RelayRecipient {
         emit TreeUpdated(_treeId);
     }
 
+    /**
+     * @dev admin or allowed verifier can verifiy or reject update request for tree.
+     * @param _treeId id of tree to verify update request
+     * @param _isVerified true for verify and false for reject
+     * NOTE based on the current time of verifing and plant date, age of tree
+     * calculated and set as the treeStatus
+     * NOTE if a token exist for that tree (minted before) planter of tree funded
+     * based on calculated tree status
+     */
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
@@ -349,6 +424,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         }
     }
 
+    /**
+     * @dev check if a tree is valid to take part in an auction
+     * set {_provideType} to provideStatus when tree is not in use
+     * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
+     */
     function availability(uint256 _treeId, uint32 _provideType)
         external
         onlyAuction
@@ -368,6 +448,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         return nowProvideStatus;
     }
 
+    /** @dev mint {_treeId} to {_ownerId} and set mintStatus to {_mintStatus} and privdeStatus to 0  */
     function updateOwner(
         uint256 _treeId,
         address _ownerId,
@@ -378,11 +459,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken.safeMint(_ownerId, _treeId);
     }
 
+    /** @dev exit a {_treeId} from auction */
     function updateAvailability(uint256 _treeId) external onlyAuction {
         treeData[_treeId].provideStatus = 0;
     }
 
-    //cancel all old incremental sell of trees
+    /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId)
         external
         onlyIncremental
@@ -394,7 +476,10 @@ contract TreeFactory is Initializable, RelayRecipient {
         }
     }
 
-    //set incremental and communityGifts sell for trees
+    /**
+     * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
+     * and end at {_endTreeId} by setting {_provideStatus} to provideStatus
+     */
     function manageProvideStatus(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -411,6 +496,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         return true;
     }
 
+    /**
+     *
+     */
     function checkMintStatus(uint256 _treeId, address _buyer)
         external
         view
@@ -421,25 +509,11 @@ contract TreeFactory is Initializable, RelayRecipient {
             treeToken.ownerOf(_treeId) == _buyer);
     }
 
-    // function updateTreefromOffer(
-    //     uint256 _treeId,
-    //     string memory _specsCid,
-    //     address _owner
-    // ) external onlyAuction {
-    //     treeData[_treeId].provideStatus = 0;
-
-    //     treeData[_treeId].treeSpecs = _specsCid;
-
-    //     treeToken.safeMint(_owner, _treeId);
-    // }
-
     /**
      * @dev This function is called by planter who have planted a new tree
      * The planter enters the information of the new tree
      * Information is stored in The {regularTrees} mapping
      * And finally the tree is waiting for approval
-     *
-     *
      * @param _treeSpecs //TODO: what is _treeSpecs ??
      * @param _birthDate birthDate of the tree
      * @param _countryCode Code of the country where the tree was planted
@@ -525,11 +599,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     /**
      * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
      * This function is called only by the regularSell contract
-     *
      * @param _lastSold The last tree sold in the regular
      * @param _owner Owner of a new tree sold in Regular
-     *
-     *
      * @return The last tree sold after update
      */
     function mintRegularTrees(uint256 _lastSold, address _owner)

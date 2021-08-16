@@ -9,7 +9,6 @@ import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
 
 /** @title DaiFunds Contract */
-
 contract DaiFunds is Initializable {
     /** NOTE {isDaiFunds} set inside the initialize to {true} */
     bool public isDaiFunds;

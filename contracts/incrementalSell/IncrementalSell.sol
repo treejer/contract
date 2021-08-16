@@ -10,6 +10,7 @@ import "../treasury/IFinancialModel.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract IncrementalSell is Initializable, RelayRecipient {
+    /** NOTE {isCommunityGifts} set inside the initialize to {true} */
     bool public isIncrementalSell;
 
     IAccessRestriction public accessRestriction;
@@ -26,23 +27,33 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint64 increaseRatio;
     }
 
+    /** NOTE {incrementalPrice} is struct of IncrementalPrice that store
+     * startTree, endTree, initialPrice, increaseStep, increaseRatio values
+     */
     IncrementalPrice public incrementalPrice;
 
+    /** NOTE mapping of buyer address to lastBuy time */
     mapping(address => uint256) public lastBuy;
 
     event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
     event IncrementalSellUpdated();
 
+    /** NOTE modifier for check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isIncrementalSell
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) public initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -52,17 +63,24 @@ contract IncrementalSell is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
     }
 
+    /**
+     * @dev admin set trusted forwarder address
+     * @param _address set to {trustedForwarder}
+     */
     function setTrustedForwarder(address _address) external onlyAdmin {
         trustedForwarder = _address;
     }
 
+    /** @dev admin set TreeFactory contract address
+     * @param _address TreeFactory contract address
+     */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }
 
-    /** @dev set wethFunds contract address
+    /** @dev admin set wethFunds contract address
      * @param _address wethFunds contract address
      */
     function setWethFundsAddress(address _address) external onlyAdmin {
@@ -73,7 +91,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         wethFunds = candidateContract;
     }
 
-    /** @dev set wethToken contract address
+    /** @dev admin set wethToken contract address
      * @param _address wethToken contract address
      */
     function setWethTokenAddress(address _address) external onlyAdmin {
@@ -85,13 +103,21 @@ contract IncrementalSell is Initializable, RelayRecipient {
      * @dev admin set FinancialModelAddress
      * @param _address set to the address of financialModel
      */
-
     function setFinancialModelAddress(address _address) external onlyAdmin {
         IFinancialModel candidateContract = IFinancialModel(_address);
         require(candidateContract.isFinancialModel());
         financialModel = candidateContract;
     }
 
+    /**
+     * @dev admin set a range from {startTree} to {startTree + treeCount}
+     * for incremental selles for tree
+     * @param startTree starting treeId
+     * @param initialPrice initialPrice of trees
+     * @param treeCount number of tree in incremental sell
+     * @param steps step to increase tree price
+     * @param incrementRate increment price rate
+     */
     function addTreeSells(
         uint256 startTree,
         uint256 initialPrice,
@@ -130,6 +156,11 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalSellUpdated();
     }
 
+    /**
+     * @dev admin add {treeCount} tree at the end of incremental sell tree range
+     * @param treeCount number of trees added at the end of the incremental sell
+     * tree range
+     */
     function updateIncrementalEnd(uint256 treeCount) external onlyAdmin {
         IncrementalPrice storage incrPrice = incrementalPrice;
         require(
@@ -149,6 +180,15 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalSellUpdated();
     }
 
+    /**
+     * tree price calculate based on treeId and msg.sender pay weth for it
+     * and ownership of tree transfered to msg.sender
+     * @param treeId id of tree to buy
+     * NOTE if buyer, buy another tree before 700 seconds from the
+     * previous purchase, pays 90% of tree price and gets 10% discount
+     * just for this tree. buying another tree give chance to buy
+     * the next tree with 10% discount
+     */
     function buyTree(uint256 treeId) external ifNotPaused {
         //check if treeId is in this incrementalSell
         IncrementalPrice storage incPrice = incrementalPrice;

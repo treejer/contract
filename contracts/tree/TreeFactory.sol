@@ -417,8 +417,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         returns (bool)
     {
         uint16 minted = treeData[_treeId].mintStatus;
-        return ((minted == 1 || minted == 2) &&
-            treeToken.ownerOf(_treeId) == _buyer);
+        return (((minted == 1 || minted == 2) &&
+            treeToken.ownerOf(_treeId) == _buyer), keccak256(
+                abi.encodePacked(lastRegularPlantedTree,treeData[treeId],updateTrees[treeId])));
     }
 
     // function updateTreefromOffer(

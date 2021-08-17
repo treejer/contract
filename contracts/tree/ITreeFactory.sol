@@ -96,7 +96,7 @@ interface ITreeFactory {
     function checkMintStatus(uint256 _treeId, address _buyer)
         external
         view
-        returns (bool);
+        returns (bool,bytes32);
 
     // function updateTreefromOffer(
     //     uint256 _treeId,

@@ -110,7 +110,7 @@ contract TreeAttribute is Initializable {
         uint32 tempGeneratedCode = generatedCode;
 
         for (uint32 i = 0; i < bitCounts.length; i++) {
-            results[i] = getFirstN32(tempGeneratedCode, bitCounts[i]);
+            results[i] = _getFirstN32(tempGeneratedCode, bitCounts[i]);
 
             tempGeneratedCode = tempGeneratedCode / uint32(2)**bitCounts[i];
         }
@@ -126,7 +126,7 @@ contract TreeAttribute is Initializable {
         );
     }
 
-    function calcRandAttributes(
+    function _calcRandAttributes(
         address buyer,
         uint256 treeId,
         uint32 rand
@@ -134,15 +134,15 @@ contract TreeAttribute is Initializable {
         uint8[6] memory bitCounts = [6, 3, 4, 4, 3, 8];
         uint32[] memory results = new uint32[](6);
         for (uint32 i = 0; i < bitCounts.length; i++) {
-            results[i] = getFirstN32(rand, bitCounts[i]);
+            results[i] = _getFirstN32(rand, bitCounts[i]);
             rand = rand / (uint32(2)**bitCounts[i]);
         }
         if (treeId > 100) {
-            results[5] = getSpecialEffect(buyer, 0, results[5]);
+            results[5] = _getSpecialEffect(buyer, 0, results[5]);
         } else if (treeId > 50) {
-            results[5] = getSpecialEffect(buyer, 2, results[5]);
+            results[5] = _getSpecialEffect(buyer, 2, results[5]);
         } else {
-            results[5] = getSpecialEffect(buyer, 3, results[5]);
+            results[5] = _getSpecialEffect(buyer, 3, results[5]);
         }
 
         //check Uniqueness
@@ -177,39 +177,32 @@ contract TreeAttribute is Initializable {
     }
 
     //the function creates
-    function createTreeAttributes(uint256 treeId, uint256 paidAmount)
-        external
-        returns (bool)
-    {
+    function createTreeAttributes(uint256 treeId) external returns (bool) {
         require(
             treeAttributes[treeId].exists == 0,
             "tree attributes are set before"
         );
-
-        require(
-            treeFactory.checkMintStatus(treeId, msg.sender),
-            "no need to tree attributes"
+        (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
+            treeId,
+            msg.sender
         );
 
+        require(ms, "no need to tree attributes");
+
         bool flag = true;
+
         for (uint256 j = 0; j < 10000; j++) {
             uint256 rand = uint256(
                 keccak256(
-                    abi.encodePacked(
-                        msg.sender,
-                        keccak256(
-                            abi.encodePacked(block.number, msg.sig, paidAmount)
-                        ),
-                        treeId,
-                        j
-                    )
+                    abi.encodePacked(msg.sender, randTree, msg.sig, treeId, j)
                 )
             );
+
             for (uint256 i = 0; i < 9; i++) {
-                flag = calcRandAttributes(
+                flag = _calcRandAttributes(
                     msg.sender,
                     treeId,
-                    getFirstN(rand, 28)
+                    _getFirstN(rand, 28)
                 );
                 if (flag) {
                     break;
@@ -229,19 +222,6 @@ contract TreeAttribute is Initializable {
         return flag;
     }
 
-    //to get n lowest bits of a uint256
-    function getFirstN(uint256 rnd, uint16 n) private pure returns (uint32) {
-        uint256 x = rnd & ((uint256(2)**n) - 1);
-
-        return x.toUint32();
-    }
-
-    //to get n lowest bits of a uint32
-    function getFirstN32(uint32 rnd, uint8 n) private pure returns (uint32) {
-        uint32 firN = (uint32(2)**n) - 1;
-        return rnd & firN;
-    }
-
     // the function Tries to Calculate the rank of buyer based on transaction statistics of his/her wallet
     function setBuyerRank(
         address buyer,
@@ -252,28 +232,41 @@ contract TreeAttribute is Initializable {
     ) external onlyAdmin {
         uint256 points;
         //each 0.004 ether spent in treejer has 10 points
-        points += (treejerSpent / (4 * 1 wei)) * 10;
+        points += (treejerSpent / (400000 gwei));
         //each 1 ether spent of wallet(sent or withdraw) has 2 points
-        points += (walletSpent / (1 * 1 ether)) * 2;
+        points += (walletSpent * 2) / (1 ether);
         // each 1 send or withdraw of wallet has 1 point
         points += walletSpentCount;
         //each tree owned by buyer has 10 points
         points += treesOwned * 10;
         //points under 31 is rank of zero
 
-        if (points > 30 && points < 61) {
-            rankOf[buyer] = 1; //points under 61  is rank 1
-        } else if (points < 201) {
+        if (points > 1000) {
+            rankOf[buyer] = 4; //points under 61  is rank 1
+        } else if (points > 200) {
+            rankOf[buyer] = 3; //points under 61  is rank 1
+        } else if (points > 60) {
             rankOf[buyer] = 2; //points under 201 is rank 2
-        } else if (points < 1001) {
-            rankOf[buyer] = 3; //points under 1001 is rank 3
-        } else {
-            rankOf[buyer] = 4; //points above 1000 is rank 4 or VIP
+        } else if (points > 30) {
+            rankOf[buyer] = 1; //points under 1001 is rank 3
         }
     }
 
+    //to get n lowest bits of a uint32
+    function _getFirstN32(uint32 rnd, uint8 n) private pure returns (uint32) {
+        uint32 firN = (uint32(2)**n) - 1;
+        return rnd & firN;
+    }
+
+    //to get n lowest bits of a uint256
+    function _getFirstN(uint256 rnd, uint16 n) private pure returns (uint32) {
+        uint256 x = rnd & ((uint256(2)**n) - 1);
+
+        return x.toUint32();
+    }
+
     // The function manipulates probability of rare special effects based on rank of buyer
-    function getSpecialEffect(
+    function _getSpecialEffect(
         address buyer,
         uint8 bonusRank,
         uint32 n

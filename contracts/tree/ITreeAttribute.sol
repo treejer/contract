@@ -43,7 +43,7 @@ interface ITreeAttribute {
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external;
 
-    function createTreeAttributes(uint256 treeId, uint256 paidAmount)
+    function createTreeAttributes(uint256 treeId)
         external
         returns (bool);
 

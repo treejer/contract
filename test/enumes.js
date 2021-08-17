@@ -11,6 +11,7 @@ const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
   CHECK_AUCTION: "Caller is not Auction",
+  CHECK_ADMIN_OR_COMMUNITY: "not Admin or CommunityGifts",
   CHECK_TREE_FACTORY: "Caller is not TreeFactory",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_REGULAR_SELL: "Caller is not RegularSell",
@@ -112,6 +113,8 @@ const TreeAttributeErrorMsg = {
   DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
   TREE_HAS_ATTRIBUTES: "tree attributes are set before",
   TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
+  ATTRIBUTE_TAKEN: "the tree attributes are taken",
+  ATTRIBUTE_NOT_RESERVED: "the tree attributes not reserved",
 };
 
 const CommunityGiftErrorMsg = {

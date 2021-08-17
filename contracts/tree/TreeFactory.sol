@@ -502,11 +502,33 @@ contract TreeFactory is Initializable, RelayRecipient {
     function checkMintStatus(uint256 _treeId, address _buyer)
         external
         view
-        returns (bool)
+        returns (bool, bytes32)
     {
         uint16 minted = treeData[_treeId].mintStatus;
-        return ((minted == 1 || minted == 2) &&
+
+        bool flag = ((minted == 1 || minted == 2) &&
             treeToken.ownerOf(_treeId) == _buyer);
+
+        if (flag) {
+            TreeStruct storage tempTree = treeData[_treeId];
+            UpdateTree storage tempUpdateTree = updateTrees[_treeId];
+
+            return (
+                true,
+                keccak256(
+                    abi.encodePacked(
+                        lastRegularPlantedTree,
+                        tempTree.birthDate,
+                        tempTree.treeSpecs,
+                        tempTree.treeStatus,
+                        tempTree.planterId,
+                        tempUpdateTree.updateSpecs
+                    )
+                )
+            );
+        }
+
+        return (false, 0);
     }
 
     /**

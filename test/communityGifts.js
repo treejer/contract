@@ -138,15 +138,15 @@ contract("CommunityGifts", (accounts) => {
       from: deployerAccount,
     });
 
-    //----------------add role to treeFactory
-    await Common.addTreeFactoryRole(
+    //----------------add role to treejer contract role to treeFactoryInstance address
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    //---------------- add role to communityGist
-    await Common.addCommunityGiftRole(
+    //----------------add role to treejer contract role to communityGiftsInstance address
+    await Common.addTreejerContractRole(
       arInstance,
       communityGiftsInstance.address,
       deployerAccount
@@ -319,7 +319,7 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    await Common.addAuctionRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeAuctionInstance.address,
       deployerAccount
@@ -662,12 +662,6 @@ contract("CommunityGifts", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
-
     await communityGiftsInstance.claimTree({
       from: giftee1,
     });
@@ -726,12 +720,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     const treeId = 11; //id of tree to be claimed
@@ -883,12 +871,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     //////// ----------------- check plnter fund before
@@ -1169,12 +1151,6 @@ contract("CommunityGifts", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
-
     //////////--------------claim with expire date error
 
     await communityGiftsInstance
@@ -1208,12 +1184,6 @@ contract("CommunityGifts", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
-
     //////////--------------claim with error
     await communityGiftsInstance
       .claimTree({
@@ -1244,12 +1214,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     //////////--------------claim tree by giftee1 for first time and it's not problem
@@ -1297,11 +1261,6 @@ contract("CommunityGifts", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
     const treeId = 11; //tree to be claimed
 
     ////////////// check planter fund values before claim
@@ -1447,12 +1406,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     const treeId1 = 11;
@@ -1729,12 +1682,6 @@ contract("CommunityGifts", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
-    );
-
     //////////--------------call transferTree by user
     await communityGiftsInstance
       .transferTree(userAccount3, 1234554321, {
@@ -1765,12 +1712,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     //////////--------------expire time does not reach
@@ -1821,12 +1762,6 @@ contract("CommunityGifts", (accounts) => {
       planterShareOfTree,
       referralShareOfTree,
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     await communityGiftsInstance.claimTree({
@@ -1909,12 +1844,6 @@ contract("CommunityGifts", (accounts) => {
       web3.utils.toWei("4.9"), //planter share
       web3.utils.toWei("2.1"), //referral share
       { from: deployerAccount }
-    );
-
-    await Common.addCommunityGiftRole(
-      arInstance,
-      communityGiftsInstance.address,
-      deployerAccount
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(giftee);

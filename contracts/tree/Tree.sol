@@ -19,6 +19,11 @@ contract Tree is ERC721Upgradeable {
         _;
     }
 
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(msg.sender);
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isTree
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
@@ -53,11 +58,10 @@ contract Tree is ERC721Upgradeable {
      * @dev mint {_tokenId} to {_to}
      * NOTE must call by TreeFactory
      */
-    function safeMint(address _to, uint256 _tokenId) external {
-        require(
-            accessRestriction.isTreeFactory(msg.sender),
-            "Caller must be TreeFactory"
-        );
+    function safeMint(address _to, uint256 _tokenId)
+        external
+        onlyTreejerContract
+    {
         _safeMint(_to, _tokenId);
     }
 

@@ -84,8 +84,8 @@ contract WethFunds is Initializable {
     }
 
     /** NOTE modifier for check msg.sender has incrementalSell or auction role */
-    modifier onlyIncrementalSellOrAuction() {
-        accessRestriction.ifIncrementalSellOrAuction(msg.sender);
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(msg.sender);
         _;
     }
 
@@ -246,7 +246,7 @@ contract WethFunds is Initializable {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
-    ) external onlyIncrementalSellOrAuction {
+    ) external onlyTreejerContract {
         totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
 
         totalFunds.localDevelop += (_amount * _localDevelop) / 10000;

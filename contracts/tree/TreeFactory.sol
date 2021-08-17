@@ -87,8 +87,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /** NOTE modifier for check msg.sender has Auction role */
-    modifier onlyAuction() {
-        accessRestriction.ifAuction(_msgSender());
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -431,7 +431,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function availability(uint256 _treeId, uint32 _provideType)
         external
-        onlyAuction
+        onlyTreejerContract
         validTree(_treeId)
         returns (uint32)
     {
@@ -453,21 +453,21 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint256 _treeId,
         address _ownerId,
         uint16 _mintStatus
-    ) external onlyIncrementalSellOrAuctionOrCommunityGifts {
+    ) external onlyTreejerContract {
         treeData[_treeId].provideStatus = 0;
         treeData[_treeId].mintStatus = _mintStatus;
         treeToken.safeMint(_ownerId, _treeId);
     }
 
     /** @dev exit a {_treeId} from auction */
-    function updateAvailability(uint256 _treeId) external onlyAuction {
+    function updateAvailability(uint256 _treeId) external onlyTreejerContract {
         treeData[_treeId].provideStatus = 0;
     }
 
     /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
     function bulkRevert(uint256 _startTreeId, uint256 _endTreeId)
         external
-        onlyIncremental
+        onlyTreejerContract
     {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (treeData[i].provideStatus == 2) {
@@ -484,7 +484,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint32 _provideStatus
-    ) external onlyIncrementalOrCommunityGifts returns (bool) {
+    ) external onlyTreejerContract returns (bool) {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (treeData[i].provideStatus > 0) {
                 return false;
@@ -627,7 +627,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function mintRegularTrees(uint256 _lastSold, address _owner)
         external
-        onlyRegularSellContract
+        onlyTreejerContract
         returns (uint256)
     {
         uint256 localLastSold = _lastSold + 1;
@@ -662,7 +662,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function requestRegularTree(uint256 _treeId, address _owner)
         external
-        onlyRegularSellContract
+        onlyTreejerContract
     {
         TreeStruct storage tree = treeData[_treeId];
 

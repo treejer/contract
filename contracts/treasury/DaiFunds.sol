@@ -85,8 +85,8 @@ contract DaiFunds is Initializable {
     }
 
     /** NOTE modifier for check msg.sender has regularSell role */
-    modifier onlyRegularSell() {
-        accessRestriction.ifRegularSell(msg.sender);
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(msg.sender);
         _;
     }
     /** NOTE modifier for check valid address */
@@ -217,7 +217,7 @@ contract DaiFunds is Initializable {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
-    ) external onlyRegularSell {
+    ) external onlyTreejerContract {
         totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
 
         totalFunds.localDevelop += (_amount * _localDevelop) / 10000;

@@ -35,6 +35,10 @@ interface IAccessRestriction {
 
     function isAdmin(address _address) external view returns (bool);
 
+    function ifTreejerContract(address _address) external view;
+
+    function isTreejerContract(address _address) external view returns (bool);
+
     function ifAuction(address _address) external view;
 
     function isAuction(address _address) external view returns (bool);

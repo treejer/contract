@@ -323,19 +323,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////////////////////--------------------- requestTrees --------------------------
 
@@ -594,19 +598,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////////////////////--------------------- requestTrees --------------------------
 
@@ -862,19 +870,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////////////////////--------------------- requestTrees --------------------------
 
@@ -1204,19 +1216,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////////////////////--------------------- requestTrees --------------------------
 
@@ -1313,19 +1329,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////////////////////--------------------- requestTrees --------------------------
 
@@ -1455,19 +1475,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     //////////////////-------------------------- plant regualar -----------------
 
@@ -1630,19 +1654,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     //////////////////-------------------------- plant regualar -----------------
 
@@ -2011,7 +2039,7 @@ contract("regularSell", (accounts) => {
 
     ///////////////------------------ add regular sell Role
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
@@ -2029,7 +2057,7 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2171,19 +2199,23 @@ contract("regularSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       regularSellInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, DaiFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
 
     ///////------------------------------handle gsn---------------------------------
 

@@ -15,6 +15,7 @@ const TREE_FACTORY_ROLE = web3.utils.soliditySha3("TREE_FACTORY_ROLE");
 const REGULAR_SELL_ROLE = web3.utils.soliditySha3("REGULAR_SELL_ROLE");
 const FUNDS_ROLE = web3.utils.soliditySha3("FUNDS_ROLE");
 const COMMUNITY_GIFTS_ROLE = web3.utils.soliditySha3("COMMUNITY_GIFTS_ROLE");
+const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 
 const Math = require("./math");
 
@@ -34,6 +35,12 @@ Common.addFundsRole = async (instance, account, adminAccount) => {
   await instance.grantRole(FUNDS_ROLE, account, { from: adminAccount });
 };
 
+Common.addTreejerContractRole = async (instance, account, adminAccount) => {
+  await instance.grantRole(TREEJER_CONTRACT_ROLE, account, {
+    from: adminAccount,
+  });
+};
+
 Common.addAdmin = async (instance, account, adminAccount) => {
   await instance.grantRole(DEFAULT_ADMIN_ROLE, account, { from: adminAccount });
 };
@@ -44,9 +51,6 @@ Common.addCommunityGiftRole = async (instance, account, adminAccount) => {
   });
 };
 
-Common.addAuctionRole = async (instance, address, adminAccount) => {
-  await instance.grantRole(AUCTION_ROLE, address, { from: adminAccount });
-};
 Common.addIncrementalSellRole = async (instance, address, adminAccount) => {
   await instance.grantRole(INCREMENTAL_SELL_ROLE, address, {
     from: adminAccount,
@@ -103,7 +107,7 @@ Common.successPlant = async (
   deployerAccount,
   planterInstance
 ) => {
-  await Common.addTreeFactoryRole(
+  await Common.addTreejerContractRole(
     arInstance,
     treeFactoryInstance.address,
     deployerAccount
@@ -293,7 +297,7 @@ Common.successFundTree = async (
   tokenOwner,
   treeFactoryInstance
 ) => {
-  await Common.addTreeFactoryRole(
+  await Common.addTreejerContractRole(
     arInstance,
     treeFactoryAddress,
     deployerAccount
@@ -316,11 +320,9 @@ Common.successFundTree = async (
     from: deployerAccount,
   });
 
-  await Common.addAuctionRole(arInstance, auctionAddress, deployerAccount);
-
-  await Common.addTreeFactoryRole(
+  await Common.addTreejerContractRole(
     arInstance,
-    treeFactoryAddress,
+    auctionAddress,
     deployerAccount
   );
 
@@ -343,16 +345,19 @@ Common.successFundTree = async (
     { from: deployerAccount }
   );
 
-  await Common.addRegularSellRole(
+  await Common.addTreejerContractRole(
     arInstance,
     treeFactoryAddress,
     deployerAccount
   );
-  // for simply test (without weth and uniswap because there is no need for teseting it here)
-  //give regular role to auction (for checking share of planter and referral and .....)
-  await Common.addRegularSellRole(arInstance, auctionAddress, deployerAccount);
 
-  await Common.addFundsRole(
+  await Common.addTreejerContractRole(
+    arInstance,
+    auctionAddress,
+    deployerAccount
+  );
+
+  await Common.addTreejerContractRole(
     arInstance,
     daiFundInstance.address,
     deployerAccount

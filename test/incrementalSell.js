@@ -193,18 +193,22 @@ contract("IncrementalSell", (accounts) => {
 
     ///////////////////////// -------------------- handle roles here ----------------
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       iSellInstance.address,
       deployerAccount
     );
 
-    await Common.addFundsRole(arInstance, WethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      WethFunds.address,
+      deployerAccount
+    );
 
     /////----------------add distributionModel
 
@@ -464,7 +468,7 @@ contract("IncrementalSell", (accounts) => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    await Common.addAuctionRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeAuctionInstance.address,
       deployerAccount
@@ -748,7 +752,7 @@ contract("IncrementalSell", (accounts) => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    await Common.addAuctionRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeAuctionInstance.address,
       deployerAccount
@@ -879,7 +883,7 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1474,7 +1478,7 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1553,7 +1557,7 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1614,7 +1618,7 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount

@@ -10,6 +10,8 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
+    bytes32 public constant TREEJER_CONTRACT_ROLE =
+        keccak256("TREEJER_CONTRACT_ROLE");
     bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
     bytes32 public constant COMMUNITY_GIFTS_ROLE =
         keccak256("COMMUNITY_GIFTS_ROLE");
@@ -85,6 +87,15 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev check if given address is auction
      * @param _address input address to check if auction or not
      */
+
+    function ifTreejerContract(address _address) public view {
+        require(isTreejerContract(_address), "caller is not treejer contract");
+    }
+
+    function isTreejerContract(address _address) public view returns (bool) {
+        return hasRole(TREEJER_CONTRACT_ROLE, _address);
+    }
+
     function ifAuction(address _address) public view {
         require(isAuction(_address), "Caller is not Auction");
     }

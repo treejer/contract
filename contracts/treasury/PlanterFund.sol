@@ -64,8 +64,8 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /** NOTE modifier for check msg.sender has treeFactory role */
-    modifier onlyTreeFactory() {
-        accessRestriction.ifTreeFactory(_msgSender());
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -127,7 +127,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         uint256 _planterFund,
         uint256 _referralFund
-    ) external onlyFundsOrCommunityGifts {
+    ) external onlyTreejerContract {
         planterFunds[_treeId] = _planterFund;
         referralFunds[_treeId] = _referralFund;
 
@@ -148,7 +148,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         address _planterId,
         uint64 _treeStatus
-    ) external onlyTreeFactory {
+    ) external onlyTreejerContract {
         require(planterFunds[_treeId] > 0, "planter fund not exist");
 
         (

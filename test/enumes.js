@@ -10,6 +10,7 @@ const TimeEnumes = {
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
+  CHECK_TREEJER_CONTTRACT: "caller is not treejer contract",
   CHECK_AUCTION: "Caller is not Auction",
   CHECK_ADMIN_OR_COMMUNITY: "not Admin or CommunityGifts",
   CHECK_TREE_FACTORY: "Caller is not TreeFactory",

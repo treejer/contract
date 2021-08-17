@@ -331,9 +331,17 @@ contract("WethFunds", (accounts) => {
     let amount = web3.utils.toWei("1", "Ether");
 
     ////--------------check set role----------------
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////--------------add and assign DistributionModel for tree
     await fModel.addFundDistributionModel(
@@ -489,9 +497,17 @@ contract("WethFunds", (accounts) => {
     let amountTreeId2 = web3.utils.toWei("3.252", "Ether");
 
     ////--------------check set role----------------
-    await Common.addAuctionRole(arInstance, userAccount3, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////--------------add and assign DistributionModel for tree
     await fModel.addFundDistributionModel(
@@ -803,9 +819,7 @@ contract("WethFunds", (accounts) => {
       .fundTree(0, amount, 2000, 1500, 1200, 1400, 1600, 1100, 600, 600, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(
-        TreasuryManagerErrorMsg.ONLY_AUCTION_OR_INCREAMENTAL
-      );
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   //////----------------------------------withdraw Tree Research test------------------------
@@ -822,9 +836,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setTreeResearchAddress(userAccount3, {
@@ -914,11 +936,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setTreeResearchAddress(treeResearchAddress, {
@@ -1175,9 +1209,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setTreeResearchAddress(zeroAddress, {
       from: deployerAccount,
@@ -1302,9 +1348,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setLocalDevelopAddress(userAccount3, {
@@ -1394,11 +1448,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setLocalDevelopAddress(localDevelopAddress, {
@@ -1609,9 +1675,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setLocalDevelopAddress(zeroAddress, {
       from: deployerAccount,
@@ -1736,9 +1814,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setRescueFundAddress(userAccount3, {
@@ -1828,11 +1914,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setRescueFundAddress(rescueFundAddress, {
@@ -2037,9 +2135,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setRescueFundAddress(zeroAddress, {
       from: deployerAccount,
@@ -2164,9 +2274,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setTreejerDevelopAddress(userAccount3, {
@@ -2256,11 +2374,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setTreejerDevelopAddress(treejerDevelopAddress, {
@@ -2471,9 +2601,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setTreejerDevelopAddress(zeroAddress, {
       from: deployerAccount,
@@ -2598,9 +2740,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setReserveFund1Address(userAccount3, {
@@ -2690,11 +2840,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setReserveFund1Address(reserveFund1Address, {
@@ -2905,9 +3067,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setReserveFund1Address(zeroAddress, {
       from: deployerAccount,
@@ -3032,9 +3206,17 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     //////// -------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     ////////////------------------- set addresses
     await wethFunds.setReserveFund2Address(userAccount3, {
@@ -3124,11 +3306,23 @@ contract("WethFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
 
     /////////// ------------------ set addresses
     await wethFunds.setReserveFund2Address(reserveFund2Address, {
@@ -3339,9 +3533,21 @@ contract("WethFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     ///////////--------------------- add roles
-    await Common.addAuctionRole(arInstance, userAccount6, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
-    await Common.addFundsRole(arInstance, wethFunds.address, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
     /////////////////------------------- set addresses
     await wethFunds.setReserveFund2Address(zeroAddress, {
       from: deployerAccount,

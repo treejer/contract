@@ -237,7 +237,7 @@ contract("TreeAttribute", (accounts) => {
 
     let generatedCode2 = 0;
 
-    await Common.addCommunityGiftRole(
+    await Common.addTreejerContractRole(
       arInstance,
       userAccount2,
       deployerAccount
@@ -279,7 +279,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .reserveTreeAttributes(generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_COMMUNITY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
@@ -311,7 +311,7 @@ contract("TreeAttribute", (accounts) => {
 
     let generatedCode2 = 0;
 
-    await Common.addCommunityGiftRole(
+    await Common.addTreejerContractRole(
       arInstance,
       userAccount2,
       deployerAccount
@@ -357,7 +357,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .freeReserveTreeAttributes(generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_COMMUNITY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   ///////////////---------------------------------test setTreeAttributesByAdmin function--------------------------------------------------------
@@ -614,7 +614,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .setTreeAttributesByAdmin(0, generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_COMMUNITY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   it("Should setTreeAttributesByAdmin rejec because generatedCode has been generated before and not resreved", async () => {
@@ -1516,12 +1516,12 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
     );
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1547,18 +1547,18 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
     );
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -1683,7 +1683,7 @@ contract("TreeAttribute", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       iSellInstance.address,
       deployerAccount
@@ -1723,7 +1723,7 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1740,7 +1740,7 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
-    await Common.addFundsRole(
+    await Common.addTreejerContractRole(
       arInstance,
       wethFundsInstance.address,
       deployerAccount
@@ -1799,7 +1799,7 @@ contract("TreeAttribute", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       iSellInstance.address,
       deployerAccount
@@ -1839,7 +1839,7 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1856,7 +1856,7 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
-    await Common.addFundsRole(
+    await Common.addTreejerContractRole(
       arInstance,
       wethFundsInstance.address,
       deployerAccount

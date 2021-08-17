@@ -61,7 +61,7 @@ contract("Planter", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
-  
+
   /////////////////---------------------------------planterJoin--------------------------------------------------------
 
   it("planterJoin should be work successfully without refferedBy and organizationAddress", async () => {
@@ -683,7 +683,7 @@ contract("Planter", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -968,7 +968,11 @@ contract("Planter", (accounts) => {
 
   it("should check data after update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1060,7 +1064,11 @@ contract("Planter", (accounts) => {
 
   it("should fail update capacity", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1107,7 +1115,11 @@ contract("Planter", (accounts) => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1139,7 +1151,11 @@ contract("Planter", (accounts) => {
   });
   it("should check data after give planting permision to be correct 1 (checking capacity limit)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1197,7 +1213,11 @@ contract("Planter", (accounts) => {
     );
   });
   it("should return false when there is no planter (planter type is not > 0)", async () => {
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await planterInstance.plantingPermission.call(
       userAccount3,
@@ -1220,7 +1240,11 @@ contract("Planter", (accounts) => {
   it("should return false when planter type is 1", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1255,7 +1279,11 @@ contract("Planter", (accounts) => {
   it("should return false when planter type is 2", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1292,7 +1320,11 @@ contract("Planter", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1338,7 +1370,11 @@ contract("Planter", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1382,7 +1418,11 @@ contract("Planter", (accounts) => {
   it("should check data after give planting permision to be correct 2", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount3, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount1,
@@ -1420,7 +1460,11 @@ contract("Planter", (accounts) => {
 
   it("should fail to give planting permision", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -1433,7 +1477,7 @@ contract("Planter", (accounts) => {
       .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
   /////// ---------------------------------------------- update organization planter payment  -------------------------------------
 
@@ -1867,7 +1911,11 @@ contract("Planter", (accounts) => {
   it("should reduce planted count and check data to be ok", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1925,7 +1973,11 @@ contract("Planter", (accounts) => {
   it("should fail to reduce planted count", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1943,7 +1995,7 @@ contract("Planter", (accounts) => {
       .plantingPermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
     await planterInstance
       .reducePlantCount(userAccount4, { from: userAccount2 })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
@@ -1954,7 +2006,11 @@ contract("Planter", (accounts) => {
   it("should planterCheck return true", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1979,7 +2035,11 @@ contract("Planter", (accounts) => {
   it("should planterCheck return false", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2011,7 +2071,11 @@ contract("Planter", (accounts) => {
   it("should check data to be correct when call planterCheck function", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2043,7 +2107,11 @@ contract("Planter", (accounts) => {
   it("should fail planterCheck", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.addTreeFactoryRole(arInstance, userAccount2, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2059,9 +2127,9 @@ contract("Planter", (accounts) => {
 
     await planterInstance
       .planterCheck(userAccount1, { from: userAccount3 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
-  
+
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");

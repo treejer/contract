@@ -78,8 +78,8 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /** NOTE modifier for check msg.sender has TreeFactory role*/
-    modifier onlyTreeFactory() {
-        accessRestriction.ifTreeFactory(_msgSender());
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -332,9 +332,7 @@ contract Planter is Initializable, RelayRecipient {
     function plantingPermission(
         address _planterAddress,
         address _assignedPlanterAddress
-    ) external returns (bool) {
-        accessRestriction.ifTreeFactory(_msgSender());
-
+    ) external onlyTreejerContract returns (bool) {
         PlanterData storage tempPlanter = planters[_planterAddress];
         if (tempPlanter.planterType > 0) {
             if (
@@ -432,7 +430,7 @@ contract Planter is Initializable, RelayRecipient {
     function reducePlantCount(address _planterAddress)
         external
         existPlanter(_planterAddress)
-        onlyTreeFactory
+        onlyTreejerContract
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
 
@@ -453,7 +451,7 @@ contract Planter is Initializable, RelayRecipient {
     function planterCheck(address _planterAddress)
         external
         existPlanter(_planterAddress)
-        onlyTreeFactory
+        onlyTreejerContract
         returns (bool)
     {
         PlanterData storage tempPlanter = planters[_planterAddress];

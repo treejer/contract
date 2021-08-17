@@ -376,7 +376,7 @@ contract("TreeFactory", (accounts) => {
     });
 
     ////////// try to plant tree and verify it to change staus to 2 and fail because it is planted
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -425,7 +425,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
     ///////////////////////// -------------------- add treeFactory role
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -579,7 +579,7 @@ contract("TreeFactory", (accounts) => {
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -626,7 +626,7 @@ contract("TreeFactory", (accounts) => {
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -761,9 +761,9 @@ contract("TreeFactory", (accounts) => {
       .plantTree(treeId, ipfsHash, birthDate, countryCode, {
         from: userAccount2,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREE_FACTORY);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -802,7 +802,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -919,7 +919,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1025,7 +1025,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1175,7 +1175,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1363,7 +1363,7 @@ contract("TreeFactory", (accounts) => {
       from: userAccount3,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1493,7 +1493,7 @@ contract("TreeFactory", (accounts) => {
       zeroAddress
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1664,7 +1664,7 @@ contract("TreeFactory", (accounts) => {
       zeroAddress
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1840,7 +1840,7 @@ contract("TreeFactory", (accounts) => {
       zeroAddress
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -1931,7 +1931,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2068,7 +2068,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2205,7 +2205,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2334,7 +2334,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2397,7 +2397,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount);
     await Common.addPlanter(arInstance, userAccount8, deployerAccount);
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -3421,7 +3421,7 @@ contract("TreeFactory", (accounts) => {
     });
     ///////////////////// fund tree without tree token owner ////////////////////////////////
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -3445,7 +3445,11 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
     await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
@@ -3462,13 +3466,11 @@ contract("TreeFactory", (accounts) => {
       { from: deployerAccount }
     );
 
-    await Common.addFundsRole(
+    await Common.addTreejerContractRole(
       arInstance,
       daiFundInstance.address,
       deployerAccount
     );
-
-    await Common.addRegularSellRole(arInstance, userAccount5, deployerAccount);
 
     await daiFundInstance.fundTree(
       treeId,
@@ -3752,7 +3754,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -3916,7 +3918,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -4081,7 +4083,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -4242,7 +4244,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -4579,7 +4581,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -4660,7 +4662,11 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4686,11 +4692,15 @@ contract("TreeFactory", (accounts) => {
       .availability(1, 1, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   it("availability should be fail because invalid tree", async () => {
-    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount1,
+      deployerAccount
+    );
 
     await treeFactoryInstance
       .availability(1, 1, {
@@ -4721,9 +4731,13 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await Common.addAuctionRole(arInstance, userAccount1, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount1,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -4778,9 +4792,13 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -4837,9 +4855,7 @@ contract("TreeFactory", (accounts) => {
       .updateOwner(1, userAccount4, 2, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(
-        CommonErrorMsg.CHECK_AUCTION_OR_COMMUNITY_GIFTS_OR_INCREMENTAL_SELL
-      );
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   it("updateOwner should be fail because token mint for another user", async () => {
@@ -4847,13 +4863,17 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -4905,7 +4925,11 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
     await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
@@ -4946,7 +4970,11 @@ contract("TreeFactory", (accounts) => {
       planterInstance
     );
 
-    await Common.addAuctionRole(arInstance, userAccount5, deployerAccount);
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount5,
+      deployerAccount
+    );
 
     await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
@@ -4956,7 +4984,7 @@ contract("TreeFactory", (accounts) => {
       .updateAvailability(treeId, {
         from: userAccount6,
       })
-      .should.be.rejectedWith(TreeFactoryErrorMsg.CALLER_IS_NOT_AUCTION);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
@@ -4968,7 +4996,7 @@ contract("TreeFactory", (accounts) => {
     const countryCode = 2;
     const planter = userAccount2;
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5039,7 +5067,7 @@ contract("TreeFactory", (accounts) => {
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5122,7 +5150,7 @@ contract("TreeFactory", (accounts) => {
     const planter = userAccount2;
     const organizationAdmin = userAccount1;
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5167,7 +5195,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5245,7 +5273,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5324,7 +5352,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5370,7 +5398,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5390,7 +5418,7 @@ contract("TreeFactory", (accounts) => {
     let regularTree = await treeFactoryInstance.regularTrees.call(0);
 
     // tree mint for userAccount4
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5453,7 +5481,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5490,7 +5518,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5523,7 +5551,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5570,7 +5598,7 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5612,7 +5640,7 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
-    await Common.addAuctionRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeAuctionInstance.address,
       deployerAccount
@@ -5683,13 +5711,13 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5713,7 +5741,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5734,7 +5762,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5786,7 +5814,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5807,7 +5835,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5861,7 +5889,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5886,7 +5914,7 @@ contract("TreeFactory", (accounts) => {
       .mintRegularTrees(9999, userAccount4, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_REGULAR_SELL);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   // //----------------------------------------requestRegularTree---------------------------------
@@ -5900,7 +5928,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5921,7 +5949,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -5973,7 +6001,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -5998,7 +6026,7 @@ contract("TreeFactory", (accounts) => {
       .requestRegularTree(10000, userAccount5, {
         from: deployerAccount,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_REGULAR_SELL);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
   });
 
   it("requestRegularTree should be fail(tree must be planted)", async () => {
@@ -6006,13 +6034,13 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
     );
 
-    await Common.addRegularSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
@@ -6111,7 +6139,7 @@ contract("TreeFactory", (accounts) => {
       from: userAccount1,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount

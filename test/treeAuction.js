@@ -187,7 +187,7 @@ contract("TreeAuction", (accounts) => {
         from: deployerAccount,
       }
     );
-    await Common.addFundsRole(
+    await Common.addTreejerContractRole(
       arInstance,
       wethFundsInstance.address,
       deployerAccount
@@ -211,13 +211,13 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addAuctionRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeAuctionInstance.address,
       deployerAccount
     );
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount
@@ -2507,7 +2507,7 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount

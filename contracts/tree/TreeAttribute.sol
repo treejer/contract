@@ -40,8 +40,8 @@ contract TreeAttribute is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
-    modifier onlyAdminOrCommunityGifts() {
-        accessRestriction.ifAdminOrCommunityGifts(msg.sender);
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(msg.sender);
         _;
     }
     modifier ifNotPaused() {
@@ -66,7 +66,7 @@ contract TreeAttribute is Initializable {
 
     function reserveTreeAttributes(uint32 generatedCode)
         external
-        onlyAdminOrCommunityGifts
+        onlyTreejerContract
     {
         require(
             generatedAttributes[generatedCode] == 0,
@@ -78,7 +78,7 @@ contract TreeAttribute is Initializable {
 
     function freeReserveTreeAttributes(uint32 generatedCode)
         external
-        onlyAdminOrCommunityGifts
+        onlyTreejerContract
     {
         require(
             reservedAttributes[generatedCode] == 1,
@@ -91,7 +91,7 @@ contract TreeAttribute is Initializable {
 
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external
-        onlyAdminOrCommunityGifts
+        onlyTreejerContract
     {
         require(
             generatedAttributes[generatedCode] == 0 ||

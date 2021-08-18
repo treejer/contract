@@ -47,7 +47,7 @@ contract Planter is Initializable, RelayRecipient {
     event RejectedByOrganization(address planterId);
     event PortionUpdated(address planterId);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -77,7 +77,7 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check msg.sender has TreeFactory role*/
+    /** NOTE modifier for check msg.sender has TreejerContract role*/
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(_msgSender());
         _;

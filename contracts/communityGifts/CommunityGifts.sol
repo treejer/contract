@@ -47,7 +47,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     event TreeClaimed(uint256 treeId);
     event TreeTransfered(uint256 treeId);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

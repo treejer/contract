@@ -5,20 +5,12 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-/** @title AccessRestriction */
+/** @title AccessRestriction contract */
 
 contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
-    bytes32 public constant AUCTION_ROLE = keccak256("AUCTION_ROLE");
     bytes32 public constant TREEJER_CONTRACT_ROLE =
         keccak256("TREEJER_CONTRACT_ROLE");
-    bytes32 public constant TREE_FACTORY_ROLE = keccak256("TREE_FACTORY_ROLE");
-    bytes32 public constant COMMUNITY_GIFTS_ROLE =
-        keccak256("COMMUNITY_GIFTS_ROLE");
-    bytes32 public constant REGULAR_SELL_ROLE = keccak256("REGULAR_SELL_ROLE");
-    bytes32 public constant FUNDS_ROLE = keccak256("FUNDS_ROLE");
-    bytes32 public constant INCREMENTAL_SELL_ROLE =
-        keccak256("INCREMENTAL_SELL_ROLE");
 
     /** NOTE {isAccessRestriction} set inside the initialize to {true} */
     bool public isAccessRestriction;
@@ -38,6 +30,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         }
     }
 
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not admin");
         _;
@@ -45,194 +38,83 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
 
     /**
      * @dev check if given address is planter
-     * @param _address input address to check if planter or not
+     * @param _address input address
      */
     function ifPlanter(address _address) public view {
         require(isPlanter(_address), "Caller is not a planter");
     }
 
+    /**
+     * @dev check if given address has planter role
+     * @param _address input address
+     * @return if given address has planter role
+     */
     function isPlanter(address _address) public view returns (bool) {
         return hasRole(PLANTER_ROLE, _address);
     }
 
     /**
      * @dev check if given address is admin
-     * @param _address input address to check if admin or not
+     * @param _address input address
      */
     function ifAdmin(address _address) public view {
         require(isAdmin(_address), "Caller is not admin");
     }
 
+    /**
+     * @dev check if given address has admin role
+     * @param _address input address
+     * @return if given address has admin role
+     */
     function isAdmin(address _address) public view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, _address);
     }
 
+    /** @dev check if functionality is not puased */
     function ifNotPaused() public view {
         require(!paused(), "Pausable: paused");
     }
 
+    /** @dev check if functionality is puased */
     function ifPaused() public view {
         require(paused(), "Pausable: not paused");
     }
 
+    /** @dev pause functionality */
     function pause() external onlyAdmin {
         _pause();
     }
 
+    /** @dev unpause functionality */
     function unpause() external onlyAdmin {
         _unpause();
     }
 
     /**
-     * @dev check if given address is auction
-     * @param _address input address to check if auction or not
+     * @dev check if given address is Treejer contract
+     * @param _address input address
      */
-
     function ifTreejerContract(address _address) public view {
         require(isTreejerContract(_address), "caller is not treejer contract");
     }
 
+    /**
+     * @dev check if given address has Treejer contract role
+     * @param _address input address
+     * @return if given address has Treejer contract role
+     */
     function isTreejerContract(address _address) public view returns (bool) {
         return hasRole(TREEJER_CONTRACT_ROLE, _address);
     }
 
-    function ifAuction(address _address) public view {
-        require(isAuction(_address), "Caller is not Auction");
-    }
-
-    function isAuction(address _address) public view returns (bool) {
-        return hasRole(AUCTION_ROLE, _address);
-    }
-
     /**
-     * @dev check if given address is incrementalSell
-     * @param _address input address to check if incrementalSell or not
+     * @dev check if given address is Admin or Treejer contract
+     * @param _address input address
      */
-    function ifIncrementalSell(address _address) public view {
-        require(isIncrementalSell(_address), "Caller is not IncrementalSell");
-    }
-
-    /**
-     * @dev check if given address is incrementalSell or auction
-     * @param _address input address to check if incrementalSell or auction or not
-     */
-
-    function ifIncrementalSellOrAuction(address _address) public view {
+    function ifAdminOrTreejerContract(address _address) public view {
         require(
-            isIncrementalSell(_address) || isAuction(_address),
-            "not IncrementalSell or Auction"
-        );
-    }
-
-    function isIncrementalSell(address _address) public view returns (bool) {
-        return hasRole(INCREMENTAL_SELL_ROLE, _address);
-    }
-
-    /**
-     * @dev check if given address is tree factory
-     * @param _address input address to check if tree factory or not
-     */
-    function ifTreeFactory(address _address) public view {
-        require(isTreeFactory(_address), "Caller is not TreeFactory");
-    }
-
-    function isTreeFactory(address _address) public view returns (bool) {
-        return hasRole(TREE_FACTORY_ROLE, _address);
-    }
-
-    /**
-     * @dev check if given address is regularSell
-     * @param _address input address to check if regularSell or not
-     */
-    function ifRegularSell(address _address) public view {
-        require(isRegularSell(_address), "Caller is not RegularSell");
-    }
-
-    function isRegularSell(address _address) public view returns (bool) {
-        return hasRole(REGULAR_SELL_ROLE, _address);
-    }
-
-    /**
-     * @dev check if given address is funds
-     * @param _address input address to check if funds or not
-     */
-    function ifFunds(address _address) public view {
-        require(isFunds(_address), "Caller is not Funds");
-    }
-
-    function isFunds(address _address) public view returns (bool) {
-        return hasRole(FUNDS_ROLE, _address);
-    }
-
-    /**
-     * @dev check if given address is communityGifts
-     * @param _address input address to check if communityGifts or not
-     */
-    function ifCommunityGifts(address _address) public view {
-        require(isCommunityGifts(_address), "Caller is not CommunityGifts");
-    }
-
-    function isCommunityGifts(address _address) public view returns (bool) {
-        return hasRole(COMMUNITY_GIFTS_ROLE, _address);
-    }
-
-    /**
-     * @dev check if given address is admin or communityGifts
-     * @param _address input address to check if admin or communityGifts or not
-     */
-    function ifAdminOrCommunityGifts(address _address) public view {
-        require(
-            isAdmin(_address) || isCommunityGifts(_address),
-            "not Admin or CommunityGifts"
-        );
-    }
-
-    /**
-     * @dev check if given address is auction or communityGifts
-     * @param _address input address to check if auction or communityGifts or not
-     */
-    function ifAuctionOrCommunityGifts(address _address) public view {
-        require(
-            isAuction(_address) || isCommunityGifts(_address),
-            "not Auction or CommunityGifts"
-        );
-    }
-
-    /**
-     * @dev check if given address is funds or communityGifts
-     * @param _address input address to check if funds or communityGifts or not
-     */
-    function ifFundsOrCommunityGifts(address _address) public view {
-        require(
-            isFunds(_address) || isCommunityGifts(_address),
-            "not funds or community gifts"
-        );
-    }
-
-    /**
-     * @dev check if given address is incrementalSell or auction or CommunityGifts
-     * @param _address input address to check if incrementalSell or auction or CommunityGifts
-     */
-    function ifIncrementalSellOrAuctionOrCommunityGifts(address _address)
-        public
-        view
-    {
-        require(
-            isIncrementalSell(_address) ||
-                isAuction(_address) ||
-                isCommunityGifts(_address),
-            "not auction or community gifts or incrementalSell"
-        );
-    }
-
-    /**
-     * @dev check if given address is incremental or communityGifts
-     * @param _address input address to check if incremental or communityGifts
-     */
-    function ifIncrementalOrCommunityGifts(address _address) public view {
-        require(
-            isIncrementalSell(_address) || isCommunityGifts(_address),
-            "not community gifts or incrementalSell"
+            isAdmin(_address) || isTreejerContract(_address),
+            "not Admin or Treejer Contract"
         );
     }
 }

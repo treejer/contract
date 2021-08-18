@@ -56,7 +56,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     event AuctionEnded(uint256 auctionId, uint256 treeId);
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

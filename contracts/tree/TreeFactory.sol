@@ -74,7 +74,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularPlantVerified(uint256 treeId);
     event RegularPlantRejected(uint256 treeId);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -86,59 +86,15 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check msg.sender has Auction role */
+    /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has Auction or CommunityGifts role */
-    modifier onlyAuctionOrCommunityGifts() {
-        accessRestriction.ifAuctionOrCommunityGifts(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has CommunityGifts role */
-    modifier onlyCommunityGifts() {
-        accessRestriction.ifCommunityGifts(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has IncrementalSell role */
-    modifier onlyIncremental() {
-        accessRestriction.ifIncrementalSell(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has IncrementalSell or Auction role */
-    modifier onlyIncrementalSellOrAuction() {
-        accessRestriction.ifIncrementalSellOrAuction(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has IncrementalSell or CommunityGifts role */
-    modifier onlyIncrementalOrCommunityGifts() {
-        accessRestriction.ifIncrementalOrCommunityGifts(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has IncrementalSell or Auction or CommunityGifts role */
-    modifier onlyIncrementalSellOrAuctionOrCommunityGifts() {
-        accessRestriction.ifIncrementalSellOrAuctionOrCommunityGifts(
-            _msgSender()
-        );
         _;
     }
 
     /** NOTE modifier for check treeId to be valid tree */
     modifier validTree(uint256 _treeId) {
         require(treeData[_treeId].treeStatus > 0, "invalid tree");
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has RegularSell role */
-    modifier onlyRegularSellContract() {
-        accessRestriction.ifRegularSell(_msgSender());
         _;
     }
 

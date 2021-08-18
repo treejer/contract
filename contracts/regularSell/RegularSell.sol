@@ -32,7 +32,7 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 amount
     );
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

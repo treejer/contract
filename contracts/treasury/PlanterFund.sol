@@ -51,7 +51,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 referralAmount
     );
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -63,15 +63,9 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check msg.sender has treeFactory role */
+    /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has funds or communityGifts role */
-    modifier onlyFundsOrCommunityGifts() {
-        accessRestriction.ifFundsOrCommunityGifts(_msgSender());
         _;
     }
 

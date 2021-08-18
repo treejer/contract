@@ -10,7 +10,7 @@ import "../treasury/IFinancialModel.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract IncrementalSell is Initializable, RelayRecipient {
-    /** NOTE {isCommunityGifts} set inside the initialize to {true} */
+    /** NOTE {isIncrementalSell} set inside the initialize to {true} */
     bool public isIncrementalSell;
 
     IAccessRestriction public accessRestriction;
@@ -38,7 +38,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
     event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
     event IncrementalSellUpdated();
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;

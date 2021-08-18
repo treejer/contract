@@ -2,11 +2,13 @@
 
 pragma solidity ^0.8.6;
 
-/** @title AccessRestriction */
+/** @title AccessRestriction interface*/
 
 interface IAccessRestriction {
+    /** @return true if AccessRestriction contract have been initialized  */
     function isAccessRestriction() external view returns (bool);
 
+    /** @return if account {account} has role {role} or not */
     function hasRole(bytes32 role, address account)
         external
         view
@@ -21,73 +23,92 @@ interface IAccessRestriction {
 
     function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
+    /**
+     * @dev grant role {role} to account {account}
+     * NOTE emit a {RoleGranted} event
+     */
     function grantRole(bytes32 role, address account) external;
 
+    /**
+     * @dev revoke role {role} from account {account}
+     * NOTE emit a {RoleRevoked} event
+     */
     function revokeRole(bytes32 role, address account) external;
 
+    /**
+     * @dev renounce role {role} from account {account}
+     * NOTE emit a {RoleRevoked} event
+     */
     function renounceRole(bytes32 role, address account) external;
 
+    /**
+     * @dev check if given address is planter
+     * @param _address input address
+     */
     function ifPlanter(address _address) external view;
 
+    /**
+     * @dev check if given address has Planter role
+     * @param _address input address
+     * @return if given address has Planter role
+     */
     function isPlanter(address _address) external view returns (bool);
 
+    /**
+     * @dev check if given address is Admin
+     * @param _address input address
+     */
     function ifAdmin(address _address) external view;
 
+    /**
+     * @dev check if given address has Admin role
+     * @param _address input address
+     * @return if given address has Admin role
+     */
     function isAdmin(address _address) external view returns (bool);
 
+    /**
+     * @dev check if given address is Treejer contract
+     * @param _address input address
+     */
     function ifTreejerContract(address _address) external view;
 
+    /**
+     * @dev check if given address has Treejer contract role
+     * @param _address input address
+     * @return if given address has Treejer contract role
+     */
     function isTreejerContract(address _address) external view returns (bool);
 
-    function ifAuction(address _address) external view;
+    /**
+     * @dev check if given address is Admin or Treejer contract
+     * @param _address input address
+     */
+    function ifAdminOrTreejerContract(address _address) external view;
 
-    function isAuction(address _address) external view returns (bool);
-
-    function ifIncrementalSell(address _address) external view;
-
-    function isIncrementalSell(address _address) external view returns (bool);
-
-    function ifIncrementalSellOrAuction(address _address) external view;
-
-    function ifTreeFactory(address _address) external view;
-
-    function isTreeFactory(address _address) external view returns (bool);
-
-    function ifRegularSell(address _address) external view;
-
-    function isRegularSell(address _address) external view returns (bool);
-
-    function ifFunds(address _address) external view;
-
-    function isFunds(address _address) external view returns (bool);
-
-    function ifCommunityGifts(address _address) external view;
-
-    function isCommunityGifts(address _address) external view returns (bool);
-
-    function ifAdminOrCommunityGifts(address _address) external view;
-
-    function ifAuctionOrCommunityGifts(address _address) external view;
-
-    function ifFundsOrCommunityGifts(address _address) external view;
-
-    function ifIncrementalSellOrAuctionOrCommunityGifts(address _address)
-        external
-        view;
-
-    function ifIncrementalOrCommunityGifts(address _address) external view;
-
+    /** @return if functionality is paused*/
     function paused() external view returns (bool);
 
+    /** @dev check if functionality is not puased */
     function ifNotPaused() external view;
 
+    /** @dev check if functionality is puased */
     function ifPaused() external view;
 
+    /** @dev unpause functionality */
+    function unpause() external;
+
+    /** @dev pause functionality */
+    function pause() external;
+
+    /** @dev emitted when role granted to account */
     event RoleGranted(
         bytes32 indexed role,
         address indexed account,
         address indexed sender
     );
+
+    /** @dev emitted when role revoked from account */
     event RoleRevoked(
         bytes32 indexed role,
         address indexed account,

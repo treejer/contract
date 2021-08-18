@@ -50,7 +50,7 @@ contract FinancialModel is Initializable {
 
     event FundDistributionModelAssigned(uint256 assignModelsLength);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;

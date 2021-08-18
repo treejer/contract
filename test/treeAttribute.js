@@ -279,7 +279,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .reserveTreeAttributes(generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_TREEJER_CONTRACT);
   });
 
   ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
@@ -357,7 +357,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .freeReserveTreeAttributes(generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_TREEJER_CONTRACT);
   });
 
   ///////////////---------------------------------test setTreeAttributesByAdmin function--------------------------------------------------------
@@ -614,7 +614,7 @@ contract("TreeAttribute", (accounts) => {
 
     await treeAttributeInstance
       .setTreeAttributesByAdmin(0, generatedCode)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN_OR_TREEJER_CONTRACT);
   });
 
   it("Should setTreeAttributesByAdmin rejec because generatedCode has been generated before and not resreved", async () => {
@@ -1051,12 +1051,12 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
-    await Common.addIncrementalSellRole(
+    await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
     );
-    await Common.addTreeFactoryRole(
+    await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
       deployerAccount

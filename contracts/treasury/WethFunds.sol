@@ -77,13 +77,13 @@ contract WethFunds is Initializable {
     );
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
-    /** NOTE modifier for check msg.sender has admin role */
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
-    /** NOTE modifier for check msg.sender has incrementalSell or auction role */
+    /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(msg.sender);
         _;

@@ -3,7 +3,7 @@ pragma solidity >=0.7.6;
 
 interface IIncrementalSell {
     /**
-     * @return true if isIncrementalSell contract have been initialized
+     * @return true if IncrementalSell contract have been initialized
      */
     function isIncrementalSell() external view returns (bool);
 

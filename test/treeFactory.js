@@ -2502,7 +2502,7 @@ contract("TreeFactory", (accounts) => {
 
     let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.mul(
-      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(7 * 24, 3600)),
       2
     );
 
@@ -2552,7 +2552,16 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
+
+    await Common.travelTime(TimeEnumes.days, 6);
+
+    await treeFactoryInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
   });
+
   it("Should update tree do not work because update time does not reach (using update status)", async () => {
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -2573,7 +2582,7 @@ contract("TreeFactory", (accounts) => {
 
     let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.subtract(
-      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(7 * 24, 3600)),
       100
     );
 
@@ -2685,8 +2694,9 @@ contract("TreeFactory", (accounts) => {
     );
 
     let tree = await treeFactoryInstance.treeData.call(treeId);
+
     let travelTime = Math.add(
-      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(24, 3600)),
+      Math.add(Math.mul(Number(tree.treeStatus), 3600), Math.mul(7 * 24, 3600)),
       100
     );
 
@@ -2838,7 +2848,7 @@ contract("TreeFactory", (accounts) => {
     let tree = await treeFactoryInstance.treeData.call(treeId);
     let travelTime = Math.add(
       Math.mul(Number(tree.treeStatus), 3600),
-      Math.mul(25, 3600)
+      Math.mul(7 * 24, 3600)
     );
 
     await Common.travelTime(TimeEnumes.seconds, travelTime);
@@ -2857,7 +2867,7 @@ contract("TreeFactory", (accounts) => {
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-    await Common.travelTime(TimeEnumes.seconds, 86400);
+    await Common.travelTime(TimeEnumes.seconds, 7 * 86400);
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -2871,7 +2881,7 @@ contract("TreeFactory", (accounts) => {
       .updateTree(treeId, ipfsHash, { from: userAccount2 })
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-    await Common.travelTime(TimeEnumes.seconds, 86300);
+    await Common.travelTime(TimeEnumes.seconds, 6 * 86400 + 86300);
 
     await treeFactoryInstance
       .updateTree(treeId, ipfsHash, {
@@ -3087,7 +3097,7 @@ contract("TreeFactory", (accounts) => {
       "local develop total fund is not ok"
     );
 
-    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800); // 7 * 172800 is equal to 7 * 48 hours
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -3533,7 +3543,7 @@ contract("TreeFactory", (accounts) => {
       "planter paid before verify update is not ok"
     );
 
-    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800); //7 * 172800 is equal to 7 * 48 hours
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -3608,7 +3618,7 @@ contract("TreeFactory", (accounts) => {
       from: userAccount5,
     });
 
-    await Common.travelTime(TimeEnumes.seconds, 172800); //172800 is equal to 48 hours
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800); //7 * 172800 is equal to 7 * 48 hours
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -3871,7 +3881,7 @@ contract("TreeFactory", (accounts) => {
       from: userAccount6,
     });
 
-    await Common.travelTime(TimeEnumes.seconds, 172800);
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800);
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount3,
@@ -3903,6 +3913,7 @@ contract("TreeFactory", (accounts) => {
       return Number(ev.treeId) == treeId;
     });
   });
+
   it("should verify by planter in organization where organiation is planter in organization (planterType=3)", async () => {
     // no fund planter happen
     const treeId = 1;
@@ -4031,7 +4042,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.travelTime(TimeEnumes.seconds, 172800);
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800);
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount4,
@@ -4200,7 +4211,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.travelTime(TimeEnumes.seconds, 172800);
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800);
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount4,
@@ -4361,7 +4372,7 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    await Common.travelTime(TimeEnumes.seconds, 172800);
+    await Common.travelTime(TimeEnumes.seconds, 7 * 172800);
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,

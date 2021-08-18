@@ -2949,7 +2949,7 @@ contract("TreeAuction", (accounts) => {
     const bidderAccount3 = userAccount5;
 
     startTime = await Common.timeInitial(TimeEnumes.minutes, 5);
-    endTime = await Common.timeInitial(TimeEnumes.days, 5);
+    endTime = await Common.timeInitial(TimeEnumes.days, 10);
 
     ////////////////// ------------------- handle address
 
@@ -3223,7 +3223,7 @@ contract("TreeAuction", (accounts) => {
       "bidder balance 3 is not ok"
     );
 
-    await Common.travelTime(TimeEnumes.days, 2);
+    await Common.travelTime(TimeEnumes.days, 7);
 
     /////////////--------------------------- give approve from bidderAccount1 for seccend bid
     await wethInstance.approve(treeAuctionInstance.address, bidAmount1_2, {
@@ -3274,9 +3274,9 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(
       Number(treeDataAfterVerifyUpdate1.treeStatus),
-      72,
+      192,
       "tree status is not ok"
-    ); //its 72 because 3 days and 5 minutes left after tree planting that is equal to 72 hours
+    ); //its 168 because 7 days and 5 minutes left after tree planting that is equal to 168 hours
 
     const planterBalance = await planterFundsInstnce.balances.call(
       userAccount2
@@ -3342,6 +3342,8 @@ contract("TreeAuction", (accounts) => {
     );
 
     await Common.travelTime(TimeEnumes.minutes, 15);
+
+    await Common.travelTime(TimeEnumes.days, 6);
 
     let expected = {
       planterFund: Math.divide(Math.mul(35, Number(bidAmount2_2)), 100),
@@ -3496,7 +3498,7 @@ contract("TreeAuction", (accounts) => {
         Math.Big(expectedSwapTokenAmount[1])
           .times(3500)
           .div(4500) //planter share
-          .times(120) // for 120 hours time travel
+          .times(384) // for 384 hours time travel
           .div(25920) // for 36*30*12
       ),
       "2.planter balance not true in treasury"
@@ -3512,7 +3514,7 @@ contract("TreeAuction", (accounts) => {
         Math.Big(expectedSwapTokenAmount[1])
           .times(3500)
           .div(4500) //planter share
-          .times(120) // for 120 hours time travel
+          .times(384) // for 384 hours time travel
           .div(25920) // for 36*30*12
       ),
       "1.planter paid not true in treasury"
@@ -4052,6 +4054,8 @@ contract("TreeAuction", (accounts) => {
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
     await Common.travelTime(TimeEnumes.hours, 28);
+
+    await Common.travelTime(TimeEnumes.days, 6);
 
     await treeFactoryInstance.updateTree(treeId1, ipfsHash, {
       from: userAccount2,

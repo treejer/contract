@@ -305,7 +305,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(
             block.timestamp >=
                 treeData[_treeId].plantDate +
-                    ((treeData[_treeId].treeStatus * 3600) + 86400),
+                    ((treeData[_treeId].treeStatus * 3600) + 86400 * 7),
             "Update time not reach"
         );
 

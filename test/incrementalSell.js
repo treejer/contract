@@ -1699,4 +1699,265 @@ contract("IncrementalSell", (accounts) => {
       "Gsn not true work"
     );
   });
+
+  ////----------------------------------------------------test updateIncrementalRates------------------------------
+
+  it("updateIncrementalRates should be work successfully", async () => {
+    let eventTx = await iSellInstance.updateIncrementalRates(
+      web3.utils.toWei("0.01"),
+      20,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let incrementalPrice = await iSellInstance.incrementalPrice();
+
+    assert.equal(
+      Number(incrementalPrice.initialPrice),
+      Number(web3.utils.toWei("0.01")),
+      "initialPrice not true"
+    );
+
+    assert.equal(
+      Number(incrementalPrice.increaseStep),
+      20,
+      "increaseStep not true"
+    );
+
+    assert.equal(
+      Number(incrementalPrice.increaseRatio),
+      1000,
+      "increaseRatio not true"
+    );
+
+    truffleAssert.eventEmitted(eventTx, "IncrementalRatesUpdated", (ev) => {
+      return true;
+    });
+  });
+
+  it("updateIncrementalRates should be work successfully", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      20,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    let funderBalance1 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance1),
+      web3.utils.toWei("0"),
+      "1-funder balance not true"
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(101, {
+      from: userAccount3,
+    });
+
+    let funderBalance2 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance2),
+      web3.utils.toWei("0"),
+      "2-funder balance not true"
+    );
+
+    await Common.travelTime(TimeEnumes.minutes, 7);
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.009"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.009"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(120, {
+      from: userAccount3,
+    });
+
+    ///////////////////
+
+    let funderBalance3 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance3),
+      web3.utils.toWei("0"),
+      "3-funder balance not true"
+    );
+
+    /////---------------- step2 ---------------------------
+
+    ////---------- update price and steps ---------------------
+
+    await iSellInstance.updateIncrementalRates(
+      web3.utils.toWei("0.03"),
+      10,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.0209"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.0209"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance
+      .buyTree(121, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.0475"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.0684"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(121, {
+      from: userAccount3,
+    });
+
+    let funderBalance4 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance4),
+      web3.utils.toWei("0.0324"),
+      "4-funder balance not true"
+    );
+
+    await iSellInstance.buyTree(130, {
+      from: userAccount3,
+    });
+
+    let funderBalance5 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance5),
+      web3.utils.toWei("0"),
+      "5-funder balance not true"
+    );
+
+    ////---------- update price and steps ---------------------
+    await iSellInstance.updateIncrementalRates(
+      web3.utils.toWei("0.01"),
+      20,
+      1000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    /////---------------- step3 ---------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.012"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.012"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(141, {
+      from: userAccount3,
+    });
+
+    let funderBalance6 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance6),
+      web3.utils.toWei("0"),
+      "6-funder balance not true"
+    );
+
+    ////---------- update price and steps ---------------------
+    await iSellInstance.updateIncrementalRates(
+      web3.utils.toWei("0.1"),
+      70,
+      10000,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.2"));
+
+    await wethInstance.approve(iSellInstance.address, web3.utils.toWei("0.2"), {
+      from: userAccount3,
+    });
+
+    await iSellInstance.buyTree(171, { from: userAccount3 });
+
+    let funderBalance7 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance7),
+      web3.utils.toWei("0.02"),
+      "7-funder balance not true"
+    );
+  });
+
+  it("updateIncrementalRates should reject becuase caller has not admin role", async () => {
+    await iSellInstance
+      .updateIncrementalRates(web3.utils.toWei("0.1"), 70, 10000, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  it("updateIncrementalRates should reject becuase step must be gt zero", async () => {
+    await iSellInstance
+      .updateIncrementalRates(web3.utils.toWei("0.1"), 0, 10000, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS);
+  });
 });

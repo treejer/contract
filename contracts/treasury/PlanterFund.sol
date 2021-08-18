@@ -210,7 +210,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
         require(
-            _amount <= balances[_msgSender()] && _amount > 0,
+            _amount <= balances[_msgSender()] && _amount >= .5 ether,
             "insufficient amount"
         );
 

@@ -219,7 +219,10 @@ contract TreeAuction is Initializable, RelayRecipient {
         );
 
         _increaseAuctionEndTime(_auctionId);
-        _withdraw(oldBid, oldBidder);
+
+        if (oldBidder != address(0)) {
+            wethToken.transfer(oldBidder, oldBid);
+        }
     }
 
     /** @dev everyone can call this method  including the winner of auction after
@@ -288,16 +291,6 @@ contract TreeAuction is Initializable, RelayRecipient {
                 _auctionId,
                 auctions[_auctionId].endDate
             );
-        }
-    }
-
-    /** @dev when new bid done we charge the previous bidder as
-     * much as paid before using this function
-     */
-
-    function _withdraw(uint256 _oldBid, address _oldBidder) private {
-        if (_oldBidder != address(0)) {
-            wethToken.transfer(_oldBidder, _oldBid);
         }
     }
 }

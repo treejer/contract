@@ -62,19 +62,19 @@ interface IIncrementalSell {
     /**
      * @dev admin set a range from {startTree} to {startTree + treeCount}
      * for incremental selles for tree
-     * @param startTree starting treeId
-     * @param initialPrice initialPrice of trees
-     * @param treeCount number of tree in incremental sell
-     * @param steps step to increase tree price
-     * @param incrementRate increment price rate
+     * @param _startTree starting treeId
+     * @param _initialPrice initialPrice of trees
+     * @param _treeCount number of tree in incremental sell
+     * @param _steps step to increase tree price
+     * @param _incrementRate increment price rate
      * emit an {IncrementalSellUpdated} event
      */
     function addTreeSells(
-        uint256 startTree,
-        uint256 initialPrice,
-        uint64 treeCount,
-        uint64 steps,
-        uint64 incrementRate
+        uint256 _startTree,
+        uint256 _initialPrice,
+        uint64 _treeCount,
+        uint64 _steps,
+        uint64 _incrementRate
     ) external;
 
     /**
@@ -97,6 +97,13 @@ interface IIncrementalSell {
      */
     function buyTree(uint256 treeId) external;
 
+    //TODO: COMMENT_ADD
+    function updateIncrementalRates(
+        uint256 _initialPrice,
+        uint64 _increaseStep,
+        uint64 _increaseRatio
+    ) external;
+
     /**
      * @dev emitted when a tree with id {treeId} purchased by {buyer} with amount {amount}
      * @param treeId purchased tree id
@@ -108,4 +115,7 @@ interface IIncrementalSell {
      * @dev emitted when incremental tree sell added or updated
      */
     event IncrementalSellUpdated();
+
+    //TODO: COMMENT_ADD
+    event IncrementalRatesUpdated();
 }

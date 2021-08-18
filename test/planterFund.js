@@ -1718,8 +1718,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = Units.convert("10", "eth", "wei");
-    const referralFund = Units.convert("5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -1744,7 +1744,7 @@ contract("PlanterFund", (accounts) => {
 
     await daiInstance.transfer(
       planterFundInstance.address,
-      Units.convert("15", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       { from: deployerAccount }
     );
 
@@ -1764,7 +1764,7 @@ contract("PlanterFund", (accounts) => {
     assert.equal(
       Number(contractBalanceAfterFund),
 
-      Units.convert("15", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       "contract balance charged inconrrectly"
     );
 
@@ -1792,8 +1792,8 @@ contract("PlanterFund", (accounts) => {
       totalReferralFund,
       "referral balance is not ok 1"
     );
-    const planterWithdrawAmount1 = Units.convert("1", "eth", "wei");
-    const referralWithdrwAmount1 = Units.convert("1", "eth", "wei");
+    const planterWithdrawAmount1 = Units.convert("10", "eth", "wei");
+    const referralWithdrwAmount1 = Units.convert("10", "eth", "wei");
     const tx = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount1,
       { from: userAccount3 }
@@ -1859,8 +1859,8 @@ contract("PlanterFund", (accounts) => {
     );
 
     //////////////////////
-    const planterWithdrawAmount2 = Units.convert("2", "eth", "wei");
-    const referralWithdrawAmount2 = Units.convert("4", "eth", "wei");
+    const planterWithdrawAmount2 = Units.convert("20", "eth", "wei");
+    const referralWithdrawAmount2 = Units.convert("40", "eth", "wei");
 
     const tx2 = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount2,
@@ -1935,7 +1935,6 @@ contract("PlanterFund", (accounts) => {
     assert.equal(
       Number(planterDaiBalance3),
       Math.add(Number(planterDaiBalance2), planterWithdrawAmount2),
-
       "planter balance is not ok 3"
     );
   });
@@ -1959,8 +1958,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = Units.convert("1", "eth", "wei");
-    const referralFund = Units.convert("0.5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2016,15 +2015,15 @@ contract("PlanterFund", (accounts) => {
 
     await daiInstance.transfer(
       planterFundInstance.address,
-      Units.convert("1.5", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       {
         from: deployerAccount,
       }
     );
 
-    const planterWithdrawAmount = Units.convert("0.20", "eth", "wei");
-    const organizationWithdrawAmount = Units.convert("0.8", "eth", "wei");
-    const referralWithdrawAmount = Units.convert("0.1", "eth", "wei");
+    const planterWithdrawAmount = Units.convert("20", "eth", "wei");
+    const organizationWithdrawAmount = Units.convert("80", "eth", "wei");
+    const referralWithdrawAmount = Units.convert("10", "eth", "wei");
 
     let txPlanter = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount,
@@ -2082,8 +2081,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = Units.convert("1", "eth", "wei");
-    const referralFund = Units.convert("0.5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2133,15 +2132,15 @@ contract("PlanterFund", (accounts) => {
 
     await daiInstance.transfer(
       planterFundInstance.address,
-      Units.convert("1.5", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       {
         from: deployerAccount,
       }
     );
 
-    const planterWithdrawAmount = Units.convert("0.21", "eth", "wei");
-    const organizationWithdrawAmount = Units.convert("0.81", "eth", "wei");
-    const referralWithdrawAmount = Units.convert("0.51", "eth", "wei");
+    const planterWithdrawAmount = Units.convert("21", "eth", "wei");
+    const organizationWithdrawAmount = Units.convert("81", "eth", "wei");
+    const referralWithdrawAmount = Units.convert("51", "eth", "wei");
 
     let txPlanter = await planterFundInstance
       .withdrawPlanterBalance(planterWithdrawAmount, {
@@ -2180,8 +2179,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = Units.convert("1", "eth", "wei");
-    const referralFund = Units.convert("0.5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2232,7 +2231,7 @@ contract("PlanterFund", (accounts) => {
 
     await daiInstance.transfer(
       planterFundInstance.address,
-      Units.convert("1.5", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       { from: deployerAccount }
     );
 
@@ -2284,9 +2283,9 @@ contract("PlanterFund", (accounts) => {
       "referral balance is not ok 1"
     );
 
-    const planterWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
-    const referralWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
-    const organizationWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+    const planterWithdrawAmount1 = Units.convert("10", "eth", "wei");
+    const referralWithdrawAmount1 = Units.convert("10", "eth", "wei");
+    const organizationWithdrawAmount1 = Units.convert("10", "eth", "wei");
     const tx = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount1,
       { from: userAccount3 }
@@ -2407,9 +2406,9 @@ contract("PlanterFund", (accounts) => {
     );
 
     //////////////////////
-    const planterWithdrawAmount2 = Units.convert("0.53", "eth", "wei");
-    const organizationWithdrawAmount2 = Units.convert("0.27", "eth", "wei");
-    const referralWithdrawAmount2 = Units.convert("0.1", "eth", "wei");
+    const planterWithdrawAmount2 = Units.convert("53", "eth", "wei");
+    const organizationWithdrawAmount2 = Units.convert("27", "eth", "wei");
+    const referralWithdrawAmount2 = Units.convert("10", "eth", "wei");
     const tx2 = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount2,
       { from: userAccount3 }
@@ -2551,8 +2550,8 @@ contract("PlanterFund", (accounts) => {
     });
 
     const treeId = 1;
-    const planterFund = Units.convert("1", "eth", "wei");
-    const referralFund = Units.convert("0.5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2575,7 +2574,7 @@ contract("PlanterFund", (accounts) => {
 
     await daiInstance.transfer(
       planterFundInstance.address,
-      Units.convert("1.5", "eth", "wei"),
+      Units.convert("150", "eth", "wei"),
       { from: deployerAccount }
     );
 
@@ -2620,7 +2619,7 @@ contract("PlanterFund", (accounts) => {
       "total referrar fund is not ok"
     );
 
-    const planterWithdrawAmount1 = Units.convert("0.1", "eth", "wei");
+    const planterWithdrawAmount1 = Units.convert("10", "eth", "wei");
 
     const tx = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount1,
@@ -2698,7 +2697,14 @@ contract("PlanterFund", (accounts) => {
     );
 
     // //////////////////////
-    const planterWithdrawAmount2 = Units.convert("0.9", "eth", "wei");
+    const planterWithdrawAmount2 = Units.convert("90", "eth", "wei");
+
+    //amount must be gt .5 dai
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("0.4"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     const tx2 = await planterFundInstance.withdrawPlanterBalance(
       planterWithdrawAmount2,
@@ -2817,8 +2823,8 @@ contract("PlanterFund", (accounts) => {
 
     const treeId = 1;
 
-    const planterFund = Units.convert("1", "eth", "wei");
-    const referralFund = Units.convert("0.5", "eth", "wei");
+    const planterFund = Units.convert("100", "eth", "wei");
+    const referralFund = Units.convert("50", "eth", "wei");
 
     await planterFundInstance.setPlanterContractAddress(
       planterInstance.address,
@@ -2857,19 +2863,26 @@ contract("PlanterFund", (accounts) => {
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     await planterFundInstance
-      .withdrawPlanterBalance(Units.convert("1.5", "eth", "wei"), {
+      .withdrawPlanterBalance(Units.convert("150", "eth", "wei"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    //amount must be gt .5 dai
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("0.2"), {
         from: userAccount3,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     await planterFundInstance
-      .withdrawPlanterBalance(Units.convert("0.75", "eth", "wei"), {
+      .withdrawPlanterBalance(Units.convert("75", "eth", "wei"), {
         from: userAccount4,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT); //not planter and his account have no vallue
 
     await planterFundInstance
-      .withdrawPlanterBalance(Units.convert("0.5", "eth", "wei"), {
+      .withdrawPlanterBalance(Units.convert("50", "eth", "wei"), {
         from: userAccount5,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);

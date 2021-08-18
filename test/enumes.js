@@ -7,6 +7,11 @@ const TimeEnumes = {
   years: "years",
 };
 
+const erc20ErrorMsg = {
+  ZERO_ADDRESS: "ERC20: transfer from the zero address",
+  INSUFFICIENT_BALANCE: "ERC20: transfer amount exceeds balance",
+  APPROVAL_ISSUE: "ERC20: transfer amount exceeds allowance",
+};
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
@@ -121,11 +126,13 @@ const TreeAttributeErrorMsg = {
 const CommunityGiftErrorMsg = {
   CLAIMED_BEFORE: "Claimed before",
   MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
-  NOT_AVAILABLE_TREE_EXIST: "not available tree exist",
+  TREES_ARE_NOT_AVAILABLE: "trees are not available",
   EXPIREDATE_REACHED: "CommunityGift ended",
   USER_NOT_EXIST: "User not exist",
   EXPIREDATE_NOT_REACHED: "CommunityGift Time not yet ended",
   SYMBOL_NOT_RESERVED: "Symbol not reserved",
+  CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
+  TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
 };
 
 module.exports = {
@@ -141,4 +148,5 @@ module.exports = {
   DaiFundsErrorMsg,
   FinancialModelErrorMsg,
   CommunityGiftErrorMsg,
+  erc20ErrorMsg,
 };

@@ -3,6 +3,7 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../tree/ITreeAttribute.sol";
@@ -26,6 +27,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     ITreeFactory public treeFactory;
     IPlanterFund public planterFundContract;
     ITreeAttribute public treeAttribute;
+    IERC20Upgradeable public daiToken;
 
     struct CommunityGift {
         uint32 symbol;
@@ -36,17 +38,22 @@ contract CommunityGifts is Initializable, RelayRecipient {
     /** NOTE mapping of giftee address to CommunityGift struct */
     mapping(address => CommunityGift) public communityGifts;
 
-    /**NOTE {claimedCount} is total number of cliamed or transfered trees */
-    uint256 public claimedCount;
     /**NOTE {expireDate} is the maximum time that giftee can claim tree */
     uint256 public expireDate;
     /**NOTE {giftCount} is total number of trees that are gifted to someone */
     uint256 public giftCount;
 
+    //TODO: new changes
+    uint256 public maxGiftCount;
+    uint256 public toClaim;
+    uint256 public upTo;
+
+    ////////////////////////////////////////////////
     event GifteeUpdated(address giftee);
     event TreeClaimed(uint256 treeId);
     event TreeTransfered(uint256 treeId);
-
+    event CommunityGiftPlanterFund(uint256 planterFund, uint256 referralFund);
+    event CommuintyGiftSet();
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -97,6 +104,17 @@ contract CommunityGifts is Initializable, RelayRecipient {
     }
 
     /**
+     * @dev admin set DaiToken address
+     * @param _daiTokenAddress set to the address of DaiToken
+     */
+    function setDaiTokenAddress(address _daiTokenAddress) external onlyAdmin {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(
+            _daiTokenAddress
+        );
+        daiToken = candidateContract;
+    }
+
+    /**
      * @dev admin set TreeAttributesAddress
      * @param _address set to the address of treeAttribute
      */
@@ -133,16 +151,36 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * @param _startTreeId stating tree id for gifts range
      * @param _endTreeId ending tree id for gifts range
      */
-    function setGiftsRange(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        onlyAdmin
-    {
+    function setGiftsRange(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint256 _planterFund,
+        uint256 _referralFund,
+        uint64 _expireDate,
+        address _adminWalletAddress
+    ) external onlyAdmin {
         bool check = treeFactory.manageProvideStatus(
             _startTreeId,
             _endTreeId,
             5
         );
-        require(check, "not available tree exist");
+
+        require(check, "trees are not available");
+
+        planterFund = _planterFund;
+        referralFund = _referralFund;
+        expireDate = _expireDate;
+        maxGiftCount = _endTreeId - _startTreeId;
+        toClaim = _startTreeId;
+        upTo = _endTreeId;
+
+        daiToken.transferFrom(
+            _adminWalletAddress,
+            address(planterFundContract),
+            maxGiftCount * (planterFund + referralFund)
+        );
+
+        emit CommuintyGiftSet();
     }
 
     /** @dev admin assign an unique symbol to a giftee
@@ -153,18 +191,18 @@ contract CommunityGifts is Initializable, RelayRecipient {
         CommunityGift storage communityGift = communityGifts[_giftee];
 
         require(!communityGift.claimed, "Claimed before");
-        require(giftCount < 90, "max giftCount reached");
 
         if (!communityGift.exist) {
+            require(giftCount < maxGiftCount, "max giftCount reached");
             giftCount += 1;
             communityGift.exist = true;
         } else {
             treeAttribute.freeReserveTreeAttributes(communityGift.symbol);
         }
 
-        communityGift.symbol = _symbol;
-
         treeAttribute.reserveTreeAttributes(_symbol);
+
+        communityGift.symbol = _symbol;
 
         emit GifteeUpdated(_giftee);
     }
@@ -181,9 +219,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
         require(communityGifts[_msgSender()].exist, "User not exist");
         require(!communityGifts[_msgSender()].claimed, "Claimed before");
 
-        uint256 treeId = 11 + claimedCount;
-
-        claimedCount += 1;
+        uint256 treeId = toClaim;
+        toClaim += 1;
 
         communityGift.claimed = true;
 
@@ -201,6 +238,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
      *
      */
     function setExpireDate(uint256 _expireDate) external onlyAdmin {
+        require(block.timestamp < expireDate, "can not update expire date");
         expireDate = _expireDate;
     }
 
@@ -218,16 +256,16 @@ contract CommunityGifts is Initializable, RelayRecipient {
             "CommunityGift Time not yet ended"
         );
 
-        require(claimedCount < 89, "claimedCount not true");
+        require(toClaim < upTo, "tree is not for community gift");
 
-        require(
-            treeAttribute.reservedAttributes(_symbol) == 1,
-            "Symbol not reserved"
-        );
+        // require(
+        //     treeAttribute.reservedAttributes(_symbol) == 1,
+        //     "Symbol not reserved"
+        // );
 
-        uint256 treeId = 11 + claimedCount;
+        uint256 treeId = toClaim;
 
-        claimedCount += 1;
+        toClaim += 1;
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
 
@@ -249,5 +287,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     {
         planterFund = _planterFund;
         referralFund = _referralFund;
+
+        emit CommunityGiftPlanterFund(_planterFund, _referralFund);
     }
 }

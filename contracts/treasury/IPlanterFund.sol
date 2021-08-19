@@ -24,6 +24,9 @@ interface IPlanterFund {
      */
     function daiToken() external view returns (address);
 
+    //TODO: COMMENT_ADD
+    function setWithdrawThreshold(uint256 _amount) external;
+
     /**
      * @dev return totalFunds struct data
      * @return planterFund share

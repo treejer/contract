@@ -15,6 +15,7 @@ import "../gsn/RelayRecipient.sol";
 contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE {isPlanterFund} set inside the initialize to {true} */
     bool public isPlanterFund;
+    uint256 public withdrawThreshold;
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
@@ -81,6 +82,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         require(candidateContract.isAccessRestriction());
 
         isPlanterFund = true;
+        withdrawThreshold = .5 ether;
         accessRestriction = candidateContract;
     }
 
@@ -110,6 +112,11 @@ contract PlanterFund is Initializable, RelayRecipient {
         accessRestriction.ifAdmin(_msgSender());
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         daiToken = candidateContract;
+    }
+
+    //TODO: COMMENT_ADD
+    function setWithdrawThreshold(uint256 _amount) external onlyAdmin {
+        withdrawThreshold = _amount;
     }
 
     /**
@@ -210,7 +217,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
         require(
-            _amount <= balances[_msgSender()] && _amount >= .5 ether,
+            _amount <= balances[_msgSender()] && _amount >= withdrawThreshold,
             "insufficient amount"
         );
 

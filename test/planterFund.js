@@ -85,6 +85,36 @@ contract("PlanterFund", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////----------------------------------------------------test set WithdrawThreshold----------------------------
+
+  it("should set planter contract address successfully", async () => {
+    planterFundInstance
+      .setWithdrawThreshold(planterInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    let priceBefore = await planterFundInstance.withdrawThreshold();
+
+    planterFundInstance.setWithdrawThreshold(web3.utils.toWei("1"), {
+      from: deployerAccount,
+    });
+
+    let priceAfter = await planterFundInstance.withdrawThreshold();
+
+    assert.equal(
+      Number(priceBefore),
+      web3.utils.toWei(".5"),
+      "1 - Number not true"
+    );
+
+    assert.equal(
+      Number(priceAfter),
+      web3.utils.toWei("1"),
+      "2 - Number not true"
+    );
+  });
+
   it("should set planter contract address successfully", async () => {
     planterFundInstance
       .setPlanterContractAddress(planterInstance.address, {
@@ -1697,6 +1727,151 @@ contract("PlanterFund", (accounts) => {
       Number(planterBalanceLeft),
       Math.subtract(planterFund, Number(planterDaiBalanceAfter))
     );
+  });
+
+  it("should withdraw planter succussfully(when minimum amount change)", async () => {
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount8,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    const treeId = 1;
+
+    planterFundInstance.setWithdrawThreshold(web3.utils.toWei(".5"), {
+      from: deployerAccount,
+    });
+
+    const planterFund = Units.convert("5", "eth", "wei");
+    const referralFund = Units.convert("5", "eth", "wei");
+
+    await planterFundInstance.setPlanterContractAddress(
+      planterInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await Common.successPlanterJoin(
+      arInstance,
+      deployerAccount,
+      planterInstance,
+      treeId,
+      userAccount3,
+      userAccount4,
+      zeroAddress
+    );
+
+    await daiInstance.transfer(
+      planterFundInstance.address,
+      Units.convert("15", "eth", "wei"),
+      {
+        from: deployerAccount,
+      }
+    );
+
+    const planterFundDaiBalance = await daiInstance.balanceOf.call(
+      planterFundInstance.address
+    );
+
+    await planterFundInstance.setPlanterFunds(
+      treeId,
+      planterFund,
+      referralFund,
+      {
+        from: userAccount8,
+      }
+    );
+
+    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
+      from: userAccount2,
+    });
+
+    await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".6"), {
+      from: userAccount3,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".6"), {
+      from: userAccount4,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".5"), {
+      from: userAccount3,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".5"), {
+      from: userAccount4,
+    });
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei(".4"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei(".4"), {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    planterFundInstance.setWithdrawThreshold(web3.utils.toWei(".4"), {
+      from: deployerAccount,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".4"), {
+      from: userAccount3,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".4"), {
+      from: userAccount4,
+    });
+
+    planterFundInstance.setWithdrawThreshold(web3.utils.toWei("2"), {
+      from: deployerAccount,
+    });
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("1.9"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("1.9"), {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei("3.5"), {
+      from: userAccount3,
+    });
+
+    await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei("3.5"), {
+      from: userAccount4,
+    });
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("3.5"), {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+    await planterFundInstance
+      .withdrawPlanterBalance(web3.utils.toWei("3.5"), {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
   it("check planter withdraw balance to be correct", async () => {

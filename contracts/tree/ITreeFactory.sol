@@ -91,6 +91,9 @@ interface ITreeFactory {
     /** @dev set {_address} to TreeToken contract address */
     function setTreeTokenAddress(address _address) external;
 
+    //TODO:COMMENT_ADD
+    function setUpdateInterval(uint256 _day) external;
+
     /**
      * @dev admin add tree
      * @param _treeId id of tree to add
@@ -187,7 +190,7 @@ interface ITreeFactory {
     function checkMintStatus(uint256 _treeId, address _buyer)
         external
         view
-        returns (bool,bytes32);
+        returns (bool, bytes32);
 
     /**
      * @dev This function is called by planter who have planted a new tree

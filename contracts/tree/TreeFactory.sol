@@ -29,6 +29,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     IPlanter public planter;
 
     uint256 public lastRegularPlantedTree;
+    uint256 public updateInterval;
 
     struct TreeStruct {
         address planterId;
@@ -113,6 +114,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         isTreeFactory = true;
         accessRestriction = candidateContract;
         lastRegularPlantedTree = 10000;
+        updateInterval = 604800;
     }
 
     /**
@@ -157,6 +159,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(candidateContract.isTree());
 
         treeToken = candidateContract;
+    }
+
+    //TODO:COMMENT_ADD
+    function setUpdateInterval(uint256 _day) external onlyAdmin {
+        updateInterval = _day * 86400;
     }
 
     /**
@@ -305,7 +312,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(
             block.timestamp >=
                 treeData[_treeId].plantDate +
-                    ((treeData[_treeId].treeStatus * 3600) + 86400 * 7),
+                    ((treeData[_treeId].treeStatus * 3600) + updateInterval),
             "Update time not reach"
         );
 

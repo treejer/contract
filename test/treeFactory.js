@@ -150,6 +150,7 @@ contract("TreeFactory", (accounts) => {
       .setPlanterFundAddress(planterFundInstnce.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
+
   ////////////------------------------------------ set planter address ----------------------------------------//
 
   it("set planter address", async () => {
@@ -174,6 +175,24 @@ contract("TreeFactory", (accounts) => {
     await treeFactoryInstance
       .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  ////////////////////------------------------------------ test set updateInterval  ----------------------------------------//
+  it("set updateInterval", async () => {
+    let dayBefore = await treeFactoryInstance.updateInterval();
+
+    await treeFactoryInstance
+      .setUpdateInterval(10, { from: userAccount1 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    let tx = await treeFactoryInstance.setUpdateInterval(10, {
+      from: deployerAccount,
+    });
+
+    let dayAfter = await treeFactoryInstance.updateInterval();
+
+    assert.equal(dayBefore, 7 * 24 * 60 * 60, "dayBefore not true");
+    assert.equal(dayAfter, 10 * 24 * 60 * 60, "dayAfter not true");
   });
   /////////////////------------------------------------ add tree ----------------------------------------//
 
@@ -2524,6 +2543,85 @@ contract("TreeFactory", (accounts) => {
 
     truffleAssert.eventEmitted(tx, "TreeUpdated", (ev) => {
       return ev.treeId == treeId;
+    });
+  });
+
+  it("Should update tree work successfully", async () => {
+    const treeId = 1;
+    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+    const countryCode = 2;
+
+    await Common.successPlant(
+      treeFactoryInstance,
+      arInstance,
+      ipfsHash,
+      treeId,
+      birthDate,
+      countryCode,
+      [userAccount2],
+      userAccount2,
+      deployerAccount,
+      planterInstance
+    );
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterFundAddress(
+      planterFundInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    let tree = await treeFactoryInstance.treeData.call(treeId);
+    let travelTime = Math.add(
+      Math.mul(Number(tree.treeStatus), 3600),
+      Math.mul(3 * 24, 3600)
+    );
+
+    await Common.travelTime(TimeEnumes.seconds, travelTime);
+
+    await treeFactoryInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
+
+    await treeFactoryInstance.setUpdateInterval(3, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
+    });
+
+    await treeFactoryInstance.verifyUpdate(treeId, true, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setUpdateInterval(4, {
+      from: deployerAccount,
+    });
+
+    let travelTime2 = Math.add(
+      Math.mul(Number(tree.treeStatus), 3600),
+      Math.mul(3 * 24, 3600)
+    );
+
+    await Common.travelTime(TimeEnumes.seconds, travelTime2);
+
+    await treeFactoryInstance
+      .updateTree(treeId, ipfsHash, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
+
+    await Common.travelTime(TimeEnumes.days, 1);
+
+    await treeFactoryInstance.updateTree(treeId, ipfsHash, {
+      from: userAccount2,
     });
   });
 

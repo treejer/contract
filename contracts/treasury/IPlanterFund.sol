@@ -9,6 +9,9 @@ interface IPlanterFund {
      */
     function isPlanterFund() external view returns (bool);
 
+    /** @return minimum amount to withdraw */
+    function withdrawThreshold() external view returns (uint256);
+
     /**
      * @return AccessRestriction contract address
      */
@@ -24,7 +27,9 @@ interface IPlanterFund {
      */
     function daiToken() external view returns (address);
 
-    //TODO: COMMENT_ADD
+    /** @dev admin can set the minimum amount to withdraw
+     * @param _amount is withdraw treshold
+     */
     function setWithdrawThreshold(uint256 _amount) external;
 
     /**

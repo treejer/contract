@@ -24,6 +24,9 @@ interface ITreeFactory {
     /** @return lastRegularPlantedTree */
     function lastRegularPlantedTree() external view returns (uint256);
 
+    /** @return minimum time to send next update request */
+    function updateInterval() external view returns (uint256);
+
     /** return TreeStruct data  of {_treeId}
      * @return planterId
      * @return treeType
@@ -91,7 +94,9 @@ interface ITreeFactory {
     /** @dev set {_address} to TreeToken contract address */
     function setTreeTokenAddress(address _address) external;
 
-    //TODO:COMMENT_ADD
+    /** @dev admin can set the minimum time to send next update request
+     * @param _day time to next update request
+     */
     function setUpdateInterval(uint256 _day) external;
 
     /**

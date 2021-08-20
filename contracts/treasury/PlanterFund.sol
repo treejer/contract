@@ -114,7 +114,9 @@ contract PlanterFund is Initializable, RelayRecipient {
         daiToken = candidateContract;
     }
 
-    //TODO: COMMENT_ADD
+    /** @dev admin can set the minimum amount to withdraw
+     * @param _amount is withdraw treshold
+     */
     function setWithdrawThreshold(uint256 _amount) external onlyAdmin {
         withdrawThreshold = _amount;
     }

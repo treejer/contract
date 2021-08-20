@@ -262,7 +262,11 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalTreeSold(_treeId, _msgSender(), amount);
     }
 
-    //TODO: COMMENT_ADD
+    /** @dev admin can update incrementalPrice
+     * @param _initialPrice initialPrice of trees
+     * @param _increaseStep step to increase tree price
+     * @param _increaseRatio increment price rate
+     */
     function updateIncrementalRates(
         uint256 _initialPrice,
         uint64 _increaseStep,

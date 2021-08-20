@@ -161,7 +161,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken = candidateContract;
     }
 
-    //TODO:COMMENT_ADD
+    /** @dev admin can set the minimum time to send next update request
+     * @param _day time to next update request
+     */
     function setUpdateInterval(uint256 _day) external onlyAdmin {
         updateInterval = _day * 86400;
     }

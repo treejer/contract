@@ -97,7 +97,12 @@ interface IIncrementalSell {
      */
     function buyTree(uint256 treeId) external;
 
-    //TODO: COMMENT_ADD
+    /** @dev admin can update incrementalPrice
+     * @param _initialPrice initialPrice of trees
+     * @param _increaseStep step to increase tree price
+     * @param _increaseRatio increment price rate
+     * NOTE emit a {IncrementalRatesUpdated} event
+     */
     function updateIncrementalRates(
         uint256 _initialPrice,
         uint64 _increaseStep,
@@ -116,6 +121,6 @@ interface IIncrementalSell {
      */
     event IncrementalSellUpdated();
 
-    //TODO: COMMENT_ADD
+    /** @dev emiited when incremental rates updated */
     event IncrementalRatesUpdated();
 }

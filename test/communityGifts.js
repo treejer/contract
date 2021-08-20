@@ -510,6 +510,38 @@ contract("CommunityGifts", (accounts) => {
       .should.be.rejectedWith(erc20ErrorMsg.ZERO_ADDRESS);
   });
 
+  it("should fail set gift range invalid range", async () => {
+    const startTree = 101;
+    const endTree = 11;
+    const planterShare = web3.utils.toWei("5");
+    const referralShare = web3.utils.toWei("2");
+    const transferAmount = web3.utils.toWei("630");
+    const adminWallet = userAccount8;
+    const expireDate = await Common.timeInitial(TimeEnumes.minutes, 1440);
+
+    ///////---------------- handle admin walllet
+
+    await daiInstance.setMint(adminWallet, transferAmount);
+
+    await daiInstance.approve(communityGiftsInstance.address, transferAmount, {
+      from: adminWallet,
+    });
+
+    await communityGiftsInstance
+      .setGiftsRange(
+        startTree,
+        endTree,
+        planterShare,
+        referralShare,
+        Number(expireDate),
+        adminWallet,
+        {
+          from: deployerAccount,
+        }
+      )
+      .should.be.rejectedWith(CommunityGiftErrorMsg.INVALID_RANGE);
+  });
+
   it("should fail set gift range insufficient admin account balance", async () => {
     const startTree = 11;
     const endTree = 101;
@@ -975,14 +1007,14 @@ contract("CommunityGifts", (accounts) => {
       .updateGiftees(giftee1, symbol2, { from: deployerAccount })
       .should.be.rejectedWith(CommunityGiftErrorMsg.CLAIMED_BEFORE);
 
-    /////////------------------------- should fail because of cuplicate symbol
+    /////////------------------------- should fail because of duplicate symbol
 
     await communityGiftsInstance
       .updateGiftees(giftee2, symbol1, { from: deployerAccount })
       .should.be.rejectedWith(TreeAttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES);
   });
 
-  it("should fail because gift count is not less than 90", async () => {
+  it("should fail because gift count is not less than maxGiftCount", async () => {
     //////// -------------------- set gifts range
 
     const startTree = 10;
@@ -1044,7 +1076,6 @@ contract("CommunityGifts", (accounts) => {
   ////////////////////// -------------------------------- claim tree ----------------------------------------
 
   it("1-should claimTree succesfully and check data to be ok", async () => {
-    //TODO:
     const giftee1 = userAccount1;
     const symbol1 = 1234554321;
 

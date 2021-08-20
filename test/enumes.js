@@ -133,6 +133,7 @@ const CommunityGiftErrorMsg = {
   SYMBOL_NOT_RESERVED: "Symbol not reserved",
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
+  INVALID_RANGE: "invalid range",
 };
 
 module.exports = {

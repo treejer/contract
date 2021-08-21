@@ -68,6 +68,12 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /** NOTE modifier for check msg.sender planterType is organization*/
     modifier onlyOrganization() {
         require(
@@ -87,7 +93,10 @@ contract Planter is Initializable, RelayRecipient {
      * @dev initialize accessRestriction contract and set true for isPlanter
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -100,7 +109,11 @@ contract Planter is Initializable, RelayRecipient {
      * @dev set trusted forwarder address
      * @param _address set to {trustedForwarder}
      */
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 

@@ -99,7 +99,10 @@ contract DaiFunds is Initializable {
      * @dev initialize accessRestriction contract and set true for isDaiFunds
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -141,6 +144,7 @@ contract DaiFunds is Initializable {
     function setTreeResearchAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         treeResearchAddress = _address;
     }
@@ -152,6 +156,7 @@ contract DaiFunds is Initializable {
     function setLocalDevelopAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         localDevelopAddress = _address;
     }
@@ -160,7 +165,11 @@ contract DaiFunds is Initializable {
      * @dev admin set rescue address to fund
      * @param _address rescue fund address
      */
-    function setRescueFundAddress(address payable _address) external onlyAdmin {
+    function setRescueFundAddress(address payable _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         rescueFundAddress = _address;
     }
 
@@ -171,6 +180,7 @@ contract DaiFunds is Initializable {
     function setTreejerDevelopAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         treejerDevelopAddress = _address;
     }
@@ -182,6 +192,7 @@ contract DaiFunds is Initializable {
     function setReserveFund1Address(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         reserveFundAddress1 = _address;
     }
@@ -193,6 +204,7 @@ contract DaiFunds is Initializable {
     function setReserveFund2Address(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         reserveFundAddress2 = _address;
     }
@@ -233,10 +245,12 @@ contract DaiFunds is Initializable {
         uint256 planterFund = (_amount * _planterFund) / 10000;
         uint256 referralFund = (_amount * _referralFund) / 10000;
 
-        daiToken.transfer(
+        bool success = daiToken.transfer(
             address(planterFundContract),
             planterFund + referralFund
         );
+
+        require(success, "unsuccessful transfer");
 
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
 
@@ -262,7 +276,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.treeResearch -= _amount;
 
-        daiToken.transfer(treeResearchAddress, _amount);
+        bool success = daiToken.transfer(treeResearchAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit TreeResearchBalanceWithdrawn(
             _amount,
@@ -290,7 +306,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.localDevelop -= _amount;
 
-        daiToken.transfer(localDevelopAddress, _amount);
+        bool success = daiToken.transfer(localDevelopAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit LocalDevelopBalanceWithdrawn(
             _amount,
@@ -318,7 +336,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.rescueFund -= _amount;
 
-        daiToken.transfer(rescueFundAddress, _amount);
+        bool success = daiToken.transfer(rescueFundAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
     }
@@ -342,7 +362,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.treejerDevelop -= _amount;
 
-        daiToken.transfer(treejerDevelopAddress, _amount);
+        bool success = daiToken.transfer(treejerDevelopAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit TreejerDevelopBalanceWithdrawn(
             _amount,
@@ -370,7 +392,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.reserveFund1 -= _amount;
 
-        daiToken.transfer(reserveFundAddress1, _amount);
+        bool success = daiToken.transfer(reserveFundAddress1, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
@@ -394,7 +418,9 @@ contract DaiFunds is Initializable {
 
         totalFunds.reserveFund2 -= _amount;
 
-        daiToken.transfer(reserveFundAddress2, _amount);
+        bool success = daiToken.transfer(reserveFundAddress2, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }

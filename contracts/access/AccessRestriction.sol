@@ -19,13 +19,13 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev initialize accessRestriction contract and set true for {isAccessRestriction}
      * @param _deployer address of the deployer that DEFAULT_ADMIN_ROLE set to it
      */
-    function initialize(address _deployer) public initializer {
+    function initialize(address _deployer) external initializer {
         AccessControlUpgradeable.__AccessControl_init();
         PausableUpgradeable.__Pausable_init();
 
         isAccessRestriction = true;
 
-        if (hasRole(DEFAULT_ADMIN_ROLE, _deployer) == false) {
+        if (!hasRole(DEFAULT_ADMIN_ROLE, _deployer)) {
             _setupRole(DEFAULT_ADMIN_ROLE, _deployer);
         }
     }
@@ -40,7 +40,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev check if given address is planter
      * @param _address input address
      */
-    function ifPlanter(address _address) public view {
+    function ifPlanter(address _address) external view {
         require(isPlanter(_address), "Caller is not a planter");
     }
 
@@ -57,7 +57,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev check if given address is admin
      * @param _address input address
      */
-    function ifAdmin(address _address) public view {
+    function ifAdmin(address _address) external view {
         require(isAdmin(_address), "Caller is not admin");
     }
 
@@ -71,12 +71,12 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     }
 
     /** @dev check if functionality is not puased */
-    function ifNotPaused() public view {
+    function ifNotPaused() external view {
         require(!paused(), "Pausable: paused");
     }
 
     /** @dev check if functionality is puased */
-    function ifPaused() public view {
+    function ifPaused() external view {
         require(paused(), "Pausable: not paused");
     }
 
@@ -94,7 +94,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev check if given address is Treejer contract
      * @param _address input address
      */
-    function ifTreejerContract(address _address) public view {
+    function ifTreejerContract(address _address) external view {
         require(isTreejerContract(_address), "caller is not treejer contract");
     }
 
@@ -111,7 +111,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @dev check if given address is Admin or Treejer contract
      * @param _address input address
      */
-    function ifAdminOrTreejerContract(address _address) public view {
+    function ifAdminOrTreejerContract(address _address) external view {
         require(
             isAdmin(_address) || isTreejerContract(_address),
             "not Admin or Treejer Contract"

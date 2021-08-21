@@ -40,6 +40,7 @@ contract TreeAttribute is Initializable {
         accessRestriction.ifAdmin(msg.sender);
         _;
     }
+
     modifier onlyAdminOrTreejerContract() {
         accessRestriction.ifAdminOrTreejerContract(msg.sender);
         _;
@@ -49,7 +50,10 @@ contract TreeAttribute is Initializable {
         _;
     }
 
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -230,7 +234,7 @@ contract TreeAttribute is Initializable {
         uint64 treesOwned,
         uint64 walletSpentCount
     ) external onlyAdmin {
-        uint256 points;
+        uint256 points = 0;
         //each 0.004 ether spent in treejer has 10 points
         points += (treejerSpent / (400000 gwei));
         //each 1 ether spent of wallet(sent or withdraw) has 2 points

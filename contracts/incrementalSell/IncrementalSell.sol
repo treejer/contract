@@ -51,11 +51,20 @@ contract IncrementalSell is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isIncrementalSell
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -68,7 +77,11 @@ contract IncrementalSell is Initializable, RelayRecipient {
      * @dev admin set trusted forwarder address
      * @param _address set to {trustedForwarder}
      */
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 
@@ -217,7 +230,12 @@ contract IncrementalSell is Initializable, RelayRecipient {
                 "low price paid"
             );
 
-            wethToken.transferFrom(_msgSender(), address(wethFunds), amount);
+            bool success = wethToken.transferFrom(
+                _msgSender(),
+                address(wethFunds),
+                amount
+            );
+            require(success, "unsuccessful transfer");
 
             lastBuy[_msgSender()] = 0;
         } else {
@@ -228,7 +246,12 @@ contract IncrementalSell is Initializable, RelayRecipient {
                 "low price paid"
             );
 
-            wethToken.transferFrom(_msgSender(), address(wethFunds), amount);
+            bool success = wethToken.transferFrom(
+                _msgSender(),
+                address(wethFunds),
+                amount
+            );
+            require(success, "unsuccessful transfer");
 
             lastBuy[_msgSender()] = block.timestamp;
         }

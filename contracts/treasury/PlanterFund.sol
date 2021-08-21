@@ -70,11 +70,20 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isPlanterFund
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -90,7 +99,11 @@ contract PlanterFund is Initializable, RelayRecipient {
      * @dev set trusted forwarder address
      * @param _address set to {trustedForwarder}
      */
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 
@@ -225,7 +238,9 @@ contract PlanterFund is Initializable, RelayRecipient {
 
         balances[_msgSender()] -= _amount;
 
-        daiToken.transfer(_msgSender(), _amount);
+        bool success = daiToken.transfer(_msgSender(), _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit PlanterBalanceWithdrawn(_amount, _msgSender());
     }

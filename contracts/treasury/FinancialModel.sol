@@ -66,7 +66,10 @@ contract FinancialModel is Initializable {
      * @dev initialize accessRestriction contract and set true for isFinancialModel
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );

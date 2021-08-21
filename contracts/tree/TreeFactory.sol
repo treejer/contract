@@ -99,12 +99,21 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isTreeFactory
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      * NOTE set lastRegularPlantedTree to 10000
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -121,7 +130,11 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev set trusted forwarder address
      * @param _address set to {trustedForwarder}
      */
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 

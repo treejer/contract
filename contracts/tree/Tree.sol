@@ -32,7 +32,7 @@ contract Tree is ERC721Upgradeable {
     function initialize(
         address _accessRestrictionAddress,
         string calldata baseURI_
-    ) public initializer {
+    ) external initializer {
         isTree = true;
 
         __ERC721_init("Tree", "TREE");

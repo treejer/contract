@@ -68,11 +68,20 @@ contract TreeAuction is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isTreeAuction
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -86,7 +95,11 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _address is the address of trusted forwarder
      */
 
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 
@@ -203,7 +216,13 @@ contract TreeAuction is Initializable, RelayRecipient {
             "insufficient balance"
         );
 
-        wethToken.transferFrom(_msgSender(), address(this), _amount);
+        bool success = wethToken.transferFrom(
+            _msgSender(),
+            address(this),
+            _amount
+        );
+
+        require(success, "unsuccessful transfer");
 
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
@@ -221,7 +240,9 @@ contract TreeAuction is Initializable, RelayRecipient {
         _increaseAuctionEndTime(_auctionId);
 
         if (oldBidder != address(0)) {
-            wethToken.transfer(oldBidder, oldBid);
+            bool successTransfer = wethToken.transfer(oldBidder, oldBid);
+
+            require(successTransfer, "unsuccessful transfer");
         }
     }
 
@@ -238,7 +259,12 @@ contract TreeAuction is Initializable, RelayRecipient {
         require(block.timestamp >= auction.endDate, "Auction not yet ended");
 
         if (auction.bidder != address(0)) {
-            wethToken.transfer(address(wethFunds), auction.highestBid);
+            bool success = wethToken.transfer(
+                address(wethFunds),
+                auction.highestBid
+            );
+
+            require(success, "unsuccessful transfer");
 
             (
                 uint16 planterFund,

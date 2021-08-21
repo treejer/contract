@@ -70,6 +70,12 @@ contract CommunityGifts is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isCommunityGifts
      * set expire date and planterFund and referralFund initial value
@@ -83,7 +89,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint256 _expireDate,
         uint256 _planterFund,
         uint256 _referralFund
-    ) public initializer {
+    ) external initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -103,7 +109,11 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * @param _address is the address of trusted forwarder
      */
 
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 
@@ -189,11 +199,13 @@ contract CommunityGifts is Initializable, RelayRecipient {
         toClaim = _startTreeId;
         upTo = _endTreeId;
 
-        daiToken.transferFrom(
+        bool success = daiToken.transferFrom(
             _adminWalletAddress,
             address(planterFundContract),
             maxGiftCount * (planterFund + referralFund)
         );
+
+        require(success, "unsuccessful transfer");
 
         emit CommuintyGiftSet();
     }

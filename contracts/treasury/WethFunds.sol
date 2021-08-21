@@ -105,7 +105,10 @@ contract WethFunds is Initializable {
      * @dev initialize accessRestriction contract and set true for isWethFunds
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) public initializer {
+    function initialize(address _accessRestrictionAddress)
+        external
+        initializer
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -120,7 +123,11 @@ contract WethFunds is Initializable {
      * @dev admin set DaiToken address
      * @param _daiAddress set to the address of DaiToken
      */
-    function setDaiAddress(address _daiAddress) external onlyAdmin {
+    function setDaiAddress(address _daiAddress)
+        external
+        onlyAdmin
+        validAddress(_daiAddress)
+    {
         daiAddress = _daiAddress;
     }
 
@@ -170,6 +177,7 @@ contract WethFunds is Initializable {
     function setTreeResearchAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         treeResearchAddress = _address;
     }
@@ -181,6 +189,7 @@ contract WethFunds is Initializable {
     function setLocalDevelopAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         localDevelopAddress = _address;
     }
@@ -189,7 +198,11 @@ contract WethFunds is Initializable {
      * @dev admin set rescue address to fund
      * @param _address rescue fund address
      */
-    function setRescueFundAddress(address payable _address) external onlyAdmin {
+    function setRescueFundAddress(address payable _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         rescueFundAddress = _address;
     }
 
@@ -200,6 +213,7 @@ contract WethFunds is Initializable {
     function setTreejerDevelopAddress(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         treejerDevelopAddress = _address;
     }
@@ -211,6 +225,7 @@ contract WethFunds is Initializable {
     function setReserveFund1Address(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         reserveFundAddress1 = _address;
     }
@@ -222,6 +237,7 @@ contract WethFunds is Initializable {
     function setReserveFund2Address(address payable _address)
         external
         onlyAdmin
+        validAddress(_address)
     {
         reserveFundAddress2 = _address;
     }
@@ -281,7 +297,9 @@ contract WethFunds is Initializable {
 
         totalFunds.treeResearch -= _amount;
 
-        wethToken.transfer(treeResearchAddress, _amount);
+        bool success = wethToken.transfer(treeResearchAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit TreeResearchBalanceWithdrawn(
             _amount,
@@ -309,7 +327,9 @@ contract WethFunds is Initializable {
 
         totalFunds.localDevelop -= _amount;
 
-        wethToken.transfer(localDevelopAddress, _amount);
+        bool success = wethToken.transfer(localDevelopAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit LocalDevelopBalanceWithdrawn(
             _amount,
@@ -337,7 +357,9 @@ contract WethFunds is Initializable {
 
         totalFunds.rescueFund -= _amount;
 
-        wethToken.transfer(rescueFundAddress, _amount);
+        bool success = wethToken.transfer(rescueFundAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
     }
@@ -361,7 +383,9 @@ contract WethFunds is Initializable {
 
         totalFunds.treejerDevelop -= _amount;
 
-        wethToken.transfer(treejerDevelopAddress, _amount);
+        bool success = wethToken.transfer(treejerDevelopAddress, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit TreejerDevelopBalanceWithdrawn(
             _amount,
@@ -389,7 +413,9 @@ contract WethFunds is Initializable {
 
         totalFunds.reserveFund1 -= _amount;
 
-        wethToken.transfer(reserveFundAddress1, _amount);
+        bool success = wethToken.transfer(reserveFundAddress1, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit reserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
@@ -413,7 +439,9 @@ contract WethFunds is Initializable {
 
         totalFunds.reserveFund2 -= _amount;
 
-        wethToken.transfer(reserveFundAddress2, _amount);
+        bool success = wethToken.transfer(reserveFundAddress2, _amount);
+
+        require(success, "unsuccessful transfer");
 
         emit reserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
@@ -442,7 +470,9 @@ contract WethFunds is Initializable {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        wethToken.approve(address(uniswapRouter), sumFund);
+        bool success = wethToken.approve(address(uniswapRouter), sumFund);
+
+        require(success, "unsuccessful approve");
 
         uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
             sumFund,

@@ -38,6 +38,12 @@ contract RegularSell is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isRegularSell
      * set {_price} to tree price and set 10000 to lastSoldRegularTree
@@ -45,7 +51,7 @@ contract RegularSell is Initializable, RelayRecipient {
      * @param _price initial tree price
      */
     function initialize(address _accessRestrictionAddress, uint256 _price)
-        public
+        external
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -64,7 +70,11 @@ contract RegularSell is Initializable, RelayRecipient {
      * @dev admin set trusted forwarder address
      * @param _address set to {trustedForwarder}
      */
-    function setTrustedForwarder(address _address) external onlyAdmin {
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         trustedForwarder = _address;
     }
 
@@ -129,7 +139,13 @@ contract RegularSell is Initializable, RelayRecipient {
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
-        daiToken.transferFrom(_msgSender(), address(daiFunds), amount);
+        bool success = daiToken.transferFrom(
+            _msgSender(),
+            address(daiFunds),
+            amount
+        );
+
+        require(success, "unsuccessful transfer");
 
         emit RegularTreeRequsted(_count, _msgSender(), amount);
 
@@ -182,7 +198,13 @@ contract RegularSell is Initializable, RelayRecipient {
             "invalid amount"
         );
 
-        daiToken.transferFrom(_msgSender(), address(daiFunds), treePrice);
+        bool success = daiToken.transferFrom(
+            _msgSender(),
+            address(daiFunds),
+            treePrice
+        );
+
+        require(success, "unsuccessful transfer");
 
         treeFactory.requestRegularTree(_treeId, _msgSender());
 

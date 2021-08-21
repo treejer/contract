@@ -121,8 +121,11 @@ contract PlanterFund is Initializable, RelayRecipient {
      * @dev admin set DaiToken contract address
      * @param _address set to the address of DaiToken contract
      */
-    function setDaiTokenAddress(address _address) external {
-        accessRestriction.ifAdmin(_msgSender());
+    function setDaiTokenAddress(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         daiToken = candidateContract;
     }

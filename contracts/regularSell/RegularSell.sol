@@ -103,7 +103,11 @@ contract RegularSell is Initializable, RelayRecipient {
     /** @dev admin set daiToken contract address
      * @param _address daiToken contract address
      */
-    function setDaiTokenAddress(address _address) external onlyAdmin {
+    function setDaiTokenAddress(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         daiToken = candidateContract;
     }

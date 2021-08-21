@@ -135,7 +135,11 @@ contract WethFunds is Initializable {
      * @dev admin set WethToken contract address
      * @param _wethTokenAddress set to the address of WethToken contract
      */
-    function setWethTokenAddress(address _wethTokenAddress) external onlyAdmin {
+    function setWethTokenAddress(address _wethTokenAddress)
+        external
+        onlyAdmin
+        validAddress(_wethTokenAddress)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(
             _wethTokenAddress
         );
@@ -149,6 +153,7 @@ contract WethFunds is Initializable {
     function setUniswapRouterAddress(address _uniswapRouterAddress)
         external
         onlyAdmin
+        validAddress(_uniswapRouterAddress)
     {
         IUniswapV2Router02New candidateContract = IUniswapV2Router02New(
             _uniswapRouterAddress

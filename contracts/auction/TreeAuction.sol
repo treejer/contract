@@ -141,7 +141,11 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _address set to the address of wethToken
      */
 
-    function setWethTokenAddress(address _address) external onlyAdmin {
+    function setWethTokenAddress(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         wethToken = candidateContract;
     }

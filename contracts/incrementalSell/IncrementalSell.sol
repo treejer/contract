@@ -108,7 +108,11 @@ contract IncrementalSell is Initializable, RelayRecipient {
     /** @dev admin set wethToken contract address
      * @param _address wethToken contract address
      */
-    function setWethTokenAddress(address _address) external onlyAdmin {
+    function setWethTokenAddress(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(_address);
         wethToken = candidateContract;
     }

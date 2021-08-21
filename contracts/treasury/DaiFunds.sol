@@ -117,7 +117,11 @@ contract DaiFunds is Initializable {
      * @dev admin set DaiToken address
      * @param _daiTokenAddress set to the address of DaiToken
      */
-    function setDaiTokenAddress(address _daiTokenAddress) external onlyAdmin {
+    function setDaiTokenAddress(address _daiTokenAddress)
+        external
+        onlyAdmin
+        validAddress(_daiTokenAddress)
+    {
         IERC20Upgradeable candidateContract = IERC20Upgradeable(
             _daiTokenAddress
         );

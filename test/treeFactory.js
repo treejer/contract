@@ -136,6 +136,31 @@ contract("TreeFactory", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await treeFactoryInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await treeFactoryInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await treeFactoryInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await treeFactoryInstance.trustedForwarder(),
+      "address set incorrect"
+    );
+  });
+
   /////////////------------------------------------ setPlanterFund address ----------------------------------------//
 
   it("set planter fund address", async () => {

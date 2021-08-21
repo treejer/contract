@@ -85,9 +85,34 @@ contract("PlanterFund", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await planterFundInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await planterFundInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await planterFundInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await planterFundInstance.trustedForwarder(),
+      "address set incorrect"
+    );
+  });
+
   ///////----------------------------------------------------test set WithdrawThreshold----------------------------
 
-  it("should set planter contract address successfully", async () => {
+  it("should set WithdrawThreshold successfully", async () => {
     planterFundInstance
       .setWithdrawThreshold(planterInstance.address, {
         from: userAccount1,
@@ -114,7 +139,7 @@ contract("PlanterFund", (accounts) => {
       "2 - Number not true"
     );
   });
-
+  ///////////////---------------------------------set planter contract address--------------------------------------------------------
   it("should set planter contract address successfully", async () => {
     planterFundInstance
       .setPlanterContractAddress(planterInstance.address, {
@@ -126,7 +151,7 @@ contract("PlanterFund", (accounts) => {
       from: deployerAccount,
     });
   });
-
+  ///////////////---------------------------------set dai token address--------------------------------------------------------
   it("should set dai token address successfully", async () => {
     planterFundInstance
       .setDaiTokenAddress(daiInstance.address, {
@@ -134,9 +159,21 @@ contract("PlanterFund", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+    planterFundInstance
+      .setDaiTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
     planterFundInstance.setDaiTokenAddress(daiInstance.address, {
       from: deployerAccount,
     });
+
+    assert.equal(
+      daiInstance.address,
+      await planterFundInstance.daiToken.call(),
+      "address set incorect"
+    );
   });
 
   it("set planter funds successfully and check data", async () => {

@@ -36,6 +36,8 @@ const {
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+
 contract("IncrementalSell", (accounts) => {
   let iSellInstance;
   let arInstance;
@@ -245,6 +247,12 @@ contract("IncrementalSell", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+    await iSellInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
     await iSellInstance.setTrustedForwarder(userAccount2, {
       from: deployerAccount,
     });
@@ -301,6 +309,12 @@ contract("IncrementalSell", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance
+      .setWethTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await iSellInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,

@@ -173,6 +173,31 @@ contract("CommunityGifts", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await communityGiftsInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await communityGiftsInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await communityGiftsInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await communityGiftsInstance.trustedForwarder(),
+      "address set incorrect"
+    );
+  });
+
   /////////////////---------------------------------set dai token address--------------------------------------------------------
   it("set dai token address", async () => {
     await communityGiftsInstance
@@ -180,6 +205,12 @@ contract("CommunityGifts", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await communityGiftsInstance
+      .setDaiTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
       from: deployerAccount,

@@ -235,6 +235,31 @@ contract("TreeAuction", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await treeAuctionInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await treeAuctionInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await treeAuctionInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await treeAuctionInstance.trustedForwarder(),
+      "address set incorrect"
+    );
+  });
+
   ////////////// ---------------------------------- set tree factory contract address ----------------------------
 
   it("should set tree factory address with admin access or fail otherwise", async () => {
@@ -281,6 +306,31 @@ contract("TreeAuction", (accounts) => {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
+  });
+
+  /////////////////---------------------------------set weth token address--------------------------------------------------------
+  it("set weth token address", async () => {
+    await treeAuctionInstance
+      .setWethTokenAddress(daiInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await treeAuctionInstance
+      .setWethTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      wethInstance.address,
+      await treeAuctionInstance.wethToken.call(),
+      "address set incorect"
+    );
   });
 
   ///////////////// ----------------------------- add auction -------------------------------

@@ -62,6 +62,31 @@ contract("Planter", (accounts) => {
     assert.notEqual(address, undefined);
   });
 
+  ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await planterInstance
+      .setTrustedForwarder(userAccount2, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await planterInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    await planterInstance.setTrustedForwarder(userAccount2, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      userAccount2,
+      await planterInstance.trustedForwarder(),
+      "address set incorrect"
+    );
+  });
+
   /////////////////---------------------------------planterJoin--------------------------------------------------------
 
   it("planterJoin should be work successfully without refferedBy and organizationAddress", async () => {

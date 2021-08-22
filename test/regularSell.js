@@ -127,6 +127,12 @@ contract("regularSell", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+    await regularSellInstance
+      .setTrustedForwarder(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
     await regularSellInstance.setTrustedForwarder(userAccount2, {
       from: deployerAccount,
     });
@@ -180,12 +186,18 @@ contract("regularSell", (accounts) => {
   });
 
   /////////////////---------------------------------set dai token address--------------------------------------------------------
-  it("Set dai funds address", async () => {
+  it("Set dai token address", async () => {
     await regularSellInstance
       .setDaiTokenAddress(daiInstance.address, {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await regularSellInstance
+      .setDaiTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
       from: deployerAccount,

@@ -132,6 +132,16 @@ contract("WethFunds", (accounts) => {
     await wethFunds
       .setDaiAddress(daiInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setDaiAddress(zeroAddress, { from: deployerAccount })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    assert.equal(
+      await wethFunds.daiAddress.call(),
+      daiInstance.address,
+      "Set dai address not true"
+    );
   });
 
   /////////////------------------------------------ set Weth Token address ----------------------------------------//
@@ -144,6 +154,16 @@ contract("WethFunds", (accounts) => {
     await wethFunds
       .setWethTokenAddress(wethInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setWethTokenAddress(zeroAddress, { from: deployerAccount })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    assert.equal(
+      await wethFunds.wethToken.call(),
+      wethInstance.address,
+      "set weth address not true"
+    );
   });
 
   /////////////------------------------------------ set Uniswap Router address ----------------------------------------//
@@ -158,11 +178,23 @@ contract("WethFunds", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setUniswapRouterAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+    assert.equal(
+      await wethFunds.uniswapRouter.call(),
+      uniswapRouterInstance.address,
+      "set uniswap router address not true"
+    );
   });
 
   /////////////------------------------------------ set PlanterFund Contract address ----------------------------------------//
 
-  it("set uniswap router address", async () => {
+  it("set planter fund contract address", async () => {
     await wethFunds.setPlanterFundContractAddress(planterFundsInstnce.address, {
       from: deployerAccount,
     });
@@ -172,6 +204,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    assert.equal(
+      await wethFunds.planterFundContract.call(),
+      planterFundsInstnce.address,
+      "set planter fund contract address not true"
+    );
   });
 
   //-------------------------------setTreeResearchAddress test-------------------------------------------------------
@@ -197,6 +235,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setTreeResearchAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
@@ -222,6 +266,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setLocalDevelopAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setRescueFundAddress test-------------------------------------------------------
@@ -247,6 +297,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setRescueFundAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setTreejerDevelopAddress test-------------------------------------------------------
@@ -272,6 +328,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setTreejerDevelopAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setReserveFund1Address test-------------------------------------------------------
@@ -297,6 +359,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setReserveFund1Address(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setReserveFund2Address test-------------------------------------------------------
@@ -322,6 +390,12 @@ contract("WethFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await wethFunds
+      .setReserveFund2Address(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   /////////////------------------------------------ fundTree function test ----------------------------------------//
@@ -1224,10 +1298,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setTreeResearchAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -1287,13 +1357,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setTreeResearchAddress(userAccount3, {
       from: deployerAccount,
@@ -1690,10 +1753,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setLocalDevelopAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -1753,13 +1812,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setLocalDevelopAddress(userAccount3, {
       from: deployerAccount,
@@ -2150,10 +2202,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setRescueFundAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -2213,13 +2261,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawRescueFund(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setRescueFundAddress(userAccount3, {
       from: deployerAccount,
@@ -2616,10 +2657,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setTreejerDevelopAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -2679,13 +2716,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawTreejerDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setTreejerDevelopAddress(userAccount3, {
       from: deployerAccount,
@@ -3082,10 +3112,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setReserveFund1Address(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -3145,13 +3171,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawReserveFund1(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setReserveFund1Address(userAccount3, {
       from: deployerAccount,
@@ -3548,10 +3567,6 @@ contract("WethFunds", (accounts) => {
       wethFunds.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await wethFunds.setReserveFund2Address(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -3611,13 +3626,6 @@ contract("WethFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await wethFunds
-      .withdrawReserveFund2(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await wethFunds.setReserveFund2Address(userAccount3, {
       from: deployerAccount,

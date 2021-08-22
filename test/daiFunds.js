@@ -83,13 +83,23 @@ contract("DaiFunds", (accounts) => {
       .setDaiTokenAddress(daiInstance.address, { from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+    await daiFundsInstance
+      .setDaiTokenAddress(zeroAddress, { from: deployerAccount })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
     await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
       from: deployerAccount,
     });
+
+    assert.equal(
+      await daiFundsInstance.daiToken.call(),
+      daiInstance.address,
+      "Set dai contract address not true"
+    );
   });
 
   /////////////------------------------------------ set PlanterFund Contract address ----------------------------------------//
-  it("set uniswap router address", async () => {
+  it("set planter fund address", async () => {
     await daiFundsInstance
       .setPlanterFundContractAddress(planterFundsInstnce.address, {
         from: userAccount1,
@@ -101,6 +111,12 @@ contract("DaiFunds", (accounts) => {
       {
         from: deployerAccount,
       }
+    );
+
+    assert.equal(
+      await daiFundsInstance.planterFundContract.call(),
+      planterFundsInstnce.address,
+      "Set planter fund contract address not true"
     );
   });
 
@@ -127,6 +143,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setTreeResearchAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
@@ -152,6 +174,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setLocalDevelopAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setRescueFundAddress test-------------------------------------------------------
@@ -177,6 +205,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setRescueFundAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setTreejerDevelopAddress test-------------------------------------------------------
@@ -202,6 +236,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setTreejerDevelopAddress(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setReserveFund1Address test-------------------------------------------------------
@@ -227,6 +267,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setReserveFund1Address(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   //-------------------------------setReserveFund2Address test-------------------------------------------------------
@@ -252,6 +298,12 @@ contract("DaiFunds", (accounts) => {
         from: userAccount5,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await daiFundsInstance
+      .setReserveFund2Address(zeroAddress, {
+        from: deployerAccount,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
   });
 
   /////////////------------------------------------ fundTree function test ----------------------------------------//
@@ -1064,10 +1116,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setTreeResearchAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -1127,13 +1175,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setTreeResearchAddress(userAccount3, {
       from: deployerAccount,
@@ -1529,10 +1570,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setLocalDevelopAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -1592,13 +1629,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
       from: deployerAccount,
@@ -1989,10 +2019,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setRescueFundAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -2052,13 +2078,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawRescueFund(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setRescueFundAddress(userAccount3, {
       from: deployerAccount,
@@ -2455,10 +2474,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setTreejerDevelopAddress(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -2518,13 +2533,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawTreejerDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
       from: deployerAccount,
@@ -2921,10 +2929,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setReserveFund1Address(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -2984,13 +2988,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawReserveFund1(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setReserveFund1Address(userAccount3, {
       from: deployerAccount,
@@ -3388,10 +3385,6 @@ contract("DaiFunds", (accounts) => {
       daiFundsInstance.address,
       deployerAccount
     );
-    /////////////////------------------- set addresses
-    await daiFundsInstance.setReserveFund2Address(zeroAddress, {
-      from: deployerAccount,
-    });
 
     //////-------------------- handle dm model
 
@@ -3451,13 +3444,6 @@ contract("DaiFunds", (accounts) => {
         from: userAccount6,
       }
     );
-
-    ///////////////////// should fail
-    await daiFundsInstance
-      .withdrawReserveFund2(web3.utils.toWei("0.2"), "reason to withdraw", {
-        from: deployerAccount,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
     await daiFundsInstance.setReserveFund2Address(userAccount3, {
       from: deployerAccount,

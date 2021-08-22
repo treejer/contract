@@ -11,6 +11,8 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
     bytes32 public constant TREEJER_CONTRACT_ROLE =
         keccak256("TREEJER_CONTRACT_ROLE");
+    bytes32 public constant DATA_MANAGER_ROLE = keccak256("DATA_MANAGER_ROLE");
+    bytes32 public constant BUYER_RANK_ROLE = keccak256("BUYER_RANK_ROLE");
 
     /** NOTE {isAccessRestriction} set inside the initialize to {true} */
     bool public isAccessRestriction;
@@ -108,13 +110,47 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     }
 
     /**
-     * @dev check if given address is Admin or Treejer contract
+     * @dev check if given address is data manager
      * @param _address input address
      */
-    function ifAdminOrTreejerContract(address _address) external view {
+    function ifDataManager(address _address) external view {
+        require(isDataManager(_address), "caller is not data manager");
+    }
+
+    /**
+     * @dev check if given address has data manager role
+     * @param _address input address
+     * @return if given address has data manager role
+     */
+    function isDataManager(address _address) public view returns (bool) {
+        return hasRole(DATA_MANAGER_ROLE, _address);
+    }
+
+    /**
+     * @dev check if given address is buyer rank
+     * @param _address input address
+     */
+    function ifBuyerRank(address _address) external view {
+        require(isBuyerRank(_address), "caller is not buyer rank");
+    }
+
+    /**
+     * @dev check if given address has buyer rank role
+     * @param _address input address
+     * @return if given address has buyer rank role
+     */
+    function isBuyerRank(address _address) public view returns (bool) {
+        return hasRole(BUYER_RANK_ROLE, _address);
+    }
+
+    /**
+     * @dev check if given address is DataManager or Treejer contract
+     * @param _address input address
+     */
+    function ifDataManagerOrTreejerContract(address _address) external view {
         require(
-            isAdmin(_address) || isTreejerContract(_address),
-            "not Admin or Treejer Contract"
+            isDataManager(_address) || isTreejerContract(_address),
+            "not Data Mnager or Treejer Contract"
         );
     }
 }

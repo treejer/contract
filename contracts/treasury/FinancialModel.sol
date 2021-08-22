@@ -50,9 +50,9 @@ contract FinancialModel is Initializable {
 
     event FundDistributionModelAssigned(uint256 assignModelsLength);
 
-    /** NOTE modifier to check msg.sender has admin role */
-    modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(msg.sender);
         _;
     }
 
@@ -101,7 +101,7 @@ contract FinancialModel is Initializable {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(
             _planter +
                 _referral +
@@ -143,7 +143,7 @@ contract FinancialModel is Initializable {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint256 _distributionModelId
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(
             fundDistributions[_distributionModelId].exists > 0,
             "Distribution model not found"

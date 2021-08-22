@@ -53,6 +53,12 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -194,6 +200,7 @@ contract Planter is Initializable, RelayRecipient {
      * @param _capacity plant capacity of organization planter
      * @param _refferedBy address of referral
      */
+    //TODO: DATA_MANAGER
     function organizationJoin(
         address _organizationAddress,
         uint64 _longitude,
@@ -201,7 +208,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         uint32 _capacity,
         address _refferedBy
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(
             planters[_organizationAddress].planterType == 0 &&
                 accessRestriction.isPlanter(_organizationAddress),
@@ -323,9 +330,10 @@ contract Planter is Initializable, RelayRecipient {
      * @param _planterAddress address of planter to update capacity
      * @param _capacity capacity that set to planter capacity
      */
+    //TODO: DATA_MANAGER
     function updateCapacity(address _planterAddress, uint32 _capacity)
         external
-        onlyAdmin
+        onlyDataManager
         existPlanter(_planterAddress)
     {
         PlanterData storage tempPlanter = planters[_planterAddress];

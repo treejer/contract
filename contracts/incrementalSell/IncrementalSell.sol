@@ -45,6 +45,12 @@ contract IncrementalSell is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -143,7 +149,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint64 _treeCount,
         uint64 _steps,
         uint64 _increaseRatio
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(_treeCount > 0, "assign at least one tree");
         require(_startTree > 100, "trees are under Auction");
         require(_steps > 0, "incremental period should be positive");
@@ -181,7 +187,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
      * @param _treeCount number of trees added at the end of the incremental sell
      * tree range
      */
-    function updateIncrementalEnd(uint256 _treeCount) external onlyAdmin {
+    function updateIncrementalEnd(uint256 _treeCount) external onlyDataManager {
         IncrementalPrice storage incrPrice = incrementalPrice;
         require(
             incrPrice.increaseStep > 0,
@@ -298,7 +304,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint256 _initialPrice,
         uint64 _increaseStep,
         uint64 _increaseRatio
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(_increaseStep > 0, "incremental period should be positive");
 
         IncrementalPrice storage incrPrice = incrementalPrice;

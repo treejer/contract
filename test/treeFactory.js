@@ -122,6 +122,8 @@ contract("TreeFactory", (accounts) => {
     await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
       from: deployerAccount,
     });
+
+    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -208,7 +210,7 @@ contract("TreeFactory", (accounts) => {
 
     await treeFactoryInstance
       .setUpdateInterval(10, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     let tx = await treeFactoryInstance.setUpdateInterval(10, {
       from: deployerAccount,
@@ -258,7 +260,7 @@ contract("TreeFactory", (accounts) => {
 
     await treeFactoryInstance
       .addTree(treeId, ipfsHash, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: deployerAccount,
@@ -407,7 +409,7 @@ contract("TreeFactory", (accounts) => {
       .assignTreeToPlanter(treeId, userAccount2, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     await treeFactoryInstance
       .assignTreeToPlanter(invalidTreeId, userAccount2, {

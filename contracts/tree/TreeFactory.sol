@@ -81,6 +81,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -177,7 +183,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** @dev admin can set the minimum time to send next update request
      * @param _day time to next update request
      */
-    function setUpdateInterval(uint256 _day) external onlyAdmin {
+    function setUpdateInterval(uint256 _day) external onlyDataManager {
         updateInterval = _day * 86400;
     }
 
@@ -188,7 +194,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function addTree(uint256 _treeId, string calldata _treeDescription)
         external
-        onlyAdmin
+        onlyDataManager
     {
         require(treeData[_treeId].treeStatus == 0, "duplicate tree");
 
@@ -208,7 +214,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function assignTreeToPlanter(uint256 _treeId, address _planterId)
         external
-        onlyAdmin
+        onlyDataManager
     {
         TreeStruct storage tempTree = treeData[_treeId];
 

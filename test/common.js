@@ -8,6 +8,7 @@ const DEFAULT_ADMIN_ROLE =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
+const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 
@@ -33,6 +34,10 @@ Common.addTreejerContractRole = async (instance, account, adminAccount) => {
 
 Common.addAdmin = async (instance, account, adminAccount) => {
   await instance.grantRole(DEFAULT_ADMIN_ROLE, account, { from: adminAccount });
+};
+
+Common.addDataManager = async (instance, account, adminAccount) => {
+  await instance.grantRole(DATA_MANAGER_ROLE, account, { from: adminAccount });
 };
 
 Common.approveAndTransfer = async (

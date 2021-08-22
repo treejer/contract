@@ -117,7 +117,7 @@ contract("PlanterFund", (accounts) => {
       .setWithdrawThreshold(planterInstance.address, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     let priceBefore = await planterFundInstance.withdrawThreshold();
 

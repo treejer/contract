@@ -58,6 +58,12 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(msg.sender);
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -133,7 +139,7 @@ contract PlanterFund is Initializable, RelayRecipient {
     /** @dev admin can set the minimum amount to withdraw
      * @param _amount is withdraw treshold
      */
-    function setWithdrawThreshold(uint256 _amount) external onlyAdmin {
+    function setWithdrawThreshold(uint256 _amount) external onlyDataManager {
         withdrawThreshold = _amount;
     }
 

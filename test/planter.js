@@ -33,7 +33,7 @@ contract("Planter", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const userAccount8 = accounts[9];
+  const dataManager = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -49,6 +49,8 @@ contract("Planter", (accounts) => {
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -159,7 +161,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     const eventTx2 = await Common.joinSimplePlanter(
@@ -214,7 +216,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     const eventTx2 = await Common.joinSimplePlanter(
@@ -341,7 +343,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     let planter = await planterInstance.planters.call(userAccount4);
@@ -368,7 +370,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       userAccount3,
-      deployerAccount
+      dataManager
     );
 
     let refferedAfter = await planterInstance.refferedBy.call(userAccount4);
@@ -398,14 +400,14 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     ).should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
   });
 
@@ -414,7 +416,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     ).should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
   });
 
@@ -425,7 +427,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       userAccount3,
-      deployerAccount
+      dataManager
     ).should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
   });
 
@@ -437,7 +439,14 @@ contract("Planter", (accounts) => {
       userAccount4,
       zeroAddress,
       userAccount6
-    ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+    await Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount4,
+      zeroAddress,
+      deployerAccount
+    ).should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   //----------------------------------------updatePlanterType------------------------------------------------
@@ -450,7 +459,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount3,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     //user join with organizationAddress
@@ -525,7 +534,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount3,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     //organizationAddress join
@@ -533,7 +542,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     //user join with organizationAddress
@@ -607,7 +616,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     //user join with organizationAddress
@@ -689,7 +698,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -705,7 +714,7 @@ contract("Planter", (accounts) => {
     });
 
     await planterInstance.updateCapacity(userAccount2, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await Common.addTreejerContractRole(
@@ -734,7 +743,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await planterInstance
@@ -799,7 +808,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -831,7 +840,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -883,7 +892,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -938,13 +947,13 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount2,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -1017,7 +1026,7 @@ contract("Planter", (accounts) => {
     );
 
     const eventTx1 = await planterInstance.updateCapacity(userAccount1, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(eventTx1, "PlanterUpdated", (ev) => {
@@ -1063,7 +1072,7 @@ contract("Planter", (accounts) => {
     );
 
     const eventTx2 = await planterInstance.updateCapacity(userAccount1, 5, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(eventTx2, "PlanterUpdated", (ev) => {
@@ -1109,16 +1118,16 @@ contract("Planter", (accounts) => {
       .updateCapacity(userAccount1, 2, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
     //////////////////////////-------------fail: planter not exist
     await planterInstance
       .updateCapacity(userAccount4, 2, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
     /////////////////----------- update capacity
     await planterInstance.updateCapacity(userAccount1, 3, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance.plantingPermission(userAccount1, userAccount1, {
@@ -1129,7 +1138,7 @@ contract("Planter", (accounts) => {
     });
     await planterInstance
       .updateCapacity(userAccount1, 1, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_CAPACITY);
   });
@@ -1156,7 +1165,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount3,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1203,7 +1212,7 @@ contract("Planter", (accounts) => {
 
     ///////////-------------------- update capacity
     await planterInstance.updateCapacity(userAccount1, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance.plantingPermission(userAccount1, userAccount1, {
@@ -1313,7 +1322,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1355,7 +1364,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -1405,7 +1414,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -1452,7 +1461,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1513,7 +1522,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1543,13 +1552,13 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount2,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -1741,13 +1750,13 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinOrganizationPlanter(
       planterInstance,
       userAccount2,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1828,7 +1837,7 @@ contract("Planter", (accounts) => {
       planterInstance,
       userAccount1,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -1951,7 +1960,7 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance.updateCapacity(userAccount1, 3, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance.plantingPermission(userAccount1, userAccount1, {
@@ -2013,7 +2022,7 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance.updateCapacity(userAccount1, 3, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance
@@ -2075,7 +2084,7 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance.updateCapacity(userAccount1, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
@@ -2118,7 +2127,7 @@ contract("Planter", (accounts) => {
     assert.equal(planter1.plantedCount, 1, "plant count is incorrect");
 
     await planterInstance.updateCapacity(userAccount1, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterInstance.planterCheck(userAccount1, { from: userAccount2 });

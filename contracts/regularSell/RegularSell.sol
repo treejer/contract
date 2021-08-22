@@ -38,6 +38,12 @@ contract RegularSell is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
@@ -125,7 +131,7 @@ contract RegularSell is Initializable, RelayRecipient {
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      */
-    function setPrice(uint256 _price) external onlyAdmin {
+    function setPrice(uint256 _price) external onlyDataManager {
         treePrice = _price;
         emit TreePriceUpdated(_price);
     }

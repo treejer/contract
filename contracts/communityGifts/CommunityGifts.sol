@@ -64,6 +64,12 @@ contract CommunityGifts is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -185,7 +191,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint256 _referralFund,
         uint64 _expireDate,
         address _adminWalletAddress
-    ) external onlyAdmin {
+    ) external onlyDataManager {
         require(_endTreeId > _startTreeId, "invalid range");
 
         bool check = treeFactory.manageProvideStatus(
@@ -218,7 +224,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * @param _giftee address of giftee
      * @param _symbol unique symbol assigned to a giftee
      */
-    function updateGiftees(address _giftee, uint32 _symbol) external onlyAdmin {
+    function updateGiftees(address _giftee, uint32 _symbol)
+        external
+        onlyDataManager
+    {
         CommunityGift storage communityGift = communityGifts[_giftee];
 
         require(!communityGift.claimed, "Claimed before");
@@ -268,7 +277,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * expire date of community gift reach
      * @param _expireDate is the maximum time to claim tree
      */
-    function setExpireDate(uint256 _expireDate) external onlyAdmin {
+    function setExpireDate(uint256 _expireDate) external onlyDataManager {
         require(block.timestamp < expireDate, "can not update expire date");
         expireDate = _expireDate;
     }
@@ -281,7 +290,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * NOTE planterFund and referralFund of tree updated in planterFund contract
      */
 
-    function transferTree(address _giftee, uint32 _symbol) external onlyAdmin {
+    function transferTree(address _giftee, uint32 _symbol)
+        external
+        onlyDataManager
+    {
         require(
             block.timestamp > expireDate,
             "CommunityGift Time not yet ended"
@@ -309,7 +321,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
     function setPrice(uint256 _planterFund, uint256 _referralFund)
         external
-        onlyAdmin
+        onlyDataManager
     {
         planterFund = _planterFund;
         referralFund = _referralFund;

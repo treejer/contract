@@ -222,6 +222,8 @@ contract("TreeAuction", (accounts) => {
       treeFactoryInstance.address,
       deployerAccount
     );
+
+    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -334,7 +336,7 @@ contract("TreeAuction", (accounts) => {
   });
 
   ///////////////// ----------------------------- add auction -------------------------------
-  it("auction call by admin access or fail otherwise", async () => {
+  it("auction call by data manager access or fail otherwise", async () => {
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
@@ -369,6 +371,7 @@ contract("TreeAuction", (accounts) => {
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: deployerAccount,
     });
+    await Common.addDataManager(arInstance, userAccount8, deployerAccount);
 
     await treeAuctionInstance.createAuction(
       treeId,
@@ -376,7 +379,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: userAccount8 }
     );
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -385,7 +388,7 @@ contract("TreeAuction", (accounts) => {
     await treeFactoryInstance.addTree(treeId2, ipfsHash, {
       from: deployerAccount,
     });
-    //only admin can call this method so it should be rejected
+    //only data manager can call this method so it should be rejected
     await treeAuctionInstance
       .createAuction(
         treeId2,
@@ -395,7 +398,7 @@ contract("TreeAuction", (accounts) => {
         web3.utils.toWei("0.1"),
         { from: userAccount1 }
       )
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("should fail auction with duplicate tree id ( tree is in other provide ) ", async () => {

@@ -62,6 +62,12 @@ contract TreeAuction is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -161,13 +167,14 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _bidInterval bid interval for auction . if it set to 10 for example and the last bid is 100.new bidder can bid for 110
      */
 
+    //TODO: DATA_MANAGER
     function createAuction(
         uint256 _treeId,
         uint64 _startDate,
         uint64 _endDate,
         uint256 _intialPrice,
         uint256 _bidInterval
-    ) external ifNotPaused onlyAdmin {
+    ) external ifNotPaused onlyDataManager {
         require(
             financialModel.distributionModelExistance(_treeId),
             "equivalant fund Model not exists"

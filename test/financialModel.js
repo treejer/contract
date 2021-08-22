@@ -5,7 +5,7 @@ const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
-
+const Common = require("./common");
 const { CommonErrorMsg, FinancialModelErrorMsg } = require("./enumes");
 
 contract("FinancialModel", (accounts) => {
@@ -39,6 +39,8 @@ contract("FinancialModel", (accounts) => {
         unsafeAllowCustomTypes: true,
       }
     );
+
+    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
   });
   afterEach(async () => {});
 

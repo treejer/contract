@@ -75,10 +75,22 @@ interface IAccessRestriction {
     function isTreejerContract(address _address) external view returns (bool);
 
     /**
-     * @dev check if given address is Admin or Treejer contract
+     * @dev check if given address is data manager
      * @param _address input address
      */
-    function ifAdminOrTreejerContract(address _address) external view;
+    function ifDataManager(address _address) external view;
+
+    /**
+     * @dev check if given address is DataManager or Treejer contract
+     * @param _address input address
+     */
+    function ifDataManagerOrTreejerContract(address _address) external view;
+
+    /**
+     * @dev check if given address is buyer rank
+     * @param _address input address
+     */
+    function ifBuyerRank(address _address) external view;
 
     /** @return if functionality is paused*/
     function paused() external view returns (bool);

@@ -227,6 +227,8 @@ contract("IncrementalSell", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -366,7 +368,7 @@ contract("IncrementalSell", (accounts) => {
       .addTreeSells(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("added incrementalSell should has steps of price change>0", async () => {
@@ -716,7 +718,7 @@ contract("IncrementalSell", (accounts) => {
       .updateIncrementalEnd(100, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("updateIncrementalEnd shoul reject because caller is not admin", async () => {
@@ -1964,7 +1966,7 @@ contract("IncrementalSell", (accounts) => {
       .updateIncrementalRates(web3.utils.toWei("0.1"), 70, 10000, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("updateIncrementalRates should reject becuase step must be gt zero", async () => {

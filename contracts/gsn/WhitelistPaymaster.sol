@@ -9,10 +9,17 @@ import "./../external/gsn/BasePaymaster.sol";
 import "../access/IAccessRestriction.sol";
 
 contract WhitelistPaymaster is BasePaymaster {
-    mapping(address => bool) public targetWhitelist;
+    mapping(address => bool) public funderTargetWhitelist;
+    mapping(address => bool) public planterTargetWhitelist;
 
     //related contracts
     IAccessRestriction public accessRestriction;
+
+    /** NOTE modifier to check msg.sender has admin role */
+    modifier onlyAdmin() {
+        accessRestriction.ifAdmin(msg.sender);
+        _;
+    }
 
     constructor(address _accessRestrictionAddress) {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -22,16 +29,30 @@ contract WhitelistPaymaster is BasePaymaster {
         accessRestriction = candidateContract;
     }
 
-    function setWhitelistTarget(address target) external {
-        accessRestriction.ifAdmin(msg.sender);
-
-        targetWhitelist[target] = true;
+    function addPlanterWhitelistTarget(address target) external onlyAdmin {
+        planterTargetWhitelist[target] = true;
     }
 
-    function setPaymasterVersion(address target) external {
-        accessRestriction.ifAdmin(msg.sender);
+    function removePlanterWhitelistTarget(address target) external onlyAdmin {
+        require(
+            planterTargetWhitelist[target],
+            "Target not exists in planterTargetWhitelist"
+        );
 
-        targetWhitelist[target] = true;
+        planterTargetWhitelist[target] = false;
+    }
+
+    function addFunderWhitelistTarget(address target) external onlyAdmin {
+        funderTargetWhitelist[target] = true;
+    }
+
+    function removeFunderWhitelistTarget(address target) external onlyAdmin {
+        require(
+            funderTargetWhitelist[target],
+            "Target not exists in funderTargetWhitelist"
+        );
+
+        funderTargetWhitelist[target] = false;
     }
 
     function preRelayedCall(
@@ -51,8 +72,13 @@ contract WhitelistPaymaster is BasePaymaster {
 
         (relayRequest, signature, approvalData, maxPossibleGas);
 
+        if (planterTargetWhitelist[relayRequest.request.to]) {
+            accessRestriction.ifPlanter(relayRequest.request.from);
+            return ("", false);
+        }
+
         require(
-            targetWhitelist[relayRequest.request.to],
+            funderTargetWhitelist[relayRequest.request.to],
             "target not whitelisted"
         );
 

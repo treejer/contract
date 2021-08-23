@@ -231,6 +231,25 @@ contract("regularSell", (accounts) => {
     );
   });
 
+  /////////////////---------------------------------set lastSoldRegularTree address--------------------------------------------------------
+  // it("Set lastSoldRegularTree address", async () => {
+  //   await regularSellInstance
+  //     .setLastSoldRegularTree(1000, {
+  //       from: userAccount1,
+  //     })
+  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+  //   await regularSellInstance.setFinancialModelAddress(fModel.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   assert.equal(
+  //     fModel.address,
+  //     await regularSellInstance.financialModel(),
+  //     "financial model address set incorect"
+  //   );
+  // });
+
   /////////////////------------------------------------- set price ------------------------------------------
   it("set price and check data", async () => {
     let treePrice1 = await regularSellInstance.treePrice.call();

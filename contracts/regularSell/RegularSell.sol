@@ -90,7 +90,7 @@ contract RegularSell is Initializable, RelayRecipient {
         onlyDataManager
     {
         require(
-            _lastSoldRegularTree >= lastSoldRegularTree,
+            _lastSoldRegularTree > lastSoldRegularTree,
             "Input must be gt last tree sold"
         );
 

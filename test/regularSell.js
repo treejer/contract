@@ -232,23 +232,211 @@ contract("regularSell", (accounts) => {
   });
 
   /////////////////---------------------------------set lastSoldRegularTree address--------------------------------------------------------
-  // it("Set lastSoldRegularTree address", async () => {
-  //   await regularSellInstance
-  //     .setLastSoldRegularTree(1000, {
-  //       from: userAccount1,
-  //     })
-  //     .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  it("set lastSoldRegularTree address", async () => {
+    Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
-  //   await regularSellInstance.setFinancialModelAddress(fModel.address, {
-  //     from: deployerAccount,
-  //   });
+    await regularSellInstance
+      .setLastSoldRegularTree(500, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(
+        RegularSellErrors.INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT
+      );
 
-  //   assert.equal(
-  //     fModel.address,
-  //     await regularSellInstance.financialModel(),
-  //     "financial model address set incorect"
-  //   );
-  // });
+    await regularSellInstance
+      .setLastSoldRegularTree(15000, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+    await regularSellInstance.setLastSoldRegularTree(15000, {
+      from: userAccount1,
+    });
+
+    let lastRegularSellTreeAfter =
+      await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastRegularSellTreeAfter),
+      15000,
+      "lastRegularSellTreeAfter not true"
+    );
+
+    await regularSellInstance
+      .setLastSoldRegularTree(15000, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(
+        RegularSellErrors.INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT
+      );
+
+    await regularSellInstance.setLastSoldRegularTree(15001, {
+      from: userAccount1,
+    });
+
+    let lastRegularSellTreeAfter2 =
+      await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastRegularSellTreeAfter2),
+      15001,
+      "2-lastRegularSellTreeAfter not true"
+    );
+  });
+
+  it("Should request trees successfully", async () => {
+    let funder = userAccount3;
+
+    //mint dai for funder
+    await daiInstance.setMint(funder, web3.utils.toWei("10000"));
+
+    ////////////// ------------------- handle fund distribution model ----------------------
+
+    await fModel.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: dataManager,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(1, 1000000, 0, {
+      from: dataManager,
+    });
+
+    /////////////////////////-------------------- deploy contracts --------------------------
+
+    const planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    ///////////////////// ------------------- handle address here --------------------------
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await regularSellInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      from: deployerAccount,
+    });
+
+    await regularSellInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      from: deployerAccount,
+    });
+
+    //-------------daiFundsInstance
+
+    await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      from: deployerAccount,
+    });
+
+    await daiFundsInstance.setPlanterFundContractAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    //-------------treeFactoryInstance
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      from: deployerAccount,
+    });
+
+    ///////////////////////// -------------------- handle roles here ----------------
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      DaiFunds.address,
+      deployerAccount
+    );
+
+    ///////////////////////--------------------- requestTrees --------------------------
+
+    await daiInstance.approve(
+      regularSellInstance.address,
+      web3.utils.toWei("10000"),
+      {
+        from: funder,
+      }
+    );
+
+    await regularSellInstance.requestTrees(7, {
+      from: funder,
+    });
+
+    let tokentOwner;
+    for (let i = 10001; i < 10008; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(i);
+      assert.equal(tokentOwner, funder, "funder not true " + i);
+    }
+
+    await treeTokenInstance.ownerOf(10000).should.be.rejected;
+    await treeTokenInstance.ownerOf(10008).should.be.rejected;
+
+    let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree),
+      10007,
+      "lastSoldRegularTree not true"
+    );
+
+    Common.addDataManager(arInstance, userAccount1, deployerAccount);
+
+    await regularSellInstance.setLastSoldRegularTree(13333, {
+      from: userAccount1,
+    });
+
+    await regularSellInstance.requestTrees(7, {
+      from: funder,
+    });
+
+    for (let i = 13334; i < 13340; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(i);
+      assert.equal(tokentOwner, funder, "funder not true " + i);
+    }
+
+    await treeTokenInstance.ownerOf(13333).should.be.rejected;
+    await treeTokenInstance.ownerOf(13341).should.be.rejected;
+
+    let lastSoldRegularTree2 = await regularSellInstance.lastSoldRegularTree();
+
+    assert.equal(
+      Number(lastSoldRegularTree2),
+      13340,
+      "lastSoldRegularTree not true"
+    );
+  });
 
   /////////////////------------------------------------- set price ------------------------------------------
   it("set price and check data", async () => {
@@ -442,7 +630,7 @@ contract("regularSell", (accounts) => {
 
     let tokentOwner;
     for (let i = 10001; i < 10008; i++) {
-      tokentOwner = await treeTokenInstance.ownerOf(10001);
+      tokentOwner = await treeTokenInstance.ownerOf(i);
       assert.equal(tokentOwner, funder, "funder not true " + i);
     }
 
@@ -715,7 +903,7 @@ contract("regularSell", (accounts) => {
 
     let tokentOwner;
     for (let i = 10001; i < 10008; i++) {
-      tokentOwner = await treeTokenInstance.ownerOf(10001);
+      tokentOwner = await treeTokenInstance.ownerOf(i);
       assert.equal(tokentOwner, funder, "funder not true " + i);
     }
 
@@ -1416,7 +1604,7 @@ contract("regularSell", (accounts) => {
       .requestTrees(3, {
         from: userAccount4,
       })
-      .should.be.rejectedWith(RegularSellErrors.INVALID_APPROVE); // ssss
+      .should.be.rejectedWith(RegularSellErrors.INVALID_APPROVE);
   });
 
   ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------

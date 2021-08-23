@@ -8,12 +8,15 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../gsn/RelayRecipient.sol";
 
+/** @title TreeAttribute Contract */
 contract TreeAttribute is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
+
     bool public isTreeAttribute;
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    //parameters of randomTreeGeneration
+
+    /** NOTE parameters of randomTreeGeneration*/
     struct Attributes {
         uint32 treeType;
         uint32 groundType;
@@ -25,18 +28,23 @@ contract TreeAttribute is Initializable, RelayRecipient {
         uint32 exists;
     }
 
-    //maping from buyer address to his/her rank
+    /** NOTE maping from buyer address to his/her rank */
     mapping(address => uint8) public rankOf;
-    // mapping from treeId to tree attributes
+
+    /** NOTE mapping from treeId to tree attributes */
     mapping(uint256 => Attributes) public treeAttributes;
-    // mapping from unique attributes id to number of generations
+
+    /** NOTE mapping from unique symbol id to number of generations */
     mapping(uint32 => uint32) public generatedAttributes;
+
+    /** NOTE mapping from unique symbol to reserved status */
     mapping(uint32 => uint8) public reservedAttributes;
 
     event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);
     event TreeAttributesNotGenerated(uint256 treeId);
 
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
@@ -48,21 +56,28 @@ contract TreeAttribute is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager or treejer contract role */
     modifier onlyDataManagerOrTreejerContract() {
         accessRestriction.ifDataManagerOrTreejerContract(_msgSender());
         _;
     }
 
+    /** NOTE modifier to check msg.sender has buyer rank role */
     modifier onlyBuyerRank() {
         accessRestriction.ifBuyerRank(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isTreeAttribute
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress)
         external
         initializer
@@ -87,12 +102,20 @@ contract TreeAttribute is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
+    /**
+     * @dev admin set TreeFactoryAddress
+     * @param _address set to the address of treeFactory
+     */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
     }
 
+    /**
+     * @dev reserve a unique symbol
+     * @param generatedCode unique symbol to reserve
+     */
     function reserveTreeAttributes(uint32 generatedCode)
         external
         onlyDataManagerOrTreejerContract
@@ -105,6 +128,10 @@ contract TreeAttribute is Initializable, RelayRecipient {
         reservedAttributes[generatedCode] = 1;
     }
 
+    /**
+     * @dev free reservation of a unique symbol
+     * @param generatedCode unique symbol to reserve
+     */
     function freeReserveTreeAttributes(uint32 generatedCode)
         external
         onlyDataManagerOrTreejerContract
@@ -118,6 +145,11 @@ contract TreeAttribute is Initializable, RelayRecipient {
         reservedAttributes[generatedCode] = 0;
     }
 
+    /**
+     * @dev admin assigns symbol to specified treeId
+     * @param treeId id of tree
+     * @param generatedCode unique symbol code to assign
+     */
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external
         onlyDataManagerOrTreejerContract
@@ -155,6 +187,13 @@ contract TreeAttribute is Initializable, RelayRecipient {
         );
     }
 
+    /**
+     * @dev calculates the random attributes from random number
+     * @param buyer buyer address of treeId
+     * @param treeId id of tree
+     * @param rand a 28 bits random attribute generator number
+     * @return if generated random attribute is unique
+     */
     function _calcRandAttributes(
         address buyer,
         uint256 treeId,
@@ -205,7 +244,12 @@ contract TreeAttribute is Initializable, RelayRecipient {
         return false;
     }
 
-    //the function creates
+    /**
+     * @dev generate a 256 bits random number as a base for tree attributes and slice it
+     * in 28 bits parts
+     * @param treeId id of tree
+     * @return if unique tree attribute generated successfully
+     */
     function createTreeAttributes(uint256 treeId) external returns (bool) {
         require(
             treeAttributes[treeId].exists == 0,
@@ -251,7 +295,15 @@ contract TreeAttribute is Initializable, RelayRecipient {
         return flag;
     }
 
-    // the function Tries to Calculate the rank of buyer based on transaction statistics of his/her wallet
+    /**
+     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
+     * his/her wallet
+     * @param buyer address of buyer
+     * @param treejerSpent weth amount spent in treejer
+     * @param walletSpent weth amount spent from wallet
+     * @param treesOwned number of trees owned
+     * @param walletSpentCount number of spents transactions from wallet
+     */
     function setBuyerRank(
         address buyer,
         uint256 treejerSpent,
@@ -279,22 +331,40 @@ contract TreeAttribute is Initializable, RelayRecipient {
         } else if (points > 30) {
             rankOf[buyer] = 1; //points under 1001 is rank 3
         }
+
+        emit BuyerRankSet(buyer, rankOf[buyer]);
     }
 
-    //to get n lowest bits of a uint32
+    /**
+     * @dev to get n lowest bits of a uint32
+     * @param rnd a 28 bits number
+     * @param n number of bits to fetch from right side of rnd
+     * @return first n bits from right
+     */
     function _getFirstN32(uint32 rnd, uint8 n) private pure returns (uint32) {
         uint32 firN = (uint32(2)**n) - 1;
         return rnd & firN;
     }
 
-    //to get n lowest bits of a uint256
+    /**
+     * @dev to get n lowest bits of a uint256
+     * @param rnd a 256 bits number
+     * @param n number of bits to fetch from right side of rnd
+     * @return first n bits from right
+     */
     function _getFirstN(uint256 rnd, uint16 n) private pure returns (uint32) {
         uint256 x = rnd & ((uint256(2)**n) - 1);
 
         return x.toUint32();
     }
 
-    // The function manipulates probability of rare special effects based on rank of buyer
+    /**
+     * @dev The function manipulates probability of rare special effects based on rank of buyer
+     * @param buyer address of buyet rank
+     * @param bonusRank rank for bonus on auctions
+     * @param n random number generated for specific effect form 0 to 255
+     * @return special effect value from 0 to 16
+     */
     function _getSpecialEffect(
         address buyer,
         uint8 bonusRank,

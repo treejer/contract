@@ -33,6 +33,9 @@ interface IRegularSell {
     /** @dev admin set trusted forwarder address */
     function setTrustedForwarder(address _address) external;
 
+    //TODO: ADD_COMMENTS
+    function setLastSoldRegularTree(uint256 _lastSoldRegularTree) external;
+
     /** @dev admin set treeFactory contract address
      * @param _address treeFactory contract address
      */

@@ -84,6 +84,19 @@ contract RegularSell is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
+    //TODO: ADD_COMMENTS
+    function setLastSoldRegularTree(uint256 _lastSoldRegularTree)
+        external
+        onlyDataManager
+    {
+        require(
+            _lastSoldRegularTree >= lastSoldRegularTree,
+            "Input must be gt last tree sold"
+        );
+
+        lastSoldRegularTree = _lastSoldRegularTree;
+    }
+
     /** @dev admin set treeFactory contract address
      * @param _address treeFactory contract address
      */

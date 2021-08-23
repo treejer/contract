@@ -94,4 +94,7 @@ interface IRegularSell {
         address buyer,
         uint256 amount
     );
+
+    //TODO: ADD_COMMENT
+    event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
 }

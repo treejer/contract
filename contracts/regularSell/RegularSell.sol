@@ -31,6 +31,7 @@ contract RegularSell is Initializable, RelayRecipient {
         address buyer,
         uint256 amount
     );
+    event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -95,6 +96,8 @@ contract RegularSell is Initializable, RelayRecipient {
         );
 
         lastSoldRegularTree = _lastSoldRegularTree;
+
+        emit LastSoldRegularTreeUpdated(_lastSoldRegularTree);
     }
 
     /** @dev admin set treeFactory contract address

@@ -249,8 +249,12 @@ contract("regularSell", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-    await regularSellInstance.setLastSoldRegularTree(15000, {
+    let tx = await regularSellInstance.setLastSoldRegularTree(15000, {
       from: userAccount1,
+    });
+
+    truffleAssert.eventEmitted(tx, "LastSoldRegularTreeUpdated", (ev) => {
+      return Number(ev.lastSoldRegularTree) == 15000;
     });
 
     let lastRegularSellTreeAfter =
@@ -270,8 +274,12 @@ contract("regularSell", (accounts) => {
         RegularSellErrors.INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT
       );
 
-    await regularSellInstance.setLastSoldRegularTree(15001, {
+    let tx2 = await regularSellInstance.setLastSoldRegularTree(15001, {
       from: userAccount1,
+    });
+
+    truffleAssert.eventEmitted(tx2, "LastSoldRegularTreeUpdated", (ev) => {
+      return Number(ev.lastSoldRegularTree) == 15001;
     });
 
     let lastRegularSellTreeAfter2 =
@@ -284,7 +292,7 @@ contract("regularSell", (accounts) => {
     );
   });
 
-  it("Should request trees successfully", async () => {
+  it("Should lastSoldRegularTree work successfully", async () => {
     let funder = userAccount3;
 
     //mint dai for funder
@@ -413,8 +421,12 @@ contract("regularSell", (accounts) => {
 
     Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
-    await regularSellInstance.setLastSoldRegularTree(13333, {
+    let tx = await regularSellInstance.setLastSoldRegularTree(13333, {
       from: userAccount1,
+    });
+
+    truffleAssert.eventEmitted(tx, "LastSoldRegularTreeUpdated", (ev) => {
+      return Number(ev.lastSoldRegularTree) == 13333;
     });
 
     await regularSellInstance.requestTrees(7, {

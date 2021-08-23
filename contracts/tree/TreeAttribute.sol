@@ -6,8 +6,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract TreeAttribute is Initializable {
+contract TreeAttribute is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
     bool public isTreeAttribute;
     IAccessRestriction public accessRestriction;
@@ -37,17 +38,23 @@ contract TreeAttribute is Initializable {
     event TreeAttributesNotGenerated(uint256 treeId);
 
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
+        accessRestriction.ifAdmin(_msgSender());
+        _;
+    }
+
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
         _;
     }
 
     modifier onlyDataManagerOrTreejerContract() {
-        accessRestriction.ifDataManagerOrTreejerContract(msg.sender);
+        accessRestriction.ifDataManagerOrTreejerContract(_msgSender());
         _;
     }
 
-    modifier onlyDataManagerOrTreejerContract() {
-        accessRestriction.ifDataManagerOrTreejerContract(msg.sender);
+    modifier onlyBuyerRank() {
+        accessRestriction.ifBuyerRank(_msgSender());
         _;
     }
 
@@ -66,6 +73,18 @@ contract TreeAttribute is Initializable {
         require(candidateContract.isAccessRestriction());
         isTreeAttribute = true;
         accessRestriction = candidateContract;
+    }
+
+    /**
+     * @dev set trusted forwarder address
+     * @param _address set to {trustedForwarder}
+     */
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
+        trustedForwarder = _address;
     }
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -194,7 +213,7 @@ contract TreeAttribute is Initializable {
         );
         (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
             treeId,
-            msg.sender
+            _msgSender()
         );
 
         require(ms, "no need to tree attributes");
@@ -204,13 +223,13 @@ contract TreeAttribute is Initializable {
         for (uint256 j = 0; j < 10000; j++) {
             uint256 rand = uint256(
                 keccak256(
-                    abi.encodePacked(msg.sender, randTree, msg.sig, treeId, j)
+                    abi.encodePacked(_msgSender(), randTree, msg.sig, treeId, j)
                 )
             );
 
             for (uint256 i = 0; i < 9; i++) {
                 flag = _calcRandAttributes(
-                    msg.sender,
+                    _msgSender(),
                     treeId,
                     _getFirstN(rand, 28)
                 );
@@ -239,7 +258,7 @@ contract TreeAttribute is Initializable {
         uint256 walletSpent,
         uint64 treesOwned,
         uint64 walletSpentCount
-    ) external onlyAdmin {
+    ) external onlyBuyerRank {
         uint256 points = 0;
         //each 0.004 ether spent in treejer has 10 points
         points += (treejerSpent / (400000 gwei));

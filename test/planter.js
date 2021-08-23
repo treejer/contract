@@ -24,7 +24,7 @@ contract("Planter", (accounts) => {
 
   let arInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -33,7 +33,7 @@ contract("Planter", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const dataManager = accounts[9];
+  const userAccount8 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 

@@ -40,7 +40,7 @@ contract("CommunityGifts", (accounts) => {
   let financialModelInstance;
   let daiInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -160,6 +160,8 @@ contract("CommunityGifts", (accounts) => {
       communityGiftsInstance.address,
       deployerAccount
     );
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -317,7 +319,7 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -425,7 +427,7 @@ contract("CommunityGifts", (accounts) => {
           from: userAccount1,
         }
       )
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     ////------------------ deploy tree auction
 
@@ -442,7 +444,7 @@ contract("CommunityGifts", (accounts) => {
     //----------------- add tree and create auction for it
 
     await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.setFinancialModelAddress(
@@ -475,12 +477,12 @@ contract("CommunityGifts", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 150, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.createAuction(
@@ -489,7 +491,7 @@ contract("CommunityGifts", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //----------------- fail setGiftsRange because a tree is in auction
@@ -503,7 +505,7 @@ contract("CommunityGifts", (accounts) => {
         Number(expireDate),
         adminWallet,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
@@ -535,7 +537,7 @@ contract("CommunityGifts", (accounts) => {
         Number(expireDate),
         zeroAddress,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(erc20ErrorMsg.ZERO_ADDRESS);
@@ -567,7 +569,7 @@ contract("CommunityGifts", (accounts) => {
         Number(expireDate),
         adminWallet,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(CommunityGiftErrorMsg.INVALID_RANGE);
@@ -599,7 +601,7 @@ contract("CommunityGifts", (accounts) => {
         Number(expireDate),
         adminWallet,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(erc20ErrorMsg.INSUFFICIENT_BALANCE);
@@ -637,7 +639,7 @@ contract("CommunityGifts", (accounts) => {
         Number(expireDate),
         adminWallet,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(erc20ErrorMsg.APPROVAL_ISSUE);
@@ -648,7 +650,7 @@ contract("CommunityGifts", (accounts) => {
     const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
 
     await communityGiftsInstance.setExpireDate(Number(expireDate), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let settedExpireDate = await communityGiftsInstance.expireDate.call();
@@ -663,14 +665,14 @@ contract("CommunityGifts", (accounts) => {
   it("should fail to set expire date", async () => {
     await communityGiftsInstance
       .setExpireDate(100, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("should fail to set expire date invalid time", async () => {
     const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
 
     await communityGiftsInstance.setExpireDate(Number(expireDate), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await Common.travelTime(TimeEnumes.days, 20);
@@ -679,7 +681,7 @@ contract("CommunityGifts", (accounts) => {
 
     await communityGiftsInstance
       .setExpireDate(Number(expireDate2), {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_UPDATE_EXPIRE_DATE);
   });
@@ -694,7 +696,7 @@ contract("CommunityGifts", (accounts) => {
       planterFund,
       referralFund,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -724,7 +726,7 @@ contract("CommunityGifts", (accounts) => {
   it("should fail to set price", async () => {
     await communityGiftsInstance
       .setPrice(100, 200, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   ////////////////////// -------------------------------- update giftees ----------------------------------------
@@ -756,7 +758,7 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -775,7 +777,7 @@ contract("CommunityGifts", (accounts) => {
       giftee1,
       symbol1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -843,7 +845,7 @@ contract("CommunityGifts", (accounts) => {
       giftee1,
       symbol2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -925,7 +927,7 @@ contract("CommunityGifts", (accounts) => {
       giftee2,
       symbol1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1009,7 +1011,7 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1023,11 +1025,11 @@ contract("CommunityGifts", (accounts) => {
     /////// ---------------should fail admin access
     await communityGiftsInstance
       .updateGiftees(giftee1, symbol1, { from: userAccount3 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     ///////////////// ------------ should fail becuse giftee claimed before
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.claimTree({
@@ -1035,13 +1037,13 @@ contract("CommunityGifts", (accounts) => {
     });
 
     await communityGiftsInstance
-      .updateGiftees(giftee1, symbol2, { from: deployerAccount })
+      .updateGiftees(giftee1, symbol2, { from: dataManager })
       .should.be.rejectedWith(CommunityGiftErrorMsg.CLAIMED_BEFORE);
 
     /////////------------------------- should fail because of duplicate symbol
 
     await communityGiftsInstance
-      .updateGiftees(giftee2, symbol1, { from: deployerAccount })
+      .updateGiftees(giftee2, symbol1, { from: dataManager })
       .should.be.rejectedWith(TreeAttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES);
   });
 
@@ -1072,7 +1074,7 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1083,13 +1085,13 @@ contract("CommunityGifts", (accounts) => {
     for (i = 0; i < 10; i++) {
       let address = await Common.getNewAccountPublicKey();
       await communityGiftsInstance.updateGiftees(address, i, {
-        from: deployerAccount,
+        from: dataManager,
       });
     }
 
     await communityGiftsInstance
       .updateGiftees(userAccount1, symbol, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.MAX_GIFT_AMOUNT_REACHED);
   });
@@ -1099,7 +1101,7 @@ contract("CommunityGifts", (accounts) => {
 
     await communityGiftsInstance
       .updateGiftees(userAccount1, symbol, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.MAX_GIFT_AMOUNT_REACHED);
   });
@@ -1136,12 +1138,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let toClaimBefore = await communityGiftsInstance.toClaim.call();
@@ -1152,7 +1154,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     const treeId = startTree; //id of tree to be claimed
@@ -1311,16 +1313,16 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.updateGiftees(giftee2, symbol2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let toClaimBefore = await communityGiftsInstance.toClaim.call();
@@ -1334,7 +1336,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //////// ----------------- check plnter fund before
@@ -1620,12 +1622,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////--------------time travel
@@ -1670,12 +1672,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////--------------claim with error
@@ -1716,12 +1718,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////--------------claim tree by giftee1 for first time and it's not problem
@@ -1770,12 +1772,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let toClaimBefore = await communityGiftsInstance.toClaim.call();
@@ -1790,7 +1792,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     const treeId = startTree; //tree to be claimed
@@ -1830,7 +1832,7 @@ contract("CommunityGifts", (accounts) => {
       userAccount3,
       1234554321,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1937,16 +1939,16 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.updateGiftees(giftee2, symbol2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let toClaimBefore = await communityGiftsInstance.toClaim.call();
@@ -1961,7 +1963,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     const treeId1 = startTree;
@@ -2035,7 +2037,7 @@ contract("CommunityGifts", (accounts) => {
       userAccount3,
       symbol1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -2089,7 +2091,7 @@ contract("CommunityGifts", (accounts) => {
       userAccount4,
       symbol2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     const toClaimAfter2 = await communityGiftsInstance.toClaim.call();
@@ -2240,12 +2242,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////--------------time travel
@@ -2258,7 +2260,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //////////--------------call transferTree by user
@@ -2266,7 +2268,7 @@ contract("CommunityGifts", (accounts) => {
       .transferTree(userAccount3, 1234554321, {
         from: userAccount3,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("Should transferTree reject (expireDate not reach)", async () => {
@@ -2299,12 +2301,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////// ----------- prepare for transfer
@@ -2314,13 +2316,13 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //////////--------------expire time does not reach
     await communityGiftsInstance
       .transferTree(userAccount3, 1234554321, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.EXPIREDATE_NOT_REACHED);
   });
@@ -2353,7 +2355,7 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -2362,7 +2364,7 @@ contract("CommunityGifts", (accounts) => {
 
     //////////--------------call transferTree by user
     await communityGiftsInstance.transferTree(userAccount3, 1234554321, {
-      from: deployerAccount,
+      from: dataManager,
     });
   });
 
@@ -2396,12 +2398,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////// ----------- prepare for transfer
@@ -2411,7 +2413,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //////////--------------time travel
@@ -2420,7 +2422,7 @@ contract("CommunityGifts", (accounts) => {
     //////////--------------call transferTree by admin(owner=>userAccount3)
 
     await communityGiftsInstance.transferTree(userAccount3, 1234554321, {
-      from: deployerAccount,
+      from: dataManager,
     });
   });
 
@@ -2457,16 +2459,16 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.updateGiftees(giftee2, symbol2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////// ----------- prepare for transfer
@@ -2476,7 +2478,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await communityGiftsInstance.claimTree({
@@ -2493,14 +2495,14 @@ contract("CommunityGifts", (accounts) => {
     let now = new Date().getTime();
 
     await communityGiftsInstance
-      .setExpireDate(now, { from: deployerAccount })
+      .setExpireDate(now, { from: dataManager })
       .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_UPDATE_EXPIRE_DATE);
 
     //////////--------------call transferTree by admin(owner=>userAccount3)
 
     await communityGiftsInstance
       .transferTree(userAccount3, 322, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.TREE_IS_NOT_FOR_GIFT);
   });
@@ -2538,16 +2540,16 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.updateGiftees(giftee2, symbol2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////// ----------- prepare for transfer
@@ -2557,7 +2559,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await communityGiftsInstance.claimTree({
@@ -2568,14 +2570,14 @@ contract("CommunityGifts", (accounts) => {
     await Common.travelTime(TimeEnumes.days, 31);
 
     await communityGiftsInstance.transferTree(giftee2, symbol2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////--------------call transferTree by admin(owner=>userAccount3)
 
     await communityGiftsInstance
       .transferTree(userAccount3, 322, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(CommunityGiftErrorMsg.TREE_IS_NOT_FOR_GIFT);
   });
@@ -2610,12 +2612,12 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee1, symbol1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////// ----------- prepare for transfer
@@ -2625,7 +2627,7 @@ contract("CommunityGifts", (accounts) => {
     await communityGiftsInstance.setPrice(
       planterShareOfTree,
       referralShareOfTree,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await communityGiftsInstance.claimTree({
@@ -2639,7 +2641,7 @@ contract("CommunityGifts", (accounts) => {
 
     await communityGiftsInstance
       .transferTree(userAccount3, 1234554321, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
   });
@@ -2722,18 +2724,18 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       adminWallet,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await communityGiftsInstance.updateGiftees(giftee, symbol, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await communityGiftsInstance.setPrice(
       web3.utils.toWei("4.9"), //planter share
       web3.utils.toWei("2.1"), //referral share
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(giftee);

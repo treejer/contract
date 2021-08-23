@@ -9,6 +9,7 @@ const DEFAULT_ADMIN_ROLE =
 
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
+const BUYER_RANK_ROLE = web3.utils.soliditySha3("BUYER_RANK_ROLE");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 
@@ -38,6 +39,10 @@ Common.addAdmin = async (instance, account, adminAccount) => {
 
 Common.addDataManager = async (instance, account, adminAccount) => {
   await instance.grantRole(DATA_MANAGER_ROLE, account, { from: adminAccount });
+};
+
+Common.addBuyerRank = async (instance, account, adminAccount) => {
+  await instance.grantRole(BUYER_RANK_ROLE, account, { from: adminAccount });
 };
 
 Common.approveAndTransfer = async (
@@ -80,7 +85,8 @@ Common.successPlant = async (
   planterList,
   planterAddress,
   deployerAccount,
-  planterInstance
+  planterInstance,
+  dataManager
 ) => {
   await Common.addTreejerContractRole(
     arInstance,
@@ -103,11 +109,11 @@ Common.successPlant = async (
   });
 
   await treeFactoryInstance.addTree(treeId, ipfsHash, {
-    from: deployerAccount,
+    from: dataManager,
   });
 
   await treeFactoryInstance.assignTreeToPlanter(treeId, planterAddress, {
-    from: deployerAccount,
+    from: dataManager,
   });
 
   await treeFactoryInstance.plantTree(
@@ -120,7 +126,7 @@ Common.successPlant = async (
     }
   );
   await treeFactoryInstance.verifyPlant(treeId, true, {
-    from: deployerAccount,
+    from: dataManager,
   });
 };
 Common.joinSimplePlanter = async (
@@ -233,7 +239,8 @@ Common.successOrganizationPlanterJoin = async (
   instance,
   organizationAddress,
   refferedBy,
-  adminAccount
+  adminAccount,
+  dataManager
 ) => {
   await Common.addPlanter(arInstance, organizationAddress, adminAccount);
 
@@ -253,7 +260,7 @@ Common.successOrganizationPlanterJoin = async (
     countryCode,
     capcity,
     refferedBy,
-    { from: adminAccount }
+    { from: dataManager }
   );
 };
 
@@ -270,7 +277,8 @@ Common.successFundTree = async (
   fundsPercent,
   fundAmount,
   tokenOwner,
-  treeFactoryInstance
+  treeFactoryInstance,
+  dataManager
 ) => {
   await Common.addTreejerContractRole(
     arInstance,
@@ -288,11 +296,11 @@ Common.successFundTree = async (
     fundsPercent.reserveFund1,
     fundsPercent.reserveFund2,
     {
-      from: deployerAccount,
+      from: dataManager,
     }
   );
   await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-    from: deployerAccount,
+    from: dataManager,
   });
 
   await Common.addTreejerContractRole(
@@ -408,7 +416,8 @@ Common.regularPlantTreeSuccessOrganization = async (
   countryCode,
   planter,
   organizationAdmin,
-  deployerAccount
+  deployerAccount,
+  dataManager
 ) => {
   await Common.addPlanter(arInstance, planter, deployerAccount);
   await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
@@ -416,7 +425,7 @@ Common.regularPlantTreeSuccessOrganization = async (
     planterInstance,
     organizationAdmin,
     zeroAddress,
-    deployerAccount
+    dataManager
   );
   await Common.joinSimplePlanter(
     planterInstance,

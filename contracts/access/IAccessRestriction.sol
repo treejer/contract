@@ -62,6 +62,13 @@ interface IAccessRestriction {
     function isAdmin(address _address) external view returns (bool);
 
     /**
+     * @dev check if given address has data manager role
+     * @param _address input address
+     * @return if given address has data manager role
+     */
+    function isDataManager(address _address) external view returns (bool);
+
+    /**
      * @dev check if given address is Treejer contract
      * @param _address input address
      */

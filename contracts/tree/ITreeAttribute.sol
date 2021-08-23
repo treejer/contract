@@ -34,6 +34,9 @@ interface ITreeAttribute {
         view
         returns (uint8);
 
+    /** @dev set {_address} to trusted forwarder */
+    function setTrustedForwarder(address _address) external;
+
     function setTreeFactoryAddress(address _address) external;
 
     function reserveTreeAttributes(uint32 generatedCode) external;
@@ -43,9 +46,7 @@ interface ITreeAttribute {
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external;
 
-    function createTreeAttributes(uint256 treeId)
-        external
-        returns (bool);
+    function createTreeAttributes(uint256 treeId) external returns (bool);
 
     function setBuyerRank(
         address buyer,

@@ -12,7 +12,7 @@ contract("FinancialModel", (accounts) => {
   let arInstance;
   let financialModelInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -40,7 +40,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
   afterEach(async () => {});
 
@@ -65,7 +65,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -129,19 +129,19 @@ contract("FinancialModel", (accounts) => {
       .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("addFundDistributionModel should be reject sum must be 10000", async () => {
     await financialModelInstance
       .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
 
     await financialModelInstance
       .addFundDistributionModel(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
   });
@@ -158,7 +158,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -172,7 +172,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -186,7 +186,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -200,7 +200,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -222,17 +222,17 @@ contract("FinancialModel", (accounts) => {
 
     const assignTx1 =
       await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-        from: deployerAccount,
+        from: dataManager,
       });
 
     const assignTx2 =
       await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
-        from: deployerAccount,
+        from: dataManager,
       });
 
     const assignTx3 =
       await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
-        from: deployerAccount,
+        from: dataManager,
       });
 
     const assignTx4 =
@@ -241,7 +241,7 @@ contract("FinancialModel", (accounts) => {
         1000000,
         3,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       );
 
@@ -325,7 +325,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -350,7 +350,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -364,7 +364,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -378,7 +378,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -392,7 +392,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -401,7 +401,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -410,12 +410,12 @@ contract("FinancialModel", (accounts) => {
       1000000,
       3,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let expected1 = [
@@ -449,11 +449,11 @@ contract("FinancialModel", (accounts) => {
     }
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let resultMaxAssignedIndex1 =
@@ -515,7 +515,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -529,7 +529,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -543,7 +543,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -557,20 +557,20 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let expected = [
@@ -624,7 +624,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -638,7 +638,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -652,24 +652,24 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 2, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 5, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(8, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(3, 9, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let expected = [
@@ -723,7 +723,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -731,13 +731,13 @@ contract("FinancialModel", (accounts) => {
       .assignTreeFundDistributionModel(0, 0, 0, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   it("assignTreeFundDistributionModel should be reject Distribution model not found", async () => {
     await financialModelInstance
       .assignTreeFundDistributionModel(0, 0, 0, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(
         FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
@@ -758,12 +758,12 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(4, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
     let hasModel1 = await financialModelInstance.distributionModelExistance(1);
 
@@ -791,7 +791,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await financialModelInstance
@@ -799,7 +799,7 @@ contract("FinancialModel", (accounts) => {
       .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
 
     await financialModelInstance.assignTreeFundDistributionModel(3, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance
@@ -828,12 +828,12 @@ contract("FinancialModel", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let dmModel = await financialModelInstance.findTreeDistribution.call(
@@ -975,7 +975,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_1,
       reserveFund2_1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -989,16 +989,16 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_2,
       reserveFund2_2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 20, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let dmModel2 = await financialModelInstance.findTreeDistribution.call(
@@ -1171,7 +1171,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_1,
       reserveFund2_1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1185,7 +1185,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_2,
       reserveFund2_2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1199,7 +1199,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_3,
       reserveFund2_3,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1213,7 +1213,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_4,
       reserveFund2_4,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1222,20 +1222,20 @@ contract("FinancialModel", (accounts) => {
       1000000,
       3,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //check treeId 0 model is 0
@@ -1778,7 +1778,7 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_5,
       reserveFund2_5,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1787,7 +1787,7 @@ contract("FinancialModel", (accounts) => {
       10000,
       4,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -2069,12 +2069,12 @@ contract("FinancialModel", (accounts) => {
       reserveFund1_6,
       reserveFund2_6,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(4, 10, 5, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //check treeId 4 model is 6
@@ -2303,7 +2303,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -2317,7 +2317,7 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -2331,12 +2331,12 @@ contract("FinancialModel", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let modelId = await financialModelInstance.getFindDistributionModelId(0);
@@ -2346,7 +2346,7 @@ contract("FinancialModel", (accounts) => {
     ///////////////
 
     await financialModelInstance.assignTreeFundDistributionModel(1, 10, 2, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let modelId2 = await financialModelInstance.getFindDistributionModelId(2);
@@ -2356,7 +2356,7 @@ contract("FinancialModel", (accounts) => {
     ///////////////
 
     await financialModelInstance.assignTreeFundDistributionModel(10, 100, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let modelId3 = await financialModelInstance.getFindDistributionModelId(15);

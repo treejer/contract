@@ -51,7 +51,7 @@ contract("TreeAuction", (accounts) => {
   let daiInstance;
   let testUniswapInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -223,7 +223,7 @@ contract("TreeAuction", (accounts) => {
       deployerAccount
     );
 
-    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -344,7 +344,7 @@ contract("TreeAuction", (accounts) => {
     const treeId2 = 2;
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.setFinancialModelAddress(
@@ -364,14 +364,13 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
-    await Common.addDataManager(arInstance, userAccount8, deployerAccount);
 
     await treeAuctionInstance.createAuction(
       treeId,
@@ -379,14 +378,14 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: userAccount8 }
+      { from: dataManager }
     );
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     await treeFactoryInstance.addTree(treeId2, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
     //only data manager can call this method so it should be rejected
     await treeAuctionInstance
@@ -408,7 +407,7 @@ contract("TreeAuction", (accounts) => {
     let treeId = 1;
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.setFinancialModelAddress(
@@ -428,12 +427,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.createAuction(
@@ -442,7 +441,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await treeAuctionInstance
@@ -452,7 +451,7 @@ contract("TreeAuction", (accounts) => {
         Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
-        { from: deployerAccount }
+        { from: dataManager }
       )
       .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
   });
@@ -471,7 +470,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance
@@ -481,7 +480,7 @@ contract("TreeAuction", (accounts) => {
         Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
-        { from: deployerAccount }
+        { from: dataManager }
       )
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
@@ -495,7 +494,7 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -506,7 +505,7 @@ contract("TreeAuction", (accounts) => {
         Number(endTime),
         web3.utils.toWei("1"),
         web3.utils.toWei("0.1"),
-        { from: deployerAccount }
+        { from: dataManager }
       )
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
   });
@@ -520,7 +519,7 @@ contract("TreeAuction", (accounts) => {
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.setFinancialModelAddress(
@@ -540,12 +539,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     const eventTx = await treeAuctionInstance.createAuction(
@@ -554,7 +553,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       initialValue,
       bidInterval,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     let result = await treeAuctionInstance.auctions.call(0);
@@ -601,7 +600,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////// --------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
     //////////////////// ----------------- handle dm model
 
@@ -615,12 +614,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////---------------------- create auction
@@ -631,7 +630,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     const resultBefore = await treeAuctionInstance.auctions.call(0);
@@ -713,7 +712,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////////////// ------------------- handle dm model
@@ -728,12 +727,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////////////// -------------------- handle create auction
@@ -743,7 +742,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -793,7 +792,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////////////// ------------------- handle dm model
@@ -808,12 +807,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////////////// -------------------- handle create auction
@@ -824,7 +823,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -870,7 +869,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -885,12 +884,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -901,7 +900,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
     let resultBefore = await treeAuctionInstance.auctions.call(0);
 
@@ -957,7 +956,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -972,12 +971,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -988,7 +987,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1041,7 +1040,7 @@ contract("TreeAuction", (accounts) => {
     await /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1056,12 +1055,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1072,7 +1071,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1124,7 +1123,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1139,12 +1138,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1155,7 +1154,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1206,7 +1205,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1221,12 +1220,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1237,7 +1236,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1293,7 +1292,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1308,12 +1307,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1324,7 +1323,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1398,7 +1397,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1413,12 +1412,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1429,7 +1428,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1497,7 +1496,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1512,12 +1511,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1528,7 +1527,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1596,7 +1595,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1611,12 +1610,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1627,7 +1626,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -1731,7 +1730,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1746,12 +1745,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1762,7 +1761,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1", "Ether"),
       web3.utils.toWei(".5", "Ether"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     //////////////////  --------------charge bidder account
@@ -1911,7 +1910,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -1926,12 +1925,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -1942,7 +1941,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.5"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -2004,7 +2003,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -2019,12 +2018,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -2035,7 +2034,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.5"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -2089,7 +2088,7 @@ contract("TreeAuction", (accounts) => {
 
     const treeId = 1;
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await financialModelInstance.addFundDistributionModel(
@@ -2102,12 +2101,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance
@@ -2117,7 +2116,7 @@ contract("TreeAuction", (accounts) => {
         Number(endTime),
         web3.utils.toWei("1", "Ether"),
         web3.utils.toWei(".5", "Ether"),
-        { from: deployerAccount }
+        { from: dataManager }
       )
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
   });
@@ -2158,7 +2157,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -2173,12 +2172,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -2189,7 +2188,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.5"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -2244,7 +2243,7 @@ contract("TreeAuction", (accounts) => {
       planterInstance,
       userAccount8,
       zeroAddress,
-      deployerAccount
+      dataManager
     );
 
     await Common.joinSimplePlanter(
@@ -2294,7 +2293,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////--------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////////// ----------------- handle dm model
@@ -2309,12 +2308,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -2326,7 +2325,7 @@ contract("TreeAuction", (accounts) => {
       initialValue,
       bidInterval,
 
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -2557,7 +2556,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount7, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await Common.addTreejerContractRole(
@@ -2657,13 +2656,14 @@ contract("TreeAuction", (accounts) => {
       [userAccount2],
       userAccount2,
       deployerAccount,
-      planterInstance
+      planterInstance,
+      dataManager
     );
     /////////////////////////////////// fail to create auction and dm model
 
     await financialModelInstance
       .addFundDistributionModel(6500, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
@@ -2675,7 +2675,7 @@ contract("TreeAuction", (accounts) => {
         initialValue,
         bidInterval,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
@@ -2692,12 +2692,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -2709,7 +2709,7 @@ contract("TreeAuction", (accounts) => {
       initialValue,
       bidInterval,
 
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -2738,7 +2738,7 @@ contract("TreeAuction", (accounts) => {
         initialValue,
         bidInterval,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
@@ -2777,7 +2777,7 @@ contract("TreeAuction", (accounts) => {
       initialValue,
       bidInterval,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -3068,7 +3068,8 @@ contract("TreeAuction", (accounts) => {
       [userAccount2],
       userAccount2,
       deployerAccount,
-      planterInstance
+      planterInstance,
+      dataManager
     );
 
     ///////////////////// ---------------- fail to add dm model
@@ -3077,7 +3078,7 @@ contract("TreeAuction", (accounts) => {
       .addFundDistributionModel(3500, 1000, 1000, 1500, 1000, 2000, 0, 0, {
         from: userAccount5,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     //////////////////// ----------------- handle dm model
 
@@ -3091,12 +3092,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -3108,7 +3109,7 @@ contract("TreeAuction", (accounts) => {
       initialValue,
       bidInterval,
 
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -3151,7 +3152,7 @@ contract("TreeAuction", (accounts) => {
     //////////////// ------------- fail to create auction
     await treeAuctionInstance
       .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
 
@@ -3318,7 +3319,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await treeFactoryInstance.verifyUpdate(treeId, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     const treeDataAfterVerifyUpdate1 = await treeFactoryInstance.treeData.call(
@@ -3432,7 +3433,7 @@ contract("TreeAuction", (accounts) => {
 
     await treeAuctionInstance
       .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
 
@@ -3540,7 +3541,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await treeFactoryInstance.verifyUpdate(treeId, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let planterBalance2 = await planterFundsInstnce.balances.call(userAccount2);
@@ -3602,7 +3603,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     await treeFactoryInstance.verifyUpdate(treeId, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let planterBalance4 = await planterFundsInstnce.balances.call(userAccount2);
@@ -3641,9 +3642,9 @@ contract("TreeAuction", (accounts) => {
     let totalFunds2 = await wethFundsInstance.totalFunds();
 
     let treejerDevelopBalance = totalFunds2.treejerDevelop;
-    let ownerAccountBalanceBefore = await wethInstance.balanceOf(ownerAccount);
+    let ownerAccountBalanceBefore = await wethInstance.balanceOf(userAccount6);
 
-    await wethFundsInstance.setTreejerDevelopAddress(ownerAccount, {
+    await wethFundsInstance.setTreejerDevelopAddress(userAccount6, {
       from: deployerAccount,
     });
 
@@ -3655,7 +3656,7 @@ contract("TreeAuction", (accounts) => {
       }
     );
 
-    let ownerAccountBalanceAfter = await wethInstance.balanceOf(ownerAccount);
+    let ownerAccountBalanceAfter = await wethInstance.balanceOf(userAccount6);
 
     assert.equal(
       Number(ownerAccountBalanceAfter),
@@ -3744,11 +3745,11 @@ contract("TreeAuction", (accounts) => {
       .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     await treeAuctionInstance
       .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
@@ -3758,7 +3759,7 @@ contract("TreeAuction", (accounts) => {
       .addFundDistributionModel(5000, 1000, 1000, 1000, 1000, 1000, 0, 0, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     await financialModelInstance
       .addFundDistributionModel(
@@ -3770,7 +3771,7 @@ contract("TreeAuction", (accounts) => {
         1000,
         1000,
         1000,
-        { from: deployerAccount }
+        { from: dataManager }
       )
       .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
@@ -3785,11 +3786,11 @@ contract("TreeAuction", (accounts) => {
       1000,
       0,
       0,
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////// ----------- fail to create auction <<invalid-tree>>
@@ -3801,14 +3802,14 @@ contract("TreeAuction", (accounts) => {
         initialPrice,
         bidInterval,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       )
       .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
 
     /////////------------------ add tree
     await treeFactoryInstance.addTree(treeId1, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------- create auction
@@ -3820,7 +3821,7 @@ contract("TreeAuction", (accounts) => {
       initialPrice,
       bidInterval,
 
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     ////////////////// charge bidder account
@@ -4093,13 +4094,13 @@ contract("TreeAuction", (accounts) => {
     );
 
     await treeFactoryInstance.assignTreeToPlanter(treeId1, userAccount2, {
-      from: deployerAccount,
+      from: dataManager,
     });
     await treeFactoryInstance.plantTree(treeId1, ipfsHash, 1, 1, {
       from: userAccount2,
     });
     await treeFactoryInstance.verifyPlant(treeId1, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
     ////////////// ------------------- update tree
     await treeFactoryInstance
@@ -4116,7 +4117,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////// --------------- verify update
 
     await treeFactoryInstance.verifyUpdate(treeId1, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////////// ---------------------- check total funds value
@@ -4272,7 +4273,7 @@ contract("TreeAuction", (accounts) => {
     /////////////////// --------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
     //////////////////// ----------------- handle dm model
 
@@ -4286,12 +4287,12 @@ contract("TreeAuction", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////////////---------------------- create auction
@@ -4302,7 +4303,7 @@ contract("TreeAuction", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await treeAuctionInstance.auctions.call(0);

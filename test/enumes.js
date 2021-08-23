@@ -16,10 +16,11 @@ const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
   CHECK_TREEJER_CONTTRACT: "caller is not treejer contract",
-  CHECK_ADMIN_OR_TREEJER_CONTRACT: "not Admin or Treejer Contract",
+  CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT:
+    "not Data Manager or Treejer Contract",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_DATA_MANAGER: "caller is not data manager",
-
+  CHECK_BUYER_RANK: "caller is not buyer rank",
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",

@@ -16,7 +16,7 @@ const Common = require("./common");
 
 contract("DaiFunds", (accounts) => {
   const deployerAccount = accounts[0];
-  const ownerAccount = accounts[1];
+  const dataManager = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
   const userAccount3 = accounts[4];
@@ -74,6 +74,8 @@ contract("DaiFunds", (accounts) => {
       planterFundsInstnce.address,
       { from: deployerAccount }
     );
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
@@ -345,12 +347,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -531,7 +533,7 @@ contract("DaiFunds", (accounts) => {
       reserveFund1_1,
       reserveFund2_1,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -545,16 +547,16 @@ contract("DaiFunds", (accounts) => {
       reserveFund1_2,
       reserveFund2_2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await fModel.assignTreeFundDistributionModel(11, 20, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -804,12 +806,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -908,11 +910,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -1129,12 +1131,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -1258,12 +1260,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -1362,11 +1364,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -1583,12 +1585,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -1712,12 +1714,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -1817,11 +1819,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -2032,12 +2034,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -2161,12 +2163,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -2266,11 +2268,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -2487,12 +2489,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -2617,12 +2619,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -2722,11 +2724,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -2942,12 +2944,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -3072,12 +3074,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer dai for daiFundsInstance-------------------
@@ -3177,11 +3179,11 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------
@@ -3398,12 +3400,12 @@ contract("DaiFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer dai for daiFundsInstance-------------------

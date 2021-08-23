@@ -290,7 +290,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         );
 
         require(
-            accessRestriction.isAdmin(_msgSender()) ||
+            accessRestriction.isDataManager(_msgSender()) ||
                 planter.canVerify(tempGenTree.planterId, _msgSender()),
             "invalid access to verify"
         );
@@ -371,7 +371,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(treeData[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
-            accessRestriction.isAdmin(_msgSender()) ||
+            accessRestriction.isDataManager(_msgSender()) ||
                 planter.canVerify(treeData[_treeId].planterId, _msgSender()),
             "invalid access to verify"
         );
@@ -563,7 +563,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         );
 
         require(
-            accessRestriction.isAdmin(_msgSender()) ||
+            accessRestriction.isDataManager(_msgSender()) ||
                 planter.canVerify(regularTree.planterAddress, _msgSender()),
             "invalid access to verify"
         );

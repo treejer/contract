@@ -22,7 +22,7 @@ const Common = require("./common");
 
 contract("WethFunds", (accounts) => {
   const deployerAccount = accounts[0];
-  const ownerAccount = accounts[1];
+  const dataManager = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
   const userAccount3 = accounts[4];
@@ -120,6 +120,8 @@ contract("WethFunds", (accounts) => {
     await wethFunds.setPlanterFundContractAddress(planterFundsInstnce.address, {
       from: deployerAccount,
     });
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
@@ -428,12 +430,12 @@ contract("WethFunds", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -594,7 +596,7 @@ contract("WethFunds", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -608,16 +610,16 @@ contract("WethFunds", (accounts) => {
       600,
       600,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await fModel.assignTreeFundDistributionModel(1, 1, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -881,12 +883,12 @@ contract("WethFunds", (accounts) => {
       600,
       600,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 0, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await wethFunds
@@ -939,12 +941,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -1044,11 +1046,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -1311,12 +1313,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -1440,12 +1442,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -1545,11 +1547,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -1766,12 +1768,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -1895,12 +1897,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -2000,11 +2002,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -2215,12 +2217,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -2344,12 +2346,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -2449,11 +2451,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -2670,12 +2672,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -2799,12 +2801,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -2904,11 +2906,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -3125,12 +3127,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -3254,12 +3256,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ////---------------transfer weth for wethFunds-------------------
@@ -3359,11 +3361,11 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------
@@ -3580,12 +3582,12 @@ contract("WethFunds", (accounts) => {
       reserveFund1,
       reserveFund2,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(0, 10, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     //////////---------------transfer weth for wethFunds-------------------

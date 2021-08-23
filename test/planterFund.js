@@ -34,7 +34,7 @@ contract("PlanterFund", (accounts) => {
   let arInstance;
   let daiInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -74,6 +74,8 @@ contract("PlanterFund", (accounts) => {
         from: deployerAccount,
       }
     );
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
   afterEach(async () => {});
 
@@ -122,7 +124,7 @@ contract("PlanterFund", (accounts) => {
     let priceBefore = await planterFundInstance.withdrawThreshold();
 
     planterFundInstance.setWithdrawThreshold(web3.utils.toWei("1"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let priceAfter = await planterFundInstance.withdrawThreshold();
@@ -444,7 +446,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await Common.successPlanterJoin(
@@ -846,7 +849,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount4,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await Common.successPlanterJoin(
@@ -1313,7 +1317,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount5,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await planterInstance.updatePlanterType(3, userAccount5, {
@@ -1782,7 +1787,7 @@ contract("PlanterFund", (accounts) => {
     const treeId = 1;
 
     planterFundInstance.setWithdrawThreshold(web3.utils.toWei(".5"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     const planterFund = Units.convert("5", "eth", "wei");
@@ -1863,7 +1868,7 @@ contract("PlanterFund", (accounts) => {
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
     planterFundInstance.setWithdrawThreshold(web3.utils.toWei(".4"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterFundInstance.withdrawPlanterBalance(web3.utils.toWei(".4"), {
@@ -1875,7 +1880,7 @@ contract("PlanterFund", (accounts) => {
     });
 
     planterFundInstance.setWithdrawThreshold(web3.utils.toWei("2"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await planterFundInstance
@@ -2185,7 +2190,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount5,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await Common.successPlanterJoin(
@@ -2308,7 +2314,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount5,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await Common.successPlanterJoin(
@@ -2406,7 +2413,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount5,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     await Common.successPlanterJoin(
@@ -2777,7 +2785,8 @@ contract("PlanterFund", (accounts) => {
       planterInstance,
       userAccount3,
       zeroAddress,
-      deployerAccount
+      deployerAccount,
+      dataManager
     );
 
     const totalPlanterFund = planterFund;

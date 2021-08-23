@@ -46,7 +46,7 @@ contract("IncrementalSell", (accounts) => {
   let endTime;
   let treeTokenInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -124,6 +124,8 @@ contract("IncrementalSell", (accounts) => {
       WETHAddress,
       { from: deployerAccount }
     );
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
     /////---------------------------addLiquidity-------------------------
 
@@ -224,11 +226,9 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
-
-    await Common.addDataManager(arInstance, deployerAccount, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -351,7 +351,7 @@ contract("IncrementalSell", (accounts) => {
   it("added incrementalSell should has positive tree Count", async () => {
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 0, 100, 400, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_TO_SELL); //must be faild because treeCount is zero
   });
@@ -359,7 +359,7 @@ contract("IncrementalSell", (accounts) => {
   it("added incrementalSell should has startTreeId>100", async () => {
     await iSellInstance
       .addTreeSells(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.OCCUPIED_TREES); //treeStartId should be >100
   });
@@ -374,19 +374,19 @@ contract("IncrementalSell", (accounts) => {
   it("added incrementalSell should has steps of price change>0", async () => {
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 0, 400, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS); // steps of price change should be >0
   });
 
   it("added incrementalSell should have equivalant fund distribution model", async () => {
     await fModel.assignTreeFundDistributionModel(105, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 400, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
   });
@@ -402,7 +402,7 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.addFundDistributionModel(
@@ -415,17 +415,17 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(110, 10000, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 1000, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
   });
@@ -460,7 +460,7 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
     await fModel.addFundDistributionModel(
@@ -473,12 +473,12 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(100, 10000, 1, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -490,7 +490,7 @@ contract("IncrementalSell", (accounts) => {
       deployerAccount
     );
 
-    await treeFactoryInstance.addTree(107, ipfsHash, { from: deployerAccount });
+    await treeFactoryInstance.addTree(107, ipfsHash, { from: dataManager });
 
     await treeAuctionInstance.createAuction(
       107,
@@ -498,11 +498,11 @@ contract("IncrementalSell", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
     await iSellInstance
       .addTreeSells(101, web3.utils.toWei("0.005"), 9900, 100, 1000, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE); // trees shouldnot be on other provides
   });
@@ -522,12 +522,12 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let eventTx = await iSellInstance.addTreeSells(
@@ -537,7 +537,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -566,7 +566,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -594,7 +594,7 @@ contract("IncrementalSell", (accounts) => {
   ///////////// --------------------------------- updateIncrementalEnd --------------------------------
   it("Should updateIncrementalEnd succesfully", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance.addTreeSells(
@@ -604,7 +604,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -664,7 +664,7 @@ contract("IncrementalSell", (accounts) => {
     );
 
     const eventTx = await iSellInstance.updateIncrementalEnd(100, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(eventTx, "IncrementalSellUpdated", (ev) => {
@@ -724,7 +724,7 @@ contract("IncrementalSell", (accounts) => {
   it("updateIncrementalEnd shoul reject because caller is not admin", async () => {
     await iSellInstance
       .updateIncrementalEnd(100, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS);
   });
@@ -751,7 +751,7 @@ contract("IncrementalSell", (accounts) => {
     });
 
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance.addTreeSells(
@@ -761,7 +761,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -775,7 +775,7 @@ contract("IncrementalSell", (accounts) => {
     );
 
     await treeFactoryInstance.addTree(217, ipfsHash, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await treeAuctionInstance.createAuction(
@@ -784,12 +784,12 @@ contract("IncrementalSell", (accounts) => {
       Number(endTime),
       web3.utils.toWei("1"),
       web3.utils.toWei("0.1"),
-      { from: deployerAccount }
+      { from: dataManager }
     );
 
     await iSellInstance
       .updateIncrementalEnd(100, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.TREE_PROVIDED_BEFORE);
   });
@@ -809,12 +809,12 @@ contract("IncrementalSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let eventTx = await iSellInstance.addTreeSells(
@@ -824,7 +824,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -854,7 +854,7 @@ contract("IncrementalSell", (accounts) => {
 
   it("low price paid for the tree without discount", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
     await iSellInstance.addTreeSells(
       101,
@@ -863,7 +863,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -885,7 +885,7 @@ contract("IncrementalSell", (accounts) => {
 
   it("check discount timeout", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance.addTreeSells(
@@ -895,7 +895,7 @@ contract("IncrementalSell", (accounts) => {
       20,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1481,7 +1481,7 @@ contract("IncrementalSell", (accounts) => {
 
   it("check discount usage", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
     await iSellInstance.addTreeSells(
       101,
@@ -1490,7 +1490,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1560,7 +1560,7 @@ contract("IncrementalSell", (accounts) => {
 
   it("low price paid for the tree with discount", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
     await iSellInstance.addTreeSells(
       101,
@@ -1569,7 +1569,7 @@ contract("IncrementalSell", (accounts) => {
       100,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1620,7 +1620,7 @@ contract("IncrementalSell", (accounts) => {
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance.addTreeSells(
@@ -1630,7 +1630,7 @@ contract("IncrementalSell", (accounts) => {
       20,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1724,7 +1724,7 @@ contract("IncrementalSell", (accounts) => {
       20,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1755,7 +1755,7 @@ contract("IncrementalSell", (accounts) => {
 
   it("updateIncrementalRates should be work successfully", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     await iSellInstance.addTreeSells(
@@ -1765,7 +1765,7 @@ contract("IncrementalSell", (accounts) => {
       20,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1842,7 +1842,7 @@ contract("IncrementalSell", (accounts) => {
       10,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1904,7 +1904,7 @@ contract("IncrementalSell", (accounts) => {
       20,
       1000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1939,7 +1939,7 @@ contract("IncrementalSell", (accounts) => {
       70,
       10000,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1972,7 +1972,7 @@ contract("IncrementalSell", (accounts) => {
   it("updateIncrementalRates should reject becuase step must be gt zero", async () => {
     await iSellInstance
       .updateIncrementalRates(web3.utils.toWei("0.1"), 0, 10000, {
-        from: deployerAccount,
+        from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS);
   });

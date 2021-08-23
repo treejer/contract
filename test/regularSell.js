@@ -44,7 +44,7 @@ contract("regularSell", (accounts) => {
   let planterFundsInstnce;
   let daiInstance;
 
-  const ownerAccount = accounts[0];
+  const dataManager = accounts[0];
   const deployerAccount = accounts[1];
   const userAccount1 = accounts[2];
   const userAccount2 = accounts[3];
@@ -107,6 +107,8 @@ contract("regularSell", (accounts) => {
     });
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -239,7 +241,7 @@ contract("regularSell", (accounts) => {
       "treePriceInvalid"
     );
 
-    let tx = await regularSellInstance.setPrice(100, { from: deployerAccount });
+    let tx = await regularSellInstance.setPrice(100, { from: dataManager });
 
     truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
       return Number(ev.price) == 100;
@@ -253,7 +255,7 @@ contract("regularSell", (accounts) => {
   it("should fail set price", async () => {
     await regularSellInstance
       .setPrice(10, { from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
   /////////////////////// -------------------------------------- request trees ----------------------------------------------------
@@ -275,12 +277,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------
@@ -550,12 +552,12 @@ contract("regularSell", (accounts) => {
       1200,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------
@@ -631,7 +633,7 @@ contract("regularSell", (accounts) => {
     ///////////////////////--------------------- requestTrees --------------------------
 
     await regularSellInstance.setPrice(web3.utils.toWei("8"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     let funderBalanceBefore = await daiInstance.balanceOf(funder);
@@ -822,12 +824,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10003, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------
@@ -1168,12 +1170,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10003, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------
@@ -1281,12 +1283,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10003, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------
@@ -1418,18 +1420,18 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////// ------------------------- handle tree price ------------------------
 
     let tx = await regularSellInstance.setPrice(treePrice, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
@@ -1519,7 +1521,7 @@ contract("regularSell", (accounts) => {
     );
 
     await treeFactoryInstance.verifyRegularPlant(0, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////////////////////////////
@@ -1584,7 +1586,7 @@ contract("regularSell", (accounts) => {
       500,
       500,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
@@ -1601,13 +1603,13 @@ contract("regularSell", (accounts) => {
     };
 
     await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////// ------------------------- handle tree price ------------------------
 
     let tx = await regularSellInstance.setPrice(treePrice, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
@@ -1698,7 +1700,7 @@ contract("regularSell", (accounts) => {
     );
 
     await treeFactoryInstance.verifyRegularPlant(0, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////////////////////////////
@@ -1794,7 +1796,7 @@ contract("regularSell", (accounts) => {
     ///////////////// ----------------- request tree -------------------------------------------
 
     await regularSellInstance.setPrice(web3.utils.toWei("10"), {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////// ------------------------- handle tree price ------------------------
@@ -1954,7 +1956,7 @@ contract("regularSell", (accounts) => {
     const treeId = 10001;
 
     let tx = await regularSellInstance.setPrice(price, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     truffleAssert.eventEmitted(tx, "TreePriceUpdated", (ev) => {
@@ -2097,7 +2099,7 @@ contract("regularSell", (accounts) => {
     );
 
     await treeFactoryInstance.verifyRegularPlant(0, true, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     ///////////////////////// ---------------- end plant regular tree-------------------------
@@ -2128,12 +2130,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
   });
 
@@ -2151,12 +2153,12 @@ contract("regularSell", (accounts) => {
       0,
       0,
       {
-        from: deployerAccount,
+        from: dataManager,
       }
     );
 
     await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
-      from: deployerAccount,
+      from: dataManager,
     });
 
     /////////////////////////-------------------- deploy contracts --------------------------

@@ -150,7 +150,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     function ifDataManagerOrTreejerContract(address _address) external view {
         require(
             isDataManager(_address) || isTreejerContract(_address),
-            "not Data Mnager or Treejer Contract"
+            "not Data Manager or Treejer Contract"
         );
     }
 }

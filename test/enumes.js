@@ -156,9 +156,6 @@ module.exports = {
   FinancialModelErrorMsg,
   CommunityGiftErrorMsg,
   erc20ErrorMsg,
-<<<<<<< HEAD
   GsnErrorMsg,
-=======
   erc721ErrorMsg,
->>>>>>> 427fd73ad1959392165db47cc3be315b736ac482
 };

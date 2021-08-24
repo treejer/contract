@@ -6234,11 +6234,11 @@ contract("TreeFactory", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(treeFactoryInstance.address, {
+    await paymaster.addPlanterWhitelistTarget(treeFactoryInstance.address, {
       from: deployerAccount,
     });
 
-    await paymaster.setWhitelistTarget(planterInstance.address, {
+    await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
       from: deployerAccount,
     });
 

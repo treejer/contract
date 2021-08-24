@@ -21,6 +21,12 @@ contract WhitelistPaymaster is BasePaymaster {
         _;
     }
 
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
+
     constructor(address _accessRestrictionAddress) {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -29,30 +35,38 @@ contract WhitelistPaymaster is BasePaymaster {
         accessRestriction = candidateContract;
     }
 
-    function addPlanterWhitelistTarget(address target) external onlyAdmin {
-        planterTargetWhitelist[target] = true;
+    function addPlanterWhitelistTarget(address _target)
+        external
+        onlyAdmin
+        validAddress(_target)
+    {
+        planterTargetWhitelist[_target] = true;
     }
 
-    function removePlanterWhitelistTarget(address target) external onlyAdmin {
+    function removePlanterWhitelistTarget(address _target) external onlyAdmin {
         require(
-            planterTargetWhitelist[target],
-            "Target not exists in planterTargetWhitelist"
+            planterTargetWhitelist[_target],
+            "Target not exists in white list"
         );
 
-        planterTargetWhitelist[target] = false;
+        planterTargetWhitelist[_target] = false;
     }
 
-    function addFunderWhitelistTarget(address target) external onlyAdmin {
-        funderTargetWhitelist[target] = true;
+    function addFunderWhitelistTarget(address _target)
+        external
+        onlyAdmin
+        validAddress(_target)
+    {
+        funderTargetWhitelist[_target] = true;
     }
 
-    function removeFunderWhitelistTarget(address target) external onlyAdmin {
+    function removeFunderWhitelistTarget(address _target) external onlyAdmin {
         require(
-            funderTargetWhitelist[target],
-            "Target not exists in funderTargetWhitelist"
+            funderTargetWhitelist[_target],
+            "Target not exists in white list"
         );
 
-        funderTargetWhitelist[target] = false;
+        funderTargetWhitelist[_target] = false;
     }
 
     function preRelayedCall(
@@ -74,12 +88,13 @@ contract WhitelistPaymaster is BasePaymaster {
 
         if (planterTargetWhitelist[relayRequest.request.to]) {
             accessRestriction.ifPlanter(relayRequest.request.from);
+
             return ("", false);
         }
 
         require(
             funderTargetWhitelist[relayRequest.request.to],
-            "target not whitelisted"
+            "Target not exists in white list"
         );
 
         return ("", false);
@@ -103,6 +118,4 @@ contract WhitelistPaymaster is BasePaymaster {
     {
         return "2.2.0+treejer.whitelist.ipaymaster";
     }
-
-    //withdraw
 }

@@ -1954,9 +1954,6 @@ contract("TreeAttribute", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(treeAttributeInstance.address, {
-      from: deployerAccount,
-    });
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -1986,6 +1983,10 @@ contract("TreeAttribute", (accounts) => {
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await paymaster.addFunderWhitelistTarget(treeAttributeInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractFunder.createTreeAttributes(102);
 

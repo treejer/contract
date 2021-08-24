@@ -27,6 +27,7 @@ const {
   CommunityGiftErrorMsg,
   TreeAttributeErrorMsg,
   erc20ErrorMsg,
+  GsnErrorMsg,
 } = require("./enumes");
 
 contract("CommunityGifts", (accounts) => {
@@ -165,6 +166,7 @@ contract("CommunityGifts", (accounts) => {
   });
 
   afterEach(async () => {});
+
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
@@ -2650,9 +2652,6 @@ contract("CommunityGifts", (accounts) => {
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
-    // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
-    // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
-    // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
     const { forwarderAddress, relayHubAddress, paymasterAddress } =
       env.contractsDeployment;
 
@@ -2662,9 +2661,6 @@ contract("CommunityGifts", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(communityGiftsInstance.address, {
-      from: deployerAccount,
-    });
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -2739,6 +2735,16 @@ contract("CommunityGifts", (accounts) => {
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(giftee);
+
+    await contractCommunityGift
+      .claimTree({
+        from: giftee,
+      })
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addFunderWhitelistTarget(communityGiftsInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractCommunityGift.claimTree({
       from: giftee,

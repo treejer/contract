@@ -7,14 +7,11 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
-const {
-  CommonErrorMsg,
-
-  PlanterErrorMsg,
-} = require("./enumes");
+const { CommonErrorMsg, GsnErrorMsg, PlanterErrorMsg } = require("./enumes");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
@@ -2168,11 +2165,7 @@ contract("Planter", (accounts) => {
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 
-    // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
-    // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
-    // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
 
     await planterInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,
@@ -2180,9 +2173,6 @@ contract("Planter", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(planterInstance.address, {
-      from: deployerAccount,
-    });
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -2211,13 +2201,28 @@ contract("Planter", (accounts) => {
       signerPlanter
     );
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-
     let longitude = 1;
     let latitude = 2;
     const countryCode = 10;
 
     let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+    let tx = await contractPlanter
+      .planterJoin(
+        1,
+        longitude,
+        latitude,
+        countryCode,
+        zeroAddress,
+        zeroAddress
+      )
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractPlanter.planterJoin(
       1,
@@ -2225,8 +2230,7 @@ contract("Planter", (accounts) => {
       latitude,
       countryCode,
       zeroAddress,
-      zeroAddress,
-      { from: userAccount2 }
+      zeroAddress
     );
 
     let balanceAccountAfter = await web3.eth.getBalance(userAccount2);

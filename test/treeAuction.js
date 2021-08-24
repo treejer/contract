@@ -32,6 +32,7 @@ const {
   TreeAuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
+  GsnErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -4210,10 +4211,6 @@ contract("TreeAuction", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(treeAuctionInstance.address, {
-      from: deployerAccount,
-    });
-
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -4322,6 +4319,16 @@ contract("TreeAuction", (accounts) => {
     /////////////////// ------------- bid
 
     let balanceAccountBefore = await web3.eth.getBalance(bidderAccount);
+
+    await contractTreeAuction
+      .bid(0, bidAmount, {
+        from: bidderAccount,
+      })
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addFunderWhitelistTarget(treeAuctionInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractTreeAuction.bid(0, bidAmount, {
       from: bidderAccount,

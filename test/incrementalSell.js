@@ -34,6 +34,7 @@ const {
   IncrementalSellErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
+  GsnErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -1617,7 +1618,7 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
 
-  ////////////////--------------------------------------------gsn------------------------------------------------
+  ////////////////-------------------------------------------- gsn ------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
       from: dataManager,
@@ -1653,9 +1654,6 @@ contract("IncrementalSell", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(iSellInstance.address, {
-      from: deployerAccount,
-    });
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -1696,6 +1694,14 @@ contract("IncrementalSell", (accounts) => {
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await contractFunder
+      .buyTree(101)
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addFunderWhitelistTarget(iSellInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractFunder.buyTree(101);
 

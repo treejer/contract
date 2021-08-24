@@ -7,6 +7,10 @@ const TimeEnumes = {
   years: "years",
 };
 
+const GsnErrorMsg = {
+  ADDRESS_NOT_EXISTS: "Target not exists in white list",
+};
+
 const erc20ErrorMsg = {
   ZERO_ADDRESS: "ERC20: transfer from the zero address",
   INSUFFICIENT_BALANCE: "ERC20: transfer amount exceeds balance",
@@ -148,4 +152,5 @@ module.exports = {
   FinancialModelErrorMsg,
   CommunityGiftErrorMsg,
   erc20ErrorMsg,
+  GsnErrorMsg,
 };

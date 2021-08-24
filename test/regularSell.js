@@ -2454,8 +2454,7 @@ contract("regularSell", (accounts) => {
 
     let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
 
     await regularSellInstance.setTrustedForwarder(forwarderAddress, {
       from: deployerAccount,
@@ -2463,9 +2462,6 @@ contract("regularSell", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(regularSellInstance.address, {
-      from: deployerAccount,
-    });
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -2508,6 +2504,23 @@ contract("regularSell", (accounts) => {
     );
 
     let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await paymaster.addPlanterWhitelistTarget(regularSellInstance.address, {
+      from: deployerAccount,
+    });
+
+    await contractFunder
+      .requestTrees(1, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
+
+    await paymaster.removePlanterWhitelistTarget(regularSellInstance.address, {
+      from: deployerAccount,
+    });
+    await paymaster.addFunderWhitelistTarget(regularSellInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractFunder.requestTrees(1, {
       from: userAccount2,

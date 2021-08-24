@@ -25,6 +25,7 @@ const {
   IncrementalSellErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
+  GsnErrorMsg,
 } = require("./enumes");
 
 contract("PlanterFund", (accounts) => {
@@ -3125,10 +3126,6 @@ contract("PlanterFund", (accounts) => {
 
     let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setWhitelistTarget(planterFundInstance.address, {
-      from: deployerAccount,
-    });
-
     await paymaster.setRelayHub(relayHubAddress);
     await paymaster.setTrustedForwarder(forwarderAddress);
 
@@ -3223,6 +3220,16 @@ contract("PlanterFund", (accounts) => {
     });
 
     let balanceAccountBefore = await web3.eth.getBalance(planterAddress);
+
+    await contractPlanterFund
+      .withdrawPlanterBalance(planterWithdrawAmount, {
+        from: planterAddress,
+      })
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addPlanterWhitelistTarget(planterFundInstance.address, {
+      from: deployerAccount,
+    });
 
     await contractPlanterFund.withdrawPlanterBalance(planterWithdrawAmount, {
       from: planterAddress,

@@ -22,7 +22,7 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 const wrapProvider = require("arb-ethers-web3-bridge").wrapProvider;
 // const infuraKey = "fj4jll3k.....";
 
-const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
+const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY, process.env.PV2];
 
 module.exports = {
   /**
@@ -120,27 +120,41 @@ module.exports = {
       gasPrice: 0,
       chainId: 215728282823301,
     },
+
     matic: {
       provider: () =>
-        new HDWalletProvider(
-          privateKeys,
-          `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`
-        ),
-      network_id: 137,
-      confirmations: 2,
-      timeoutBlocks: 200,
-      skipDryRun: true,
-    },
-    mumbai: {
-      provider: () =>
-        new HDWalletProvider(
-          privateKeys,
-          `https://rpc-mumbai.maticvigil.com/${process.env.MATICVIGIL_PROJECT_ID}`
-        ),
+        new HDWalletProvider(privateKeys, `https://rpc-mumbai.matic.today`),
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
+      gas: 60000000,
+      gasPrice: 100000000000,
+    },
+
+    // matic: {
+    //   provider: () =>
+    //     new HDWalletProvider(
+    //       privateKeys,
+    //       `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`
+    //     ),
+    //   network_id: 137,
+    //   confirmations: 2,
+    //   timeoutBlocks: 200,
+    //   skipDryRun: true,
+    // },
+    mumbai: {
+      provider: () =>
+        new HDWalletProvider(
+          privateKeys,
+          `wss://rpc-mumbai.maticvigil.com/ws/v1/${process.env.MATICVIGIL_PROJECT_ID}`
+        ),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 500,
+      skipDryRun: true,
+      // gas: 60000000,
+      // gasPrice: 100000000000,
     },
   },
   plugins: ["solidity-coverage"],

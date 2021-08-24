@@ -113,7 +113,6 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @dev admin set TreeFactoryAddress
      * @param _address set to the address of treeFactory
      */
-
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());

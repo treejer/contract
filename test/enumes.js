@@ -16,6 +16,10 @@ const erc20ErrorMsg = {
   INSUFFICIENT_BALANCE: "ERC20: transfer amount exceeds balance",
   APPROVAL_ISSUE: "ERC20: transfer amount exceeds allowance",
 };
+
+const erc721ErrorMsg = {
+  MINTED_BEFORE: "token already minted.",
+};
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller is not admin",
@@ -152,5 +156,9 @@ module.exports = {
   FinancialModelErrorMsg,
   CommunityGiftErrorMsg,
   erc20ErrorMsg,
+<<<<<<< HEAD
   GsnErrorMsg,
+=======
+  erc721ErrorMsg,
+>>>>>>> 427fd73ad1959392165db47cc3be315b736ac482
 };

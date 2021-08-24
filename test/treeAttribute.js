@@ -708,7 +708,7 @@ contract("TreeAttribute", (accounts) => {
 
     ////--------test treejerSpent 2--------------------
 
-    await treeAttributeInstance.setBuyerRank(
+    const eventTx1 = await treeAttributeInstance.setBuyerRank(
       userAccount2,
       web3.utils.toWei(".012"), // 30 points(rank must be 0)
       0,
@@ -719,13 +719,17 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
+    truffleAssert.eventEmitted(eventTx1, "BuyerRankSet", (ev) => {
+      return ev.buyer == userAccount2 && Number(ev.rank) == 0;
+    });
+
     let testRank2 = await treeAttributeInstance.rankOf(userAccount2);
 
     assert.equal(Number(testRank2), 0, "2-rank is not true");
 
     ////--------test treejerSpent--------------------
 
-    await treeAttributeInstance.setBuyerRank(
+    const eventTx2 = await treeAttributeInstance.setBuyerRank(
       userAccount2,
       web3.utils.toWei(".016"), // 31 points(rank must be 1)
       0,
@@ -736,13 +740,17 @@ contract("TreeAttribute", (accounts) => {
       }
     );
 
+    truffleAssert.eventEmitted(eventTx2, "BuyerRankSet", (ev) => {
+      return ev.buyer == userAccount2 && Number(ev.rank) == 1;
+    });
+
     let testRank = await treeAttributeInstance.rankOf(userAccount2);
 
     assert.equal(Number(testRank), 1, "1-rank is not true");
 
     ////--------test walletSpent(test2)--------------------
 
-    await treeAttributeInstance.setBuyerRank(
+    const eventTx3 = await treeAttributeInstance.setBuyerRank(
       userAccount3,
       0,
       web3.utils.toWei("15"), // 30 points(rank must be 0)
@@ -752,6 +760,10 @@ contract("TreeAttribute", (accounts) => {
         from: buyerRank,
       }
     );
+
+    truffleAssert.eventEmitted(eventTx3, "BuyerRankSet", (ev) => {
+      return ev.buyer == userAccount3 && Number(ev.rank) == 0;
+    });
 
     let testRank4 = await treeAttributeInstance.rankOf(userAccount3);
 

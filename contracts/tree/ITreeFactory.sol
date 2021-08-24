@@ -4,9 +4,7 @@ pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
 interface ITreeFactory {
-    /**
-     * @return true in case of TreeFactory contract have been initialized
-     */
+    /** @return true in case of TreeFactory contract have been initialized */
     function isTreeFactory() external view returns (bool);
 
     /** @return AccessRestriction contract address */

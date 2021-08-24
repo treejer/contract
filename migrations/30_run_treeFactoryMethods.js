@@ -6,7 +6,7 @@ const PlanterFund = artifacts.require("PlanterFund.sol");
 const Planter = artifacts.require("Planter.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  const isLocal = network === "development";
+  const isLocal = ["development", "mumbai"].includes(network);
 
   const treeTokenAddress = Tree.address;
   const planterAddress = Planter.address;

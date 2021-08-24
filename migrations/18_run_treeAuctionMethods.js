@@ -26,9 +26,9 @@ module.exports = async function (deployer, network, accounts) {
   } else {
     trustedForwarder = process.env.GSN_FORWARDER;
 
-    // wethTokenAddress = eval(
-    //   `process.env.WETH_TOKEN_ADDRESS_${network.toUpperCase()}`
-    // );
+    wethTokenAddress = eval(
+      `process.env.WETH_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
   }
 
   console.log("Call TreeAuction Methods...");

@@ -5,7 +5,7 @@ const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
 
 module.exports = async function (deployer, network, accounts) {
-  const isLocal = network === "development";
+  const isLocal = ["development", "mumbai"].includes(network);
 
   let planterFundAddress = PlanterFund.address;
   let daiTokenAddress = isLocal

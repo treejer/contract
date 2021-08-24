@@ -22,6 +22,10 @@ module.exports = async function (deployer, network, accounts) {
     UniswapV2RouterAddress = UniswapV2Router02New.address;
     daiAddress = Dai.address;
     wethAddress = Weth.address;
+  } else if (network == "mumbai") {
+    UniswapV2RouterAddress = UniswapV2Router02New.address;
+    daiAddress = Dai.address;
+    wethAddress = Weth.address;
   } else {
     UniswapV2RouterAddress = eval(
       `process.env.UNISWAP_ROUTER_V2_ADDRESS_${network.toUpperCase()}`

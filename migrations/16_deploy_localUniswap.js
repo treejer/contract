@@ -2,6 +2,7 @@
 var Factory = artifacts.require("Factory.sol");
 var Dai = artifacts.require("Dai.sol");
 var Weth = artifacts.require("Weth.sol");
+var Wmatic = artifacts.require("Wmatic.sol");
 var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var TestUniswap = artifacts.require("TestUniswap.sol");
 
@@ -25,12 +26,14 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 //gsn
 
 module.exports = async function (deployer, network, accounts) {
-  const isLocal = network === "development";
-  if (isLocal || true) {
+  const isLocal = network === "development" || network === "mumbai";
+
+  if (isLocals) {
     let factoryAddress;
     let wethAddress;
     let uniswapV2Router02NewAddress;
     let daiAddress;
+    let wmaticAddress;
 
     await deployer
       .deploy(Factory, accounts[1], {
@@ -39,6 +42,7 @@ module.exports = async function (deployer, network, accounts) {
       .then((err) => {
         factoryAddress = Factory.address;
       });
+
     await deployer
       .deploy(Weth, "WETH", "weth", {
         from: accounts[0],
@@ -46,6 +50,7 @@ module.exports = async function (deployer, network, accounts) {
       .then((err) => {
         wethAddress = Weth.address;
       });
+
     await deployer
       .deploy(Dai, "DAI", "dai", {
         from: accounts[0],
@@ -53,13 +58,23 @@ module.exports = async function (deployer, network, accounts) {
       .then((err) => {
         daiAddress = Dai.address;
       });
+
     await deployer
-      .deploy(UniswapV2Router02New, factoryAddress, wethAddress, {
+      .deploy(Wmatic, "WMATIC", "wmatic", {
+        from: accounts[0],
+      })
+      .then((err) => {
+        wmaticAddress = Wmatic.address;
+      });
+
+    await deployer
+      .deploy(UniswapV2Router02New, factoryAddress, wmaticAddress, {
         from: accounts[0],
       })
       .then((err) => {
         uniswapV2Router02NewAddress = UniswapV2Router02New.address;
       });
+
     await deployer
       .deploy(
         TestUniswap,
@@ -92,6 +107,7 @@ module.exports = async function (deployer, network, accounts) {
 
     console.log("daiAddress", daiAddress);
     console.log("wethAddress", wethAddress);
+    console.log("wmaticAddress", wmaticAddress);
     console.log("testUniswapAddress", testUniswapAddress);
     console.log("factoryAddress", factoryAddress);
     console.log("uniswapV2Router02NewAddress", uniswapV2Router02NewAddress);

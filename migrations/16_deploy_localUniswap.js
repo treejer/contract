@@ -28,7 +28,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development" || network === "mumbai";
 
-  if (isLocals) {
+  if (isLocal) {
     let factoryAddress;
     let wethAddress;
     let uniswapV2Router02NewAddress;

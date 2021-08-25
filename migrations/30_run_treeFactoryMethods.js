@@ -18,7 +18,6 @@ module.exports = async function (deployer, network, accounts) {
     : process.env.GSN_FORWARDER;
 
   console.log("Call Tree Factory Methods...");
-
   await TreeFactory.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterFundAddress(planterFundAddress);

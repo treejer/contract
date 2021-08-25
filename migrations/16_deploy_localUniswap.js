@@ -105,12 +105,12 @@ module.exports = async function (deployer, network, accounts) {
 
     await testUniswapInstance.addLiquidity();
 
-    console.log("daiAddress", daiAddress);
-    console.log("wethAddress", wethAddress);
-    console.log("wmaticAddress", wmaticAddress);
-    console.log("testUniswapAddress", testUniswapAddress);
-    console.log("factoryAddress", factoryAddress);
-    console.log("uniswapV2Router02NewAddress", uniswapV2Router02NewAddress);
+    console.log("daiAddress=", daiAddress);
+    console.log("wethAddress=", wethAddress);
+    console.log("wmaticAddress=", wmaticAddress);
+    console.log("testUniswapAddress=", testUniswapAddress);
+    console.log("factoryAddress=", factoryAddress);
+    console.log("uniswapV2Router02NewAddress=", uniswapV2Router02NewAddress);
   }
 
   const accessRestrictionAddress = AccessRestriction.address;

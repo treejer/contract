@@ -23,8 +23,8 @@ module.exports = async function (deployer, network, accounts) {
       `process.env.DAI_TOKEN_ADDRESS_${network.toUpperCase()}`
     );
   }
-  console.log("Call PlanterFund Methods...");
 
+  console.log("Call PlanterFund Methods...");
   await PlanterFund.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterContractAddress(planterAddress);

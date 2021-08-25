@@ -33,7 +33,10 @@ interface IRegularSell {
     /** @dev admin set trusted forwarder address */
     function setTrustedForwarder(address _address) external;
 
-    //TODO: ADD_COMMENTS
+    /**
+     * @dev data manager can update lastSoldRegularTree
+     * emit a {LastSoldRegularTreeUpdated} event
+     */
     function setLastSoldRegularTree(uint256 _lastSoldRegularTree) external;
 
     /** @dev admin set treeFactory contract address
@@ -95,6 +98,6 @@ interface IRegularSell {
         uint256 amount
     );
 
-    //TODO: ADD_COMMENT
+    /** @dev emitted when lastSoldRegularTree updated to {lastSoldRegularTree}  */
     event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
 }

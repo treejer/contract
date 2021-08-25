@@ -8,8 +8,11 @@ import "./../external/gsn/BasePaymaster.sol";
 
 import "../access/IAccessRestriction.sol";
 
+/** @title WhitelistPaymaster contract */
 contract WhitelistPaymaster is BasePaymaster {
+    /** NOTE mapping of funderTargetWhitelist addressses to if gsn supported */
     mapping(address => bool) public funderTargetWhitelist;
+    /** NOTE mapping of planterTargetWhitelist addressses to if gsn supported */
     mapping(address => bool) public planterTargetWhitelist;
 
     //related contracts
@@ -35,6 +38,7 @@ contract WhitelistPaymaster is BasePaymaster {
         accessRestriction = candidateContract;
     }
 
+    /** @dev admin add a valid address to planterTargetWhitelist */
     function addPlanterWhitelistTarget(address _target)
         external
         onlyAdmin
@@ -43,6 +47,7 @@ contract WhitelistPaymaster is BasePaymaster {
         planterTargetWhitelist[_target] = true;
     }
 
+    /** @dev admin remove an address from planterTargetWhitelist */
     function removePlanterWhitelistTarget(address _target) external onlyAdmin {
         require(
             planterTargetWhitelist[_target],
@@ -52,6 +57,7 @@ contract WhitelistPaymaster is BasePaymaster {
         planterTargetWhitelist[_target] = false;
     }
 
+    /** @dev admin add a valid address to funderTargetWhitelist */
     function addFunderWhitelistTarget(address _target)
         external
         onlyAdmin
@@ -60,6 +66,7 @@ contract WhitelistPaymaster is BasePaymaster {
         funderTargetWhitelist[_target] = true;
     }
 
+    /** @dev admin remove a address from funderTargetWhitelist */
     function removeFunderWhitelistTarget(address _target) external onlyAdmin {
         require(
             funderTargetWhitelist[_target],
@@ -69,6 +76,7 @@ contract WhitelistPaymaster is BasePaymaster {
         funderTargetWhitelist[_target] = false;
     }
 
+    /** @dev check that we support gas of a function called by a user */
     function preRelayedCall(
         GsnTypes.RelayRequest calldata relayRequest,
         bytes calldata signature,
@@ -109,6 +117,7 @@ contract WhitelistPaymaster is BasePaymaster {
         (context, success, gasUseWithoutPost, relayData);
     }
 
+    /** @dev return version paymaster */
     function versionPaymaster()
         external
         view

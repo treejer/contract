@@ -234,6 +234,8 @@ contract("IncrementalSell", (accounts) => {
 
   afterEach(async () => {});
 
+  /* ssss
+
   it("deploys successfully", async () => {
     const address = iSellInstance.address;
     assert.notEqual(address, 0x0);
@@ -590,6 +592,227 @@ contract("IncrementalSell", (accounts) => {
     let tree285 = await treeFactoryInstance.treeData(285);
 
     assert.equal(Number(tree285.provideStatus), 0);
+  });
+
+  ////////////// -------------------------------- freeIncrementalSell ---------------------------------
+  it("Should freeIncrementalSell succesfully", async () => {
+    await iSellInstance
+      .freeIncrementalSell(400)
+      .should.be.rejectedWith(
+        IncrementalSellErrorMsg.FREE_INCREMENTALSELL_FAIL
+      );
+
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      200,
+      100,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    for (let i = 0; i < 5; i++) {
+      await iSellInstance.updateIncrementalEnd(200, {
+        from: dataManager,
+      });
+    }
+
+    let incrementalPrice = await iSellInstance.incrementalPrice();
+
+    assert.equal(Number(incrementalPrice.startTree), 101, "startTree not true");
+
+    assert.equal(Number(incrementalPrice.endTree), 1301, "endTree not true");
+
+    ////////// check tree data
+
+    const tree101_1 = await treeFactoryInstance.treeData.call(101);
+    const tree1300_1 = await treeFactoryInstance.treeData.call(1300);
+    const tree1301_1 = await treeFactoryInstance.treeData.call(1301);
+
+    assert.equal(
+      Number(tree101_1.provideStatus),
+      2,
+      "provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1300_1.provideStatus),
+      2,
+      "provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1301_1.provideStatus),
+      0,
+      "provide status is not correct"
+    );
+
+    await iSellInstance
+      .freeIncrementalSell(500, {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+    await iSellInstance.freeIncrementalSell(500);
+
+    let incrementalPrice2 = await iSellInstance.incrementalPrice();
+
+    assert.equal(
+      Number(incrementalPrice2.startTree),
+      601,
+      "2startTree not true"
+    );
+
+    assert.equal(Number(incrementalPrice2.endTree), 1301, "2endTree not true");
+
+    const tree101_2 = await treeFactoryInstance.treeData.call(101);
+    const tree300_2 = await treeFactoryInstance.treeData.call(300);
+    const tree600_2 = await treeFactoryInstance.treeData.call(600);
+    const tree601_2 = await treeFactoryInstance.treeData.call(601);
+
+    assert.equal(
+      Number(tree101_2.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree300_2.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree600_2.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree601_2.provideStatus),
+      2,
+      "2provide status is not correct"
+    );
+
+    await iSellInstance.freeIncrementalSell(400);
+
+    let incrementalPrice3 = await iSellInstance.incrementalPrice();
+
+    assert.equal(
+      Number(incrementalPrice3.startTree),
+      1001,
+      "3startTree not true"
+    );
+
+    assert.equal(Number(incrementalPrice3.endTree), 1301, "3endTree not true");
+
+    const tree601_3 = await treeFactoryInstance.treeData.call(601);
+    const tree800_3 = await treeFactoryInstance.treeData.call(800);
+    const tree1000_3 = await treeFactoryInstance.treeData.call(1000);
+    const tree1001_3 = await treeFactoryInstance.treeData.call(1001);
+
+    assert.equal(
+      Number(tree601_3.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree800_3.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1000_3.provideStatus),
+      0,
+      "2provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1001_3.provideStatus),
+      2,
+      "2provide status is not correct"
+    );
+
+    await iSellInstance
+      .freeIncrementalSell(400)
+      .should.be.rejectedWith(
+        IncrementalSellErrorMsg.FREE_INCREMENTALSELL_FAIL
+      );
+
+    await iSellInstance.freeIncrementalSell(300);
+
+    let incrementalPrice4 = await iSellInstance.incrementalPrice();
+
+    assert.equal(
+      Number(incrementalPrice4.startTree),
+      1301,
+      "3startTree not true"
+    );
+
+    assert.equal(Number(incrementalPrice4.endTree), 1301, "3endTree not true");
+
+    const tree1001_4 = await treeFactoryInstance.treeData.call(1001);
+    const tree1200_4 = await treeFactoryInstance.treeData.call(1200);
+    const tree1300_4 = await treeFactoryInstance.treeData.call(1300);
+    const tree1301_4 = await treeFactoryInstance.treeData.call(1301);
+
+    assert.equal(
+      Number(tree1001_4.provideStatus),
+      0,
+      "3provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1200_4.provideStatus),
+      0,
+      "3provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1300_4.provideStatus),
+      0,
+      "3provide status is not correct"
+    );
+
+    assert.equal(
+      Number(tree1301_4.provideStatus),
+      0,
+      "3provide status is not correct"
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance
+      .buyTree(1301, { from: userAccount3 })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await iSellInstance.addTreeSells(
+      15000,
+      web3.utils.toWei("0.01"),
+      200,
+      100,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
   });
 
   ///////////// --------------------------------- updateIncrementalEnd --------------------------------
@@ -1617,6 +1840,8 @@ contract("IncrementalSell", (accounts) => {
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
+
+  ssss */
 
   ////////////////-------------------------------------------- gsn ------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {

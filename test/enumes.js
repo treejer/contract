@@ -120,6 +120,8 @@ const IncrementalSellErrorMsg = {
   TREE_PROVIDED_BEFORE: "trees are not available for sell",
   INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
+  FREE_INCREMENTALSELL_FAIL:
+    "IncrementalSell not exist or count must be lt endTree",
 };
 const TreeAttributeErrorMsg = {
   DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",

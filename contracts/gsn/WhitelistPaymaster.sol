@@ -80,8 +80,6 @@ contract WhitelistPaymaster is BasePaymaster {
         override
         returns (bytes memory context, bool revertOnRecipientRevert)
     {
-        (relayRequest, signature, approvalData, maxPossibleGas);
-
         _verifyForwarder(relayRequest);
 
         (relayRequest, signature, approvalData, maxPossibleGas);

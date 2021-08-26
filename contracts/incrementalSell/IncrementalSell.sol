@@ -133,6 +133,22 @@ contract IncrementalSell is Initializable, RelayRecipient {
         financialModel = candidateContract;
     }
 
+    //TODO: ADD_COMMENT
+    function freeIncrementalSell(uint256 _count) external onlyDataManager {
+        IncrementalPrice storage incrPrice = incrementalPrice;
+
+        uint256 newStartTree = incrPrice.startTree + _count;
+
+        require(
+            incrPrice.increaseStep > 0 && newStartTree <= incrPrice.endTree,
+            "IncrementalSell not exist or count must be lt endTree"
+        );
+
+        treeFactory.bulkRevert(incrPrice.startTree, newStartTree);
+
+        incrPrice.startTree = newStartTree;
+    }
+
     /**
      * @dev admin set a range from {startTree} to {startTree + treeCount}
      * for incremental selles for tree

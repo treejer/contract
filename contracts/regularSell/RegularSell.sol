@@ -85,7 +85,7 @@ contract RegularSell is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
-    //TODO: ADD_COMMENTS
+    /** @dev data manager can update lastSoldRegularTree */
     function setLastSoldRegularTree(uint256 _lastSoldRegularTree)
         external
         onlyDataManager

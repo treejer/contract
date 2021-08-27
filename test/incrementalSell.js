@@ -234,8 +234,6 @@ contract("IncrementalSell", (accounts) => {
 
   afterEach(async () => {});
 
-  /* ssss
-
   it("deploys successfully", async () => {
     const address = iSellInstance.address;
     assert.notEqual(address, 0x0);
@@ -1840,8 +1838,6 @@ contract("IncrementalSell", (accounts) => {
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
   });
-
-  ssss */
 
   ////////////////-------------------------------------------- gsn ------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {

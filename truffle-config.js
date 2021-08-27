@@ -159,6 +159,7 @@ module.exports = {
   },
   plugins: ["solidity-coverage"],
   mocha: {
+    timeout: 11111111111111111111111111100,
     // reporter: 'eth-gas-reporter',
     // reporterOptions: {
     //   currency: 'USD',

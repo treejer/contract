@@ -165,8 +165,6 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _intialPrice initial price of auction
      * @param _bidInterval bid interval for auction . if it set to 10 for example and the last bid is 100.new bidder can bid for 110
      */
-
-    //TODO: DATA_MANAGER
     function createAuction(
         uint256 _treeId,
         uint64 _startDate,

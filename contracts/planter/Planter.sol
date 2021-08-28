@@ -200,7 +200,6 @@ contract Planter is Initializable, RelayRecipient {
      * @param _capacity plant capacity of organization planter
      * @param _refferedBy address of referral
      */
-    //TODO: DATA_MANAGER
     function organizationJoin(
         address _organizationAddress,
         uint64 _longitude,
@@ -330,7 +329,6 @@ contract Planter is Initializable, RelayRecipient {
      * @param _planterAddress address of planter to update capacity
      * @param _capacity capacity that set to planter capacity
      */
-    //TODO: DATA_MANAGER
     function updateCapacity(address _planterAddress, uint32 _capacity)
         external
         onlyDataManager

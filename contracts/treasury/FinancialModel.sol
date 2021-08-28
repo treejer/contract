@@ -56,12 +56,6 @@ contract FinancialModel is Initializable {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
-    modifier ifNotPaused() {
-        accessRestriction.ifNotPaused();
-        _;
-    }
-
     /**
      * @dev initialize accessRestriction contract and set true for isFinancialModel
      * @param _accessRestrictionAddress set to the address of accessRestriction contract

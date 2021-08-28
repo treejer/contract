@@ -16,6 +16,9 @@ var Dai = artifacts.require("Dai.sol");
 var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var TestUniswap = artifacts.require("TestUniswap.sol");
 
+//test
+const TestTreeAttributes = artifacts.require("TestTreeAttributes.sol");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -1007,6 +1010,132 @@ contract("TreeAttribute", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
   });
 
+  it("1-Should createTreeAttributes work successfully", async () => {
+    //----------------------------config tree factory-------------------------
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await Common.addTreejerContractRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+    ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
+    await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      from: deployerAccount,
+    });
+    await treeAttributeInstance.createTreeAttributes(102, {
+      from: userAccount2,
+    });
+
+    ////----------------------------test tree 150 (with rank==1) owner==> userAccounts4----------------------
+    await treeAttributeInstance.setBuyerRank(
+      userAccount4,
+      web3.utils.toWei(".004"),
+      web3.utils.toWei("3"),
+      1,
+      5,
+      {
+        from: buyerRank,
+      }
+    );
+
+    await treeFactoryInstance.updateOwner(150, userAccount4, 1, {
+      from: deployerAccount,
+    });
+
+    await treeAttributeInstance.createTreeAttributes(150, {
+      from: userAccount4,
+    });
+
+    ////----------------------------test tree 170 (with rank==2) owner==> userAccounts5----------------------
+    await treeAttributeInstance.setBuyerRank(
+      userAccount5,
+      web3.utils.toWei(".016"),
+      web3.utils.toWei("4"),
+      1,
+      3,
+      {
+        from: buyerRank,
+      }
+    );
+    await treeFactoryInstance.updateOwner(170, userAccount5, 1, {
+      from: deployerAccount,
+    });
+    await treeAttributeInstance.createTreeAttributes(170, {
+      from: userAccount5,
+    });
+
+    ////----------------------------test tree 999 (with rank==3) owner==> userAccounts5----------------------
+    await treeAttributeInstance.setBuyerRank(
+      userAccount5,
+      web3.utils.toWei("0"),
+      web3.utils.toWei("5.5"),
+      11,
+      80,
+      {
+        from: buyerRank,
+      }
+    );
+    await treeFactoryInstance.updateOwner(999, userAccount5, 1, {
+      from: deployerAccount,
+    });
+    await treeAttributeInstance.createTreeAttributes(999, {
+      from: userAccount5,
+    });
+
+    //----------------------------test tree 1531 (with rank==4) owner==> userAccounts5----------------------
+    await treeAttributeInstance.setBuyerRank(
+      userAccount5,
+      web3.utils.toWei("0"),
+      web3.utils.toWei("5.5"),
+      11,
+      80,
+      {
+        from: buyerRank,
+      }
+    );
+    await treeFactoryInstance.updateOwner(1531, userAccount5, 1, {
+      from: deployerAccount,
+    });
+    await treeAttributeInstance.createTreeAttributes(1531, {
+      from: userAccount5,
+    });
+
+    //----------------------------test tree 2 (with rank==0) owner==> userAccounts2----------------------
+    await treeFactoryInstance.updateOwner(2, userAccount5, 1, {
+      from: deployerAccount,
+    });
+    await treeAttributeInstance.createTreeAttributes(2, {
+      from: userAccount5,
+    });
+
+    //----------------------------test tree 51 (with rank==2) owner==> userAccounts5----------------------
+    await treeAttributeInstance.setBuyerRank(
+      userAccount5,
+      web3.utils.toWei(".016"),
+      web3.utils.toWei("4"),
+      1,
+      3,
+      {
+        from: buyerRank,
+      }
+    );
+
+    await treeFactoryInstance.updateOwner(51, userAccount5, 1, {
+      from: deployerAccount,
+    });
+
+    await treeAttributeInstance.createTreeAttributes(51, {
+      from: userAccount5,
+    });
+  });
+
   // it("Should createTreeAttributes work successfully", async () => {
   //   ///------------------------------expected for tree with id 102
   //   let rand102 = 136929780; //10000010 100 1011 0000 111 110100
@@ -1565,11 +1694,13 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
+
     await Common.addTreejerContractRole(
       arInstance,
       deployerAccount,
       deployerAccount
     );
+
     await Common.addTreejerContractRole(
       arInstance,
       treeFactoryInstance.address,
@@ -2012,5 +2143,62 @@ contract("TreeAttribute", (accounts) => {
       balanceAccountBefore,
       "Gsn not true work"
     );
+  });
+
+  it("test TestTreeAttributes contract", async () => {
+    //----------------------------config tree factory-------------------------
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await Common.addTreejerContractRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ////------------------ deploy testTreeAttributes ------------------------------
+
+    let testInstance = await deployProxy(
+      TestTreeAttributes,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    await testInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+      from: deployerAccount,
+    });
+
+    ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
+    await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      from: deployerAccount,
+    });
+    await testInstance.createTreeAttributes(102, {
+      from: userAccount2,
+    });
+
+    let treeAttribute = await testInstance.treeAttributes(102);
+
+    await testInstance.test(102, {
+      from: userAccount2,
+    });
+
+    await testInstance.createTreeAttributes(102, {
+      from: userAccount2,
+    });
+
+    let generatedAttribute = await testInstance.generatedAttributes(
+      treeAttribute.universalCode
+    );
+
+    assert.equal(Number(generatedAttribute), 2);
   });
 });

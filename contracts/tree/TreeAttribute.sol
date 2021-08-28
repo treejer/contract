@@ -250,7 +250,11 @@ contract TreeAttribute is Initializable, RelayRecipient {
      * @param treeId id of tree
      * @return if unique tree attribute generated successfully
      */
-    function createTreeAttributes(uint256 treeId) external returns (bool) {
+    function createTreeAttributes(uint256 treeId)
+        external
+        ifNotPaused
+        returns (bool)
+    {
         require(
             treeAttributes[treeId].exists == 0,
             "tree attributes are set before"
@@ -478,6 +482,5 @@ contract TreeAttribute is Initializable, RelayRecipient {
                 return i;
             }
         }
-        return 0;
     }
 }

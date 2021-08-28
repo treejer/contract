@@ -59,12 +59,6 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
-    modifier ifNotPaused() {
-        accessRestriction.ifNotPaused();
-        _;
-    }
-
     /** NOTE modifier for check _planterAddress is exist*/
     modifier existPlanter(address _planterAddress) {
         require(

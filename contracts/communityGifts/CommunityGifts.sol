@@ -292,6 +292,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
     function transferTree(address _giftee, uint32 _symbol)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(

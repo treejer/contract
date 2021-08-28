@@ -339,6 +339,53 @@ contract("FinancialModel", (accounts) => {
     );
   });
 
+  it("5.assignTreeFundDistributionModel should be success", async () => {
+    await financialModelInstance.addFundDistributionModel(
+      4000,
+      1200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: dataManager,
+      }
+    );
+
+    await financialModelInstance.addFundDistributionModel(
+      3000,
+      2200,
+      1200,
+      1200,
+      1200,
+      1200,
+      0,
+      0,
+      {
+        from: dataManager,
+      }
+    );
+
+    await financialModelInstance.assignTreeFundDistributionModel(10, 100, 0, {
+      from: dataManager,
+    });
+
+    await financialModelInstance.assignTreeFundDistributionModel(1, 0, 1, {
+      from: dataManager,
+    });
+
+    let resultMaxAssignedIndex1 =
+      await financialModelInstance.maxAssignedIndex();
+
+    assert.equal(
+      Number(resultMaxAssignedIndex1),
+      2 ** 256 - 1,
+      "1.maxAssignedIndex not true"
+    );
+  });
+
   it("2.assignTreeFundDistributionModel should be success", async () => {
     await financialModelInstance.addFundDistributionModel(
       4000,
@@ -746,6 +793,10 @@ contract("FinancialModel", (accounts) => {
 
   //--------------------------------------------------- DistributionModelOfTreeNotExist ------------------------------------
   it("Check DistributionModelOfTreeNotExist event", async () => {
+    let hasModel0 = await financialModelInstance.distributionModelExistance(0);
+
+    assert.equal(hasModel0, false, "hasModel not true");
+
     let amount = web3.utils.toWei("1", "Ether");
 
     await financialModelInstance.addFundDistributionModel(
@@ -2362,5 +2413,9 @@ contract("FinancialModel", (accounts) => {
     let modelId3 = await financialModelInstance.getFindDistributionModelId(15);
 
     assert.equal(modelId3, 1, "3.modelId not true");
+
+    let modelId4 = await financialModelInstance.getFindDistributionModelId(3);
+
+    assert.equal(modelId4, 2, "4.modelId not true");
   });
 });

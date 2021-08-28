@@ -114,4 +114,34 @@ contract("Tree", (accounts) => {
       .safeMint(userAccount2, tokenId1, { from: userAccount3 })
       .should.be.rejectedWith(erc721ErrorMsg.MINTED_BEFORE);
   });
+
+  it("test _baseURI", async () => {
+    const tokenId1 = 2;
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await treeInstance.safeMint(userAccount1, tokenId1, {
+      from: userAccount3,
+    });
+
+    await treeInstance.setBaseURI("", {
+      from: deployerAccount,
+    });
+
+    let tokenURIBefore = await treeInstance.tokenURI(tokenId1);
+
+    assert.equal(tokenURIBefore, "");
+
+    await treeInstance.setBaseURI("https://api.treejer.com/trees/", {
+      from: deployerAccount,
+    });
+
+    let tokenURIAfter = await treeInstance.tokenURI(tokenId1);
+
+    assert.equal(tokenURIAfter, "https://api.treejer.com/trees/2");
+  });
 });

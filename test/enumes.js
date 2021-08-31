@@ -32,6 +32,8 @@ const CommonErrorMsg = {
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
+  CHECK_IF_PAUSED: "Pausable: not paused",
+  CHECK_IF_NOT_PAUSED: "Pausable: paused",
 };
 
 const TreeAuctionErrorMsg = {

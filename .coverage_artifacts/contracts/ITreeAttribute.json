@@ -1,0 +1,3678 @@
+{
+  "contractName": "ITreeAttribute",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "rank",
+          "type": "uint8"
+        }
+      ],
+      "name": "BuyerRankSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "treeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "TreeAttributesGenerated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "treeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "TreeAttributesNotGenerated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "isTreeAttribute",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "accessRestriction",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "treeFactory",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_buyer",
+          "type": "address"
+        }
+      ],
+      "name": "rankOf",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_treeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "treeAttributes",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "attributeId",
+          "type": "uint32"
+        }
+      ],
+      "name": "generatedAttributes",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "attributeId",
+          "type": "uint32"
+        }
+      ],
+      "name": "reservedAttributes",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "setTrustedForwarder",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "setTreeFactoryAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "generatedCode",
+          "type": "uint32"
+        }
+      ],
+      "name": "reserveTreeAttributes",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "generatedCode",
+          "type": "uint32"
+        }
+      ],
+      "name": "freeReserveTreeAttributes",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "treeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint32",
+          "name": "generatedCode",
+          "type": "uint32"
+        }
+      ],
+      "name": "setTreeAttributesByAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "treeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "createTreeAttributes",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "treejerSpent",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "walletSpent",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "treesOwned",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "walletSpentCount",
+          "type": "uint64"
+        }
+      ],
+      "name": "setBuyerRank",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.6+commit.11564f7e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"rank\",\"type\":\"uint8\"}],\"name\":\"BuyerRankSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"treeId\",\"type\":\"uint256\"}],\"name\":\"TreeAttributesGenerated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"treeId\",\"type\":\"uint256\"}],\"name\":\"TreeAttributesNotGenerated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"accessRestriction\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"treeId\",\"type\":\"uint256\"}],\"name\":\"createTreeAttributes\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"generatedCode\",\"type\":\"uint32\"}],\"name\":\"freeReserveTreeAttributes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"attributeId\",\"type\":\"uint32\"}],\"name\":\"generatedAttributes\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isTreeAttribute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_buyer\",\"type\":\"address\"}],\"name\":\"rankOf\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"generatedCode\",\"type\":\"uint32\"}],\"name\":\"reserveTreeAttributes\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"attributeId\",\"type\":\"uint32\"}],\"name\":\"reservedAttributes\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"treejerSpent\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"walletSpent\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"treesOwned\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"walletSpentCount\",\"type\":\"uint64\"}],\"name\":\"setBuyerRank\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"treeId\",\"type\":\"uint256\"},{\"internalType\":\"uint32\",\"name\":\"generatedCode\",\"type\":\"uint32\"}],\"name\":\"setTreeAttributesByAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"}],\"name\":\"setTreeFactoryAddress\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_address\",\"type\":\"address\"}],\"name\":\"setTrustedForwarder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_treeId\",\"type\":\"uint256\"}],\"name\":\"treeAttributes\",\"outputs\":[{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeFactory\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"BuyerRankSet(address,uint8)\":{\"details\":\"emitted when {rank} set for {buyer} \"},\"TreeAttributesGenerated(uint256)\":{\"details\":\"emitted when unique tree attribute generated successfully for {treeId} \"},\"TreeAttributesNotGenerated(uint256)\":{\"details\":\"emitted when unique tree attribute fail to generate for {treeId} \"}},\"kind\":\"dev\",\"methods\":{\"accessRestriction()\":{\"returns\":{\"_0\":\"AccessRestriction contract address \"}},\"createTreeAttributes(uint256)\":{\"details\":\"generate a 256 bits random number as a base for tree attributes and slice it in 28 bits parts\",\"params\":{\"treeId\":\"id of tree\"},\"returns\":{\"_0\":\"if unique tree attribute generated successfully NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event\"}},\"freeReserveTreeAttributes(uint32)\":{\"details\":\"free reservation of a unique symbol\",\"params\":{\"generatedCode\":\"unique symbol to reserve\"}},\"generatedAttributes(uint32)\":{\"returns\":{\"_0\":\"number of generations of a unique symbol \"}},\"isTreeAttribute()\":{\"returns\":{\"_0\":\"true in case of TreeAttribute contract have been initialized \"}},\"rankOf(address)\":{\"returns\":{\"_0\":\"rank of buyer address \"}},\"reserveTreeAttributes(uint32)\":{\"details\":\"reserve a unique symbol\",\"params\":{\"generatedCode\":\"unique symbol to reserve\"}},\"reservedAttributes(uint32)\":{\"returns\":{\"_0\":\"reserved status of a unique symbol \"}},\"setBuyerRank(address,uint256,uint256,uint64,uint64)\":{\"details\":\"the function Tries to Calculate the rank of buyer based on transaction statistics of his/her wallet\",\"params\":{\"buyer\":\"address of buyer\",\"treejerSpent\":\"weth amount spent in treejer\",\"treesOwned\":\"number of trees owned\",\"walletSpent\":\"weth amount spent from wallet\",\"walletSpentCount\":\"number of spents transactions from wallet NOTE emit a {BuyerRankSet} event\"}},\"setTreeAttributesByAdmin(uint256,uint32)\":{\"details\":\"admin assigns symbol to specified treeId\",\"params\":{\"generatedCode\":\"unique symbol code to assign\",\"treeId\":\"id of tree\"}},\"setTreeFactoryAddress(address)\":{\"details\":\"set {_address} to TreeFactory contract address \"},\"setTrustedForwarder(address)\":{\"details\":\"set {_address} to trusted forwarder \"},\"treeAttributes(uint256)\":{\"returns\":{\"_0\":\"treeType\",\"_1\":\"groundType\",\"_2\":\"trunkColor\",\"_3\":\"crownColor\",\"_4\":\"groundColor\",\"_5\":\"specialEffects\",\"_6\":\"universalCode\",\"_7\":\"exists\"}},\"treeFactory()\":{\"returns\":{\"_0\":\"TreeFactory contract address \"}}},\"title\":\"TreeAttribute interfce \",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"treeAttributes(uint256)\":{\"notice\":\"return Attributes data of {_treeId}\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/.coverage_contracts/tree/ITreeAttribute.sol\":\"ITreeAttribute\"},\"evmVersion\":\"berlin\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/.coverage_contracts/tree/ITreeAttribute.sol\":{\"keccak256\":\"0x39ff907a4d84286c6de7b182a32176497fdf8325ff362be661710c8b66476a91\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://df926059a558e908e56a3db3c30137d36ddb4367f78f512824c2a01cef133100\",\"dweb:/ipfs/QmXkvh4MvVSJoQ6TRrumYKsq5sHrmbimyjG76VmjGb5s6B\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.6;\nfunction c_0x5e60ab1c(bytes32 c__0x5e60ab1c) pure {}\n\n\n/** @title TreeAttribute interfce */\ninterface ITreeAttribute {\n    /** @return true in case of TreeAttribute contract have been initialized */\n    function isTreeAttribute() external view returns (bool);\n\n    /** @return AccessRestriction contract address */\n    function accessRestriction() external view returns (address);\n\n    /** @return TreeFactory contract address */\n    function treeFactory() external view returns (address);\n\n    /** @return rank of buyer address */\n    function rankOf(address _buyer) external view returns (uint8);\n\n    /** return Attributes data of {_treeId}\n     * @return treeType\n     * @return groundType\n     * @return trunkColor\n     * @return crownColor\n     * @return groundColor\n     * @return specialEffects\n     * @return universalCode\n     * @return exists\n     */\n    function treeAttributes(uint256 _treeId)\n        external\n        view\n        returns (\n            uint32,\n            uint32,\n            uint32,\n            uint32,\n            uint32,\n            uint32,\n            uint32,\n            uint32\n        );\n\n    /** @return number of generations of a unique symbol */\n    function generatedAttributes(uint32 attributeId)\n        external\n        view\n        returns (uint32);\n\n    /** @return reserved status of a unique symbol */\n    function reservedAttributes(uint32 attributeId)\n        external\n        view\n        returns (uint8);\n\n    /** @dev set {_address} to trusted forwarder */\n    function setTrustedForwarder(address _address) external;\n\n    /** @dev set {_address} to TreeFactory contract address */\n    function setTreeFactoryAddress(address _address) external;\n\n    /**\n     * @dev reserve a unique symbol\n     * @param generatedCode unique symbol to reserve\n     */\n    function reserveTreeAttributes(uint32 generatedCode) external;\n\n    /**\n     * @dev free reservation of a unique symbol\n     * @param generatedCode unique symbol to reserve\n     */\n    function freeReserveTreeAttributes(uint32 generatedCode) external;\n\n    /**\n     * @dev admin assigns symbol to specified treeId\n     * @param treeId id of tree\n     * @param generatedCode unique symbol code to assign\n     */\n    function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)\n        external;\n\n    /**\n     * @dev generate a 256 bits random number as a base for tree attributes and slice it\n     * in 28 bits parts\n     * @param treeId id of tree\n     * @return if unique tree attribute generated successfully\n     * NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event\n     */\n    function createTreeAttributes(uint256 treeId) external returns (bool);\n\n    /**\n     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of\n     * his/her wallet\n     * @param buyer address of buyer\n     * @param treejerSpent weth amount spent in treejer\n     * @param walletSpent weth amount spent from wallet\n     * @param treesOwned number of trees owned\n     * @param walletSpentCount number of spents transactions from wallet\n     * NOTE emit a {BuyerRankSet} event\n     */\n    function setBuyerRank(\n        address buyer,\n        uint256 treejerSpent,\n        uint256 walletSpent,\n        uint64 treesOwned,\n        uint64 walletSpentCount\n    ) external;\n\n    /** @dev emitted when {rank} set for {buyer} */\n    event BuyerRankSet(address buyer, uint8 rank);\n    /** @dev emitted when unique tree attribute generated successfully for {treeId} */\n    event TreeAttributesGenerated(uint256 treeId);\n    /** @dev emitted when unique tree attribute fail to generate for {treeId} */\n    event TreeAttributesNotGenerated(uint256 treeId);\n}\n",
+  "sourcePath": "/home/smuggler/contract/.coverage_contracts/tree/ITreeAttribute.sol",
+  "ast": {
+    "absolutePath": "project:/.coverage_contracts/tree/ITreeAttribute.sol",
+    "exportedSymbols": {
+      "ITreeAttribute": [
+        31365
+      ],
+      "c_0x5e60ab1c": [
+        31228
+      ]
+    },
+    "id": 31366,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 31222,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".6"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:23:97"
+      },
+      {
+        "body": {
+          "id": 31227,
+          "nodeType": "Block",
+          "src": "106:2:97",
+          "statements": []
+        },
+        "id": 31228,
+        "implemented": true,
+        "kind": "freeFunction",
+        "modifiers": [],
+        "name": "c_0x5e60ab1c",
+        "nameLocation": "65:12:97",
+        "nodeType": "FunctionDefinition",
+        "parameters": {
+          "id": 31225,
+          "nodeType": "ParameterList",
+          "parameters": [
+            {
+              "constant": false,
+              "id": 31224,
+              "mutability": "mutable",
+              "name": "c__0x5e60ab1c",
+              "nameLocation": "86:13:97",
+              "nodeType": "VariableDeclaration",
+              "scope": 31228,
+              "src": "78:21:97",
+              "stateVariable": false,
+              "storageLocation": "default",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              },
+              "typeName": {
+                "id": 31223,
+                "name": "bytes32",
+                "nodeType": "ElementaryTypeName",
+                "src": "78:7:97",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                }
+              },
+              "visibility": "internal"
+            }
+          ],
+          "src": "77:23:97"
+        },
+        "returnParameters": {
+          "id": 31226,
+          "nodeType": "ParameterList",
+          "parameters": [],
+          "src": "106:0:97"
+        },
+        "scope": 31366,
+        "src": "56:52:97",
+        "stateMutability": "pure",
+        "virtual": false,
+        "visibility": "internal"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 31229,
+          "nodeType": "StructuredDocumentation",
+          "src": "111:36:97",
+          "text": "@title TreeAttribute interfce "
+        },
+        "fullyImplemented": false,
+        "id": 31365,
+        "linearizedBaseContracts": [
+          31365
+        ],
+        "name": "ITreeAttribute",
+        "nameLocation": "158:14:97",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 31230,
+              "nodeType": "StructuredDocumentation",
+              "src": "179:75:97",
+              "text": "@return true in case of TreeAttribute contract have been initialized "
+            },
+            "functionSelector": "46efcdc1",
+            "id": 31235,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isTreeAttribute",
+            "nameLocation": "268:15:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31231,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "283:2:97"
+            },
+            "returnParameters": {
+              "id": 31234,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31233,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31235,
+                  "src": "309:4:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 31232,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "309:4:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "308:6:97"
+            },
+            "scope": 31365,
+            "src": "259:56:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31236,
+              "nodeType": "StructuredDocumentation",
+              "src": "321:49:97",
+              "text": "@return AccessRestriction contract address "
+            },
+            "functionSelector": "d6762c4a",
+            "id": 31241,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "accessRestriction",
+            "nameLocation": "384:17:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31237,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "401:2:97"
+            },
+            "returnParameters": {
+              "id": 31240,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31239,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31241,
+                  "src": "427:7:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31238,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "427:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "426:9:97"
+            },
+            "scope": 31365,
+            "src": "375:61:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31242,
+              "nodeType": "StructuredDocumentation",
+              "src": "442:43:97",
+              "text": "@return TreeFactory contract address "
+            },
+            "functionSelector": "421ef6d4",
+            "id": 31247,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "treeFactory",
+            "nameLocation": "499:11:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31243,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "510:2:97"
+            },
+            "returnParameters": {
+              "id": 31246,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31245,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31247,
+                  "src": "536:7:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31244,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "536:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "535:9:97"
+            },
+            "scope": 31365,
+            "src": "490:55:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31248,
+              "nodeType": "StructuredDocumentation",
+              "src": "551:36:97",
+              "text": "@return rank of buyer address "
+            },
+            "functionSelector": "874c1daf",
+            "id": 31255,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "rankOf",
+            "nameLocation": "601:6:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31251,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31250,
+                  "mutability": "mutable",
+                  "name": "_buyer",
+                  "nameLocation": "616:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31255,
+                  "src": "608:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31249,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "608:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "607:16:97"
+            },
+            "returnParameters": {
+              "id": 31254,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31253,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31255,
+                  "src": "647:5:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31252,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "647:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "646:7:97"
+            },
+            "scope": 31365,
+            "src": "592:62:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31256,
+              "nodeType": "StructuredDocumentation",
+              "src": "660:257:97",
+              "text": "return Attributes data of {_treeId}\n @return treeType\n @return groundType\n @return trunkColor\n @return crownColor\n @return groundColor\n @return specialEffects\n @return universalCode\n @return exists"
+            },
+            "functionSelector": "786354a6",
+            "id": 31277,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "treeAttributes",
+            "nameLocation": "931:14:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31259,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31258,
+                  "mutability": "mutable",
+                  "name": "_treeId",
+                  "nameLocation": "954:7:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "946:15:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31257,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "946:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "945:17:97"
+            },
+            "returnParameters": {
+              "id": 31276,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31261,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1023:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31260,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1023:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31263,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1043:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31262,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1043:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31265,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1063:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31264,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1063:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31267,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1083:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31266,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1083:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31269,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1103:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31268,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1103:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31271,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1123:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31270,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1123:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31273,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1143:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31272,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1143:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31275,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1163:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31274,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1163:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1009:170:97"
+            },
+            "scope": 31365,
+            "src": "922:258:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31278,
+              "nodeType": "StructuredDocumentation",
+              "src": "1186:55:97",
+              "text": "@return number of generations of a unique symbol "
+            },
+            "functionSelector": "b55c0a83",
+            "id": 31285,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "generatedAttributes",
+            "nameLocation": "1255:19:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31281,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31280,
+                  "mutability": "mutable",
+                  "name": "attributeId",
+                  "nameLocation": "1282:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31285,
+                  "src": "1275:18:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31279,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1275:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1274:20:97"
+            },
+            "returnParameters": {
+              "id": 31284,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31283,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31285,
+                  "src": "1342:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31282,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1342:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1341:8:97"
+            },
+            "scope": 31365,
+            "src": "1246:104:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31286,
+              "nodeType": "StructuredDocumentation",
+              "src": "1356:49:97",
+              "text": "@return reserved status of a unique symbol "
+            },
+            "functionSelector": "448e5d2b",
+            "id": 31293,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "reservedAttributes",
+            "nameLocation": "1419:18:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31289,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31288,
+                  "mutability": "mutable",
+                  "name": "attributeId",
+                  "nameLocation": "1445:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31293,
+                  "src": "1438:18:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31287,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1438:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1437:20:97"
+            },
+            "returnParameters": {
+              "id": 31292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31291,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31293,
+                  "src": "1505:5:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31290,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1505:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1504:7:97"
+            },
+            "scope": 31365,
+            "src": "1410:102:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31294,
+              "nodeType": "StructuredDocumentation",
+              "src": "1518:47:97",
+              "text": "@dev set {_address} to trusted forwarder "
+            },
+            "functionSelector": "da742228",
+            "id": 31299,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTrustedForwarder",
+            "nameLocation": "1579:19:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31297,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31296,
+                  "mutability": "mutable",
+                  "name": "_address",
+                  "nameLocation": "1607:8:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31299,
+                  "src": "1599:16:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31295,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1599:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1598:18:97"
+            },
+            "returnParameters": {
+              "id": 31298,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1625:0:97"
+            },
+            "scope": 31365,
+            "src": "1570:56:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31300,
+              "nodeType": "StructuredDocumentation",
+              "src": "1632:58:97",
+              "text": "@dev set {_address} to TreeFactory contract address "
+            },
+            "functionSelector": "0bf351f8",
+            "id": 31305,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTreeFactoryAddress",
+            "nameLocation": "1704:21:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31303,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31302,
+                  "mutability": "mutable",
+                  "name": "_address",
+                  "nameLocation": "1734:8:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31305,
+                  "src": "1726:16:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31301,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1726:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1725:18:97"
+            },
+            "returnParameters": {
+              "id": 31304,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1752:0:97"
+            },
+            "scope": 31365,
+            "src": "1695:58:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31306,
+              "nodeType": "StructuredDocumentation",
+              "src": "1759:100:97",
+              "text": " @dev reserve a unique symbol\n @param generatedCode unique symbol to reserve"
+            },
+            "functionSelector": "89e2af18",
+            "id": 31311,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "reserveTreeAttributes",
+            "nameLocation": "1873:21:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31309,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31308,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "1902:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31311,
+                  "src": "1895:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31307,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1895:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1894:22:97"
+            },
+            "returnParameters": {
+              "id": 31310,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1925:0:97"
+            },
+            "scope": 31365,
+            "src": "1864:62:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31312,
+              "nodeType": "StructuredDocumentation",
+              "src": "1932:112:97",
+              "text": " @dev free reservation of a unique symbol\n @param generatedCode unique symbol to reserve"
+            },
+            "functionSelector": "29769253",
+            "id": 31317,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "freeReserveTreeAttributes",
+            "nameLocation": "2058:25:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31315,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31314,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "2091:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31317,
+                  "src": "2084:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31313,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2084:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2083:22:97"
+            },
+            "returnParameters": {
+              "id": 31316,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2114:0:97"
+            },
+            "scope": 31365,
+            "src": "2049:66:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31318,
+              "nodeType": "StructuredDocumentation",
+              "src": "2121:153:97",
+              "text": " @dev admin assigns symbol to specified treeId\n @param treeId id of tree\n @param generatedCode unique symbol code to assign"
+            },
+            "functionSelector": "2a4ddf6d",
+            "id": 31325,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTreeAttributesByAdmin",
+            "nameLocation": "2288:24:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31323,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31320,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "2321:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31325,
+                  "src": "2313:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31319,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2313:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31322,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "2336:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31325,
+                  "src": "2329:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31321,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2329:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2312:38:97"
+            },
+            "returnParameters": {
+              "id": 31324,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2367:0:97"
+            },
+            "scope": 31365,
+            "src": "2279:89:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31326,
+              "nodeType": "StructuredDocumentation",
+              "src": "2374:302:97",
+              "text": " @dev generate a 256 bits random number as a base for tree attributes and slice it\n in 28 bits parts\n @param treeId id of tree\n @return if unique tree attribute generated successfully\n NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event"
+            },
+            "functionSelector": "77522cc9",
+            "id": 31333,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createTreeAttributes",
+            "nameLocation": "2690:20:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31329,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31328,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "2719:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31333,
+                  "src": "2711:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31327,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2711:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2710:16:97"
+            },
+            "returnParameters": {
+              "id": 31332,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31331,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31333,
+                  "src": "2745:4:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 31330,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2745:4:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2744:6:97"
+            },
+            "scope": 31365,
+            "src": "2681:70:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31334,
+              "nodeType": "StructuredDocumentation",
+              "src": "2757:439:97",
+              "text": " @dev the function Tries to Calculate the rank of buyer based on transaction statistics of\n his/her wallet\n @param buyer address of buyer\n @param treejerSpent weth amount spent in treejer\n @param walletSpent weth amount spent from wallet\n @param treesOwned number of trees owned\n @param walletSpentCount number of spents transactions from wallet\n NOTE emit a {BuyerRankSet} event"
+            },
+            "functionSelector": "ac689ec3",
+            "id": 31347,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setBuyerRank",
+            "nameLocation": "3210:12:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31345,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31336,
+                  "mutability": "mutable",
+                  "name": "buyer",
+                  "nameLocation": "3240:5:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3232:13:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31335,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3232:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31338,
+                  "mutability": "mutable",
+                  "name": "treejerSpent",
+                  "nameLocation": "3263:12:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3255:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31337,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3255:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31340,
+                  "mutability": "mutable",
+                  "name": "walletSpent",
+                  "nameLocation": "3293:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3285:19:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31339,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3285:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31342,
+                  "mutability": "mutable",
+                  "name": "treesOwned",
+                  "nameLocation": "3321:10:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3314:17:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 31341,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3314:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31344,
+                  "mutability": "mutable",
+                  "name": "walletSpentCount",
+                  "nameLocation": "3348:16:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3341:23:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 31343,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3341:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3222:148:97"
+            },
+            "returnParameters": {
+              "id": 31346,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3379:0:97"
+            },
+            "scope": 31365,
+            "src": "3201:179:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31348,
+              "nodeType": "StructuredDocumentation",
+              "src": "3386:47:97",
+              "text": "@dev emitted when {rank} set for {buyer} "
+            },
+            "id": 31354,
+            "name": "BuyerRankSet",
+            "nameLocation": "3444:12:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31353,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31350,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "buyer",
+                  "nameLocation": "3465:5:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31354,
+                  "src": "3457:13:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31349,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3457:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31352,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rank",
+                  "nameLocation": "3478:4:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31354,
+                  "src": "3472:10:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31351,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3472:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3456:27:97"
+            },
+            "src": "3438:46:97"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31355,
+              "nodeType": "StructuredDocumentation",
+              "src": "3489:82:97",
+              "text": "@dev emitted when unique tree attribute generated successfully for {treeId} "
+            },
+            "id": 31359,
+            "name": "TreeAttributesGenerated",
+            "nameLocation": "3582:23:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31358,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31357,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "3614:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31359,
+                  "src": "3606:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31356,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3606:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3605:16:97"
+            },
+            "src": "3576:46:97"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31360,
+              "nodeType": "StructuredDocumentation",
+              "src": "3627:76:97",
+              "text": "@dev emitted when unique tree attribute fail to generate for {treeId} "
+            },
+            "id": 31364,
+            "name": "TreeAttributesNotGenerated",
+            "nameLocation": "3714:26:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31363,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31362,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "3749:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31364,
+                  "src": "3741:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31361,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3741:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3740:16:97"
+            },
+            "src": "3708:49:97"
+          }
+        ],
+        "scope": 31366,
+        "src": "148:3611:97",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:3728:97"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/.coverage_contracts/tree/ITreeAttribute.sol",
+    "exportedSymbols": {
+      "ITreeAttribute": [
+        31365
+      ],
+      "c_0x5e60ab1c": [
+        31228
+      ]
+    },
+    "id": 31366,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 31222,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".6"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:23:97"
+      },
+      {
+        "body": {
+          "id": 31227,
+          "nodeType": "Block",
+          "src": "106:2:97",
+          "statements": []
+        },
+        "id": 31228,
+        "implemented": true,
+        "kind": "freeFunction",
+        "modifiers": [],
+        "name": "c_0x5e60ab1c",
+        "nameLocation": "65:12:97",
+        "nodeType": "FunctionDefinition",
+        "parameters": {
+          "id": 31225,
+          "nodeType": "ParameterList",
+          "parameters": [
+            {
+              "constant": false,
+              "id": 31224,
+              "mutability": "mutable",
+              "name": "c__0x5e60ab1c",
+              "nameLocation": "86:13:97",
+              "nodeType": "VariableDeclaration",
+              "scope": 31228,
+              "src": "78:21:97",
+              "stateVariable": false,
+              "storageLocation": "default",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              },
+              "typeName": {
+                "id": 31223,
+                "name": "bytes32",
+                "nodeType": "ElementaryTypeName",
+                "src": "78:7:97",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes32",
+                  "typeString": "bytes32"
+                }
+              },
+              "visibility": "internal"
+            }
+          ],
+          "src": "77:23:97"
+        },
+        "returnParameters": {
+          "id": 31226,
+          "nodeType": "ParameterList",
+          "parameters": [],
+          "src": "106:0:97"
+        },
+        "scope": 31366,
+        "src": "56:52:97",
+        "stateMutability": "pure",
+        "virtual": false,
+        "visibility": "internal"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 31229,
+          "nodeType": "StructuredDocumentation",
+          "src": "111:36:97",
+          "text": "@title TreeAttribute interfce "
+        },
+        "fullyImplemented": false,
+        "id": 31365,
+        "linearizedBaseContracts": [
+          31365
+        ],
+        "name": "ITreeAttribute",
+        "nameLocation": "158:14:97",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 31230,
+              "nodeType": "StructuredDocumentation",
+              "src": "179:75:97",
+              "text": "@return true in case of TreeAttribute contract have been initialized "
+            },
+            "functionSelector": "46efcdc1",
+            "id": 31235,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isTreeAttribute",
+            "nameLocation": "268:15:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31231,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "283:2:97"
+            },
+            "returnParameters": {
+              "id": 31234,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31233,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31235,
+                  "src": "309:4:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 31232,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "309:4:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "308:6:97"
+            },
+            "scope": 31365,
+            "src": "259:56:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31236,
+              "nodeType": "StructuredDocumentation",
+              "src": "321:49:97",
+              "text": "@return AccessRestriction contract address "
+            },
+            "functionSelector": "d6762c4a",
+            "id": 31241,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "accessRestriction",
+            "nameLocation": "384:17:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31237,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "401:2:97"
+            },
+            "returnParameters": {
+              "id": 31240,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31239,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31241,
+                  "src": "427:7:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31238,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "427:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "426:9:97"
+            },
+            "scope": 31365,
+            "src": "375:61:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31242,
+              "nodeType": "StructuredDocumentation",
+              "src": "442:43:97",
+              "text": "@return TreeFactory contract address "
+            },
+            "functionSelector": "421ef6d4",
+            "id": 31247,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "treeFactory",
+            "nameLocation": "499:11:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31243,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "510:2:97"
+            },
+            "returnParameters": {
+              "id": 31246,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31245,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31247,
+                  "src": "536:7:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31244,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "536:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "535:9:97"
+            },
+            "scope": 31365,
+            "src": "490:55:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31248,
+              "nodeType": "StructuredDocumentation",
+              "src": "551:36:97",
+              "text": "@return rank of buyer address "
+            },
+            "functionSelector": "874c1daf",
+            "id": 31255,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "rankOf",
+            "nameLocation": "601:6:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31251,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31250,
+                  "mutability": "mutable",
+                  "name": "_buyer",
+                  "nameLocation": "616:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31255,
+                  "src": "608:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31249,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "608:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "607:16:97"
+            },
+            "returnParameters": {
+              "id": 31254,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31253,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31255,
+                  "src": "647:5:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31252,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "647:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "646:7:97"
+            },
+            "scope": 31365,
+            "src": "592:62:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31256,
+              "nodeType": "StructuredDocumentation",
+              "src": "660:257:97",
+              "text": "return Attributes data of {_treeId}\n @return treeType\n @return groundType\n @return trunkColor\n @return crownColor\n @return groundColor\n @return specialEffects\n @return universalCode\n @return exists"
+            },
+            "functionSelector": "786354a6",
+            "id": 31277,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "treeAttributes",
+            "nameLocation": "931:14:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31259,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31258,
+                  "mutability": "mutable",
+                  "name": "_treeId",
+                  "nameLocation": "954:7:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "946:15:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31257,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "946:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "945:17:97"
+            },
+            "returnParameters": {
+              "id": 31276,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31261,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1023:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31260,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1023:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31263,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1043:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31262,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1043:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31265,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1063:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31264,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1063:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31267,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1083:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31266,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1083:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31269,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1103:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31268,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1103:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31271,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1123:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31270,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1123:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31273,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1143:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31272,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1143:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31275,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31277,
+                  "src": "1163:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31274,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1163:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1009:170:97"
+            },
+            "scope": 31365,
+            "src": "922:258:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31278,
+              "nodeType": "StructuredDocumentation",
+              "src": "1186:55:97",
+              "text": "@return number of generations of a unique symbol "
+            },
+            "functionSelector": "b55c0a83",
+            "id": 31285,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "generatedAttributes",
+            "nameLocation": "1255:19:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31281,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31280,
+                  "mutability": "mutable",
+                  "name": "attributeId",
+                  "nameLocation": "1282:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31285,
+                  "src": "1275:18:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31279,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1275:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1274:20:97"
+            },
+            "returnParameters": {
+              "id": 31284,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31283,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31285,
+                  "src": "1342:6:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31282,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1342:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1341:8:97"
+            },
+            "scope": 31365,
+            "src": "1246:104:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31286,
+              "nodeType": "StructuredDocumentation",
+              "src": "1356:49:97",
+              "text": "@return reserved status of a unique symbol "
+            },
+            "functionSelector": "448e5d2b",
+            "id": 31293,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "reservedAttributes",
+            "nameLocation": "1419:18:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31289,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31288,
+                  "mutability": "mutable",
+                  "name": "attributeId",
+                  "nameLocation": "1445:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31293,
+                  "src": "1438:18:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31287,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1438:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1437:20:97"
+            },
+            "returnParameters": {
+              "id": 31292,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31291,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31293,
+                  "src": "1505:5:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31290,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1505:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1504:7:97"
+            },
+            "scope": 31365,
+            "src": "1410:102:97",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31294,
+              "nodeType": "StructuredDocumentation",
+              "src": "1518:47:97",
+              "text": "@dev set {_address} to trusted forwarder "
+            },
+            "functionSelector": "da742228",
+            "id": 31299,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTrustedForwarder",
+            "nameLocation": "1579:19:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31297,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31296,
+                  "mutability": "mutable",
+                  "name": "_address",
+                  "nameLocation": "1607:8:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31299,
+                  "src": "1599:16:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31295,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1599:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1598:18:97"
+            },
+            "returnParameters": {
+              "id": 31298,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1625:0:97"
+            },
+            "scope": 31365,
+            "src": "1570:56:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31300,
+              "nodeType": "StructuredDocumentation",
+              "src": "1632:58:97",
+              "text": "@dev set {_address} to TreeFactory contract address "
+            },
+            "functionSelector": "0bf351f8",
+            "id": 31305,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTreeFactoryAddress",
+            "nameLocation": "1704:21:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31303,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31302,
+                  "mutability": "mutable",
+                  "name": "_address",
+                  "nameLocation": "1734:8:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31305,
+                  "src": "1726:16:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31301,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1726:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1725:18:97"
+            },
+            "returnParameters": {
+              "id": 31304,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1752:0:97"
+            },
+            "scope": 31365,
+            "src": "1695:58:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31306,
+              "nodeType": "StructuredDocumentation",
+              "src": "1759:100:97",
+              "text": " @dev reserve a unique symbol\n @param generatedCode unique symbol to reserve"
+            },
+            "functionSelector": "89e2af18",
+            "id": 31311,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "reserveTreeAttributes",
+            "nameLocation": "1873:21:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31309,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31308,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "1902:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31311,
+                  "src": "1895:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31307,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1895:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1894:22:97"
+            },
+            "returnParameters": {
+              "id": 31310,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1925:0:97"
+            },
+            "scope": 31365,
+            "src": "1864:62:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31312,
+              "nodeType": "StructuredDocumentation",
+              "src": "1932:112:97",
+              "text": " @dev free reservation of a unique symbol\n @param generatedCode unique symbol to reserve"
+            },
+            "functionSelector": "29769253",
+            "id": 31317,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "freeReserveTreeAttributes",
+            "nameLocation": "2058:25:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31315,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31314,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "2091:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31317,
+                  "src": "2084:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31313,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2084:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2083:22:97"
+            },
+            "returnParameters": {
+              "id": 31316,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2114:0:97"
+            },
+            "scope": 31365,
+            "src": "2049:66:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31318,
+              "nodeType": "StructuredDocumentation",
+              "src": "2121:153:97",
+              "text": " @dev admin assigns symbol to specified treeId\n @param treeId id of tree\n @param generatedCode unique symbol code to assign"
+            },
+            "functionSelector": "2a4ddf6d",
+            "id": 31325,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setTreeAttributesByAdmin",
+            "nameLocation": "2288:24:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31323,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31320,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "2321:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31325,
+                  "src": "2313:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31319,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2313:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31322,
+                  "mutability": "mutable",
+                  "name": "generatedCode",
+                  "nameLocation": "2336:13:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31325,
+                  "src": "2329:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  },
+                  "typeName": {
+                    "id": 31321,
+                    "name": "uint32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2329:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint32",
+                      "typeString": "uint32"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2312:38:97"
+            },
+            "returnParameters": {
+              "id": 31324,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2367:0:97"
+            },
+            "scope": 31365,
+            "src": "2279:89:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31326,
+              "nodeType": "StructuredDocumentation",
+              "src": "2374:302:97",
+              "text": " @dev generate a 256 bits random number as a base for tree attributes and slice it\n in 28 bits parts\n @param treeId id of tree\n @return if unique tree attribute generated successfully\n NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event"
+            },
+            "functionSelector": "77522cc9",
+            "id": 31333,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createTreeAttributes",
+            "nameLocation": "2690:20:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31329,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31328,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "2719:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31333,
+                  "src": "2711:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31327,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2711:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2710:16:97"
+            },
+            "returnParameters": {
+              "id": 31332,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31331,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31333,
+                  "src": "2745:4:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 31330,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2745:4:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2744:6:97"
+            },
+            "scope": 31365,
+            "src": "2681:70:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 31334,
+              "nodeType": "StructuredDocumentation",
+              "src": "2757:439:97",
+              "text": " @dev the function Tries to Calculate the rank of buyer based on transaction statistics of\n his/her wallet\n @param buyer address of buyer\n @param treejerSpent weth amount spent in treejer\n @param walletSpent weth amount spent from wallet\n @param treesOwned number of trees owned\n @param walletSpentCount number of spents transactions from wallet\n NOTE emit a {BuyerRankSet} event"
+            },
+            "functionSelector": "ac689ec3",
+            "id": 31347,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setBuyerRank",
+            "nameLocation": "3210:12:97",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 31345,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31336,
+                  "mutability": "mutable",
+                  "name": "buyer",
+                  "nameLocation": "3240:5:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3232:13:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31335,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3232:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31338,
+                  "mutability": "mutable",
+                  "name": "treejerSpent",
+                  "nameLocation": "3263:12:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3255:20:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31337,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3255:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31340,
+                  "mutability": "mutable",
+                  "name": "walletSpent",
+                  "nameLocation": "3293:11:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3285:19:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31339,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3285:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31342,
+                  "mutability": "mutable",
+                  "name": "treesOwned",
+                  "nameLocation": "3321:10:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3314:17:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 31341,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3314:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31344,
+                  "mutability": "mutable",
+                  "name": "walletSpentCount",
+                  "nameLocation": "3348:16:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31347,
+                  "src": "3341:23:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint64",
+                    "typeString": "uint64"
+                  },
+                  "typeName": {
+                    "id": 31343,
+                    "name": "uint64",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3341:6:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint64",
+                      "typeString": "uint64"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3222:148:97"
+            },
+            "returnParameters": {
+              "id": 31346,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "3379:0:97"
+            },
+            "scope": 31365,
+            "src": "3201:179:97",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31348,
+              "nodeType": "StructuredDocumentation",
+              "src": "3386:47:97",
+              "text": "@dev emitted when {rank} set for {buyer} "
+            },
+            "id": 31354,
+            "name": "BuyerRankSet",
+            "nameLocation": "3444:12:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31353,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31350,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "buyer",
+                  "nameLocation": "3465:5:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31354,
+                  "src": "3457:13:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 31349,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3457:7:97",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 31352,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rank",
+                  "nameLocation": "3478:4:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31354,
+                  "src": "3472:10:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint8",
+                    "typeString": "uint8"
+                  },
+                  "typeName": {
+                    "id": 31351,
+                    "name": "uint8",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3472:5:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint8",
+                      "typeString": "uint8"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3456:27:97"
+            },
+            "src": "3438:46:97"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31355,
+              "nodeType": "StructuredDocumentation",
+              "src": "3489:82:97",
+              "text": "@dev emitted when unique tree attribute generated successfully for {treeId} "
+            },
+            "id": 31359,
+            "name": "TreeAttributesGenerated",
+            "nameLocation": "3582:23:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31358,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31357,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "3614:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31359,
+                  "src": "3606:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31356,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3606:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3605:16:97"
+            },
+            "src": "3576:46:97"
+          },
+          {
+            "anonymous": false,
+            "documentation": {
+              "id": 31360,
+              "nodeType": "StructuredDocumentation",
+              "src": "3627:76:97",
+              "text": "@dev emitted when unique tree attribute fail to generate for {treeId} "
+            },
+            "id": 31364,
+            "name": "TreeAttributesNotGenerated",
+            "nameLocation": "3714:26:97",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 31363,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 31362,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "treeId",
+                  "nameLocation": "3749:6:97",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 31364,
+                  "src": "3741:14:97",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 31361,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3741:7:97",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3740:16:97"
+            },
+            "src": "3708:49:97"
+          }
+        ],
+        "scope": 31366,
+        "src": "148:3611:97",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:3728:97"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.6+commit.11564f7e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-08-31T13:33:31.735Z",
+  "devdoc": {
+    "events": {
+      "BuyerRankSet(address,uint8)": {
+        "details": "emitted when {rank} set for {buyer} "
+      },
+      "TreeAttributesGenerated(uint256)": {
+        "details": "emitted when unique tree attribute generated successfully for {treeId} "
+      },
+      "TreeAttributesNotGenerated(uint256)": {
+        "details": "emitted when unique tree attribute fail to generate for {treeId} "
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "accessRestriction()": {
+        "returns": {
+          "_0": "AccessRestriction contract address "
+        }
+      },
+      "createTreeAttributes(uint256)": {
+        "details": "generate a 256 bits random number as a base for tree attributes and slice it in 28 bits parts",
+        "params": {
+          "treeId": "id of tree"
+        },
+        "returns": {
+          "_0": "if unique tree attribute generated successfully NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event"
+        }
+      },
+      "freeReserveTreeAttributes(uint32)": {
+        "details": "free reservation of a unique symbol",
+        "params": {
+          "generatedCode": "unique symbol to reserve"
+        }
+      },
+      "generatedAttributes(uint32)": {
+        "returns": {
+          "_0": "number of generations of a unique symbol "
+        }
+      },
+      "isTreeAttribute()": {
+        "returns": {
+          "_0": "true in case of TreeAttribute contract have been initialized "
+        }
+      },
+      "rankOf(address)": {
+        "returns": {
+          "_0": "rank of buyer address "
+        }
+      },
+      "reserveTreeAttributes(uint32)": {
+        "details": "reserve a unique symbol",
+        "params": {
+          "generatedCode": "unique symbol to reserve"
+        }
+      },
+      "reservedAttributes(uint32)": {
+        "returns": {
+          "_0": "reserved status of a unique symbol "
+        }
+      },
+      "setBuyerRank(address,uint256,uint256,uint64,uint64)": {
+        "details": "the function Tries to Calculate the rank of buyer based on transaction statistics of his/her wallet",
+        "params": {
+          "buyer": "address of buyer",
+          "treejerSpent": "weth amount spent in treejer",
+          "treesOwned": "number of trees owned",
+          "walletSpent": "weth amount spent from wallet",
+          "walletSpentCount": "number of spents transactions from wallet NOTE emit a {BuyerRankSet} event"
+        }
+      },
+      "setTreeAttributesByAdmin(uint256,uint32)": {
+        "details": "admin assigns symbol to specified treeId",
+        "params": {
+          "generatedCode": "unique symbol code to assign",
+          "treeId": "id of tree"
+        }
+      },
+      "setTreeFactoryAddress(address)": {
+        "details": "set {_address} to TreeFactory contract address "
+      },
+      "setTrustedForwarder(address)": {
+        "details": "set {_address} to trusted forwarder "
+      },
+      "treeAttributes(uint256)": {
+        "returns": {
+          "_0": "treeType",
+          "_1": "groundType",
+          "_2": "trunkColor",
+          "_3": "crownColor",
+          "_4": "groundColor",
+          "_5": "specialEffects",
+          "_6": "universalCode",
+          "_7": "exists"
+        }
+      },
+      "treeFactory()": {
+        "returns": {
+          "_0": "TreeFactory contract address "
+        }
+      }
+    },
+    "title": "TreeAttribute interfce ",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "treeAttributes(uint256)": {
+        "notice": "return Attributes data of {_treeId}"
+      }
+    },
+    "version": 1
+  }
+}

@@ -16,6 +16,9 @@ const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
+//test
+const TestWhitelistPaymaster = artifacts.require("TestWhitelistPaymaster.sol");
+
 contract("Gsn", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -293,5 +296,19 @@ contract("Gsn", (accounts) => {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+  });
+
+  it("test TestTreeAttributes", async () => {
+    //deploy TestWhitelistPaymaster
+
+    testInstance = await deployProxy(TestWhitelistPaymaster, [], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await testInstance.test(whitelistPaymasterInstance.address, {
+      from: deployerAccount,
+    });
   });
 });

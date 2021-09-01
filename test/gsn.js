@@ -37,18 +37,21 @@ contract("Gsn", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  beforeEach(async () => {
-    /////////////---------------------- deploy contracts ------------------- //////////////
-
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    relayRecipientInstance = await deployProxy(RelayRecipient, {
+    await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
+
+  beforeEach(async () => {
+    /////////////---------------------- deploy contracts ------------------- //////////////
+    relayRecipientInstance = await RelayRecipient.new({
+      from: deployerAccount,
     });
 
     whitelistPaymasterInstance = await WhitelistPaymaster.new(
@@ -56,13 +59,11 @@ contract("Gsn", (accounts) => {
       { from: deployerAccount }
     );
 
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    planterInstance = await Planter.new({ from: deployerAccount });
 
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+    await planterInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
   });
 
   it("return versionRecipient", async () => {

@@ -36,31 +36,47 @@ contract("DaiFunds", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const withdrawReason = "reason to withdraw";
 
+  before(async () => {
+    arInstance = await AccessRestriction.new({
+      from: deployerAccount,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
+    });
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount2,
+      deployerAccount
+    );
+  });
+
   beforeEach(async () => {
     /////////////---------------------- deploy contracts ------------------- //////////////
 
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+    daiFundsInstance = await DaiFunds.new({ from: deployerAccount });
+
+    await daiFundsInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
-    daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
-      initializer: "initialize",
+    fModel = await FinancialModel.new({ from: deployerAccount });
+
+    await fModel.initialize(arInstance.address, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
-    fModel = await deployProxy(FinancialModel, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    planterFundsInstnce = await PlanterFund.new({ from: deployerAccount });
 
-    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
+    await planterFundsInstnce.initialize(arInstance.address, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
@@ -74,8 +90,6 @@ contract("DaiFunds", (accounts) => {
       planterFundsInstnce.address,
       { from: deployerAccount }
     );
-
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
@@ -777,11 +791,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -876,17 +885,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1103,16 +1101,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,
@@ -1231,11 +1220,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1330,17 +1314,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1557,16 +1530,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,
@@ -1685,11 +1649,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1785,17 +1744,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2006,16 +1954,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,
@@ -2134,11 +2073,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2234,17 +2168,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2461,16 +2384,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,
@@ -2590,11 +2504,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 0;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2690,17 +2599,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2916,16 +2814,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund1 = 1000;
     const reserveFund2 = 0;
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,
@@ -3045,11 +2934,6 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     //////// -------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -3145,17 +3029,6 @@ contract("DaiFunds", (accounts) => {
     );
 
     ///////----------------------add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -3372,16 +3245,7 @@ contract("DaiFunds", (accounts) => {
     const reserveFund2 = 1000;
 
     ///////////--------------------- add roles
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount6,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+
     await Common.addTreejerContractRole(
       arInstance,
       daiFundsInstance.address,

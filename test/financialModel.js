@@ -23,25 +23,28 @@ contract("FinancialModel", (accounts) => {
   const userAccount7 = accounts[8];
   const treasuryAddress = accounts[9];
 
-  beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    financialModelInstance = await deployProxy(
-      FinancialModel,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
+    });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
+
+  beforeEach(async () => {
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+  });
+
   afterEach(async () => {});
 
   // //----------------------------------------- deploy successfully -----------------------------------------//
@@ -53,6 +56,7 @@ contract("FinancialModel", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+
   //--------------------------------addFundDistributionModel test-----------------------------------------------
   it("addFundDistributionModel should be success", async () => {
     const eventTx = await financialModelInstance.addFundDistributionModel(

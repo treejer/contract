@@ -25,15 +25,13 @@ contract("AccessRestriction", (accounts) => {
     "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
-  });
 
-  afterEach(async () => {
-    // await gbInstance.kill({ from: ownerAccount });
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
+    });
   });
 
   it("should add admin", async () => {

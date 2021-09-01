@@ -18,17 +18,20 @@ contract("WhitelistPaymaster", (accounts) => {
   const userAccount2 = accounts[3];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
-  beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    paymasterInstance = await WhitelistPaymaster.new(arInstance.address);
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
+    });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
+
+  beforeEach(async () => {
+    paymasterInstance = await WhitelistPaymaster.new(arInstance.address);
   });
 
   afterEach(async () => {});

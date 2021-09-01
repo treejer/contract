@@ -43,28 +43,52 @@ contract("PlanterFund", (accounts) => {
   const userAccount4 = accounts[5];
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
-  const userAccount7 = accounts[8];
+  const notTreejerContractAccount = accounts[8];
   const userAccount8 = accounts[9];
 
   const ipfsHash = "some ipfs hash here";
 
+  before(async () => {
+    arInstance = await AccessRestriction.new({
+      from: deployerAccount,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
+    });
+
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount1,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount8,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount6,
+      deployerAccount
+    );
+  });
+
   beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+    planterInstance = await Planter.new({ from: deployerAccount });
+
+    await planterInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
+    planterFundInstance = await PlanterFund.new({ from: deployerAccount });
 
-    planterFundInstance = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
+    await planterFundInstance.initialize(arInstance.address, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
     daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
@@ -75,8 +99,6 @@ contract("PlanterFund", (accounts) => {
         from: deployerAccount,
       }
     );
-
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
   afterEach(async () => {});
 
@@ -188,12 +210,6 @@ contract("PlanterFund", (accounts) => {
     const referralFund2 = 1000;
 
     ////////////////////////----------- handle role
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
 
     const planterFundsBefore = await planterFundInstance.planterFunds.call(
       treeId1
@@ -327,51 +343,9 @@ contract("PlanterFund", (accounts) => {
 
     await planterFundInstance
       .setPlanterFunds(treeId, planterFund, referralFund, {
-        from: userAccount1,
+        from: notTreejerContractAccount,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
-
-    await planterFundInstance.setPlanterFunds(
-      treeId,
-      planterFund,
-      referralFund,
-      {
-        from: userAccount1,
-      }
-    );
-  });
-
-  it("should fail to set planter funds in invalid access2", async () => {
-    const treeId = 1;
-    const planterFund = 1000;
-    const referralFund = 500;
-
-    await planterFundInstance
-      .setPlanterFunds(treeId, planterFund, referralFund, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
-
-    await planterFundInstance.setPlanterFunds(
-      treeId,
-      planterFund,
-      referralFund,
-      {
-        from: userAccount1,
-      }
-    );
   });
 
   //----------------------- fund planter test ---------------------------------------//ali
@@ -379,13 +353,6 @@ contract("PlanterFund", (accounts) => {
     const treeId = 1;
     const planterFund = 5000;
     const referralFund = 1000;
-
-    ////////////////////////----------- handle role
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
 
     ////////////////////////----------- handle address
 
@@ -424,14 +391,6 @@ contract("PlanterFund", (accounts) => {
     const treeId = 1;
     const planterFund = 5000;
     const referralFund = 1000;
-
-    ////////////////////////----------- handle role
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
 
     ////////////////////////----------- handle address
 
@@ -492,14 +451,6 @@ contract("PlanterFund", (accounts) => {
     const treeStatus4 = 25920;
     const treeStatus5 = 65535; //2^16-1
     const finalStatus = 25920;
-
-    ////////////////////////----------- handle role
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
 
     ////////////////////////----------- handle address
     await planterFundInstance.setPlanterContractAddress(
@@ -821,12 +772,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("check fund planter data to be ok1 with organizationAddress", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
-
     const treeId = 1;
 
     const planterFund = 5000;
@@ -877,11 +822,6 @@ contract("PlanterFund", (accounts) => {
 
     const referralTotalFunded = referralFund;
 
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
     await planterFundInstance.setPlanterFunds(
       treeId,
       planterFund,
@@ -1466,12 +1406,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("check fund planter data to be ok1", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
-
     const treeId = 1;
     const treeId2 = 2;
 
@@ -1502,12 +1436,6 @@ contract("PlanterFund", (accounts) => {
     const planterTotalFunded = planterFund;
 
     const referralTotalFunded = referralFund;
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
 
     await planterFundInstance.setPlanterFunds(
       treeId,
@@ -1595,16 +1523,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("should fail fund planter", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount1,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     const treeId = 1;
     const treeId2 = 2;
     const planterFund = 5000;
@@ -1645,22 +1563,12 @@ contract("PlanterFund", (accounts) => {
 
     await planterFundInstance
       .fundPlanter(treeId2, userAccount2, treeStatus, {
-        from: userAccount2,
+        from: userAccount6,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
   });
   ///////// -------------------------------  withdraw planter ----------------------------------------
   it("should withdraw planter succussfully", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -1717,7 +1625,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -1773,16 +1681,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("should withdraw planter succussfully(when minimum amount change)", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -1833,7 +1731,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -1918,16 +1816,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("check planter withdraw balance to be correct", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -1987,7 +1875,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     const planterBalance1 = await planterFundInstance.balances.call(
@@ -2158,16 +2046,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("should withdraw planter and organizationPlanter succussfully", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2223,7 +2101,7 @@ contract("PlanterFund", (accounts) => {
       }
     );
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     let planterBalance = await web3.eth.getBalance(userAccount3);
@@ -2282,16 +2160,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("should fail of insufficient amount", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2347,7 +2215,7 @@ contract("PlanterFund", (accounts) => {
       }
     );
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     await daiInstance.transfer(
@@ -2381,16 +2249,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("check planter and organization withdraw balance to be correct", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2467,7 +2325,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     const planterBalance1 = await planterFundInstance.balances.call(
@@ -2754,16 +2612,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("organizationPlanter plant tree and withdraw successfully", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2814,7 +2662,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     const OrganizationPlanterBalance1 = await planterFundInstance.balances.call(
@@ -3030,16 +2878,6 @@ contract("PlanterFund", (accounts) => {
   });
 
   it("should fail withdraw planter", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
 
@@ -3075,7 +2913,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     await planterFundInstance
@@ -3158,16 +2996,6 @@ contract("PlanterFund", (accounts) => {
 
     const planterAddress = userAccount3;
 
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     const treeId = 1;
@@ -3212,7 +3040,7 @@ contract("PlanterFund", (accounts) => {
     );
 
     await planterFundInstance.fundPlanter(treeId, planterAddress, 25920, {
-      from: userAccount2,
+      from: userAccount6,
     });
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {

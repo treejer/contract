@@ -33,21 +33,26 @@ contract("Planter", (accounts) => {
   const userAccount8 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
+  before(async () => {});
   beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
+    await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
-
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    planterInstance = await Planter.new({ from: deployerAccount });
+    await planterInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+    // deployProxy(Planter, [arInstance.address], {
+    //   initializer: "initialize",
+    //   from: deployerAccount,
+    //   unsafeAllowCustomTypes: true,
+    // });
   });
 
   afterEach(async () => {});
@@ -266,6 +271,7 @@ contract("Planter", (accounts) => {
 
   it("planterJoin should be fail because planterType not allowed value", async () => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
     await Common.joinSimplePlanter(
       planterInstance,
       5,

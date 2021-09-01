@@ -46,6 +46,12 @@ contract("IncrementalSell", (accounts) => {
   let startTime;
   let endTime;
   let treeTokenInstance;
+  let WETHAddress;
+  let DAIAddress;
+  let uniswapV2Router02NewAddress;
+  let wethFundsInstance;
+  let fModel;
+  let planterFundsInstnce;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -60,45 +66,13 @@ contract("IncrementalSell", (accounts) => {
 
   const ipfsHash = "some ipfs hash here";
 
-  beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-    });
-    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
-    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-      initializer: "initialize",
+    await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    fModel = await deployProxy(FinancialModel, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
     ////--------------------------uniswap deploy
@@ -107,17 +81,18 @@ contract("IncrementalSell", (accounts) => {
     const factoryAddress = factoryInstance.address;
 
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
-    const WETHAddress = wethInstance.address;
+    WETHAddress = wethInstance.address;
 
     daiInstance = await Weth.new("DAI", "dai", { from: accounts[0] });
-    const DAIAddress = daiInstance.address;
+    DAIAddress = daiInstance.address;
 
     uniswapRouterInstance = await UniswapV2Router02New.new(
       factoryAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
 
     testUniswapInstance = await TestUniswap.new(
       uniswapV2Router02NewAddress,
@@ -143,6 +118,56 @@ contract("IncrementalSell", (accounts) => {
     );
 
     await testUniswapInstance.addLiquidity();
+  });
+
+  beforeEach(async () => {
+    iSellInstance = await IncrementalSell.new({
+      from: deployerAccount,
+    });
+
+    await iSellInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    treeFactoryInstance = await TreeFactory.new({
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    treeTokenInstance = await Tree.new({
+      from: deployerAccount,
+    });
+
+    await treeTokenInstance.initialize(arInstance.address, "", {
+      from: deployerAccount,
+    });
+
+    wethFundsInstance = await WethFunds.new({
+      from: deployerAccount,
+    });
+
+    await wethFundsInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    fModel = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await fModel.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    planterFundsInstnce = await PlanterFund.new({
+      from: deployerAccount,
+    });
+
+    await planterFundsInstnce.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
 
     /////-------------------------handle address here-----------------
 
@@ -154,7 +179,7 @@ contract("IncrementalSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await iSellInstance.setWethTokenAddress(wethInstance.address, {
+    await iSellInstance.setWethTokenAddress(WETHAddress, {
       from: deployerAccount,
     });
 
@@ -164,7 +189,7 @@ contract("IncrementalSell", (accounts) => {
 
     //-------------wethFundsInstance
 
-    await wethFundsInstance.setWethTokenAddress(wethInstance.address, {
+    await wethFundsInstance.setWethTokenAddress(WETHAddress, {
       from: deployerAccount,
     });
 
@@ -211,7 +236,7 @@ contract("IncrementalSell", (accounts) => {
 
     await Common.addTreejerContractRole(
       arInstance,
-      WethFunds.address,
+      wethFundsInstance.address,
       deployerAccount
     );
 
@@ -1072,6 +1097,8 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance
       .buyTree(355, { from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await wethInstance.resetAcc(userAccount3);
   });
 
   it("low price paid for the tree without discount", async () => {
@@ -1103,6 +1130,8 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance
       .buyTree(110, { from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+
+    await wethInstance.resetAcc(userAccount3);
   });
 
   it("check discount timeout", async () => {
@@ -1699,6 +1728,8 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance
       .buyTree(201, { from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await wethInstance.resetAcc(userAccount3);
   });
 
   it("check discount usage", async () => {
@@ -1778,6 +1809,8 @@ contract("IncrementalSell", (accounts) => {
         from: userAccount3,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+
+    await wethInstance.resetAcc(userAccount3);
   });
 
   it("low price paid for the tree with discount", async () => {
@@ -1837,6 +1870,8 @@ contract("IncrementalSell", (accounts) => {
         from: userAccount3,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+
+    await wethInstance.resetAcc(userAccount3);
   });
 
   ////////////////-------------------------------------------- gsn ------------------------------------------------

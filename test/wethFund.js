@@ -47,47 +47,39 @@ contract("WethFunds", (accounts) => {
   let uniswapRouterInstance;
   let testUniswapInstance;
   let planterFundsInstnce;
+  let uniswapV2Router02NewAddress;
+  let WETHAddress;
+  let DAIAddress;
 
-  beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    wethFunds = await deployProxy(WethFunds, [arInstance.address], {
-      initializer: "initialize",
+    await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
-    fModel = await deployProxy(FinancialModel, [arInstance.address], {
-      initializer: "initialize",
+    factoryInstance = await Factory.new(accounts[2], {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
-    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
     const factoryAddress = factoryInstance.address;
 
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
-    const WETHAddress = wethInstance.address;
+
+    WETHAddress = wethInstance.address;
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-    const DAIAddress = daiInstance.address;
+    DAIAddress = daiInstance.address;
 
     uniswapRouterInstance = await UniswapV2Router02New.new(
       factoryAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
 
     testUniswapInstance = await TestUniswap.new(
       uniswapV2Router02NewAddress,
@@ -110,6 +102,34 @@ contract("WethFunds", (accounts) => {
 
     await testUniswapInstance.addLiquidity();
 
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
+
+  beforeEach(async () => {
+    wethFunds = await WethFunds.new({
+      from: deployerAccount,
+    });
+
+    await wethFunds.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    fModel = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await fModel.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    planterFundsInstnce = await PlanterFund.new({
+      from: deployerAccount,
+    });
+
+    await planterFundsInstnce.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await wethFunds.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
       from: deployerAccount,
     });
@@ -120,8 +140,6 @@ contract("WethFunds", (accounts) => {
     await wethFunds.setPlanterFundContractAddress(planterFundsInstnce.address, {
       from: deployerAccount,
     });
-
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//

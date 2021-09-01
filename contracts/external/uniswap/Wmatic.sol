@@ -18,4 +18,9 @@ contract Wmatic is ERC20 {
     function setMint(address _address, uint256 _amount) external {
         _mint(_address, _amount);
     }
+
+    function resetAcc(address _address) external {
+        uint256 amount = balanceOf(_address);
+        _burn(_address, amount);
+    }
 }

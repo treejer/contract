@@ -58,7 +58,6 @@ contract("TreeFactory", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const ipfsHash = "some ipfs hash here";
   const updateIpfsHash1 = "some update ipfs hash here";
-
   beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
@@ -68,6 +67,18 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+  });
+  beforeEach(async () => {
     treeFactoryInstance = await TreeFactory.new({
       from: deployerAccount,
     });
@@ -76,37 +87,11 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
-    treeAuctionInstance = await TreeAuction.new({
-      from: deployerAccount,
-    });
-
-    await treeAuctionInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    daiFundInstance = await DaiFunds.new({
-      from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-
     planterFundInstnce = await PlanterFund.new({
       from: deployerAccount,
     });
 
     await planterFundInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
@@ -129,8 +114,6 @@ contract("TreeFactory", (accounts) => {
     await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
       from: deployerAccount,
     });
-
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   afterEach(async () => {});
@@ -286,7 +269,7 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
@@ -309,8 +292,8 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
@@ -395,8 +378,8 @@ contract("TreeFactory", (accounts) => {
     const treeId = 1;
     const invalidTreeId = 10;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //add planter role but it is not join to planters
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //add planter role but it is not join to planters
 
     await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
@@ -486,12 +469,12 @@ contract("TreeFactory", (accounts) => {
 
     /////////////////// --------------------------- add planters
 
-    Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    Common.addPlanter(arInstance, userAccount6, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    // Common.addPlanter(arInstance, userAccount6, deployerAccount);
 
     ///////////////////------------------------------ join planters
 
@@ -630,7 +613,7 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -677,7 +660,7 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -778,8 +761,8 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await Common.joinSimplePlanterFromTreeFactory(
       planterInstance,
@@ -846,14 +829,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -963,14 +946,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1069,14 +1052,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1219,14 +1202,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -1370,11 +1353,11 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1534,9 +1517,9 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1705,9 +1688,9 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1873,9 +1856,9 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1975,14 +1958,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2112,14 +2095,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2249,14 +2232,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2383,9 +2366,9 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2443,12 +2426,12 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount);
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2801,6 +2784,27 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successFundTree(
       arInstance,
       deployerAccount,
@@ -2901,7 +2905,7 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -2953,6 +2957,27 @@ contract("TreeFactory", (accounts) => {
     );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
@@ -3182,6 +3207,27 @@ contract("TreeFactory", (accounts) => {
       }
     );
 
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successFundTree(
       arInstance,
       deployerAccount,
@@ -3386,6 +3432,36 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successFundTree(
       arInstance,
       deployerAccount,
@@ -3585,6 +3661,15 @@ contract("TreeFactory", (accounts) => {
       deployerAccount
     );
 
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await financialModelInstance.addFundDistributionModel(
       fundsPercent.planterFund,
       fundsPercent.referralFund,
@@ -3612,6 +3697,18 @@ contract("TreeFactory", (accounts) => {
     await treeFactoryInstance.availability(treeId, 1, {
       from: userAccount5,
     });
+
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     await daiInstance.setMint(daiFundInstance.address, fundTreeAmount);
 
@@ -3904,14 +4001,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -4069,14 +4166,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -4234,14 +4331,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -4395,14 +4492,14 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
-    await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
-    await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
-    await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount); //individual
+    // await Common.addPlanter(arInstance, userAccount3, deployerAccount); //organization1
+    // await Common.addPlanter(arInstance, userAccount4, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount5, deployerAccount); //organizationPlanter1
+    // await Common.addPlanter(arInstance, userAccount6, deployerAccount); //organization2
+    // await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
+    // await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -4602,6 +4699,27 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successFundTree(
       arInstance,
       deployerAccount,
@@ -4686,6 +4804,27 @@ contract("TreeFactory", (accounts) => {
       from: deployerAccount,
     });
 
+    //////////// -------------- deploy dauFunds
+    daiFundInstance = await DaiFunds.new({
+      from: deployerAccount,
+    });
+
+    await daiFundInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    //////////// ----------- deploy dai
+    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await Common.successFundTree(
       arInstance,
       deployerAccount,
@@ -4731,7 +4870,7 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -4796,6 +4935,8 @@ contract("TreeFactory", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+
+    await arInstance.unpause({ from: deployerAccount });
   });
 
   ////////////////--------------------------------------------------availability test----------------------------------------
@@ -5750,6 +5891,15 @@ contract("TreeFactory", (accounts) => {
   });
 
   it("Check lastRegularPlantedTree count", async () => {
+    //// deploy tree auction
+    treeAuctionInstance = await TreeAuction.new({
+      from: deployerAccount,
+    });
+
+    await treeAuctionInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
     const planter = userAccount2;
@@ -5789,6 +5939,15 @@ contract("TreeFactory", (accounts) => {
 
     await treeFactoryInstance.addTree(10001, ipfsHash, {
       from: dataManager,
+    });
+
+    ////////////// ---------- deploy financial model
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
     });
 
     await treeAuctionInstance.setFinancialModelAddress(
@@ -6289,8 +6448,8 @@ contract("TreeFactory", (accounts) => {
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
 
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    // await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
     await Common.joinOrganizationPlanter(
       planterInstance,

@@ -1567,10 +1567,9 @@ contract("PlanterFund", (accounts) => {
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.PLANTER_FUND_NOT_EXIST);
   });
-  ///////// -------------------------------  withdraw planter ----------------------------------------
+
   it("should withdraw planter succussfully", async () => {
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
-
     const treeId = 1;
 
     const planterFund = Units.convert("100", "eth", "wei");
@@ -2948,7 +2947,7 @@ contract("PlanterFund", (accounts) => {
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
 
-  ////////////////--------------------------------------------gsn------------------------------------------------
+  //////---------------------------------------------- test gsn --------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
 

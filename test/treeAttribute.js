@@ -46,6 +46,9 @@ contract("TreeAttribute", (accounts) => {
   let factoryInstance;
   let uniswapRouterInstance;
   let testUniswapInstance;
+  let WETHAddress;
+  let DAIAddress;
+  let uniswapV2Router02NewAddress;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -60,53 +63,13 @@ contract("TreeAttribute", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  // beforeAll(async () => {});
-
-  beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
-      unsafeAllowCustomTypes: true,
+  before(async () => {
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
 
-    treeAttributeInstance = await deployProxy(
-      TreeAttribute,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
-
-    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
-      initializer: "initialize",
+    await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
     ////--------------------------uniswap deploy
@@ -115,17 +78,18 @@ contract("TreeAttribute", (accounts) => {
     const factoryAddress = factoryInstance.address;
 
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
-    const WETHAddress = wethInstance.address;
+    WETHAddress = wethInstance.address;
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-    const DAIAddress = daiInstance.address;
+    DAIAddress = daiInstance.address;
 
     uniswapRouterInstance = await UniswapV2Router02New.new(
       factoryAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    const uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+
+    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
 
     testUniswapInstance = await TestUniswap.new(
       uniswapV2Router02NewAddress,
@@ -150,6 +114,59 @@ contract("TreeAttribute", (accounts) => {
 
     await testUniswapInstance.addLiquidity();
 
+    await Common.addDataManager(arInstance, dataManager, deployerAccount);
+    await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
+  });
+
+  beforeEach(async () => {
+    treeAttributeInstance = await TreeAttribute.new({
+      from: deployerAccount,
+    });
+
+    await treeAttributeInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    treeFactoryInstance = await TreeFactory.new({
+      from: deployerAccount,
+    });
+
+    await treeFactoryInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    treeTokenInstance = await Tree.new({
+      from: deployerAccount,
+    });
+
+    await treeTokenInstance.initialize(arInstance.address, "", {
+      from: deployerAccount,
+    });
+
+    iSellInstance = await IncrementalSell.new({
+      from: deployerAccount,
+    });
+
+    await iSellInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    wethFundsInstance = await WethFunds.new({
+      from: deployerAccount,
+    });
+
+    await wethFundsInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
+    planterFundsInstnce = await PlanterFund.new({
+      from: deployerAccount,
+    });
+
+    await planterFundsInstnce.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     /////////////////////////////////////////////////////////////////////////////////
 
     await treeAttributeInstance.setTreeFactoryAddress(
@@ -169,6 +186,7 @@ contract("TreeAttribute", (accounts) => {
     await iSellInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,
     });
+
     ////////////////////////// set weth funds address
 
     await wethFundsInstance.setPlanterFundContractAddress(
@@ -192,9 +210,89 @@ contract("TreeAttribute", (accounts) => {
     await wethFundsInstance.setDaiAddress(DAIAddress, {
       from: deployerAccount,
     });
+  });
 
-    await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
+  ////////////////--------------------------------------------gsn------------------------------------------------
+  it("test gsn [ @skip-on-coverage ]", async () => {
+    ////----------------------------config tree factory-------------------------
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+    await Common.addTreejerContractRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ////---------------------------createTreeAttributes----------------------
+    await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      from: deployerAccount,
+    });
+
+    ///////------------------------------handle gsn---------------------------------
+
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await treeAttributeInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerFunder = provider.getSigner(3);
+
+    let contractFunder = await new ethers.Contract(
+      treeAttributeInstance.address,
+      treeAttributeInstance.abi,
+      signerFunder
+    );
+
+    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await paymaster.addFunderWhitelistTarget(treeAttributeInstance.address, {
+      from: deployerAccount,
+    });
+
+    await contractFunder.createTreeAttributes(102);
+
+    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+
+    console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    console.log("balanceAccountAfter", Number(balanceAccountAfter));
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "Gsn not true work"
+    );
   });
 
   it("deploys successfully", async () => {
@@ -1839,15 +1937,13 @@ contract("TreeAttribute", (accounts) => {
   });
 
   it("tree check for attribute assignment", async () => {
-    financialModelInstance = await deployProxy(
-      FinancialModel,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
 
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
@@ -1955,15 +2051,13 @@ contract("TreeAttribute", (accounts) => {
   });
 
   it("tree check for attribute assignment", async () => {
-    financialModelInstance = await deployProxy(
-      FinancialModel,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+    financialModelInstance = await FinancialModel.new({
+      from: deployerAccount,
+    });
+
+    await financialModelInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
 
     await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,
@@ -2062,89 +2156,6 @@ contract("TreeAttribute", (accounts) => {
       .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
   });
 
-  ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    ////----------------------------config tree factory-------------------------
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
-    await Common.addTreejerContractRole(
-      arInstance,
-      deployerAccount,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
-
-    ////---------------------------createTreeAttributes----------------------
-    await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
-      from: deployerAccount,
-    });
-
-    ///////------------------------------handle gsn---------------------------------
-
-    let env = await GsnTestEnvironment.startGsn("localhost");
-
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
-
-    await treeAttributeInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
-
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
-
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
-
-    origProvider = web3.currentProvider;
-
-    conf = { paymasterAddress: paymaster.address };
-
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
-
-    provider = new ethers.providers.Web3Provider(gsnProvider);
-
-    let signerFunder = provider.getSigner(3);
-
-    let contractFunder = await new ethers.Contract(
-      treeAttributeInstance.address,
-      treeAttributeInstance.abi,
-      signerFunder
-    );
-
-    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
-
-    await paymaster.addFunderWhitelistTarget(treeAttributeInstance.address, {
-      from: deployerAccount,
-    });
-
-    await contractFunder.createTreeAttributes(102);
-
-    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
-
-    console.log("balanceAccountBefore", Number(balanceAccountBefore));
-    console.log("balanceAccountAfter", Number(balanceAccountAfter));
-
-    assert.equal(
-      balanceAccountAfter,
-      balanceAccountBefore,
-      "Gsn not true work"
-    );
-  });
-
   it("test TestTreeAttributes contract", async () => {
     //----------------------------config tree factory-------------------------
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -2163,15 +2174,13 @@ contract("TreeAttribute", (accounts) => {
 
     ////------------------ deploy testTreeAttributes ------------------------------
 
-    let testInstance = await deployProxy(
-      TestTreeAttributes,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+    testInstance = await TestTreeAttributes.new({
+      from: deployerAccount,
+    });
+
+    await testInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
 
     await testInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
       from: deployerAccount,

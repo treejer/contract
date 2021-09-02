@@ -259,6 +259,110 @@ contract("IncrementalSell", (accounts) => {
 
   afterEach(async () => {});
 
+  ////////////////-------------------------------------------- gsn ------------------------------------------------
+  it("test gsn [ @skip-on-coverage ]", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      20,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    ///////------------------------------handle gsn---------------------------------
+
+    let env = await GsnTestEnvironment.startGsn("localhost");
+
+    const { forwarderAddress, relayHubAddress, paymasterAddress } =
+      env.contractsDeployment;
+
+    await iSellInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
+
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
+
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
+
+    origProvider = web3.currentProvider;
+
+    conf = { paymasterAddress: paymaster.address };
+
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
+
+    provider = new ethers.providers.Web3Provider(gsnProvider);
+
+    let signerFunder = provider.getSigner(3);
+
+    let contractFunder = await new ethers.Contract(
+      iSellInstance.address,
+      iSellInstance.abi,
+      signerFunder
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount2,
+      }
+    );
+
+    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+
+    await contractFunder
+      .buyTree(101)
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+    await paymaster.addFunderWhitelistTarget(iSellInstance.address, {
+      from: deployerAccount,
+    });
+
+    await contractFunder.buyTree(101);
+
+    //////////--------------check tree owner
+    let addressGetToken = await treeTokenInstance.ownerOf(101);
+
+    assert.equal(addressGetToken, userAccount2, "1.mint not true");
+
+    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+
+    console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    console.log("balanceAccountAfter", Number(balanceAccountAfter));
+
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "Gsn not true work"
+    );
+  });
+
   it("deploys successfully", async () => {
     const address = iSellInstance.address;
     assert.notEqual(address, 0x0);
@@ -456,11 +560,14 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
   });
   it("incrementalSell all trees should be availabe to sell", async () => {
-    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
-      initializer: "initialize",
+    treeAuctionInstance = await TreeAuction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
+
+    await treeAuctionInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await treeAuctionInstance.setFinancialModelAddress(fModel.address, {
       from: deployerAccount,
     });
@@ -977,11 +1084,14 @@ contract("IncrementalSell", (accounts) => {
   });
 
   it("updateIncrementalEnd Should reject because a tree is not available", async () => {
-    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
-      initializer: "initialize",
+    treeAuctionInstance = await TreeAuction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
+
+    await treeAuctionInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     await treeAuctionInstance.setFinancialModelAddress(fModel.address, {
       from: deployerAccount,
     });
@@ -1872,110 +1982,6 @@ contract("IncrementalSell", (accounts) => {
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
 
     await wethInstance.resetAcc(userAccount3);
-  });
-
-  ////////////////-------------------------------------------- gsn ------------------------------------------------
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: dataManager,
-    });
-
-    await iSellInstance.addTreeSells(
-      101,
-      web3.utils.toWei("0.01"),
-      100,
-      20,
-      1000,
-      {
-        from: dataManager,
-      }
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
-
-    ///////------------------------------handle gsn---------------------------------
-
-    let env = await GsnTestEnvironment.startGsn("localhost");
-
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
-
-    await iSellInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
-
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
-
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
-
-    origProvider = web3.currentProvider;
-
-    conf = { paymasterAddress: paymaster.address };
-
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
-
-    provider = new ethers.providers.Web3Provider(gsnProvider);
-
-    let signerFunder = provider.getSigner(3);
-
-    let contractFunder = await new ethers.Contract(
-      iSellInstance.address,
-      iSellInstance.abi,
-      signerFunder
-    );
-
-    //mint weth for funder
-    await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
-
-    await wethInstance.approve(
-      iSellInstance.address,
-      web3.utils.toWei("0.01"),
-      {
-        from: userAccount2,
-      }
-    );
-
-    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
-
-    await contractFunder
-      .buyTree(101)
-      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
-
-    await paymaster.addFunderWhitelistTarget(iSellInstance.address, {
-      from: deployerAccount,
-    });
-
-    await contractFunder.buyTree(101);
-
-    //////////--------------check tree owner
-    let addressGetToken = await treeTokenInstance.ownerOf(101);
-
-    assert.equal(addressGetToken, userAccount2, "1.mint not true");
-
-    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
-
-    console.log("balanceAccountBefore", Number(balanceAccountBefore));
-    console.log("balanceAccountAfter", Number(balanceAccountAfter));
-
-    assert.equal(
-      balanceAccountAfter,
-      balanceAccountBefore,
-      "Gsn not true work"
-    );
   });
 
   ////----------------------------------------------------test updateIncrementalRates------------------------------

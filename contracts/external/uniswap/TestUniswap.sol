@@ -46,4 +46,23 @@ contract TestUniswap {
             block.timestamp + 15
         );
     }
+
+    function addLiquidity2() external {
+        // daiToken.transferFrom(msg.sender, address(this), 10000 * (10**18));
+        // wethToken.transferFrom(msg.sender, address(this), 5 * (10**18));
+
+        daiToken.approve(address(uniswapRouter), 1000000000000000 * (10**18));
+        wethToken.approve(address(uniswapRouter), 1000000000000000 * (10**18));
+
+        uniswapRouter.addLiquidity(
+            daiAddress,
+            wethAddress,
+            1000000000000000 * (10**18),
+            600000000000 * (10**18),
+            1,
+            1,
+            address(this),
+            block.timestamp + 15
+        );
+    }
 }

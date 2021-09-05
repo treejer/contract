@@ -43,6 +43,9 @@ contract TreeAttribute is Initializable, RelayRecipient {
     event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);
     event TreeAttributesNotGenerated(uint256 treeId);
+    event SymbolReserved(uint32 generatedCode);
+    event ReservedSymbolFreed(uint32 generatedCode);
+    event SymbolSetByAdmin(uint256 treeId);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -53,6 +56,12 @@ contract TreeAttribute is Initializable, RelayRecipient {
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
+        _;
+    }
+
+    /** NOTE modifier for check msg.sender has TreejerContract role */
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -126,6 +135,7 @@ contract TreeAttribute is Initializable, RelayRecipient {
         );
         generatedAttributes[generatedCode] = 1;
         reservedAttributes[generatedCode] = 1;
+        emit SymbolReserved(generatedCode);
     }
 
     /**
@@ -143,6 +153,8 @@ contract TreeAttribute is Initializable, RelayRecipient {
 
         generatedAttributes[generatedCode] = 0;
         reservedAttributes[generatedCode] = 0;
+
+        emit ReservedSymbolFreed(generatedCode);
     }
 
     /**
@@ -185,6 +197,8 @@ contract TreeAttribute is Initializable, RelayRecipient {
             generatedCode,
             1
         );
+
+        emit SymbolSetByAdmin(treeId);
     }
 
     /**
@@ -244,59 +258,100 @@ contract TreeAttribute is Initializable, RelayRecipient {
         return false;
     }
 
+    // function createTreeAttributes(uint256 treeId)
+    //     external
+    //     ifNotPaused
+    //     returns (bool)
+    // {
+    //     require(
+    //         treeAttributes[treeId].exists == 0,
+    //         "tree attributes are set before"
+    //     );
+    //     (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
+    //         treeId,
+    //         _msgSender()
+    //     );
+
+    //     require(ms, "no need to tree attributes");
+
+    //     bool flag = true;
+
+    //     for (uint256 j = 0; j < 10000; j++) {
+    //         uint256 rand = uint256(
+    //             keccak256(
+    //                 abi.encodePacked(_msgSender(), randTree, msg.sig, treeId, j)
+    //             )
+    //         );
+
+    //         for (uint256 i = 0; i < 9; i++) {
+    //             flag = _calcRandAttributes(
+    //                 _msgSender(),
+    //                 treeId,
+    //                 _getFirstN(rand, 28)
+    //             );
+    //             if (flag) {
+    //                 break;
+    //             }
+    //             rand = rand / (uint256(2)**28);
+    //         }
+    //         if (flag) {
+    //             break;
+    //         }
+    //     }
+    //     if (flag) {
+    //         emit TreeAttributesGenerated(treeId);
+    //     } else {
+    //         emit TreeAttributesNotGenerated(treeId);
+    //     }
+
+    //     return flag;
+    // }
     /**
      * @dev generate a 256 bits random number as a base for tree attributes and slice it
      * in 28 bits parts
      * @param treeId id of tree
      * @return if unique tree attribute generated successfully
      */
-    function createTreeAttributes(uint256 treeId)
-        external
-        ifNotPaused
-        returns (bool)
-    {
-        require(
-            treeAttributes[treeId].exists == 0,
-            "tree attributes are set before"
-        );
-        (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
-            treeId,
-            _msgSender()
-        );
+    function createTreeAttributes(
+        uint256 treeId,
+        bytes32 randTree,
+        address buyer
+    ) external ifNotPaused onlyTreejerContract returns (bool) {
+        if (treeAttributes[treeId].exists == 0) {
+            bool flag = true;
 
-        require(ms, "no need to tree attributes");
-
-        bool flag = true;
-
-        for (uint256 j = 0; j < 10000; j++) {
-            uint256 rand = uint256(
-                keccak256(
-                    abi.encodePacked(_msgSender(), randTree, msg.sig, treeId, j)
-                )
-            );
-
-            for (uint256 i = 0; i < 9; i++) {
-                flag = _calcRandAttributes(
-                    _msgSender(),
-                    treeId,
-                    _getFirstN(rand, 28)
+            for (uint256 j = 0; j < 10000; j++) {
+                uint256 rand = uint256(
+                    keccak256(
+                        abi.encodePacked(buyer, randTree, msg.sig, treeId, j)
+                    )
                 );
+
+                for (uint256 i = 0; i < 9; i++) {
+                    flag = _calcRandAttributes(
+                        buyer,
+                        treeId,
+                        _getFirstN(rand, 28)
+                    );
+                    if (flag) {
+                        break;
+                    }
+                    rand = rand / (uint256(2)**28);
+                }
                 if (flag) {
                     break;
                 }
-                rand = rand / (uint256(2)**28);
             }
             if (flag) {
-                break;
+                emit TreeAttributesGenerated(treeId);
+            } else {
+                emit TreeAttributesNotGenerated(treeId);
             }
-        }
-        if (flag) {
-            emit TreeAttributesGenerated(treeId);
-        } else {
-            emit TreeAttributesNotGenerated(treeId);
-        }
 
-        return flag;
+            return flag;
+        } else {
+            return true;
+        }
     }
 
     /**

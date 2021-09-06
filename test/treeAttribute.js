@@ -171,12 +171,6 @@ contract("TreeAttribute", (accounts) => {
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    await treeAttributeInstance.setTreeFactoryAddress(
-      treeFactoryInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
@@ -310,28 +304,6 @@ contract("TreeAttribute", (accounts) => {
     assert.notEqual(address, "");
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
-  });
-
-  ///////////////---------------------------------set tree factory address--------------------------------------------------------
-  it("set tree factory address", async () => {
-    await treeAttributeInstance
-      .setTreeFactoryAddress(treeFactoryInstance.address, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-    await treeAttributeInstance.setTreeFactoryAddress(
-      treeFactoryInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    assert.equal(
-      treeFactoryInstance.address,
-      await treeAttributeInstance.treeFactory(),
-      "address set incorect"
-    );
   });
 
   ///////////////---------------------------------set Trusted Forwarder address--------------------------------------------------------
@@ -1172,10 +1144,6 @@ contract("TreeAttribute", (accounts) => {
 
     let randTree1 = web3.utils.soliditySha3(10000, 0, "", 0, zeroAddress, "");
 
-    // await treeAttributeInstance.createTreeAttributes(102, {
-    //   from: userAccount2,
-    // });
-
     await Common.addTreejerContractRole(
       arInstance,
       userAccount6,
@@ -1207,10 +1175,6 @@ contract("TreeAttribute", (accounts) => {
       from: deployerAccount,
     });
 
-    // let tx1 = await treeAttributeInstance.createTreeAttributes(150, {
-    //   from: userAccount4,
-    // });
-
     await treeAttributeInstance.createTreeAttributes(
       150,
       randTree,
@@ -1234,9 +1198,6 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.updateOwner(170, userAccount5, 1, {
       from: deployerAccount,
     });
-    // let tx2 = await treeAttributeInstance.createTreeAttributes(170, {
-    //   from: userAccount5,
-    // });
 
     await treeAttributeInstance.createTreeAttributes(
       170,
@@ -1261,9 +1222,6 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.updateOwner(999, userAccount5, 1, {
       from: deployerAccount,
     });
-    // let tx3 = await treeAttributeInstance.createTreeAttributes(999, {
-    //   from: userAccount5,
-    // });
 
     await treeAttributeInstance.createTreeAttributes(
       999,
@@ -1288,9 +1246,6 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.updateOwner(1531, userAccount5, 1, {
       from: deployerAccount,
     });
-    // let tx4 = await treeAttributeInstance.createTreeAttributes(1531, {
-    //   from: userAccount5,
-    // });
 
     await treeAttributeInstance.createTreeAttributes(
       1531,
@@ -1305,9 +1260,6 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.updateOwner(2, userAccount5, 1, {
       from: deployerAccount,
     });
-    // await treeAttributeInstance.createTreeAttributes(2, {
-    //   from: userAccount5,
-    // });
 
     await treeAttributeInstance.createTreeAttributes(
       2,
@@ -1333,10 +1285,6 @@ contract("TreeAttribute", (accounts) => {
     await treeFactoryInstance.updateOwner(51, userAccount5, 1, {
       from: deployerAccount,
     });
-
-    // let tx5 = await treeAttributeInstance.createTreeAttributes(51, {
-    //   from: userAccount5,
-    // });
 
     await treeAttributeInstance.createTreeAttributes(
       51,
@@ -2020,10 +1968,6 @@ contract("TreeAttribute", (accounts) => {
       from: deployerAccount,
     });
 
-    // await treeAttributeInstance.createTreeAttributes(102, {
-    //   from: userAccount2,
-    // });
-
     await Common.addTreejerContractRole(
       arInstance,
       userAccount6,
@@ -2038,12 +1982,6 @@ contract("TreeAttribute", (accounts) => {
         from: userAccount6,
       }
     );
-
-    // await treeAttributeInstance
-    //   .createTreeAttributes(102, {
-    //     from: userAccount3,
-    //   })
-    //   .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
 
     await treeAttributeInstance
       .createTreeAttributes(102, randTree, userAccount3, {
@@ -2184,11 +2122,6 @@ contract("TreeAttribute", (accounts) => {
     await treeAttributeInstance.setTreeAttributesByAdmin(107, 13000001, {
       from: dataManager,
     });
-    // await treeAttributeInstance
-    //   .createTreeAttributes(107, {
-    //     from: userAccount5,
-    //   })
-    //   .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2307,7 +2240,7 @@ contract("TreeAttribute", (accounts) => {
       deployerAccount
     );
 
-    await iSellInstance.buyTree(102, {
+    await iSellInstance.buyTree(1, {
       from: userAccount3,
     });
 
@@ -2319,13 +2252,6 @@ contract("TreeAttribute", (accounts) => {
       from: dataManager,
     });
 
-    // const tx5 = await treeAttributeInstance.createTreeAttributes(
-    //   102,
-
-    //   {
-    //     from: userAccount3,
-    //   }
-    // );
     await Common.addTreejerContractRole(
       arInstance,
       userAccount6,
@@ -2345,112 +2271,6 @@ contract("TreeAttribute", (accounts) => {
     // await treeAttributeInstance
     //   .createTreeAttributes(103, {
     //     from: userAccount5,
-    //   })
-    //   .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
-  });
-
-  it("tree check for attribute assignment", async () => {
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    await iSellInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
-      from: deployerAccount,
-    });
-
-    await iSellInstance.setFinancialModelAddress(
-      financialModelInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      iSellInstance.address,
-      deployerAccount
-    );
-
-    await financialModelInstance.addFundDistributionModel(
-      3000,
-      1200,
-      1200,
-      1200,
-      1200,
-      2200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    await financialModelInstance.assignTreeFundDistributionModel(
-      100,
-      10000,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    await iSellInstance.addTreeSells(
-      101,
-      web3.utils.toWei("0.005"),
-      100,
-      100,
-      1000,
-      {
-        from: dataManager,
-      }
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
-
-    //mint weth for funder
-    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
-
-    await wethInstance.approve(
-      iSellInstance.address,
-      web3.utils.toWei("0.01"),
-      {
-        from: userAccount3,
-      }
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      wethFundsInstance.address,
-      deployerAccount
-    );
-
-    await iSellInstance.buyTree(102, {
-      from: userAccount3,
-    });
-
-    await treeAttributeInstance.reserveTreeAttributes(13000000, {
-      from: dataManager,
-    });
-
-    await treeAttributeInstance.setTreeAttributesByAdmin(100, 13000001, {
-      from: dataManager,
-    });
-    //@NOTE aliad010 no need to check this
-    // await treeAttributeInstance
-    //   .createTreeAttributes(102, {
-    //     from: userAccount4,
     //   })
     //   .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
   });
@@ -2481,17 +2301,10 @@ contract("TreeAttribute", (accounts) => {
       from: deployerAccount,
     });
 
-    await testInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
-      from: deployerAccount,
-    });
-
     ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
     await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
       from: deployerAccount,
     });
-    // const tx5 = await testInstance.createTreeAttributes(102, {
-    //   from: userAccount2,
-    // });
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2508,10 +2321,6 @@ contract("TreeAttribute", (accounts) => {
     await testInstance.test(102, {
       from: userAccount2,
     });
-
-    // const tx = await testInstance.createTreeAttributes(102, {
-    //   from: userAccount2,
-    // });
 
     await testInstance.createTreeAttributes(102, randTree, userAccount2, {
       from: userAccount6,

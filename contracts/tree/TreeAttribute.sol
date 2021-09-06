@@ -5,7 +5,6 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-import "../tree/ITreeFactory.sol";
 import "../gsn/RelayRecipient.sol";
 
 /** @title TreeAttribute Contract */
@@ -14,7 +13,6 @@ contract TreeAttribute is Initializable, RelayRecipient {
 
     bool public isTreeAttribute;
     IAccessRestriction public accessRestriction;
-    ITreeFactory public treeFactory;
 
     /** NOTE parameters of randomTreeGeneration*/
     struct Attributes {
@@ -109,16 +107,6 @@ contract TreeAttribute is Initializable, RelayRecipient {
         validAddress(_address)
     {
         trustedForwarder = _address;
-    }
-
-    /**
-     * @dev admin set TreeFactoryAddress
-     * @param _address set to the address of treeFactory
-     */
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
-        ITreeFactory candidateContract = ITreeFactory(_address);
-        require(candidateContract.isTreeFactory());
-        treeFactory = candidateContract;
     }
 
     /**
@@ -258,54 +246,6 @@ contract TreeAttribute is Initializable, RelayRecipient {
         return false;
     }
 
-    // function createTreeAttributes(uint256 treeId)
-    //     external
-    //     ifNotPaused
-    //     returns (bool)
-    // {
-    //     require(
-    //         treeAttributes[treeId].exists == 0,
-    //         "tree attributes are set before"
-    //     );
-    //     (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
-    //         treeId,
-    //         _msgSender()
-    //     );
-
-    //     require(ms, "no need to tree attributes");
-
-    //     bool flag = true;
-
-    //     for (uint256 j = 0; j < 10000; j++) {
-    //         uint256 rand = uint256(
-    //             keccak256(
-    //                 abi.encodePacked(_msgSender(), randTree, msg.sig, treeId, j)
-    //             )
-    //         );
-
-    //         for (uint256 i = 0; i < 9; i++) {
-    //             flag = _calcRandAttributes(
-    //                 _msgSender(),
-    //                 treeId,
-    //                 _getFirstN(rand, 28)
-    //             );
-    //             if (flag) {
-    //                 break;
-    //             }
-    //             rand = rand / (uint256(2)**28);
-    //         }
-    //         if (flag) {
-    //             break;
-    //         }
-    //     }
-    //     if (flag) {
-    //         emit TreeAttributesGenerated(treeId);
-    //     } else {
-    //         emit TreeAttributesNotGenerated(treeId);
-    //     }
-
-    //     return flag;
-    // }
     /**
      * @dev generate a 256 bits random number as a base for tree attributes and slice it
      * in 28 bits parts

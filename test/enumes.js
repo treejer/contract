@@ -117,6 +117,7 @@ const RegularSellErrors = {
 
 const IncrementalSellErrorMsg = {
   TREE_TO_SELL: "assign at least one tree",
+  INVALID_COUNT: "Count must be lt 100",
   OCCUPIED_TREES: "trees are under Auction",
   PRICE_CHANGE_PERIODS: "incremental period should be positive",
   TREE_PROVIDED_BEFORE: "trees are not available for sell",

@@ -1984,6 +1984,108 @@ contract("IncrementalSell", (accounts) => {
     await wethInstance.resetAcc(userAccount3);
   });
 
+  it("buyTree should be reject (INVALID_COUNT)", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      150,
+      50,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    let funderBalance1 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance1),
+      web3.utils.toWei("0"),
+      "1-funder balance not true"
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("1000"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("1000"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance
+      .buyTree(120, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_COUNT);
+
+    await wethInstance.resetAcc(userAccount3);
+  });
+
+  it("buyTree should be reject (INVALID_TREE)", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      20,
+      50,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("1000"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("1000"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance
+      .buyTree(21, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await iSellInstance.buyTree(5, {
+      from: userAccount3,
+    });
+
+    await iSellInstance
+      .buyTree(16, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await wethInstance.resetAcc(userAccount3);
+  });
+
   it("check discount usage", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
       from: dataManager,

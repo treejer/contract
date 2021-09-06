@@ -298,7 +298,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
                 (steps * incPrice.initialPrice * incPrice.increaseRatio) /
                 10000;
 
-            _buy(treeId, treePrice);
+            _indivitualTree(treeId, treePrice);
 
             treeId += 1;
         }
@@ -346,7 +346,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalRatesUpdated();
     }
 
-    function _buy(uint256 _localLastSold, uint256 _treePrice) private {
+    function _indivitualTree(uint256 _treeId, uint256 _treePrice) private {
         (
             uint16 planterFund,
             uint16 referralFund,
@@ -356,10 +356,10 @@ contract IncrementalSell is Initializable, RelayRecipient {
             uint16 treejerDevelop,
             uint16 reserveFund1,
             uint16 reserveFund2
-        ) = financialModel.findTreeDistribution(_localLastSold);
+        ) = financialModel.findTreeDistribution(_treeId);
 
         wethFunds.fundTree(
-            _localLastSold,
+            _treeId,
             _treePrice,
             planterFund,
             referralFund,
@@ -371,6 +371,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
             reserveFund2
         );
 
-        treeFactory.updateOwner(_localLastSold, _msgSender(), 1);
+        treeFactory.updateOwner(_treeId, _msgSender(), 1);
     }
 }

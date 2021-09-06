@@ -3,6 +3,7 @@ const IncrementalSell = artifacts.require("IncrementalSell.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
+const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -35,6 +36,7 @@ const {
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   GsnErrorMsg,
+  TreeAttributeErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -52,6 +54,7 @@ contract("IncrementalSell", (accounts) => {
   let wethFundsInstance;
   let fModel;
   let planterFundsInstnce;
+  let treeAttributeInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -121,6 +124,14 @@ contract("IncrementalSell", (accounts) => {
   });
 
   beforeEach(async () => {
+    treeAttributeInstance = await TreeAttribute.new({
+      from: deployerAccount,
+    });
+
+    await treeAttributeInstance.initialize(arInstance.address, {
+      from: deployerAccount,
+    });
+
     iSellInstance = await IncrementalSell.new({
       from: deployerAccount,
     });
@@ -481,6 +492,14 @@ contract("IncrementalSell", (accounts) => {
       from: userAccount3,
     });
 
+    truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
+      return (
+        ev.buyer.toString() === userAccount3.toString() &&
+          Number(ev.startId) === 102,
+        20
+      );
+    });
+
     //////////--------------check tree owner
     let addressGetToken102 = await treeTokenInstance.ownerOf(102);
 
@@ -672,8 +691,16 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await iSellInstance.buyTree(19, {
+    let tx2 = await iSellInstance.buyTree(19, {
       from: userAccount4,
+    });
+
+    truffleAssert.eventEmitted(tx2, "IncrementalTreeSold", (ev) => {
+      return (
+        ev.buyer.toString() === userAccount4.toString() &&
+          Number(ev.startId) === 122,
+        19
+      );
     });
 
     let funderBalance5 = await wethInstance.balanceOf(userAccount4);
@@ -943,6 +970,28 @@ contract("IncrementalSell", (accounts) => {
     assert.equal(
       userAccount2,
       await iSellInstance.trustedForwarder(),
+      "address set incorect"
+    );
+  });
+
+  ///////////////---------------------------------set TreeAttributes address--------------------------------------------------------
+  it("set trust forwarder address", async () => {
+    await iSellInstance
+      .setTreeAttributesAddress(treeAttributeInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await iSellInstance.setTreeAttributesAddress(
+      treeAttributeInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    assert.equal(
+      treeAttributeInstance.address,
+      await iSellInstance.treeAttribute(),
       "address set incorect"
     );
   });
@@ -2258,5 +2307,201 @@ contract("IncrementalSell", (accounts) => {
         from: dataManager,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.PRICE_CHANGE_PERIODS);
+  });
+
+  ///-------------------------------------------------------- claimTreeAttributes ---------------------------------------
+
+  it("claimTreeAttributes should be rejec (owner) ", async () => {
+    await iSellInstance.setTreeAttributesAddress(
+      treeAttributeInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.addFundDistributionModel(
+      3000,
+      1200,
+      1200,
+      1200,
+      1200,
+      2200,
+      0,
+      0,
+      {
+        from: dataManager,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.005"),
+      100,
+      100,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFundsInstance.address,
+      deployerAccount
+    );
+
+    await iSellInstance.buyTree(1, {
+      from: userAccount3,
+    });
+
+    await iSellInstance
+      .claimTreeAttributes(101, 1, {
+        from: userAccount6,
+      })
+      .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      deployerAccount,
+      deployerAccount
+    );
+
+    await treeTokenInstance.safeMint(userAccount5, 103, {
+      from: deployerAccount,
+    });
+
+    await iSellInstance
+      .claimTreeAttributes(103, 1, {
+        from: userAccount5,
+      })
+      .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+  });
+
+  it("claimTreeAttributes should be work successfully ", async () => {
+    await iSellInstance.setTreeAttributesAddress(
+      treeAttributeInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await fModel.addFundDistributionModel(
+      3000,
+      1200,
+      1200,
+      1200,
+      1200,
+      2200,
+      0,
+      0,
+      {
+        from: dataManager,
+      }
+    );
+
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      20,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount2, web3.utils.toWei("0.05"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.05"),
+      {
+        from: userAccount2,
+      }
+    );
+
+    await iSellInstance.buyTree(5, {
+      from: userAccount2,
+    });
+
+    let treeAttributeTemp;
+
+    for (let i = 101; i < 106; i++) {
+      treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
+      assert.equal(
+        Number(treeAttributeTemp.exists),
+        0,
+        i + " - Exists not true"
+      );
+    }
+
+    await iSellInstance.claimTreeAttributes(101, 5, {
+      from: userAccount2,
+    });
+
+    for (let i = 101; i < 106; i++) {
+      treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
+      assert.equal(
+        Number(treeAttributeTemp.exists),
+        1,
+        i + " - Exists not true"
+      );
+    }
+    treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
+    assert.equal(Number(treeAttributeTemp.exists), 0, "106 - Exists not true");
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount2,
+      }
+    );
+
+    await iSellInstance.buyTree(1, {
+      from: userAccount2,
+    });
+
+    await iSellInstance.claimTreeAttributes(106, 1, {
+      from: userAccount2,
+    });
+
+    treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
+    assert.equal(Number(treeAttributeTemp.exists), 1, "106 - Exists not true");
   });
 });

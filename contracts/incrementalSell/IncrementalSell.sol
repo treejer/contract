@@ -7,6 +7,7 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFunds.sol";
 import "../treasury/IFinancialModel.sol";
+import "../tree/ITreeAttribute.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract IncrementalSell is Initializable, RelayRecipient {
@@ -18,6 +19,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
     ITreeFactory public treeFactory;
     IWethFunds public wethFunds;
     IFinancialModel public financialModel;
+    ITreeAttribute public treeAttribute;
     IERC20Upgradeable public wethToken;
 
     struct IncrementalPrice {
@@ -36,7 +38,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
     /** NOTE mapping of buyer address to lastBuy time */
     // mapping(address => uint256) public lastBuy;
 
-    event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
+    event IncrementalTreeSold(address buyer, uint256 startId, uint256 count);
     event IncrementalSellUpdated();
     event IncrementalRatesUpdated();
 
@@ -134,6 +136,17 @@ contract IncrementalSell is Initializable, RelayRecipient {
         financialModel = candidateContract;
     }
 
+    /**
+     * @dev admin set TreeAttributesAddress
+     * @param _address set to the address of treeAttribute
+     */
+
+    function setTreeAttributesAddress(address _address) external onlyAdmin {
+        ITreeAttribute candidateContract = ITreeAttribute(_address);
+        require(candidateContract.isTreeAttribute());
+        treeAttribute = candidateContract;
+    }
+
     //TODO: ADD_COMMENT
     function freeIncrementalSell(uint256 _count) external onlyDataManager {
         IncrementalPrice storage incrPrice = incrementalPrice;
@@ -226,10 +239,9 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalSellUpdated();
     }
 
-    event xx(int256 yy);
-
+    //TODO:ADD_COMMENTS
     function buyTree(uint256 _count) external ifNotPaused {
-        require(_count <= 100 && _count > 0, "Count must be lt 100");
+        require(_count < 101 && _count > 0, "Count must be lt 100");
 
         IncrementalPrice storage incPrice = incrementalPrice;
 
@@ -238,18 +250,14 @@ contract IncrementalSell is Initializable, RelayRecipient {
             "Not enough tree in incremental sell"
         );
 
-        uint256 localLastSold = lastSold + 1;
+        uint256 treeId = lastSold + 1;
 
-        //calc tree price based on treeId
-        uint256 y = (localLastSold - incPrice.startTree) /
-            incPrice.increaseStep;
-
-        //TODO:lastSold or localLastSold ???
+        uint256 y = (treeId - incPrice.startTree) / incPrice.increaseStep;
 
         uint256 z = (y + 1) *
             incPrice.increaseStep +
             incPrice.startTree -
-            localLastSold;
+            treeId;
 
         uint256 nowPrice = incPrice.initialPrice +
             (y * incPrice.initialPrice * incPrice.increaseRatio) /
@@ -258,8 +266,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint256 totalPrice = _count * nowPrice;
 
         int256 extra = int256(_count) - int256(z);
-
-        emit xx(extra);
 
         while (extra > 0) {
             totalPrice +=
@@ -285,109 +291,39 @@ contract IncrementalSell is Initializable, RelayRecipient {
         require(success, "unsuccessful transfer");
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (localLastSold - incPrice.startTree) /
+            uint256 steps = (treeId - incPrice.startTree) /
                 incPrice.increaseStep;
 
             uint256 treePrice = incPrice.initialPrice +
                 (steps * incPrice.initialPrice * incPrice.increaseRatio) /
                 10000;
 
-            _buy(localLastSold, treePrice);
+            _buy(treeId, treePrice);
 
-            localLastSold += 1;
+            treeId += 1;
         }
-        //TODO : localLastSold - 1 ????
-        lastSold = localLastSold - 1;
+
+        lastSold = treeId - 1;
+
+        emit IncrementalTreeSold(_msgSender(), treeId - _count, _count);
     }
 
-    // /**
-    //  * tree price calculate based on treeId and msg.sender pay weth for it
-    //  * and ownership of tree transfered to msg.sender
-    //  * @param _treeId id of tree to buy
-    //  * NOTE if buyer, buy another tree before 700 seconds from the
-    //  * previous purchase, pays 90% of tree price and gets 10% discount
-    //  * just for this tree. buying another tree give chance to buy
-    //  * the next tree with 10% discount
-    //  */
-    // function buyTree(uint256 _treeId) external ifNotPaused {
-    //     //check if _treeId is in this incrementalSell
-    //     IncrementalPrice storage incPrice = incrementalPrice;
+    //TODO:ADD_COMMENTS
+    function claimTreeAttributes(uint256 _startTree, uint256 _count) external {
+        uint256 treeId = _startTree;
+        for (uint256 i = 0; i < _count; i++) {
+            treeId = _startTree + i;
 
-    //     require(
-    //         _treeId < incPrice.endTree && _treeId >= incPrice.startTree,
-    //         "tree is not in incremental sell"
-    //     );
+            (bool ms, bytes32 randTree) = treeFactory.checkMintStatus(
+                treeId,
+                _msgSender()
+            );
 
-    //     //calc tree price based on treeId
-    //     uint256 steps = (_treeId - incPrice.startTree) / incPrice.increaseStep;
-    //     uint256 treePrice = incPrice.initialPrice +
-    //         (steps * incPrice.initialPrice * incPrice.increaseRatio) /
-    //         10000;
+            require(ms, "no need to tree attributes");
 
-    //     uint256 amount;
-
-    //     //checking price paid is enough for buying the treeId checking discounts
-    //     if (lastBuy[_msgSender()] > block.timestamp - 700 seconds) {
-    //         amount = (treePrice * 90) / 100;
-    //         require(
-    //             wethToken.balanceOf(_msgSender()) >= amount,
-    //             "low price paid"
-    //         );
-
-    //         bool success = wethToken.transferFrom(
-    //             _msgSender(),
-    //             address(wethFunds),
-    //             amount
-    //         );
-    //         require(success, "unsuccessful transfer");
-
-    //         lastBuy[_msgSender()] = 0;
-    //     } else {
-    //         amount = treePrice;
-
-    //         require(
-    //             wethToken.balanceOf(_msgSender()) >= amount,
-    //             "low price paid"
-    //         );
-
-    //         bool success = wethToken.transferFrom(
-    //             _msgSender(),
-    //             address(wethFunds),
-    //             amount
-    //         );
-    //         require(success, "unsuccessful transfer");
-
-    //         lastBuy[_msgSender()] = block.timestamp;
-    //     }
-
-    //     (
-    //         uint16 planterFund,
-    //         uint16 referralFund,
-    //         uint16 treeResearch,
-    //         uint16 localDevelop,
-    //         uint16 rescueFund,
-    //         uint16 treejerDevelop,
-    //         uint16 reserveFund1,
-    //         uint16 reserveFund2
-    //     ) = financialModel.findTreeDistribution(_treeId);
-
-    //     wethFunds.fundTree(
-    //         _treeId,
-    //         amount,
-    //         planterFund,
-    //         referralFund,
-    //         treeResearch,
-    //         localDevelop,
-    //         rescueFund,
-    //         treejerDevelop,
-    //         reserveFund1,
-    //         reserveFund2
-    //     );
-
-    //     treeFactory.updateOwner(_treeId, _msgSender(), 1);
-
-    //     emit IncrementalTreeSold(_treeId, _msgSender(), amount);
-    // }
+            treeAttribute.createTreeAttributes(treeId, randTree, _msgSender());
+        }
+    }
 
     /** @dev admin can update incrementalPrice
      * @param _initialPrice initialPrice of trees
@@ -436,7 +372,5 @@ contract IncrementalSell is Initializable, RelayRecipient {
         );
 
         treeFactory.updateOwner(_localLastSold, _msgSender(), 1);
-
-        emit IncrementalTreeSold(_localLastSold, _msgSender(), _treePrice);
     }
 }

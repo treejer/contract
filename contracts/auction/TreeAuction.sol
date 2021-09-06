@@ -40,11 +40,15 @@ contract TreeAuction is Initializable, RelayRecipient {
     /** NOTE mapping of auctionId to Auction struct */
     mapping(uint256 => Auction) public auctions;
 
+    /**NOTE mapping of bidder to mapping of treeId to referral */
+    mapping(address => mapping(uint256 => address)) public referrals;
+
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
         address bidder,
-        uint256 amount
+        uint256 amount,
+        address referral
     );
     event AuctionSettled(
         uint256 auctionId,
@@ -201,7 +205,11 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _auctionId auctionId that user bid for it.
      */
 
-    function bid(uint256 _auctionId, uint256 _amount) external ifNotPaused {
+    function bid(
+        uint256 _auctionId,
+        uint256 _amount,
+        address _referrer
+    ) external ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
         require(
@@ -232,6 +240,13 @@ contract TreeAuction is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
+        if (
+            _referrer != address(0) &&
+            referrals[_msgSender()][_storageAuction.treeId] == address(0)
+        ) {
+            referrals[_msgSender()][_storageAuction.treeId] = _referrer;
+        }
+
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
@@ -242,7 +257,8 @@ contract TreeAuction is Initializable, RelayRecipient {
             _auctionId,
             _storageAuction.treeId,
             _msgSender(),
-            _amount
+            _amount,
+            _referrer
         );
 
         _increaseAuctionEndTime(_auctionId);
@@ -299,6 +315,10 @@ contract TreeAuction is Initializable, RelayRecipient {
             );
 
             treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
+
+            if (referrals[auction.bidder][auction.treeId] != address(0)) {
+                //call mint
+            }
 
             emit AuctionSettled(
                 _auctionId,

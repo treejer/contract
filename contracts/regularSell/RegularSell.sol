@@ -45,6 +45,12 @@ contract RegularSell is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check msg.sender has TreejerContract role*/
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
@@ -203,6 +209,26 @@ contract RegularSell is Initializable, RelayRecipient {
                 treejerDevelop,
                 reserveFund1,
                 reserveFund2
+            );
+
+            emit RegularMint(_msgSender(), tempLastRegularSold);
+        }
+
+        lastSoldRegularTree = tempLastRegularSold;
+    }
+
+    //TODO: ADD_COMMENT
+    function mintTreeTorefferal(uint256 _count) external onlyTreejerContract {
+        require(_count > 0, "invalid count");
+
+        uint256 amount = treePrice * _count;
+
+        uint256 tempLastRegularSold = lastSoldRegularTree;
+
+        for (uint256 i = 0; i < _count; i++) {
+            tempLastRegularSold = treeFactory.mintRegularTrees(
+                tempLastRegularSold,
+                _msgSender()
             );
 
             emit RegularMint(_msgSender(), tempLastRegularSold);

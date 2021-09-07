@@ -553,7 +553,7 @@ contract WethFunds is Initializable {
 
         uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
             _wethAmount,
-            totalFunds.treejerDevelop,
+            type(uint256).max,
             path,
             address(planterFundContract),
             block.timestamp + 1800 // 30 * 60 (30 min)

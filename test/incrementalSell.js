@@ -341,7 +341,7 @@ contract("IncrementalSell", (accounts) => {
       );
     });
 
-    console.log("x", tx);
+    console.log("tx", tx);
 
     await wethInstance.resetAcc(userAccount3);
   });

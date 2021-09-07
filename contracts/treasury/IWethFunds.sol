@@ -192,7 +192,7 @@ interface IWethFunds {
     function withdrawReserveFund2(uint256 _amount, string calldata _reason)
         external;
 
-    function buyerReferrerFund(uint256 _wethAmount) external;
+    function buyerReferrerFund(uint256 _amount) external;
 
     function incrementalFund(
         uint256 _totalPlanterFund,

@@ -203,6 +203,19 @@ interface IWethFunds {
     function withdrawReserveFund2(uint256 _amount, string calldata _reason)
         external;
 
+    function buyerReferrerFund(uint256 _wethAmount) external;
+
+    function incrementalFund(
+        uint16 _totalPlanterFund,
+        uint16 _totalReferralFund,
+        uint16 _totalTreeResearch,
+        uint16 _totalLocalDevelop,
+        uint16 _totalRescueFund,
+        uint16 _totalTreejerDevelop,
+        uint16 _totalReserveFund1,
+        uint16 _totalReserveFund2
+    ) external returns (uint256);
+
     /**
      * @dev emitted when admin withdraw tree research balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage

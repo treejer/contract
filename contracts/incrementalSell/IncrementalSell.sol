@@ -46,6 +46,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint256 treejerDevelop;
         uint256 reserveFund1;
         uint256 reserveFund2;
+        address buyer;
     }
 
     /** NOTE {incrementalPrice} is struct of IncrementalPrice that store
@@ -385,9 +386,11 @@ contract IncrementalSell is Initializable, RelayRecipient {
     ) private returns (uint256) {
         IncrementalPrice storage incPrice = incrementalPrice;
 
+        FundDistribution memory totalFunds;
+
         uint256 treeId = _startTreeId;
 
-        FundDistribution memory totalFunds;
+        totalFunds.buyer = _buyer;
 
         for (uint256 i = 0; i < _count; i++) {
             uint256 steps = (treeId - incPrice.startTree) /
@@ -417,7 +420,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
             totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
             totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
 
-            treeFactory.updateOwner(treeId, _buyer, 1);
+            treeFactory.updateOwner(treeId, totalFunds.buyer, 1);
 
             treeId += 1;
         }

@@ -82,6 +82,13 @@ interface IRegularSell {
      */
     function requestByTreeId(uint256 _treeId) external;
 
+    function mintReferralTree(
+        uint256 _count,
+        address _referrer,
+        uint256 _regularPlanterFund,
+        uint256 _regularReferralFund
+    ) external;
+
     /** @dev emited when price of tree change */
     event TreePriceUpdated(uint256 price);
 

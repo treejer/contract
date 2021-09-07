@@ -7,7 +7,9 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFunds.sol";
 import "../treasury/IFinancialModel.sol";
+import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
+import "../regularSell/IRegularSell.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract IncrementalSell is Initializable, RelayRecipient {
@@ -23,6 +25,8 @@ contract IncrementalSell is Initializable, RelayRecipient {
     IWethFunds public wethFunds;
     IFinancialModel public financialModel;
     ITreeAttribute public treeAttribute;
+    IPlanterFund public planterFundContract;
+    IRegularSell public regularSell;
     IERC20Upgradeable public wethToken;
 
     struct IncrementalPrice {
@@ -31,6 +35,17 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint256 initialPrice;
         uint64 increaseStep;
         uint64 increaseRatio;
+    }
+
+    struct FundDistribution {
+        uint256 planterFund;
+        uint256 referralFund;
+        uint256 treeResearch;
+        uint256 localDevelop;
+        uint256 rescueFund;
+        uint256 treejerDevelop;
+        uint256 reserveFund1;
+        uint256 reserveFund2;
     }
 
     /** NOTE {incrementalPrice} is struct of IncrementalPrice that store
@@ -95,6 +110,23 @@ contract IncrementalSell is Initializable, RelayRecipient {
         validAddress(_address)
     {
         trustedForwarder = _address;
+    }
+
+    /**
+     * @dev admin set PlanterFundAddress
+     * @param _address set to the address of PlanterFund
+     */
+
+    function setPlanterFundAddress(address _address) external onlyAdmin {
+        IPlanterFund candidateContract = IPlanterFund(_address);
+        require(candidateContract.isPlanterFund());
+        planterFundContract = candidateContract;
+    }
+
+    function setRegularSellAddress(address _address) external onlyAdmin {
+        IRegularSell candidateContract = IRegularSell(_address);
+        require(candidateContract.isRegularSell());
+        regularSell = candidateContract;
     }
 
     /** @dev admin set TreeFactory contract address
@@ -243,7 +275,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
     }
 
     //TODO:ADD_COMMENTS
-    function buyTree(uint256 _count) external ifNotPaused {
+    function buyTree(uint256 _count, address _referrer) external ifNotPaused {
         require(_count < 101 && _count > 0, "Count must be lt 100");
 
         IncrementalPrice storage incPrice = incrementalPrice;
@@ -293,18 +325,20 @@ contract IncrementalSell is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (treeId - incPrice.startTree) /
-                incPrice.increaseStep;
+        _calcTotal(treeId, _count, _msgSender(), _referrer, totalPrice);
 
-            uint256 treePrice = incPrice.initialPrice +
-                (steps * incPrice.initialPrice * incPrice.increaseRatio) /
-                10000;
+        // for (uint256 i = 0; i < _count; i++) {
+        //     uint256 steps = (treeId - incPrice.startTree) /
+        //         incPrice.increaseStep;
 
-            _indivitualTree(treeId, treePrice);
+        //     uint256 treePrice = incPrice.initialPrice +
+        //         (steps * incPrice.initialPrice * incPrice.increaseRatio) /
+        //         10000;
 
-            treeId += 1;
-        }
+        //     _indivitualTree(treeId, treePrice);
+
+        //     treeId += 1;
+        // }
 
         lastSold = treeId - 1;
 
@@ -349,33 +383,147 @@ contract IncrementalSell is Initializable, RelayRecipient {
         emit IncrementalRatesUpdated();
     }
 
-    function _indivitualTree(uint256 _treeId, uint256 _treePrice) private {
-        (
-            uint16 planterFund,
-            uint16 referralFund,
-            uint16 treeResearch,
-            uint16 localDevelop,
-            uint16 rescueFund,
-            uint16 treejerDevelop,
-            uint16 reserveFund1,
-            uint16 reserveFund2
-        ) = financialModel.findTreeDistribution(_treeId);
+    function _calcTotal(
+        uint256 _startTreeId,
+        uint256 _count,
+        address _buyer,
+        address _referrer,
+        uint256 _totalPrice
+    ) private {
+        IncrementalPrice storage incPrice = incrementalPrice;
 
-        wethFunds.fundTree(
-            _treeId,
-            _treePrice,
-            planterFund,
-            referralFund,
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+        uint256 treeId = _startTreeId;
+
+        FundDistribution memory totalFunds;
+
+        for (uint256 i = 0; i < _count; i++) {
+            uint256 steps = (treeId - incPrice.startTree) /
+                incPrice.increaseStep;
+
+            uint256 treePrice = incPrice.initialPrice +
+                (steps * incPrice.initialPrice * incPrice.increaseRatio) /
+                10000;
+
+            (
+                uint16 planterFund,
+                uint16 referralFund,
+                uint16 treeResearch,
+                uint16 localDevelop,
+                uint16 rescueFund,
+                uint16 treejerDevelop,
+                uint16 reserveFund1,
+                uint16 reserveFund2
+            ) = financialModel.findTreeDistribution(treeId);
+
+            totalFunds.planterFund += (treePrice * planterFund) / 10000;
+            totalFunds.referralFund += (treePrice * referralFund) / 10000;
+            totalFunds.treeResearch += (treePrice * treeResearch) / 10000;
+            totalFunds.localDevelop += (treePrice * localDevelop) / 10000;
+            totalFunds.rescueFund += (treePrice * rescueFund) / 10000;
+            totalFunds.treejerDevelop += (treePrice * treejerDevelop) / 10000;
+            totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
+            totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
+
+            treeFactory.updateOwner(treeId, _msgSender(), 1);
+
+            treeId += 1;
+        }
+
+        uint256 daiAmount = wethFunds.incrementalFund(
+            totalFunds.planterFund,
+            totalFunds.referralFund,
+            totalFunds.treeResearch,
+            totalFunds.localDevelop,
+            totalFunds.rescueFund,
+            totalFunds.treejerDevelop,
+            totalFunds.reserveFund1,
+            totalFunds.reserveFund2
         );
 
-        treeFactory.updateOwner(_treeId, _msgSender(), 1);
+        _func3(
+            _startTreeId,
+            _count,
+            daiAmount,
+            totalFunds.planterFund,
+            totalFunds.referralFund,
+            _totalPrice
+        );
+        if (_referrer != address(0)) {
+            wethFunds.buyerReferrerFund(
+                _count * (regularPlanterFund + regularReferralFund)
+            );
+
+            regularSell.mintReferralTree(
+                _referrer,
+                _count,
+                regularPlanterFund,
+                regularReferralFund
+            );
+        }
     }
+
+    function _func3(
+        uint256 _startTreeId,
+        uint256 _count,
+        uint256 _daiAmount,
+        uint256 _planterFund,
+        uint256 _referralFund,
+        uint256 _totalPrice
+    ) private {
+        uint256 planterDai = (_daiAmount * (_planterFund)) /
+            (_planterFund + _referralFund);
+        uint256 referralDai = (_daiAmount * (_referralFund)) /
+            (_planterFund + _referralFund);
+
+        IncrementalPrice storage incPrice = incrementalPrice;
+
+        uint256 treeId = _startTreeId;
+
+        for (uint256 i = 0; i < _count; i++) {
+            uint256 steps = (treeId - incPrice.startTree) /
+                incPrice.increaseStep;
+
+            uint256 treePrice = incPrice.initialPrice +
+                (steps * incPrice.initialPrice * incPrice.increaseRatio) /
+                10000;
+
+            planterFundContract.incrementalFund(
+                treeId,
+                (planterDai * treePrice) / _totalPrice,
+                (referralDai * treePrice) / _totalPrice
+            );
+
+            treeId += 1;
+        }
+    }
+
+    // function _indivitualTree(uint256 _treeId, uint256 _treePrice) private {
+    //     (
+    //         uint16 planterFund,
+    //         uint16 referralFund,
+    //         uint16 treeResearch,
+    //         uint16 localDevelop,
+    //         uint16 rescueFund,
+    //         uint16 treejerDevelop,
+    //         uint16 reserveFund1,
+    //         uint16 reserveFund2
+    //     ) = financialModel.findTreeDistribution(_treeId);
+
+    //     wethFunds.fundTree(
+    //         _treeId,
+    //         _treePrice,
+    //         planterFund,
+    //         referralFund,
+    //         treeResearch,
+    //         localDevelop,
+    //         rescueFund,
+    //         treejerDevelop,
+    //         reserveFund1,
+    //         reserveFund2
+    //     );
+
+    //     treeFactory.updateOwner(_treeId, _msgSender(), 1);
+    // }
 
     function setRegularPlanterFund(
         uint256 _regularPlanterFund,

@@ -4,6 +4,12 @@ pragma solidity ^0.8.6;
 
 /** @title PlanterFund interfce */
 interface IPlanterFund {
+    function incrementalFund(
+        uint256 treeId,
+        uint256 planterDai,
+        uint256 referralDai
+    ) external returns (bool);
+
     /**
      * @return true in case of PlanterFund contract have been initialized
      */

@@ -4,6 +4,17 @@ pragma solidity ^0.8.6;
 
 /** @title WethFunds interfce */
 interface IWethFunds {
+    function incrementalFund(
+        uint256 _planterFund,
+        uint256 _referralFund,
+        uint256 _treeResearch,
+        uint256 _localDevelop,
+        uint256 _rescueFund,
+        uint256 _treejerDevelop,
+        uint256 _reserveFund1,
+        uint256 _reserveFund2
+    ) external returns (uint256);
+
     /**
      * @return true in case of WethFunds contract have been initialized
      */

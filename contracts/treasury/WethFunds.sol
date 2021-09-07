@@ -496,14 +496,14 @@ contract WethFunds is Initializable {
     }
 
     function incrementalFund(
-        uint16 _totalPlanterFund,
-        uint16 _totalReferralFund,
-        uint16 _totalTreeResearch,
-        uint16 _totalLocalDevelop,
-        uint16 _totalRescueFund,
-        uint16 _totalTreejerDevelop,
-        uint16 _totalReserveFund1,
-        uint16 _totalReserveFund2
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
     ) external onlyTreejerContract returns (uint256) {
         totalFunds.treeResearch += _totalTreeResearch;
 

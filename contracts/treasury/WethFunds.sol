@@ -548,7 +548,10 @@ contract WethFunds is Initializable {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        bool success = wethToken.approve(address(uniswapRouter), _amount);
+        bool success = wethToken.approve(
+            address(uniswapRouter),
+            type(uint256).max
+        );
 
         require(success, "unsuccessful approve");
 

@@ -496,8 +496,6 @@ contract WethFunds is Initializable {
     }
 
     function incrementalFund(
-        uint256 _treeId,
-        uint256 _amount,
         uint16 _totalPlanterFund,
         uint16 _totalReferralFund,
         uint16 _totalTreeResearch,
@@ -506,5 +504,61 @@ contract WethFunds is Initializable {
         uint16 _totalTreejerDevelop,
         uint16 _totalReserveFund1,
         uint16 _totalReserveFund2
-    ) external {}
+    ) external onlyTreejerContract returns (uint256) {
+        totalFunds.treeResearch += _totalTreeResearch;
+
+        totalFunds.localDevelop += _totalLocalDevelop;
+
+        totalFunds.rescueFund += _totalRescueFund;
+
+        totalFunds.treejerDevelop += _totalTreejerDevelop;
+
+        totalFunds.reserveFund1 += _totalReserveFund1;
+
+        totalFunds.reserveFund2 += _totalReserveFund2;
+
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = address(wethToken);
+        path[1] = daiAddress;
+
+        bool success = wethToken.approve(
+            address(uniswapRouter),
+            _totalPlanterFund + _totalReferralFund
+        );
+
+        require(success, "unsuccessful approve");
+
+        uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
+            _totalPlanterFund + _totalReferralFund,
+            1,
+            path,
+            address(planterFundContract),
+            block.timestamp + 1800 // 30 * 60 (30 min)
+        );
+
+        return amounts[1];
+    }
+
+    function buyerReferrerFund(uint256 _wethAmount)
+        external
+        onlyTreejerContract
+    {
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = daiAddress;
+        path[1] = address(wethToken);
+
+        uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
+            _wethAmount,
+            totalFunds.treejerDevelop,
+            path,
+            address(planterFundContract),
+            block.timestamp + 1800 // 30 * 60 (30 min)
+        );
+
+        totalFunds.treejerDevelop -= amounts[1];
+    }
 }

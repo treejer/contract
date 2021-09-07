@@ -8,6 +8,7 @@ import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFunds.sol";
 import "../treasury/IFinancialModel.sol";
 import "../gsn/RelayRecipient.sol";
+import "../treasury/IPlanterFund.sol";
 
 /** @title RegularSell contract */
 contract RegularSell is Initializable, RelayRecipient {
@@ -22,6 +23,7 @@ contract RegularSell is Initializable, RelayRecipient {
     IDaiFunds public daiFunds;
     IFinancialModel public financialModel;
     IERC20Upgradeable public daiToken;
+    IPlanterFund public planterFundContract;
 
     event TreePriceUpdated(uint256 price);
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
@@ -150,6 +152,17 @@ contract RegularSell is Initializable, RelayRecipient {
         financialModel = candidateContract;
     }
 
+    /** @dev admin set planterFund contract address
+     * @param _address planterFund contract address
+     */
+    function setPlanterFundAddress(address _address) external onlyAdmin {
+        IPlanterFund candidateContract = IPlanterFund(_address);
+
+        require(candidateContract.isPlanterFund());
+
+        planterFundContract = candidateContract;
+    }
+
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      */
@@ -232,6 +245,12 @@ contract RegularSell is Initializable, RelayRecipient {
             tempLastRegularSold = treeFactory.mintRegularTrees(
                 tempLastRegularSold,
                 _referrer
+            );
+
+            planterFundContract.setPlanterFunds(
+                tempLastRegularSold,
+                _regularPlanterFund,
+                _regularReferralFund
             );
 
             emit RegularMint(_referrer, tempLastRegularSold);

@@ -15,6 +15,9 @@ contract IncrementalSell is Initializable, RelayRecipient {
     bool public isIncrementalSell;
     uint256 public lastSold;
 
+    uint256 public regularPlanterFund;
+    uint256 public regularReferralFund;
+
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IWethFunds public wethFunds;
@@ -372,5 +375,13 @@ contract IncrementalSell is Initializable, RelayRecipient {
         );
 
         treeFactory.updateOwner(_treeId, _msgSender(), 1);
+    }
+
+    function setRegularPlanterFund(
+        uint256 _regularPlanterFund,
+        uint256 _regularReferralFund
+    ) external onlyDataManager {
+        regularPlanterFund = _regularPlanterFund;
+        regularReferralFund = _regularReferralFund;
     }
 }

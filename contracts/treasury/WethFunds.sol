@@ -494,4 +494,17 @@ contract WethFunds is Initializable {
         );
         emit TreeFunded(_treeId, _amount, planterFund + referralFund);
     }
+
+    function incrementalFund(
+        uint256 _treeId,
+        uint256 _amount,
+        uint16 _totalPlanterFund,
+        uint16 _totalReferralFund,
+        uint16 _totalTreeResearch,
+        uint16 _totalLocalDevelop,
+        uint16 _totalRescueFund,
+        uint16 _totalTreejerDevelop,
+        uint16 _totalReserveFund1,
+        uint16 _totalReserveFund2
+    ) external {}
 }

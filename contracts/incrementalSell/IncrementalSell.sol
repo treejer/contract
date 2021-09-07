@@ -471,6 +471,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
     ) private {
         uint256 planterDai = (_daiAmount * (_planterFund)) /
             (_planterFund + _referralFund);
+
         uint256 referralDai = (_daiAmount * (_referralFund)) /
             (_planterFund + _referralFund);
 
@@ -486,7 +487,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
                 (steps * incPrice.initialPrice * incPrice.increaseRatio) /
                 10000;
 
-            planterFundContract.incrementalFund(
+            planterFundContract.setPlanterFunds(
                 treeId,
                 (planterDai * treePrice) / _totalPrice,
                 (referralDai * treePrice) / _totalPrice

@@ -325,20 +325,13 @@ contract IncrementalSell is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        _calcTotal(treeId, _count, _msgSender(), _referrer, totalPrice);
-
-        // for (uint256 i = 0; i < _count; i++) {
-        //     uint256 steps = (treeId - incPrice.startTree) /
-        //         incPrice.increaseStep;
-
-        //     uint256 treePrice = incPrice.initialPrice +
-        //         (steps * incPrice.initialPrice * incPrice.increaseRatio) /
-        //         10000;
-
-        //     _indivitualTree(treeId, treePrice);
-
-        //     treeId += 1;
-        // }
+        treeId = _calcTotal(
+            treeId,
+            _count,
+            _msgSender(),
+            _referrer,
+            totalPrice
+        );
 
         lastSold = treeId - 1;
 
@@ -389,7 +382,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         address _buyer,
         address _referrer,
         uint256 _totalPrice
-    ) private {
+    ) private returns (uint256) {
         IncrementalPrice storage incPrice = incrementalPrice;
 
         uint256 treeId = _startTreeId;
@@ -424,7 +417,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
             totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
             totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
 
-            treeFactory.updateOwner(treeId, _msgSender(), 1);
+            treeFactory.updateOwner(treeId, _buyer, 1);
 
             treeId += 1;
         }
@@ -448,18 +441,21 @@ contract IncrementalSell is Initializable, RelayRecipient {
             totalFunds.referralFund,
             _totalPrice
         );
+
         if (_referrer != address(0)) {
             wethFunds.buyerReferrerFund(
                 _count * (regularPlanterFund + regularReferralFund)
             );
 
             regularSell.mintReferralTree(
-                _referrer,
                 _count,
+                _referrer,
                 regularPlanterFund,
                 regularReferralFund
             );
         }
+
+        return treeId;
     }
 
     function _func3(
@@ -496,34 +492,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
             treeId += 1;
         }
     }
-
-    // function _indivitualTree(uint256 _treeId, uint256 _treePrice) private {
-    //     (
-    //         uint16 planterFund,
-    //         uint16 referralFund,
-    //         uint16 treeResearch,
-    //         uint16 localDevelop,
-    //         uint16 rescueFund,
-    //         uint16 treejerDevelop,
-    //         uint16 reserveFund1,
-    //         uint16 reserveFund2
-    //     ) = financialModel.findTreeDistribution(_treeId);
-
-    //     wethFunds.fundTree(
-    //         _treeId,
-    //         _treePrice,
-    //         planterFund,
-    //         referralFund,
-    //         treeResearch,
-    //         localDevelop,
-    //         rescueFund,
-    //         treejerDevelop,
-    //         reserveFund1,
-    //         reserveFund2
-    //     );
-
-    //     treeFactory.updateOwner(_treeId, _msgSender(), 1);
-    // }
 
     function setRegularPlanterFund(
         uint256 _regularPlanterFund,

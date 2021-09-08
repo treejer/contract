@@ -143,7 +143,7 @@ contract("WethFunds", (accounts) => {
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
-
+  /*
   it("set dai token address", async () => {
     await wethFunds.setDaiAddress(daiInstance.address, {
       from: deployerAccount,
@@ -3684,5 +3684,193 @@ contract("WethFunds", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+  });
+  */
+
+  it("2.Should incrementalFund work successfully", async () => {
+    const treeId = 0;
+    const treeId2 = 1;
+
+    let amount = web3.utils.toWei(".531", "Ether");
+
+    const totalPlanterFund1 = web3.utils.toWei("5");
+    const totalReferralFund1 = web3.utils.toWei("4");
+    const totalTreeResearch1 = web3.utils.toWei("2");
+    const totalLocalDevelop1 = web3.utils.toWei("1");
+    const totalRescueFund1 = web3.utils.toWei("2");
+    const totalTreejerDevelop1 = web3.utils.toWei("2");
+    const totalReserveFund1_1 = web3.utils.toWei("2.5");
+    const totalReserveFund2_1 = web3.utils.toWei("1");
+    const total1 = web3.utils.toWei("19.5"); //total amount of above shares
+
+    const totalPlanterFund2 = web3.utils.toWei("7");
+    const totalReferralFund2 = web3.utils.toWei("2");
+    const totalTreeResearch2 = web3.utils.toWei("1");
+    const totalLocalDevelop2 = web3.utils.toWei("3");
+    const totalRescueFund2 = web3.utils.toWei("4");
+    const totalTreejerDevelop2 = web3.utils.toWei("2");
+    const totalReserveFund1_2 = web3.utils.toWei("1.5");
+    const totalReserveFund2_2 = web3.utils.toWei("1.5");
+    const total2 = web3.utils.toWei("19"); //total amount of above shares
+
+    ////--------------check set role----------------
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
+
+    ////---------------transfer weth for wethFunds-------------------
+    await wethInstance.setMint(wethFunds.address, total1);
+    await wethInstance.setMint(wethFunds.address, total2);
+
+    ////--------------------call fund tree by auction----------------
+
+    let expectedSwapTokenAmount =
+      await uniswapRouterInstance.getAmountsOut.call(web3.utils.toWei("9"), [
+        wethInstance.address,
+        daiInstance.address,
+      ]);
+
+    await wethFunds.incrementalFund(
+      totalPlanterFund1,
+      totalReferralFund1,
+      totalTreeResearch1,
+      totalLocalDevelop1,
+      totalRescueFund1,
+      totalTreejerDevelop1,
+      totalReserveFund1_1,
+      totalReserveFund2_1,
+      { from: userAccount3 }
+    );
+
+    //check wethFund totalFunds treeId1
+    let totalFunds = await wethFunds.totalFunds();
+
+    assert.equal(
+      Number(totalFunds.treeResearch),
+      Number(totalTreeResearch1),
+      "treeResearch funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.localDevelop),
+      Number(totalLocalDevelop1),
+      "localDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.rescueFund),
+      Number(totalRescueFund1),
+      "rescueFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.treejerDevelop),
+      Number(totalTreejerDevelop1),
+      "treejerDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.reserveFund1),
+      Number(totalReserveFund1_1),
+      "reserveFund1 funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.reserveFund2),
+      Number(totalReserveFund2_1),
+      "reserveFund2 funds invalid"
+    );
+
+    ////------------check planter fund contract balance
+    let contractBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(contractBalance),
+      Number(expectedSwapTokenAmount[1]),
+      "Contract balance not true"
+    );
+
+    // ////--------------------call fund tree by auction(treeId2)----------------
+    let expectedSwapTokenAmountTreeId2 =
+      await uniswapRouterInstance.getAmountsOut.call(web3.utils.toWei("9"), [
+        wethInstance.address,
+        daiInstance.address,
+      ]);
+
+    await wethFunds.incrementalFund(
+      totalPlanterFund2,
+      totalReferralFund2,
+      totalTreeResearch2,
+      totalLocalDevelop2,
+      totalRescueFund2,
+      totalTreejerDevelop2,
+      totalReserveFund1_2,
+      totalReserveFund2_2,
+      { from: userAccount3 }
+    );
+
+    // //check wethFund totalFunds treeId2
+    let totalFunds2 = await wethFunds.totalFunds();
+
+    assert.equal(
+      Number(totalFunds2.treeResearch),
+      Math.add(totalTreeResearch1, totalTreeResearch2),
+      "2-treeResearch funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.localDevelop),
+      Math.add(totalLocalDevelop1, totalLocalDevelop2),
+      "2-localDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.rescueFund),
+      Math.add(totalRescueFund1, totalRescueFund2),
+      "2-rescueFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.treejerDevelop),
+      Math.add(totalTreejerDevelop1, totalTreejerDevelop2),
+      "2-treejerDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.reserveFund1),
+      Math.add(totalReserveFund1_1, totalReserveFund1_2),
+      "2-reserveFund1 funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.reserveFund2),
+      Math.add(totalReserveFund2_1, totalReserveFund2_2),
+      "2-reserveFund2 funds invalid"
+    );
+
+    ////------------check planter fund contract balance
+    let contractBalance2 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(contractBalance2),
+      Number(
+        Math.Big(expectedSwapTokenAmount[1]).plus(
+          expectedSwapTokenAmountTreeId2[1]
+        )
+      ),
+      "2-Contract balance not true"
+    );
   });
 });

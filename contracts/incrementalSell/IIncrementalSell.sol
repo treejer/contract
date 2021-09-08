@@ -22,6 +22,12 @@ interface IIncrementalSell {
     /** @return WethToken contract address */
     function wethToken() external view returns (address);
 
+    /** @return regularPlanterFund */
+    function regularPlanterFund() external view returns (uint256);
+
+    /** @return regularReferralFund  */
+    function regularReferralFund() external view returns (uint256);
+
     /**
      * @dev return incrementalPrice struct data
      * @return startTree

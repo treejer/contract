@@ -10,6 +10,7 @@ import "../tree/ITreeFactory.sol";
 import "../treasury/IFinancialModel.sol";
 import "../treasury/IWethFunds.sol";
 import "../gsn/RelayRecipient.sol";
+import "../regularSell/IRegularSell.sol";
 
 /** @title Tree Auction */
 
@@ -27,6 +28,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     IWethFunds public wethFunds;
     IFinancialModel public financialModel;
     IERC20Upgradeable public wethToken;
+    IRegularSell public regularSell;
 
     struct Auction {
         uint256 treeId;
@@ -42,6 +44,10 @@ contract TreeAuction is Initializable, RelayRecipient {
 
     /**NOTE mapping of bidder to mapping of treeId to referral */
     mapping(address => mapping(uint256 => address)) public referrals;
+
+    //TODO:ADD_COMMENT
+    uint256 public regularPlanterFund;
+    uint256 public regularReferralFund;
 
     event HighestBidIncreased(
         uint256 auctionId,
@@ -75,6 +81,12 @@ contract TreeAuction is Initializable, RelayRecipient {
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
+        _;
+    }
+
+    /** NOTE modifier for check msg.sender has TreejerContract role*/
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -143,6 +155,17 @@ contract TreeAuction is Initializable, RelayRecipient {
         IWethFunds candidateContract = IWethFunds(_address);
         require(candidateContract.isWethFunds());
         wethFunds = candidateContract;
+    }
+
+    /**
+     * @dev admin set RegularSell
+     * @param _address set to the address of regularSell
+     */
+
+    function setRegularSellAddress(address _address) external onlyAdmin {
+        IRegularSell candidateContract = IRegularSell(_address);
+        require(candidateContract.isRegularSell());
+        regularSell = candidateContract;
     }
 
     /**
@@ -318,6 +341,12 @@ contract TreeAuction is Initializable, RelayRecipient {
 
             if (referrals[auction.bidder][auction.treeId] != address(0)) {
                 //call mint
+                regularSell.mintReferralTree(
+                    1,
+                    referrals[auction.bidder][auction.treeId],
+                    regularPlanterFund,
+                    regularReferralFund
+                );
             }
 
             emit AuctionSettled(
@@ -346,5 +375,13 @@ contract TreeAuction is Initializable, RelayRecipient {
                 auctions[_auctionId].endDate
             );
         }
+    }
+
+    function setReferrerPlanterFund(
+        uint256 _regularPlanterFund,
+        uint256 _regularReferralFund
+    ) external onlyTreejerContract {
+        regularPlanterFund = _regularPlanterFund;
+        regularReferralFund = _regularReferralFund;
     }
 }

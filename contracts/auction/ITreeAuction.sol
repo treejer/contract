@@ -101,6 +101,12 @@ interface ITreeAuction {
      */
     function endAuction(uint256 _auctionId) external;
 
+    //TODO: ADD_COMMENT
+    function setReferrerPlanterFund(
+        uint256 _regularPlanterFund,
+        uint256 _regularReferralFund
+    ) external;
+
     /**
      * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
      * with value of {amount}

@@ -24,14 +24,6 @@ contract("FinancialModel", (accounts) => {
   const treasuryAddress = accounts[9];
 
   before(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -42,14 +34,6 @@ contract("FinancialModel", (accounts) => {
   });
 
   beforeEach(async () => {
-    // financialModelInstance = await FinancialModel.new({
-    //   from: deployerAccount,
-    // });
-
-    // await financialModelInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     financialModelInstance = await deployProxy(
       FinancialModel,
       [arInstance.address],

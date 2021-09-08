@@ -25,14 +25,6 @@ contract("AccessRestriction", (accounts) => {
     "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   beforeEach(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,

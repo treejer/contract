@@ -55,14 +55,6 @@ contract("CommunityGifts", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   before(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -73,41 +65,11 @@ contract("CommunityGifts", (accounts) => {
   });
 
   beforeEach(async () => {
-    // // arInstance = await AccessRestriction.new({
-    // //   from: deployerAccount,
-    // // });
-
-    // // await arInstance.initialize(deployerAccount, {
-    // //   from: deployerAccount,
-    // // });
-
-    // arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-    //   initializer: "initialize",
-    //   from: deployerAccount,
-    //   unsafeAllowCustomTypes: true,
-    // });
-
-    // await Common.addDataManager(arInstance, dataManager, deployerAccount);
-
     const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
     const initialPlanterFund = web3.utils.toWei("0.5");
     const initialReferralFund = web3.utils.toWei("0.1");
 
     //------------------ deploy contracts
-
-    // communityGiftsInstance = await CommunityGifts.new({
-    //   from: deployerAccount,
-    // });
-
-    // await communityGiftsInstance.initialize(
-    //   arInstance.address,
-    //   expireDate,
-    //   initialPlanterFund,
-    //   initialReferralFund,
-    //   {
-    //     from: deployerAccount,
-    //   }
-    // );
 
     communityGiftsInstance = await deployProxy(
       CommunityGifts,
@@ -119,14 +81,6 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    // treeAttributeInstance = await TreeAttribute.new({
-    //   from: deployerAccount,
-    // });
-
-    // await treeAttributeInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     treeAttributeInstance = await deployProxy(
       TreeAttribute,
       [arInstance.address],
@@ -137,27 +91,11 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    // planterFundsInstnce = await PlanterFund.new({
-    //   from: deployerAccount,
-    // });
-
-    // await planterFundsInstnce.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // financialModelInstance = await FinancialModel.new({
-    //   from: deployerAccount,
-    // });
-
-    // await financialModelInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     financialModelInstance = await deployProxy(
       FinancialModel,
@@ -169,27 +107,11 @@ contract("CommunityGifts", (accounts) => {
       }
     );
 
-    // treeFactoryInstance = await TreeFactory.new({
-    //   from: deployerAccount,
-    // });
-
-    // await treeFactoryInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // treeTokenInstance = await Tree.new({
-    //   from: deployerAccount,
-    // });
-
-    // await treeTokenInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
       initializer: "initialize",

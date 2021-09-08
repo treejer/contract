@@ -38,14 +38,6 @@ contract("Gsn", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   before(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -65,12 +57,6 @@ contract("Gsn", (accounts) => {
       arInstance.address,
       { from: deployerAccount }
     );
-
-    // planterInstance = await Planter.new({ from: deployerAccount });
-
-    // await planterInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     planterInstance = await deployProxy(Planter, [arInstance.address], {
       initializer: "initialize",

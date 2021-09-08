@@ -37,14 +37,6 @@ contract("DaiFunds", (accounts) => {
   const withdrawReason = "reason to withdraw";
 
   before(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -68,35 +60,17 @@ contract("DaiFunds", (accounts) => {
   beforeEach(async () => {
     /////////////---------------------- deploy contracts ------------------- //////////////
 
-    // daiFundsInstance = await DaiFunds.new({ from: deployerAccount });
-
-    // await daiFundsInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
 
-    // fModel = await FinancialModel.new({ from: deployerAccount });
-
-    // await fModel.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     fModel = await deployProxy(FinancialModel, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // planterFundsInstnce = await PlanterFund.new({ from: deployerAccount });
-
-    // await planterFundsInstnce.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
       initializer: "initialize",

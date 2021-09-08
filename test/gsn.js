@@ -42,13 +42,20 @@ contract("Gsn", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
+
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
-    });
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
     /////////////---------------------- deploy contracts ------------------- //////////////
@@ -61,10 +68,16 @@ contract("Gsn", (accounts) => {
       { from: deployerAccount }
     );
 
-    planterInstance = await Planter.new({ from: deployerAccount });
+    // planterInstance = await Planter.new({ from: deployerAccount });
 
-    await planterInstance.initialize(arInstance.address, {
+    // await planterInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
   });
 

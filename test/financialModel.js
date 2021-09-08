@@ -28,23 +28,39 @@ contract("FinancialModel", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
-      from: deployerAccount,
-    });
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
 
-    await arInstance.initialize(deployerAccount, {
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
+    // financialModelInstance = await FinancialModel.new({
+    //   from: deployerAccount,
+    // });
 
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    // await financialModelInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
   });
 
   afterEach(async () => {});

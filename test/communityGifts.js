@@ -54,11 +54,7 @@ contract("CommunityGifts", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
+  before(async () => {
     // arInstance = await AccessRestriction.new({
     //   from: deployerAccount,
     // });
@@ -74,6 +70,24 @@ contract("CommunityGifts", (accounts) => {
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
+
+  beforeEach(async () => {
+    // // arInstance = await AccessRestriction.new({
+    // //   from: deployerAccount,
+    // // });
+
+    // // await arInstance.initialize(deployerAccount, {
+    // //   from: deployerAccount,
+    // // });
+
+    // arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+    //   initializer: "initialize",
+    //   from: deployerAccount,
+    //   unsafeAllowCustomTypes: true,
+    // });
+
+    // await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
     const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
     const initialPlanterFund = web3.utils.toWei("0.5");

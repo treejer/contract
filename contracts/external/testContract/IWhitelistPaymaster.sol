@@ -11,12 +11,12 @@ interface IWhitelistPaymaster {
         bool success,
         uint256 gasUseWithoutPost,
         GsnTypes.RelayData calldata relayData
-    ) external virtual;
+    ) external;
 
     function preRelayedCall(
         GsnTypes.RelayRequest calldata relayRequest,
         bytes calldata signature,
         bytes calldata approvalData,
         uint256 maxPossibleGas
-    ) external virtual;
+    ) external;
 }

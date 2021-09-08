@@ -74,12 +74,18 @@ contract("TreeAuction", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
-      from: deployerAccount,
-    });
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
 
-    await arInstance.initialize(deployerAccount, {
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     factoryInstance = await Factory.new(accounts[2], {
@@ -126,60 +132,106 @@ contract("TreeAuction", (accounts) => {
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-    treeAuctionInstance = await TreeAuction.new({
+    // treeAuctionInstance = await TreeAuction.new({
+    //   from: deployerAccount,
+    // });
+
+    // await treeAuctionInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeAuctionInstance.initialize(arInstance.address, {
+    // financialModelInstance = await FinancialModel.new({
+    //   from: deployerAccount,
+    // });
+
+    // await financialModelInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    // wethFundsInstance = await WethFunds.new({
+    //   from: deployerAccount,
+    // });
+
+    // await wethFundsInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    financialModelInstance = await FinancialModel.new({
+    // treeFactoryInstance = await TreeFactory.new({
+    //   from: deployerAccount,
+    // });
+
+    // await treeFactoryInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await financialModelInstance.initialize(arInstance.address, {
+    // treeTokenInstance = await Tree.new({
+    //   from: deployerAccount,
+    // });
+
+    // await treeTokenInstance.initialize(arInstance.address, "", {
+    //   from: deployerAccount,
+    // });
+
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    wethFundsInstance = await WethFunds.new({
+    // planterInstance = await Planter.new({
+    //   from: deployerAccount,
+    // });
+
+    // await planterInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await wethFundsInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    // planterFundsInstnce = await PlanterFund.new({
+    //   from: deployerAccount,
+    // });
 
-    treeFactoryInstance = await TreeFactory.new({
-      from: deployerAccount,
-    });
+    // await planterFundsInstnce.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
 
-    await treeFactoryInstance.initialize(arInstance.address, {
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    treeTokenInstance = await Tree.new({
-      from: deployerAccount,
-    });
-
-    await treeTokenInstance.initialize(arInstance.address, "", {
-      from: deployerAccount,
-    });
-
-    planterInstance = await Planter.new({
-      from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    planterFundsInstnce = await PlanterFund.new({
-      from: deployerAccount,
-    });
-
-    await planterFundsInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////////////////////////-------------------- handle address

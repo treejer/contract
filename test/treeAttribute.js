@@ -70,12 +70,18 @@ contract("TreeAttribute", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
-      from: deployerAccount,
-    });
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
 
-    await arInstance.initialize(deployerAccount, {
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ////--------------------------uniswap deploy
@@ -125,52 +131,44 @@ contract("TreeAttribute", (accounts) => {
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
     await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
 
-    treeAttributeInstance = await TreeAttribute.new({
+    treeAttributeInstance = await deployProxy(
+      TreeAttribute,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeAttributeInstance.initialize(arInstance.address, {
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeFactoryInstance = await TreeFactory.new({
+    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeFactoryInstance.initialize(arInstance.address, {
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeTokenInstance = await Tree.new({
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await treeTokenInstance.initialize(arInstance.address, "", {
-      from: deployerAccount,
-    });
-
-    iSellInstance = await IncrementalSell.new({
-      from: deployerAccount,
-    });
-
-    await iSellInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    wethFundsInstance = await WethFunds.new({
-      from: deployerAccount,
-    });
-
-    await wethFundsInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    planterFundsInstnce = await PlanterFund.new({
-      from: deployerAccount,
-    });
-
-    await planterFundsInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     /////////////////////////////////////////////////////////////////////////////////

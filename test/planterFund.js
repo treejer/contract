@@ -53,12 +53,18 @@ contract("PlanterFund", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
-      from: deployerAccount,
-    });
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
 
-    await arInstance.initialize(deployerAccount, {
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
@@ -80,16 +86,29 @@ contract("PlanterFund", (accounts) => {
       userAccount6,
       deployerAccount
     );
-    planterInstance = await Planter.new({ from: deployerAccount });
 
-    await planterInstance.initialize(arInstance.address, {
+    // planterInstance = await Planter.new({ from: deployerAccount });
+
+    // await planterInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    planterFundInstance = await PlanterFund.new({ from: deployerAccount });
+    // planterFundInstance = await PlanterFund.new({ from: deployerAccount });
 
-    await planterFundInstance.initialize(arInstance.address, {
+    // await planterFundInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    planterFundInstance = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });

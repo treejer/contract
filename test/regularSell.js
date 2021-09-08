@@ -62,12 +62,18 @@ contract("regularSell", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
-      from: deployerAccount,
-    });
+    // arInstance = await AccessRestriction.new({
+    //   from: deployerAccount,
+    // });
 
-    await arInstance.initialize(deployerAccount, {
+    // await arInstance.initialize(deployerAccount, {
+    //   from: deployerAccount,
+    // });
+
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
@@ -76,52 +82,92 @@ contract("regularSell", (accounts) => {
 
     const treePrice = Units.convert("7", "eth", "wei"); // 7 dai
 
-    regularSellInstance = await RegularSell.new({
+    // regularSellInstance = await RegularSell.new({
+    //   from: deployerAccount,
+    // });
+
+    // await regularSellInstance.initialize(arInstance.address, treePrice, {
+    //   from: deployerAccount,
+    // });
+
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, treePrice],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    // treeFactoryInstance = await TreeFactory.new({
+    //   from: deployerAccount,
+    // });
+
+    // await treeFactoryInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await regularSellInstance.initialize(arInstance.address, treePrice, {
+    // treeTokenInstance = await Tree.new({
+    //   from: deployerAccount,
+    // });
+
+    // await treeTokenInstance.initialize(arInstance.address, "", {
+    //   from: deployerAccount,
+    // });
+
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeFactoryInstance = await TreeFactory.new({
+    // daiFundsInstance = await DaiFunds.new({
+    //   from: deployerAccount,
+    // });
+
+    // await daiFundsInstance.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeFactoryInstance.initialize(arInstance.address, {
+    // fModel = await FinancialModel.new({
+    //   from: deployerAccount,
+    // });
+
+    // await fModel.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
+
+    fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeTokenInstance = await Tree.new({
-      from: deployerAccount,
-    });
+    // planterFundsInstnce = await PlanterFund.new({
+    //   from: deployerAccount,
+    // });
 
-    await treeTokenInstance.initialize(arInstance.address, "", {
-      from: deployerAccount,
-    });
+    // await planterFundsInstnce.initialize(arInstance.address, {
+    //   from: deployerAccount,
+    // });
 
-    daiFundsInstance = await DaiFunds.new({
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundsInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    fModel = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await fModel.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    planterFundsInstnce = await PlanterFund.new({
-      from: deployerAccount,
-    });
-
-    await planterFundsInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
   });
 

@@ -48,19 +48,7 @@ contract("PlanterFund", (accounts) => {
 
   const ipfsHash = "some ipfs hash here";
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
+  before(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -86,24 +74,14 @@ contract("PlanterFund", (accounts) => {
       userAccount6,
       deployerAccount
     );
+  });
 
-    // planterInstance = await Planter.new({ from: deployerAccount });
-
-    // await planterInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
+  beforeEach(async () => {
     planterInstance = await deployProxy(Planter, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // planterFundInstance = await PlanterFund.new({ from: deployerAccount });
-
-    // await planterFundInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     planterFundInstance = await deployProxy(PlanterFund, [arInstance.address], {
       initializer: "initialize",
@@ -120,6 +98,7 @@ contract("PlanterFund", (accounts) => {
       }
     );
   });
+
   afterEach(async () => {});
 
   //////---------------------------------------------- test gsn --------------------------------

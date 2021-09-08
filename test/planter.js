@@ -33,26 +33,25 @@ contract("Planter", (accounts) => {
   const userAccount8 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-  // before(async () => {});
+
+  // before(async () => {
+
+  // });
+
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
-    });
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-    planterInstance = await Planter.new({ from: deployerAccount });
-    await planterInstance.initialize(arInstance.address, {
+    planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
-    // deployProxy(Planter, [arInstance.address], {
-    //   initializer: "initialize",
-    //   from: deployerAccount,
-    //   unsafeAllowCustomTypes: true,
-    // });
   });
 
   afterEach(async () => {});

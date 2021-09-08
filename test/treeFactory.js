@@ -2766,25 +2766,27 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
-      from: deployerAccount,
-    });
 
-    await daiFundInstance.initialize(arInstance.address, {
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
 
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -2942,25 +2944,25 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -3189,25 +3191,25 @@ contract("TreeFactory", (accounts) => {
     );
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -3414,34 +3416,25 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
-      from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -3643,13 +3636,15 @@ contract("TreeFactory", (accounts) => {
     );
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await financialModelInstance.addFundDistributionModel(
       fundsPercent.planterFund,
@@ -3680,12 +3675,10 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
@@ -4681,25 +4674,25 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -4786,25 +4779,24 @@ contract("TreeFactory", (accounts) => {
     });
 
     //////////// -------------- deploy dauFunds
-    daiFundInstance = await DaiFunds.new({
+    daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
-
-    await daiFundInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
     //////////// ----------- deploy dai
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await Common.successFundTree(
       arInstance,
@@ -5875,12 +5867,11 @@ contract("TreeFactory", (accounts) => {
 
   it("Check lastRegularPlantedTree count", async () => {
     //// deploy tree auction
-    treeAuctionInstance = await TreeAuction.new({
-      from: deployerAccount,
-    });
 
-    await treeAuctionInstance.initialize(arInstance.address, {
+    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -5925,13 +5916,15 @@ contract("TreeFactory", (accounts) => {
     });
 
     ////////////// ---------- deploy financial model
-    financialModelInstance = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await financialModelInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
+    financialModelInstance = await deployProxy(
+      FinancialModel,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     await treeAuctionInstance.setFinancialModelAddress(
       financialModelInstance.address,

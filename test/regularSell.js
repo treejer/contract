@@ -504,12 +504,10 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle address here --------------------------
@@ -694,14 +692,11 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
     ///////////////////// ------------------- handle address here --------------------------
 
     await regularSellInstance.setTreeFactoryAddress(
@@ -971,12 +966,10 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
@@ -1245,12 +1238,10 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
@@ -1596,12 +1587,10 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
@@ -1713,14 +1702,11 @@ contract("regularSell", (accounts) => {
 
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
     ///////////////////// ------------------- handle addresses here --------------------------
 
     await regularSellInstance.setTreeFactoryAddress(
@@ -1864,12 +1850,10 @@ contract("regularSell", (accounts) => {
     });
     /////////////////////////-------------------- deploy contracts --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
@@ -2047,12 +2031,10 @@ contract("regularSell", (accounts) => {
 
     ////////////// ---------------- handle deploy --------------------------
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
@@ -2510,12 +2492,10 @@ contract("regularSell", (accounts) => {
       deployerAccount
     );
 
-    let planterInstance = await Planter.new({
+    let planterInstance = await deployProxy(Planter, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await planterInstance.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     await treeFactoryInstance.setPlanterAddress(planterInstance.address, {

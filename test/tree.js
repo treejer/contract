@@ -38,25 +38,19 @@ contract("Tree", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  // before(async () => {
-
-  // });
+  before(async () => {
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+  });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
+    treeInstance = await deployProxy(Tree, [arInstance.address, "base uri"], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
-    });
-
-    treeInstance = await Tree.new({
-      from: deployerAccount,
-    });
-
-    await treeInstance.initialize(arInstance.address, "base uri", {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
   });
 

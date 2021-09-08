@@ -23,12 +23,10 @@ contract("WhitelistPaymaster", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);

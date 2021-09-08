@@ -23,11 +23,7 @@ contract("FinancialModel", (accounts) => {
   const userAccount7 = accounts[8];
   const treasuryAddress = accounts[9];
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
+  before(async () => {
     // arInstance = await AccessRestriction.new({
     //   from: deployerAccount,
     // });
@@ -43,7 +39,9 @@ contract("FinancialModel", (accounts) => {
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
 
+  beforeEach(async () => {
     // financialModelInstance = await FinancialModel.new({
     //   from: deployerAccount,
     // });

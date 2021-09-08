@@ -51,17 +51,11 @@ contract("WethFunds", (accounts) => {
   let WETHAddress;
   let DAIAddress;
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
-    arInstance = await AccessRestriction.new({
+  before(async () => {
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     factoryInstance = await Factory.new(accounts[2], {
@@ -107,29 +101,25 @@ contract("WethFunds", (accounts) => {
     await testUniswapInstance.addLiquidity();
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
 
-    wethFunds = await WethFunds.new({
+  beforeEach(async () => {
+    wethFunds = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await wethFunds.initialize(arInstance.address, {
+    fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    fModel = await FinancialModel.new({
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await fModel.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    planterFundsInstnce = await PlanterFund.new({
-      from: deployerAccount,
-    });
-
-    await planterFundsInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     await wethFunds.setUniswapRouterAddress(uniswapV2Router02NewAddress, {

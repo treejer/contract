@@ -65,19 +65,7 @@ contract("TreeAttribute", (accounts) => {
 
   const randTree = web3.utils.soliditySha3(10000, 0, "", 0, zeroAddress, "");
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
+  before(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -130,7 +118,9 @@ contract("TreeAttribute", (accounts) => {
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
     await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
+  });
 
+  beforeEach(async () => {
     treeAttributeInstance = await deployProxy(
       TreeAttribute,
       [arInstance.address],

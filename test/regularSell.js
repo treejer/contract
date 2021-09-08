@@ -57,19 +57,7 @@ contract("regularSell", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  // before(async () => {
-
-  // });
-
-  beforeEach(async () => {
-    // arInstance = await AccessRestriction.new({
-    //   from: deployerAccount,
-    // });
-
-    // await arInstance.initialize(deployerAccount, {
-    //   from: deployerAccount,
-    // });
-
+  before(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -79,16 +67,10 @@ contract("regularSell", (accounts) => {
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+  });
 
+  beforeEach(async () => {
     const treePrice = Units.convert("7", "eth", "wei"); // 7 dai
-
-    // regularSellInstance = await RegularSell.new({
-    //   from: deployerAccount,
-    // });
-
-    // await regularSellInstance.initialize(arInstance.address, treePrice, {
-    //   from: deployerAccount,
-    // });
 
     regularSellInstance = await deployProxy(
       RegularSell,
@@ -100,27 +82,11 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    // treeFactoryInstance = await TreeFactory.new({
-    //   from: deployerAccount,
-    // });
-
-    // await treeFactoryInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // treeTokenInstance = await Tree.new({
-    //   from: deployerAccount,
-    // });
-
-    // await treeTokenInstance.initialize(arInstance.address, "", {
-    //   from: deployerAccount,
-    // });
 
     treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
       initializer: "initialize",
@@ -128,41 +94,17 @@ contract("regularSell", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    // daiFundsInstance = await DaiFunds.new({
-    //   from: deployerAccount,
-    // });
-
-    // await daiFundsInstance.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
 
-    // fModel = await FinancialModel.new({
-    //   from: deployerAccount,
-    // });
-
-    // await fModel.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
-
     fModel = await deployProxy(FinancialModel, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,
       unsafeAllowCustomTypes: true,
     });
-
-    // planterFundsInstnce = await PlanterFund.new({
-    //   from: deployerAccount,
-    // });
-
-    // await planterFundsInstnce.initialize(arInstance.address, {
-    //   from: deployerAccount,
-    // });
 
     planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
       initializer: "initialize",

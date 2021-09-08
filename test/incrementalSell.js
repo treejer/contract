@@ -233,7 +233,7 @@ contract("IncrementalSell", (accounts) => {
   });
 
   afterEach(async () => {});
-  /*
+
   it("deploys successfully", async () => {
     const address = iSellInstance.address;
     assert.notEqual(address, 0x0);
@@ -591,7 +591,6 @@ contract("IncrementalSell", (accounts) => {
 
     assert.equal(Number(tree285.provideStatus), 0);
   });
-  */
 
   ////////////// -------------------------------- freeIncrementalSell ---------------------------------
   it("Should freeIncrementalSell succesfully", async () => {

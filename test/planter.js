@@ -34,7 +34,11 @@ contract("Planter", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
       from: deployerAccount,
@@ -42,9 +46,7 @@ contract("Planter", (accounts) => {
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-  });
 
-  beforeEach(async () => {
     planterInstance = await deployProxy(Planter, [arInstance.address], {
       initializer: "initialize",
       from: deployerAccount,

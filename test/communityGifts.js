@@ -54,7 +54,11 @@ contract("CommunityGifts", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -64,9 +68,7 @@ contract("CommunityGifts", (accounts) => {
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-  });
 
-  beforeEach(async () => {
     const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
     const initialPlanterFund = web3.utils.toWei("0.5");
     const initialReferralFund = web3.utils.toWei("0.1");
@@ -178,115 +180,115 @@ contract("CommunityGifts", (accounts) => {
   afterEach(async () => {});
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    let env = await GsnTestEnvironment.startGsn("localhost");
+  // it("test gsn [ @skip-on-coverage ]", async () => {
+  //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+  //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+  //     env.contractsDeployment;
 
-    await communityGiftsInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
+  //   await communityGiftsInstance.setTrustedForwarder(forwarderAddress, {
+  //     from: deployerAccount,
+  //   });
 
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
+  //   await paymaster.setRelayHub(relayHubAddress);
+  //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
+  //   web3.eth.sendTransaction({
+  //     from: accounts[0],
+  //     to: paymaster.address,
+  //     value: web3.utils.toWei("1"),
+  //   });
 
-    origProvider = web3.currentProvider;
+  //   origProvider = web3.currentProvider;
 
-    conf = { paymasterAddress: paymaster.address };
+  //   conf = { paymasterAddress: paymaster.address };
 
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
+  //   gsnProvider = await Gsn.RelayProvider.newProvider({
+  //     provider: origProvider,
+  //     config: conf,
+  //   }).init();
 
-    provider = new ethers.providers.Web3Provider(gsnProvider);
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-    let signerGiftee = provider.getSigner(3);
+  //   let signerGiftee = provider.getSigner(3);
 
-    let contractCommunityGift = await new ethers.Contract(
-      communityGiftsInstance.address,
-      communityGiftsInstance.abi,
-      signerGiftee
-    );
+  //   let contractCommunityGift = await new ethers.Contract(
+  //     communityGiftsInstance.address,
+  //     communityGiftsInstance.abi,
+  //     signerGiftee
+  //   );
 
-    const giftee = userAccount2;
-    const symbol = 1234554321;
+  //   const giftee = userAccount2;
+  //   const symbol = 1234554321;
 
-    //////////--------------add giftee by admin
+  //   //////////--------------add giftee by admin
 
-    const startTree = 11;
-    const endTree = 13;
-    const planterShare = web3.utils.toWei("5");
-    const referralShare = web3.utils.toWei("2");
-    const transferAmount = web3.utils.toWei("14");
-    const adminWallet = userAccount8;
-    const expireDate = await Common.timeInitial(TimeEnumes.days, 30);
+  //   const startTree = 11;
+  //   const endTree = 13;
+  //   const planterShare = web3.utils.toWei("5");
+  //   const referralShare = web3.utils.toWei("2");
+  //   const transferAmount = web3.utils.toWei("14");
+  //   const adminWallet = userAccount8;
+  //   const expireDate = await Common.timeInitial(TimeEnumes.days, 30);
 
-    ///////---------------- handle admin walllet
+  //   ///////---------------- handle admin walllet
 
-    await daiInstance.setMint(adminWallet, transferAmount);
+  //   await daiInstance.setMint(adminWallet, transferAmount);
 
-    await daiInstance.approve(communityGiftsInstance.address, transferAmount, {
-      from: adminWallet,
-    });
+  //   await daiInstance.approve(communityGiftsInstance.address, transferAmount, {
+  //     from: adminWallet,
+  //   });
 
-    //////////--------------add giftee by admin
+  //   //////////--------------add giftee by admin
 
-    await communityGiftsInstance.setGiftsRange(
-      startTree,
-      endTree,
-      planterShare,
-      referralShare,
-      Number(expireDate),
-      adminWallet,
-      {
-        from: dataManager,
-      }
-    );
+  //   await communityGiftsInstance.setGiftsRange(
+  //     startTree,
+  //     endTree,
+  //     planterShare,
+  //     referralShare,
+  //     Number(expireDate),
+  //     adminWallet,
+  //     {
+  //       from: dataManager,
+  //     }
+  //   );
 
-    await communityGiftsInstance.updateGiftees(giftee, symbol, {
-      from: dataManager,
-    });
+  //   await communityGiftsInstance.updateGiftees(giftee, symbol, {
+  //     from: dataManager,
+  //   });
 
-    await communityGiftsInstance.setPrice(
-      web3.utils.toWei("4.9"), //planter share
-      web3.utils.toWei("2.1"), //referral share
-      { from: dataManager }
-    );
+  //   await communityGiftsInstance.setPrice(
+  //     web3.utils.toWei("4.9"), //planter share
+  //     web3.utils.toWei("2.1"), //referral share
+  //     { from: dataManager }
+  //   );
 
-    let balanceAccountBefore = await web3.eth.getBalance(giftee);
+  //   let balanceAccountBefore = await web3.eth.getBalance(giftee);
 
-    await contractCommunityGift
-      .claimTree({
-        from: giftee,
-      })
-      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+  //   await contractCommunityGift
+  //     .claimTree({
+  //       from: giftee,
+  //     })
+  //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-    await paymaster.addFunderWhitelistTarget(communityGiftsInstance.address, {
-      from: deployerAccount,
-    });
+  //   await paymaster.addFunderWhitelistTarget(communityGiftsInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    await contractCommunityGift.claimTree({
-      from: giftee,
-    });
+  //   await contractCommunityGift.claimTree({
+  //     from: giftee,
+  //   });
 
-    let balanceAccountAfter = await web3.eth.getBalance(giftee);
+  //   let balanceAccountAfter = await web3.eth.getBalance(giftee);
 
-    assert.equal(
-      balanceAccountAfter,
-      balanceAccountBefore,
-      "gsn not true work"
-    );
-  });
+  //   assert.equal(
+  //     balanceAccountAfter,
+  //     balanceAccountBefore,
+  //     "gsn not true work"
+  //   );
+  // });
 
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
 

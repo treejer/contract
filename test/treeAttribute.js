@@ -65,7 +65,11 @@ contract("TreeAttribute", (accounts) => {
 
   const randTree = web3.utils.soliditySha3(10000, 0, "", 0, zeroAddress, "");
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -76,7 +80,9 @@ contract("TreeAttribute", (accounts) => {
 
     ////--------------------------uniswap deploy
 
-    factoryInstance = await Factory.new(accounts[2], { from: deployerAccount });
+    factoryInstance = await Factory.new(accounts[2], {
+      from: deployerAccount,
+    });
     const factoryAddress = factoryInstance.address;
 
     wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
@@ -118,9 +124,7 @@ contract("TreeAttribute", (accounts) => {
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
     await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
-  });
 
-  beforeEach(async () => {
     treeAttributeInstance = await TreeAttribute.new({
       from: deployerAccount,
     });
@@ -208,95 +212,95 @@ contract("TreeAttribute", (accounts) => {
     });
   });
 
-  ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    ////----------------------------config tree factory-------------------------
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
-    await Common.addTreejerContractRole(
-      arInstance,
-      deployerAccount,
-      deployerAccount
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
+  // ////////////////--------------------------------------------gsn------------------------------------------------
+  // it("test gsn [ @skip-on-coverage ]", async () => {
+  //   ////----------------------------config tree factory-------------------------
+  //   await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await Common.addTreejerContractRole(
+  //     arInstance,
+  //     deployerAccount,
+  //     deployerAccount
+  //   );
+  //   await Common.addTreejerContractRole(
+  //     arInstance,
+  //     treeFactoryInstance.address,
+  //     deployerAccount
+  //   );
 
-    ////---------------------------createTreeAttributes----------------------
-    await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
-      from: deployerAccount,
-    });
+  //   ////---------------------------createTreeAttributes----------------------
+  //   await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+  //     from: deployerAccount,
+  //   });
 
-    ///////------------------------------handle gsn---------------------------------
+  //   ///////------------------------------handle gsn---------------------------------
 
-    let env = await GsnTestEnvironment.startGsn("localhost");
+  //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+  //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+  //     env.contractsDeployment;
 
-    await treeAttributeInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
+  //   await treeAttributeInstance.setTrustedForwarder(forwarderAddress, {
+  //     from: deployerAccount,
+  //   });
 
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
+  //   await paymaster.setRelayHub(relayHubAddress);
+  //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
+  //   web3.eth.sendTransaction({
+  //     from: accounts[0],
+  //     to: paymaster.address,
+  //     value: web3.utils.toWei("1"),
+  //   });
 
-    origProvider = web3.currentProvider;
+  //   origProvider = web3.currentProvider;
 
-    conf = { paymasterAddress: paymaster.address };
+  //   conf = { paymasterAddress: paymaster.address };
 
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
+  //   gsnProvider = await Gsn.RelayProvider.newProvider({
+  //     provider: origProvider,
+  //     config: conf,
+  //   }).init();
 
-    provider = new ethers.providers.Web3Provider(gsnProvider);
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-    let signerFunder = provider.getSigner(3);
+  //   let signerFunder = provider.getSigner(3);
 
-    let contractFunder = await new ethers.Contract(
-      treeAttributeInstance.address,
-      treeAttributeInstance.abi,
-      signerFunder
-    );
+  //   let contractFunder = await new ethers.Contract(
+  //     treeAttributeInstance.address,
+  //     treeAttributeInstance.abi,
+  //     signerFunder
+  //   );
 
-    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+  //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-    await paymaster.addFunderWhitelistTarget(treeAttributeInstance.address, {
-      from: deployerAccount,
-    });
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount2,
-      deployerAccount
-    );
+  //   await paymaster.addFunderWhitelistTarget(treeAttributeInstance.address, {
+  //     from: deployerAccount,
+  //   });
+  //   await Common.addTreejerContractRole(
+  //     arInstance,
+  //     userAccount2,
+  //     deployerAccount
+  //   );
 
-    await contractFunder.createTreeAttributes(102, randTree, userAccount3, {
-      from: userAccount2,
-    });
+  //   await contractFunder.createTreeAttributes(102, randTree, userAccount3, {
+  //     from: userAccount2,
+  //   });
 
-    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+  //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
 
-    console.log("balanceAccountBefore", Number(balanceAccountBefore));
-    console.log("balanceAccountAfter", Number(balanceAccountAfter));
+  //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
+  //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
 
-    assert.equal(
-      balanceAccountAfter,
-      balanceAccountBefore,
-      "Gsn not true work"
-    );
-  });
+  //   assert.equal(
+  //     balanceAccountAfter,
+  //     balanceAccountBefore,
+  //     "Gsn not true work"
+  //   );
+  // });
 
   it("deploys successfully", async () => {
     const address = treeAttributeInstance.address;

@@ -51,7 +51,11 @@ contract("WethFunds", (accounts) => {
   let WETHAddress;
   let DAIAddress;
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -103,9 +107,7 @@ contract("WethFunds", (accounts) => {
     await testUniswapInstance.addLiquidity();
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-  });
 
-  beforeEach(async () => {
     wethFunds = await WethFunds.new({
       from: deployerAccount,
     });

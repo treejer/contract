@@ -37,7 +37,11 @@ contract("Gsn", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -46,9 +50,7 @@ contract("Gsn", (accounts) => {
       from: deployerAccount,
     });
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-  });
 
-  beforeEach(async () => {
     /////////////---------------------- deploy contracts ------------------- //////////////
     relayRecipientInstance = await RelayRecipient.new({
       from: deployerAccount,

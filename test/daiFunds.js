@@ -36,7 +36,13 @@ contract("DaiFunds", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const withdrawReason = "reason to withdraw";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
+    /////////////---------------------- deploy contracts ------------------- //////////////
+
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -56,10 +62,6 @@ contract("DaiFunds", (accounts) => {
       userAccount2,
       deployerAccount
     );
-  });
-
-  beforeEach(async () => {
-    /////////////---------------------- deploy contracts ------------------- //////////////
 
     daiFundsInstance = await DaiFunds.new({ from: deployerAccount });
 

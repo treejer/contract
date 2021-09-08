@@ -6388,125 +6388,125 @@ contract("TreeFactory", (accounts) => {
 
   // ////////////////////////////////////////////////////////////////////////////////////////////////
 
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    let env = await GsnTestEnvironment.startGsn("localhost");
+  // it("test gsn [ @skip-on-coverage ]", async () => {
+  //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+  //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+  //     env.contractsDeployment;
 
-    await treeFactoryInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
+  //   await treeFactoryInstance.setTrustedForwarder(forwarderAddress, {
+  //     from: deployerAccount,
+  //   });
 
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.addPlanterWhitelistTarget(treeFactoryInstance.address, {
-      from: deployerAccount,
-    });
+  //   await paymaster.addPlanterWhitelistTarget(treeFactoryInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
-      from: deployerAccount,
-    });
+  //   await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    await paymaster.setRelayHub(relayHubAddress);
+  //   await paymaster.setRelayHub(relayHubAddress);
 
-    await paymaster.setTrustedForwarder(forwarderAddress);
+  //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
+  //   web3.eth.sendTransaction({
+  //     from: accounts[0],
+  //     to: paymaster.address,
+  //     value: web3.utils.toWei("1"),
+  //   });
 
-    origProvider = web3.currentProvider;
+  //   origProvider = web3.currentProvider;
 
-    conf = { paymasterAddress: paymaster.address };
+  //   conf = { paymasterAddress: paymaster.address };
 
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
+  //   gsnProvider = await Gsn.RelayProvider.newProvider({
+  //     provider: origProvider,
+  //     config: conf,
+  //   }).init();
 
-    provider = new ethers.providers.Web3Provider(gsnProvider);
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-    let signerPlanter = provider.getSigner(3);
-    let signerAmbassador = provider.getSigner(2);
+  //   let signerPlanter = provider.getSigner(3);
+  //   let signerAmbassador = provider.getSigner(2);
 
-    let contractPlanter = await new ethers.Contract(
-      treeFactoryInstance.address,
-      treeFactoryInstance.abi,
-      signerPlanter
-    );
+  //   let contractPlanter = await new ethers.Contract(
+  //     treeFactoryInstance.address,
+  //     treeFactoryInstance.abi,
+  //     signerPlanter
+  //   );
 
-    let contractAmbassador = await new ethers.Contract(
-      treeFactoryInstance.address,
-      treeFactoryInstance.abi,
-      signerAmbassador
-    );
+  //   let contractAmbassador = await new ethers.Contract(
+  //     treeFactoryInstance.address,
+  //     treeFactoryInstance.abi,
+  //     signerAmbassador
+  //   );
 
-    const treeId = 1;
-    const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
-    const countryCode = 2;
+  //   const treeId = 1;
+  //   const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+  //   const countryCode = 2;
 
-    // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    // await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+  //   // await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+  //   // await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
-    await Common.joinOrganizationPlanter(
-      planterInstance,
-      userAccount1,
-      zeroAddress,
-      dataManager
-    );
+  //   await Common.joinOrganizationPlanter(
+  //     planterInstance,
+  //     userAccount1,
+  //     zeroAddress,
+  //     dataManager
+  //   );
 
-    await Common.joinSimplePlanter(
-      planterInstance,
-      3,
-      userAccount2,
-      zeroAddress,
-      userAccount1
-    );
+  //   await Common.joinSimplePlanter(
+  //     planterInstance,
+  //     3,
+  //     userAccount2,
+  //     zeroAddress,
+  //     userAccount1
+  //   );
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
-      from: userAccount1,
-    });
+  //   await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+  //     from: userAccount1,
+  //   });
 
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
+  //   await Common.addTreejerContractRole(
+  //     arInstance,
+  //     treeFactoryInstance.address,
+  //     deployerAccount
+  //   );
 
-    await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: dataManager,
-    });
+  //   await treeFactoryInstance.addTree(treeId, ipfsHash, {
+  //     from: dataManager,
+  //   });
 
-    await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
-      from: dataManager,
-    });
+  //   await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+  //     from: dataManager,
+  //   });
 
-    let planterBeforeBalance = await web3.eth.getBalance(userAccount2);
+  //   let planterBeforeBalance = await web3.eth.getBalance(userAccount2);
 
-    let ambassadorBeforeBalance = await web3.eth.getBalance(userAccount1);
+  //   let ambassadorBeforeBalance = await web3.eth.getBalance(userAccount1);
 
-    await contractPlanter.plantTree(treeId, ipfsHash, birthDate, countryCode);
+  //   await contractPlanter.plantTree(treeId, ipfsHash, birthDate, countryCode);
 
-    await contractAmbassador.verifyPlant(treeId, true);
+  //   await contractAmbassador.verifyPlant(treeId, true);
 
-    let planterAfterBalance = await web3.eth.getBalance(userAccount2);
+  //   let planterAfterBalance = await web3.eth.getBalance(userAccount2);
 
-    let ambassadorAfterBalance = await web3.eth.getBalance(userAccount1);
+  //   let ambassadorAfterBalance = await web3.eth.getBalance(userAccount1);
 
-    assert.equal(
-      planterAfterBalance,
-      planterBeforeBalance,
-      "planter balance not equal"
-    );
+  //   assert.equal(
+  //     planterAfterBalance,
+  //     planterBeforeBalance,
+  //     "planter balance not equal"
+  //   );
 
-    assert.equal(
-      ambassadorAfterBalance,
-      ambassadorBeforeBalance,
-      "ambassador balance not equal"
-    );
-    await GsnTestEnvironment.stopGsn();
-  });
+  //   assert.equal(
+  //     ambassadorAfterBalance,
+  //     ambassadorBeforeBalance,
+  //     "ambassador balance not equal"
+  //   );
+  //   await GsnTestEnvironment.stopGsn();
+  // });
 });

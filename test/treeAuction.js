@@ -69,7 +69,11 @@ contract("TreeAuction", (accounts) => {
 
   const ipfsHash = "some ipfs hash here";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -121,9 +125,7 @@ contract("TreeAuction", (accounts) => {
     await testUniswapInstance.addLiquidity();
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-  });
 
-  beforeEach(async () => {
     treeAuctionInstance = await TreeAuction.new({
       from: deployerAccount,
     });
@@ -249,152 +251,152 @@ contract("TreeAuction", (accounts) => {
   afterEach(async () => {});
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  it("test gsn [ @skip-on-coverage ]", async () => {
-    await wethInstance.resetAcc(userAccount2);
+  // it("test gsn [ @skip-on-coverage ]", async () => {
+  //   await wethInstance.resetAcc(userAccount2);
 
-    let env = await GsnTestEnvironment.startGsn("localhost");
+  //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-    const { forwarderAddress, relayHubAddress, paymasterAddress } =
-      env.contractsDeployment;
+  //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+  //     env.contractsDeployment;
 
-    await treeAuctionInstance.setTrustedForwarder(forwarderAddress, {
-      from: deployerAccount,
-    });
+  //   await treeAuctionInstance.setTrustedForwarder(forwarderAddress, {
+  //     from: deployerAccount,
+  //   });
 
-    let paymaster = await WhitelistPaymaster.new(arInstance.address);
+  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-    await paymaster.setRelayHub(relayHubAddress);
-    await paymaster.setTrustedForwarder(forwarderAddress);
+  //   await paymaster.setRelayHub(relayHubAddress);
+  //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: paymaster.address,
-      value: web3.utils.toWei("1"),
-    });
+  //   web3.eth.sendTransaction({
+  //     from: accounts[0],
+  //     to: paymaster.address,
+  //     value: web3.utils.toWei("1"),
+  //   });
 
-    origProvider = web3.currentProvider;
+  //   origProvider = web3.currentProvider;
 
-    conf = { paymasterAddress: paymaster.address };
+  //   conf = { paymasterAddress: paymaster.address };
 
-    gsnProvider = await Gsn.RelayProvider.newProvider({
-      provider: origProvider,
-      config: conf,
-    }).init();
+  //   gsnProvider = await Gsn.RelayProvider.newProvider({
+  //     provider: origProvider,
+  //     config: conf,
+  //   }).init();
 
-    provider = new ethers.providers.Web3Provider(gsnProvider);
+  //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-    let signerAuction = provider.getSigner(3);
+  //   let signerAuction = provider.getSigner(3);
 
-    let contractTreeAuction = await new ethers.Contract(
-      treeAuctionInstance.address,
-      treeAuctionInstance.abi,
-      signerAuction
-    );
+  //   let contractTreeAuction = await new ethers.Contract(
+  //     treeAuctionInstance.address,
+  //     treeAuctionInstance.abi,
+  //     signerAuction
+  //   );
 
-    // //////////---------------------------------------------------------------------------------
-    const bidderAccount = userAccount2;
-    const bidAmount = web3.utils.toWei("1.15");
-    const bidderInitialBalance = web3.utils.toWei("2");
-    const treeId = 1;
+  //   // //////////---------------------------------------------------------------------------------
+  //   const bidderAccount = userAccount2;
+  //   const bidAmount = web3.utils.toWei("1.15");
+  //   const bidderInitialBalance = web3.utils.toWei("2");
+  //   const treeId = 1;
 
-    let startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    let endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+  //   let startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+  //   let endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    // ////////////// ------------------ handle address
+  //   // ////////////// ------------------ handle address
 
-    await treeAuctionInstance.setFinancialModelAddress(
-      financialModelInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
+  //   await treeAuctionInstance.setFinancialModelAddress(
+  //     financialModelInstance.address,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
 
-    await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
-      from: deployerAccount,
-    });
+  //   await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    // /////////////////// ---------------give approve to auction contract
+  //   // /////////////////// ---------------give approve to auction contract
 
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
-      from: bidderAccount,
-    });
+  //   await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
+  //     from: bidderAccount,
+  //   });
 
-    // /////////////////// --------------- handle add tree
+  //   // /////////////////// --------------- handle add tree
 
-    await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: dataManager,
-    });
+  //   await treeFactoryInstance.addTree(treeId, ipfsHash, {
+  //     from: dataManager,
+  //   });
 
-    // //////////////////// ----------------- handle dm model
+  //   // //////////////////// ----------------- handle dm model
 
-    await financialModelInstance.addFundDistributionModel(
-      3000,
-      1200,
-      1200,
-      1200,
-      1200,
-      2200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
+  //   await financialModelInstance.addFundDistributionModel(
+  //     3000,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     1200,
+  //     2200,
+  //     0,
+  //     0,
+  //     {
+  //       from: dataManager,
+  //     }
+  //   );
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: dataManager,
-    });
+  //   await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  //     from: dataManager,
+  //   });
 
-    // ////////////---------------------- create auction
+  //   // ////////////---------------------- create auction
 
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime),
-      Number(endTime),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: dataManager }
-    );
+  //   await treeAuctionInstance.createAuction(
+  //     treeId,
+  //     Number(startTime),
+  //     Number(endTime),
+  //     web3.utils.toWei("1"),
+  //     web3.utils.toWei("0.1"),
+  //     { from: dataManager }
+  //   );
 
-    await treeAuctionInstance.auctions.call(0);
+  //   await treeAuctionInstance.auctions.call(0);
 
-    // ////////////////// charge bidder account and check balance before bid
+  //   // ////////////////// charge bidder account and check balance before bid
 
-    await wethInstance.setMint(bidderAccount, bidderInitialBalance);
+  //   await wethInstance.setMint(bidderAccount, bidderInitialBalance);
 
-    const bidderBalanceBefore = await wethInstance.balanceOf(bidderAccount);
+  //   const bidderBalanceBefore = await wethInstance.balanceOf(bidderAccount);
 
-    assert.equal(
-      bidderBalanceBefore,
-      Number(bidderInitialBalance),
-      "bidderAmount is not "
-    );
-    // /////////////////// ------------- bid
+  //   assert.equal(
+  //     bidderBalanceBefore,
+  //     Number(bidderInitialBalance),
+  //     "bidderAmount is not "
+  //   );
+  //   // /////////////////// ------------- bid
 
-    let balanceAccountBefore = await web3.eth.getBalance(bidderAccount);
+  //   let balanceAccountBefore = await web3.eth.getBalance(bidderAccount);
 
-    await contractTreeAuction
-      .bid(0, bidAmount, {
-        from: bidderAccount,
-      })
-      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+  //   await contractTreeAuction
+  //     .bid(0, bidAmount, {
+  //       from: bidderAccount,
+  //     })
+  //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-    await paymaster.addFunderWhitelistTarget(treeAuctionInstance.address, {
-      from: deployerAccount,
-    });
+  //   await paymaster.addFunderWhitelistTarget(treeAuctionInstance.address, {
+  //     from: deployerAccount,
+  //   });
 
-    await contractTreeAuction.bid(0, bidAmount, {
-      from: bidderAccount,
-    });
+  //   await contractTreeAuction.bid(0, bidAmount, {
+  //     from: bidderAccount,
+  //   });
 
-    let balanceAccountAfter = await web3.eth.getBalance(bidderAccount);
+  //   let balanceAccountAfter = await web3.eth.getBalance(bidderAccount);
 
-    assert.equal(
-      balanceAccountAfter,
-      balanceAccountBefore,
-      "gsn not true work"
-    );
-  });
+  //   assert.equal(
+  //     balanceAccountAfter,
+  //     balanceAccountBefore,
+  //     "gsn not true work"
+  //   );
+  // });
 
   ////////////// ---------------------------------- deploy ----------------------------
 

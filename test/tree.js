@@ -38,7 +38,11 @@ contract("Tree", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-  before(async () => {
+  // before(async () => {
+
+  // });
+
+  beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
     });
@@ -46,9 +50,7 @@ contract("Tree", (accounts) => {
     await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
     });
-  });
 
-  beforeEach(async () => {
     treeInstance = await Tree.new({
       from: deployerAccount,
     });

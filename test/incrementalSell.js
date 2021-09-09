@@ -74,12 +74,10 @@ contract("IncrementalSell", (accounts) => {
   const ipfsHash = "some ipfs hash here";
 
   before(async () => {
-    arInstance = await AccessRestriction.new({
+    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
+      initializer: "initialize",
       from: deployerAccount,
-    });
-
-    await arInstance.initialize(deployerAccount, {
-      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
     ////--------------------------uniswap deploy
@@ -130,69 +128,61 @@ contract("IncrementalSell", (accounts) => {
   beforeEach(async () => {
     const treePrice = Units.convert("7", "eth", "wei");
 
-    treeAttributeInstance = await TreeAttribute.new({
+    treeAttributeInstance = await deployProxy(
+      TreeAttribute,
+      [arInstance.address],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeAttributeInstance.initialize(arInstance.address, {
+    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    iSellInstance = await IncrementalSell.new({
+    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await iSellInstance.initialize(arInstance.address, {
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeFactoryInstance = await TreeFactory.new({
+    fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    await treeFactoryInstance.initialize(arInstance.address, {
+    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
+      initializer: "initialize",
       from: deployerAccount,
+      unsafeAllowCustomTypes: true,
     });
 
-    treeTokenInstance = await Tree.new({
-      from: deployerAccount,
-    });
-
-    await treeTokenInstance.initialize(arInstance.address, "", {
-      from: deployerAccount,
-    });
-
-    wethFundsInstance = await WethFunds.new({
-      from: deployerAccount,
-    });
-
-    await wethFundsInstance.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    fModel = await FinancialModel.new({
-      from: deployerAccount,
-    });
-
-    await fModel.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    planterFundsInstnce = await PlanterFund.new({
-      from: deployerAccount,
-    });
-
-    await planterFundsInstnce.initialize(arInstance.address, {
-      from: deployerAccount,
-    });
-
-    regularSellInstance = await RegularSell.new({
-      from: deployerAccount,
-    });
-
-    await regularSellInstance.initialize(arInstance.address, treePrice, {
-      from: deployerAccount,
-    });
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, treePrice],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
 
     /////-------------------------handle address here-----------------
 
@@ -292,61 +282,7 @@ contract("IncrementalSell", (accounts) => {
 
   afterEach(async () => {});
 
-  it("buyTree should be work", async () => {
-    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
-      from: dataManager,
-    });
-
-    await iSellInstance.addTreeSells(
-      101,
-      web3.utils.toWei("0.01"),
-      100,
-      50,
-      1000,
-      {
-        from: dataManager,
-      }
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
-
-    //mint weth for funder
-    await wethInstance.setMint(userAccount3, web3.utils.toWei("1000"));
-
-    await wethInstance.approve(
-      iSellInstance.address,
-      web3.utils.toWei("1000"),
-      {
-        from: userAccount3,
-      }
-    );
-
-    await iSellInstance.buyTree(1, zeroAddress, {
-      from: userAccount3,
-    });
-
-    let tx = await iSellInstance.buyTree(1, zeroAddress, {
-      from: userAccount3,
-    });
-
-    truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
-      return (
-        ev.buyer.toString() === userAccount3.toString() &&
-          Number(ev.startId) === 101,
-        1
-      );
-    });
-
-    console.log("tx", tx);
-
-    await wethInstance.resetAcc(userAccount3);
-  });
-
-  // it("check discount timeout", async () => {
+  // it("buyTree should be work", async () => {
   //   await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
   //     from: dataManager,
   //   });
@@ -355,7 +291,7 @@ contract("IncrementalSell", (accounts) => {
   //     101,
   //     web3.utils.toWei("0.01"),
   //     100,
-  //     20,
+  //     50,
   //     1000,
   //     {
   //       from: dataManager,
@@ -368,550 +304,631 @@ contract("IncrementalSell", (accounts) => {
   //     deployerAccount
   //   );
 
-  //   let funderBalance1 = await wethInstance.balanceOf(userAccount3);
-
-  //   assert.equal(
-  //     Number(funderBalance1),
-  //     web3.utils.toWei("0"),
-  //     "1-funder balance not true"
-  //   );
-
   //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.01"),
-  //     {
-  //       from: userAccount3,
-  //     }
-  //   );
-
-  //   let expectedSwapTokenAmountTreeid101 =
-  //     await uniswapRouterInstance.getAmountsOut.call(
-  //       web3.utils.toWei("0.0042", "Ether"),
-  //       [wethInstance.address, daiInstance.address]
-  //     );
-
-  //   await iSellInstance.buyTree(1, {
-  //     from: userAccount3,
-  //   });
-
-  //   ////////// check last buy
-  //   // const lastBuy1 = await iSellInstance.lastBuy.call(userAccount3);
-
-  //   // assert.isTrue(Number(lastBuy1) > 0, "last buy is not ok");
-
-  //   //////////--------------check tree owner
-  //   let addressGetToken101 = await treeTokenInstance.ownerOf(101);
-
-  //   assert.equal(addressGetToken101, userAccount3, "1.mint not true");
-
-  //   let tree101 = await treeFactoryInstance.treeData(101);
-
-  //   assert.equal(Number(tree101.provideStatus), 0);
-
-  //   await treeTokenInstance.ownerOf(102).should.be.rejected;
-
-  //   ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==101)
-
-  //   const wethFundsBalanceAfter = await wethInstance.balanceOf(
-  //     wethFundsInstance.address
-  //   );
-
-  //   const planterFundsBalanceAfter = await daiInstance.balanceOf(
-  //     planterFundsInstnce.address
-  //   );
-
-  //   const iSellBalanceAfter = await wethInstance.balanceOf(
-  //     iSellInstance.address
-  //   );
-
-  //   assert.equal(
-  //     Number(wethFundsBalanceAfter),
-  //     Number(web3.utils.toWei(".0058")),
-  //     "daiFunds balance not true"
-  //   );
-
-  //   assert.equal(
-  //     Number(planterFundsBalanceAfter),
-  //     Number(expectedSwapTokenAmountTreeid101[1]),
-  //     "planterFunds balance not true"
-  //   );
-
-  //   assert.equal(Number(iSellBalanceAfter), 0, "iSell balance not true");
-
-  //   ////--------------------------check weth fund
-  //   let amount = Number(web3.utils.toWei("0.01"));
-
-  //   let expected = {
-  //     planterFund: (30 * amount) / 100,
-  //     referralFund: (12 * amount) / 100,
-  //     treeResearch: (12 * amount) / 100,
-  //     localDevelop: (12 * amount) / 100,
-  //     rescueFund: (12 * amount) / 100,
-  //     treejerDevelop: (22 * amount) / 100,
-  //     reserveFund1: 0,
-  //     reserveFund2: 0,
-  //   };
-
-  //   //check wethFund totalFunds
-  //   let totalFunds = await wethFundsInstance.totalFunds();
-
-  //   assert.equal(
-  //     Number(totalFunds.treeResearch),
-  //     expected.treeResearch,
-  //     "treeResearch funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds.localDevelop),
-  //     expected.localDevelop,
-  //     "localDevelop funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds.rescueFund),
-  //     expected.rescueFund,
-  //     "rescueFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds.treejerDevelop),
-  //     expected.treejerDevelop,
-  //     "treejerDevelop funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds.reserveFund1),
-  //     expected.reserveFund1,
-  //     "reserveFund1 funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds.reserveFund2),
-  //     expected.reserveFund2,
-  //     "reserveFund2 funds invalid"
-  //   );
-
-  //   ////--------------------------check fund planter
-
-  //   let totalPlanterFund = await planterFundsInstnce.totalFunds.call();
-
-  //   let planterFunds = await planterFundsInstnce.planterFunds.call(101);
-  //   let referralFunds = await planterFundsInstnce.referralFunds.call(101);
-
-  //   assert.equal(
-  //     Number(totalPlanterFund.planterFund),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
-  //     ),
-  //     "totalFund planterFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalPlanterFund.referralFund),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1]).times(1200).div(4200)
-  //     ),
-  //     "totalFund referralFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(planterFunds),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
-  //     ),
-  //     "planterFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(referralFunds),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1]).times(1200).div(4200)
-  //     ),
-  //     "referralFund funds invalid"
-  //   );
-
-  //   ////////////////////////////////////////////
-
-  //   let funderBalance2 = await wethInstance.balanceOf(userAccount3);
-
-  //   assert.equal(
-  //     Number(funderBalance2),
-  //     web3.utils.toWei("0"),
-  //     "2-funder balance not true"
-  //   );
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.201"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.201"),
-  //     {
-  //       from: userAccount3,
-  //     }
-  //   );
-
-  //   let expectedSwapTokenAmountForBuy20Tree = web3.utils.toWei(
-  //     "140277899999978339000",
-  //     "wei"
-  //   );
-
-  //   let expectedSwapTokenAmountTreeid121 = web3.utils.toWei(
-  //     "7676899999997795000",
-  //     "wei"
-  //   );
-
-  //   let tx = await iSellInstance.buyTree(20, {
-  //     from: userAccount3,
-  //   });
-
-  //   truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
-  //     return (
-  //       ev.buyer.toString() === userAccount3.toString() &&
-  //         Number(ev.startId) === 102,
-  //       20
-  //     );
-  //   });
-
-  //   //////////--------------check tree owner
-  //   let addressGetToken102 = await treeTokenInstance.ownerOf(102);
-
-  //   assert.equal(addressGetToken102, userAccount3, "2.1-mint not true");
-
-  //   let tree102 = await treeFactoryInstance.treeData(102);
-
-  //   assert.equal(Number(tree102.provideStatus), 0);
-
-  //   /////-----------------buy 110
-
-  //   let addressGetToken110 = await treeTokenInstance.ownerOf(110);
-
-  //   assert.equal(addressGetToken110, userAccount3, "2.2-mint not true");
-
-  //   let tree110 = await treeFactoryInstance.treeData(110);
-
-  //   assert.equal(Number(tree110.provideStatus), 0);
-
-  //   /////-----------------buy 120
-
-  //   let addressGetToken120 = await treeTokenInstance.ownerOf(120);
-
-  //   assert.equal(addressGetToken120, userAccount3, "2.3-mint not true");
-
-  //   let tree120 = await treeFactoryInstance.treeData(120);
-
-  //   assert.equal(Number(tree120.provideStatus), 0);
-
-  //   /////-----------------buy 121
-
-  //   let addressGetToken121 = await treeTokenInstance.ownerOf(121);
-
-  //   assert.equal(addressGetToken121, userAccount3, "2.4-mint not true");
-
-  //   let tree121 = await treeFactoryInstance.treeData(121);
-
-  //   assert.equal(Number(tree121.provideStatus), 0);
-
-  //   ///////////////////
-
-  //   let funderBalance3 = await wethInstance.balanceOf(userAccount3);
-
-  //   assert.equal(
-  //     Number(funderBalance3),
-  //     web3.utils.toWei("0"),
-  //     "3-funder balance not true"
-  //   );
-
-  //   ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==120)
-
-  //   const wethFundsBalanceAfter2 = await wethInstance.balanceOf(
-  //     wethFundsInstance.address
-  //   );
-
-  //   const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
-  //     planterFundsInstnce.address
-  //   );
-
-  //   const iSellBalanceAfter2 = await wethInstance.balanceOf(
-  //     iSellInstance.address
-  //   );
-
-  //   assert.equal(
-  //     Number(wethFundsBalanceAfter2),
-  //     Math.add(
-  //       Number(web3.utils.toWei(".0058")),
-  //       Number(web3.utils.toWei("0.11658"))
-  //     ),
-  //     "daiFunds balance not true"
-  //   );
-
-  //   assert.equal(
-  //     Number(planterFundsBalanceAfter2),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1]).plus(
-  //         expectedSwapTokenAmountForBuy20Tree
-  //       )
-  //     ),
-  //     "planterFunds balance not true"
-  //   );
-
-  //   assert.equal(Number(iSellBalanceAfter2), 0, "iSell balance not true");
-
-  //   ////--------------------------check weth fund
-  //   let amount2 = Number(web3.utils.toWei("0.201"));
-
-  //   let expected2 = {
-  //     planterFund: (30 * amount2) / 100,
-  //     referralFund: (12 * amount2) / 100,
-  //     treeResearch: (12 * amount2) / 100,
-  //     localDevelop: (12 * amount2) / 100,
-  //     rescueFund: (12 * amount2) / 100,
-  //     treejerDevelop: (22 * amount2) / 100,
-  //     reserveFund1: 0,
-  //     reserveFund2: 0,
-  //   };
-
-  //   //check wethFund totalFunds
-  //   let totalFunds2 = await wethFundsInstance.totalFunds();
-
-  //   assert.equal(
-  //     Number(totalFunds2.treeResearch),
-  //     Math.add(Number(expected2.treeResearch), Number(expected.treeResearch)),
-  //     "treeResearch funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds2.localDevelop),
-  //     Math.add(Number(expected2.localDevelop), Number(expected.localDevelop)),
-  //     "localDevelop funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds2.rescueFund),
-  //     Math.add(Number(expected2.rescueFund), Number(expected.rescueFund)),
-  //     "rescueFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds2.treejerDevelop),
-  //     Math.add(
-  //       Number(expected2.treejerDevelop),
-  //       Number(expected.treejerDevelop)
-  //     ),
-  //     "treejerDevelop funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds2.reserveFund1),
-  //     Math.add(Number(expected2.reserveFund1), Number(expected.reserveFund1)),
-  //     "reserveFund1 funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalFunds2.reserveFund2),
-  //     Math.add(Number(expected2.reserveFund2), Number(expected.reserveFund2)),
-  //     "reserveFund2 funds invalid"
-  //   );
-
-  //   ////--------------------------check fund planter
-
-  //   let totalPlanterFund2 = await planterFundsInstnce.totalFunds.call();
-
-  //   let planterFunds2 = await planterFundsInstnce.planterFunds.call(121);
-  //   let referralFunds2 = await planterFundsInstnce.referralFunds.call(121);
-
-  //   assert.equal(
-  //     Number(totalPlanterFund2.planterFund),
-  //     Number(Math.Big(planterFundsBalanceAfter2).div(4200).times(3000)),
-  //     "totalFund planterFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(totalPlanterFund2.referralFund),
-  //     Number(
-  //       Math.Big(expectedSwapTokenAmountTreeid101[1])
-  //         .times(1200)
-  //         .div(4200)
-  //         .plus(
-  //           Math.Big(expectedSwapTokenAmountForBuy20Tree).times(1200).div(4200)
-  //         )
-  //     ),
-  //     "totalFund referralFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(planterFunds2),
-  //     Number(Math.Big(expectedSwapTokenAmountTreeid121).times(3000).div(4200)),
-  //     "planterFund funds invalid"
-  //   );
-
-  //   assert.equal(
-  //     Number(referralFunds2),
-  //     Number(Math.Big(expectedSwapTokenAmountTreeid121).times(1200).div(4200)),
-  //     "referralFund funds invalid"
-  //   );
-
-  //   // /////---------------- step2 ---------------------------
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount4, web3.utils.toWei("0.209"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.209"),
-  //     {
-  //       from: userAccount4,
-  //     }
-  //   );
-
-  //   let tx2 = await iSellInstance.buyTree(19, {
-  //     from: userAccount4,
-  //   });
-
-  //   truffleAssert.eventEmitted(tx2, "IncrementalTreeSold", (ev) => {
-  //     return (
-  //       ev.buyer.toString() === userAccount4.toString() &&
-  //         Number(ev.startId) === 122,
-  //       19
-  //     );
-  //   });
-
-  //   let funderBalance5 = await wethInstance.balanceOf(userAccount4);
-
-  //   assert.equal(
-  //     Number(funderBalance5),
-  //     web3.utils.toWei("0"),
-  //     "5-funder balance not true"
-  //   );
-
-  //   let lastSold = await iSellInstance.lastSold();
-
-  //   assert.equal(lastSold, 140, "Step 2 lastSold not true");
-
-  //   // /////---------------- step3 ---------------------------
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.18"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.18"),
-  //     {
-  //       from: userAccount3,
-  //     }
-  //   );
-
-  //   await iSellInstance.buyTree(15, {
-  //     from: userAccount3,
-  //   });
-
-  //   let funderBalance6 = await wethInstance.balanceOf(userAccount3);
-
-  //   assert.equal(
-  //     Number(funderBalance6),
-  //     web3.utils.toWei("0"),
-  //     "6-funder balance not true"
-  //   );
-
-  //   let lastSold2 = await iSellInstance.lastSold();
-
-  //   assert.equal(lastSold2, 155, "Step 3 lastSold not true");
-
-  //   // /////---------------- step 3, 4 ---------------------------
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.125"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.125"),
-  //     {
-  //       from: userAccount3,
-  //     }
-  //   );
-
-  //   await iSellInstance.buyTree(10, {
-  //     from: userAccount3,
-  //   });
-
-  //   let funderBalance7 = await wethInstance.balanceOf(userAccount3);
-
-  //   assert.equal(
-  //     Number(funderBalance7),
-  //     web3.utils.toWei("0"),
-  //     "7-funder balance not true"
-  //   );
-
-  //   let lastSold3 = await iSellInstance.lastSold();
-
-  //   assert.equal(lastSold3, 165, "Step 3 lastSold not true");
-
-  //   // /////---------------- step4 ---------------------------
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount4, web3.utils.toWei("1000"));
+  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("1000"));
 
   //   await wethInstance.approve(
   //     iSellInstance.address,
   //     web3.utils.toWei("1000"),
   //     {
-  //       from: userAccount4,
-  //     }
-  //   );
-
-  //   await iSellInstance.buyTree(20, {
-  //     from: userAccount4,
-  //   });
-  //   await iSellInstance.buyTree(14, {
-  //     from: userAccount4,
-  //   });
-
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.1"));
-
-  //   let funderBalance8 = await wethInstance.balanceOf(userAccount3);
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.014"),
-  //     {
   //       from: userAccount3,
   //     }
   //   );
 
-  //   await iSellInstance.buyTree(1, { from: userAccount3 });
+  //   // await iSellInstance.buyTree(1, zeroAddress, {
+  //   //   from: userAccount3,
+  //   // });
 
-  //   let funderBalance9 = await wethInstance.balanceOf(userAccount3);
+  //   // let tx = await iSellInstance.buyTree(1, zeroAddress, {
+  //   //   from: userAccount3,
+  //   // });
 
-  //   assert.equal(
-  //     Number(funderBalance9),
-  //     web3.utils.toWei("0.086"),
-  //     "9-funder balance not true"
-  //   );
+  //   // truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
+  //   //   return (
+  //   //     ev.buyer.toString() === userAccount3.toString() &&
+  //   //       Number(ev.startId) === 101,
+  //   //     1
+  //   //   );
+  //   // });
 
-  //   // ////--------------------step6------------------------
+  //   let tx = await iSellInstance.setRegularPlanterFund(1200, 1200, {
+  //     from: dataManager,
+  //   });
 
-  //   //mint weth for funder
-  //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
-
-  //   await wethInstance.approve(
-  //     iSellInstance.address,
-  //     web3.utils.toWei("0.01"),
-  //     {
-  //       from: userAccount3,
-  //     }
-  //   );
-
-  //   await iSellInstance
-  //     .buyTree(1, { from: userAccount3 })
-  //     .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+  //   console.log("tx", tx);
 
   //   await wethInstance.resetAcc(userAccount3);
-  //   await wethInstance.resetAcc(userAccount4);
   // });
+
+  /* ssss
+
+
+  it("check discount timeout", async () => {
+    await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      from: dataManager,
+    });
+
+    await iSellInstance.addTreeSells(
+      101,
+      web3.utils.toWei("0.01"),
+      100,
+      20,
+      1000,
+      {
+        from: dataManager,
+      }
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    let funderBalance1 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance1),
+      web3.utils.toWei("0"),
+      "1-funder balance not true"
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    let expectedSwapTokenAmountTreeid101 =
+      await uniswapRouterInstance.getAmountsOut.call(
+        web3.utils.toWei("0.0042", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    await iSellInstance.buyTree(1, zeroAddress, {
+      from: userAccount3,
+    });
+
+    ////////// check last buy
+    // const lastBuy1 = await iSellInstance.lastBuy.call(userAccount3);
+
+    // assert.isTrue(Number(lastBuy1) > 0, "last buy is not ok");
+
+    //////////--------------check tree owner
+    let addressGetToken101 = await treeTokenInstance.ownerOf(101);
+
+    assert.equal(addressGetToken101, userAccount3, "1.mint not true");
+
+    let tree101 = await treeFactoryInstance.treeData(101);
+
+    assert.equal(Number(tree101.provideStatus), 0);
+
+    await treeTokenInstance.ownerOf(102).should.be.rejected;
+
+    ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==101)
+
+    const wethFundsBalanceAfter = await wethInstance.balanceOf(
+      wethFundsInstance.address
+    );
+
+    const planterFundsBalanceAfter = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    const iSellBalanceAfter = await wethInstance.balanceOf(
+      iSellInstance.address
+    );
+
+    assert.equal(
+      Number(wethFundsBalanceAfter),
+      Number(web3.utils.toWei(".0058")),
+      "daiFunds balance not true"
+    );
+
+    assert.equal(
+      Number(planterFundsBalanceAfter),
+      Number(expectedSwapTokenAmountTreeid101[1]),
+      "planterFunds balance not true"
+    );
+
+    assert.equal(Number(iSellBalanceAfter), 0, "iSell balance not true");
+
+    ////--------------------------check weth fund
+    let amount = Number(web3.utils.toWei("0.01"));
+
+    let expected = {
+      planterFund: (30 * amount) / 100,
+      referralFund: (12 * amount) / 100,
+      treeResearch: (12 * amount) / 100,
+      localDevelop: (12 * amount) / 100,
+      rescueFund: (12 * amount) / 100,
+      treejerDevelop: (22 * amount) / 100,
+      reserveFund1: 0,
+      reserveFund2: 0,
+    };
+
+    //check wethFund totalFunds
+    let totalFunds = await wethFundsInstance.totalFunds();
+
+    assert.equal(
+      Number(totalFunds.treeResearch),
+      expected.treeResearch,
+      "treeResearch funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.localDevelop),
+      expected.localDevelop,
+      "localDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.rescueFund),
+      expected.rescueFund,
+      "rescueFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.treejerDevelop),
+      expected.treejerDevelop,
+      "treejerDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.reserveFund1),
+      expected.reserveFund1,
+      "reserveFund1 funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds.reserveFund2),
+      expected.reserveFund2,
+      "reserveFund2 funds invalid"
+    );
+
+    ////--------------------------check fund planter
+
+    let totalPlanterFund = await planterFundsInstnce.totalFunds.call();
+
+    let planterFunds = await planterFundsInstnce.planterFunds.call(101);
+    let referralFunds = await planterFundsInstnce.referralFunds.call(101);
+
+    assert.equal(
+      Number(totalPlanterFund.planterFund),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
+      ),
+      "totalFund planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalPlanterFund.referralFund),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1]).times(1200).div(4200)
+      ),
+      "totalFund referralFund funds invalid"
+    );
+
+    assert.equal(
+      Number(planterFunds),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
+      ),
+      "planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(referralFunds),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1]).times(1200).div(4200)
+      ),
+      "referralFund funds invalid"
+    );
+
+    ////////////////////////////////////////////
+
+    let funderBalance2 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance2),
+      web3.utils.toWei("0"),
+      "2-funder balance not true"
+    );
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.201"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.201"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    let expectedSwapTokenAmountForBuy20Tree =
+      await uniswapRouterInstance.getAmountsOut.call(
+        web3.utils.toWei("0.08442", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    // web3.utils.toWei(
+    //   "140277899999978339000",
+    //   "wei"
+    // );
+
+    let expectedSwapTokenAmountTreeid121 = Math.Big(
+      expectedSwapTokenAmountForBuy20Tree[1]
+    )
+      .times(0.00462)
+      .div(0.08442);
+
+    // expectedSwapTokenAmountForBuy20Tree;
+    // await uniswapRouterInstance.getAmountsOut.call(
+    //   web3.utils.toWei("0.00462", "Ether"),
+    //   [wethInstance.address, daiInstance.address]
+    // );
+
+    // web3.utils.toWei(
+    //   "7676899999997795000",
+    //   "wei"
+    // );
+
+    let tx = await iSellInstance.buyTree(20, zeroAddress, {
+      from: userAccount3,
+    });
+
+    truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
+      return (
+        ev.buyer.toString() === userAccount3.toString() &&
+          Number(ev.startId) === 102,
+        20
+      );
+    });
+
+    //////////--------------check tree owner
+    let addressGetToken102 = await treeTokenInstance.ownerOf(102);
+
+    assert.equal(addressGetToken102, userAccount3, "2.1-mint not true");
+
+    let tree102 = await treeFactoryInstance.treeData(102);
+
+    assert.equal(Number(tree102.provideStatus), 0);
+
+    /////-----------------buy 110
+
+    let addressGetToken110 = await treeTokenInstance.ownerOf(110);
+
+    assert.equal(addressGetToken110, userAccount3, "2.2-mint not true");
+
+    let tree110 = await treeFactoryInstance.treeData(110);
+
+    assert.equal(Number(tree110.provideStatus), 0);
+
+    /////-----------------buy 120
+
+    let addressGetToken120 = await treeTokenInstance.ownerOf(120);
+
+    assert.equal(addressGetToken120, userAccount3, "2.3-mint not true");
+
+    let tree120 = await treeFactoryInstance.treeData(120);
+
+    assert.equal(Number(tree120.provideStatus), 0);
+
+    /////-----------------buy 121
+
+    let addressGetToken121 = await treeTokenInstance.ownerOf(121);
+
+    assert.equal(addressGetToken121, userAccount3, "2.4-mint not true");
+
+    let tree121 = await treeFactoryInstance.treeData(121);
+
+    assert.equal(Number(tree121.provideStatus), 0);
+
+    ///////////////////
+
+    let funderBalance3 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance3),
+      web3.utils.toWei("0"),
+      "3-funder balance not true"
+    );
+
+    ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==120)
+
+    const wethFundsBalanceAfter2 = await wethInstance.balanceOf(
+      wethFundsInstance.address
+    );
+
+    const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    const iSellBalanceAfter2 = await wethInstance.balanceOf(
+      iSellInstance.address
+    );
+
+    assert.equal(
+      Number(wethFundsBalanceAfter2),
+      Math.add(
+        Number(web3.utils.toWei(".0058")),
+        Number(web3.utils.toWei("0.11658"))
+      ),
+      "daiFunds balance not true"
+    );
+
+    assert.equal(
+      Number(planterFundsBalanceAfter2),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1]).plus(
+          expectedSwapTokenAmountForBuy20Tree[1]
+        )
+      ),
+      "planterFunds balance not true"
+    );
+
+    assert.equal(Number(iSellBalanceAfter2), 0, "iSell balance not true");
+
+    ////--------------------------check weth fund
+    let amount2 = Number(web3.utils.toWei("0.201"));
+
+    let expected2 = {
+      planterFund: (30 * amount2) / 100,
+      referralFund: (12 * amount2) / 100,
+      treeResearch: (12 * amount2) / 100,
+      localDevelop: (12 * amount2) / 100,
+      rescueFund: (12 * amount2) / 100,
+      treejerDevelop: (22 * amount2) / 100,
+      reserveFund1: 0,
+      reserveFund2: 0,
+    };
+
+    //check wethFund totalFunds
+    let totalFunds2 = await wethFundsInstance.totalFunds();
+
+    assert.equal(
+      Number(totalFunds2.treeResearch),
+      Math.add(Number(expected2.treeResearch), Number(expected.treeResearch)),
+      "treeResearch funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.localDevelop),
+      Math.add(Number(expected2.localDevelop), Number(expected.localDevelop)),
+      "localDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.rescueFund),
+      Math.add(Number(expected2.rescueFund), Number(expected.rescueFund)),
+      "rescueFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.treejerDevelop),
+      Math.add(
+        Number(expected2.treejerDevelop),
+        Number(expected.treejerDevelop)
+      ),
+      "treejerDevelop funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.reserveFund1),
+      Math.add(Number(expected2.reserveFund1), Number(expected.reserveFund1)),
+      "reserveFund1 funds invalid"
+    );
+
+    assert.equal(
+      Number(totalFunds2.reserveFund2),
+      Math.add(Number(expected2.reserveFund2), Number(expected.reserveFund2)),
+      "reserveFund2 funds invalid"
+    );
+
+    ////--------------------------check fund planter
+
+    let totalPlanterFund2 = await planterFundsInstnce.totalFunds.call();
+
+    let planterFunds2 = await planterFundsInstnce.planterFunds.call(121);
+    let referralFunds2 = await planterFundsInstnce.referralFunds.call(121);
+
+    assert.equal(
+      Number(totalPlanterFund2.planterFund),
+      Number(Math.Big(planterFundsBalanceAfter2).div(4200).times(3000)),
+      "totalFund planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(totalPlanterFund2.referralFund),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1])
+          .times(1200)
+          .div(4200)
+          .plus(
+            Math.Big(expectedSwapTokenAmountForBuy20Tree[1])
+              .times(1200)
+              .div(4200)
+          )
+      ),
+      "totalFund referralFund funds invalid"
+    );
+
+    assert.equal(
+      Number(planterFunds2),
+      Number(Math.Big(expectedSwapTokenAmountTreeid121).times(3000).div(4200)),
+      "planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(referralFunds2),
+      Number(Math.Big(expectedSwapTokenAmountTreeid121).times(1200).div(4200)),
+      "referralFund funds invalid"
+    );
+
+    // /////---------------- step2 ---------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount4, web3.utils.toWei("0.209"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.209"),
+      {
+        from: userAccount4,
+      }
+    );
+
+    let tx2 = await iSellInstance.buyTree(19, zeroAddress, {
+      from: userAccount4,
+    });
+
+    truffleAssert.eventEmitted(tx2, "IncrementalTreeSold", (ev) => {
+      return (
+        ev.buyer.toString() === userAccount4.toString() &&
+          Number(ev.startId) === 122,
+        19
+      );
+    });
+
+    let funderBalance5 = await wethInstance.balanceOf(userAccount4);
+
+    assert.equal(
+      Number(funderBalance5),
+      web3.utils.toWei("0"),
+      "5-funder balance not true"
+    );
+
+    let lastSold = await iSellInstance.lastSold();
+
+    assert.equal(lastSold, 140, "Step 2 lastSold not true");
+
+    // /////---------------- step3 ---------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.18"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.18"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(15, zeroAddress, {
+      from: userAccount3,
+    });
+
+    let funderBalance6 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance6),
+      web3.utils.toWei("0"),
+      "6-funder balance not true"
+    );
+
+    let lastSold2 = await iSellInstance.lastSold();
+
+    assert.equal(lastSold2, 155, "Step 3 lastSold not true");
+
+    // /////---------------- step 3, 4 ---------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.125"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.125"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(10, zeroAddress, {
+      from: userAccount3,
+    });
+
+    let funderBalance7 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance7),
+      web3.utils.toWei("0"),
+      "7-funder balance not true"
+    );
+
+    let lastSold3 = await iSellInstance.lastSold();
+
+    assert.equal(lastSold3, 165, "Step 3 lastSold not true");
+
+    // /////---------------- step4 ---------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount4, web3.utils.toWei("1000"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("1000"),
+      {
+        from: userAccount4,
+      }
+    );
+
+    await iSellInstance.buyTree(20, zeroAddress, {
+      from: userAccount4,
+    });
+    await iSellInstance.buyTree(14, zeroAddress, {
+      from: userAccount4,
+    });
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.1"));
+
+    let funderBalance8 = await wethInstance.balanceOf(userAccount3);
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.014"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance.buyTree(1, zeroAddress, { from: userAccount3 });
+
+    let funderBalance9 = await wethInstance.balanceOf(userAccount3);
+
+    assert.equal(
+      Number(funderBalance9),
+      web3.utils.toWei("0.086"),
+      "9-funder balance not true"
+    );
+
+    // ////--------------------step6------------------------
+
+    //mint weth for funder
+    await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+    await wethInstance.approve(
+      iSellInstance.address,
+      web3.utils.toWei("0.01"),
+      {
+        from: userAccount3,
+      }
+    );
+
+    await iSellInstance
+      .buyTree(1, zeroAddress, { from: userAccount3 })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_TREE);
+
+    await wethInstance.resetAcc(userAccount3);
+    await wethInstance.resetAcc(userAccount4);
+  });
 
   ////////////////-------------------------------------------- gsn ------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
@@ -2682,4 +2699,44 @@ contract("IncrementalSell", (accounts) => {
     treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
     assert.equal(Number(treeAttributeTemp.exists), 1, "106 - Exists not true");
   });
+  ssss */
+
+  /////---------------------------- test setReferrerPlanterFund ---------------------------------
+  it("setReferrerPlanterFund should be fail(onlyDataManager)", async () => {
+    await iSellInstance
+      .setReferrerPlanterFund(1200, 1200, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+  });
+
+  // it("setReferrerPlanterFund should be fail(onlyDataManager)", async () => {
+  //   treeAuctionInstance = await TreeAuction.new({
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.initialize(arInstance.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.setFinancialModelAddress(fModel.address, {
+  //     from: deployerAccount,
+  //   });
+
+  //   await treeAuctionInstance.setTreeFactoryAddress(
+  //     treeFactoryInstance.address,
+  //     {
+  //       from: deployerAccount,
+  //     }
+  //   );
+
+  //   await iSellInstance.setReferrerPlanterFund(1200, 1200, {
+  //     from: dataManager,
+  //   });
+  //   assert.equal(
+  //     Number(await iSellInstance.regularPlanterFund()),
+  //     1,
+  //     "106 - Exists not true"
+  //   );
+  // });
 });

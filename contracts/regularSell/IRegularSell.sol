@@ -89,6 +89,9 @@ interface IRegularSell {
         uint256 _regularReferralFund
     ) external;
 
+    function updateReferrerGiftCount(address _referrer, uint256 _count)
+        external;
+
     /** @dev emited when price of tree change */
     event TreePriceUpdated(uint256 price);
 

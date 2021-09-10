@@ -320,4 +320,11 @@ contract RegularSell is Initializable, RelayRecipient {
         regularPlanterFund = _regularPlanterFund;
         regularReferralFund = _regularReferralFund;
     }
+
+    function updateReferrerGiftCount(address _referrer, uint256 _count)
+        external
+        onlyTreejerContract
+    {
+        referrerGifts[_referrer] += _count;
+    }
 }

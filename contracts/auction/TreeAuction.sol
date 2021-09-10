@@ -42,12 +42,8 @@ contract TreeAuction is Initializable, RelayRecipient {
     /** NOTE mapping of auctionId to Auction struct */
     mapping(uint256 => Auction) public auctions;
 
-    /**NOTE mapping of bidder to mapping of treeId to referral */
+    /**NOTE mapping of bidder to mapping of auctionId to referral */
     mapping(address => mapping(uint256 => address)) public referrals;
-
-    //TODO:ADD_COMMENT
-    uint256 public regularPlanterFund;
-    uint256 public regularReferralFund;
 
     event HighestBidIncreased(
         uint256 auctionId,
@@ -265,9 +261,9 @@ contract TreeAuction is Initializable, RelayRecipient {
 
         if (
             _referrer != address(0) &&
-            referrals[_msgSender()][_storageAuction.treeId] == address(0)
+            referrals[_msgSender()][_auctionId] == address(0)
         ) {
-            referrals[_msgSender()][_storageAuction.treeId] = _referrer;
+            referrals[_msgSender()][_auctionId] = _referrer;
         }
 
         address oldBidder = _storageAuction.bidder;
@@ -339,13 +335,11 @@ contract TreeAuction is Initializable, RelayRecipient {
 
             treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
-            if (referrals[auction.bidder][auction.treeId] != address(0)) {
+            if (referrals[auction.bidder][_auctionId] != address(0)) {
                 //call mint
                 regularSell.mintReferralTree(
                     1,
-                    referrals[auction.bidder][auction.treeId],
-                    regularPlanterFund,
-                    regularReferralFund
+                    referrals[auction.bidder][_auctionId]
                 );
             }
 
@@ -375,13 +369,5 @@ contract TreeAuction is Initializable, RelayRecipient {
                 auctions[_auctionId].endDate
             );
         }
-    }
-
-    function setReferrerPlanterFund(
-        uint256 _regularPlanterFund,
-        uint256 _regularReferralFund
-    ) external onlyTreejerContract {
-        regularPlanterFund = _regularPlanterFund;
-        regularReferralFund = _regularReferralFund;
     }
 }

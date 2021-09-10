@@ -82,9 +82,9 @@ interface IRegularSell {
      */
     function requestByTreeId(uint256 _treeId) external;
 
-    function mintReferralTree(
-        uint256 _count,
-        address _referrer,
+    function mintReferralTree(uint256 _count, address _referrer) external;
+
+    function setRegularPlanterFund(
         uint256 _regularPlanterFund,
         uint256 _regularReferralFund
     ) external;

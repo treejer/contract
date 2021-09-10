@@ -18,6 +18,12 @@ contract RegularSell is Initializable, RelayRecipient {
     /** NOTE {isRegularSell} set inside the initialize to {true} */
     bool public isRegularSell;
 
+    //TODO:ADD_COMMENT
+    uint256 public regularPlanterFund;
+    uint256 public regularReferralFund;
+
+    mapping(address => uint256) referrerGifts;
+
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IDaiFunds public daiFunds;
@@ -231,12 +237,10 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function mintReferralTree(
-        uint256 _count,
-        address _referrer,
-        uint256 _regularPlanterFund,
-        uint256 _regularReferralFund
-    ) external onlyTreejerContract {
+    function mintReferralTree(uint256 _count, address _referrer)
+        external
+        onlyTreejerContract
+    {
         require(_count > 0, "invalid count");
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
@@ -249,8 +253,8 @@ contract RegularSell is Initializable, RelayRecipient {
 
             planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                _regularPlanterFund,
-                _regularReferralFund
+                regularPlanterFund,
+                regularReferralFund
             );
 
             emit RegularMint(_referrer, tempLastRegularSold);
@@ -307,5 +311,13 @@ contract RegularSell is Initializable, RelayRecipient {
         );
 
         emit RegularTreeRequstedById(_treeId, _msgSender(), treePrice);
+    }
+
+    function setRegularPlanterFund(
+        uint256 _regularPlanterFund,
+        uint256 _regularReferralFund
+    ) external onlyDataManager {
+        regularPlanterFund = _regularPlanterFund;
+        regularReferralFund = _regularReferralFund;
     }
 }

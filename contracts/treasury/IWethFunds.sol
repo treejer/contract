@@ -205,6 +205,8 @@ interface IWethFunds {
         uint256 _totalReserveFund2
     ) external returns (uint256);
 
+    function updateDaiSwap(uint256 _amount) external;
+
     /**
      * @dev emitted when admin withdraw tree research balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage

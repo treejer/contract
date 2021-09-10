@@ -483,10 +483,15 @@ contract WethFunds is Initializable {
         return amount;
     }
 
-    function swapDaiToPlanters(uint256 _wethMaxUse)
-        external
-        onlyTreejerContract
-    {
+    //TODO: ADD_COMMENT
+    function swapDaiToPlanters(uint256 _wethMaxUse) external {
+        require(
+            _wethMaxUse <= totalFunds.treejerDevelop,
+            "Liquidity not enough"
+        );
+
+        require(totalDaiToPlanterSwap > 0, "not true");
+
         address[] memory path;
         path = new address[](2);
 
@@ -508,6 +513,7 @@ contract WethFunds is Initializable {
         totalFunds.treejerDevelop -= amounts[0];
     }
 
+    //TODO: ADD_COMMENT
     function updateDaiSwap(uint256 _amount) external onlyTreejerContract {
         totalDaiToPlanterSwap += _amount;
     }
@@ -547,6 +553,7 @@ contract WethFunds is Initializable {
         emit TreeFunded(_treeId, _amount, planterFund + referralFund);
     }
 
+    //TODO: ADD_COMMENT
     function _swapExactTokensForTokens(uint256 _amount)
         private
         returns (uint256 amount)

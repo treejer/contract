@@ -21,6 +21,9 @@ interface IRegularSell {
     /** @return FinancialModel contract address */
     function financialModel() external view returns (address);
 
+    /** @return WethFunds contract address */
+    function wethFunds() external view returns (address);
+
     /** @return DaiToken contract address */
     function daiToken() external view returns (address);
 

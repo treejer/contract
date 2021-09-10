@@ -3,6 +3,7 @@ const RegularSell = artifacts.require("RegularSell.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
+const WethFunds = artifacts.require("WethFunds.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -43,6 +44,7 @@ contract("regularSell", (accounts) => {
   let daiFundsInstance;
   let planterFundsInstnce;
   let daiInstance;
+  let wethFundsInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -51,7 +53,7 @@ contract("regularSell", (accounts) => {
   const userAccount3 = accounts[4];
   const userAccount4 = accounts[5];
   const userAccount5 = accounts[6];
-  const userAccount6 = accounts[7];
+  const userAccount6 = accounts[7]; //not data manager or treejerContract
   const userAccount7 = accounts[8];
   const userAccount8 = accounts[9];
 
@@ -69,6 +71,12 @@ contract("regularSell", (accounts) => {
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount8,
+      deployerAccount
+    );
   });
 
   beforeEach(async () => {
@@ -424,6 +432,32 @@ contract("regularSell", (accounts) => {
       "financial model address set incorect"
     );
   });
+
+  ///////////////---------------------------------set weth funds address--------------------------------------------------------
+  it("set weth funds address", async () => {
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await regularSellInstance
+      .setWethFundsAddress(wethFundsInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await regularSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      from: deployerAccount,
+    });
+
+    assert.equal(
+      wethFundsInstance.address,
+      await regularSellInstance.wethFunds(),
+      "address set incorect"
+    );
+  });
+
 
   /////////////////---------------------------------set lastSoldRegularTree address--------------------------------------------------------
   it("set lastSoldRegularTree address", async () => {
@@ -2586,12 +2620,13 @@ contract("regularSell", (accounts) => {
     await daiInstance.resetAcc(userAccount1);
   });
   */
+  /*
   it("should mint referral tree", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
+    // await Common.addTreejerContractRole(
+    //   arInstance,
+    //   userAccount8,
+    //   deployerAccount
+    // );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2678,11 +2713,11 @@ contract("regularSell", (accounts) => {
     await treeFactoryInstance.addTree(10002, "", { from: dataManager });
     await treeFactoryInstance.addTree(10004, "", { from: dataManager });
 
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
+    // await Common.addTreejerContractRole(
+    //   arInstance,
+    //   userAccount8,
+    //   deployerAccount
+    // );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2773,11 +2808,11 @@ contract("regularSell", (accounts) => {
     );
   });
   it("should fail mint referral tree invalid count", async () => {
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
+    // await Common.addTreejerContractRole(
+    //   arInstance,
+    //   userAccount8,
+    //   deployerAccount
+    // );
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -2853,11 +2888,11 @@ contract("regularSell", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-    await Common.addTreejerContractRole(
-      arInstance,
-      userAccount8,
-      deployerAccount
-    );
+    // await Common.addTreejerContractRole(
+    //   arInstance,
+    //   userAccount8,
+    //   deployerAccount
+    // );
     await regularSellInstance
       .mintReferralTree(treeCount, userAccount7, planterShare, referralShare, {
         from: userAccount8,
@@ -2897,5 +2932,170 @@ contract("regularSell", (accounts) => {
     //   planterFundsInstnce.address,
     //   deployerAccount
     // );
+  });
+  */
+  it("should updateReferrerGiftCount successfully", async () => {
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount8,
+      deployerAccount
+    );
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount1, 4, {
+      from: userAccount8,
+    });
+
+    let user1GiftCount = await regularSellInstance.referrerGifts.call(
+      userAccount1
+    );
+
+    assert.equal(Number(user1GiftCount), 4, "user1 gift count is not correct");
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount2, 10, {
+      from: userAccount8,
+    });
+
+    let user2GiftCount = await regularSellInstance.referrerGifts.call(
+      userAccount2
+    );
+
+    assert.equal(Number(user2GiftCount), 10, "user2 gift count is not correct");
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount1, 3, {
+      from: userAccount8,
+    });
+
+    let user1GiftCount2 = await regularSellInstance.referrerGifts.call(
+      userAccount1
+    );
+
+    assert.equal(Number(user1GiftCount2), 7, "user1 gift count is not correct");
+  });
+
+  it("should fail updateReferrerGiftCount", async () => {
+    await regularSellInstance
+      .updateReferrerGiftCount(userAccount1, 2, { from: userAccount6 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+  });
+  /////////////////-------------------------------------- set price ------------------------------------------------
+
+  it("should setRegularPlanterFund successfully and check data to be ok", async () => {
+    const planterFund1 = Units.convert("0.5", "eth", "wei");
+    const referralFund1 = Units.convert("0.1", "eth", "wei");
+
+    await regularSellInstance.setRegularPlanterFund(
+      planterFund1,
+      referralFund1,
+      {
+        from: dataManager,
+      }
+    );
+
+    const settedPlanterFund1 =
+      await regularSellInstance.regularPlanterFund.call();
+    const settedReferralFund1 =
+      await regularSellInstance.regularReferralFund.call();
+
+    assert.equal(
+      Number(settedPlanterFund1),
+      planterFund1,
+      "planter fund is not correct"
+    );
+
+    assert.equal(
+      Number(settedReferralFund1),
+      referralFund1,
+      "referral fund is not correct"
+    );
+    /////////////////////////////////////////////////////////////////////////
+
+    const planterFund2 = Units.convert("0.5", "eth", "wei");
+    const referralFund2 = Units.convert("0.1", "eth", "wei");
+
+    await regularSellInstance.setRegularPlanterFund(
+      planterFund2,
+      referralFund2,
+      {
+        from: dataManager,
+      }
+    );
+
+    const settedPlanterFund2 =
+      await regularSellInstance.regularPlanterFund.call();
+    const settedReferralFund2 =
+      await regularSellInstance.regularReferralFund.call();
+
+    assert.equal(
+      Number(settedPlanterFund2),
+      planterFund2,
+      "planter fund is not correct"
+    );
+
+    assert.equal(
+      Number(settedReferralFund2),
+      referralFund2,
+      "referral fund is not correct"
+    );
+  });
+
+  it("should fail to setRegularPlanterFund", async () => {
+    await regularSellInstance
+      .setRegularPlanterFund(100, 200, { from: userAccount6 })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+  });
+
+  it("should claim gifts less than 70 succuesfully", async () => {
+    const planterShare = await web3.utils.toWei("2");
+    const referralShare = await web3.utils.toWei("1");
+
+    ///////////// deploy weth funds and set address
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await regularSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      from: deployerAccount,
+    });
+    //////////////-------------  update refferal gift count
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount1, 25, {
+      from: userAccount8,
+    });
+
+    await regularSellInstance.setRegularPlanterFund(
+      planterShare,
+      referralShare,
+      { from: dataManager }
+    );
+
+    const user1GiftCountBeforeClaim =
+      await regularSellInstance.referrerGifts.call(userAccount1);
+
+    assert.equal(
+      Number(user1GiftCountBeforeClaim),
+      25,
+      "user 1 gift before claim is not correct"
+    );
+    // const totalDaiToPlanterSwap1 =
+    //   await wethFundsInstance.totalDaiToPlanterSwap1.call();
+
+    // assert.equal(
+    //   Number(totalDaiToPlanterSwap1),
+    //   0,
+    //   "totalDaiToPlanterSwap1 is not correct"
+    // );
+
+    await regularSellInstance.claimGifts({ from: userAccount1 });
+
+    const user1GiftCountAfterClaim =
+      await regularSellInstance.referrerGifts.call(userAccount1);
+
+    assert.equal(
+      Number(user1GiftCountAfterClaim),
+      0,
+      "user 1 gift after claim is not correct"
+    );
   });
 });

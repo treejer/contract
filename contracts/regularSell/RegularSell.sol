@@ -23,7 +23,7 @@ contract RegularSell is Initializable, RelayRecipient {
     uint256 public regularPlanterFund;
     uint256 public regularReferralFund;
 
-    mapping(address => uint256) referrerGifts;
+    mapping(address => uint256) public referrerGifts;
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;

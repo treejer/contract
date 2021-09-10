@@ -480,10 +480,10 @@ contract IncrementalSell is Initializable, RelayRecipient {
         uint256 _referralFund,
         uint256 _totalPrice
     ) private {
-        uint256 planterDai = (_daiAmount * (_planterFund)) /
+        uint256 planterDai = (_daiAmount * _planterFund) /
             (_planterFund + _referralFund);
 
-        uint256 referralDai = (_daiAmount * (_referralFund)) /
+        uint256 referralDai = (_daiAmount * _referralFund) /
             (_planterFund + _referralFund);
 
         IncrementalPrice storage incPrice = incrementalPrice;

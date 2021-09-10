@@ -298,6 +298,10 @@ contract("IncrementalSell", (accounts) => {
   //     }
   //   );
 
+  //   await regularSellInstance.setRegularPlanterFund(1200, 1200, {
+  //     from: dataManager,
+  //   });
+
   //   await Common.addTreejerContractRole(
   //     arInstance,
   //     treeFactoryInstance.address,
@@ -315,33 +319,24 @@ contract("IncrementalSell", (accounts) => {
   //     }
   //   );
 
-  //   // await iSellInstance.buyTree(1, zeroAddress, {
-  //   //   from: userAccount3,
-  //   // });
-
-  //   // let tx = await iSellInstance.buyTree(1, zeroAddress, {
-  //   //   from: userAccount3,
-  //   // });
-
-  //   // truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
-  //   //   return (
-  //   //     ev.buyer.toString() === userAccount3.toString() &&
-  //   //       Number(ev.startId) === 101,
-  //   //     1
-  //   //   );
-  //   // });
-
-  //   let tx = await iSellInstance.setRegularPlanterFund(1200, 1200, {
-  //     from: dataManager,
+  //   let tx = await iSellInstance.buyTree(1, userAccount5, {
+  //     from: userAccount3,
   //   });
 
-  //   console.log("tx", tx);
+  //   truffleAssert.eventEmitted(tx, "IncrementalTreeSold", (ev) => {
+  //     return (
+  //       ev.buyer.toString() === userAccount3.toString() &&
+  //         Number(ev.startId) === 101,
+  //       1
+  //     );
+  //   });
+
+  //   let count = await regularSellInstance.referrerGifts.call(userAccount5);
+
+  //   console.log("count", Number(count));
 
   //   await wethInstance.resetAcc(userAccount3);
   // });
-
-  /* ssss
-
 
   it("check discount timeout", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
@@ -358,6 +353,8 @@ contract("IncrementalSell", (accounts) => {
         from: dataManager,
       }
     );
+
+    assert.equal(await iSellInstance.lastSold(), 100, "lastSold not true");
 
     await Common.addTreejerContractRole(
       arInstance,
@@ -393,11 +390,6 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.buyTree(1, zeroAddress, {
       from: userAccount3,
     });
-
-    ////////// check last buy
-    // const lastBuy1 = await iSellInstance.lastBuy.call(userAccount3);
-
-    // assert.isTrue(Number(lastBuy1) > 0, "last buy is not ok");
 
     //////////--------------check tree owner
     let addressGetToken101 = await treeTokenInstance.ownerOf(101);
@@ -530,6 +522,14 @@ contract("IncrementalSell", (accounts) => {
       "referralFund funds invalid"
     );
 
+    ////--------------------------check last sold---------------------
+
+    assert.equal(
+      await iSellInstance.lastSold(),
+      101,
+      "Step 0 lastSold not true"
+    );
+
     ////////////////////////////////////////////
 
     let funderBalance2 = await wethInstance.balanceOf(userAccount3);
@@ -557,10 +557,17 @@ contract("IncrementalSell", (accounts) => {
         [wethInstance.address, daiInstance.address]
       );
 
-    // web3.utils.toWei(
-    //   "140277899999978339000",
-    //   "wei"
-    // );
+    let expectedSwapTokenAmountTreeid102 = Math.Big(
+      expectedSwapTokenAmountForBuy20Tree[1]
+    )
+      .times(0.0042)
+      .div(0.08442);
+
+    let expectedSwapTokenAmountTreeid110 = Math.Big(
+      expectedSwapTokenAmountForBuy20Tree[1]
+    )
+      .times(0.0042)
+      .div(0.08442);
 
     let expectedSwapTokenAmountTreeid121 = Math.Big(
       expectedSwapTokenAmountForBuy20Tree[1]
@@ -568,18 +575,7 @@ contract("IncrementalSell", (accounts) => {
       .times(0.00462)
       .div(0.08442);
 
-    // expectedSwapTokenAmountForBuy20Tree;
-    // await uniswapRouterInstance.getAmountsOut.call(
-    //   web3.utils.toWei("0.00462", "Ether"),
-    //   [wethInstance.address, daiInstance.address]
-    // );
-
-    // web3.utils.toWei(
-    //   "7676899999997795000",
-    //   "wei"
-    // );
-
-    let tx = await iSellInstance.buyTree(20, zeroAddress, {
+    let tx = await iSellInstance.buyTree(20, userAccount6, {
       from: userAccount3,
     });
 
@@ -629,6 +625,14 @@ contract("IncrementalSell", (accounts) => {
     let tree121 = await treeFactoryInstance.treeData(121);
 
     assert.equal(Number(tree121.provideStatus), 0);
+
+    /////-----------------not buy 122
+
+    await treeTokenInstance.ownerOf(122).should.be.rejected;
+
+    let tree122 = await treeFactoryInstance.treeData(122);
+
+    assert.equal(Number(tree122.provideStatus), 2);
 
     ///////////////////
 
@@ -738,9 +742,24 @@ contract("IncrementalSell", (accounts) => {
     let planterFunds2 = await planterFundsInstnce.planterFunds.call(121);
     let referralFunds2 = await planterFundsInstnce.referralFunds.call(121);
 
+    let planterFunds3 = await planterFundsInstnce.planterFunds.call(102);
+    let referralFunds3 = await planterFundsInstnce.referralFunds.call(102);
+
+    let planterFunds4 = await planterFundsInstnce.planterFunds.call(110);
+    let referralFunds4 = await planterFundsInstnce.referralFunds.call(110);
+
     assert.equal(
       Number(totalPlanterFund2.planterFund),
-      Number(Math.Big(planterFundsBalanceAfter2).div(4200).times(3000)),
+      Number(
+        Math.Big(expectedSwapTokenAmountTreeid101[1])
+          .times(3000)
+          .div(4200)
+          .plus(
+            Math.Big(expectedSwapTokenAmountForBuy20Tree[1])
+              .times(3000)
+              .div(4200)
+          )
+      ),
       "totalFund planterFund funds invalid"
     );
 
@@ -769,6 +788,46 @@ contract("IncrementalSell", (accounts) => {
       Number(referralFunds2),
       Number(Math.Big(expectedSwapTokenAmountTreeid121).times(1200).div(4200)),
       "referralFund funds invalid"
+    );
+
+    assert.equal(
+      Number(planterFunds3),
+      Number(Math.Big(expectedSwapTokenAmountTreeid102).times(3000).div(4200)),
+      "planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(referralFunds3),
+      Number(Math.Big(expectedSwapTokenAmountTreeid102).times(1200).div(4200)),
+      "referralFund funds invalid"
+    );
+
+    assert.equal(
+      Number(planterFunds4),
+      Number(Math.Big(expectedSwapTokenAmountTreeid110).times(3000).div(4200)),
+      "planterFund funds invalid"
+    );
+
+    assert.equal(
+      Number(referralFunds4),
+      Number(Math.Big(expectedSwapTokenAmountTreeid110).times(1200).div(4200)),
+      "referralFund funds invalid"
+    );
+
+    ////--------------------check referral---------------------
+
+    let referralCount = await regularSellInstance.referrerGifts.call(
+      userAccount6
+    );
+
+    assert.equal(Number(referralCount), 20, "Referral not true");
+
+    ////--------------------------check last sold---------------------
+
+    assert.equal(
+      await iSellInstance.lastSold(),
+      121,
+      "Step 0 lastSold not true"
     );
 
     // /////---------------- step2 ---------------------------
@@ -821,9 +880,17 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await iSellInstance.buyTree(15, zeroAddress, {
+    await iSellInstance.buyTree(15, userAccount6, {
       from: userAccount3,
     });
+
+    ////--------------------check referral---------------------
+
+    let referralCount2 = await regularSellInstance.referrerGifts.call(
+      userAccount6
+    );
+
+    assert.equal(Number(referralCount2), 35, "Referral not true");
 
     let funderBalance6 = await wethInstance.balanceOf(userAccount3);
 
@@ -854,6 +921,14 @@ contract("IncrementalSell", (accounts) => {
       from: userAccount3,
     });
 
+    ////--------------------check referral---------------------
+
+    let referralCount3 = await regularSellInstance.referrerGifts.call(
+      zeroAddress
+    );
+
+    assert.equal(Number(referralCount3), 0, "3-Referral not true");
+
     let funderBalance7 = await wethInstance.balanceOf(userAccount3);
 
     assert.equal(
@@ -879,12 +954,20 @@ contract("IncrementalSell", (accounts) => {
       }
     );
 
-    await iSellInstance.buyTree(20, zeroAddress, {
+    await iSellInstance.buyTree(20, userAccount5, {
       from: userAccount4,
     });
-    await iSellInstance.buyTree(14, zeroAddress, {
+    await iSellInstance.buyTree(14, userAccount5, {
       from: userAccount4,
     });
+
+    ////--------------------check referral---------------------
+
+    let referralCount4 = await regularSellInstance.referrerGifts.call(
+      userAccount5
+    );
+
+    assert.equal(Number(referralCount4), 34, "4-Referral not true");
 
     //mint weth for funder
     await wethInstance.setMint(userAccount3, web3.utils.toWei("0.1"));
@@ -1976,7 +2059,19 @@ contract("IncrementalSell", (accounts) => {
 
     await iSellInstance.buyTree(20, zeroAddress, { from: userAccount3 });
 
-    await iSellInstance.buyTree(20, zeroAddress, { from: userAccount3 });
+    await iSellInstance.buyTree(20, userAccount3, { from: userAccount3 });
+
+    assert.equal(
+      Number(await regularSellInstance.referrerGifts.call(userAccount3)),
+      20,
+      "Referral not true"
+    );
+
+    assert.equal(
+      Number(await regularSellInstance.referrerGifts.call(zeroAddress)),
+      0,
+      "2-Referral not true"
+    );
 
     let lastSold = await iSellInstance.lastSold();
 
@@ -2018,10 +2113,14 @@ contract("IncrementalSell", (accounts) => {
       .buyTree(1, zeroAddress, { from: userAccount3 })
       .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
 
+    await iSellInstance
+      .buyTree(1, userAccount3, { from: userAccount3 })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.LOW_PRICE_PAID);
+
     await wethInstance.resetAcc(userAccount3);
   });
 
-  it("buyTree work successfully", async () => {
+  it("buyTree work successfully(1 tree => 1 step)", async () => {
     await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
       from: dataManager,
     });
@@ -2120,6 +2219,12 @@ contract("IncrementalSell", (accounts) => {
 
     await iSellInstance
       .buyTree(120, zeroAddress, {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_COUNT);
+
+    await iSellInstance
+      .buyTree(120, userAccount2, {
         from: userAccount3,
       })
       .should.be.rejectedWith(IncrementalSellErrorMsg.INVALID_COUNT);
@@ -2699,44 +2804,4 @@ contract("IncrementalSell", (accounts) => {
     treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
     assert.equal(Number(treeAttributeTemp.exists), 1, "106 - Exists not true");
   });
-  ssss */
-
-  /////---------------------------- test setReferrerPlanterFund ---------------------------------
-  it("setReferrerPlanterFund should be fail(onlyDataManager)", async () => {
-    await iSellInstance
-      .setReferrerPlanterFund(1200, 1200, {
-        from: userAccount2,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
-  });
-
-  // it("setReferrerPlanterFund should be fail(onlyDataManager)", async () => {
-  //   treeAuctionInstance = await TreeAuction.new({
-  //     from: deployerAccount,
-  //   });
-
-  //   await treeAuctionInstance.initialize(arInstance.address, {
-  //     from: deployerAccount,
-  //   });
-
-  //   await treeAuctionInstance.setFinancialModelAddress(fModel.address, {
-  //     from: deployerAccount,
-  //   });
-
-  //   await treeAuctionInstance.setTreeFactoryAddress(
-  //     treeFactoryInstance.address,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
-
-  //   await iSellInstance.setReferrerPlanterFund(1200, 1200, {
-  //     from: dataManager,
-  //   });
-  //   assert.equal(
-  //     Number(await iSellInstance.regularPlanterFund()),
-  //     1,
-  //     "106 - Exists not true"
-  //   );
-  // });
 });

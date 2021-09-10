@@ -113,6 +113,7 @@ const RegularSellErrors = {
   INVALID_AMOUNT: "invalid amount",
   INVALID_COUNT: "invalid count",
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
+  INVALID_GIFT_OWNER: "invalid gift owner",
 };
 
 const IncrementalSellErrorMsg = {

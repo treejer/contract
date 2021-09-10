@@ -2708,7 +2708,7 @@ contract("regularSell", (accounts) => {
       Math.mul(treeCount, Number(referralShare))
     );
   });
-
+****
   it("should mint referral tree2", async () => {
     await treeFactoryInstance.addTree(10002, "", { from: dataManager });
     await treeFactoryInstance.addTree(10004, "", { from: dataManager });
@@ -2934,6 +2934,7 @@ contract("regularSell", (accounts) => {
     // );
   });
   */
+  /*
   it("should updateReferrerGiftCount successfully", async () => {
     await Common.addTreejerContractRole(
       arInstance,
@@ -3043,6 +3044,7 @@ contract("regularSell", (accounts) => {
       .setRegularPlanterFund(100, 200, { from: userAccount6 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
+  */
 
   it("should claim gifts less than 70 succuesfully", async () => {
     const planterShare = await web3.utils.toWei("2");
@@ -3058,10 +3060,34 @@ contract("regularSell", (accounts) => {
     await regularSellInstance.setWethFundsAddress(wethFundsInstance.address, {
       from: deployerAccount,
     });
-    //////////////-------------  update refferal gift count
+    //////////////------------- setup
 
-    await regularSellInstance.updateReferrerGiftCount(userAccount1, 25, {
-      from: userAccount8,
+    await Common.addTreejerContractRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    await regularSellInstance.setPlanterFundAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
     });
 
     await regularSellInstance.setRegularPlanterFund(
@@ -3069,6 +3095,12 @@ contract("regularSell", (accounts) => {
       referralShare,
       { from: dataManager }
     );
+
+    /////////////// claim 25 tree with user1
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount1, 25, {
+      from: userAccount8,
+    });
 
     const user1GiftCountBeforeClaim =
       await regularSellInstance.referrerGifts.call(userAccount1);
@@ -3078,16 +3110,22 @@ contract("regularSell", (accounts) => {
       25,
       "user 1 gift before claim is not correct"
     );
-    // const totalDaiToPlanterSwap1 =
-    //   await wethFundsInstance.totalDaiToPlanterSwap1.call();
 
-    // assert.equal(
-    //   Number(totalDaiToPlanterSwap1),
-    //   0,
-    //   "totalDaiToPlanterSwap1 is not correct"
-    // );
+    const totalDaiToPlanterSwap1 =
+      await wethFundsInstance.totalDaiToPlanterSwap.call();
+
+    assert.equal(
+      Number(totalDaiToPlanterSwap1),
+      0,
+      "totalDaiToPlanterSwap1 is not correct"
+    );
 
     await regularSellInstance.claimGifts({ from: userAccount1 });
+
+    //should fail no gift to claim
+    await regularSellInstance
+      .claimGifts({ from: userAccount1 })
+      .should.be.rejectedWith(RegularSellErrors.INVALID_GIFT_OWNER);
 
     const user1GiftCountAfterClaim =
       await regularSellInstance.referrerGifts.call(userAccount1);
@@ -3096,6 +3134,368 @@ contract("regularSell", (accounts) => {
       Number(user1GiftCountAfterClaim),
       0,
       "user 1 gift after claim is not correct"
+    );
+
+    const totalDaiToPlanterSwap2 =
+      await wethFundsInstance.totalDaiToPlanterSwap.call();
+
+    assert.equal(
+      Number(totalDaiToPlanterSwap2),
+      Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25),
+      "totalDaiToPlanterSwap1 is not correct"
+    );
+
+    let tokentOwner;
+
+    for (let i = 10001; i < 10026; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(i);
+      assert.equal(tokentOwner, userAccount1, "funder not true " + i);
+    }
+
+    let lastTreeSold = await regularSellInstance.lastSoldRegularTree.call();
+
+    console.log("lastTreeSold.toString()", lastTreeSold.toString());
+
+    assert.equal(lastTreeSold, 10025, "last sold is not correct");
+    let planterFund;
+    let referralFund;
+    for (let i = 10001; i < 10026; i++) {
+      planterFund = await planterFundsInstnce.planterFunds.call(i);
+      referralFund = await planterFundsInstnce.referralFunds.call(i);
+
+      assert.equal(
+        Number(planterFund),
+        Number(web3.utils.toWei("2")),
+        "2-planterFund funds invalid"
+      );
+
+      assert.equal(
+        Number(referralFund),
+        Number(web3.utils.toWei("1")),
+        "2-referralFund funds invalid"
+      );
+    }
+
+    let totalFunds = await planterFundsInstnce.totalFunds.call();
+    assert.equal(
+      Number(totalFunds.planterFund),
+      Math.mul(25, Number(planterShare))
+    );
+
+    assert.equal(
+      Number(totalFunds.referralFund),
+      Math.mul(25, Number(referralShare))
+    );
+
+    /////////////// claim 10 tree with user2 (two tree is in use)
+    await treeFactoryInstance.addTree(10028, "", { from: dataManager });
+    await treeFactoryInstance.addTree(10030, "", { from: dataManager });
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount2, 10, {
+      from: userAccount8,
+    });
+
+    const user2GiftCountBeforeClaim =
+      await regularSellInstance.referrerGifts.call(userAccount2);
+
+    assert.equal(
+      Number(user2GiftCountBeforeClaim),
+      10,
+      "user 2 gift before claim is not correct"
+    );
+
+    await regularSellInstance.claimGifts({ from: userAccount2 });
+
+    const user2GiftCountAfterClaim =
+      await regularSellInstance.referrerGifts.call(userAccount2);
+
+    assert.equal(
+      Number(user2GiftCountAfterClaim),
+      0,
+      "user 1 gift after claim is not correct"
+    );
+
+    const totalDaiToPlanterSwap3 =
+      await wethFundsInstance.totalDaiToPlanterSwap.call();
+
+    assert.equal(
+      Number(totalDaiToPlanterSwap3),
+      Math.mul(Math.add(Number(planterShare), Number(referralShare)), 35),
+      "totalDaiToPlanterSwap1 is not correct"
+    );
+
+    let tokentOwner2;
+
+    for (let i = 10026; i < 10038; i++) {
+      if ([10028, 10030].includes(i)) {
+        await treeTokenInstance.ownerOf(i).should.be.rejected;
+      } else {
+        tokentOwner2 = await treeTokenInstance.ownerOf(i);
+        assert.equal(tokentOwner2, userAccount2, "funder not true " + i);
+      }
+    }
+
+    let lastTreeSold2 = await regularSellInstance.lastSoldRegularTree.call();
+
+    assert.equal(lastTreeSold2, 10037, "last sold is not correct");
+    let planterFund2;
+    let referralFund2;
+    for (let i = 10026; i < 10038; i++) {
+      if ([10028, 10030].includes(i)) {
+        planterFund2 = await planterFundsInstnce.planterFunds.call(i);
+        referralFund2 = await planterFundsInstnce.referralFunds.call(i);
+
+        assert.equal(Number(planterFund2), 0, "2-planterFund funds invalid");
+
+        assert.equal(Number(referralFund2), 0, "2-referralFund funds invalid");
+      } else {
+        planterFund2 = await planterFundsInstnce.planterFunds.call(i);
+        referralFund2 = await planterFundsInstnce.referralFunds.call(i);
+
+        assert.equal(
+          Number(planterFund2),
+          Number(web3.utils.toWei("2")),
+          "2-planterFund funds invalid"
+        );
+
+        assert.equal(
+          Number(referralFund2),
+          Number(web3.utils.toWei("1")),
+          "2-referralFund funds invalid"
+        );
+      }
+    }
+
+    let totalFunds2 = await planterFundsInstnce.totalFunds.call();
+    assert.equal(
+      Number(totalFunds2.planterFund),
+      Math.mul(35, Number(planterShare))
+    );
+
+    assert.equal(
+      Number(totalFunds2.referralFund),
+      Math.mul(35, Number(referralShare))
+    );
+
+    /////////////// -------------- claim 10 tree with new shares
+
+    const planterShare2 = await web3.utils.toWei("3");
+    const referralShare2 = await web3.utils.toWei("1.5");
+
+    await regularSellInstance.setRegularPlanterFund(
+      planterShare2,
+      referralShare2,
+      { from: dataManager }
+    );
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount3, 10, {
+      from: userAccount8,
+    });
+
+    const user3GiftCountBeforeClaim =
+      await regularSellInstance.referrerGifts.call(userAccount3);
+
+    assert.equal(
+      Number(user3GiftCountBeforeClaim),
+      10,
+      "user 3 gift before claim is not correct"
+    );
+
+    await regularSellInstance.claimGifts({ from: userAccount3 });
+
+    const user3GiftCountAfterClaim =
+      await regularSellInstance.referrerGifts.call(userAccount3);
+
+    assert.equal(
+      Number(user3GiftCountAfterClaim),
+      0,
+      "user 3 gift after claim is not correct"
+    );
+
+    const totalDaiToPlanterSwap4 =
+      await wethFundsInstance.totalDaiToPlanterSwap.call();
+
+    assert.equal(
+      Number(totalDaiToPlanterSwap4),
+      Math.add(
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 35),
+        Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 10)
+      ),
+      "totalDaiToPlanterSwap4 is not correct"
+    );
+
+    let tokentOwner3;
+
+    for (let i = 10038; i < 10048; i++) {
+      tokentOwner3 = await treeTokenInstance.ownerOf(i);
+      assert.equal(tokentOwner3, userAccount3, "funder not true " + i);
+    }
+
+    let lastTreeSold3 = await regularSellInstance.lastSoldRegularTree.call();
+
+    console.log("lastTreeSold.toString()", lastTreeSold3.toString());
+
+    assert.equal(lastTreeSold3, 10047, "last sold is not correct");
+    let planterFund3;
+    let referralFund3;
+    for (let i = 10038; i < 10048; i++) {
+      planterFund3 = await planterFundsInstnce.planterFunds.call(i);
+      referralFund3 = await planterFundsInstnce.referralFunds.call(i);
+
+      assert.equal(
+        Number(planterFund3),
+        Number(web3.utils.toWei("3")),
+        "2-planterFund funds invalid"
+      );
+
+      assert.equal(
+        Number(referralFund3),
+        Number(web3.utils.toWei("1.5")),
+        "2-referralFund funds invalid"
+      );
+    }
+
+    let totalFunds3 = await planterFundsInstnce.totalFunds.call();
+    assert.equal(
+      Number(totalFunds3.planterFund),
+      Math.add(
+        Math.mul(35, Number(planterShare)),
+        Math.mul(10, Number(planterShare2))
+      )
+    );
+
+    assert.equal(
+      Number(totalFunds3.referralFund),
+      Math.add(
+        Math.mul(35, Number(referralShare)),
+        Math.mul(10, Number(referralShare2))
+      )
+    );
+  });
+
+  it("should claim gifts more than 70 succuesfully", async () => {
+    const planterShare = await web3.utils.toWei("2");
+    const referralShare = await web3.utils.toWei("1");
+
+    ///////////// deploy weth funds and set address
+    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
+
+    await regularSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      from: deployerAccount,
+    });
+    //////////////------------- setup
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      regularSellInstance.address,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      treeFactoryInstance.address,
+      deployerAccount
+    );
+
+    await regularSellInstance.setPlanterFundAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await regularSellInstance.setTreeFactoryAddress(
+      treeFactoryInstance.address,
+      { from: deployerAccount }
+    );
+
+    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      from: deployerAccount,
+    });
+
+    await regularSellInstance.setRegularPlanterFund(
+      planterShare,
+      referralShare,
+      { from: dataManager }
+    );
+
+    await regularSellInstance.updateReferrerGiftCount(userAccount3, 85, {
+      from: userAccount8,
+    });
+
+    const user3GiftCountBeforeClaim =
+      await regularSellInstance.referrerGifts.call(userAccount3);
+
+    assert.equal(
+      Number(user3GiftCountBeforeClaim),
+      85,
+      "user 3 gift before claim is not correct"
+    );
+
+    await regularSellInstance.claimGifts({ from: userAccount3 });
+
+    const user3GiftCountAfterClaim =
+      await regularSellInstance.referrerGifts.call(userAccount3);
+
+    assert.equal(
+      Number(user3GiftCountAfterClaim),
+      35,
+      "user 3 gift after claim is not correct"
+    );
+
+    const totalDaiToPlanterSwap1 =
+      await wethFundsInstance.totalDaiToPlanterSwap.call();
+
+    assert.equal(
+      Number(totalDaiToPlanterSwap1),
+      Math.mul(Math.add(Number(planterShare), Number(referralShare)), 50),
+      "totalDaiToPlanterSwap1 is not correct"
+    );
+
+    let tokentOwner;
+
+    for (let i = 10001; i < 10051; i++) {
+      tokentOwner = await treeTokenInstance.ownerOf(i);
+      assert.equal(tokentOwner, userAccount3, "funder not true " + i);
+    }
+
+    let lastTreeSold = await regularSellInstance.lastSoldRegularTree.call();
+
+    console.log("lastTreeSold3.toString()", lastTreeSold.toString());
+
+    assert.equal(lastTreeSold, 10050, "last sold is not correct");
+    let planterFund;
+    let referralFund;
+    for (let i = 10001; i < 10051; i++) {
+      planterFund = await planterFundsInstnce.planterFunds.call(i);
+      referralFund = await planterFundsInstnce.referralFunds.call(i);
+
+      assert.equal(
+        Number(planterFund),
+        Number(web3.utils.toWei("2")),
+        "2-planterFund funds invalid"
+      );
+
+      assert.equal(
+        Number(referralFund),
+        Number(web3.utils.toWei("1")),
+        "2-referralFund funds invalid"
+      );
+    }
+
+    let totalFunds = await planterFundsInstnce.totalFunds.call();
+    assert.equal(
+      Number(totalFunds.planterFund),
+      Math.mul(50, Number(planterShare))
+    );
+
+    assert.equal(
+      Number(totalFunds.referralFund),
+      Math.mul(50, Number(referralShare))
     );
   });
 });

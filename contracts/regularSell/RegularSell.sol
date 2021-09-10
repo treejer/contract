@@ -23,7 +23,6 @@ contract RegularSell is Initializable, RelayRecipient {
     uint256 public regularPlanterFund;
     uint256 public regularReferralFund;
 
-    //TODO: ADD_COMMENT
     mapping(address => uint256) public referrerGifts;
 
     IAccessRestriction public accessRestriction;
@@ -257,10 +256,7 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function _mintReferralTree(uint256 _count, address _referrer)
-        private
-        onlyTreejerContract
-    {
+    function _mintReferralTree(uint256 _count, address _referrer) private {
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
         for (uint256 i = 0; i < _count; i++) {
@@ -349,8 +345,8 @@ contract RegularSell is Initializable, RelayRecipient {
     function claimGifts() external onlyGiftOwner {
         uint256 count = referrerGifts[_msgSender()];
 
-        if (referrerGifts[_msgSender()] > 70) {
-            count = 70;
+        if (referrerGifts[_msgSender()] > 50) {
+            count = 50;
         }
 
         wethFunds.updateDaiSwap(

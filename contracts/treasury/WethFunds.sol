@@ -483,31 +483,6 @@ contract WethFunds is Initializable {
         return amount;
     }
 
-    // function buyerReferrerFund(uint256 _amount) external onlyTreejerContract {
-    //     address[] memory path;
-    //     path = new address[](2);
-
-    //     path[0] = address(wethToken);
-    //     path[1] = daiAddress;
-
-    //     bool success = wethToken.approve(
-    //         address(uniswapRouter),
-    //         type(uint256).max
-    //     );
-
-    //     require(success, "unsuccessful approve");
-
-    //     uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
-    //         _amount,
-    //         type(uint256).max,
-    //         path,
-    //         address(planterFundContract),
-    //         block.timestamp + 1800 // 30 * 60 (30 min)
-    //     );
-
-    //     totalFunds.treejerDevelop -= amounts[0];
-    // }
-
     function swapDaiToPlanters(uint256 _wethMaxUse)
         external
         onlyTreejerContract

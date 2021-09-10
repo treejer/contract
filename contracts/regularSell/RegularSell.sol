@@ -19,7 +19,7 @@ contract RegularSell is Initializable, RelayRecipient {
     /** NOTE {isRegularSell} set inside the initialize to {true} */
     bool public isRegularSell;
 
-    //TODO:ADD_COMMENT
+    //TODO: ADD_COMMENT
     uint256 public regularPlanterFund;
     uint256 public regularReferralFund;
 
@@ -50,8 +50,8 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     /**NOTE only gift owner  */
-    modifier onlyGiftOwner(address _address) {
-        require(referrerGifts[_address] > 0, "invalid gift owner");
+    modifier onlyGiftOwner() {
+        require(referrerGifts[_msgSender()] > 0, "invalid gift owner");
         _;
     }
 
@@ -256,12 +256,10 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function mintReferralTree(uint256 _count, address _referrer)
-        public
+    function _mintReferralTree(uint256 _count, address _referrer)
+        private
         onlyTreejerContract
     {
-        require(_count > 0, "invalid count");
-
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
         for (uint256 i = 0; i < _count; i++) {
@@ -347,12 +345,11 @@ contract RegularSell is Initializable, RelayRecipient {
         referrerGifts[_referrer] += _count;
     }
 
-    function claimGifts() external onlyGiftOwner(_msgSender()) {
-        uint256 count = 0;
+    function claimGifts() external onlyGiftOwner {
+        uint256 count = referrerGifts[_msgSender()];
+
         if (referrerGifts[_msgSender()] > 70) {
             count = 70;
-        } else {
-            count = referrerGifts[_msgSender()];
         }
 
         wethFunds.updateDaiSwap(
@@ -361,6 +358,6 @@ contract RegularSell is Initializable, RelayRecipient {
 
         referrerGifts[_msgSender()] -= count;
 
-        mintReferralTree(count, _msgSender());
+        _mintReferralTree(count, _msgSender());
     }
 }

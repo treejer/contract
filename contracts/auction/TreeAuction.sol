@@ -336,10 +336,9 @@ contract TreeAuction is Initializable, RelayRecipient {
             treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
             if (referrals[auction.bidder][_auctionId] != address(0)) {
-                //call mint
-                regularSell.mintReferralTree(
-                    1,
-                    referrals[auction.bidder][_auctionId]
+                regularSell.updateReferrerGiftCount(
+                    referrals[auction.bidder][_auctionId],
+                    1
                 );
             }
 

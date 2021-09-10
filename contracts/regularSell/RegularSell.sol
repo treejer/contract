@@ -9,6 +9,7 @@ import "../treasury/IDaiFunds.sol";
 import "../treasury/IFinancialModel.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
+import "../treasury/IWethFunds.sol";
 
 /** @title RegularSell contract */
 contract RegularSell is Initializable, RelayRecipient {
@@ -30,6 +31,7 @@ contract RegularSell is Initializable, RelayRecipient {
     IFinancialModel public financialModel;
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
+    IWethFunds public wethFunds;
 
     event TreePriceUpdated(uint256 price);
     event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
@@ -44,6 +46,12 @@ contract RegularSell is Initializable, RelayRecipient {
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
+        _;
+    }
+
+    /**NOTE only gift owner  */
+    modifier onlyGiftOwner(address _address) {
+        require(referrerGifts[_address] > 0, "invalid gift owner");
         _;
     }
 
@@ -169,6 +177,17 @@ contract RegularSell is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
+    /** @dev admin set wethFunds contract address
+     * @param _address wethFunds contract address
+     */
+    function setWethFundsAddress(address _address) external onlyAdmin {
+        IWethFunds candidateContract = IWethFunds(_address);
+
+        require(candidateContract.isWethFunds());
+
+        wethFunds = candidateContract;
+    }
+
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      */
@@ -238,7 +257,7 @@ contract RegularSell is Initializable, RelayRecipient {
 
     //TODO: ADD_COMMENT
     function mintReferralTree(uint256 _count, address _referrer)
-        external
+        public
         onlyTreejerContract
     {
         require(_count > 0, "invalid count");
@@ -326,5 +345,22 @@ contract RegularSell is Initializable, RelayRecipient {
         onlyTreejerContract
     {
         referrerGifts[_referrer] += _count;
+    }
+
+    function claimGifts() external onlyGiftOwner(_msgSender()) {
+        uint256 count = 0;
+        if (referrerGifts[_msgSender()] > 70) {
+            count = 70;
+        } else {
+            count = referrerGifts[_msgSender()];
+        }
+
+        wethFunds.updateDaiSwap(
+            count * (regularPlanterFund + regularReferralFund)
+        );
+
+        referrerGifts[_msgSender()] -= count;
+
+        mintReferralTree(count, _msgSender());
     }
 }

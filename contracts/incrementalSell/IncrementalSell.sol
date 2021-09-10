@@ -18,9 +18,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
     bool public isIncrementalSell;
     uint256 public lastSold;
 
-    uint256 public regularPlanterFund;
-    uint256 public regularReferralFund;
-
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IWethFunds public wethFunds;
@@ -59,7 +56,12 @@ contract IncrementalSell is Initializable, RelayRecipient {
     /** NOTE mapping of buyer address to lastBuy time */
     // mapping(address => uint256) public lastBuy;
 
-    event IncrementalTreeSold(address buyer, uint256 startId, uint256 count);
+    event IncrementalTreeSold(
+        address buyer,
+        address referrer,
+        uint256 startId,
+        uint256 count
+    );
     event IncrementalSellUpdated();
     event IncrementalRatesUpdated();
 
@@ -349,7 +351,12 @@ contract IncrementalSell is Initializable, RelayRecipient {
 
         lastSold = treeId - 1;
 
-        emit IncrementalTreeSold(_msgSender(), treeId - _count, _count);
+        emit IncrementalTreeSold(
+            _msgSender(),
+            _referrer,
+            treeId - _count,
+            _count
+        );
     }
 
     //TODO:ADD_COMMENTS
@@ -459,16 +466,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         );
 
         if (_referrer != address(0)) {
-            wethFunds.buyerReferrerFund(
-                _count * (regularPlanterFund + regularReferralFund)
-            );
-
-            regularSell.mintReferralTree(
-                _count,
-                _referrer,
-                regularPlanterFund,
-                regularReferralFund
-            );
+            regularSell.updateReferrerGiftCount(_referrer, _count);
         }
 
         return treeId;
@@ -508,18 +506,5 @@ contract IncrementalSell is Initializable, RelayRecipient {
 
             treeId += 1;
         }
-    }
-
-    function setReferrerPlanterFund(
-        uint256 _regularPlanterFund,
-        uint256 _regularReferralFund
-    ) external onlyDataManager {
-        regularPlanterFund = _regularPlanterFund;
-        regularReferralFund = _regularReferralFund;
-
-        treeAuction.setReferrerPlanterFund(
-            _regularPlanterFund,
-            _regularReferralFund
-        );
     }
 }

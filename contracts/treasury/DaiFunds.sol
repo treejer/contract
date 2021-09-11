@@ -213,6 +213,37 @@ contract DaiFunds is Initializable {
         reserveFundAddress2 = _address;
     }
 
+    //TODO : ADD_COMMENT
+    function regularFund(
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
+    ) external onlyTreejerContract {
+        totalFunds.treeResearch += _totalTreeResearch;
+
+        totalFunds.localDevelop += _totalLocalDevelop;
+
+        totalFunds.rescueFund += _totalRescueFund;
+
+        totalFunds.treejerDevelop += _totalTreejerDevelop;
+
+        totalFunds.reserveFund1 += _totalReserveFund1;
+
+        totalFunds.reserveFund2 += _totalReserveFund2;
+
+        bool success = daiToken.transfer(
+            address(planterFundContract),
+            _totalPlanterFund + _totalReferralFund
+        );
+
+        require(success, "unsuccessful transfer");
+    }
+
     /**
      * @dev fund a tree by RegularSell contract and based on distribution
      * model of tree, shares divide beetwen (planter, referral, treeResearch,

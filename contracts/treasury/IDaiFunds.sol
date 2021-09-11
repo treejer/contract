@@ -14,6 +14,18 @@ interface IDaiFunds {
      */
     function accessRestriction() external view returns (address);
 
+    //TODO : ADD_COMMENT
+    function regularFund(
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
+    ) external;
+
     /**
      * @return PlanterFund contract address
      */

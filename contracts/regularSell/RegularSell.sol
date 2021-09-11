@@ -23,7 +23,21 @@ contract RegularSell is Initializable, RelayRecipient {
     uint256 public regularPlanterFund;
     uint256 public regularReferralFund;
 
+    uint256 public perRegularBuys;
+
     mapping(address => uint256) public referrerGifts;
+    mapping(address => uint256) public referrerRegularCount;
+
+    struct FundDistribution {
+        uint256 planterFund;
+        uint256 referralFund;
+        uint256 treeResearch;
+        uint256 localDevelop;
+        uint256 rescueFund;
+        uint256 treejerDevelop;
+        uint256 reserveFund1;
+        uint256 reserveFund2;
+    }
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
@@ -34,7 +48,12 @@ contract RegularSell is Initializable, RelayRecipient {
     IWethFunds public wethFunds;
 
     event TreePriceUpdated(uint256 price);
-    event RegularTreeRequsted(uint256 count, address buyer, uint256 amount);
+    event RegularTreeRequsted(
+        address buyer,
+        address referrer,
+        uint256 count,
+        uint256 amount
+    );
     event RegularMint(address buyer, uint256 treeId);
     event RegularTreeRequstedById(
         uint256 treeId,
@@ -196,28 +215,36 @@ contract RegularSell is Initializable, RelayRecipient {
         emit TreePriceUpdated(_price);
     }
 
+    //TODO: ADD_COMMENT , who can call this func ??(onlyDataManager)
+    function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
+        perRegularBuys = _count;
+    }
+
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * treePrice }
      * @param _count is the number of trees requested by user
      */
-    function requestTrees(uint256 _count) external {
-        require(_count > 0, "invalid count");
+    function requestTrees(uint256 _count, address _referrer) external {
+        require(_count > 0 && _count < 101, "invalid count");
 
-        uint256 amount = treePrice * _count;
+        uint256 totalPrice = treePrice * _count;
 
-        require(daiToken.balanceOf(_msgSender()) >= amount, "invalid amount");
+        require(
+            daiToken.balanceOf(_msgSender()) >= totalPrice,
+            "invalid amount"
+        );
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
         bool success = daiToken.transferFrom(
             _msgSender(),
             address(daiFunds),
-            amount
+            totalPrice
         );
 
         require(success, "unsuccessful transfer");
 
-        emit RegularTreeRequsted(_count, _msgSender(), amount);
+        FundDistribution memory totalFunds;
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintRegularTrees(
@@ -236,23 +263,56 @@ contract RegularSell is Initializable, RelayRecipient {
                 uint16 reserveFund2
             ) = financialModel.findTreeDistribution(tempLastRegularSold);
 
-            daiFunds.fundTree(
+            totalFunds.planterFund += (treePrice * planterFund) / 10000;
+            totalFunds.referralFund += (treePrice * referralFund) / 10000;
+            totalFunds.treeResearch += (treePrice * treeResearch) / 10000;
+            totalFunds.localDevelop += (treePrice * localDevelop) / 10000;
+            totalFunds.rescueFund += (treePrice * rescueFund) / 10000;
+            totalFunds.treejerDevelop += (treePrice * treejerDevelop) / 10000;
+            totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
+            totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
+
+            planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                treePrice,
-                planterFund,
-                referralFund,
-                treeResearch,
-                localDevelop,
-                rescueFund,
-                treejerDevelop,
-                reserveFund1,
-                reserveFund2
+                (treePrice * planterFund) / 10000,
+                (treePrice * referralFund) / 10000
             );
 
+            //TODO : should i add treePrice for this emit ???
             emit RegularMint(_msgSender(), tempLastRegularSold);
         }
 
+        daiFunds.regularFund(
+            totalFunds.planterFund,
+            totalFunds.referralFund,
+            totalFunds.treeResearch,
+            totalFunds.localDevelop,
+            totalFunds.rescueFund,
+            totalFunds.treejerDevelop,
+            totalFunds.reserveFund1,
+            totalFunds.reserveFund2
+        );
+
         lastSoldRegularTree = tempLastRegularSold;
+
+        if (_referrer != address(0)) {
+            _funcReferrer(_referrer, _count);
+        }
+
+        emit RegularTreeRequsted(_msgSender(), _referrer, _count, totalPrice);
+    }
+
+    function _funcReferrer(address _referrer, uint256 _count) private {
+        uint256 localReferrerRegularCount = referrerRegularCount[_referrer] +
+            _count;
+
+        if (localReferrerRegularCount > perRegularBuys) {
+            uint256 temp = localReferrerRegularCount / perRegularBuys;
+            localReferrerRegularCount -= temp * perRegularBuys;
+            referrerGifts[_referrer] += temp;
+        }
+
+        referrerRegularCount[_referrer] = localReferrerRegularCount;
     }
 
     //TODO: ADD_COMMENT

@@ -93,6 +93,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has buyer rank role */
+    modifier onlyBuyerRank() {
+        accessRestriction.ifBuyerRank(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(_msgSender());
@@ -543,6 +549,14 @@ contract TreeFactory is Initializable, RelayRecipient {
         emit RegularTreePlanted(regularTreeId.current());
 
         regularTreeId.increment();
+    }
+
+    //TODO:ADD_COMMENT WRITE_TEST
+    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
+        external
+        onlyBuyerRank
+    {
+        treeData[_treeId].treeSpecs = _treeSpecs;
     }
 
     /**

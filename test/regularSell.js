@@ -133,6 +133,8 @@ contract("regularSell", (accounts) => {
 
   afterEach(async () => {});
 
+  /*
+
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     ////////////// ------------------- handle fund distribution model ----------------------
@@ -287,7 +289,7 @@ contract("regularSell", (accounts) => {
     });
 
     await contractFunder
-      .requestTrees(1, {
+      .requestTrees(1, zeroAddress, {
         from: userAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
@@ -299,7 +301,7 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await contractFunder.requestTrees(1, {
+    await contractFunder.requestTrees(1, zeroAddress, {
       from: userAccount2,
     });
 
@@ -458,6 +460,8 @@ contract("regularSell", (accounts) => {
     );
   });
 
+
+
   /////////////////---------------------------------set lastSoldRegularTree address--------------------------------------------------------
   it("set lastSoldRegularTree address", async () => {
     Common.addDataManager(arInstance, userAccount1, deployerAccount);
@@ -518,6 +522,8 @@ contract("regularSell", (accounts) => {
       "2-lastRegularSellTreeAfter not true"
     );
   });
+
+  /* ssss
 
   it("Should lastSoldRegularTree work successfully", async () => {
     let funder = userAccount3;
@@ -627,7 +633,7 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    await regularSellInstance.requestTrees(7, {
+    await regularSellInstance.requestTrees(7, zeroAddress, {
       from: funder,
     });
 
@@ -658,7 +664,7 @@ contract("regularSell", (accounts) => {
       return Number(ev.lastSoldRegularTree) == 13333;
     });
 
-    await regularSellInstance.requestTrees(7, {
+    await regularSellInstance.requestTrees(7, zeroAddress, {
       from: funder,
     });
 
@@ -825,7 +831,7 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    let requestTx = await regularSellInstance.requestTrees(7, {
+    let requestTx = await regularSellInstance.requestTrees(7, zeroAddress, {
       from: funder,
     });
 
@@ -1106,7 +1112,7 @@ contract("regularSell", (accounts) => {
       }
     );
 
-    let requestTx = await regularSellInstance.requestTrees(7, {
+    let requestTx = await regularSellInstance.requestTrees(7, zeroAddress, {
       from: funder,
     });
 
@@ -1261,6 +1267,8 @@ contract("regularSell", (accounts) => {
     }
   });
 
+  ssss */
+
   it("3.should request trees successfully", async () => {
     let funder1 = userAccount3;
     let funder2 = userAccount3;
@@ -1297,6 +1305,13 @@ contract("regularSell", (accounts) => {
     });
 
     ///////////////////// ------------------- handle addresses here --------------------------
+
+    await regularSellInstance.setPlanterFundAddress(
+      planterFundsInstnce.address,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await regularSellInstance.setTreeFactoryAddress(
       treeFactoryInstance.address,
@@ -1379,240 +1394,242 @@ contract("regularSell", (accounts) => {
       "1-funder balance not true"
     );
 
-    let requestTx1 = await regularSellInstance.requestTrees(1, {
+    let requestTx1 = await regularSellInstance.requestTrees(1, zeroAddress, {
       from: funder1,
     });
 
-    truffleAssert.eventEmitted(requestTx1, "RegularTreeRequsted", (ev) => {
-      return (
-        Number(ev.count) == 1 &&
-        ev.buyer == funder1 &&
-        Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
-      );
-    });
+    // truffleAssert.eventEmitted(requestTx1, "RegularTreeRequsted", (ev) => {
+    //   return (
+    //     Number(ev.count) == 1 &&
+    //     ev.buyer == funder1 &&
+    //     Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+    //   );
+    // });
 
-    let funder1BalanceAfter = await daiInstance.balanceOf(funder1);
+    // let funder1BalanceAfter = await daiInstance.balanceOf(funder1);
 
-    assert.equal(
-      Number(funder1BalanceAfter),
-      web3.utils.toWei("0"),
-      "2-funder balance not true"
-    );
+    // assert.equal(
+    //   Number(funder1BalanceAfter),
+    //   web3.utils.toWei("0"),
+    //   "2-funder balance not true"
+    // );
 
-    const daiFundsBalanceAfter1 = await daiInstance.balanceOf(
-      daiFundsInstance.address
-    );
+    // const daiFundsBalanceAfter1 = await daiInstance.balanceOf(
+    //   daiFundsInstance.address
+    // );
 
-    const planterFundsBalanceAfter1 = await daiInstance.balanceOf(
-      planterFundsInstnce.address
-    );
+    // const planterFundsBalanceAfter1 = await daiInstance.balanceOf(
+    //   planterFundsInstnce.address
+    // );
 
-    const regularSellBalanceAfter1 = await daiInstance.balanceOf(
-      regularSellInstance.address
-    );
+    // const regularSellBalanceAfter1 = await daiInstance.balanceOf(
+    //   regularSellInstance.address
+    // );
 
-    assert.equal(
-      Number(daiFundsBalanceAfter1),
-      Number(web3.utils.toWei("3.36")),
-      "daiFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(daiFundsBalanceAfter1),
+    //   Number(web3.utils.toWei("3.36")),
+    //   "daiFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(planterFundsBalanceAfter1),
-      Number(web3.utils.toWei("3.64")),
-      "planterFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(planterFundsBalanceAfter1),
+    //   Number(web3.utils.toWei("3.64")),
+    //   "planterFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(regularSellBalanceAfter1),
-      0,
-      "regularSell balance not true"
-    );
+    // assert.equal(
+    //   Number(regularSellBalanceAfter1),
+    //   0,
+    //   "regularSell balance not true"
+    // );
 
-    let tokentOwner;
+    // let tokentOwner;
 
-    tokentOwner = await treeTokenInstance.ownerOf(10001);
-    assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
+    // tokentOwner = await treeTokenInstance.ownerOf(10001);
+    // assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
 
-    let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+    // let lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
 
-    assert.equal(
-      Number(lastSoldRegularTree),
-      10001,
-      "lastSoldRegularTree not true"
-    );
+    // assert.equal(
+    //   Number(lastSoldRegularTree),
+    //   10001,
+    //   "lastSoldRegularTree not true"
+    // );
 
-    ///------------- funder2 -----------------
+    // ///------------- funder2 -----------------
 
-    //mint dai for funder
-    await daiInstance.setMint(funder2, web3.utils.toWei("7"));
+    // //mint dai for funder
+    // await daiInstance.setMint(funder2, web3.utils.toWei("7"));
 
-    let funder2BalanceBefore = await daiInstance.balanceOf(funder2);
+    // let funder2BalanceBefore = await daiInstance.balanceOf(funder2);
 
-    await daiInstance.approve(
-      regularSellInstance.address,
-      web3.utils.toWei("7"),
-      {
-        from: funder2,
-      }
-    );
+    // await daiInstance.approve(
+    //   regularSellInstance.address,
+    //   web3.utils.toWei("7"),
+    //   {
+    //     from: funder2,
+    //   }
+    // );
 
-    assert.equal(
-      Number(funder2BalanceBefore),
-      web3.utils.toWei("7"),
-      "3-funder balance not true"
-    );
+    // assert.equal(
+    //   Number(funder2BalanceBefore),
+    //   web3.utils.toWei("7"),
+    //   "3-funder balance not true"
+    // );
 
-    let requestTx2 = await regularSellInstance.requestTrees(1, {
-      from: funder2,
-    });
+    // let requestTx2 = await regularSellInstance.requestTrees(1, zeroAddress, {
+    //   from: funder2,
+    // });
 
-    truffleAssert.eventEmitted(requestTx2, "RegularTreeRequsted", (ev) => {
-      return (
-        Number(ev.count) == 1 &&
-        ev.buyer == funder2 &&
-        Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
-      );
-    });
+    // truffleAssert.eventEmitted(requestTx2, "RegularTreeRequsted", (ev) => {
+    //   return (
+    //     Number(ev.count) == 1 &&
+    //     ev.buyer == funder2 &&
+    //     Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+    //   );
+    // });
 
-    let funder2BalanceAfter = await daiInstance.balanceOf(funder2);
+    // let funder2BalanceAfter = await daiInstance.balanceOf(funder2);
 
-    assert.equal(
-      Number(funder2BalanceAfter),
-      web3.utils.toWei("0"),
-      "4-funder balance not true"
-    );
+    // assert.equal(
+    //   Number(funder2BalanceAfter),
+    //   web3.utils.toWei("0"),
+    //   "4-funder balance not true"
+    // );
 
-    const daiFundsBalanceAfter2 = await daiInstance.balanceOf(
-      daiFundsInstance.address
-    );
+    // const daiFundsBalanceAfter2 = await daiInstance.balanceOf(
+    //   daiFundsInstance.address
+    // );
 
-    const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
-      planterFundsInstnce.address
-    );
+    // const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
+    //   planterFundsInstnce.address
+    // );
 
-    const regularSellBalanceAfter2 = await daiInstance.balanceOf(
-      regularSellInstance.address
-    );
+    // const regularSellBalanceAfter2 = await daiInstance.balanceOf(
+    //   regularSellInstance.address
+    // );
 
-    assert.equal(
-      Number(daiFundsBalanceAfter2),
-      Number(web3.utils.toWei("6.72")),
-      "2-daiFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(daiFundsBalanceAfter2),
+    //   Number(web3.utils.toWei("6.72")),
+    //   "2-daiFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(planterFundsBalanceAfter2),
-      Number(web3.utils.toWei("7.28")),
-      "2-planterFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(planterFundsBalanceAfter2),
+    //   Number(web3.utils.toWei("7.28")),
+    //   "2-planterFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(regularSellBalanceAfter2),
-      0,
-      "2-regularSell balance not true"
-    );
+    // assert.equal(
+    //   Number(regularSellBalanceAfter2),
+    //   0,
+    //   "2-regularSell balance not true"
+    // );
 
-    tokentOwner = await treeTokenInstance.ownerOf(10002);
-    assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
+    // tokentOwner = await treeTokenInstance.ownerOf(10002);
+    // assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
 
-    lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+    // lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
 
-    assert.equal(
-      Number(lastSoldRegularTree),
-      10002,
-      "2.lastSoldRegularTree not true"
-    );
+    // assert.equal(
+    //   Number(lastSoldRegularTree),
+    //   10002,
+    //   "2.lastSoldRegularTree not true"
+    // );
 
-    ///------------- funder3 -----------------
+    // ///------------- funder3 -----------------
 
-    //mint dai for funder
-    await daiInstance.setMint(funder3, web3.utils.toWei("7"));
+    // //mint dai for funder
+    // await daiInstance.setMint(funder3, web3.utils.toWei("7"));
 
-    let funder3BalanceBefore = await daiInstance.balanceOf(funder3);
+    // let funder3BalanceBefore = await daiInstance.balanceOf(funder3);
 
-    await daiInstance.approve(
-      regularSellInstance.address,
-      web3.utils.toWei("7"),
-      {
-        from: funder3,
-      }
-    );
+    // await daiInstance.approve(
+    //   regularSellInstance.address,
+    //   web3.utils.toWei("7"),
+    //   {
+    //     from: funder3,
+    //   }
+    // );
 
-    assert.equal(
-      Number(funder3BalanceBefore),
-      web3.utils.toWei("7"),
-      "3-funder balance not true"
-    );
+    // assert.equal(
+    //   Number(funder3BalanceBefore),
+    //   web3.utils.toWei("7"),
+    //   "3-funder balance not true"
+    // );
 
-    let requestTx = await regularSellInstance.requestTrees(1, {
-      from: funder3,
-    });
+    // let requestTx = await regularSellInstance.requestTrees(1, zeroAddress, {
+    //   from: funder3,
+    // });
 
-    truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
-      return (
-        Number(ev.count) == 1 &&
-        ev.buyer == funder3 &&
-        Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
-      );
-    });
+    // truffleAssert.eventEmitted(requestTx, "RegularTreeRequsted", (ev) => {
+    //   return (
+    //     Number(ev.count) == 1 &&
+    //     ev.buyer == funder3 &&
+    //     Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+    //   );
+    // });
 
-    const txFee = await Common.getTransactionFee(requestTx);
+    // const txFee = await Common.getTransactionFee(requestTx);
 
-    console.log("2.test fee", web3.utils.fromWei(txFee.toString()));
+    // console.log("2.test fee", web3.utils.fromWei(txFee.toString()));
 
-    let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
+    // let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
 
-    assert.equal(
-      Number(funder3BalanceAfter),
-      web3.utils.toWei("0"),
-      "3-funder balance not true"
-    );
+    // assert.equal(
+    //   Number(funder3BalanceAfter),
+    //   web3.utils.toWei("0"),
+    //   "3-funder balance not true"
+    // );
 
-    const daiFundsBalanceAfter3 = await daiInstance.balanceOf(
-      daiFundsInstance.address
-    );
+    // const daiFundsBalanceAfter3 = await daiInstance.balanceOf(
+    //   daiFundsInstance.address
+    // );
 
-    const planterFundsBalanceAfter3 = await daiInstance.balanceOf(
-      planterFundsInstnce.address
-    );
+    // const planterFundsBalanceAfter3 = await daiInstance.balanceOf(
+    //   planterFundsInstnce.address
+    // );
 
-    const regularSellBalanceAfter3 = await daiInstance.balanceOf(
-      regularSellInstance.address
-    );
+    // const regularSellBalanceAfter3 = await daiInstance.balanceOf(
+    //   regularSellInstance.address
+    // );
 
-    assert.equal(
-      Number(daiFundsBalanceAfter3),
-      Number(web3.utils.toWei("10.08")),
-      "daiFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(daiFundsBalanceAfter3),
+    //   Number(web3.utils.toWei("10.08")),
+    //   "daiFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(planterFundsBalanceAfter3),
-      Number(web3.utils.toWei("10.92")),
-      "planterFunds balance not true"
-    );
+    // assert.equal(
+    //   Number(planterFundsBalanceAfter3),
+    //   Number(web3.utils.toWei("10.92")),
+    //   "planterFunds balance not true"
+    // );
 
-    assert.equal(
-      Number(regularSellBalanceAfter3),
-      0,
-      "regularSell balance not true"
-    );
+    // assert.equal(
+    //   Number(regularSellBalanceAfter3),
+    //   0,
+    //   "regularSell balance not true"
+    // );
 
-    tokentOwner = await treeTokenInstance.ownerOf(10003);
-    assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
+    // tokentOwner = await treeTokenInstance.ownerOf(10003);
+    // assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
 
-    lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
+    // lastSoldRegularTree = await regularSellInstance.lastSoldRegularTree();
 
-    assert.equal(
-      Number(lastSoldRegularTree),
-      10003,
-      "3.lastSoldRegularTree not true"
-    );
+    // assert.equal(
+    //   Number(lastSoldRegularTree),
+    //   10003,
+    //   "3.lastSoldRegularTree not true"
+    // );
     await daiInstance.resetAcc(funder1);
     await daiInstance.resetAcc(funder2);
     await daiInstance.resetAcc(funder3);
   });
+
+  /* ssss
 
   it("Should request trees rejecet(The count must be greater than zero)", async () => {
     let funder = userAccount3;
@@ -1723,7 +1740,7 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestTrees(0, {
+      .requestTrees(0, zeroAddress, {
         from: funder,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
@@ -1840,7 +1857,7 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestTrees(3, {
+      .requestTrees(3, zeroAddress, {
         from: funder,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
@@ -1859,7 +1876,7 @@ contract("regularSell", (accounts) => {
     );
 
     await regularSellInstance
-      .requestTrees(3, {
+      .requestTrees(3, zeroAddress, {
         from: userAccount4,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_APPROVE);
@@ -3252,4 +3269,6 @@ contract("regularSell", (accounts) => {
 
     await regularSellInstance.claimGifts({ from: userAccount1 });
   });
+
+  ssss */
 });

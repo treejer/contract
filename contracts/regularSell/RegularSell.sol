@@ -54,10 +54,11 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 count,
         uint256 amount
     );
-    event RegularMint(address buyer, uint256 treeId);
+    event RegularMint(address buyer, uint256 treeId, uint256 treePrice);
     event RegularTreeRequstedById(
-        uint256 treeId,
         address buyer,
+        address referrer,
+        uint256 treeId,
         uint256 amount
     );
     event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
@@ -215,7 +216,7 @@ contract RegularSell is Initializable, RelayRecipient {
         emit TreePriceUpdated(_price);
     }
 
-    //TODO: ADD_COMMENT , who can call this func ??(onlyDataManager)
+    //TODO: ADD_COMMENT
     function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
         perRegularBuys = _count;
     }
@@ -234,8 +235,6 @@ contract RegularSell is Initializable, RelayRecipient {
             "invalid amount"
         );
 
-        uint256 tempLastRegularSold = lastSoldRegularTree;
-
         bool success = daiToken.transferFrom(
             _msgSender(),
             address(daiFunds),
@@ -243,6 +242,8 @@ contract RegularSell is Initializable, RelayRecipient {
         );
 
         require(success, "unsuccessful transfer");
+
+        uint256 tempLastRegularSold = lastSoldRegularTree;
 
         FundDistribution memory totalFunds;
 
@@ -278,8 +279,7 @@ contract RegularSell is Initializable, RelayRecipient {
                 (treePrice * referralFund) / 10000
             );
 
-            //TODO : should i add treePrice for this emit ???
-            emit RegularMint(_msgSender(), tempLastRegularSold);
+            emit RegularMint(_msgSender(), tempLastRegularSold, treePrice);
         }
 
         daiFunds.regularFund(
@@ -331,7 +331,7 @@ contract RegularSell is Initializable, RelayRecipient {
                 regularReferralFund
             );
 
-            emit RegularMint(_referrer, tempLastRegularSold);
+            emit RegularMint(_referrer, tempLastRegularSold, treePrice);
         }
 
         lastSoldRegularTree = tempLastRegularSold;
@@ -342,7 +342,7 @@ contract RegularSell is Initializable, RelayRecipient {
      * make sure that has not been sold before
      * @param _treeId is the id of tree requested by user
      */
-    function requestByTreeId(uint256 _treeId) external {
+    function requestByTreeId(uint256 _treeId, address _referrer) external {
         require(_treeId > lastSoldRegularTree, "invalid tree");
 
         require(
@@ -384,7 +384,16 @@ contract RegularSell is Initializable, RelayRecipient {
             reserveFund2
         );
 
-        emit RegularTreeRequstedById(_treeId, _msgSender(), treePrice);
+        if (_referrer != address(0)) {
+            _funcReferrer(_referrer, 1);
+        }
+
+        emit RegularTreeRequstedById(
+            _msgSender(),
+            _referrer,
+            _treeId,
+            treePrice
+        );
     }
 
     function setRegularPlanterFund(

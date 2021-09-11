@@ -476,21 +476,21 @@ contract WethFunds is Initializable {
 
         totalFunds.reserveFund2 += _totalReserveFund2;
 
-        uint256 amount = _swapExactTokensForTokens(
-            _totalPlanterFund + _totalReferralFund
-        );
+        uint256 sumFund = _totalPlanterFund + _totalReferralFund;
+
+        uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
 
         return amount;
     }
 
-    //TODO: ADD_COMMENT
+    //TODO: who can call ???? , ADD_COMMENT
     function swapDaiToPlanters(uint256 _wethMaxUse) external {
         require(
             _wethMaxUse <= totalFunds.treejerDevelop,
             "Liquidity not enough"
         );
 
-        require(totalDaiToPlanterSwap > 0, "not true");
+        require(totalDaiToPlanterSwap > 0, "totalDaiToPlanterSwap not be zero");
 
         address[] memory path;
         path = new address[](2);
@@ -510,6 +510,7 @@ contract WethFunds is Initializable {
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
 
+        totalDaiToPlanterSwap = 0;
         totalFunds.treejerDevelop -= amounts[0];
     }
 
@@ -542,7 +543,7 @@ contract WethFunds is Initializable {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        uint256 amount = _swapExactTokensForTokens(sumFund);
+        uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
 
         planterFundContract.setPlanterFunds(
             _treeId,

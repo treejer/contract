@@ -16,7 +16,11 @@ var TestUniswap = artifacts.require("TestUniswap.sol");
 
 const Math = require("./math");
 
-const { CommonErrorMsg, TreasuryManagerErrorMsg } = require("./enumes");
+const {
+  CommonErrorMsg,
+  TreasuryManagerErrorMsg,
+  WethFundsErrorMsg,
+} = require("./enumes");
 
 const Common = require("./common");
 
@@ -143,7 +147,7 @@ contract("WethFunds", (accounts) => {
   });
 
   /////////////------------------------------------ set Dai Token address ----------------------------------------//
-  /*
+
   it("set dai token address", async () => {
     await wethFunds.setDaiAddress(daiInstance.address, {
       from: deployerAccount,
@@ -3685,7 +3689,6 @@ contract("WethFunds", (accounts) => {
       })
       .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
   });
-  */
 
   it("2.Should incrementalFund work successfully", async () => {
     const treeId = 0;
@@ -3872,5 +3875,202 @@ contract("WethFunds", (accounts) => {
       ),
       "2-Contract balance not true"
     );
+  });
+
+  ///////---------------------------------- test updateDaiSwap -----------------------
+
+  it("Should updateDaiSwap reject (only treejer contract can call)", async () => {
+    await wethFunds
+      .updateDaiSwap(web3.utils.toWei("12", "Ether"), {
+        from: userAccount4,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+  });
+
+  it("Should updateDaiSwap work successFully (only treejer contract can call)", async () => {
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await wethFunds.updateDaiSwap(web3.utils.toWei("12", "Ether"), {
+      from: userAccount3,
+    });
+
+    assert.equal(
+      Number(await wethFunds.totalDaiToPlanterSwap()),
+      12e18,
+      "2-Contract balance not true"
+    );
+  });
+
+  ///////---------------------------------- test swapDaiToPlanters -----------------------
+
+  it("Should swapDaiToPlanters work successfully", async () => {
+    const totalTreejerDevelop2 = web3.utils.toWei("2");
+
+    ////--------------check set role----------------
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
+
+    ////---------------transfer weth for wethFunds-------------------
+
+    await wethInstance.setMint(wethFunds.address, totalTreejerDevelop2);
+
+    // ////--------------------call fund tree by auction(treeId2)----------------
+
+    await wethFunds.incrementalFund(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+      from: userAccount3,
+    });
+
+    await wethFunds.updateDaiSwap(web3.utils.toWei("1000", "Ether"), {
+      from: userAccount3,
+    });
+
+    assert.equal(
+      Number(await wethFunds.totalDaiToPlanterSwap()),
+      web3.utils.toWei("1000", "Ether"),
+      "totalDaiToPlanterSwap not true"
+    );
+
+    let expectedSwapTokenAmountTreeId2 =
+      await uniswapRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1000", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    await wethFunds.swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
+      from: userAccount3,
+    });
+
+    ////------------check planter fund contract balance
+    let planterFundBalance = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(planterFundBalance),
+      Number(web3.utils.toWei("1000", "Ether")),
+      "planterFund not true"
+    );
+
+    ////------------check planter fund contract balance
+    let wethFundBalance = await wethInstance.balanceOf(wethFunds.address);
+
+    assert.equal(
+      Number(wethFundBalance),
+      Number(
+        Math.Big(totalTreejerDevelop2).minus(expectedSwapTokenAmountTreeId2[0])
+      ),
+      "wethFund not true"
+    );
+
+    assert.equal(
+      Number(await wethFunds.totalDaiToPlanterSwap()),
+      0,
+      "totalDaiToPlanterSwap not true"
+    );
+
+    let totalFunds = await wethFunds.totalFunds();
+
+    assert.equal(
+      Number(totalFunds.treejerDevelop),
+      Number(
+        Math.Big(totalTreejerDevelop2).minus(expectedSwapTokenAmountTreeId2[0])
+      ),
+      "treejerDevelop funds invalid"
+    );
+  });
+
+  it("Should swapDaiToPlanters reject (Liquidity not enough)", async () => {
+    const totalTreejerDevelop2 = web3.utils.toWei("2");
+
+    ////--------------check set role----------------
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
+
+    ////---------------transfer weth for wethFunds-------------------
+
+    await wethInstance.setMint(wethFunds.address, totalTreejerDevelop2);
+
+    // ////--------------------call fund tree by auction(treeId2)----------------
+
+    await wethFunds.incrementalFund(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+      from: userAccount3,
+    });
+
+    await wethFunds.updateDaiSwap(web3.utils.toWei("4000", "Ether"), {
+      from: userAccount3,
+    });
+
+    let expectedSwapTokenAmountTreeId2 =
+      await uniswapRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("4000", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    await wethFunds
+      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(WethFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
+  });
+
+  it("Should swapDaiToPlanters reject (totalDaiToPlanterSwap not be zero)", async () => {
+    const totalTreejerDevelop2 = web3.utils.toWei("2");
+
+    ////--------------check set role----------------
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
+
+    ////---------------transfer weth for wethFunds-------------------
+
+    await wethInstance.setMint(wethFunds.address, totalTreejerDevelop2);
+
+    // ////--------------------call fund tree by auction(treeId2)----------------
+
+    await wethFunds.incrementalFund(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+      from: userAccount3,
+    });
+
+    let expectedSwapTokenAmountTreeId2 =
+      await uniswapRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1000", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    await wethFunds
+      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(WethFundsErrorMsg.TOTALDAI_ZERO);
   });
 });

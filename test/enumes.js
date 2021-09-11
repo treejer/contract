@@ -149,6 +149,11 @@ const CommunityGiftErrorMsg = {
   INVALID_RANGE: "invalid range",
 };
 
+const WethFundsErrorMsg = {
+  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
+  TOTALDAI_ZERO: "totalDaiToPlanterSwap not be zero",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -165,4 +170,5 @@ module.exports = {
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,
+  WethFundsErrorMsg,
 };

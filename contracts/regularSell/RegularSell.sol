@@ -414,7 +414,7 @@ contract RegularSell is Initializable, RelayRecipient {
     function claimGifts() external onlyGiftOwner {
         uint256 count = referrerGifts[_msgSender()];
 
-        if (referrerGifts[_msgSender()] > 50) {
+        if (count > 50) {
             count = 50;
         }
 

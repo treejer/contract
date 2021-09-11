@@ -5,6 +5,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const WethFunds = artifacts.require("WethFunds.sol");
+const RegularSell = artifacts.require("RegularSell.sol");
 const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
@@ -34,6 +35,7 @@ const {
   TreasuryManagerErrorMsg,
   GsnErrorMsg,
 } = require("./enumes");
+const { zeroPad } = require("ethers/lib/utils");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -47,6 +49,7 @@ contract("TreeAuction", (accounts) => {
   let planterFundsInstnce;
   let financialModelInstance;
   let wethFundsInstance;
+  let regularSellInstance;
   let uniswapRouterInstance;
   let factoryInstance;
   let wethInstance;
@@ -374,7 +377,7 @@ contract("TreeAuction", (accounts) => {
     let balanceAccountBefore = await web3.eth.getBalance(bidderAccount);
 
     await contractTreeAuction
-      .bid(0, bidAmount, {
+      .bid(0, bidAmount, zeroAddress, {
         from: bidderAccount,
       })
       .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
@@ -383,7 +386,7 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
-    await contractTreeAuction.bid(0, bidAmount, {
+    await contractTreeAuction.bid(0, bidAmount, zeroAddress, {
       from: bidderAccount,
     });
 
@@ -394,6 +397,7 @@ contract("TreeAuction", (accounts) => {
       balanceAccountBefore,
       "gsn not true work"
     );
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   ////////////// ---------------------------------- deploy ----------------------------
@@ -482,7 +486,7 @@ contract("TreeAuction", (accounts) => {
   /////////////////---------------------------------set weth token address--------------------------------------------------------
   it("set weth token address", async () => {
     await treeAuctionInstance
-      .setWethTokenAddress(daiInstance.address, {
+      .setWethTokenAddress(wethInstance.address, {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -500,6 +504,38 @@ contract("TreeAuction", (accounts) => {
     assert.equal(
       wethInstance.address,
       await treeAuctionInstance.wethToken.call(),
+      "address set incorect"
+    );
+  });
+
+  /////////////////---------------------------------set regular sell address--------------------------------------------------------
+  it("set regular sell address", async () => {
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, web3.utils.toWei("7")],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    await treeAuctionInstance
+      .setRegularSellAddress(regularSellInstance.address, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+    await treeAuctionInstance.setRegularSellAddress(
+      regularSellInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    assert.equal(
+      regularSellInstance.address,
+      await treeAuctionInstance.regularSell.call(),
       "address set incorect"
     );
   });
@@ -817,8 +853,19 @@ contract("TreeAuction", (accounts) => {
     );
     /////////////////// ------------- bid
 
-    await treeAuctionInstance.bid(0, bidAmount, {
+    const eventTx = await treeAuctionInstance.bid(0, bidAmount, zeroAddress, {
       from: bidderAccount,
+    });
+
+    ////////// -------------- check highest bid event
+    truffleAssert.eventEmitted(eventTx, "HighestBidIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == 0 &&
+        ev.bidder == bidderAccount &&
+        Number(ev.amount) == Number(bidAmount) &&
+        Number(ev.treeId) == treeId &&
+        ev.referral == zeroAddress
+      );
     });
 
     /////////////////---------------- check contract and bidder balace after bid
@@ -848,6 +895,8 @@ contract("TreeAuction", (accounts) => {
       ),
       web3.utils.toWei("0.15")
     );
+
+    await wethInstance.resetAcc(bidderAccount);
   });
   it("must offer suitable value for auction or rejected otherwise", async () => {
     const treeId = 1;
@@ -921,12 +970,12 @@ contract("TreeAuction", (accounts) => {
     //////////////////// ----------------------- bid
 
     await treeAuctionInstance
-      .bid(0, invalidBidAmmount, {
+      .bid(0, invalidBidAmmount, zeroAddress, {
         from: bidderAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
-    await treeAuctionInstance.bid(0, bidAmount, {
+    await treeAuctionInstance.bid(0, bidAmount, zeroAddress, {
       from: bidderAccount,
     });
 
@@ -1004,7 +1053,7 @@ contract("TreeAuction", (accounts) => {
     //////////////////// ----------------------- bid
 
     await treeAuctionInstance
-      .bid(0, bidAmount, {
+      .bid(0, bidAmount, zeroAddress, {
         from: bidderAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.INSUFFICIENT_AMOUNT);
@@ -1082,7 +1131,7 @@ contract("TreeAuction", (accounts) => {
     await wethInstance.setMint(bidderAccount, bidderInitialBalance);
 
     /////////////////////////// ----------------- bid
-    await treeAuctionInstance.bid(0, bidAmount, {
+    const eventTx = await treeAuctionInstance.bid(0, bidAmount, zeroAddress, {
       from: bidderAccount,
     });
 
@@ -1097,6 +1146,14 @@ contract("TreeAuction", (accounts) => {
       ),
       600
     );
+
+    truffleAssert.eventEmitted(eventTx, "AuctionEndTimeIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == 0 &&
+        Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
+      );
+    });
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   it("bid before start of aution must be failed", async () => {
@@ -1170,10 +1227,12 @@ contract("TreeAuction", (accounts) => {
     //////////////////////////// fail to bid
 
     await treeAuctionInstance
-      .bid(0, bidAmount, {
+      .bid(0, bidAmount, zeroAddress, {
         from: bidderAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
+
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   it("bid after end of auction must be failed", async () => {
@@ -1254,28 +1313,44 @@ contract("TreeAuction", (accounts) => {
 
     ///////////////////////////////////////////////////////////////////////////////////////
 
-    await treeAuctionInstance.bid(0, bidAmount1, {
+    await treeAuctionInstance.bid(0, bidAmount1, zeroAddress, {
       from: bidderAccount1,
     });
 
     await Common.travelTime(TimeEnumes.hours, 2);
     await treeAuctionInstance
-      .bid(0, bidAmount2, {
+      .bid(0, bidAmount2, zeroAddress, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_AFTER_END);
+
+    await wethInstance.resetAcc(bidderAccount1);
+    await wethInstance.resetAcc(bidderAccount2);
   });
 
-  it("should emit highest bid event", async () => {
-    const treeId = 1;
-    const bidAmount = web3.utils.toWei("1.15");
+  it("bid with referrals and check data", async () => {
+    const bidderAccount1 = userAccount1;
+    const referralAccount1 = userAccount2;
+    const bidderAccount2 = userAccount3;
+    const referralAccount2 = userAccount4;
+    const bidderAccount3 = userAccount5;
+    const referralAccount3 = userAccount6;
+
+    const bidAmount1 = web3.utils.toWei("1.15");
+    const bidAmount2 = web3.utils.toWei("1.25");
+    const bidAmount3 = web3.utils.toWei("1.35");
+    const bidAmount4 = web3.utils.toWei("1.45");
+    const bidAmount5 = web3.utils.toWei("1.55");
+
     const bidderInitialBalance = web3.utils.toWei("2");
-    const bidderAccount = userAccount1;
+    const treeId = 1;
+    const auctionId1 = 0;
+    const auctionId2 = 1;
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-    ////////////////// ------------------- handle address
+    ////////////// ------------------ handle address
 
     await treeAuctionInstance.setFinancialModelAddress(
       financialModelInstance.address,
@@ -1290,15 +1365,23 @@ contract("TreeAuction", (accounts) => {
 
     /////////////////// ---------------give approve to auction contract
 
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
-      from: bidderAccount,
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      from: bidderAccount1,
     });
-    /////////////////--------------- handle add tree
+
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      from: bidderAccount2,
+    });
+
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount3, {
+      from: bidderAccount3,
+    });
+
+    /////////////////// --------------- handle add tree
 
     await treeFactoryInstance.addTree(treeId, ipfsHash, {
       from: dataManager,
     });
-
     //////////////////// ----------------- handle dm model
 
     await financialModelInstance.addFundDistributionModel(
@@ -1319,7 +1402,7 @@ contract("TreeAuction", (accounts) => {
       from: dataManager,
     });
 
-    //////////////// ---------------- create auction
+    ////////////---------------------- create auction
 
     await treeAuctionInstance.createAuction(
       treeId,
@@ -1330,104 +1413,247 @@ contract("TreeAuction", (accounts) => {
       { from: dataManager }
     );
 
-    ////////////////// charge bidder account
+    ////////////////// charge bidder accounts
 
-    await wethInstance.setMint(bidderAccount, bidderInitialBalance);
+    await wethInstance.setMint(bidderAccount1, bidderInitialBalance);
 
-    let tx = await treeAuctionInstance.bid(0, bidAmount, {
-      from: bidderAccount,
-    });
+    await wethInstance.setMint(bidderAccount2, bidderInitialBalance);
 
-    truffleAssert.eventEmitted(tx, "HighestBidIncreased", (ev) => {
-      return (
-        Number(ev.auctionId) == 0 &&
-        ev.bidder == bidderAccount &&
-        Number(ev.amount) == Number(bidAmount) &&
-        Number(ev.treeId) == treeId
-      );
-    });
-  });
+    await wethInstance.setMint(bidderAccount3, bidderInitialBalance);
 
-  it("should emit end time event", async () => {
-    let treeId = 1;
-    const bidAmount = web3.utils.toWei("1.15");
-    const bidderInitialBalance = web3.utils.toWei("2");
-    const bidderAccount = userAccount1;
+    ///////////// check bidder1 referral before
+    const bidder1RefferalBefore = await treeAuctionInstance.referrals.call(
+      bidderAccount1,
+      auctionId1
+    );
+    assert.equal(
+      bidder1RefferalBefore,
+      zeroAddress,
+      "referral 1 is not correct"
+    );
+    /////////////////// ------------- bid
 
-    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
-
-    ////////////////// ------------------- handle address
-
-    await treeAuctionInstance.setFinancialModelAddress(
-      financialModelInstance.address,
+    const eventTx1 = await treeAuctionInstance.bid(
+      auctionId1,
+      bidAmount1,
+      referralAccount1,
       {
-        from: deployerAccount,
+        from: bidderAccount1,
       }
     );
 
-    await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
-      from: deployerAccount,
+    truffleAssert.eventEmitted(eventTx1, "HighestBidIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == auctionId1 &&
+        ev.treeId == treeId &&
+        ev.bidder == bidderAccount1 &&
+        Number(ev.amount) == Number(bidAmount1) &&
+        ev.referral == referralAccount1
+      );
     });
 
-    /////////////////// ---------------give approve to auction contract
+    ///////////// check bidder1 referral after bid
+    const bidder1RefferalAfter = await treeAuctionInstance.referrals.call(
+      bidderAccount1,
+      auctionId1
+    );
 
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
-      from: bidderAccount,
-    });
-    /////////////////--------------- handle add tree
+    assert.equal(
+      bidder1RefferalAfter,
+      referralAccount1,
+      "referral 1 is not correct"
+    );
 
-    await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: dataManager,
-    });
+    /////////////////////////////////////////////////////////////////
 
-    //////////////////// ----------------- handle dm model
+    ///////////// check bidder1 referral before
+    const bidder2RefferalBefore = await treeAuctionInstance.referrals.call(
+      bidderAccount2,
+      auctionId1
+    );
+    assert.equal(
+      bidder2RefferalBefore,
+      zeroAddress,
+      "referral 2 is not correct"
+    );
+    /////////////////// ------------- bid
 
-    await financialModelInstance.addFundDistributionModel(
-      3000,
-      1200,
-      1200,
-      1200,
-      1200,
-      2200,
-      0,
-      0,
+    const eventTx2 = await treeAuctionInstance.bid(
+      auctionId1,
+      bidAmount2,
+      zeroAddress,
       {
-        from: dataManager,
+        from: bidderAccount2,
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: dataManager,
-    });
-
-    //////////////// ---------------- create auction
-
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime),
-      Number(endTime),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: dataManager }
-    );
-
-    ////////////////// charge bidder account
-
-    await wethInstance.setMint(bidderAccount, bidderInitialBalance);
-
-    /////////////////////////////////////////////////////////////////////////////
-
-    let tx = await treeAuctionInstance.bid(0, bidAmount, {
-      from: bidderAccount,
-    });
-
-    truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
+    truffleAssert.eventEmitted(eventTx2, "HighestBidIncreased", (ev) => {
       return (
-        Number(ev.auctionId) == 0 &&
-        Number(ev.newAuctionEndTime) == Math.add(Number(endTime), 600)
+        Number(ev.auctionId) == auctionId1 &&
+        ev.treeId == treeId &&
+        ev.bidder == bidderAccount2 &&
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referral == zeroAddress
       );
     });
+
+    ///////////// check bidder1 referral after bid
+    const bidder2RefferalAfter = await treeAuctionInstance.referrals.call(
+      bidderAccount2,
+      auctionId1
+    );
+
+    assert.equal(
+      bidder2RefferalAfter,
+      zeroAddress,
+      "referral 2 is not correct"
+    );
+
+    /////////////////////////////////////////////////////////////////
+
+    ///////////// check bidder3 referral before
+    const bidder3RefferalBefore = await treeAuctionInstance.referrals.call(
+      bidderAccount3,
+      auctionId1
+    );
+    assert.equal(
+      bidder3RefferalBefore,
+      zeroAddress,
+      "referral 3 is not correct"
+    );
+    /////////////////// ------------- bid
+
+    const eventTx3 = await treeAuctionInstance.bid(
+      auctionId1,
+      bidAmount3,
+      referralAccount3,
+      {
+        from: bidderAccount3,
+      }
+    );
+
+    truffleAssert.eventEmitted(eventTx3, "HighestBidIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == auctionId1 &&
+        ev.treeId == treeId &&
+        ev.bidder == bidderAccount3 &&
+        Number(ev.amount) == Number(bidAmount3) &&
+        ev.referral == referralAccount3
+      );
+    });
+
+    ///////////// check bidder1 referral after bid
+    const bidder3RefferalAfter = await treeAuctionInstance.referrals.call(
+      bidderAccount3,
+      auctionId1
+    );
+
+    assert.equal(
+      bidder3RefferalAfter,
+      referralAccount3,
+      "referral 3 is not correct"
+    );
+
+    /////////////////////////////////////////////////////////////////
+
+    ///////////// check bidder2 referral before
+    const bidder2RefferalBefore2 = await treeAuctionInstance.referrals.call(
+      bidderAccount2,
+      auctionId1
+    );
+    assert.equal(
+      bidder2RefferalBefore2,
+      zeroAddress,
+      "referral 2 is not correct"
+    );
+    /////////////////// ------------- bid
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount4, {
+      from: bidderAccount2,
+    });
+
+    await treeAuctionInstance.bid(auctionId1, bidAmount4, referralAccount2, {
+      from: bidderAccount2,
+    });
+
+    ///////////// check bidder2 referral after bid
+    const bidder2RefferalAfter2 = await treeAuctionInstance.referrals.call(
+      bidderAccount2,
+      auctionId1
+    );
+
+    assert.equal(
+      bidder2RefferalAfter2,
+      referralAccount2,
+      "referral 2 is not correct"
+    );
+
+    /////////////////////////////////////////////////////////////////
+
+    ///////////// check bidder3 referral before
+    const bidder3RefferalBefore2 = await treeAuctionInstance.referrals.call(
+      bidderAccount3,
+      auctionId1
+    );
+    assert.equal(
+      bidder3RefferalBefore2,
+      referralAccount3,
+      "referral 3 is not correct"
+    );
+    /////////////////// ------------- bid
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount5, {
+      from: bidderAccount3,
+    });
+    await treeAuctionInstance.bid(auctionId1, bidAmount5, zeroAddress, {
+      from: bidderAccount3,
+    });
+
+    ///////////// check bidder1 referral after bid
+    const bidder3RefferalAfter2 = await treeAuctionInstance.referrals.call(
+      bidderAccount3,
+      auctionId1
+    );
+
+    assert.equal(
+      bidder3RefferalAfter2,
+      referralAccount3,
+      "referral 3 is not correct"
+    );
+
+    ////////////////------------------- check refferes in auction2
+
+    const bidder1RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      bidderAccount1,
+      auctionId2
+    );
+
+    const bidder2RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      bidderAccount1,
+      auctionId2
+    );
+    const bidder3RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      bidderAccount1,
+      auctionId2
+    );
+
+    assert.equal(
+      bidder1RefferalAuction2,
+      zeroAddress,
+      "referral 1 is not correct"
+    );
+    assert.equal(
+      bidder2RefferalAuction2,
+      zeroAddress,
+      "referral 2 is not correct"
+    );
+    assert.equal(
+      bidder3RefferalAuction2,
+      zeroAddress,
+      "referral 3 is not correct"
+    );
+
+    await wethInstance.resetAcc(bidderAccount1);
+    await wethInstance.resetAcc(bidderAccount2);
+    await wethInstance.resetAcc(bidderAccount3);
   });
 
   it("should end auction and fail in invalid situations", async () => {
@@ -1511,7 +1737,7 @@ contract("TreeAuction", (accounts) => {
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
 
-    await treeAuctionInstance.bid(0, bidAmount, {
+    await treeAuctionInstance.bid(0, bidAmount, zeroAddress, {
       from: bidderAccount,
     });
 
@@ -1520,6 +1746,19 @@ contract("TreeAuction", (accounts) => {
     let successEnd = await treeAuctionInstance.endAuction(0, {
       from: deployerAccount,
     }); //succesfully end the auction
+
+    let addressGetToken = await treeTokenInstance.ownerOf(treeId);
+
+    assert.equal(addressGetToken, bidderAccount, "token not true mint");
+
+    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
+      return (
+        Number(ev.auctionId) == 0 &&
+        Number(ev.treeId) == treeId &&
+        ev.winner == bidderAccount &&
+        Number(ev.amount) == bidAmount
+      );
+    });
 
     let result = await treeAuctionInstance.auctions.call(0);
 
@@ -1532,106 +1771,8 @@ contract("TreeAuction", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.AUCTION_IS_UNAVAILABLE); //auction already ended and must be rejected
-  });
 
-  it("Check emit auction settled event", async () => {
-    const treeId = 1;
-
-    const bidAmount = web3.utils.toWei("1.15");
-    const bidderInitialBalance = web3.utils.toWei("2");
-    const bidderAccount = userAccount1;
-
-    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    endTime = await Common.timeInitial(TimeEnumes.seconds, 60);
-
-    ////////////////// ------------------- handle address
-
-    await treeAuctionInstance.setTreeFactoryAddress(
-      treeFactoryInstance.address,
-      { from: deployerAccount }
-    );
-
-    await treeAuctionInstance.setFinancialModelAddress(
-      financialModelInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
-      from: deployerAccount,
-    });
-
-    /////////////////// ---------------give approve to auction contract
-
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
-      from: bidderAccount,
-    });
-    /////////////////--------------- handle add tree
-
-    await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: dataManager,
-    });
-
-    //////////////////// ----------------- handle dm model
-
-    await financialModelInstance.addFundDistributionModel(
-      3000,
-      1200,
-      1200,
-      1200,
-      1200,
-      2200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: dataManager,
-    });
-
-    //////////////// ---------------- create auction
-
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime),
-      Number(endTime),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.1"),
-      { from: dataManager }
-    );
-
-    ////////////////// charge bidder account
-
-    await wethInstance.setMint(bidderAccount, bidderInitialBalance);
-
-    //////////////////////////////////////////////////////////////////////////////////
-
-    await treeAuctionInstance.bid(0, bidAmount, {
-      from: bidderAccount,
-    });
-
-    await Common.travelTime(TimeEnumes.seconds, 670);
-
-    let successEnd = await treeAuctionInstance.endAuction(0, {
-      from: bidderAccount,
-    });
-
-    let addressGetToken = await treeTokenInstance.ownerOf(treeId);
-
-    assert.equal(addressGetToken, userAccount1, "token not true mint");
-
-    truffleAssert.eventEmitted(successEnd, "AuctionSettled", (ev) => {
-      return (
-        Number(ev.auctionId) == 0 &&
-        Number(ev.treeId) == treeId &&
-        ev.winner == bidderAccount &&
-        Number(ev.amount) == bidAmount
-      );
-    });
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   it("end auction when there is no bidder", async () => {
@@ -1722,6 +1863,8 @@ contract("TreeAuction", (accounts) => {
     truffleAssert.eventEmitted(failEnd, "AuctionEnded", (ev) => {
       return Number(ev.auctionId) == 0 && Number(ev.treeId) == treeId;
     });
+
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   it("Should automatic withdraw successfully", async () => {
@@ -1812,7 +1955,7 @@ contract("TreeAuction", (accounts) => {
     //create auction
 
     //userAccount1 take part in auction
-    await treeAuctionInstance.bid(auctionId, bidAmount1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount1, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -1829,12 +1972,12 @@ contract("TreeAuction", (accounts) => {
 
     //userAccount2 take part in auction
     await treeAuctionInstance
-      .bid(auctionId, bidAmount1, {
+      .bid(auctionId, bidAmount1, zeroAddress, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
-    await treeAuctionInstance.bid(auctionId, bidAmount2, {
+    await treeAuctionInstance.bid(auctionId, bidAmount2, zeroAddress, {
       from: bidderAccount2,
     });
 
@@ -1967,7 +2110,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     //userAccount1 take part in auction
-    await treeAuctionInstance.bid(auctionId, bidAmount1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount1, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -1986,7 +2129,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     //userAccount2 take part in auction
-    await treeAuctionInstance.bid(auctionId, bidAmount2, {
+    await treeAuctionInstance.bid(auctionId, bidAmount2, zeroAddress, {
       from: bidderAccount2,
     });
 
@@ -2014,7 +2157,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     //userAccount3 take part in auction
-    await treeAuctionInstance.bid(auctionId, bidAmount3, {
+    await treeAuctionInstance.bid(auctionId, bidAmount3, zeroAddress, {
       from: bidderAccount3,
     });
 
@@ -2132,7 +2275,7 @@ contract("TreeAuction", (accounts) => {
     ////////////////////////////////////////////////////////////////////////////////
 
     //userAccount1 take part in auction
-    await treeAuctionInstance.bid(auctionId, bidAmount1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount1, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -2142,7 +2285,7 @@ contract("TreeAuction", (accounts) => {
 
     //userAccount2 take part in auction but function is pause
     await treeAuctionInstance
-      .bid(auctionId, bidAmount2, {
+      .bid(auctionId, bidAmount2, zeroAddress, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(CommonErrorMsg.PAUSE);
@@ -2230,7 +2373,7 @@ contract("TreeAuction", (accounts) => {
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    await treeAuctionInstance.bid(auctionId, bidAmount, {
+    await treeAuctionInstance.bid(auctionId, bidAmount, zeroAddress, {
       from: bidderAccount,
     });
 
@@ -2247,6 +2390,8 @@ contract("TreeAuction", (accounts) => {
     await arInstance.unpause({
       from: deployerAccount,
     });
+
+    await wethInstance.resetAcc(bidderAccount);
   });
 
   it("Should createAuction function is reject because function is pause", async () => {
@@ -2316,103 +2461,7 @@ contract("TreeAuction", (accounts) => {
     });
   });
 
-  it("Should endAuction function is reject because function is pause", async () => {
-    let auctionId = 0;
-    const treeId = 1;
-    const bidAmount = web3.utils.toWei("2");
-    const bidderInitialBalance = web3.utils.toWei("2");
-    const bidderAccount = userAccount1;
-
-    startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-    endTime = await Common.timeInitial(TimeEnumes.hours, 1);
-
-    ////////////////// ------------------- handle address
-
-    await treeAuctionInstance.setTreeFactoryAddress(
-      treeFactoryInstance.address,
-      { from: deployerAccount }
-    );
-
-    await treeAuctionInstance.setFinancialModelAddress(
-      financialModelInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
-      from: deployerAccount,
-    });
-
-    /////////////////// ---------------give approve to auction contract
-
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
-      from: bidderAccount,
-    });
-    /////////////////--------------- handle add tree
-
-    await treeFactoryInstance.addTree(treeId, ipfsHash, {
-      from: dataManager,
-    });
-
-    //////////////////// ----------------- handle dm model
-
-    await financialModelInstance.addFundDistributionModel(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
-      from: dataManager,
-    });
-
-    //////////////// ---------------- create auction
-
-    await treeAuctionInstance.createAuction(
-      treeId,
-      Number(startTime),
-      Number(endTime),
-      web3.utils.toWei("1"),
-      web3.utils.toWei("0.5"),
-      { from: dataManager }
-    );
-
-    ////////////////// charge bidder account
-
-    await wethInstance.setMint(bidderAccount, bidderInitialBalance);
-
-    /////////////////////////////////////////////////////////////////////////////////
-
-    await treeAuctionInstance.bid(auctionId, bidAmount, {
-      from: bidderAccount,
-    });
-
-    await Common.travelTime(TimeEnumes.hours, 2);
-
-    await arInstance.pause({
-      from: deployerAccount,
-    });
-
-    await treeAuctionInstance
-      .endAuction(auctionId, { from: deployerAccount })
-      .should.be.rejectedWith(CommonErrorMsg.PAUSE);
-
-    await arInstance.unpause({
-      from: deployerAccount,
-    });
-  });
-
   // //------------------------------------------- complete proccess of auction ------------------------------------------ //
-
   it("should do an acution completly", async () => {
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -2537,7 +2586,7 @@ contract("TreeAuction", (accounts) => {
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    await treeAuctionInstance.bid(0, bidAmount1_1, {
+    await treeAuctionInstance.bid(0, bidAmount1_1, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -2553,7 +2602,7 @@ contract("TreeAuction", (accounts) => {
 
     await Common.travelTime(TimeEnumes.minutes, 55);
 
-    await treeAuctionInstance.bid(0, bidAmount2_1, {
+    await treeAuctionInstance.bid(0, bidAmount2_1, zeroAddress, {
       from: bidderAccount2,
     });
 
@@ -2567,7 +2616,7 @@ contract("TreeAuction", (accounts) => {
     );
 
     await treeAuctionInstance
-      .bid(0, invalidBidAmount, { from: userAccount1 })
+      .bid(0, invalidBidAmount, zeroAddress, { from: userAccount1 })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
     /////////////////// ---------------give approve again to auction contract from bidderAccount1
@@ -2576,7 +2625,7 @@ contract("TreeAuction", (accounts) => {
       from: bidderAccount1,
     });
 
-    await treeAuctionInstance.bid(0, bidAmount1_2, {
+    await treeAuctionInstance.bid(0, bidAmount1_2, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -2591,7 +2640,7 @@ contract("TreeAuction", (accounts) => {
 
     await Common.travelTime(TimeEnumes.seconds, 600);
 
-    await treeAuctionInstance.bid(0, bidAmount3_1, {
+    await treeAuctionInstance.bid(0, bidAmount3_1, zeroAddress, {
       from: bidderAccount3,
     });
 
@@ -2652,6 +2701,33 @@ contract("TreeAuction", (accounts) => {
       ]);
 
     await treeAuctionInstance.endAuction(0, { from: userAccount3 });
+
+    /////////// --------------- check referral for zero address
+
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, web3.utils.toWei("7")],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
+    const winnerReferral = await treeAuctionInstance.referrals.call(
+      auction3.bidder,
+      0
+    );
+
+    assert.equal(winnerReferral, zeroAddress, "winner referral is not correct");
+
+    const giftCount = await regularSellInstance.referrerGifts.call(
+      winnerReferral
+    );
+
+    assert.equal(Number(giftCount), 0, "gift count is not correct");
+
+    ////////////////--------------------------------------------
 
     let contractBalanceAfter = await wethInstance.balanceOf(
       treeAuctionInstance.address
@@ -2787,11 +2863,25 @@ contract("TreeAuction", (accounts) => {
       .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_ACCESS);
 
     await treeFactoryInstance.verifyPlant(treeId, true, { from: userAccount8 });
+
+    await wethInstance.resetAcc(bidderAccount1);
+    await wethInstance.resetAcc(bidderAccount2);
+    await wethInstance.resetAcc(bidderAccount3);
   });
 
   // ---------------------------------------complex test (auction and treeFactory and treasury)-------------------------------------
 
-  it("complex test 1", async () => {
+  it("complex test 1 with referral", async () => {
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, web3.utils.toWei("7")],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
     const treeId = 1;
     const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     const countryCode = 2;
@@ -2804,9 +2894,11 @@ contract("TreeAuction", (accounts) => {
     const bidAmount1 = web3.utils.toWei("1.15");
     const bidderInitialBalance1 = web3.utils.toWei("2");
     const bidderAccount1 = userAccount3;
+    const refferal1 = userAccount5;
     const bidAmount2 = web3.utils.toWei("1.25");
     const bidderInitialBalance2 = web3.utils.toWei("2");
     const bidderAccount2 = userAccount4;
+    const refferal2 = userAccount6;
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -2828,6 +2920,11 @@ contract("TreeAuction", (accounts) => {
     await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
       from: deployerAccount,
     });
+
+    await treeAuctionInstance.setRegularSellAddress(
+      regularSellInstance.address,
+      { from: deployerAccount }
+    );
 
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
@@ -2989,24 +3086,24 @@ contract("TreeAuction", (accounts) => {
     );
 
     await treeAuctionInstance
-      .bid(1, invalidBidAmount1, {
+      .bid(1, invalidBidAmount1, refferal1, {
         from: bidderAccount1,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
-    await treeAuctionInstance.bid(1, bidAmount1, {
+    await treeAuctionInstance.bid(1, bidAmount1, refferal1, {
       from: bidderAccount1,
     });
 
     let firstBidderAfterBid = await wethInstance.balanceOf(bidderAccount1);
 
     await treeAuctionInstance
-      .bid(1, invalidBidAmount2, {
+      .bid(1, invalidBidAmount2, refferal2, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
-    await treeAuctionInstance.bid(1, bidAmount2, {
+    await treeAuctionInstance.bid(1, bidAmount2, refferal2, {
       from: bidderAccount2,
     });
 
@@ -3066,9 +3163,42 @@ contract("TreeAuction", (accounts) => {
         daiInstance.address,
       ]);
 
+    const auctionDataBeforeEnd = await treeAuctionInstance.auctions.call(1);
+
     let successEnd = await treeAuctionInstance.endAuction(1, {
       from: deployerAccount,
     });
+
+    //////////////// --------------------------------- check refferal part
+
+    const winnerReferral = await treeAuctionInstance.referrals.call(
+      auctionDataBeforeEnd.bidder,
+      1
+    );
+
+    assert.equal(winnerReferral, refferal2, "winner referral is not correct");
+
+    const giftCountWinner = await regularSellInstance.referrerGifts.call(
+      winnerReferral
+    );
+
+    const giftCountRefferal1 = await regularSellInstance.referrerGifts.call(
+      refferal1
+    );
+
+    assert.equal(
+      Number(giftCountWinner),
+      1,
+      "gift count of winner is not correct"
+    );
+
+    assert.equal(
+      Number(giftCountRefferal1),
+      0,
+      "gift count of refferal1 is not correct"
+    );
+
+    ////////////////////////////---------------------------------------
 
     assert.equal(
       Number(await wethInstance.balanceOf(wethFundsInstance.address)),
@@ -3359,7 +3489,7 @@ contract("TreeAuction", (accounts) => {
       .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
 
     await treeAuctionInstance
-      .bid(auctionId, web3.utils.toWei("1.5"), {
+      .bid(auctionId, web3.utils.toWei("1.5"), zeroAddress, {
         from: bidderAccount1,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
@@ -3367,14 +3497,14 @@ contract("TreeAuction", (accounts) => {
     await Common.travelTime(TimeEnumes.minutes, 5);
 
     await treeAuctionInstance
-      .bid(auctionId, invalidBidAmount1, {
+      .bid(auctionId, invalidBidAmount1, zeroAddress, {
         from: bidderAccount1,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
     ///////////////////// --------------- bid for auction
 
-    await treeAuctionInstance.bid(auctionId, bidAmount1_1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount1_1, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -3400,20 +3530,20 @@ contract("TreeAuction", (accounts) => {
 
     /////////////------------- fail to bid
     await treeAuctionInstance
-      .bid(auctionId, invalidBidAmount2, {
+      .bid(auctionId, invalidBidAmount2, zeroAddress, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
     await treeAuctionInstance
-      .bid(auctionId, invalidBidAmount3, {
+      .bid(auctionId, invalidBidAmount3, zeroAddress, {
         from: bidderAccount2,
       })
       .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
 
     /////////////////// ------------ bid for auction
 
-    await treeAuctionInstance.bid(auctionId, bidAmount2_1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount2_1, zeroAddress, {
       from: bidderAccount2,
     });
 
@@ -3447,7 +3577,7 @@ contract("TreeAuction", (accounts) => {
     );
     ///////////////// -------------- bid for auction
 
-    await treeAuctionInstance.bid(auctionId, bidAmount3_1, {
+    await treeAuctionInstance.bid(auctionId, bidAmount3_1, zeroAddress, {
       from: bidderAccount3,
     });
 
@@ -3486,7 +3616,7 @@ contract("TreeAuction", (accounts) => {
       from: bidderAccount1,
     });
 
-    await treeAuctionInstance.bid(auctionId, bidAmount1_2, {
+    await treeAuctionInstance.bid(auctionId, bidAmount1_2, zeroAddress, {
       from: bidderAccount1,
     });
 
@@ -3561,9 +3691,14 @@ contract("TreeAuction", (accounts) => {
       from: bidderAccount2,
     });
 
-    let tx = await treeAuctionInstance.bid(auctionId, bidAmount2_2, {
-      from: bidderAccount2,
-    });
+    let tx = await treeAuctionInstance.bid(
+      auctionId,
+      bidAmount2_2,
+      zeroAddress,
+      {
+        from: bidderAccount2,
+      }
+    );
 
     truffleAssert.eventEmitted(tx, "AuctionEndTimeIncreased", (ev) => {
       return (
@@ -3881,18 +4016,30 @@ contract("TreeAuction", (accounts) => {
   });
 
   it("complex test 3 ( complete auction done ) ", async () => {
+    regularSellInstance = await deployProxy(
+      RegularSell,
+      [arInstance.address, web3.utils.toWei("7")],
+      {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      }
+    );
+
     const treeId1 = 1;
     const treeId2 = 2;
     const auctionId1 = 0;
+    const auctionId2 = 1;
     const initialPrice = web3.utils.toWei("1");
     const bidInterval = web3.utils.toWei("0.1");
-
     const bidAmount1 = web3.utils.toWei("1.5");
-    const bidderInitialBalance1 = web3.utils.toWei("3");
+    const bidderInitialBalance1 = web3.utils.toWei("6");
     const bidderAccount1 = userAccount8;
     const bidAmount2 = web3.utils.toWei("2");
-    const bidderInitialBalance2 = web3.utils.toWei("3");
+    const bidderInitialBalance2 = web3.utils.toWei("6");
     const bidderAccount2 = userAccount7;
+    const mainRefferer = userAccount4;
+    const otherRefferer = userAccount5;
 
     startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
     endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -3915,6 +4062,11 @@ contract("TreeAuction", (accounts) => {
       from: deployerAccount,
     });
 
+    await treeAuctionInstance.setRegularSellAddress(
+      regularSellInstance.address,
+      { from: deployerAccount }
+    );
+
     await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
       from: deployerAccount,
     });
@@ -3933,16 +4085,6 @@ contract("TreeAuction", (accounts) => {
 
     await planterFundsInstnce.setDaiTokenAddress(daiInstance.address, {
       from: deployerAccount,
-    });
-
-    /////////////////// ---------------give approve to auction contract
-
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
-      from: bidderAccount1,
-    });
-
-    await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
-      from: bidderAccount2,
     });
 
     //////////////// -----------  fail to create auction
@@ -4018,10 +4160,24 @@ contract("TreeAuction", (accounts) => {
       from: dataManager,
     });
 
+    await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      from: dataManager,
+    });
+
     //////////////// ---------------- create auction
 
     await treeAuctionInstance.createAuction(
       treeId1,
+      Number(startTime),
+      Number(endTime),
+      initialPrice,
+      bidInterval,
+
+      { from: dataManager }
+    );
+
+    await treeAuctionInstance.createAuction(
+      treeId2,
       Number(startTime),
       Number(endTime),
       initialPrice,
@@ -4038,125 +4194,194 @@ contract("TreeAuction", (accounts) => {
 
     /////////////////////////////////////////////////////////////////////////////////
 
-    const initailAuction = await treeAuctionInstance.auctions.call(auctionId1);
+    const initailAuction1 = await treeAuctionInstance.auctions.call(auctionId1);
 
-    //////////// bid 1
+    /////////////////// ---------------give approve to auction contract
 
-    let bidTx = await treeAuctionInstance.bid(auctionId1, bidAmount1, {
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
       from: bidderAccount1,
     });
 
-    truffleAssert.eventEmitted(bidTx, "HighestBidIncreased", (ev) => {
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      from: bidderAccount2,
+    });
+
+    //////////// bid 1
+
+    let bidTx1 = await treeAuctionInstance.bid(
+      auctionId1,
+      bidAmount1,
+      otherRefferer,
+      {
+        from: bidderAccount1,
+      }
+    );
+    let bidTx2 = await treeAuctionInstance.bid(
+      auctionId2,
+      bidAmount1,
+      otherRefferer,
+      {
+        from: bidderAccount2,
+      }
+    );
+
+    truffleAssert.eventEmitted(bidTx1, "HighestBidIncreased", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         ev.treeId == treeId1 &&
         ev.bidder == bidderAccount1 &&
-        Number(ev.amount) == Number(bidAmount1)
+        Number(ev.amount) == Number(bidAmount1) &&
+        ev.referral == otherRefferer
       );
+    });
+
+    truffleAssert.eventEmitted(bidTx2, "HighestBidIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == auctionId2 &&
+        ev.treeId == treeId2 &&
+        ev.bidder == bidderAccount2 &&
+        Number(ev.amount) == Number(bidAmount1) &&
+        ev.referral == otherRefferer
+      );
+    });
+
+    /////////////////// ---------------give approve to auction contract
+
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      from: bidderAccount2,
+    });
+
+    await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      from: bidderAccount1,
     });
 
     /////////////// bid 2
 
     await Common.travelTime(TimeEnumes.minutes, 55);
-    const FinalBidTx = await treeAuctionInstance.bid(auctionId1, bidAmount2, {
-      from: bidderAccount2,
-    });
 
-    const auctionAfterEndTimeIncrease = await treeAuctionInstance.auctions.call(
-      auctionId1
+    const FinalBidTx1 = await treeAuctionInstance.bid(
+      auctionId1,
+      bidAmount2,
+      mainRefferer,
+      {
+        from: bidderAccount2,
+      }
     );
 
-    truffleAssert.eventEmitted(FinalBidTx, "HighestBidIncreased", (ev) => {
+    const FinalBidTx2 = await treeAuctionInstance.bid(
+      auctionId2,
+      bidAmount2,
+      mainRefferer,
+      {
+        from: bidderAccount1,
+      }
+    );
+
+    const auction1AfterEndTimeIncrease =
+      await treeAuctionInstance.auctions.call(auctionId1);
+
+    truffleAssert.eventEmitted(FinalBidTx1, "HighestBidIncreased", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         ev.treeId == treeId1 &&
         ev.bidder == bidderAccount2 &&
-        Number(ev.amount) == Number(bidAmount2)
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referral == mainRefferer
+      );
+    });
+
+    truffleAssert.eventEmitted(FinalBidTx2, "HighestBidIncreased", (ev) => {
+      return (
+        Number(ev.auctionId) == auctionId2 &&
+        ev.treeId == treeId2 &&
+        ev.bidder == bidderAccount1 &&
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referral == mainRefferer
       );
     });
 
     assert.equal(
-      Math.add(Number(initailAuction.endDate), 600),
-      Number(auctionAfterEndTimeIncrease.endDate),
+      Math.add(Number(initailAuction1.endDate), 600),
+      Number(auction1AfterEndTimeIncrease.endDate),
       "invaild end time for auction after increase time"
     );
 
-    truffleAssert.eventEmitted(FinalBidTx, "AuctionEndTimeIncreased", (ev) => {
+    truffleAssert.eventEmitted(FinalBidTx1, "AuctionEndTimeIncreased", (ev) => {
       return (
         Number(ev.auctionId) == auctionId1 &&
         Number(ev.newAuctionEndTime) ==
-          Math.add(Number(initailAuction.endDate), 600)
+          Math.add(Number(initailAuction1.endDate), 600)
       );
     });
 
-    const planterFundBalanceBeforeAuctionEnd = await daiInstance.balanceOf(
+    const planterFundBalanceBeforeAuction1End = await daiInstance.balanceOf(
       planterFundsInstnce.address
     );
-    const wethFundsBalanceBeforeAuctionEnd = await wethInstance.balanceOf(
+    const wethFundsBalanceBeforeAuction1End = await wethInstance.balanceOf(
       wethFundsInstance.address
     );
-    const totalFundPlanterFundBeforeAuctionEnd =
+    const totalFundPlanterFundBeforeAuction1End =
       await planterFundsInstnce.totalFunds();
 
-    const totalFundWethFundBeforeAuctionEnd =
+    const totalFundWethFundBeforeAuction1End =
       await wethFundsInstance.totalFunds();
 
     //////////////// ------------------  check contract funds before end auction
 
     assert.equal(
-      Number(planterFundBalanceBeforeAuctionEnd),
+      Number(planterFundBalanceBeforeAuction1End),
       0,
       "invalid planter fund contract balance before auction end"
     );
     assert.equal(
-      Number(wethFundsBalanceBeforeAuctionEnd),
+      Number(wethFundsBalanceBeforeAuction1End),
       0,
       "invalid weth fund contract balance before auction end"
     );
 
     ///------------ check totalFunds before auction end
     assert.equal(
-      Number(totalFundPlanterFundBeforeAuctionEnd.planterFund),
+      Number(totalFundPlanterFundBeforeAuction1End.planterFund),
       0,
       "invalid planterFund"
     );
     assert.equal(
-      Number(totalFundPlanterFundBeforeAuctionEnd.referralFund),
+      Number(totalFundPlanterFundBeforeAuction1End.referralFund),
       0,
       "invalid referralFund"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.treeResearch),
+      Number(totalFundWethFundBeforeAuction1End.treeResearch),
       0,
       "invalid treeResearch"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.localDevelop),
+      Number(totalFundWethFundBeforeAuction1End.localDevelop),
       0,
       "invalid localDevelop"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.rescueFund),
+      Number(totalFundWethFundBeforeAuction1End.rescueFund),
       0,
       "invalid rescueFund"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.treejerDevelop),
+      Number(totalFundWethFundBeforeAuction1End.treejerDevelop),
       0,
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.reserveFund1),
+      Number(totalFundWethFundBeforeAuction1End.reserveFund1),
       0,
       "invalid reserveFund1"
     );
     assert.equal(
-      Number(totalFundWethFundBeforeAuctionEnd.reserveFund2),
+      Number(totalFundWethFundBeforeAuction1End.reserveFund2),
       0,
       "invalid reserveFund2"
     );
 
-    //------------- end auction
+    // //------------- end auction
 
     await treeAuctionInstance
       .endAuction(auctionId1)
@@ -4174,6 +4399,7 @@ contract("TreeAuction", (accounts) => {
       reserveFund1: 0,
       reserveFund2: 0,
     };
+
     const wethFundsShare = Math.add(
       expectedPayValue.treeResearch,
       expectedPayValue.treejerDevelop,
@@ -4191,13 +4417,47 @@ contract("TreeAuction", (accounts) => {
         daiInstance.address,
       ]);
 
+    const auction1BeforeEnd = await treeAuctionInstance.auctions.call(
+      auctionId1
+    );
+
     const endAuctionTx = await treeAuctionInstance.endAuction(auctionId1);
 
-    const wethFundsBalanceAfterAuctionEnd = await wethInstance.balanceOf(
+    /////////////////---------------------- check referral part
+
+    const winnerRefferer1 = await treeAuctionInstance.referrals.call(
+      auction1BeforeEnd.bidder,
+      auctionId1
+    );
+
+    assert.equal(
+      winnerRefferer1,
+      mainRefferer,
+      "winner refferer of auction 0 is not ok"
+    );
+
+    const winnerGiftCount1 = await regularSellInstance.referrerGifts.call(
+      winnerRefferer1
+    );
+
+    assert.equal(Number(winnerGiftCount1), 1, "winner gift count is not ok");
+
+    const otherReffereGiftCount1 = await regularSellInstance.referrerGifts.call(
+      otherRefferer
+    );
+    assert.equal(
+      Number(otherReffereGiftCount1),
+      0,
+      "other referrer gift count is not ok"
+    );
+
+    /////////////////////////////// ---------------------------
+
+    const wethFundsBalanceAfterAuction1End = await wethInstance.balanceOf(
       wethFundsInstance.address
     );
 
-    const planterFundBalanceAfterAuctionEnd = await daiInstance.balanceOf(
+    const planterFundBalanceAfterAuction1End = await daiInstance.balanceOf(
       planterFundsInstnce.address
     );
 
@@ -4205,63 +4465,58 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(tokenOwner, userAccount7, "token owner not correct");
 
-    const totalPlanterFund = Math.divide(
-      Math.mul(Number(web3.utils.toWei("2")), 5000),
-      10000
-    );
-
-    const totalFundPlanterFundAfterAuctionEnd =
+    const totalFundPlanterFundAfterAuction1End =
       await planterFundsInstnce.totalFunds();
 
-    const totalFundWethFundAfterAuctionEnd =
+    const totalFundWethFundAfterAuction1End =
       await wethFundsInstance.totalFunds();
 
     ///------------ check totalFunds after auction end
     assert.equal(
-      Number(totalFundPlanterFundAfterAuctionEnd.planterFund),
+      Number(totalFundPlanterFundAfterAuction1End.planterFund),
       Number(Math.Big(expectedSwapTokenAmount[1]).times(5000).div(6000)),
       "invalid planterFund"
     );
     assert.equal(
-      Number(totalFundPlanterFundAfterAuctionEnd.referralFund),
+      Number(totalFundPlanterFundAfterAuction1End.referralFund),
       Number(Math.Big(expectedSwapTokenAmount[1]).times(1000).div(6000)),
       "invalid referralFund"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.treeResearch),
+      Number(totalFundWethFundAfterAuction1End.treeResearch),
       expectedPayValue.treeResearch,
       "invalid treeResearch"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.localDevelop),
+      Number(totalFundWethFundAfterAuction1End.localDevelop),
       expectedPayValue.localDevelop,
       "invalid localDevelop"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.rescueFund),
+      Number(totalFundWethFundAfterAuction1End.rescueFund),
       expectedPayValue.rescueFund,
       "invalid rescueFund"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.treejerDevelop),
+      Number(totalFundWethFundAfterAuction1End.treejerDevelop),
       expectedPayValue.treejerDevelop,
       "invalid treejerDevelop"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.reserveFund1),
+      Number(totalFundWethFundAfterAuction1End.reserveFund1),
       expectedPayValue.reserveFund1,
       "invalid reserveFund1"
     );
     assert.equal(
-      Number(totalFundWethFundAfterAuctionEnd.reserveFund2),
+      Number(totalFundWethFundAfterAuction1End.reserveFund2),
       expectedPayValue.reserveFund2,
       "invalid reserveFund2"
     );
-    ///////////------------ check charge treasury contract
+    // ///////////------------ check charge treasury contract
     assert.equal(
       Math.subtract(
-        Number(wethFundsBalanceAfterAuctionEnd),
-        Number(wethFundsBalanceBeforeAuctionEnd)
+        Number(wethFundsBalanceAfterAuction1End),
+        Number(wethFundsBalanceBeforeAuction1End)
       ),
       wethFundsShare,
       "weth funds contract dont charge correctly"
@@ -4269,8 +4524,8 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(
       Math.subtract(
-        Number(planterFundBalanceAfterAuctionEnd),
-        Number(planterFundBalanceBeforeAuctionEnd)
+        Number(planterFundBalanceAfterAuction1End),
+        Number(planterFundBalanceBeforeAuction1End)
       ),
       Number(expectedSwapTokenAmount[1]),
       "planter fund contract dont charge correctly"
@@ -4285,9 +4540,155 @@ contract("TreeAuction", (accounts) => {
       );
     });
 
+    ///////////////////----------------------------- end auction2
+
+    const auction2BeforeEnd = await treeAuctionInstance.auctions.call(
+      auctionId2
+    );
+
+    const expectedSwapTokenAmount2 =
+      await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        wethInstance.address,
+        daiInstance.address,
+      ]);
+
+    const endAuctionTx2 = await treeAuctionInstance.endAuction(auctionId2);
+
+    /////////////////---------------------- check referral part
+
+    const winnerRefferer2 = await treeAuctionInstance.referrals.call(
+      auction2BeforeEnd.bidder,
+      auctionId2
+    );
+    assert.equal(
+      winnerRefferer2,
+      mainRefferer,
+      "winner refferer of auction 0 is not ok"
+    );
+
+    const winnerGiftCount2 = await regularSellInstance.referrerGifts.call(
+      winnerRefferer2
+    );
+    assert.equal(Number(winnerGiftCount2), 2, "winner gift count is not ok");
+
+    const otherReffereGiftCount2 = await regularSellInstance.referrerGifts.call(
+      otherRefferer
+    );
+    assert.equal(
+      Number(otherReffereGiftCount2),
+      0,
+      "other referrer gift count is not ok"
+    );
+
+    /////////////////////////////// ---------------------------
+
+    ///////----------------- check token owner
+    let tokenOwner2 = await treeTokenInstance.ownerOf(treeId2);
+
+    assert.equal(tokenOwner2, userAccount8, "token owner not correct");
+
+    ///////////////// ----------- check planterFund totalFunds
+
+    const wethFundsBalanceAfterAuction2End = await wethInstance.balanceOf(
+      wethFundsInstance.address
+    );
+
+    const planterFundBalanceAfterAuction2End = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    const totalFundPlanterFundAfterAuction2End =
+      await planterFundsInstnce.totalFunds();
+
+    const totalFundWethFundAfterAuction2End =
+      await wethFundsInstance.totalFunds();
+
+    ///------------ check totalFunds after auction end
+
+    assert.equal(
+      Number(totalFundPlanterFundAfterAuction2End.planterFund),
+      Number(
+        Math.Big(expectedSwapTokenAmount[1])
+          .times(5000)
+          .div(6000)
+          .add(Math.Big(expectedSwapTokenAmount2[1]).times(5000).div(6000))
+      ),
+      "invalid planterFund"
+    );
+    assert.equal(
+      Number(totalFundPlanterFundAfterAuction2End.referralFund),
+      Number(
+        Math.Big(expectedSwapTokenAmount[1])
+          .times(1000)
+          .div(6000)
+          .add(Math.Big(expectedSwapTokenAmount2[1]).times(1000).div(6000))
+      ),
+      "invalid referralFund"
+    );
+
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.treeResearch),
+      Math.mul(expectedPayValue.treeResearch, 2),
+      "invalid treeResearch"
+    );
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.localDevelop),
+      Math.mul(expectedPayValue.localDevelop, 2),
+      "invalid localDevelop"
+    );
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.rescueFund),
+      Math.mul(expectedPayValue.rescueFund, 2),
+      "invalid rescueFund"
+    );
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.treejerDevelop),
+      Math.mul(expectedPayValue.treejerDevelop, 2),
+      "invalid treejerDevelop"
+    );
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.reserveFund1),
+      Math.mul(expectedPayValue.reserveFund1, 2),
+      "invalid reserveFund1"
+    );
+    assert.equal(
+      Number(totalFundWethFundAfterAuction2End.reserveFund2),
+      Math.mul(expectedPayValue.reserveFund2, 2),
+      "invalid reserveFund2"
+    );
+
+    // ///////////------------ check charge treasury contract
+    assert.equal(
+      Math.subtract(
+        Number(wethFundsBalanceAfterAuction2End),
+        Number(wethFundsBalanceAfterAuction1End)
+      ),
+      wethFundsShare,
+      "weth funds contract dont charge correctly"
+    );
+
+    // assert.equal(
+    //   Math.subtract(
+    //     Number(planterFundBalanceAfterAuction2End),
+    //     Number(planterFundBalanceAfterAuction1End)
+    //   ),
+    //   Number(expectedSwapTokenAmount2[1]),
+    //   "planter fund contract dont charge correctly"
+    // );
+
+    assert.equal(
+      Number(planterFundBalanceAfterAuction2End),
+      Number(
+        Math.Big(expectedSwapTokenAmount2[1]).add(
+          Math.Big(expectedSwapTokenAmount[1])
+        )
+      ),
+      "planter fund contract dont charge correctly"
+    );
+
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    /////////////----------------------- plant tree
+    /////////////----------------------- plant treeId1
 
     await Common.successPlanterJoin(
       arInstance,
@@ -4349,7 +4750,7 @@ contract("TreeAuction", (accounts) => {
     assert.equal(
       parseInt(
         Number(
-          Math.Big(totalFundPlanterFundAfterAuctionEnd.planterFund).minus(
+          Math.Big(totalFundPlanterFundAfterAuction2End.planterFund).minus(
             totalFundsAfterFundPlanter.planterFund
           )
         )
@@ -4387,6 +4788,7 @@ contract("TreeAuction", (accounts) => {
     // ////////////////--------------- check planter balance after withdraw
     const planterPaidAfterWithdrawTotalAmount =
       await planterFundsInstnce.balances.call(userAccount2);
+
     assert.equal(
       parseInt(
         Number(

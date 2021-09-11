@@ -29,6 +29,11 @@ interface ITreeAuction {
     function financialModel() external view returns (address);
 
     /**
+     * @return RegularSell contract address
+     */
+    function regularSell() external view returns (address);
+
+    /**
      * @return WethToken contract address
      */
     function wethToken() external view returns (address);

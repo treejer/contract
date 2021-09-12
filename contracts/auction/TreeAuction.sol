@@ -50,13 +50,14 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 treeId,
         address bidder,
         uint256 amount,
-        address referral
+        address referrer
     );
     event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
     event AuctionCreated(uint256 auctionId);
     event AuctionEnded(uint256 auctionId, uint256 treeId);
@@ -335,18 +336,18 @@ contract TreeAuction is Initializable, RelayRecipient {
 
             treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
-            if (referrals[auction.bidder][_auctionId] != address(0)) {
-                regularSell.updateReferrerGiftCount(
-                    referrals[auction.bidder][_auctionId],
-                    1
-                );
+            address _tempReferrer = referrals[auction.bidder][_auctionId];
+
+            if (_tempReferrer != address(0)) {
+                regularSell.updateReferrerGiftCount(_tempReferrer, 1);
             }
 
             emit AuctionSettled(
                 _auctionId,
                 auction.treeId,
                 auction.bidder,
-                auction.highestBid
+                auction.highestBid,
+                _tempReferrer
             );
         } else {
             treeFactory.updateAvailability(auction.treeId);

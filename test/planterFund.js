@@ -101,7 +101,7 @@ contract("PlanterFund", (accounts) => {
     );
   });
   afterEach(async () => {});
-
+  /*
   //////---------------------------------------------- test gsn --------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
@@ -225,7 +225,7 @@ contract("PlanterFund", (accounts) => {
       "gsn not true work"
     );
   });
-
+*/
   it("deploys successfully", async () => {
     const address = planterFundInstance.address;
     assert.notEqual(address, 0x0);
@@ -270,9 +270,14 @@ contract("PlanterFund", (accounts) => {
 
     let priceBefore = await planterFundInstance.withdrawThreshold();
 
-    planterFundInstance.setWithdrawThreshold(web3.utils.toWei("1"), {
-      from: dataManager,
-    });
+    const eventTx1 = await planterFundInstance.setWithdrawThreshold(
+      web3.utils.toWei("1"),
+      {
+        from: dataManager,
+      }
+    );
+
+    truffleAssert.eventEmitted(eventTx1, "WithdrawThresholdSet");
 
     let priceAfter = await planterFundInstance.withdrawThreshold();
 
@@ -506,8 +511,22 @@ contract("PlanterFund", (accounts) => {
       }
     );
 
-    await planterFundInstance.fundPlanter(treeId, userAccount2, 25920, {
-      from: userAccount1,
+    const eventTx = await planterFundInstance.fundPlanter(
+      treeId,
+      userAccount2,
+      25920,
+      {
+        from: userAccount1,
+      }
+    );
+
+    truffleAssert.eventEmitted(eventTx, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount2 &&
+        ev.amount == planterFund &&
+        ev.referral == zeroAddress
+      );
     });
   });
 
@@ -624,6 +643,16 @@ contract("PlanterFund", (accounts) => {
       }
     );
 
+    truffleAssert.eventEmitted(fundP1, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount2 &&
+        Number(ev.amount) ==
+          Math.divide(Math.mul(planterFund, treeStatus1), finalStatus) &&
+        ev.referral == userAccount3
+      );
+    });
+
     const totalFund1 = await planterFundInstance.totalFunds();
     let planterPaid1 = await planterFundInstance.plantersPaid.call(treeId);
     let planterBalance1 = await planterFundInstance.balances(userAccount2);
@@ -671,6 +700,9 @@ contract("PlanterFund", (accounts) => {
       treeStatus1,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventNotEmitted(fundP2, "PlanterFunded");
+
     const totalFund2 = await planterFundInstance.totalFunds();
     let planterPaid2 = await planterFundInstance.plantersPaid.call(treeId);
     let planterBalance2 = await planterFundInstance.balances(userAccount2);
@@ -718,6 +750,20 @@ contract("PlanterFund", (accounts) => {
       treeStatus2,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventEmitted(fundP3, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount2 &&
+        Number(ev.amount) ==
+          Math.subtract(
+            Math.divide(Math.mul(planterFund, treeStatus2), finalStatus),
+            planterPaid2
+          ) &&
+        ev.referral == userAccount3
+      );
+    });
+
     const totalFund3 = await planterFundInstance.totalFunds();
 
     let planterPaid3 = await planterFundInstance.plantersPaid.call(treeId);
@@ -767,6 +813,20 @@ contract("PlanterFund", (accounts) => {
       treeStatus3,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventEmitted(fundP4, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount2 &&
+        Number(ev.amount) ==
+          Math.subtract(
+            Math.divide(Math.mul(planterFund, treeStatus3), finalStatus),
+            planterPaid3
+          ) &&
+        ev.referral == userAccount3
+      );
+    });
+
     const totalFund4 = await planterFundInstance.totalFunds();
 
     let planterPaid4 = await planterFundInstance.plantersPaid.call(treeId);
@@ -816,6 +876,20 @@ contract("PlanterFund", (accounts) => {
       treeStatus4,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventEmitted(fundP5, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount2 &&
+        Number(ev.amount) ==
+          Math.subtract(
+            Math.divide(Math.mul(planterFund, treeStatus4), finalStatus),
+            planterPaid4
+          ) &&
+        ev.referral == userAccount3
+      );
+    });
+
     const totalFund5 = await planterFundInstance.totalFunds();
     let planterPaid5 = await planterFundInstance.plantersPaid.call(treeId);
     let planterBalance5 = await planterFundInstance.balances(userAccount2);
@@ -864,6 +938,9 @@ contract("PlanterFund", (accounts) => {
       treeStatus5,
       { from: userAccount1 }
     );
+
+    truffleAssert.eventNotEmitted(fundP6, "PlanterFunded");
+
     const totalFund6 = await planterFundInstance.totalFunds();
     let planterPaid6 = await planterFundInstance.plantersPaid.call(treeId);
     let planterBalance6 = await planterFundInstance.balances(userAccount2);
@@ -1606,7 +1683,8 @@ contract("PlanterFund", (accounts) => {
       return (
         Number(ev.treeId) == treeId &&
         ev.planterId == userAccount2 &&
-        Number(ev.amount) == planterTotalFunded
+        Number(ev.amount) == planterTotalFunded &&
+        ev.referral == userAccount3
       );
     });
 
@@ -1747,8 +1825,22 @@ contract("PlanterFund", (accounts) => {
       userAccount4
     );
 
-    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount6,
+    const fundTx = await planterFundInstance.fundPlanter(
+      treeId,
+      userAccount3,
+      25920,
+      {
+        from: userAccount6,
+      }
+    );
+
+    truffleAssert.eventEmitted(fundTx, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount3 &&
+        Number(ev.amount) == Number(planterFund) &&
+        ev.referral == userAccount4
+      );
     });
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -1853,8 +1945,22 @@ contract("PlanterFund", (accounts) => {
       }
     );
 
-    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount6,
+    const fundTx = await planterFundInstance.fundPlanter(
+      treeId,
+      userAccount3,
+      25920,
+      {
+        from: userAccount6,
+      }
+    );
+
+    truffleAssert.eventEmitted(fundTx, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount3 &&
+        Number(ev.amount) == Number(planterFund) &&
+        ev.referral == userAccount4
+      );
     });
 
     await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2784,8 +2890,22 @@ contract("PlanterFund", (accounts) => {
       }
     );
 
-    await planterFundInstance.fundPlanter(treeId, userAccount3, 25920, {
-      from: userAccount6,
+    const fundTx = await planterFundInstance.fundPlanter(
+      treeId,
+      userAccount3,
+      25920,
+      {
+        from: userAccount6,
+      }
+    );
+
+    truffleAssert.eventEmitted(fundTx, "PlanterFunded", (ev) => {
+      return (
+        ev.treeId == treeId &&
+        ev.planterId == userAccount3 &&
+        Number(ev.amount) == Number(planterFund) &&
+        ev.referral == zeroAddress
+      );
     });
 
     const OrganizationPlanterBalance1 = await planterFundInstance.balances.call(

@@ -864,7 +864,7 @@ contract("TreeAuction", (accounts) => {
         ev.bidder == bidderAccount &&
         Number(ev.amount) == Number(bidAmount) &&
         Number(ev.treeId) == treeId &&
-        ev.referral == zeroAddress
+        ev.referrer == zeroAddress
       );
     });
 
@@ -1448,7 +1448,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId &&
         ev.bidder == bidderAccount1 &&
         Number(ev.amount) == Number(bidAmount1) &&
-        ev.referral == referralAccount1
+        ev.referrer == referralAccount1
       );
     });
 
@@ -1493,7 +1493,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId &&
         ev.bidder == bidderAccount2 &&
         Number(ev.amount) == Number(bidAmount2) &&
-        ev.referral == zeroAddress
+        ev.referrer == zeroAddress
       );
     });
 
@@ -1538,7 +1538,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId &&
         ev.bidder == bidderAccount3 &&
         Number(ev.amount) == Number(bidAmount3) &&
-        ev.referral == referralAccount3
+        ev.referrer == referralAccount3
       );
     });
 
@@ -1756,7 +1756,8 @@ contract("TreeAuction", (accounts) => {
         Number(ev.auctionId) == 0 &&
         Number(ev.treeId) == treeId &&
         ev.winner == bidderAccount &&
-        Number(ev.amount) == bidAmount
+        Number(ev.amount) == bidAmount &&
+        ev.referrer == zeroAddress
       );
     });
 
@@ -3299,7 +3300,8 @@ contract("TreeAuction", (accounts) => {
         Number(ev.auctionId) == 1 &&
         Number(ev.treeId) == treeId &&
         ev.winner == bidderAccount2 &&
-        Number(ev.amount) == Number(bidAmount2)
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referrer == refferal2
       );
     });
 
@@ -3797,7 +3799,8 @@ contract("TreeAuction", (accounts) => {
         Number(ev.auctionId) == auctionId &&
         Number(ev.treeId) == treeId &&
         ev.winner == bidderAccount2 &&
-        Number(ev.amount) == Number(bidAmount2_2)
+        Number(ev.amount) == Number(bidAmount2_2) &&
+        ev.referrer == zeroAddress
       );
     });
 
@@ -4231,7 +4234,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId1 &&
         ev.bidder == bidderAccount1 &&
         Number(ev.amount) == Number(bidAmount1) &&
-        ev.referral == otherRefferer
+        ev.referrer == otherRefferer
       );
     });
 
@@ -4241,7 +4244,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId2 &&
         ev.bidder == bidderAccount2 &&
         Number(ev.amount) == Number(bidAmount1) &&
-        ev.referral == otherRefferer
+        ev.referrer == otherRefferer
       );
     });
 
@@ -4286,7 +4289,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId1 &&
         ev.bidder == bidderAccount2 &&
         Number(ev.amount) == Number(bidAmount2) &&
-        ev.referral == mainRefferer
+        ev.referrer == mainRefferer
       );
     });
 
@@ -4296,7 +4299,7 @@ contract("TreeAuction", (accounts) => {
         ev.treeId == treeId2 &&
         ev.bidder == bidderAccount1 &&
         Number(ev.amount) == Number(bidAmount2) &&
-        ev.referral == mainRefferer
+        ev.referrer == mainRefferer
       );
     });
 
@@ -4536,7 +4539,8 @@ contract("TreeAuction", (accounts) => {
         Number(ev.auctionId) == auctionId1 &&
         Number(ev.treeId) == treeId1 &&
         ev.winner == bidderAccount2 &&
-        Number(ev.amount) == Number(bidAmount2)
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referrer == mainRefferer
       );
     });
 
@@ -4667,15 +4671,6 @@ contract("TreeAuction", (accounts) => {
       "weth funds contract dont charge correctly"
     );
 
-    // assert.equal(
-    //   Math.subtract(
-    //     Number(planterFundBalanceAfterAuction2End),
-    //     Number(planterFundBalanceAfterAuction1End)
-    //   ),
-    //   Number(expectedSwapTokenAmount2[1]),
-    //   "planter fund contract dont charge correctly"
-    // );
-
     assert.equal(
       Number(planterFundBalanceAfterAuction2End),
       Number(
@@ -4685,6 +4680,16 @@ contract("TreeAuction", (accounts) => {
       ),
       "planter fund contract dont charge correctly"
     );
+
+    truffleAssert.eventEmitted(endAuctionTx2, "AuctionSettled", (ev) => {
+      return (
+        Number(ev.auctionId) == auctionId2 &&
+        Number(ev.treeId) == treeId2 &&
+        ev.winner == bidderAccount1 &&
+        Number(ev.amount) == Number(bidAmount2) &&
+        ev.referrer == mainRefferer
+      );
+    });
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 

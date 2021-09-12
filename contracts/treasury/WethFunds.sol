@@ -80,6 +80,13 @@ contract WethFunds is Initializable {
     );
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
+    event IncrementalFunded();
+
+    event SwapToPlanterFund(
+        uint256 wethMaxUse,
+        uint256 daiAmount,
+        uint256 wethAmount
+    );
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -480,6 +487,8 @@ contract WethFunds is Initializable {
 
         uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
 
+        emit IncrementalFunded();
+
         return amount;
     }
 
@@ -509,6 +518,8 @@ contract WethFunds is Initializable {
             address(planterFundContract),
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
+
+        emit SwapToPlanterFund(_wethMaxUse, totalDaiToPlanterSwap, amounts[0]);
 
         totalDaiToPlanterSwap = 0;
         totalFunds.treejerDevelop -= amounts[0];

@@ -72,6 +72,8 @@ contract DaiFunds is Initializable {
 
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
+    event RegularFunded();
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -242,6 +244,8 @@ contract DaiFunds is Initializable {
         );
 
         require(success, "unsuccessful transfer");
+
+        emit RegularFunded();
     }
 
     /**

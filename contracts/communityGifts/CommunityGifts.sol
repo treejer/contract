@@ -280,6 +280,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
     function setExpireDate(uint256 _expireDate) external onlyDataManager {
         require(block.timestamp < expireDate, "can not update expire date");
         expireDate = _expireDate;
+
+        emit CommuintyGiftSet();
     }
 
     /** @dev if giftee did not claim gift, admin can transfer reserved symbol to

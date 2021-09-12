@@ -62,6 +62,13 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 amount
     );
     event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
+    event GiftPerRegularBuyUpdated();
+    event RegularPlanterFundSet(
+        uint256 regularPlanterFund,
+        uint256 regularReferralFund
+    );
+
+    event ReferrGiftClaimed(address referrer, uint256 count, uint256 amount);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -219,6 +226,8 @@ contract RegularSell is Initializable, RelayRecipient {
     //TODO: ADD_COMMENT
     function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
         perRegularBuys = _count;
+
+        emit GiftPerRegularBuyUpdated();
     }
 
     /** @dev request {_count} trees and the paid amount must be more than
@@ -242,6 +251,8 @@ contract RegularSell is Initializable, RelayRecipient {
         );
 
         require(success, "unsuccessful transfer");
+
+        emit RegularTreeRequsted(_msgSender(), _referrer, _count, totalPrice);
 
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
@@ -298,8 +309,6 @@ contract RegularSell is Initializable, RelayRecipient {
         if (_referrer != address(0)) {
             _funcReferrer(_referrer, _count);
         }
-
-        emit RegularTreeRequsted(_msgSender(), _referrer, _count, totalPrice);
     }
 
     function _funcReferrer(address _referrer, uint256 _count) private {
@@ -358,6 +367,13 @@ contract RegularSell is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
+        emit RegularTreeRequstedById(
+            _msgSender(),
+            _referrer,
+            _treeId,
+            treePrice
+        );
+
         treeFactory.requestRegularTree(_treeId, _msgSender());
 
         (
@@ -387,13 +403,6 @@ contract RegularSell is Initializable, RelayRecipient {
         if (_referrer != address(0)) {
             _funcReferrer(_referrer, 1);
         }
-
-        emit RegularTreeRequstedById(
-            _msgSender(),
-            _referrer,
-            _treeId,
-            treePrice
-        );
     }
 
     function setRegularPlanterFund(
@@ -402,6 +411,8 @@ contract RegularSell is Initializable, RelayRecipient {
     ) external onlyDataManager {
         regularPlanterFund = _regularPlanterFund;
         regularReferralFund = _regularReferralFund;
+
+        emit RegularPlanterFundSet(_regularPlanterFund, _regularReferralFund);
     }
 
     function updateReferrerGiftCount(address _referrer, uint256 _count)
@@ -412,18 +423,19 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     function claimGifts() external onlyGiftOwner {
-        uint256 count = referrerGifts[_msgSender()];
+        uint256 _count = referrerGifts[_msgSender()];
 
-        if (count > 50) {
-            count = 50;
+        if (_count > 50) {
+            _count = 50;
         }
+        uint256 _amount = _count * (regularPlanterFund + regularReferralFund);
 
-        wethFunds.updateDaiSwap(
-            count * (regularPlanterFund + regularReferralFund)
-        );
+        wethFunds.updateDaiSwap(_amount);
 
-        referrerGifts[_msgSender()] -= count;
+        referrerGifts[_msgSender()] -= _count;
 
-        _mintReferralTree(count, _msgSender());
+        emit ReferrGiftClaimed(_msgSender(), _count, _amount);
+
+        _mintReferralTree(_count, _msgSender());
     }
 }

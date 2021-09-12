@@ -3741,7 +3741,7 @@ contract("WethFunds", (accounts) => {
         daiInstance.address,
       ]);
 
-    await wethFunds.incrementalFund(
+    const eventTx1 = await wethFunds.incrementalFund(
       totalPlanterFund1,
       totalReferralFund1,
       totalTreeResearch1,
@@ -3752,6 +3752,8 @@ contract("WethFunds", (accounts) => {
       totalReserveFund2_1,
       { from: userAccount3 }
     );
+
+    truffleAssert.eventEmitted(eventTx1, "IncrementalFunded");
 
     //check wethFund totalFunds treeId1
     let totalFunds = await wethFunds.totalFunds();
@@ -3810,7 +3812,7 @@ contract("WethFunds", (accounts) => {
         daiInstance.address,
       ]);
 
-    await wethFunds.incrementalFund(
+    const eventTx2 = await wethFunds.incrementalFund(
       totalPlanterFund2,
       totalReferralFund2,
       totalTreeResearch2,
@@ -3821,6 +3823,8 @@ contract("WethFunds", (accounts) => {
       totalReserveFund2_2,
       { from: userAccount3 }
     );
+
+    truffleAssert.eventEmitted(eventTx2, "IncrementalFunded");
 
     // //check wethFund totalFunds treeId2
     let totalFunds2 = await wethFunds.totalFunds();
@@ -3936,9 +3940,11 @@ contract("WethFunds", (accounts) => {
     await wethFunds.updateDaiSwap(web3.utils.toWei("1000", "Ether"), {
       from: userAccount3,
     });
+    const totalDaiToPlanterSwapBeforeSwap =
+      await wethFunds.totalDaiToPlanterSwap();
 
     assert.equal(
-      Number(await wethFunds.totalDaiToPlanterSwap()),
+      Number(totalDaiToPlanterSwapBeforeSwap),
       web3.utils.toWei("1000", "Ether"),
       "totalDaiToPlanterSwap not true"
     );
@@ -3949,8 +3955,19 @@ contract("WethFunds", (accounts) => {
         [wethInstance.address, daiInstance.address]
       );
 
-    await wethFunds.swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
-      from: userAccount3,
+    const eventTx = await wethFunds.swapDaiToPlanters(
+      expectedSwapTokenAmountTreeId2[0],
+      {
+        from: userAccount3,
+      }
+    );
+
+    truffleAssert.eventEmitted(eventTx, "SwapToPlanterFund", (ev) => {
+      return (
+        Number(ev.wethMaxUse) == Number(expectedSwapTokenAmountTreeId2[0]) &&
+        Number(ev.daiAmount) == Number(totalDaiToPlanterSwapBeforeSwap) &&
+        Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
+      );
     });
 
     ////------------check planter fund contract balance

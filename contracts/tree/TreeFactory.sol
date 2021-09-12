@@ -74,7 +74,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularTreePlanted(uint256 treeId);
     event RegularPlantVerified(uint256 treeId);
     event RegularPlantRejected(uint256 treeId);
-
+    event UpdateIntervalSet();
+    event TreeSpecsUpdate(uint256 treeId);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -191,6 +192,8 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function setUpdateInterval(uint256 _day) external onlyDataManager {
         updateInterval = _day * 86400;
+
+        emit UpdateIntervalSet();
     }
 
     /**
@@ -557,6 +560,8 @@ contract TreeFactory is Initializable, RelayRecipient {
         onlyBuyerRank
     {
         treeData[_treeId].treeSpecs = _treeSpecs;
+
+        emit TreeSpecsUpdate(_treeId);
     }
 
     /**

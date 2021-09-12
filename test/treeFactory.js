@@ -210,6 +210,8 @@ contract("TreeFactory", (accounts) => {
 
     assert.equal(dayBefore, 7 * 24 * 60 * 60, "dayBefore not true");
     assert.equal(dayAfter, 10 * 24 * 60 * 60, "dayAfter not true");
+
+    truffleAssert.eventEmitted(tx, "UpdateIntervalSet");
   });
   /////////////////------------------------------------ add tree ----------------------------------------//
 
@@ -2608,9 +2610,11 @@ contract("TreeFactory", (accounts) => {
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-    await treeFactoryInstance.setUpdateInterval(3, {
+    const updateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(3, {
       from: dataManager,
     });
+
+    truffleAssert.eventEmitted(updateIntervalTx1, "UpdateIntervalSet");
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -2620,9 +2624,11 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await treeFactoryInstance.setUpdateInterval(4, {
+    const updateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(4, {
       from: dataManager,
     });
+
+    truffleAssert.eventEmitted(updateIntervalTx2, "UpdateIntervalSet");
 
     let travelTime2 = Math.add(
       Math.mul(Number(tree.treeStatus), 3600),

@@ -114,6 +114,7 @@ interface ICommunityGifts {
     /** @dev admin can set the maximum time that giftees can claim their gift before
      * expire date of community gift reach
      * @param _expireDate is the maximum time to claim tree
+     * NOTE emit a {CommuintyGiftSet} event
      */
     function setExpireDate(uint256 _expireDate) external;
 

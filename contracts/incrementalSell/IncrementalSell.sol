@@ -213,6 +213,8 @@ contract IncrementalSell is Initializable, RelayRecipient {
 
         incrPrice.startTree = newStartTree;
         lastSold = newStartTree - 1;
+
+        emit IncrementalSellUpdated();
     }
 
     /**

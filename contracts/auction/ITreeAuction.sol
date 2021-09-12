@@ -114,24 +114,27 @@ interface ITreeAuction {
 
     /**
      * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
-     * with value of {amount}
+     * with value of {amount} and {referrer} address
      */
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
         address bidder,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
     /**
      * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
      * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     * and {referrer} is the address of refferer
      */
 
     event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
 
     /**

@@ -1626,7 +1626,9 @@ contract("IncrementalSell", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-    await iSellInstance.freeIncrementalSell(500);
+    const eventTx1 = await iSellInstance.freeIncrementalSell(500);
+
+    truffleAssert.eventEmitted(eventTx1, "IncrementalSellUpdated");
 
     let incrementalPrice2 = await iSellInstance.incrementalPrice();
 
@@ -1673,7 +1675,9 @@ contract("IncrementalSell", (accounts) => {
       "2provide status is not correct"
     );
 
-    await iSellInstance.freeIncrementalSell(400);
+    const eventTx2 = await iSellInstance.freeIncrementalSell(400);
+
+    truffleAssert.eventEmitted(eventTx2, "IncrementalSellUpdated");
 
     let incrementalPrice3 = await iSellInstance.incrementalPrice();
 
@@ -1726,7 +1730,9 @@ contract("IncrementalSell", (accounts) => {
         IncrementalSellErrorMsg.FREE_INCREMENTALSELL_FAIL
       );
 
-    await iSellInstance.freeIncrementalSell(300);
+    const eventTx3 = await iSellInstance.freeIncrementalSell(300);
+
+    truffleAssert.eventEmitted(eventTx3, "IncrementalSellUpdated");
 
     let incrementalPrice4 = await iSellInstance.incrementalPrice();
 

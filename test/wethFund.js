@@ -35,6 +35,7 @@ contract("WethFunds", (accounts) => {
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
   const userAccount8 = accounts[9];
+  const buyerRank = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const withdrawReason = "reason to withdraw";
@@ -107,6 +108,7 @@ contract("WethFunds", (accounts) => {
     await testUniswapInstance.addLiquidity();
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+    await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
   });
 
   beforeEach(async () => {
@@ -3958,7 +3960,7 @@ contract("WethFunds", (accounts) => {
     const eventTx = await wethFunds.swapDaiToPlanters(
       expectedSwapTokenAmountTreeId2[0],
       {
-        from: userAccount3,
+        from: buyerRank,
       }
     );
 
@@ -4047,7 +4049,7 @@ contract("WethFunds", (accounts) => {
 
     await wethFunds
       .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
-        from: userAccount3,
+        from: buyerRank,
       })
       .should.be.rejectedWith(WethFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
   });
@@ -4086,8 +4088,47 @@ contract("WethFunds", (accounts) => {
 
     await wethFunds
       .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
-        from: userAccount3,
+        from: buyerRank,
       })
       .should.be.rejectedWith(WethFundsErrorMsg.TOTALDAI_ZERO);
+  });
+
+  it("Should swapDaiToPlanters reject (onlyBuyerRank)", async () => {
+    const totalTreejerDevelop2 = web3.utils.toWei("2");
+
+    ////--------------check set role----------------
+    await Common.addTreejerContractRole(
+      arInstance,
+      userAccount3,
+      deployerAccount
+    );
+
+    await Common.addTreejerContractRole(
+      arInstance,
+      wethFunds.address,
+      deployerAccount
+    );
+
+    ////---------------transfer weth for wethFunds-------------------
+
+    await wethInstance.setMint(wethFunds.address, totalTreejerDevelop2);
+
+    // ////--------------------call fund tree by auction(treeId2)----------------
+
+    await wethFunds.incrementalFund(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+      from: userAccount3,
+    });
+
+    let expectedSwapTokenAmountTreeId2 =
+      await uniswapRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1000", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
+
+    await wethFunds
+      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
+        from: userAccount3,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
   });
 });

@@ -68,12 +68,12 @@ contract WethFunds is Initializable {
         address account,
         string reason
     );
-    event reserveBalanceWithdrawn1(
+    event ReserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event reserveBalanceWithdrawn2(
+    event ReserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -87,6 +87,7 @@ contract WethFunds is Initializable {
         uint256 daiAmount,
         uint256 wethAmount
     );
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -108,6 +109,12 @@ contract WethFunds is Initializable {
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
+        _;
+    }
+
+    /** NOTE modifier to check msg.sender has buyer rank role */
+    modifier onlyBuyerRank() {
+        accessRestriction.ifBuyerRank(msg.sender);
         _;
     }
 
@@ -432,7 +439,7 @@ contract WethFunds is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        emit reserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
 
     /**
@@ -458,7 +465,7 @@ contract WethFunds is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        emit reserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 
     function incrementalFund(
@@ -492,8 +499,8 @@ contract WethFunds is Initializable {
         return amount;
     }
 
-    //TODO: who can call ???? set buyerRank , ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse) external {
+    //TODO: ADD_COMMENT
+    function swapDaiToPlanters(uint256 _wethMaxUse) external onlyBuyerRank {
         require(
             _wethMaxUse <= totalFunds.treejerDevelop,
             "Liquidity not enough"

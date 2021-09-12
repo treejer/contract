@@ -320,7 +320,7 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 localReferrerRegularCount = referrerRegularCount[_referrer] +
             _count;
 
-        if (localReferrerRegularCount > perRegularBuys) {
+        if (localReferrerRegularCount >= perRegularBuys) {
             uint256 temp = localReferrerRegularCount / perRegularBuys;
             localReferrerRegularCount -= temp * perRegularBuys;
             referrerGifts[_referrer] += temp;

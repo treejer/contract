@@ -111,6 +111,12 @@ contract WethFunds is Initializable {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has buyer rank role */
+    modifier onlyBuyerRank() {
+        accessRestriction.ifBuyerRank(msg.sender);
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isWethFunds
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
@@ -492,8 +498,8 @@ contract WethFunds is Initializable {
         return amount;
     }
 
-    //TODO: who can call ???? set buyerRank , ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse) external {
+    //TODO: ADD_COMMENT
+    function swapDaiToPlanters(uint256 _wethMaxUse) external onlyBuyerRank {
         require(
             _wethMaxUse <= totalFunds.treejerDevelop,
             "Liquidity not enough"

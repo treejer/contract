@@ -138,8 +138,6 @@ contract("regularSell", (accounts) => {
     );
   });
 
-  /* ssss
-
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     ////////////// ------------------- handle fund distribution model ----------------------
@@ -1320,8 +1318,6 @@ contract("regularSell", (accounts) => {
     }
   });
 
-  ssss */
-
   it("3.should request trees successfully", async () => {
     let funder1 = userAccount3;
     let funder2 = userAccount3;
@@ -1632,7 +1628,6 @@ contract("regularSell", (accounts) => {
       "3-funder balance not true"
     );
 
-    console.log("ss", await Number(regularSellInstance.perRegularBuys()));
     let requestTx = await regularSellInstance.requestTrees(1, userAccount1, {
       from: funder3,
     });
@@ -1656,8 +1651,6 @@ contract("regularSell", (accounts) => {
     });
 
     const txFee = await Common.getTransactionFee(requestTx);
-
-    console.log("2.test fee", web3.utils.fromWei(txFee.toString()));
 
     let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
 
@@ -1822,6 +1815,12 @@ contract("regularSell", (accounts) => {
 
     await regularSellInstance
       .requestTrees(0, zeroAddress, {
+        from: funder,
+      })
+      .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
+
+    await regularSellInstance
+      .requestTrees(101, zeroAddress, {
         from: funder,
       })
       .should.be.rejectedWith(RegularSellErrors.INVALID_COUNT);
@@ -3178,7 +3177,7 @@ contract("regularSell", (accounts) => {
     const planterShare2 = await web3.utils.toWei("3");
     const referralShare2 = await web3.utils.toWei("1.5");
 
-    let txPlanterShare2 = regularSellInstance.setRegularPlanterFund(
+    let txPlanterShare2 = await regularSellInstance.setRegularPlanterFund(
       planterShare2,
       referralShare2,
       { from: dataManager }

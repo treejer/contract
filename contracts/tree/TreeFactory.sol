@@ -76,6 +76,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularPlantRejected(uint256 treeId);
     event UpdateIntervalSet();
     event TreeSpecsUpdate(uint256 treeId);
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -554,16 +555,6 @@ contract TreeFactory is Initializable, RelayRecipient {
         regularTreeId.increment();
     }
 
-    //TODO:ADD_COMMENT WRITE_TEST
-    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
-        external
-        onlyBuyerRank
-    {
-        treeData[_treeId].treeSpecs = _treeSpecs;
-
-        emit TreeSpecsUpdate(_treeId);
-    }
-
     /**
      * @dev In this function, the admin approves or rejects the pending trees
      * After calling this function, if the tree is approved the tree information will be transferred to the {treeData}
@@ -677,5 +668,15 @@ contract TreeFactory is Initializable, RelayRecipient {
         tree.provideStatus = 0;
 
         treeToken.safeMint(_owner, _treeId);
+    }
+
+    /** @dev script role update {_treeSpecs} of {_treeId} */
+    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
+        external
+        onlyBuyerRank
+    {
+        treeData[_treeId].treeSpecs = _treeSpecs;
+
+        emit TreeSpecsUpdate(_treeId);
     }
 }

@@ -94,6 +94,7 @@ interface ITreeFactory {
 
     /** @dev admin can set the minimum time to send next update request
      * @param _day time to next update request
+     * NOTE emit an {UpdateIntervalSet} event
      */
     function setUpdateInterval(uint256 _day) external;
 
@@ -240,6 +241,13 @@ interface ITreeFactory {
      */
     function requestRegularTree(uint256 _treeId, address _owner) external;
 
+    /**
+     * @dev script role update {_treeSpecs} of {_treeId}
+     * NOTE emit a {TreeSpecsUpdate} event
+     */
+    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
+        external;
+
     /** @dev emitted when tree with id {treeId} added */
     event TreeAdded(uint256 treeId);
 
@@ -272,4 +280,10 @@ interface ITreeFactory {
 
     /** @dev emitted when planting for regular tree with id {treeId} rejected */
     event RegularPlantRejected(uint256 treeId);
+
+    /** @dev emitted when new updateInterval set */
+    event UpdateIntervalSet();
+
+    /** @dev emitted when treeSpecs of {treeId} updated */
+    event TreeSpecsUpdate(uint256 treeId);
 }

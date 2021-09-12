@@ -68,12 +68,12 @@ contract WethFunds is Initializable {
         address account,
         string reason
     );
-    event reserveBalanceWithdrawn1(
+    event ReserveBalanceWithdrawn1(
         uint256 amount,
         address account,
         string reason
     );
-    event reserveBalanceWithdrawn2(
+    event ReserveBalanceWithdrawn2(
         uint256 amount,
         address account,
         string reason
@@ -87,6 +87,7 @@ contract WethFunds is Initializable {
         uint256 daiAmount,
         uint256 wethAmount
     );
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -438,7 +439,7 @@ contract WethFunds is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        emit reserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
     }
 
     /**
@@ -464,7 +465,7 @@ contract WethFunds is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        emit reserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
     }
 
     function incrementalFund(

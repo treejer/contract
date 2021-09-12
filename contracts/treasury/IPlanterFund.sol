@@ -27,11 +27,6 @@ interface IPlanterFund {
      */
     function daiToken() external view returns (address);
 
-    /** @dev admin can set the minimum amount to withdraw
-     * @param _amount is withdraw treshold
-     */
-    function setWithdrawThreshold(uint256 _amount) external;
-
     /**
      * @dev return totalFunds struct data
      * @return planterFund share
@@ -76,6 +71,11 @@ interface IPlanterFund {
     /** @dev set {_address} to DaiToken contract address */
     function setDaiTokenAddress(address _address) external;
 
+    /** @dev admin can set the minimum amount to withdraw
+     * @param _amount is withdraw treshold
+     */
+    function setWithdrawThreshold(uint256 _amount) external;
+
     /**
      * @dev set planterFunds and refferalFunds of a tree with id {_treeId}
      * and add {_planterFund} to planterFund part of totalFunds and add
@@ -113,7 +113,12 @@ interface IPlanterFund {
      * @dev emitted when a planter {planterId} funded {amount} for tree
      * with id {treeId}
      */
-    event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
+    event PlanterFunded(
+        uint256 treeId,
+        address planterId,
+        uint256 amount,
+        address referral
+    );
 
     /**
      * @dev emitted when a planter by address {account} withdraw {amount}
@@ -130,4 +135,7 @@ interface IPlanterFund {
         uint256 planterAmount,
         uint256 referralAmount
     );
+
+    //TODO:ADD_COMMENT
+    event WithdrawThresholdSet();
 }

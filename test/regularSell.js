@@ -872,7 +872,11 @@ contract("regularSell", (accounts) => {
 
     for (let i = 10001; i <= 10007; i++) {
       truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
-        return ev.buyer == funder && ev.treeId == i;
+        return (
+          ev.buyer == funder &&
+          ev.treeId == i &&
+          Number(ev.treePrice) == Number(web3.utils.toWei("7"))
+        );
       });
     }
 
@@ -1316,6 +1320,8 @@ contract("regularSell", (accounts) => {
     }
   });
 
+  ssss */
+
   it("3.should request trees successfully", async () => {
     let funder1 = userAccount3;
     let funder2 = userAccount3;
@@ -1626,6 +1632,7 @@ contract("regularSell", (accounts) => {
       "3-funder balance not true"
     );
 
+    console.log("ss", await Number(regularSellInstance.perRegularBuys()));
     let requestTx = await regularSellInstance.requestTrees(1, userAccount1, {
       from: funder3,
     });
@@ -2844,7 +2851,7 @@ contract("regularSell", (accounts) => {
     assert.equal(Number(user1GiftCount2), 7, "user1 gift count is not correct");
   });
 
-  it("should fail updateReferrerGiftCount", async () => {
+  it("should fail updateReferrerGiftCount (TREEJER CONTTRACT)", async () => {
     await regularSellInstance
       .updateReferrerGiftCount(userAccount1, 2, { from: userAccount6 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -2855,13 +2862,20 @@ contract("regularSell", (accounts) => {
     const planterFund1 = Units.convert("0.5", "eth", "wei");
     const referralFund1 = Units.convert("0.1", "eth", "wei");
 
-    await regularSellInstance.setRegularPlanterFund(
+    let tx = await regularSellInstance.setRegularPlanterFund(
       planterFund1,
       referralFund1,
       {
         from: dataManager,
       }
     );
+
+    truffleAssert.eventEmitted(tx, "RegularPlanterFundSet", (ev) => {
+      return (
+        Number(ev.regularPlanterFund) == Number(planterFund1) &&
+        Number(ev.regularReferralFund) == Number(referralFund1)
+      );
+    });
 
     const settedPlanterFund1 =
       await regularSellInstance.regularPlanterFund.call();
@@ -2884,13 +2898,20 @@ contract("regularSell", (accounts) => {
     const planterFund2 = Units.convert("0.5", "eth", "wei");
     const referralFund2 = Units.convert("0.1", "eth", "wei");
 
-    await regularSellInstance.setRegularPlanterFund(
+    let tx2 = await regularSellInstance.setRegularPlanterFund(
       planterFund2,
       referralFund2,
       {
         from: dataManager,
       }
     );
+
+    truffleAssert.eventEmitted(tx2, "RegularPlanterFundSet", (ev) => {
+      return (
+        Number(ev.regularPlanterFund) == Number(planterFund2) &&
+        Number(ev.regularReferralFund) == Number(referralFund2)
+      );
+    });
 
     const settedPlanterFund2 =
       await regularSellInstance.regularPlanterFund.call();
@@ -2960,11 +2981,18 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await regularSellInstance.setRegularPlanterFund(
+    let txPlanterFund = await regularSellInstance.setRegularPlanterFund(
       planterShare,
       referralShare,
       { from: dataManager }
     );
+
+    truffleAssert.eventEmitted(txPlanterFund, "RegularPlanterFundSet", (ev) => {
+      return (
+        Number(ev.regularPlanterFund) == Number(planterShare) &&
+        Number(ev.regularReferralFund) == Number(referralShare)
+      );
+    });
 
     /////////////// claim 25 tree with user1
 
@@ -3150,10 +3178,21 @@ contract("regularSell", (accounts) => {
     const planterShare2 = await web3.utils.toWei("3");
     const referralShare2 = await web3.utils.toWei("1.5");
 
-    await regularSellInstance.setRegularPlanterFund(
+    let txPlanterShare2 = regularSellInstance.setRegularPlanterFund(
       planterShare2,
       referralShare2,
       { from: dataManager }
+    );
+
+    truffleAssert.eventEmitted(
+      txPlanterShare2,
+      "RegularPlanterFundSet",
+      (ev) => {
+        return (
+          Number(ev.regularPlanterFund) == Number(planterShare2) &&
+          Number(ev.regularReferralFund) == Number(referralShare2)
+        );
+      }
     );
 
     await regularSellInstance.updateReferrerGiftCount(userAccount3, 10, {
@@ -3283,11 +3322,18 @@ contract("regularSell", (accounts) => {
       from: deployerAccount,
     });
 
-    await regularSellInstance.setRegularPlanterFund(
+    let Tx = await regularSellInstance.setRegularPlanterFund(
       planterShare,
       referralShare,
       { from: dataManager }
     );
+
+    truffleAssert.eventEmitted(Tx, "RegularPlanterFundSet", (ev) => {
+      return (
+        Number(ev.regularPlanterFund) == Number(planterShare) &&
+        Number(ev.regularReferralFund) == Number(referralShare)
+      );
+    });
 
     await regularSellInstance.updateReferrerGiftCount(userAccount3, 85, {
       from: userAccount8,
@@ -3424,21 +3470,25 @@ contract("regularSell", (accounts) => {
     await regularSellInstance.claimGifts({ from: userAccount1 });
   });
 
-  ssss */
-
   ////--------------------------------------- test setGiftPerRegularBuys -----------------------
 
   it("Should setGiftPerRegularBuys reject (onlyDataManager)", async () => {
-    await regularSellInstance.setGiftPerRegularBuys(10, {
-      from: userAccount2,
-    });
-  }).should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+    await regularSellInstance
+      .setGiftPerRegularBuys(10, {
+        from: userAccount2,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+  });
 
   it("Should setGiftPerRegularBuys successFully", async () => {
-    await regularSellInstance.setGiftPerRegularBuys(8, {
+    assert.equal(Number(await regularSellInstance.perRegularBuys()), 20);
+
+    let tx = await regularSellInstance.setGiftPerRegularBuys(8, {
       from: dataManager,
     });
 
     assert.equal(Number(await regularSellInstance.perRegularBuys()), 8);
+
+    truffleAssert.eventEmitted(tx, "GiftPerRegularBuyUpdated");
   });
 });

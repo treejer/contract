@@ -228,7 +228,7 @@ contract RegularSell is Initializable, RelayRecipient {
     function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
         perRegularBuys = _count;
 
-        // emit GiftPerRegularBuyUpdated();
+        emit GiftPerRegularBuyUpdated();
     }
 
     /** @dev request {_count} trees and the paid amount must be more than

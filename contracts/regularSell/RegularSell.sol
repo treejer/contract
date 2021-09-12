@@ -19,10 +19,13 @@ contract RegularSell is Initializable, RelayRecipient {
     /** NOTE {isRegularSell} set inside the initialize to {true} */
     bool public isRegularSell;
 
-    //TODO: ADD_COMMENT
+    /** NOTE regular planter fund amount */
     uint256 public regularPlanterFund;
+
+    /** NOTE regular referral fund amount */
     uint256 public regularReferralFund;
 
+    //TODO: ADD_COMMENT
     uint256 public perRegularBuys;
 
     mapping(address => uint256) public referrerGifts;
@@ -234,6 +237,7 @@ contract RegularSell is Initializable, RelayRecipient {
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * treePrice }
      * @param _count is the number of trees requested by user
+     * @param _referrer is address of refferer
      */
     function requestTrees(uint256 _count, address _referrer) external {
         require(_count > 0 && _count < 101, "invalid count");
@@ -351,6 +355,7 @@ contract RegularSell is Initializable, RelayRecipient {
      * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to
      * make sure that has not been sold before
      * @param _treeId is the id of tree requested by user
+     * @param _referrer is address of referrer
      */
     function requestByTreeId(uint256 _treeId, address _referrer) external {
         require(_treeId > lastSoldRegularTree, "invalid tree");
@@ -406,6 +411,7 @@ contract RegularSell is Initializable, RelayRecipient {
         }
     }
 
+    //TODO: ADD_COMMENT
     function setRegularPlanterFund(
         uint256 _regularPlanterFund,
         uint256 _regularReferralFund
@@ -416,6 +422,7 @@ contract RegularSell is Initializable, RelayRecipient {
         emit RegularPlanterFundSet(_regularPlanterFund, _regularReferralFund);
     }
 
+    //TODO: ADD_COMMENT
     function updateReferrerGiftCount(address _referrer, uint256 _count)
         external
         onlyTreejerContract
@@ -423,6 +430,7 @@ contract RegularSell is Initializable, RelayRecipient {
         referrerGifts[_referrer] += _count;
     }
 
+    //TODO: ADD_COMMENT
     function claimGifts() external onlyGiftOwner {
         uint256 _count = referrerGifts[_msgSender()];
 

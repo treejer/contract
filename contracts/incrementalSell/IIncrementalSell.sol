@@ -7,6 +7,9 @@ interface IIncrementalSell {
      */
     function isIncrementalSell() external view returns (bool);
 
+    //TODO: ADD_COMMENT
+    function lastSold() external view returns (uint256);
+
     /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
 
@@ -19,14 +22,20 @@ interface IIncrementalSell {
     /** @return FinancialModel contract address */
     function financialModel() external view returns (address);
 
+    /** @return TreeAttribute contract address */
+    function treeAttribute() external view returns (address);
+
+    /** @return PlanterFund contract address */
+    function planterFundContract() external view returns (address);
+
+    /** @return RegularSell contract address */
+    function regularSell() external view returns (address);
+
     /** @return WethToken contract address */
     function wethToken() external view returns (address);
 
-    /** @return regularPlanterFund */
-    function regularPlanterFund() external view returns (uint256);
-
-    /** @return regularReferralFund  */
-    function regularReferralFund() external view returns (uint256);
+    /** @return TreeAuction contract address */
+    function treeAuction() external view returns (address);
 
     /**
      * @dev return incrementalPrice struct data
@@ -47,13 +56,23 @@ interface IIncrementalSell {
             uint64
         );
 
+    //TODO: SHOULD_REMOVE
     /** @return lastBuy time of tree purchase for {_buyer} */
     function lastBuy(address _buyer) external view returns (uint256);
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
 
-    /** @dev set {_address} to TreeFactory contract address */
+    /** @dev set {_address} to PlanterFund contract address */
+    function setPlanterFundAddress(address _address) external;
+
+    /** @dev set {_address} to TreeAuction contract address */
+    function setTreeAuctionAddress(address _address) external;
+
+    /** @dev set {_address} to RegularSell contract address */
+    function setRegularSellAddress(address _address) external;
+
+    /** @dev set {_address} to TreeFactory  contract address */
     function setTreeFactoryAddress(address _address) external;
 
     /** @dev set {_address} to WethFunds contract address */
@@ -64,6 +83,9 @@ interface IIncrementalSell {
 
     /** @dev set {_address} to FinancialModel contract address */
     function setFinancialModelAddress(address _address) external;
+
+    /** @dev set {_address} to TreeAttributes contract address */
+    function setTreeAttributesAddress(address _address) external;
 
     /**
      * @dev admin set a range from {startTree} to {startTree + treeCount}
@@ -91,17 +113,21 @@ interface IIncrementalSell {
      */
     function updateIncrementalEnd(uint256 treeCount) external;
 
+    //TODO:CHECK_COMMENT
     /**
      * tree price calculate based on treeId and msg.sender pay weth for it
      * and ownership of tree transfered to msg.sender
-     * @param treeId id of tree to buy
+     * @param _count id of tree to buy
      * NOTE if buyer, buy another tree before 700 seconds from the
      * previous purchase, pays 90% of tree price and gets 10% discount
      * just for this tree. buying another tree give chance to buy
      * the next tree with 10% discount
      * NOTE emit an {IncrementalTreeSold} event
      */
-    function buyTree(uint256 treeId) external;
+    function buyTree(uint256 _count, address _referrer) external;
+
+    //TODO:ADD_COMMENTS
+    function claimTreeAttributes(uint256 _startTree, uint256 _count) external;
 
     //TODO:ADD_COMMENT
     function freeIncrementalSell(uint256 _count) external;
@@ -112,7 +138,6 @@ interface IIncrementalSell {
      * @param _increaseRatio increment price rate
      * NOTE emit a {IncrementalRatesUpdated} event
      */
-
     function updateIncrementalRates(
         uint256 _initialPrice,
         uint64 _increaseStep,

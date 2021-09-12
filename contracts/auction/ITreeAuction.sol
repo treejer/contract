@@ -29,14 +29,14 @@ interface ITreeAuction {
     function financialModel() external view returns (address);
 
     /**
-     * @return RegularSell contract address
-     */
-    function regularSell() external view returns (address);
-
-    /**
      * @return WethToken contract address
      */
     function wethToken() external view returns (address);
+
+    /**
+     * @return RegularSell contract address
+     */
+    function regularSell() external view returns (address);
 
     /**
      *@dev return data of an auction with auction id
@@ -71,6 +71,9 @@ interface ITreeAuction {
     /** @dev set {_address} to WethFunds contract address */
     function setWethFundsAddress(address _address) external;
 
+    /** @dev set {_address} to RegularSell contract address */
+    function setRegularSellAddress(address _address) external;
+
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;
 
@@ -94,9 +97,12 @@ interface ITreeAuction {
      * NOTE check if less than 10 minutes left to end of auction add 10 minutes to the end date of auction
      * NOTE when new bid done previous bidder refunded automatically
      * emit a {HighestBidIncreased} event
-
      */
-    function bid(uint256 _auctionId, uint256 _amount) external;
+    function bid(
+        uint256 _auctionId,
+        uint256 _amount,
+        address _referrer
+    ) external;
 
     /** @dev everyone can call this method after
      * auction end time and if auction have bidder , transfer owner of tree to bidder
@@ -105,12 +111,6 @@ interface ITreeAuction {
      * emit a {AuctionEnded} event
      */
     function endAuction(uint256 _auctionId) external;
-
-    //TODO: ADD_COMMENT
-    function setReferrerPlanterFund(
-        uint256 _regularPlanterFund,
-        uint256 _regularReferralFund
-    ) external;
 
     /**
      * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
@@ -138,6 +138,12 @@ interface ITreeAuction {
     );
 
     /**
+     * @dev emitted when an auction created
+     * {auctionId} is the number of auction
+     */
+    event AuctionCreated(uint256 auctionId);
+
+    /**
      * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
      * and there is no bidder
      *
@@ -150,10 +156,4 @@ interface ITreeAuction {
      * {newAuctionEndTime} is old auction end time plus 10 minutes
      */
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
-
-    /**
-     * @dev emitted when an auction created
-     * {auctionId} is the number of auction
-     */
-    event AuctionCreated(uint256 auctionId);
 }

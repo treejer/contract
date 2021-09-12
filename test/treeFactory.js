@@ -6390,6 +6390,40 @@ contract("TreeFactory", (accounts) => {
       .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_MUST_BE_PLANTED);
   });
 
+  ///////////////////////------------------ test updateTreeSpecs -----------------
+  it("should updateTreeSpecs succeusfully and fail in invalid accesses", async () => {
+    const treeId = 0;
+    const newIpfs = "new ipfs hash";
+
+    await Common.addBuyerRank(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
+
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      from: dataManager,
+    });
+
+    const treeData1 = await treeFactoryInstance.treeData.call(treeId);
+
+    assert.equal(treeData1.treeSpecs, ipfsHash, "ipfs hash is not correct");
+
+    const eventTx = await treeFactoryInstance.updateTreeSpecs(treeId, newIpfs, {
+      from: dataManager,
+    });
+
+    truffleAssert.eventEmitted(eventTx, "TreeSpecsUpdate", (ev) => {
+      return Number(ev.treeId) == treeId;
+    });
+
+    const treeData2 = await treeFactoryInstance.treeData.call(treeId);
+
+    assert.equal(treeData2.treeSpecs, newIpfs, "new ipfs hash is not correct");
+
+    await treeFactoryInstance
+      .updateTreeSpecs(treeId, newIpfs, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
+  });
+
   /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
 
   // ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -3532,4 +3532,122 @@ contract("DaiFunds", (accounts) => {
       "2-Contract balance not true"
     );
   });
+
+  it("should refererTransferDai succussfully and fail in invalid situation", async () => {
+    await daiInstance.setMint(
+      daiFundsInstance.address,
+      await web3.utils.toWei("16")
+    );
+    await daiFundsInstance.regularFund(
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      await web3.utils.toWei("2"),
+      {
+        from: userAccount6,
+      }
+    );
+    const planterFundBalanceBeforeTransfer1 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(planterFundBalanceBeforeTransfer1),
+      Number(await web3.utils.toWei("4")),
+      "planter fund balance is not ok"
+    );
+
+    const totalFundsBeforeTransfer1 = await daiFundsInstance.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsBeforeTransfer1.treejerDevelop),
+      Number(await web3.utils.toWei("2")),
+      "treejer develop is not ok"
+    );
+
+    const transferAmount1 = await web3.utils.toWei("1");
+    const transferAmount2 = await web3.utils.toWei("0.5");
+    const transferAmount3 = await web3.utils.toWei("1");
+    const transferAmount4 = await web3.utils.toWei("0.5");
+
+    await daiFundsInstance
+      .refererTransferDai(transferAmount1, { from: dataManager })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+    await daiFundsInstance.refererTransferDai(transferAmount1, {
+      from: userAccount6,
+    });
+
+    const totalFundsBeforeTransfer2 = await daiFundsInstance.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsBeforeTransfer2.treejerDevelop),
+      Number(await web3.utils.toWei("1")),
+      "treejer develop is not ok"
+    );
+
+    const planterFundBalanceBeforeTransfer2 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(planterFundBalanceBeforeTransfer2),
+      Number(await web3.utils.toWei("5")),
+      "planter fund balance is not ok"
+    );
+
+    await daiFundsInstance.refererTransferDai(transferAmount2, {
+      from: userAccount6,
+    });
+
+    const totalFundsBeforeTransfer3 = await daiFundsInstance.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsBeforeTransfer3.treejerDevelop),
+      Number(await web3.utils.toWei("0.5")),
+      "treejer develop is not ok"
+    );
+
+    const planterFundBalanceBeforeTransfer3 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(planterFundBalanceBeforeTransfer3),
+      Number(await web3.utils.toWei("5.5")),
+      "planter fund balance is not ok"
+    );
+
+    await daiFundsInstance
+      .refererTransferDai(transferAmount3, {
+        from: userAccount6,
+      })
+      .should.be.rejectedWith(DaiFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
+
+    await daiFundsInstance.refererTransferDai(transferAmount4, {
+      from: userAccount6,
+    });
+
+    const totalFundsAfterTransfer4 = await daiFundsInstance.totalFunds.call();
+
+    assert.equal(
+      Number(totalFundsAfterTransfer4.treejerDevelop),
+      0,
+      "treejer develop is not ok"
+    );
+
+    const planterFundBalanceAfterTransfer4 = await daiInstance.balanceOf(
+      planterFundsInstnce.address
+    );
+
+    assert.equal(
+      Number(planterFundBalanceAfterTransfer4),
+      Number(await web3.utils.toWei("6")),
+      "planter fund balance is not ok"
+    );
+  });
 });

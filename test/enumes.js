@@ -85,6 +85,7 @@ const TreasuryManagerErrorMsg = {
 
 const DaiFundsErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
+  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
 };
 const FinancialModelErrorMsg = {
   SUM_INVALID: "sum must be 10000",

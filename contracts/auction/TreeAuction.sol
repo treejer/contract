@@ -339,7 +339,7 @@ contract TreeAuction is Initializable, RelayRecipient {
             address _tempReferrer = referrals[auction.bidder][_auctionId];
 
             if (_tempReferrer != address(0)) {
-                regularSell.updateReferrerGiftCount(_tempReferrer, 1);
+                regularSell.updateGenesisReferrerGift(_tempReferrer, 1);
             }
 
             emit AuctionSettled(

@@ -468,7 +468,7 @@ contract IncrementalSell is Initializable, RelayRecipient {
         );
 
         if (_referrer != address(0)) {
-            regularSell.updateReferrerGiftCount(_referrer, _count);
+            regularSell.updateGenesisReferrerGift(_referrer, _count);
         }
 
         return treeId;

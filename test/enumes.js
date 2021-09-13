@@ -152,7 +152,7 @@ const CommunityGiftErrorMsg = {
 
 const WethFundsErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
-  TOTALDAI_ZERO: "totalDaiToPlanterSwap not be zero",
+  TOTALDAI_INVALID: "totalDaiToPlanterSwap invalid",
 };
 
 module.exports = {

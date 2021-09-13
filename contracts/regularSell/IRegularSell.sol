@@ -128,7 +128,11 @@ interface IRegularSell {
     ) external;
 
     //TODO: ADD_COMMENT
-    function updateReferrerGiftCount(address _referrer, uint256 _count)
+    function updateRegularReferrerGift(address _referrer, uint256 _count)
+        external;
+
+    //TODO: ADD_COMMENT
+    function updateGenesisReferrerGift(address _referrer, uint256 _count)
         external;
 
     //TODO: ADD_COMMENT

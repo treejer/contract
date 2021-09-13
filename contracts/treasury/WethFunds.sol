@@ -500,13 +500,19 @@ contract WethFunds is Initializable {
     }
 
     //TODO: ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse) external onlyScript {
+    function swapDaiToPlanters(uint256 _wethMaxUse, uint256 _totalDaiSwap)
+        external
+        onlyScript
+    {
         require(
             _wethMaxUse <= totalFunds.treejerDevelop,
             "Liquidity not enough"
         );
 
-        require(totalDaiToPlanterSwap > 0, "totalDaiToPlanterSwap not be zero");
+        require(
+            _totalDaiSwap > 0 && _totalDaiSwap <= totalDaiToPlanterSwap,
+            "totalDaiToPlanterSwap invalid"
+        );
 
         address[] memory path;
         path = new address[](2);
@@ -519,16 +525,16 @@ contract WethFunds is Initializable {
         require(success, "unsuccessful approve");
 
         uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
-            totalDaiToPlanterSwap,
+            _totalDaiSwap,
             _wethMaxUse,
             path,
             address(planterFundContract),
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
 
-        emit SwapToPlanterFund(_wethMaxUse, totalDaiToPlanterSwap, amounts[0]);
+        emit SwapToPlanterFund(_wethMaxUse, _totalDaiSwap, amounts[0]);
 
-        totalDaiToPlanterSwap = 0;
+        totalDaiToPlanterSwap -= _totalDaiSwap;
         totalFunds.treejerDevelop -= amounts[0];
     }
 

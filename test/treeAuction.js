@@ -2722,7 +2722,7 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(winnerReferral, zeroAddress, "winner referral is not correct");
 
-    const giftCount = await regularSellInstance.referrerGifts.call(
+    const giftCount = await regularSellInstance.genesisReferrerGifts.call(
       winnerReferral
     );
 
@@ -3179,11 +3179,11 @@ contract("TreeAuction", (accounts) => {
 
     assert.equal(winnerReferral, refferal2, "winner referral is not correct");
 
-    const giftCountWinner = await regularSellInstance.referrerGifts.call(
+    const giftCountWinner = await regularSellInstance.genesisReferrerGifts.call(
       winnerReferral
     );
 
-    const giftCountRefferal1 = await regularSellInstance.referrerGifts.call(
+    const giftCountRefferal1 = await regularSellInstance.genesisReferrerGifts.call(
       refferal1
     );
 
@@ -4439,13 +4439,13 @@ contract("TreeAuction", (accounts) => {
       "winner refferer of auction 0 is not ok"
     );
 
-    const winnerGiftCount1 = await regularSellInstance.referrerGifts.call(
+    const winnerGiftCount1 = await regularSellInstance.genesisReferrerGifts.call(
       winnerRefferer1
     );
 
     assert.equal(Number(winnerGiftCount1), 1, "winner gift count is not ok");
 
-    const otherReffereGiftCount1 = await regularSellInstance.referrerGifts.call(
+    const otherReffereGiftCount1 = await regularSellInstance.genesisReferrerGifts.call(
       otherRefferer
     );
     assert.equal(
@@ -4570,12 +4570,12 @@ contract("TreeAuction", (accounts) => {
       "winner refferer of auction 0 is not ok"
     );
 
-    const winnerGiftCount2 = await regularSellInstance.referrerGifts.call(
+    const winnerGiftCount2 = await regularSellInstance.genesisReferrerGifts.call(
       winnerRefferer2
     );
     assert.equal(Number(winnerGiftCount2), 2, "winner gift count is not ok");
 
-    const otherReffereGiftCount2 = await regularSellInstance.referrerGifts.call(
+    const otherReffereGiftCount2 = await regularSellInstance.genesisReferrerGifts.call(
       otherRefferer
     );
     assert.equal(

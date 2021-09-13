@@ -439,11 +439,11 @@ contract RegularSell is Initializable, RelayRecipient {
 
         require(_count > 0, "invalid gift owner");
 
-        if (_count > 50) {
-            _count = 50;
+        if (_count > 45) {
+            _count = 45;
         }
 
-        int256 x = int256(regularReferrerGifts[_msgSender()] - _count);
+        int256 x = int256(regularReferrerGifts[_msgSender()]) - int256(_count);
 
         uint256 _amount = 0;
 

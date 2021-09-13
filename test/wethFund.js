@@ -3008,7 +3008,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "reserveBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund1Address &&
@@ -3056,7 +3056,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "reserveBalanceWithdrawn1", (ev) => {
+    truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn1", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund1Address &&
@@ -3463,7 +3463,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx, "reserveBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance1) &&
         ev.account == reserveFund2Address &&
@@ -3511,7 +3511,7 @@ contract("WethFunds", (accounts) => {
       { from: deployerAccount }
     );
 
-    truffleAssert.eventEmitted(tx2, "reserveBalanceWithdrawn2", (ev) => {
+    truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn2", (ev) => {
       return (
         Number(ev.amount) == Number(withdrawBalance2) &&
         ev.account == reserveFund2Address &&
@@ -3953,12 +3953,13 @@ contract("WethFunds", (accounts) => {
 
     let expectedSwapTokenAmountTreeId2 =
       await uniswapRouterInstance.getAmountsIn.call(
-        web3.utils.toWei("1000", "Ether"),
+        web3.utils.toWei("500", "Ether"),
         [wethInstance.address, daiInstance.address]
       );
 
     const eventTx = await wethFunds.swapDaiToPlanters(
       expectedSwapTokenAmountTreeId2[0],
+      web3.utils.toWei("500", "Ether"),
       {
         from: buyerRank,
       }
@@ -3967,7 +3968,7 @@ contract("WethFunds", (accounts) => {
     truffleAssert.eventEmitted(eventTx, "SwapToPlanterFund", (ev) => {
       return (
         Number(ev.wethMaxUse) == Number(expectedSwapTokenAmountTreeId2[0]) &&
-        Number(ev.daiAmount) == Number(totalDaiToPlanterSwapBeforeSwap) &&
+        Number(ev.daiAmount) == Number(web3.utils.toWei("500", "Ether")) &&
         Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
       );
     });
@@ -3979,7 +3980,7 @@ contract("WethFunds", (accounts) => {
 
     assert.equal(
       Number(planterFundBalance),
-      Number(web3.utils.toWei("1000", "Ether")),
+      Number(web3.utils.toWei("500", "Ether")),
       "planterFund not true"
     );
 
@@ -3996,7 +3997,7 @@ contract("WethFunds", (accounts) => {
 
     assert.equal(
       Number(await wethFunds.totalDaiToPlanterSwap()),
-      0,
+      Number(web3.utils.toWei("500", "Ether")),
       "totalDaiToPlanterSwap not true"
     );
 
@@ -4048,9 +4049,13 @@ contract("WethFunds", (accounts) => {
       );
 
     await wethFunds
-      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
-        from: buyerRank,
-      })
+      .swapDaiToPlanters(
+        expectedSwapTokenAmountTreeId2[0],
+        web3.utils.toWei("4000", "Ether"),
+        {
+          from: buyerRank,
+        }
+      )
       .should.be.rejectedWith(WethFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
   });
 
@@ -4087,10 +4092,52 @@ contract("WethFunds", (accounts) => {
       );
 
     await wethFunds
-      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
+      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], 0, {
         from: buyerRank,
       })
-      .should.be.rejectedWith(WethFundsErrorMsg.TOTALDAI_ZERO);
+      .should.be.rejectedWith(WethFundsErrorMsg.TOTALDAI_INVALID);
+
+    await wethFunds.updateDaiSwap(web3.utils.toWei("1000", "Ether"), {
+      from: userAccount3,
+    });
+
+    assert.equal(
+      await wethFunds.totalDaiToPlanterSwap(),
+      web3.utils.toWei("1000", "Ether"),
+      "totalDaiToPlanterSwap not true"
+    );
+
+    await wethFunds
+      .swapDaiToPlanters(
+        expectedSwapTokenAmountTreeId2[0],
+        web3.utils.toWei("2000", "Ether"),
+        {
+          from: buyerRank,
+        }
+      )
+      .should.be.rejectedWith(WethFundsErrorMsg.TOTALDAI_INVALID);
+
+    let eventTx = await wethFunds.swapDaiToPlanters(
+      expectedSwapTokenAmountTreeId2[0],
+      web3.utils.toWei("1000", "Ether"),
+      {
+        from: buyerRank,
+      }
+    );
+
+    assert.equal(
+      await wethFunds.totalDaiToPlanterSwap(),
+      0,
+      "totalDaiToPlanterSwap not true"
+    );
+
+    truffleAssert.eventEmitted(eventTx, "SwapToPlanterFund", (ev) => {
+      return (
+        Number(ev.wethMaxUse) == Number(expectedSwapTokenAmountTreeId2[0]) &&
+        Number(ev.daiAmount) == Number(web3.utils.toWei("1000", "Ether")) &&
+        Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
+      );
+    });
   });
 
   it("Should swapDaiToPlanters reject (onlyBuyerRank)", async () => {
@@ -4126,9 +4173,13 @@ contract("WethFunds", (accounts) => {
       );
 
     await wethFunds
-      .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], {
-        from: userAccount3,
-      })
+      .swapDaiToPlanters(
+        expectedSwapTokenAmountTreeId2[0],
+        web3.utils.toWei("1000", "Ether"),
+        {
+          from: userAccount3,
+        }
+      )
       .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
   });
 });

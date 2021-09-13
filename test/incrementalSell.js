@@ -331,7 +331,7 @@ contract("IncrementalSell", (accounts) => {
   //     );
   //   });
 
-  //   let count = await regularSellInstance.referrerGifts.call(userAccount5);
+  //   let count = await regularSellInstance.genesisReferrerGifts.call(userAccount5);
 
   //   console.log("count", Number(count));
 
@@ -816,7 +816,7 @@ contract("IncrementalSell", (accounts) => {
 
     ////--------------------check referral---------------------
 
-    let referralCount = await regularSellInstance.referrerGifts.call(
+    let referralCount = await regularSellInstance.genesisReferrerGifts.call(
       userAccount6
     );
 
@@ -886,7 +886,7 @@ contract("IncrementalSell", (accounts) => {
 
     ////--------------------check referral---------------------
 
-    let referralCount2 = await regularSellInstance.referrerGifts.call(
+    let referralCount2 = await regularSellInstance.genesisReferrerGifts.call(
       userAccount6
     );
 
@@ -923,7 +923,7 @@ contract("IncrementalSell", (accounts) => {
 
     ////--------------------check referral---------------------
 
-    let referralCount3 = await regularSellInstance.referrerGifts.call(
+    let referralCount3 = await regularSellInstance.genesisReferrerGifts.call(
       zeroAddress
     );
 
@@ -963,7 +963,7 @@ contract("IncrementalSell", (accounts) => {
 
     ////--------------------check referral---------------------
 
-    let referralCount4 = await regularSellInstance.referrerGifts.call(
+    let referralCount4 = await regularSellInstance.genesisReferrerGifts.call(
       userAccount5
     );
 
@@ -2068,13 +2068,13 @@ contract("IncrementalSell", (accounts) => {
     await iSellInstance.buyTree(20, userAccount3, { from: userAccount3 });
 
     assert.equal(
-      Number(await regularSellInstance.referrerGifts.call(userAccount3)),
+      Number(await regularSellInstance.genesisReferrerGifts.call(userAccount3)),
       20,
       "Referral not true"
     );
 
     assert.equal(
-      Number(await regularSellInstance.referrerGifts.call(zeroAddress)),
+      Number(await regularSellInstance.genesisReferrerGifts.call(zeroAddress)),
       0,
       "2-Referral not true"
     );

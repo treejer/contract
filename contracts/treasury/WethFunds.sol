@@ -112,9 +112,9 @@ contract WethFunds is Initializable {
         _;
     }
 
-    /** NOTE modifier to check msg.sender has buyer rank role */
-    modifier onlyBuyerRank() {
-        accessRestriction.ifBuyerRank(msg.sender);
+    /** NOTE modifier to check msg.sender has script role */
+    modifier onlyScript() {
+        accessRestriction.ifScript(msg.sender);
         _;
     }
 
@@ -500,7 +500,7 @@ contract WethFunds is Initializable {
     }
 
     //TODO: ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse) external onlyBuyerRank {
+    function swapDaiToPlanters(uint256 _wethMaxUse) external onlyScript {
         require(
             _wethMaxUse <= totalFunds.treejerDevelop,
             "Liquidity not enough"

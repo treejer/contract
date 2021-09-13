@@ -9,7 +9,7 @@ const DEFAULT_ADMIN_ROLE =
 
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
-const BUYER_RANK_ROLE = web3.utils.soliditySha3("BUYER_RANK_ROLE");
+const SCRIPT_ROLE = web3.utils.soliditySha3("SCRIPT_ROLE");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 
@@ -42,7 +42,7 @@ Common.addDataManager = async (instance, account, adminAccount) => {
 };
 
 Common.addBuyerRank = async (instance, account, adminAccount) => {
-  await instance.grantRole(BUYER_RANK_ROLE, account, { from: adminAccount });
+  await instance.grantRole(SCRIPT_ROLE, account, { from: adminAccount });
 };
 
 Common.approveAndTransfer = async (

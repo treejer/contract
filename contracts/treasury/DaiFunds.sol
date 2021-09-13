@@ -297,7 +297,9 @@ contract DaiFunds is Initializable {
     }
 
     //TODO:ADD_COMMENTS
-    function refererTransferDai(uint256 _amount) external {
+    function refererTransferDai(uint256 _amount) external onlyTreejerContract {
+        require(totalFunds.treejerDevelop >= _amount, "Liquidity not enough");
+
         totalFunds.treejerDevelop -= _amount;
 
         bool success = daiToken.transfer(address(planterFundContract), _amount);

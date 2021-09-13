@@ -114,18 +114,18 @@ contract("AccessRestriction", (accounts) => {
     assert.equal(after, true, "DataManager role is not correct");
   });
 
-  it("should add buyer rank and check data", async () => {
+  it("should add script and check data", async () => {
     await arInstance
-      .ifBuyerRank(userAccount1)
+      .ifScript(userAccount1)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
 
-    const before = await arInstance.isBuyerRank(userAccount1);
+    const before = await arInstance.isScript(userAccount1);
 
     await Common.addBuyerRank(arInstance, userAccount1, deployerAccount);
 
-    await arInstance.ifBuyerRank(userAccount1);
+    await arInstance.ifScript(userAccount1);
 
-    const after = await arInstance.isBuyerRank(userAccount1);
+    const after = await arInstance.isScript(userAccount1);
 
     assert.equal(before, false, "BuyerRank role is not correct");
     assert.equal(after, true, "BuyerRank role is not correct");

@@ -69,9 +69,9 @@ contract TreeAttribute is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier to check msg.sender has buyer rank role */
-    modifier onlyBuyerRank() {
-        accessRestriction.ifBuyerRank(_msgSender());
+    /** NOTE modifier to check msg.sender has script role */
+    modifier onlyScript() {
+        accessRestriction.ifScript(_msgSender());
         _;
     }
 
@@ -309,7 +309,7 @@ contract TreeAttribute is Initializable, RelayRecipient {
         uint256 walletSpent,
         uint64 treesOwned,
         uint64 walletSpentCount
-    ) external onlyBuyerRank {
+    ) external onlyScript {
         uint256 points = 0;
         //each 0.004 ether spent in treejer has 10 points
         points += (treejerSpent / (400000 gwei));

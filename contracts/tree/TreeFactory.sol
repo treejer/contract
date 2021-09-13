@@ -95,9 +95,9 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier to check msg.sender has buyer rank role */
-    modifier onlyBuyerRank() {
-        accessRestriction.ifBuyerRank(_msgSender());
+    /** NOTE modifier to check msg.sender has script role */
+    modifier onlyScript() {
+        accessRestriction.ifScript(_msgSender());
         _;
     }
 
@@ -673,7 +673,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** @dev script role update {_treeSpecs} of {_treeId} */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
-        onlyBuyerRank
+        onlyScript
     {
         treeData[_treeId].treeSpecs = _treeSpecs;
 

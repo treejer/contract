@@ -75,7 +75,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularPlantVerified(uint256 treeId);
     event RegularPlantRejected(uint256 treeId);
     event UpdateIntervalSet();
-    event TreeSpecsUpdate(uint256 treeId);
+    event TreeSpecsUpdate(uint256 treeId, string treeSpecs);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -677,6 +677,6 @@ contract TreeFactory is Initializable, RelayRecipient {
     {
         treeData[_treeId].treeSpecs = _treeSpecs;
 
-        emit TreeSpecsUpdate(_treeId);
+        emit TreeSpecsUpdate(_treeId, _treeSpecs);
     }
 }

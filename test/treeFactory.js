@@ -58,6 +58,7 @@ contract("TreeFactory", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const ipfsHash = "some ipfs hash here";
   const updateIpfsHash1 = "some update ipfs hash here";
+
   beforeEach(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
@@ -78,6 +79,7 @@ contract("TreeFactory", (accounts) => {
     await Common.addPlanter(arInstance, userAccount7, deployerAccount); //organizationPlanter2
     await Common.addPlanter(arInstance, userAccount8, deployerAccount); //organizationPlanter2
   });
+
   beforeEach(async () => {
     treeFactoryInstance = await TreeFactory.new({
       from: deployerAccount,
@@ -117,6 +119,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   afterEach(async () => {});
+
   /////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
@@ -6410,7 +6413,7 @@ contract("TreeFactory", (accounts) => {
     });
 
     truffleAssert.eventEmitted(eventTx, "TreeSpecsUpdate", (ev) => {
-      return Number(ev.treeId) == treeId;
+      return Number(ev.treeId) == treeId && ev.treeSpecs == newIpfs;
     });
 
     const treeData2 = await treeFactoryInstance.treeData.call(treeId);

@@ -138,6 +138,8 @@ contract("regularSell", (accounts) => {
     );
   });
 
+  /* ssss
+
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     ////////////// ------------------- handle fund distribution model ----------------------
@@ -3479,6 +3481,8 @@ contract("regularSell", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
+  ssss */
+
   it("Should setGiftPerRegularBuys successFully", async () => {
     assert.equal(Number(await regularSellInstance.perRegularBuys()), 20);
 
@@ -3488,6 +3492,8 @@ contract("regularSell", (accounts) => {
 
     assert.equal(Number(await regularSellInstance.perRegularBuys()), 8);
 
-    truffleAssert.eventEmitted(tx, "GiftPerRegularBuyUpdated");
+    truffleAssert.eventEmitted(tx, "GiftPerRegularBuyUpdated", (ev) => {
+      return Number(ev.count) == 8;
+    });
   });
 });

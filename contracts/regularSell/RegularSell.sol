@@ -65,7 +65,7 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 amount
     );
     event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
-    event GiftPerRegularBuyUpdated();
+    event GiftPerRegularBuyUpdated(uint256 count);
     event RegularPlanterFundSet(
         uint256 regularPlanterFund,
         uint256 regularReferralFund
@@ -121,9 +121,9 @@ contract RegularSell is Initializable, RelayRecipient {
 
         isRegularSell = true;
         lastSoldRegularTree = 10000;
+
         perRegularBuys = 20;
         treePrice = _price;
-        emit TreePriceUpdated(_price);
     }
 
     /**
@@ -230,8 +230,7 @@ contract RegularSell is Initializable, RelayRecipient {
     //TODO: ADD_COMMENT
     function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
         perRegularBuys = _count;
-
-        emit GiftPerRegularBuyUpdated();
+        emit GiftPerRegularBuyUpdated(_count);
     }
 
     /** @dev request {_count} trees and the paid amount must be more than

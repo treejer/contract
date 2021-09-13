@@ -296,6 +296,15 @@ contract DaiFunds is Initializable {
         emit RegularFunded();
     }
 
+    //TODO:ADD_COMMENTS
+    function refererTransferDai(uint256 _amount) external {
+        totalFunds.treejerDevelop -= _amount;
+
+        bool success = daiToken.transfer(address(planterFundContract), _amount);
+
+        require(success, "unsuccessful transfer");
+    }
+
     /**
      * @dev admin withdraw {_amount} from treeResearch totalFund in case of
      * valid {_amount}  and daiToken transfer to {treeResearchAddress}

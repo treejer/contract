@@ -28,7 +28,8 @@ contract RegularSell is Initializable, RelayRecipient {
     //TODO: ADD_COMMENT
     uint256 public perRegularBuys;
 
-    mapping(address => uint256) public referrerGifts;
+    mapping(address => uint256) public genesisReferrerGifts;
+    mapping(address => uint256) public regularReferrerGifts;
     mapping(address => uint256) public referrerRegularCount;
 
     struct FundDistribution {
@@ -65,7 +66,7 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 amount
     );
     event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
-    event GiftPerRegularBuyUpdated();
+    event GiftPerRegularBuyUpdated(uint256 count);
     event RegularPlanterFundSet(
         uint256 regularPlanterFund,
         uint256 regularReferralFund
@@ -76,12 +77,6 @@ contract RegularSell is Initializable, RelayRecipient {
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
-        _;
-    }
-
-    /**NOTE only gift owner  */
-    modifier onlyGiftOwner() {
-        require(referrerGifts[_msgSender()] > 0, "invalid gift owner");
         _;
     }
 
@@ -121,9 +116,9 @@ contract RegularSell is Initializable, RelayRecipient {
 
         isRegularSell = true;
         lastSoldRegularTree = 10000;
+
         perRegularBuys = 20;
         treePrice = _price;
-        emit TreePriceUpdated(_price);
     }
 
     /**
@@ -230,8 +225,7 @@ contract RegularSell is Initializable, RelayRecipient {
     //TODO: ADD_COMMENT
     function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
         perRegularBuys = _count;
-
-        emit GiftPerRegularBuyUpdated();
+        emit GiftPerRegularBuyUpdated(_count);
     }
 
     /** @dev request {_count} trees and the paid amount must be more than
@@ -323,7 +317,7 @@ contract RegularSell is Initializable, RelayRecipient {
         if (localReferrerRegularCount >= perRegularBuys) {
             uint256 temp = localReferrerRegularCount / perRegularBuys;
             localReferrerRegularCount -= temp * perRegularBuys;
-            referrerGifts[_referrer] += temp;
+            regularReferrerGifts[_referrer] += temp;
         }
 
         referrerRegularCount[_referrer] = localReferrerRegularCount;
@@ -423,25 +417,62 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function updateReferrerGiftCount(address _referrer, uint256 _count)
+    function updateRegularReferrerGift(address _referrer, uint256 _count)
         external
         onlyTreejerContract
     {
-        referrerGifts[_referrer] += _count;
+        regularReferrerGifts[_referrer] += _count;
     }
 
     //TODO: ADD_COMMENT
-    function claimGifts() external onlyGiftOwner {
-        uint256 _count = referrerGifts[_msgSender()];
+    function updateGenesisReferrerGift(address _referrer, uint256 _count)
+        external
+        onlyTreejerContract
+    {
+        genesisReferrerGifts[_referrer] += _count;
+    }
+
+    //TODO: ADD_COMMENT
+    function claimGifts() external {
+        uint256 _count = regularReferrerGifts[_msgSender()] +
+            genesisReferrerGifts[_msgSender()];
+
+        require(_count > 0, "invalid gift owner");
 
         if (_count > 50) {
             _count = 50;
         }
-        uint256 _amount = _count * (regularPlanterFund + regularReferralFund);
 
-        wethFunds.updateDaiSwap(_amount);
+        int256 x = int256(regularReferrerGifts[_msgSender()] - _count);
 
-        referrerGifts[_msgSender()] -= _count;
+        uint256 _amount = 0;
+
+        if (x > -1) {
+            _amount = _count * (regularPlanterFund + regularReferralFund);
+
+            regularReferrerGifts[_msgSender()] -= _count;
+
+            daiFunds.refererTransferDai(_amount);
+        } else {
+            if (regularReferrerGifts[_msgSender()] > 0) {
+                _amount =
+                    regularReferrerGifts[_msgSender()] *
+                    (regularPlanterFund + regularReferralFund);
+
+                regularReferrerGifts[_msgSender()] = 0;
+
+                daiFunds.refererTransferDai(_amount);
+            }
+
+            uint256 wethAmount = uint256(-x) *
+                (regularPlanterFund + regularReferralFund);
+
+            genesisReferrerGifts[_msgSender()] -= uint256(-x);
+
+            wethFunds.updateDaiSwap(wethAmount);
+
+            _amount += wethAmount;
+        }
 
         emit ReferrGiftClaimed(_msgSender(), _count, _amount);
 

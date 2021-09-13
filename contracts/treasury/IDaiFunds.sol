@@ -45,6 +45,9 @@ interface IDaiFunds {
             uint256 reserveFund2
         );
 
+    //TODO:ADD_COMMENTS
+    function refererTransferDai(uint256 _amount) external;
+
     /**
      * @return treeResearch address
      */

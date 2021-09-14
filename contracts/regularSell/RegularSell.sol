@@ -119,6 +119,9 @@ contract RegularSell is Initializable, RelayRecipient {
 
         perRegularBuys = 20;
         treePrice = _price;
+
+        emit GiftPerRegularBuyUpdated(20);
+        emit TreePriceUpdated(_price);
     }
 
     /**

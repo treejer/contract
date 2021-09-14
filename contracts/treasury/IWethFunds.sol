@@ -207,7 +207,8 @@ interface IWethFunds {
     ) external returns (uint256);
 
     //TODO: ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse) external;
+    function swapDaiToPlanters(uint256 _wethMaxUse, uint256 _totalDaiSwap)
+        external;
 
     //TODO: ADD_COMMENT
     function updateDaiSwap(uint256 _amount) external;

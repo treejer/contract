@@ -25,7 +25,16 @@ interface IRegularSell {
     function perRegularBuys() external view returns (uint256);
 
     //TODO:ADD_COMMENT
-    function referrerGifts(address _refferer) external view returns (uint256);
+    function genesisReferrerGifts(address _refferer)
+        external
+        view
+        returns (uint256);
+
+    //TODO:ADD_COMMENT
+    function regularReferrerGifts(address _refferer)
+        external
+        view
+        returns (uint256);
 
     //TODO:ADD_COMMENT
     function referrerRegularCount(address _refferer)
@@ -126,10 +135,6 @@ interface IRegularSell {
         uint256 _regularPlanterFund,
         uint256 _regularReferralFund
     ) external;
-
-    //TODO: ADD_COMMENT
-    function updateRegularReferrerGift(address _referrer, uint256 _count)
-        external;
 
     //TODO: ADD_COMMENT
     function updateGenesisReferrerGift(address _referrer, uint256 _count)

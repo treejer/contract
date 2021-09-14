@@ -420,14 +420,6 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function updateRegularReferrerGift(address _referrer, uint256 _count)
-        external
-        onlyTreejerContract
-    {
-        regularReferrerGifts[_referrer] += _count;
-    }
-
-    //TODO: ADD_COMMENT
     function updateGenesisReferrerGift(address _referrer, uint256 _count)
         external
         onlyTreejerContract

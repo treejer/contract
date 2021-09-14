@@ -9,6 +9,8 @@ const PlanterFund = artifacts.require("PlanterFund.sol");
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
+  const planterFund = web3.utils.toWei("0.5");
+  const referralFund = web3.utils.toWei("0.1");
   const treeFactoryAddress = TreeFactory.address;
   const daiFundsAddress = DaiFunds.address;
   const financialModelAddress = FinancialModel.address;
@@ -41,5 +43,9 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setFinancialModelAddress(financialModelAddress);
     await instance.setPlanterFundAddress(planterFundsAddress);
     await instance.setWethFundsAddress(wethFundsAddress);
+
+    await instance.setRegularPlanterFund(planterFund, referralFund, {
+      from: accounts[0],
+    });
   });
 };

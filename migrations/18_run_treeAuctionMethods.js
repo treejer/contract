@@ -21,8 +21,7 @@ module.exports = async function (deployer, network, accounts) {
   if (isLocal) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
     wethTokenAddress = Weth.address;
-  }
-  if (network == "mumbai") {
+  } else if (network == "mumbai") {
     trustedForwarder = process.env.GSN_FORWARDER;
     wethTokenAddress = Weth.address;
   } else {

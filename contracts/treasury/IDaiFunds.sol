@@ -45,9 +45,6 @@ interface IDaiFunds {
             uint256 reserveFund2
         );
 
-    //TODO:ADD_COMMENTS
-    function refererTransferDai(uint256 _amount) external;
-
     /**
      * @return treeResearch address
      */
@@ -148,6 +145,9 @@ interface IDaiFunds {
         uint256 _totalReserveFund1,
         uint256 _totalReserveFund2
     ) external;
+
+    //TODO:ADD_COMMENTS
+    function refererTransferDai(uint256 _amount) external;
 
     /**
      * @dev trnasfer {_amount} from treeResearch in {totalFunds} to treeResearchAddress

@@ -94,10 +94,10 @@ interface IAccessRestriction {
     function ifDataManagerOrTreejerContract(address _address) external view;
 
     /**
-     * @dev check if given address is buyer rank
+     * @dev check if given address is script
      * @param _address input address
      */
-    function ifBuyerRank(address _address) external view;
+    function ifScript(address _address) external view;
 
     /** @return if functionality is paused*/
     function paused() external view returns (bool);

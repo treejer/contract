@@ -34,6 +34,11 @@ interface ITreeAuction {
     function wethToken() external view returns (address);
 
     /**
+     * @return RegularSell contract address
+     */
+    function regularSell() external view returns (address);
+
+    /**
      *@dev return data of an auction with auction id
      *@return  treeId
      *@return bidder
@@ -66,6 +71,9 @@ interface ITreeAuction {
     /** @dev set {_address} to WethFunds contract address */
     function setWethFundsAddress(address _address) external;
 
+    /** @dev set {_address} to RegularSell contract address */
+    function setRegularSellAddress(address _address) external;
+
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;
 
@@ -89,9 +97,12 @@ interface ITreeAuction {
      * NOTE check if less than 10 minutes left to end of auction add 10 minutes to the end date of auction
      * NOTE when new bid done previous bidder refunded automatically
      * emit a {HighestBidIncreased} event
-
      */
-    function bid(uint256 _auctionId, uint256 _amount) external;
+    function bid(
+        uint256 _auctionId,
+        uint256 _amount,
+        address _referrer
+    ) external;
 
     /** @dev everyone can call this method after
      * auction end time and if auction have bidder , transfer owner of tree to bidder
@@ -103,25 +114,34 @@ interface ITreeAuction {
 
     /**
      * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
-     * with value of {amount}
+     * with value of {amount} and {referrer} address
      */
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
         address bidder,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
     /**
      * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
      * {winner} is the final bidder of auction and {amount} is the auction's highestBid
+     * and {referrer} is the address of refferer
      */
 
     event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
+
+    /**
+     * @dev emitted when an auction created
+     * {auctionId} is the number of auction
+     */
+    event AuctionCreated(uint256 auctionId);
 
     /**
      * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
@@ -136,10 +156,4 @@ interface ITreeAuction {
      * {newAuctionEndTime} is old auction end time plus 10 minutes
      */
     event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
-
-    /**
-     * @dev emitted when an auction created
-     * {auctionId} is the number of auction
-     */
-    event AuctionCreated(uint256 auctionId);
 }

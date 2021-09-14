@@ -72,6 +72,8 @@ contract DaiFunds is Initializable {
 
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
+    event RegularFunded();
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -259,6 +261,50 @@ contract DaiFunds is Initializable {
         planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
 
         emit TreeFunded(_treeId, _amount, planterFund + referralFund);
+    }
+
+    //TODO : ADD_COMMENT
+    function regularFund(
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
+    ) external onlyTreejerContract {
+        totalFunds.treeResearch += _totalTreeResearch;
+
+        totalFunds.localDevelop += _totalLocalDevelop;
+
+        totalFunds.rescueFund += _totalRescueFund;
+
+        totalFunds.treejerDevelop += _totalTreejerDevelop;
+
+        totalFunds.reserveFund1 += _totalReserveFund1;
+
+        totalFunds.reserveFund2 += _totalReserveFund2;
+
+        bool success = daiToken.transfer(
+            address(planterFundContract),
+            _totalPlanterFund + _totalReferralFund
+        );
+
+        require(success, "unsuccessful transfer");
+
+        emit RegularFunded();
+    }
+
+    //TODO:ADD_COMMENTS
+    function refererTransferDai(uint256 _amount) external onlyTreejerContract {
+        require(totalFunds.treejerDevelop >= _amount, "Liquidity not enough");
+
+        totalFunds.treejerDevelop -= _amount;
+
+        bool success = daiToken.transfer(address(planterFundContract), _amount);
+
+        require(success, "unsuccessful transfer");
     }
 
     /**

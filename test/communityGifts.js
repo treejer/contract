@@ -762,9 +762,12 @@ contract("CommunityGifts", (accounts) => {
   it("should set expire date successfully and check data to be ok", async () => {
     const expireDate = await Common.timeInitial(TimeEnumes.days, 10);
 
-    await communityGiftsInstance.setExpireDate(Number(expireDate), {
-      from: dataManager,
-    });
+    const eventTx = await communityGiftsInstance.setExpireDate(
+      Number(expireDate),
+      {
+        from: dataManager,
+      }
+    );
 
     let settedExpireDate = await communityGiftsInstance.expireDate.call();
 
@@ -773,6 +776,8 @@ contract("CommunityGifts", (accounts) => {
       Number(expireDate),
       "expire date is not correct"
     );
+
+    truffleAssert.eventEmitted(eventTx, "CommuintyGiftSet");
   });
 
   it("should fail to set expire date", async () => {

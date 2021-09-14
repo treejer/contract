@@ -9,9 +9,6 @@ interface ITreeAttribute {
     /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
 
-    /** @return TreeFactory contract address */
-    function treeFactory() external view returns (address);
-
     /** @return rank of buyer address */
     function rankOf(address _buyer) external view returns (uint8);
 
@@ -54,18 +51,17 @@ interface ITreeAttribute {
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
 
-    /** @dev set {_address} to TreeFactory contract address */
-    function setTreeFactoryAddress(address _address) external;
-
     /**
      * @dev reserve a unique symbol
      * @param generatedCode unique symbol to reserve
+     * NOTE emit a {SymbolReserved} event
      */
     function reserveTreeAttributes(uint32 generatedCode) external;
 
     /**
      * @dev free reservation of a unique symbol
      * @param generatedCode unique symbol to reserve
+     * NOTE emit a {ReservedSymbolFreed} event
      */
     function freeReserveTreeAttributes(uint32 generatedCode) external;
 
@@ -73,6 +69,7 @@ interface ITreeAttribute {
      * @dev admin assigns symbol to specified treeId
      * @param treeId id of tree
      * @param generatedCode unique symbol code to assign
+     * NOTE emit a {SymbolSetByAdmin} event
      */
     function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
         external;
@@ -114,4 +111,10 @@ interface ITreeAttribute {
     event TreeAttributesGenerated(uint256 treeId);
     /** @dev emitted when unique tree attribute fail to generate for {treeId} */
     event TreeAttributesNotGenerated(uint256 treeId);
+    /** @dev emitted when a unique symbol reserved */
+    event SymbolReserved(uint32 generatedCode);
+    /** @dev emitted when reservation of a unique symbol freed */
+    event ReservedSymbolFreed(uint32 generatedCode);
+    /** @dev emitted when admin assings a symbol to {treeId} */
+    event SymbolSetByAdmin(uint256 treeId);
 }

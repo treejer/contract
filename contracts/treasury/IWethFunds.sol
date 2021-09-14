@@ -34,6 +34,9 @@ interface IWethFunds {
      */
     function daiAddress() external view returns (address);
 
+    //TODO:ADD_COMMENT
+    function totalDaiToPlanterSwap() external view returns (uint256);
+
     /**
      * @dev return totalFunds struct data
      * @return treeResearch share
@@ -192,6 +195,23 @@ interface IWethFunds {
     function withdrawReserveFund2(uint256 _amount, string calldata _reason)
         external;
 
+    function incrementalFund(
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
+    ) external returns (uint256);
+
+    //TODO: ADD_COMMENT
+    function swapDaiToPlanters(uint256 _wethMaxUse) external;
+
+    //TODO: ADD_COMMENT
+    function updateDaiSwap(uint256 _amount) external;
+
     /**
      * @dev emitted when admin withdraw tree research balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage
@@ -258,4 +278,14 @@ interface IWethFunds {
      * {treeId} is id of tree that is funded
      */
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+
+    //TODO:ADD_COMMENT
+    event IncrementalFunded();
+
+    //TODO:ADD_COMMENT
+    event SwapToPlanterFund(
+        uint256 wethMaxUse,
+        uint256 daiAmount,
+        uint256 wethAmount
+    );
 }

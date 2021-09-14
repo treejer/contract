@@ -10,6 +10,7 @@ import "../tree/ITreeFactory.sol";
 import "../treasury/IFinancialModel.sol";
 import "../treasury/IWethFunds.sol";
 import "../gsn/RelayRecipient.sol";
+import "../regularSell/IRegularSell.sol";
 
 /** @title Tree Auction */
 
@@ -27,6 +28,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     IWethFunds public wethFunds;
     IFinancialModel public financialModel;
     IERC20Upgradeable public wethToken;
+    IRegularSell public regularSell;
 
     struct Auction {
         uint256 treeId;
@@ -40,17 +42,22 @@ contract TreeAuction is Initializable, RelayRecipient {
     /** NOTE mapping of auctionId to Auction struct */
     mapping(uint256 => Auction) public auctions;
 
+    /**NOTE mapping of bidder to mapping of auctionId to referral */
+    mapping(address => mapping(uint256 => address)) public referrals;
+
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
         address bidder,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
     event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
         address winner,
-        uint256 amount
+        uint256 amount,
+        address referrer
     );
     event AuctionCreated(uint256 auctionId);
     event AuctionEnded(uint256 auctionId, uint256 treeId);
@@ -71,6 +78,12 @@ contract TreeAuction is Initializable, RelayRecipient {
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
+        _;
+    }
+
+    /** NOTE modifier for check msg.sender has TreejerContract role*/
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(_msgSender());
         _;
     }
 
@@ -142,6 +155,17 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     /**
+     * @dev admin set RegularSell
+     * @param _address set to the address of regularSell
+     */
+
+    function setRegularSellAddress(address _address) external onlyAdmin {
+        IRegularSell candidateContract = IRegularSell(_address);
+        require(candidateContract.isRegularSell());
+        regularSell = candidateContract;
+    }
+
+    /**
      * @dev admin set WethToken
      * @param _address set to the address of wethToken
      */
@@ -201,7 +225,11 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _auctionId auctionId that user bid for it.
      */
 
-    function bid(uint256 _auctionId, uint256 _amount) external ifNotPaused {
+    function bid(
+        uint256 _auctionId,
+        uint256 _amount,
+        address _referrer
+    ) external ifNotPaused {
         Auction storage _storageAuction = auctions[_auctionId];
 
         require(
@@ -232,6 +260,13 @@ contract TreeAuction is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
+        if (
+            _referrer != address(0) &&
+            referrals[_msgSender()][_auctionId] == address(0)
+        ) {
+            referrals[_msgSender()][_auctionId] = _referrer;
+        }
+
         address oldBidder = _storageAuction.bidder;
         uint256 oldBid = _storageAuction.highestBid;
 
@@ -242,7 +277,8 @@ contract TreeAuction is Initializable, RelayRecipient {
             _auctionId,
             _storageAuction.treeId,
             _msgSender(),
-            _amount
+            _amount,
+            _referrer
         );
 
         _increaseAuctionEndTime(_auctionId);
@@ -300,11 +336,18 @@ contract TreeAuction is Initializable, RelayRecipient {
 
             treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
 
+            address _tempReferrer = referrals[auction.bidder][_auctionId];
+
+            if (_tempReferrer != address(0)) {
+                regularSell.updateGenesisReferrerGift(_tempReferrer, 1);
+            }
+
             emit AuctionSettled(
                 _auctionId,
                 auction.treeId,
                 auction.bidder,
-                auction.highestBid
+                auction.highestBid,
+                _tempReferrer
             );
         } else {
             treeFactory.updateAvailability(auction.treeId);

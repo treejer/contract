@@ -44,13 +44,20 @@ contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE mapping of planter address to planter balance*/
     mapping(address => uint256) public balances;
 
-    event PlanterFunded(uint256 treeId, address planterId, uint256 amount);
+    event PlanterFunded(
+        uint256 treeId,
+        address planterId,
+        uint256 amount,
+        address referral
+    );
     event PlanterBalanceWithdrawn(uint256 amount, address account);
     event PlanterFundSet(
         uint256 treeId,
         uint256 planterAmount,
         uint256 referralAmount
     );
+
+    event WithdrawThresholdSet();
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -141,6 +148,8 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function setWithdrawThreshold(uint256 _amount) external onlyDataManager {
         withdrawThreshold = _amount;
+
+        emit WithdrawThresholdSet();
     }
 
     /**
@@ -229,7 +238,12 @@ contract PlanterFund is Initializable, RelayRecipient {
                     (totalPayablePlanter * gottenPortion) /
                     fullPortion;
 
-                emit PlanterFunded(_treeId, _planterId, totalPayablePlanter);
+                emit PlanterFunded(
+                    _treeId,
+                    _planterId,
+                    totalPayablePlanter,
+                    gottenReferralAddress
+                );
             }
         }
     }

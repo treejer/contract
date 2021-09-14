@@ -85,6 +85,7 @@ const TreasuryManagerErrorMsg = {
 
 const DaiFundsErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
+  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
 };
 const FinancialModelErrorMsg = {
   SUM_INVALID: "sum must be 10000",
@@ -113,6 +114,7 @@ const RegularSellErrors = {
   INVALID_AMOUNT: "invalid amount",
   INVALID_COUNT: "invalid count",
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
+  INVALID_GIFT_OWNER: "invalid gift owner",
 };
 
 const IncrementalSellErrorMsg = {
@@ -121,8 +123,8 @@ const IncrementalSellErrorMsg = {
   OCCUPIED_TREES: "trees are under Auction",
   PRICE_CHANGE_PERIODS: "incremental period should be positive",
   TREE_PROVIDED_BEFORE: "trees are not available for sell",
-  // INVALID_TREE: "Not enough tree in incremental sell",
-  INVALID_TREE: "tree is not in incremental sell",
+  INVALID_TREE: "Not enough tree in incremental sell",
+  // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
   FREE_INCREMENTALSELL_FAIL:
     "IncrementalSell not exist or count must be lt endTree",
@@ -149,6 +151,11 @@ const CommunityGiftErrorMsg = {
   INVALID_RANGE: "invalid range",
 };
 
+const WethFundsErrorMsg = {
+  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
+  TOTALDAI_INVALID: "totalDaiToPlanterSwap invalid",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -165,4 +172,5 @@ module.exports = {
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,
+  WethFundsErrorMsg,
 };

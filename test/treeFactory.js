@@ -58,7 +58,6 @@ contract("TreeFactory", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const ipfsHash = "some ipfs hash here";
   const updateIpfsHash1 = "some update ipfs hash here";
-
   beforeEach(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
       initializer: "initialize",
@@ -98,6 +97,7 @@ contract("TreeFactory", (accounts) => {
   });
 
   afterEach(async () => {});
+
   /////////////------------------------------------ deploy successfully ----------------------------------------//
 
   it("deploys successfully", async () => {
@@ -191,6 +191,8 @@ contract("TreeFactory", (accounts) => {
 
     assert.equal(dayBefore, 7 * 24 * 60 * 60, "dayBefore not true");
     assert.equal(dayAfter, 10 * 24 * 60 * 60, "dayAfter not true");
+
+    truffleAssert.eventEmitted(tx, "UpdateIntervalSet");
   });
   /////////////////------------------------------------ add tree ----------------------------------------//
 
@@ -2589,9 +2591,11 @@ contract("TreeFactory", (accounts) => {
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-    await treeFactoryInstance.setUpdateInterval(3, {
+    const updateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(3, {
       from: dataManager,
     });
+
+    truffleAssert.eventEmitted(updateIntervalTx1, "UpdateIntervalSet");
 
     await treeFactoryInstance.updateTree(treeId, ipfsHash, {
       from: userAccount2,
@@ -2601,9 +2605,11 @@ contract("TreeFactory", (accounts) => {
       from: dataManager,
     });
 
-    await treeFactoryInstance.setUpdateInterval(4, {
+    const updateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(4, {
       from: dataManager,
     });
+
+    truffleAssert.eventEmitted(updateIntervalTx2, "UpdateIntervalSet");
 
     let travelTime2 = Math.add(
       Math.mul(Number(tree.treeStatus), 3600),
@@ -6358,6 +6364,40 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       })
       .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_MUST_BE_PLANTED);
+  });
+
+  ///////////////////////------------------ test updateTreeSpecs -----------------
+  it("should updateTreeSpecs succeusfully and fail in invalid accesses", async () => {
+    const treeId = 0;
+    const newIpfs = "new ipfs hash";
+
+    await Common.addBuyerRank(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
+
+    await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      from: dataManager,
+    });
+
+    const treeData1 = await treeFactoryInstance.treeData.call(treeId);
+
+    assert.equal(treeData1.treeSpecs, ipfsHash, "ipfs hash is not correct");
+
+    const eventTx = await treeFactoryInstance.updateTreeSpecs(treeId, newIpfs, {
+      from: dataManager,
+    });
+
+    truffleAssert.eventEmitted(eventTx, "TreeSpecsUpdate", (ev) => {
+      return Number(ev.treeId) == treeId && ev.treeSpecs == newIpfs;
+    });
+
+    const treeData2 = await treeFactoryInstance.treeData.call(treeId);
+
+    assert.equal(treeData2.treeSpecs, newIpfs, "new ipfs hash is not correct");
+
+    await treeFactoryInstance
+      .updateTreeSpecs(treeId, newIpfs, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
   });
 
   /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////

@@ -45,6 +45,9 @@ interface IDaiFunds {
             uint256 reserveFund2
         );
 
+    //TODO:ADD_COMMENTS
+    function refererTransferDai(uint256 _amount) external;
+
     /**
      * @return treeResearch address
      */
@@ -132,6 +135,18 @@ interface IDaiFunds {
         uint16 _treejerDevelop,
         uint16 _reserveFund1,
         uint16 _reserveFund2
+    ) external;
+
+    //TODO : ADD_COMMENT
+    function regularFund(
+        uint256 _totalPlanterFund,
+        uint256 _totalReferralFund,
+        uint256 _totalTreeResearch,
+        uint256 _totalLocalDevelop,
+        uint256 _totalRescueFund,
+        uint256 _totalTreejerDevelop,
+        uint256 _totalReserveFund1,
+        uint256 _totalReserveFund2
     ) external;
 
     /**
@@ -238,4 +253,7 @@ interface IDaiFunds {
      * {treeId} is id of tree that is funded
      */
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+
+    //TODO: ADD_COMMENT
+    event RegularFunded();
 }

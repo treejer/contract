@@ -12,7 +12,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant TREEJER_CONTRACT_ROLE =
         keccak256("TREEJER_CONTRACT_ROLE");
     bytes32 public constant DATA_MANAGER_ROLE = keccak256("DATA_MANAGER_ROLE");
-    bytes32 public constant BUYER_RANK_ROLE = keccak256("BUYER_RANK_ROLE");
+    bytes32 public constant SCRIPT_ROLE = keccak256("SCRIPT_ROLE");
 
     /** NOTE {isAccessRestriction} set inside the initialize to {true} */
     bool public isAccessRestriction;
@@ -127,20 +127,20 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     }
 
     /**
-     * @dev check if given address is buyer rank
+     * @dev check if given address is script
      * @param _address input address
      */
-    function ifBuyerRank(address _address) external view {
-        require(isBuyerRank(_address), "caller is not buyer rank");
+    function ifScript(address _address) external view {
+        require(isScript(_address), "caller is not buyer rank");
     }
 
     /**
-     * @dev check if given address has buyer rank role
+     * @dev check if given address has script role
      * @param _address input address
-     * @return if given address has buyer rank role
+     * @return if given address has script role
      */
-    function isBuyerRank(address _address) public view returns (bool) {
-        return hasRole(BUYER_RANK_ROLE, _address);
+    function isScript(address _address) public view returns (bool) {
+        return hasRole(SCRIPT_ROLE, _address);
     }
 
     /**

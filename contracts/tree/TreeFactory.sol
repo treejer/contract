@@ -74,6 +74,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     event RegularTreePlanted(uint256 treeId);
     event RegularPlantVerified(uint256 treeId);
     event RegularPlantRejected(uint256 treeId);
+    event UpdateIntervalSet();
+    event TreeSpecsUpdate(uint256 treeId, string treeSpecs);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -90,6 +92,12 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
+        _;
+    }
+
+    /** NOTE modifier to check msg.sender has script role */
+    modifier onlyScript() {
+        accessRestriction.ifScript(_msgSender());
         _;
     }
 
@@ -185,6 +193,8 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function setUpdateInterval(uint256 _day) external onlyDataManager {
         updateInterval = _day * 86400;
+
+        emit UpdateIntervalSet();
     }
 
     /**
@@ -658,5 +668,15 @@ contract TreeFactory is Initializable, RelayRecipient {
         tree.provideStatus = 0;
 
         treeToken.safeMint(_owner, _treeId);
+    }
+
+    /** @dev script role update {_treeSpecs} of {_treeId} */
+    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
+        external
+        onlyScript
+    {
+        treeData[_treeId].treeSpecs = _treeSpecs;
+
+        emit TreeSpecsUpdate(_treeId, _treeSpecs);
     }
 }

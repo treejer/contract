@@ -238,7 +238,7 @@ contract("TreeAuction", (accounts) => {
   });
 
   afterEach(async () => {});
-
+  /*
   ////////////////--------------------------------------------gsn------------------------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     await wethInstance.resetAcc(userAccount2);
@@ -387,7 +387,7 @@ contract("TreeAuction", (accounts) => {
     );
     await wethInstance.resetAcc(bidderAccount);
   });
-
+*/
   ////////////// ---------------------------------- deploy ----------------------------
 
   it("deploys successfully", async () => {

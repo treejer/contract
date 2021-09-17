@@ -66,9 +66,6 @@ interface IIncrementalSell {
     /** @dev set {_address} to PlanterFund contract address */
     function setPlanterFundAddress(address _address) external;
 
-    /** @dev set {_address} to TreeAuction contract address */
-    function setTreeAuctionAddress(address _address) external;
-
     /** @dev set {_address} to RegularSell contract address */
     function setRegularSellAddress(address _address) external;
 

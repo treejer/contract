@@ -58,7 +58,27 @@ contract("FinancialModel", (accounts) => {
   });
 
   //--------------------------------addFundDistributionModel test-----------------------------------------------
-  it("addFundDistributionModel should be success", async () => {
+  it("addFundDistributionModel should be success and fail in invalid situation", async () => {
+    //////////////---------------- fail invalid access
+    await financialModelInstance
+      .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: userAccount1,
+      })
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+    /////////----------- fail sum must be 10000
+    await financialModelInstance
+      .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      })
+      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
+
+    await financialModelInstance
+      .addFundDistributionModel(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
+        from: dataManager,
+      })
+      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
+
     const eventTx = await financialModelInstance.addFundDistributionModel(
       4000,
       1200,
@@ -126,28 +146,6 @@ contract("FinancialModel", (accounts) => {
       0,
       "reserveFund2 percent not true"
     );
-  });
-
-  it("addFundDistributionModel should be reject invalid access", async () => {
-    await financialModelInstance
-      .addFundDistributionModel(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: userAccount1,
-      })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
-  });
-
-  it("addFundDistributionModel should be reject sum must be 10000", async () => {
-    await financialModelInstance
-      .addFundDistributionModel(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      })
-      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
-
-    await financialModelInstance
-      .addFundDistributionModel(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
-        from: dataManager,
-      })
-      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
   });
 
   //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
@@ -763,7 +761,17 @@ contract("FinancialModel", (accounts) => {
     );
   });
 
-  it("assignTreeFundDistributionModel should be reject invalid access", async () => {
+  it("assignTreeFundDistributionModel should be reject", async () => {
+    ///////////------------ fail Distribution model not found
+
+    await financialModelInstance
+      .assignTreeFundDistributionModel(0, 0, 0, {
+        from: dataManager,
+      })
+      .should.be.rejectedWith(
+        FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
+      );
+
     await financialModelInstance.addFundDistributionModel(
       4000,
       1200,
@@ -783,16 +791,6 @@ contract("FinancialModel", (accounts) => {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
-  });
-
-  it("assignTreeFundDistributionModel should be reject Distribution model not found", async () => {
-    await financialModelInstance
-      .assignTreeFundDistributionModel(0, 0, 0, {
-        from: dataManager,
-      })
-      .should.be.rejectedWith(
-        FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
-      );
   });
 
   //--------------------------------------------------- DistributionModelOfTreeNotExist ------------------------------------
@@ -2337,13 +2335,6 @@ contract("FinancialModel", (accounts) => {
       reserveFund2_2,
       "reserveFund2 funds invalid"
     );
-    // let maxAssignedIndex1 = await financialModelInstance.maxAssignedIndex();
-
-    // assert.equal(
-    //   Number(maxAssignedIndex1),
-    //   1000000,
-    //   "maxAssignedIndex1 not tTrue"
-    // );
   });
 
   ////////--------------------------- test getFindDistributionModelId --------------------------

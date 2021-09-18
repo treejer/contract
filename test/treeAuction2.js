@@ -412,8 +412,7 @@ contract("TreeAuction", (accounts) => {
     });
   });
 
-  /// end of describe 1
-  describe("deployment and set addresses", () => {
+  describe("add auction and bid", () => {
     beforeEach(async () => {
       treeAuctionInstance = await deployProxy(
         TreeAuction,
@@ -1254,7 +1253,7 @@ contract("TreeAuction", (accounts) => {
     });
   });
 
-  describe("deployment and set addresses", () => {
+  describe("test with end auction", () => {
     beforeEach(async () => {
       treeAuctionInstance = await deployProxy(
         TreeAuction,

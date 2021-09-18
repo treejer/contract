@@ -76,29 +76,6 @@ contract("PlanterFund", (accounts) => {
     );
   });
 
-  // beforeEach(async () => {
-  //   planterInstance = await deployProxy(Planter, [arInstance.address], {
-  //     initializer: "initialize",
-  //     from: deployerAccount,
-  //     unsafeAllowCustomTypes: true,
-  //   });
-
-  //   planterFundInstance = await deployProxy(PlanterFund, [arInstance.address], {
-  //     initializer: "initialize",
-  //     from: deployerAccount,
-  //     unsafeAllowCustomTypes: true,
-  //   });
-
-  //   daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
-
-  //   await planterFundInstance.setPlanterContractAddress(
-  //     planterInstance.address,
-  //     {
-  //       from: deployerAccount,
-  //     }
-  //   );
-  // });
-
   afterEach(async () => {});
   /*
   //////---------------------------------------------- test gsn --------------------------------

@@ -100,7 +100,7 @@ contract("PlanterFund", (accounts) => {
   });
 
   afterEach(async () => {});
-
+  /*
   //////---------------------------------------------- test gsn --------------------------------
   it("test gsn [ @skip-on-coverage ]", async () => {
     let env = await GsnTestEnvironment.startGsn("localhost");
@@ -224,7 +224,7 @@ contract("PlanterFund", (accounts) => {
       "gsn not true work"
     );
   });
-
+*/
   it("deploys successfully", async () => {
     const address = planterFundInstance.address;
     assert.notEqual(address, 0x0);

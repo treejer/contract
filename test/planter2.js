@@ -140,7 +140,7 @@ contract("Planter", (accounts) => {
   // });
 
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
-  /*
+
   it("deploys successfully and set addresses", async () => {
     const address = planterInstance.address;
     assert.notEqual(address, 0x0);
@@ -470,7 +470,7 @@ contract("Planter", (accounts) => {
       return userAccount4 == ev.organizationId;
     });
   });
-*/
+
   it("organizationJoin should be fail", async () => {
     ///////////----------- fail because user not planter
 

@@ -44,18 +44,6 @@ contract TreeAttribute is Initializable {
     event ReservedSymbolFreed(uint32 generatedCode);
     event SymbolSetByAdmin(uint256 treeId);
 
-    /** NOTE modifier to check msg.sender has admin role */
-    modifier onlyAdmin() {
-        accessRestriction.ifAdmin(msg.sender);
-        _;
-    }
-
-    /** NOTE modifier for check valid address */
-    modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
-        _;
-    }
-
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(msg.sender);

@@ -6,15 +6,10 @@ const WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 const Planter = artifacts.require("Planter.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const truffleAssert = require("truffle-assertions");
 
 const { CommonErrorMsg, GsnErrorMsg } = require("./enumes");
 
 const Common = require("./common");
-
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
 
 //test
 const TestWhitelistPaymaster = artifacts.require("TestWhitelistPaymaster.sol");

@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const TreeAuction = artifacts.require("TreeAuction.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
@@ -8,11 +10,19 @@ const WethFunds = artifacts.require("WethFunds.sol");
 const RegularSell = artifacts.require("RegularSell.sol");
 const FinancialModel = artifacts.require("FinancialModel.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
-const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 var Dai = artifacts.require("Dai.sol");
 var Weth = artifacts.require("Weth.sol");
-const Factory = artifacts.require("Factory.sol");
-var TestUniswap = artifacts.require("TestUniswap.sol");
+let Factory;
+let UniswapV2Router02New;
+let TestUniswap;
+
+if (process.env.COVERAGE) {
+  UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
+} else {
+  Factory = artifacts.require("Factory.sol");
+  UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+  TestUniswap = artifacts.require("TestUniswap.sol");
+}
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
@@ -80,166 +90,66 @@ contract("TreeAuction", (accounts) => {
       unsafeAllowCustomTypes: true,
     });
 
-    factoryInstance = await Factory.new(accounts[2], {
-      from: deployerAccount,
-    });
-    const factoryAddress = factoryInstance.address;
+    if (!process.env.COVERAGE) {
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+      wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
+      WETHAddress = wethInstance.address;
+      daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+      DAIAddress = daiInstance.address;
+      uniswapRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        WETHAddress,
+        { from: deployerAccount }
+      );
+      uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+      testUniswapInstance = await TestUniswap.new(
+        uniswapV2Router02NewAddress,
+        DAIAddress,
+        WETHAddress,
+        { from: deployerAccount }
+      );
+      /////---------------------------addLiquidity-------------------------
+      const testUniswapAddress = testUniswapInstance.address;
+      await wethInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+      await daiInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("250000000", "Ether")
+      );
+      await testUniswapInstance.addLiquidity();
+    } else {
+      wethInstance = await Weth.new("WETH", "weth", {
+        from: accounts[0],
+      });
+      WETHAddress = wethInstance.address;
+      daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+      DAIAddress = daiInstance.address;
+      uniswapRouterInstance = await UniswapV2Router02New.new(
+        DAIAddress,
+        WETHAddress,
+        { from: deployerAccount }
+      );
+      uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+      await wethInstance.setMint(
+        uniswapV2Router02NewAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+      await daiInstance.setMint(
+        uniswapV2Router02NewAddress,
+        web3.utils.toWei("250000000", "Ether")
+      );
+    }
 
-    factoryInstance.INIT_CODE_PAIR_HASH();
-
-    wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
-    WETHAddress = wethInstance.address;
-
-    daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-    DAIAddress = daiInstance.address;
-
-    uniswapRouterInstance = await UniswapV2Router02New.new(
-      factoryAddress,
-      WETHAddress,
-      { from: deployerAccount }
-    );
-
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
-
-    testUniswapInstance = await TestUniswap.new(
-      uniswapV2Router02NewAddress,
-      DAIAddress,
-      WETHAddress,
-      { from: deployerAccount }
-    );
-
-    const testUniswapAddress = testUniswapInstance.address;
-
-    await wethInstance.setMint(
-      testUniswapAddress,
-      web3.utils.toWei("125000", "Ether")
-    );
-
-    await daiInstance.setMint(
-      testUniswapAddress,
-      web3.utils.toWei("250000000", "Ether")
-    );
-
-    await testUniswapInstance.addLiquidity();
+    //////////////////////////////////////////////////////////////////////
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
-  /*
-  beforeEach(async () => {
-    treeAuctionInstance = await deployProxy(TreeAuction, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
 
-    financialModelInstance = await deployProxy(
-      FinancialModel,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
-
-    wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    treeFactoryInstance = await deployProxy(TreeFactory, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-      initializer: "initialize",
-      from: deployerAccount,
-      unsafeAllowCustomTypes: true,
-    });
-
-    //////////////////////////////-------------------- handle address
-    await treeAuctionInstance.setTreeFactoryAddress(
-      treeFactoryInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await wethFundsInstance.setUniswapRouterAddress(
-      uniswapV2Router02NewAddress,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await wethFundsInstance.setWethTokenAddress(WETHAddress, {
-      from: deployerAccount,
-    });
-
-    await wethFundsInstance.setDaiAddress(DAIAddress, {
-      from: deployerAccount,
-    });
-
-    await wethFundsInstance.setPlanterFundContractAddress(
-      planterFundsInstnce.address,
-      {
-        from: deployerAccount,
-      }
-    );
-    await Common.addTreejerContractRole(
-      arInstance,
-      wethFundsInstance.address,
-      deployerAccount
-    );
-    await treeAuctionInstance.setWethFundsAddress(wethFundsInstance.address, {
-      from: deployerAccount,
-    });
-
-    await treeAuctionInstance.setFinancialModelAddress(
-      financialModelInstance.address,
-      {
-        from: deployerAccount,
-      }
-    );
-
-    await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      from: deployerAccount,
-    });
-
-    await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-      from: deployerAccount,
-    });
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeAuctionInstance.address,
-      deployerAccount
-    );
-
-    await Common.addTreejerContractRole(
-      arInstance,
-      treeFactoryInstance.address,
-      deployerAccount
-    );
-  });
-
-  afterEach(async () => {});
-*/
   describe("deployment and set addresses", () => {
     before(async () => {
       treeAuctionInstance = await deployProxy(

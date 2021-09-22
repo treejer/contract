@@ -2646,9 +2646,6 @@ contract("PlanterFund", (accounts) => {
       const referralBalance2 = await planterFundInstance.balances.call(
         userAccount4
       );
-      const accountReferralBalance2 = await daiInstance.balanceOf.call(
-        userAccount4
-      );
 
       const organizationBalance2 = await planterFundInstance.balances.call(
         userAccount5

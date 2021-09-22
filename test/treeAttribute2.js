@@ -2,11 +2,10 @@ const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const IncrementalSell = artifacts.require("IncrementalSell.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
-const { soliditySha3 } = require("web3-utils");
 const Tree = artifacts.require("Tree.sol");
 //treasury section
 const WethFunds = artifacts.require("WethFunds.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
 
@@ -47,7 +46,6 @@ contract("TreeAttribute", (accounts) => {
   let arInstance;
 
   let treeAttributeInstance;
-  let financialModelInstance;
   let wethFundsInstance;
   let planterFundsInstnce;
   let wethInstance;

@@ -1919,7 +1919,7 @@ contract("regularSell", (accounts) => {
       await daiInstance.resetAcc(funder2);
       await daiInstance.resetAcc(funder3);
     });
-
+    /*
     ////--------------------------------gsn test--------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
       ////////////// ------------------- handle fund distribution model ----------------------
@@ -2104,6 +2104,7 @@ contract("regularSell", (accounts) => {
         "Gsn not true work"
       );
     });
+    */
 
     ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
     it("should request tree by id successfully", async () => {

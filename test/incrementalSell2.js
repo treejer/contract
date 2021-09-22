@@ -2820,7 +2820,7 @@ contract("IncrementalSell", (accounts) => {
         "106 - Exists not true"
       );
     });
-
+    /*
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
@@ -2924,5 +2924,6 @@ contract("IncrementalSell", (accounts) => {
         "Gsn not true work"
       );
     });
+    */
   });
 });

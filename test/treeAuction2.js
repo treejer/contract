@@ -1474,7 +1474,7 @@ contract("TreeAuction", (accounts) => {
 
       await wethInstance.resetAcc(bidderAccount2);
     });
-
+    /*
     // //------------------------------------------- complete proccess of auction ------------------------------------------ //
     it("should do an acution completly", async () => {
       const treeId = 1;
@@ -3844,5 +3844,6 @@ contract("TreeAuction", (accounts) => {
       await wethInstance.resetAcc(bidderAccount1);
       await wethInstance.resetAcc(bidderAccount2);
     });
+    */
   });
 });

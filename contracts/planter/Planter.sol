@@ -184,6 +184,58 @@ contract Planter is Initializable, RelayRecipient {
         emit PlanterJoin(_msgSender());
     }
 
+    //TODO: ADD_COMMENT
+    function planterJoinByAdmin(
+        address _planterAddress,
+        uint8 _planterType,
+        uint64 _longitude,
+        uint64 _latitude,
+        uint16 _countryCode,
+        address _refferedBy,
+        address _organizationAddress
+    ) external onlyDataManager {
+        require(
+            accessRestriction.isPlanter(_planterAddress) &&
+                planters[_planterAddress].planterType == 0,
+            "User exist or not planter"
+        );
+
+        require(
+            _planterType == 1 || _planterType == 3,
+            "planterType not allowed values"
+        );
+
+        if (_planterType == 3) {
+            require(
+                planters[_organizationAddress].planterType == 2,
+                "organization address not valid"
+            );
+
+            memberOf[_planterAddress] = _organizationAddress;
+        }
+
+        if (_refferedBy != address(0)) {
+            require(
+                _refferedBy != _planterAddress &&
+                    accessRestriction.isPlanter(_refferedBy),
+                "refferedBy not true"
+            );
+
+            refferedBy[_planterAddress] = _refferedBy;
+        }
+
+        PlanterData storage planter = planters[_planterAddress];
+
+        planter.planterType = _planterType;
+        planter.status = 1;
+        planter.countryCode = _countryCode;
+        planter.capacity = 100;
+        planter.longitude = _longitude;
+        planter.latitude = _latitude;
+
+        emit PlanterJoin(_planterAddress);
+    }
+
     /**
      * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.

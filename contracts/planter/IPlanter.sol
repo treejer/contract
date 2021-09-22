@@ -78,6 +78,17 @@ interface IPlanter {
         address _organizationAddress
     ) external;
 
+    //TODO: ADD_COMMENT
+    function planterJoinByAdmin(
+        address _planterAddress,
+        uint8 _planterType,
+        uint64 _longitude,
+        uint64 _latitude,
+        uint16 _countryCode,
+        address _refferedBy,
+        address _organizationAddress
+    ) external;
+
     /**
      * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.

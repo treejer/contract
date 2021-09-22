@@ -380,13 +380,9 @@ contract("Planter", (accounts) => {
       planterInstance,
       1,
       userAccount2,
-      userAccount4,
+      userAccount2,
       zeroAddress
     ).should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
-  });
-
-  it("planterJoin should be fail because reffered not true", async () => {
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -396,6 +392,7 @@ contract("Planter", (accounts) => {
       zeroAddress
     ).should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
 
+    /////////// userAccount2 join
     await Common.joinSimplePlanter(
       planterInstance,
       1,
@@ -412,6 +409,326 @@ contract("Planter", (accounts) => {
       zeroAddress,
       zeroAddress
     ).should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
+  });
+
+  /////////////////---------------------------------planterJoinByAdmin--------------------------------------------------------
+
+  it("planterJoinByAdmin should work successfully", async () => {
+    const longitude = 1;
+    const latitude = 2;
+    const countryCode = 10;
+
+    ////////////// ------------ planterJoin should be work successfully without refferedBy and organizationAddress
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+    const eventTx1 = await planterInstance.planterJoinByAdmin(
+      userAccount2,
+      1,
+      longitude,
+      latitude,
+      countryCode,
+      zeroAddress,
+      zeroAddress,
+      { from: dataManager }
+    );
+
+    let planter1 = await planterInstance.planters.call(userAccount2);
+
+    assert.equal(Number(planter1.planterType), 1, "planterType not true");
+    assert.equal(Number(planter1.status), 1, "status not true");
+    assert.equal(Number(planter1.capacity), 100, "capacity not true");
+    assert.equal(Number(planter1.longitude), 1, "longitude not true");
+    assert.equal(Number(planter1.latitude), 2, "latitude not true");
+    assert.equal(Number(planter1.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter1.score), 0, "score not true");
+    assert.equal(Number(planter1.plantedCount), 0, "plantedCount not true");
+
+    truffleAssert.eventEmitted(eventTx1, "PlanterJoin", (ev) => {
+      return userAccount2 == ev.planterId;
+    });
+
+    ////////////////// ---------------------- planterJoin should be work successfully with refferedBy and without organizationAddress
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+
+    const eventTx2 = await planterInstance.planterJoinByAdmin(
+      userAccount3,
+      1,
+      longitude,
+      latitude,
+      countryCode,
+      userAccount4,
+      zeroAddress,
+      { from: dataManager }
+    );
+
+    let planter2 = await planterInstance.planters.call(userAccount3);
+
+    assert.equal(Number(planter2.planterType), 1, "planterType not true");
+    assert.equal(Number(planter2.status), 1, "status not true");
+    assert.equal(Number(planter2.capacity), 100, "capacity not true");
+    assert.equal(Number(planter2.longitude), 1, "longitude not true");
+    assert.equal(Number(planter2.latitude), 2, "latitude not true");
+    assert.equal(Number(planter2.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter2.score), 0, "score not true");
+    assert.equal(Number(planter2.plantedCount), 0, "plantedCount not true");
+
+    let reffered1 = await planterInstance.refferedBy.call(userAccount3);
+
+    assert.equal(reffered1, userAccount4, "refferedBy not true set");
+
+    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
+      return userAccount3 == ev.planterId;
+    });
+
+    /////////////////////-------------------------planterJoin should be work successfully with organizationAddress and without refferedBy
+    //planter address
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+    //organization address
+    await Common.addPlanter(arInstance, userAccount6, deployerAccount);
+
+    const eventTx3 = await Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount6,
+      zeroAddress,
+      dataManager
+    );
+
+    const eventTx4 = await planterInstance.planterJoinByAdmin(
+      userAccount5,
+      3,
+      longitude,
+      latitude,
+      countryCode,
+      zeroAddress,
+      userAccount6,
+      { from: dataManager }
+    );
+
+    let planter3 = await planterInstance.planters.call(userAccount5);
+
+    assert.equal(Number(planter3.planterType), 3, "planterType not true");
+    assert.equal(Number(planter3.status), 1, "status not true");
+    assert.equal(Number(planter3.capacity), 100, "capacity not true");
+    assert.equal(Number(planter3.longitude), 1, "longitude not true");
+    assert.equal(Number(planter3.latitude), 2, "latitude not true");
+    assert.equal(Number(planter3.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter3.score), 0, "score not true");
+    assert.equal(Number(planter3.plantedCount), 0, "plantedCount not true");
+
+    let reffered2 = await planterInstance.refferedBy.call(userAccount5);
+
+    assert.equal(reffered2, zeroAddress, "refferedBy not true set");
+
+    let organizationAddress1 = await planterInstance.memberOf.call(
+      userAccount5
+    );
+
+    assert.equal(
+      organizationAddress1,
+      userAccount6,
+      "organizationAddress not true set"
+    );
+
+    truffleAssert.eventEmitted(eventTx3, "OrganizationJoin", (ev) => {
+      return userAccount6 == ev.organizationId;
+    });
+
+    truffleAssert.eventEmitted(eventTx4, "PlanterJoin", (ev) => {
+      return userAccount5 == ev.planterId;
+    });
+
+    /////////////////////////------------------ planterJoin should be work successfully with refferedBy and organizationAddress
+
+    //planter address
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    //reffer address
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+    //organization address
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
+
+    const eventTx5 = await Common.joinOrganizationPlanter(
+      planterInstance,
+      userAccount8,
+      zeroAddress,
+      dataManager
+    );
+
+    const eventTx6 = await planterInstance.planterJoinByAdmin(
+      userAccount1,
+      3,
+      longitude,
+      latitude,
+      countryCode,
+      userAccount7,
+      userAccount8,
+      { from: dataManager }
+    );
+
+    let planter4 = await planterInstance.planters.call(userAccount1);
+
+    assert.equal(Number(planter4.planterType), 3, "planterType not true");
+    assert.equal(Number(planter4.status), 1, "status not true");
+    assert.equal(Number(planter4.capacity), 100, "capacity not true");
+    assert.equal(Number(planter4.longitude), 1, "longitude not true");
+    assert.equal(Number(planter4.latitude), 2, "latitude not true");
+    assert.equal(Number(planter4.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter4.score), 0, "score not true");
+    assert.equal(Number(planter4.plantedCount), 0, "plantedCount not true");
+
+    let reffered3 = await planterInstance.refferedBy.call(userAccount1);
+
+    assert.equal(reffered3, userAccount7, "refferedBy not true set");
+
+    let organizationAddress2 = await planterInstance.memberOf.call(
+      userAccount1
+    );
+
+    assert.equal(
+      organizationAddress2,
+      userAccount8,
+      "organizationAddress not true set"
+    );
+
+    truffleAssert.eventEmitted(eventTx5, "OrganizationJoin", (ev) => {
+      return userAccount8 == ev.organizationId;
+    });
+
+    truffleAssert.eventEmitted(eventTx6, "PlanterJoin", (ev) => {
+      return userAccount1 == ev.planterId;
+    });
+  });
+
+  it("planterJoinByAdmin should be fail", async () => {
+    ///////////////// -------------- fail because caller is not data manager
+
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        1,
+        12,
+        24,
+        12,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: userAccount3,
+        }
+      )
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+    ///////////// fail user not planter
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        1,
+        12,
+        24,
+        12,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
+
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+
+    ////////////// ------- fail planterType not allowed value
+
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        5,
+        12,
+        24,
+        12,
+        userAccount3,
+        userAccount4,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.PLANTERTYPE_ALLOWED_VALUE);
+
+    ///////////// --------------- fail organization address not valid
+
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        3,
+        12,
+        24,
+        12,
+        userAccount3,
+        userAccount4,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.ORGANIZATION_NOT_VALID);
+
+    ///////// --------------- reffered not true 1- equal to planter address 2-not planter
+
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        1,
+        12,
+        24,
+        12,
+        userAccount2,
+        zeroAddress,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
+
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        1,
+        12,
+        24,
+        12,
+        userAccount4,
+        zeroAddress,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
+
+    await planterInstance.planterJoinByAdmin(
+      userAccount2,
+      1,
+      12,
+      24,
+      12,
+      zeroAddress,
+      zeroAddress,
+      {
+        from: dataManager,
+      }
+    );
+    ///////////// fail because userAccount2 is exist
+    await planterInstance
+      .planterJoinByAdmin(
+        userAccount2,
+        1,
+        12,
+        24,
+        12,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: dataManager,
+        }
+      )
+      .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
   });
 
   //---------------------------------------organizationJoin-------------------------
@@ -1844,13 +2161,38 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PAYMENT_PORTION);
   });
+
   //////////////-----------------------------------------------  get planter portion  --------------------------------------------
   it("should get correct data from planter payment portion", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //orgnaizer planter
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //independent planter
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount); //independent planter
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount); //orgnaizer planter
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+
+    const user2PortionBeforeJoin =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount2);
+
+    assert.equal(
+      user2PortionBeforeJoin["0"],
+      false,
+      "user2PortionBeforeJoin[0] is not correct"
+    );
+    assert.equal(
+      user2PortionBeforeJoin["1"],
+      zeroAddress,
+      "user2PortionBeforeJoin[1] is not correct"
+    );
+    assert.equal(
+      user2PortionBeforeJoin["2"],
+      zeroAddress,
+      "user2PortionBeforeJoin[2] is not correct"
+    );
+    assert.equal(
+      Number(user2PortionBeforeJoin["3"]),
+      0,
+      "user2PortionBeforeJoin[3] is not correct"
+    );
 
     await Common.joinOrganizationPlanter(
       planterInstance,
@@ -1874,64 +2216,68 @@ contract("Planter", (accounts) => {
       userAccount1
     );
 
-    await planterInstance.getPlanterPaymentPortion.call(
-      userAccount2,
-      (err, result) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          assert.equal(result[0], true, "invalid bool");
-          assert.equal(result[1], 0x0, "invalid organaizer address");
-          assert.equal(result[2], userAccount5, "invalid refferal address");
-          assert.equal(Number(result[3]), 10000, "invalid payment portion");
-        }
-      }
+    const user2PortionAfterJoin =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount2);
+
+    assert.equal(user2PortionAfterJoin["0"], true, "invalid bool");
+    assert.equal(
+      user2PortionAfterJoin["1"],
+      zeroAddress,
+      "invalid organaizer address"
+    );
+    assert.equal(
+      user2PortionAfterJoin["2"],
+      userAccount5,
+      "invalid refferal address"
+    );
+    assert.equal(
+      Number(user2PortionAfterJoin["3"]),
+      10000,
+      "invalid payment portion"
     );
 
-    await planterInstance.getPlanterPaymentPortion.call(
-      userAccount1,
-      (err, result) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          assert.equal(result[0], true, "invalid bool");
-          assert.equal(result[1], 0x0, "invalid organaizer address");
-          assert.equal(result[2], 0x0, "invalid refferal address");
-          assert.equal(Number(result[3]), 10000, "invalid payment portion");
-        }
-      }
+    const user1PortionAfterJoin =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount1);
+
+    assert.equal(user1PortionAfterJoin["0"], true, "invalid bool");
+    assert.equal(user1PortionAfterJoin["1"], 0x0, "invalid organaizer address");
+    assert.equal(user1PortionAfterJoin["2"], 0x0, "invalid refferal address");
+    assert.equal(
+      Number(user1PortionAfterJoin["3"]),
+      10000,
+      "invalid payment portion"
     );
 
-    await planterInstance.getPlanterPaymentPortion.call(
-      userAccount3,
-      (err, result) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          assert.equal(result[0], true, "invalid bool");
-          assert.equal(result[1], 0x0, "invalid organaizer address");
-          assert.equal(result[2], 0x0, "invalid refferal address");
-          assert.equal(Number(result[3]), 10000, "invalid payment portion");
-        }
-      }
+    const user3PortionAfterJoin =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+
+    assert.equal(user3PortionAfterJoin["0"], true, "invalid bool");
+    assert.equal(user3PortionAfterJoin["1"], 0x0, "invalid organaizer address");
+    assert.equal(user3PortionAfterJoin["2"], 0x0, "invalid refferal address");
+    assert.equal(
+      Number(user3PortionAfterJoin["3"]),
+      10000,
+      "invalid payment portion"
     );
 
     await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
       from: userAccount1,
     });
 
-    await planterInstance.getPlanterPaymentPortion.call(
-      userAccount3,
-      (err, result) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          assert.equal(result[0], true, "invalid bool");
-          assert.equal(result[1], userAccount1, "invalid organaizer address");
-          assert.equal(result[2], 0x0, "invalid refferal address");
-          assert.equal(Number(result[3]), 0, "invalid payment portion /:");
-        }
-      }
+    const user3PortionAferAccept =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+
+    assert.equal(user3PortionAferAccept["0"], true, "invalid bool");
+    assert.equal(
+      user3PortionAferAccept["1"],
+      userAccount1,
+      "invalid organaizer address"
+    );
+    assert.equal(user3PortionAferAccept["2"], 0x0, "invalid refferal address");
+    assert.equal(
+      Number(user3PortionAferAccept["3"]),
+      0,
+      "invalid payment portion /:"
     );
 
     const eventTx = await planterInstance.updateOrganizationPlanterPayment(
@@ -1946,20 +2292,23 @@ contract("Planter", (accounts) => {
       return userAccount3 == ev.planterId;
     });
 
-    await planterInstance.getPlanterPaymentPortion.call(
-      userAccount3,
-      (err, result) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          assert.equal(result[0], true, "invalid bool");
-          assert.equal(result[1], userAccount1, "invalid organaizer address");
-          assert.equal(result[2], 0x0, "invalid refferal address");
-          assert.equal(Number(result[3]), 2000, "invalid payment portion");
-        }
-      }
+    const user3PortionAfterUpdate =
+      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+
+    assert.equal(user3PortionAfterUpdate["0"], true, "invalid bool");
+    assert.equal(
+      user3PortionAfterUpdate["1"],
+      userAccount1,
+      "invalid organaizer address"
+    );
+    assert.equal(user3PortionAfterUpdate["2"], 0x0, "invalid refferal address");
+    assert.equal(
+      Number(user3PortionAfterUpdate["3"]),
+      2000,
+      "invalid payment portion"
     );
   });
+
   ///////////////////////-----------------------------------------------  reduce plant count  --------------------------------------------
   it("should reduce planted count and check data to be ok", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -2086,7 +2435,6 @@ contract("Planter", (accounts) => {
 
     assert.equal(result2, false, "it must return false");
   });
-  it("should planterCheck return false", async () => {});
 
   it("should check data to be correct when call planterCheck function and fail in invaid situation", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);

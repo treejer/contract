@@ -172,13 +172,13 @@ contract("Planter", (accounts) => {
       "address set incorrect"
     );
   });
-
   /////////////////---------------------------------planterJoin--------------------------------------------------------
 
-  it("planterJoin should be work successfully without refferedBy and organizationAddress", async () => {
+  it("planterJoin should work successfully", async () => {
+    ////////////// ------------ planterJoin should be work successfully without refferedBy and organizationAddress
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    const eventTx = await Common.joinSimplePlanter(
+    const eventTx1 = await Common.joinSimplePlanter(
       planterInstance,
       1,
       userAccount2,
@@ -186,160 +186,162 @@ contract("Planter", (accounts) => {
       zeroAddress
     );
 
-    let planter = await planterInstance.planters.call(userAccount2);
+    let planter1 = await planterInstance.planters.call(userAccount2);
 
-    assert.equal(Number(planter.planterType), 1, "planterType not true");
-    assert.equal(Number(planter.status), 1, "status not true");
-    assert.equal(Number(planter.capacity), 100, "capacity not true");
-    assert.equal(Number(planter.longitude), 1, "longitude not true");
-    assert.equal(Number(planter.latitude), 2, "latitude not true");
-    assert.equal(Number(planter.countryCode), 10, "countryCode not true");
-    assert.equal(Number(planter.score), 0, "score not true");
-    assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
+    assert.equal(Number(planter1.planterType), 1, "planterType not true");
+    assert.equal(Number(planter1.status), 1, "status not true");
+    assert.equal(Number(planter1.capacity), 100, "capacity not true");
+    assert.equal(Number(planter1.longitude), 1, "longitude not true");
+    assert.equal(Number(planter1.latitude), 2, "latitude not true");
+    assert.equal(Number(planter1.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter1.score), 0, "score not true");
+    assert.equal(Number(planter1.plantedCount), 0, "plantedCount not true");
 
-    truffleAssert.eventEmitted(eventTx, "PlanterJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx1, "PlanterJoin", (ev) => {
       return userAccount2 == ev.planterId;
     });
-  });
 
-  it("planterJoin should be work successfully with refferedBy and without organizationAddress", async () => {
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-
+    ////////////////// ---------------------- planterJoin should be work successfully with refferedBy and without organizationAddress
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
-    const eventTx = await Common.joinSimplePlanter(
+    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+
+    const eventTx2 = await Common.joinSimplePlanter(
       planterInstance,
       1,
-      userAccount2,
       userAccount3,
+      userAccount4,
       zeroAddress
     );
 
-    let planter = await planterInstance.planters.call(userAccount2);
+    let planter2 = await planterInstance.planters.call(userAccount3);
 
-    assert.equal(Number(planter.planterType), 1, "planterType not true");
-    assert.equal(Number(planter.status), 1, "status not true");
-    assert.equal(Number(planter.capacity), 100, "capacity not true");
-    assert.equal(Number(planter.longitude), 1, "longitude not true");
-    assert.equal(Number(planter.latitude), 2, "latitude not true");
-    assert.equal(Number(planter.countryCode), 10, "countryCode not true");
-    assert.equal(Number(planter.score), 0, "score not true");
-    assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
+    assert.equal(Number(planter2.planterType), 1, "planterType not true");
+    assert.equal(Number(planter2.status), 1, "status not true");
+    assert.equal(Number(planter2.capacity), 100, "capacity not true");
+    assert.equal(Number(planter2.longitude), 1, "longitude not true");
+    assert.equal(Number(planter2.latitude), 2, "latitude not true");
+    assert.equal(Number(planter2.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter2.score), 0, "score not true");
+    assert.equal(Number(planter2.plantedCount), 0, "plantedCount not true");
 
-    let reffered = await planterInstance.refferedBy.call(userAccount2);
+    let reffered1 = await planterInstance.refferedBy.call(userAccount3);
 
-    assert.equal(reffered, userAccount3, "refferedBy not true set");
+    assert.equal(reffered1, userAccount4, "refferedBy not true set");
 
-    truffleAssert.eventEmitted(eventTx, "PlanterJoin", (ev) => {
-      return userAccount2 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
+      return userAccount3 == ev.planterId;
     });
-  });
 
-  it("planterJoin should be work successfully with organizationAddress and without refferedBy", async () => {
+    /////////////////////-------------------------planterJoin should be work successfully with organizationAddress and without refferedBy
     //planter address
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount5, deployerAccount);
     //organization address
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount6, deployerAccount);
 
-    const eventTx1 = await Common.joinOrganizationPlanter(
+    const eventTx3 = await Common.joinOrganizationPlanter(
       planterInstance,
-      userAccount4,
+      userAccount6,
       zeroAddress,
       dataManager
     );
 
-    const eventTx2 = await Common.joinSimplePlanter(
+    const eventTx4 = await Common.joinSimplePlanter(
       planterInstance,
       3,
-      userAccount2,
+      userAccount5,
       zeroAddress,
-      userAccount4
+      userAccount6
     );
 
-    let planter = await planterInstance.planters.call(userAccount2);
+    let planter3 = await planterInstance.planters.call(userAccount5);
 
-    assert.equal(Number(planter.planterType), 3, "planterType not true");
-    assert.equal(Number(planter.status), 0, "status not true");
-    assert.equal(Number(planter.capacity), 100, "capacity not true");
-    assert.equal(Number(planter.longitude), 1, "longitude not true");
-    assert.equal(Number(planter.latitude), 2, "latitude not true");
-    assert.equal(Number(planter.countryCode), 10, "countryCode not true");
-    assert.equal(Number(planter.score), 0, "score not true");
-    assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
+    assert.equal(Number(planter3.planterType), 3, "planterType not true");
+    assert.equal(Number(planter3.status), 0, "status not true");
+    assert.equal(Number(planter3.capacity), 100, "capacity not true");
+    assert.equal(Number(planter3.longitude), 1, "longitude not true");
+    assert.equal(Number(planter3.latitude), 2, "latitude not true");
+    assert.equal(Number(planter3.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter3.score), 0, "score not true");
+    assert.equal(Number(planter3.plantedCount), 0, "plantedCount not true");
 
-    let reffered = await planterInstance.refferedBy.call(userAccount2);
+    let reffered2 = await planterInstance.refferedBy.call(userAccount5);
 
-    assert.equal(reffered, zeroAddress, "refferedBy not true set");
+    assert.equal(reffered2, zeroAddress, "refferedBy not true set");
 
-    let organizationAddress = await planterInstance.memberOf.call(userAccount2);
+    let organizationAddress1 = await planterInstance.memberOf.call(
+      userAccount5
+    );
 
     assert.equal(
-      organizationAddress,
-      userAccount4,
+      organizationAddress1,
+      userAccount6,
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx1, "OrganizationJoin", (ev) => {
-      return userAccount4 == ev.organizationId;
+    truffleAssert.eventEmitted(eventTx3, "OrganizationJoin", (ev) => {
+      return userAccount6 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
-      return userAccount2 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx4, "PlanterJoin", (ev) => {
+      return userAccount5 == ev.planterId;
     });
-  });
 
-  it("planterJoin should be work successfully with refferedBy and organizationAddress", async () => {
+    /////////////////////////------------------ planterJoin should be work successfully with refferedBy and organizationAddress
+
     //planter address
-    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     //reffer address
-    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
     //organization address
-    await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount8, deployerAccount);
 
-    const eventTx1 = await Common.joinOrganizationPlanter(
+    const eventTx5 = await Common.joinOrganizationPlanter(
       planterInstance,
-      userAccount4,
+      userAccount8,
       zeroAddress,
       dataManager
     );
 
-    const eventTx2 = await Common.joinSimplePlanter(
+    const eventTx6 = await Common.joinSimplePlanter(
       planterInstance,
       3,
-      userAccount2,
-      userAccount3,
-      userAccount4
+      userAccount1,
+      userAccount7,
+      userAccount8
     );
 
-    let planter = await planterInstance.planters.call(userAccount2);
+    let planter4 = await planterInstance.planters.call(userAccount1);
 
-    assert.equal(Number(planter.planterType), 3, "planterType not true");
-    assert.equal(Number(planter.status), 0, "status not true");
-    assert.equal(Number(planter.capacity), 100, "capacity not true");
-    assert.equal(Number(planter.longitude), 1, "longitude not true");
-    assert.equal(Number(planter.latitude), 2, "latitude not true");
-    assert.equal(Number(planter.countryCode), 10, "countryCode not true");
-    assert.equal(Number(planter.score), 0, "score not true");
-    assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
+    assert.equal(Number(planter4.planterType), 3, "planterType not true");
+    assert.equal(Number(planter4.status), 0, "status not true");
+    assert.equal(Number(planter4.capacity), 100, "capacity not true");
+    assert.equal(Number(planter4.longitude), 1, "longitude not true");
+    assert.equal(Number(planter4.latitude), 2, "latitude not true");
+    assert.equal(Number(planter4.countryCode), 10, "countryCode not true");
+    assert.equal(Number(planter4.score), 0, "score not true");
+    assert.equal(Number(planter4.plantedCount), 0, "plantedCount not true");
 
-    let reffered = await planterInstance.refferedBy.call(userAccount2);
+    let reffered3 = await planterInstance.refferedBy.call(userAccount1);
 
-    assert.equal(reffered, userAccount3, "refferedBy not true set");
+    assert.equal(reffered3, userAccount7, "refferedBy not true set");
 
-    let organizationAddress = await planterInstance.memberOf.call(userAccount2);
+    let organizationAddress2 = await planterInstance.memberOf.call(
+      userAccount1
+    );
 
     assert.equal(
-      organizationAddress,
-      userAccount4,
+      organizationAddress2,
+      userAccount8,
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx1, "OrganizationJoin", (ev) => {
-      return userAccount4 == ev.organizationId;
+    truffleAssert.eventEmitted(eventTx5, "OrganizationJoin", (ev) => {
+      return userAccount8 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
-      return userAccount2 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx6, "PlanterJoin", (ev) => {
+      return userAccount1 == ev.planterId;
     });
   });
 

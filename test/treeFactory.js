@@ -2032,7 +2032,74 @@ contract("TreeFactory", (accounts) => {
         from: userAccount3,
       });
     });
+
+    ////////////////////------------------------------------ test manageProvideStatus func  ----------------------------------------//
+
+    it("test manageProvideStatus function", async () => {
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+
+      await treeFactoryInstance
+        .manageProvideStatus(102, 103, 2, { from: deployerAccount })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      // await Common.addTreejerContractRole(
+      //   arInstance,
+      //   treeTokenInstance.address,
+      //   deployerAccount
+      // );
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+        from: deployerAccount,
+      });
+
+      let result = await treeFactoryInstance.manageProvideStatus.call(
+        102,
+        103,
+        2,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result, false, "result not true");
+
+      let result2 = await treeFactoryInstance.manageProvideStatus(103, 104, 2, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        Number((await treeFactoryInstance.treeData.call(103)).provideStatus),
+        2,
+        "provideStatus not true"
+      );
+
+      let result3 = await treeFactoryInstance.manageProvideStatus.call(
+        103,
+        104,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result3, false, "result3 not true");
+    });
   });
+
   // //  -----------------------------------------------------------updateTree test--------------------------------------------
 
   describe("deploy and set addresses", () => {

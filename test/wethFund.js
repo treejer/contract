@@ -2986,11 +2986,6 @@ contract("WethFunds", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
-      console.log(
-        "expectedSwapTokenAmountTreeId2",
-        expectedSwapTokenAmountTreeId2
-      );
-
       const eventTx = await wethFunds.swapDaiToPlanters(
         expectedSwapTokenAmountTreeId2[0],
         web3.utils.toWei("500", "Ether"),

@@ -1407,18 +1407,12 @@ contract("IncrementalSell", (accounts) => {
         }
       );
 
-      console.log("uniswapRouterInstance", uniswapRouterInstance.getAmountsOut);
-
       let expectedSwapTokenAmountTreeid101 =
         await uniswapRouterInstance.getAmountsOut.call(
           web3.utils.toWei("0.0042", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
 
-      console.log(
-        "expectedSwapTokenAmountTreeid101",
-        expectedSwapTokenAmountTreeid101[1]
-      );
       await iSellInstance.buyTree(1, zeroAddress, {
         from: userAccount3,
       });
@@ -2347,7 +2341,7 @@ contract("IncrementalSell", (accounts) => {
       await iSellInstance.addTreeSells(
         101,
         web3.utils.toWei("0.01"),
-        250,
+        220,
         100,
         1000,
         {
@@ -2820,7 +2814,7 @@ contract("IncrementalSell", (accounts) => {
         "106 - Exists not true"
       );
     });
-    /*
+
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
@@ -2924,6 +2918,5 @@ contract("IncrementalSell", (accounts) => {
         "Gsn not true work"
       );
     });
-    */
   });
 });

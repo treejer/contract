@@ -554,7 +554,7 @@ contract("CommunityGifts", (accounts) => {
     });
   });
 
-  describe("set gift range", () => {
+  describe("update giftees", () => {
     beforeEach(async () => {
       const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
 
@@ -568,6 +568,16 @@ contract("CommunityGifts", (accounts) => {
           initialPlanterFund,
           initialReferralFund,
         ],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -595,12 +605,25 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
 
       //----------------- set cntract addresses
 
       await communityGiftsInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await communityGiftsInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
         {
           from: deployerAccount,
         }
@@ -617,12 +640,16 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       });
 
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
       //----------------add role to treejer contract role to treeFactoryInstance address
-      // await Common.addTreejerContractRole(
-      //   arInstance,
-      //   treeFactoryInstance.address,
-      //   deployerAccount
-      // );
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
 
       //----------------add role to treejer contract role to communityGiftsInstance address
       await Common.addTreejerContractRole(
@@ -888,111 +915,6 @@ contract("CommunityGifts", (accounts) => {
           }
         )
         .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
-    });
-  });
-  describe("update giftees", () => {
-    beforeEach(async () => {
-      const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
-
-      //------------------ deploy contracts
-
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [
-          arInstance.address,
-          expireDate,
-          initialPlanterFund,
-          initialReferralFund,
-        ],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
-
-      //----------------- set cntract addresses
-
-      await communityGiftsInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await communityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await communityGiftsInstance.setPlanterFundAddress(
-        planterFundsInstnce.address,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
-
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
-
-      //----------------add role to treejer contract role to treeFactoryInstance address
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
-
-      //----------------add role to treejer contract role to communityGiftsInstance address
-      await Common.addTreejerContractRole(
-        arInstance,
-        communityGiftsInstance.address,
-        deployerAccount
-      );
     });
 
     ////////////////////// -------------------------------- update giftees ----------------------------------------

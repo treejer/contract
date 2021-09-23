@@ -2412,5 +2412,11 @@ contract("FinancialModel", (accounts) => {
     let modelId4 = await financialModelInstance.getFindDistributionModelId(3);
 
     assert.equal(modelId4, 2, "4.modelId not true");
+
+    let modelId5 = await financialModelInstance.getFindDistributionModelId(
+      1050
+    );
+
+    assert.equal(modelId5, 1, "4.modelId not true");
   });
 });

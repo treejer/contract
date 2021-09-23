@@ -256,11 +256,9 @@ contract FinancialModel is Initializable {
             uint16 reserveFund2
         )
     {
-        uint256 i = 0;
-
         FundDistribution storage fundDistribution;
 
-        for (i; i < assignModels.length; i++) {
+        for (uint256 i = 0; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
                 require(i > 0, "invalid fund model");
 
@@ -281,10 +279,10 @@ contract FinancialModel is Initializable {
             }
         }
 
-        require(i > 0, "invalid fund model");
+        require(assignModels.length > 0, "invalid fund model");
 
         fundDistribution = fundDistributions[
-            assignModels[i - 1].distributionModelId
+            assignModels[assignModels.length - 1].distributionModelId
         ];
 
         return (
@@ -309,17 +307,15 @@ contract FinancialModel is Initializable {
         view
         returns (uint256)
     {
-        uint256 i = 0;
-
-        for (i; i < assignModels.length; i++) {
+        for (uint256 i = 0; i < assignModels.length; i++) {
             if (assignModels[i].startingTreeId > _treeId) {
                 require(i > 0, "invalid fund model");
                 return (assignModels[i - 1].distributionModelId);
             }
         }
 
-        require(i > 0, "invalid fund model");
+        require(assignModels.length > 0, "invalid fund model");
 
-        return (assignModels[i - 1].distributionModelId);
+        return (assignModels[assignModels.length - 1].distributionModelId);
     }
 }

@@ -480,7 +480,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint32 _provideStatus
     ) external onlyTreejerContract returns (bool) {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (treeData[i].provideStatus > 0) {
+            if (treeData[i].provideStatus > 0 || treeToken.exists(i)) {
                 return false;
             }
         }

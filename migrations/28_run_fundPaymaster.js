@@ -14,7 +14,7 @@ module.exports = async function (deployer, network, accounts) {
       {
         from: accounts[0],
         to: paymasterAddress,
-        value: web3.utils.toWei("0.1"),
+        value: web3.utils.toWei("0.01"),
       },
       (err, res) => {
         console.log("err", err);

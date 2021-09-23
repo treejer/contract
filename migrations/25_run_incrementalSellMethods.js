@@ -43,7 +43,6 @@ module.exports = async function (deployer, network, accounts) {
   await IncrementalSell.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterFundAddress(planterFundAddress);
-    await instance.setTreeAuctionAddress(treeAuctionAddress);
     await instance.setRegularSellAddress(regularSellAddress);
     await instance.setTreeFactoryAddress(treeFactoryAddress);
     await instance.setWethFundsAddress(wethFundsAddress);

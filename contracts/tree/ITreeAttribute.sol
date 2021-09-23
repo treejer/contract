@@ -48,9 +48,6 @@ interface ITreeAttribute {
         view
         returns (uint8);
 
-    /** @dev set {_address} to trusted forwarder */
-    function setTrustedForwarder(address _address) external;
-
     /**
      * @dev reserve a unique symbol
      * @param generatedCode unique symbol to reserve

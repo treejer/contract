@@ -11,7 +11,6 @@ import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
 import "../regularSell/IRegularSell.sol";
 import "../gsn/RelayRecipient.sol";
-import "../auction/ITreeAuction.sol";
 
 contract IncrementalSell is Initializable, RelayRecipient {
     /** NOTE {isIncrementalSell} set inside the initialize to {true} */
@@ -26,7 +25,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
     IPlanterFund public planterFundContract;
     IRegularSell public regularSell;
     IERC20Upgradeable public wethToken;
-    ITreeAuction public treeAuction;
 
     struct IncrementalPrice {
         uint256 startTree;
@@ -126,17 +124,6 @@ contract IncrementalSell is Initializable, RelayRecipient {
         IPlanterFund candidateContract = IPlanterFund(_address);
         require(candidateContract.isPlanterFund());
         planterFundContract = candidateContract;
-    }
-
-    /**
-     * @dev admin set TreeAuctionAddress
-     * @param _address set to the address of TreeAuction
-     */
-
-    function setTreeAuctionAddress(address _address) external onlyAdmin {
-        ITreeAuction candidateContract = ITreeAuction(_address);
-        require(candidateContract.isTreeAuction());
-        treeAuction = candidateContract;
     }
 
     function setRegularSellAddress(address _address) external onlyAdmin {

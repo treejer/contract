@@ -81,12 +81,6 @@ contract TreeAuction is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check msg.sender has TreejerContract role*/
-    modifier onlyTreejerContract() {
-        accessRestriction.ifTreejerContract(_msgSender());
-        _;
-    }
-
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");

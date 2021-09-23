@@ -136,8 +136,8 @@ Common.joinSimplePlanter = async (
   refferedBy,
   organizationAddress
 ) => {
-  let longitude = 1;
-  let latitude = 2;
+  const longitude = 1;
+  const latitude = 2;
   const countryCode = 10;
 
   const tx = await planterInstance.planterJoin(

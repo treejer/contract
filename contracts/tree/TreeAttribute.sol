@@ -5,10 +5,9 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
-import "../gsn/RelayRecipient.sol";
 
 /** @title TreeAttribute Contract */
-contract TreeAttribute is Initializable, RelayRecipient {
+contract TreeAttribute is Initializable {
     using SafeCastUpgradeable for uint256;
 
     bool public isTreeAttribute;
@@ -45,33 +44,21 @@ contract TreeAttribute is Initializable, RelayRecipient {
     event ReservedSymbolFreed(uint32 generatedCode);
     event SymbolSetByAdmin(uint256 treeId);
 
-    /** NOTE modifier to check msg.sender has admin role */
-    modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
-        _;
-    }
-
-    /** NOTE modifier for check valid address */
-    modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
-        _;
-    }
-
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
-        accessRestriction.ifTreejerContract(_msgSender());
+        accessRestriction.ifTreejerContract(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has data manager or treejer contract role */
     modifier onlyDataManagerOrTreejerContract() {
-        accessRestriction.ifDataManagerOrTreejerContract(_msgSender());
+        accessRestriction.ifDataManagerOrTreejerContract(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has script role */
     modifier onlyScript() {
-        accessRestriction.ifScript(_msgSender());
+        accessRestriction.ifScript(msg.sender);
         _;
     }
 
@@ -95,18 +82,6 @@ contract TreeAttribute is Initializable, RelayRecipient {
         require(candidateContract.isAccessRestriction());
         isTreeAttribute = true;
         accessRestriction = candidateContract;
-    }
-
-    /**
-     * @dev set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
-    function setTrustedForwarder(address _address)
-        external
-        onlyAdmin
-        validAddress(_address)
-    {
-        trustedForwarder = _address;
     }
 
     /**

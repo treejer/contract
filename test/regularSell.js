@@ -2226,20 +2226,15 @@ contract("regularSell", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.regularPlantTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        {
-          from: planter,
-        }
-      );
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
 
-      await treeFactoryInstance.verifyRegularPlant(1, true, {
+      await treeFactoryInstance.verifyTree(1, true, {
         from: dataManager,
       });
 
@@ -2458,20 +2453,15 @@ contract("regularSell", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.regularPlantTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        {
-          from: planter,
-        }
-      );
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
 
-      await treeFactoryInstance.verifyRegularPlant(1, true, {
+      await treeFactoryInstance.verifyTree(1, true, {
         from: dataManager,
       });
 
@@ -2531,12 +2521,12 @@ contract("regularSell", (accounts) => {
 
       ////////////////// ---------------- check tree before -----------------------
 
-      const treeBefore = await treeFactoryInstance.treeData.call(treeId);
+      const treeBefore = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(Number(treeBefore.treeStatus), 4, "invalid tree status");
 
       assert.equal(
-        Number(treeBefore.provideStatus),
+        Number(treeBefore.saleType),
         4,
         "invalid tree provide status"
       );
@@ -2677,12 +2667,12 @@ contract("regularSell", (accounts) => {
 
       ////////////////// ---------------- check tree after request-----------------------
 
-      const treeAfter = await treeFactoryInstance.treeData.call(treeId);
+      const treeAfter = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(Number(treeAfter.treeStatus), 4, "invalid tree status");
 
       assert.equal(
-        Number(treeAfter.provideStatus),
+        Number(treeAfter.saleType),
         0,
         "invalid tree provide status"
       );
@@ -3017,8 +3007,8 @@ contract("regularSell", (accounts) => {
       );
 
       /////////////// claim 10 tree with user2 (two tree is in use)
-      await treeFactoryInstance.addTree(10048, "", { from: dataManager });
-      await treeFactoryInstance.addTree(10050, "", { from: dataManager });
+      await treeFactoryInstance.listTree(10048, "", { from: dataManager });
+      await treeFactoryInstance.listTree(10050, "", { from: dataManager });
 
       await testRegularSellInstance.updateRegularReferrerGift(
         userAccount2,

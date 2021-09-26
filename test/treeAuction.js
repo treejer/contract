@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const TreeAuction = artifacts.require("TreeAuction.sol");
+const Auction = artifacts.require("Auction.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 
 const Tree = artifacts.require("Tree.sol");
@@ -40,7 +40,7 @@ const Math = require("./math");
 const {
   TimeEnumes,
   CommonErrorMsg,
-  TreeAuctionErrorMsg,
+  AuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   GsnErrorMsg,
@@ -50,8 +50,8 @@ const { util } = require("chai");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-contract("TreeAuction", (accounts) => {
-  let treeAuctionInstance;
+contract("Auction", (accounts) => {
+  let auctionInstance;
   let arInstance;
   let treeFactoryInstance;
   let startTime;
@@ -152,15 +152,11 @@ contract("TreeAuction", (accounts) => {
 
   describe("deployment and set addresses", () => {
     before(async () => {
-      treeAuctionInstance = await deployProxy(
-        TreeAuction,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      auctionInstance = await deployProxy(Auction, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       treeFactoryInstance = await deployProxy(
         TreeFactory,
@@ -202,7 +198,7 @@ contract("TreeAuction", (accounts) => {
     });
 
     it("deploys successfully", async () => {
-      const address = treeAuctionInstance.address;
+      const address = auctionInstance.address;
       assert.notEqual(address, 0x0);
       assert.notEqual(address, "");
       assert.notEqual(address, null);
@@ -212,52 +208,49 @@ contract("TreeAuction", (accounts) => {
     it("set Tree Auction address and fail in invalid situation", async () => {
       ///// ---------------- set trusted forwarder
 
-      await treeAuctionInstance
+      await auctionInstance
         .setTrustedForwarder(userAccount2, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await treeAuctionInstance
+      await auctionInstance
         .setTrustedForwarder(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await treeAuctionInstance.setTrustedForwarder(userAccount2, {
+      await auctionInstance.setTrustedForwarder(userAccount2, {
         from: deployerAccount,
       });
 
       assert.equal(
         userAccount2,
-        await treeAuctionInstance.trustedForwarder(),
+        await auctionInstance.trustedForwarder(),
         "address set incorrect"
       );
 
       ///// ---------------- set treeFactory
 
-      await treeAuctionInstance
+      await auctionInstance
         .setTreeFactoryAddress(treeFactoryInstance.address, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
 
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
       ///// ---------------- set financial model
 
-      await treeAuctionInstance
+      await auctionInstance
         .setFinancialModelAddress(financialModelInstance.address, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -266,55 +259,52 @@ contract("TreeAuction", (accounts) => {
 
       ///// ---------------- set wethToken
 
-      await treeAuctionInstance
+      await auctionInstance
         .setWethTokenAddress(wethInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await treeAuctionInstance
+      await auctionInstance
         .setWethTokenAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
         wethInstance.address,
-        await treeAuctionInstance.wethToken.call(),
+        await auctionInstance.wethToken.call(),
         "address set incorect"
       );
 
       ///// ---------------- set regular sell
 
-      await treeAuctionInstance
+      await auctionInstance
         .setRegularSellAddress(regularSellInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await treeAuctionInstance.setRegularSellAddress(
-        regularSellInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setRegularSellAddress(regularSellInstance.address, {
+        from: deployerAccount,
+      });
 
       assert.equal(
         regularSellInstance.address,
-        await treeAuctionInstance.regularSell.call(),
+        await auctionInstance.regularSell.call(),
         "address set incorect"
       );
 
       ///// ---------------- set wethFunds
 
-      await treeAuctionInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await auctionInstance.setWethFundsAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
-      await treeAuctionInstance
+      await auctionInstance
         .setWethFundsAddress(wethFundsInstance.address, {
           from: userAccount2,
         })
@@ -324,15 +314,11 @@ contract("TreeAuction", (accounts) => {
 
   describe("add auction and bid", () => {
     beforeEach(async () => {
-      treeAuctionInstance = await deployProxy(
-        TreeAuction,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      auctionInstance = await deployProxy(Auction, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       financialModelInstance = await deployProxy(
         FinancialModel,
@@ -361,14 +347,11 @@ contract("TreeAuction", (accounts) => {
       });
 
       //////////////////////////////-------------------- handle address
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -381,7 +364,7 @@ contract("TreeAuction", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAuctionInstance.address,
+        auctionInstance.address,
         deployerAccount
       );
 
@@ -404,20 +387,20 @@ contract("TreeAuction", (accounts) => {
       let initialValue = web3.utils.toWei("1");
       let bidInterval = web3.utils.toWei("0.1");
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
       ////// --------------- fail because of invalid assing model
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -442,7 +425,7 @@ contract("TreeAuction", (accounts) => {
         }
       );
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -459,7 +442,7 @@ contract("TreeAuction", (accounts) => {
 
       //////// fail because caller is not data manager
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -472,7 +455,7 @@ contract("TreeAuction", (accounts) => {
 
       /////////// ---------- create auction
 
-      const eventTx = await treeAuctionInstance.createAuction(
+      const eventTx = await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -482,7 +465,7 @@ contract("TreeAuction", (accounts) => {
       );
 
       /////// --------------- fail duplicate tree id
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -491,9 +474,9 @@ contract("TreeAuction", (accounts) => {
           bidInterval,
           { from: dataManager }
         )
-        .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+        .should.be.rejectedWith(AuctionErrorMsg.TREE_STATUS);
 
-      let result = await treeAuctionInstance.auctions.call(0);
+      let result = await auctionInstance.auctions.call(0);
 
       assert.equal(result.treeId.toNumber(), treeId);
       assert.equal(Number(result.highestBid), Number(initialValue));
@@ -525,14 +508,14 @@ contract("TreeAuction", (accounts) => {
 
       //////// -----------add auction
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
       //////////////////// ----------------- handle dm model
@@ -557,7 +540,7 @@ contract("TreeAuction", (accounts) => {
 
       ////////////---------------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -568,23 +551,23 @@ contract("TreeAuction", (accounts) => {
 
       //////// ------------ prepare for bid auction
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1, {
         from: userAccount1,
       });
 
       ////////// ---------- fail because bid before start
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(0, bidAmount1, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_BEFORE_START);
 
       await Common.travelTime(TimeEnumes.minutes, 10);
 
@@ -592,11 +575,11 @@ contract("TreeAuction", (accounts) => {
 
       await wethInstance.setMint(userAccount1, invalidInitialBalance);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(0, bidAmount1, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(AuctionErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethInstance.resetAcc(userAccount1);
 
@@ -604,24 +587,24 @@ contract("TreeAuction", (accounts) => {
 
       await wethInstance.setMint(userAccount1, bidderInitialBalance);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(0, invalidBidAmmount1, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
       await wethInstance.resetAcc(userAccount1);
 
       ////////////// travel time to check endTime increase
       await Common.travelTime(TimeEnumes.minutes, 45);
 
-      let resultBeforeBid = await treeAuctionInstance.auctions.call(0);
+      let resultBeforeBid = await auctionInstance.auctions.call(0);
 
       ////////////////// charge bidder account
 
       await wethInstance.setMint(userAccount1, bidderInitialBalance);
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: userAccount2,
       });
 
@@ -636,18 +619,13 @@ contract("TreeAuction", (accounts) => {
       );
 
       /////////////////////////// ----------------- bid
-      const eventTx = await treeAuctionInstance.bid(
-        0,
-        bidAmount1,
-        zeroAddress,
-        {
-          from: userAccount1,
-        }
-      );
+      const eventTx = await auctionInstance.bid(0, bidAmount1, zeroAddress, {
+        from: userAccount1,
+      });
 
       const bidder1BalanceAfterBid = await wethInstance.balanceOf(userAccount1);
 
-      const resultAfterBid1 = await treeAuctionInstance.auctions.call(0);
+      const resultAfterBid1 = await auctionInstance.auctions.call(0);
 
       ////////// -------------- check highest bid event
       truffleAssert.eventEmitted(eventTx, "HighestBidIncreased", (ev) => {
@@ -666,7 +644,7 @@ contract("TreeAuction", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount1),
         "contract balance is not ok"
       );
@@ -677,16 +655,11 @@ contract("TreeAuction", (accounts) => {
         "highest bid is not correct"
       );
 
-      const eventTx2 = await treeAuctionInstance.bid(
-        0,
-        bidAmount2,
-        zeroAddress,
-        {
-          from: userAccount2,
-        }
-      );
+      const eventTx2 = await auctionInstance.bid(0, bidAmount2, zeroAddress, {
+        from: userAccount2,
+      });
 
-      const resultAfterBid2 = await treeAuctionInstance.auctions.call(0);
+      const resultAfterBid2 = await auctionInstance.auctions.call(0);
 
       ////////// -------------- check highest bid event
 
@@ -709,7 +682,7 @@ contract("TreeAuction", (accounts) => {
 
       //check contract balance
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount2),
         "2.Contract balance is not true"
       );
@@ -746,11 +719,11 @@ contract("TreeAuction", (accounts) => {
       ////////////// ------------- travel time to after end of auction to fail bid
       await Common.travelTime(TimeEnumes.minutes, 20);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(0, web3.utils.toWei("2"), zeroAddress, {
           from: userAccount2,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_AFTER_END);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_AFTER_END);
     });
 
     it("bid with referrals and check data", async () => {
@@ -777,34 +750,34 @@ contract("TreeAuction", (accounts) => {
 
       ////////////// ------------------ handle address
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1, {
         from: bidderAccount1,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: bidderAccount2,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount3, {
+      await wethInstance.approve(auctionInstance.address, bidAmount3, {
         from: bidderAccount3,
       });
 
       /////////////////// --------------- handle add tree
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
       //////////////////// ----------------- handle dm model
@@ -829,7 +802,7 @@ contract("TreeAuction", (accounts) => {
 
       ////////////---------------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -847,7 +820,7 @@ contract("TreeAuction", (accounts) => {
       await wethInstance.setMint(bidderAccount3, bidderInitialBalance);
 
       ///////////// check bidder1 referral before
-      const bidder1RefferalBefore = await treeAuctionInstance.referrals.call(
+      const bidder1RefferalBefore = await auctionInstance.referrals.call(
         bidderAccount1,
         auctionId1
       );
@@ -858,7 +831,7 @@ contract("TreeAuction", (accounts) => {
       );
       /////////////////// ------------- bid
 
-      const eventTx1 = await treeAuctionInstance.bid(
+      const eventTx1 = await auctionInstance.bid(
         auctionId1,
         bidAmount1,
         referralAccount1,
@@ -878,7 +851,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       ///////////// check bidder1 referral after bid
-      const bidder1RefferalAfter = await treeAuctionInstance.referrals.call(
+      const bidder1RefferalAfter = await auctionInstance.referrals.call(
         bidderAccount1,
         auctionId1
       );
@@ -892,7 +865,7 @@ contract("TreeAuction", (accounts) => {
       /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder1 referral before
-      const bidder2RefferalBefore = await treeAuctionInstance.referrals.call(
+      const bidder2RefferalBefore = await auctionInstance.referrals.call(
         bidderAccount2,
         auctionId1
       );
@@ -903,7 +876,7 @@ contract("TreeAuction", (accounts) => {
       );
       /////////////////// ------------- bid
 
-      const eventTx2 = await treeAuctionInstance.bid(
+      const eventTx2 = await auctionInstance.bid(
         auctionId1,
         bidAmount2,
         zeroAddress,
@@ -923,7 +896,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       ///////////// check bidder1 referral after bid
-      const bidder2RefferalAfter = await treeAuctionInstance.referrals.call(
+      const bidder2RefferalAfter = await auctionInstance.referrals.call(
         bidderAccount2,
         auctionId1
       );
@@ -937,7 +910,7 @@ contract("TreeAuction", (accounts) => {
       /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder3 referral before
-      const bidder3RefferalBefore = await treeAuctionInstance.referrals.call(
+      const bidder3RefferalBefore = await auctionInstance.referrals.call(
         bidderAccount3,
         auctionId1
       );
@@ -948,7 +921,7 @@ contract("TreeAuction", (accounts) => {
       );
       /////////////////// ------------- bid
 
-      const eventTx3 = await treeAuctionInstance.bid(
+      const eventTx3 = await auctionInstance.bid(
         auctionId1,
         bidAmount3,
         referralAccount3,
@@ -968,7 +941,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       ///////////// check bidder1 referral after bid
-      const bidder3RefferalAfter = await treeAuctionInstance.referrals.call(
+      const bidder3RefferalAfter = await auctionInstance.referrals.call(
         bidderAccount3,
         auctionId1
       );
@@ -982,7 +955,7 @@ contract("TreeAuction", (accounts) => {
       /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder2 referral before
-      const bidder2RefferalBefore2 = await treeAuctionInstance.referrals.call(
+      const bidder2RefferalBefore2 = await auctionInstance.referrals.call(
         bidderAccount2,
         auctionId1
       );
@@ -992,16 +965,16 @@ contract("TreeAuction", (accounts) => {
         "referral 2 is not correct"
       );
       /////////////////// ------------- bid
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount4, {
+      await wethInstance.approve(auctionInstance.address, bidAmount4, {
         from: bidderAccount2,
       });
 
-      await treeAuctionInstance.bid(auctionId1, bidAmount4, referralAccount2, {
+      await auctionInstance.bid(auctionId1, bidAmount4, referralAccount2, {
         from: bidderAccount2,
       });
 
       ///////////// check bidder2 referral after bid
-      const bidder2RefferalAfter2 = await treeAuctionInstance.referrals.call(
+      const bidder2RefferalAfter2 = await auctionInstance.referrals.call(
         bidderAccount2,
         auctionId1
       );
@@ -1015,7 +988,7 @@ contract("TreeAuction", (accounts) => {
       /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder3 referral before
-      const bidder3RefferalBefore2 = await treeAuctionInstance.referrals.call(
+      const bidder3RefferalBefore2 = await auctionInstance.referrals.call(
         bidderAccount3,
         auctionId1
       );
@@ -1025,15 +998,15 @@ contract("TreeAuction", (accounts) => {
         "referral 3 is not correct"
       );
       /////////////////// ------------- bid
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount5, {
+      await wethInstance.approve(auctionInstance.address, bidAmount5, {
         from: bidderAccount3,
       });
-      await treeAuctionInstance.bid(auctionId1, bidAmount5, zeroAddress, {
+      await auctionInstance.bid(auctionId1, bidAmount5, zeroAddress, {
         from: bidderAccount3,
       });
 
       ///////////// check bidder1 referral after bid
-      const bidder3RefferalAfter2 = await treeAuctionInstance.referrals.call(
+      const bidder3RefferalAfter2 = await auctionInstance.referrals.call(
         bidderAccount3,
         auctionId1
       );
@@ -1046,16 +1019,16 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////------------------- check refferes in auction2
 
-      const bidder1RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      const bidder1RefferalAuction2 = await auctionInstance.referrals.call(
         bidderAccount1,
         auctionId2
       );
 
-      const bidder2RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      const bidder2RefferalAuction2 = await auctionInstance.referrals.call(
         bidderAccount1,
         auctionId2
       );
-      const bidder3RefferalAuction2 = await treeAuctionInstance.referrals.call(
+      const bidder3RefferalAuction2 = await auctionInstance.referrals.call(
         bidderAccount1,
         auctionId2
       );
@@ -1089,21 +1062,18 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
       ///////////////------------------- pause
@@ -1112,7 +1082,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       const treeId = 1;
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
@@ -1134,7 +1104,7 @@ contract("TreeAuction", (accounts) => {
         from: dataManager,
       });
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -1145,7 +1115,7 @@ contract("TreeAuction", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.PAUSE);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(auctionId, web3.utils.toWei("1.5"), zeroAddress, {
           from: userAccount1,
         })
@@ -1153,7 +1123,7 @@ contract("TreeAuction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.hours, 2);
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(auctionId, { from: deployerAccount })
         .should.be.rejectedWith(CommonErrorMsg.PAUSE);
 
@@ -1165,15 +1135,11 @@ contract("TreeAuction", (accounts) => {
 
   describe("test with end auction", () => {
     beforeEach(async () => {
-      treeAuctionInstance = await deployProxy(
-        TreeAuction,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      auctionInstance = await deployProxy(Auction, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       financialModelInstance = await deployProxy(
         FinancialModel,
@@ -1224,12 +1190,9 @@ contract("TreeAuction", (accounts) => {
       );
 
       //////////////////////////////-------------------- handle address
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
       await wethFundsInstance.setUniswapRouterAddress(
         uniswapV2Router02NewAddress,
@@ -1257,11 +1220,11 @@ contract("TreeAuction", (accounts) => {
         wethFundsInstance.address,
         deployerAccount
       );
-      await treeAuctionInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await auctionInstance.setWethFundsAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1278,7 +1241,7 @@ contract("TreeAuction", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAuctionInstance.address,
+        auctionInstance.address,
         deployerAccount
       );
 
@@ -1300,12 +1263,9 @@ contract("TreeAuction", (accounts) => {
         }
       );
 
-      await treeAuctionInstance.setRegularSellAddress(
-        regularSellInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setRegularSellAddress(regularSellInstance.address, {
+        from: deployerAccount,
+      });
 
       const treeId = 1;
       const bidAmount = web3.utils.toWei("1.15");
@@ -1322,39 +1282,38 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        { from: deployerAccount }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount, {
+      await wethInstance.approve(auctionInstance.address, bidAmount, {
         from: bidderAccount,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: bidderAccount2,
       });
 
       /////////////////--------------- handle add tree
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
 
@@ -1380,7 +1339,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////////// ---------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -1397,21 +1356,19 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////------------------- end auction with bidder
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(0, {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
-        ); //end time dont reach and must be rejected
+        .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
 
-      await treeAuctionInstance.bid(0, bidAmount, zeroAddress, {
+      await auctionInstance.bid(0, bidAmount, zeroAddress, {
         from: bidderAccount,
       });
 
       await Common.travelTime(TimeEnumes.seconds, 670);
 
-      let successEnd = await treeAuctionInstance.endAuction(0, {
+      let successEnd = await auctionInstance.endAuction(0, {
         from: deployerAccount,
       }); //succesfully end the auction
 
@@ -1429,23 +1386,23 @@ contract("TreeAuction", (accounts) => {
         );
       });
 
-      let result = await treeAuctionInstance.auctions.call(0);
+      let result = await auctionInstance.auctions.call(0);
 
       assert.equal(Number(result.endDate), 0, "auction not true");
 
       assert.equal(Number(result.startDate), 0, "auction not true");
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(0, {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.AUCTION_IS_UNAVAILABLE); //auction already ended and must be rejected
+        .should.be.rejectedWith(AuctionErrorMsg.AUCTION_IS_UNAVAILABLE); //auction already ended and must be rejected
 
       await wethInstance.resetAcc(bidderAccount);
 
       //////////////////////--------------------------- auction with no bidder
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId2,
         Number(startTime),
         Number(endTime),
@@ -1456,17 +1413,13 @@ contract("TreeAuction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.seconds, 70);
 
-      let failEndNoBidder = await treeAuctionInstance.endAuction(1, {
+      let failEndNoBidder = await auctionInstance.endAuction(1, {
         from: deployerAccount,
       });
 
-      const treeData2 = await treeFactoryInstance.treeData.call(treeId2);
+      const treeData2 = await treeFactoryInstance.trees.call(treeId2);
 
-      assert.equal(
-        Number(treeData2.provideStatus),
-        0,
-        "provide status is not ok"
-      );
+      assert.equal(Number(treeData2.saleType), 0, "provide status is not ok");
 
       truffleAssert.eventEmitted(failEndNoBidder, "AuctionEnded", (ev) => {
         return Number(ev.auctionId) == 1 && Number(ev.treeId) == treeId2;
@@ -1518,19 +1471,19 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
+      await auctionInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
@@ -1540,21 +1493,21 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1_1, {
         from: bidderAccount1,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2_1, {
         from: bidderAccount2,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount3_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount3_1, {
         from: bidderAccount3,
       });
 
       /////////////////--------------- handle add tree
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
@@ -1580,7 +1533,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////////// ---------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -1600,11 +1553,11 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////////////////////////////////////////////////////////////////////
 
-      await treeAuctionInstance.bid(0, bidAmount1_1, zeroAddress, {
+      await auctionInstance.bid(0, bidAmount1_1, zeroAddress, {
         from: bidderAccount1,
       });
 
-      const auction1 = await treeAuctionInstance.auctions.call(0);
+      const auction1 = await auctionInstance.auctions.call(0);
 
       assert.equal(auction1.bidder, userAccount1, "bidder is incoreect");
 
@@ -1616,11 +1569,11 @@ contract("TreeAuction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.minutes, 55);
 
-      await treeAuctionInstance.bid(0, bidAmount2_1, zeroAddress, {
+      await auctionInstance.bid(0, bidAmount2_1, zeroAddress, {
         from: bidderAccount2,
       });
 
-      const auction2 = await treeAuctionInstance.auctions.call(0);
+      const auction2 = await auctionInstance.auctions.call(0);
 
       assert.equal(auction2.bidder, userAccount2, "bidder is incorrect");
       assert.equal(
@@ -1629,21 +1582,21 @@ contract("TreeAuction", (accounts) => {
         "time increse incorrect"
       );
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(0, invalidBidAmount, zeroAddress, { from: userAccount1 })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
       /////////////////// ---------------give approve again to auction contract from bidderAccount1
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1_2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1_2, {
         from: bidderAccount1,
       });
 
-      await treeAuctionInstance.bid(0, bidAmount1_2, zeroAddress, {
+      await auctionInstance.bid(0, bidAmount1_2, zeroAddress, {
         from: bidderAccount1,
       });
 
-      const auction3 = await treeAuctionInstance.auctions.call(0);
+      const auction3 = await auctionInstance.auctions.call(0);
 
       assert.equal(auction3.bidder, userAccount1, "bidder is incorrect");
       assert.equal(
@@ -1654,17 +1607,17 @@ contract("TreeAuction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.seconds, 600);
 
-      await treeAuctionInstance.bid(0, bidAmount3_1, zeroAddress, {
+      await auctionInstance.bid(0, bidAmount3_1, zeroAddress, {
         from: bidderAccount3,
       });
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(0, { from: deployerAccount })
         .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
+          AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
         );
 
-      const auction4 = await treeAuctionInstance.auctions.call(0);
+      const auction4 = await auctionInstance.auctions.call(0);
 
       assert.equal(
         Math.subtract(Number(auction4.endDate), Number(auction3.endDate)),
@@ -1677,7 +1630,7 @@ contract("TreeAuction", (accounts) => {
       await Common.travelTime(TimeEnumes.minutes, 16);
 
       let contractBalanceBefore = await wethInstance.balanceOf(
-        treeAuctionInstance.address
+        auctionInstance.address
       );
 
       assert.equal(
@@ -1716,7 +1669,7 @@ contract("TreeAuction", (accounts) => {
           daiInstance.address,
         ]);
 
-      await treeAuctionInstance.endAuction(0, { from: userAccount3 });
+      await auctionInstance.endAuction(0, { from: userAccount3 });
 
       /////////// --------------- check referral for zero address
 
@@ -1730,7 +1683,7 @@ contract("TreeAuction", (accounts) => {
         }
       );
 
-      const winnerReferral = await treeAuctionInstance.referrals.call(
+      const winnerReferral = await auctionInstance.referrals.call(
         auction3.bidder,
         0
       );
@@ -1750,7 +1703,7 @@ contract("TreeAuction", (accounts) => {
       ////////////////--------------------------------------------
 
       let contractBalanceAfter = await wethInstance.balanceOf(
-        treeAuctionInstance.address
+        auctionInstance.address
       );
 
       assert.equal(
@@ -1850,7 +1803,7 @@ contract("TreeAuction", (accounts) => {
         from: userAccount8,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount7, {
+      await treeFactoryInstance.assignTree(treeId, userAccount7, {
         from: dataManager,
       });
 
@@ -1861,12 +1814,12 @@ contract("TreeAuction", (accounts) => {
       );
 
       await treeFactoryInstance
-        .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId, ipfsHash, birthDate, countryCode, {
           from: userAccount8,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANT_TREE_WITH_PLANTER);
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -1875,14 +1828,14 @@ contract("TreeAuction", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount7 })
+        .verifyAssignedTree(treeId, true, { from: userAccount7 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount3 })
+        .verifyAssignedTree(treeId, true, { from: userAccount3 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_ACCESS);
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: userAccount8,
       });
 
@@ -1927,23 +1880,23 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
+      await auctionInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
-      await treeAuctionInstance.setRegularSellAddress(
+      await auctionInstance.setRegularSellAddress(
         regularSellInstance.address,
         { from: deployerAccount }
       );
@@ -1954,11 +1907,11 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1, {
         from: bidderAccount1,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: bidderAccount2,
       });
 
@@ -1985,7 +1938,7 @@ contract("TreeAuction", (accounts) => {
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -2020,7 +1973,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////////// ---------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -2038,17 +1991,17 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////////////////////////////////////////////////////////////////////
 
-      let createResult = await treeFactoryInstance.treeData.call(treeId);
+      let createResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        createResult.provideStatus,
+        createResult.saleType,
         1,
         "Provide status not true update when auction create"
       );
 
       ////////////////////----------------- fail to create auction
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId,
           Number(startTime),
@@ -2059,30 +2012,30 @@ contract("TreeAuction", (accounts) => {
             from: dataManager,
           }
         )
-        .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+        .should.be.rejectedWith(AuctionErrorMsg.TREE_STATUS);
 
       ////////////////// ----------------- fail to end auction
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
+          AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
         );
 
       await Common.travelTime(TimeEnumes.hours, 1);
 
       /////////////////// -------------- end auction
 
-      await treeAuctionInstance.endAuction(0, {
+      await auctionInstance.endAuction(0, {
         from: deployerAccount,
       });
 
-      let failResult = await treeFactoryInstance.treeData.call(treeId);
+      let failResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        failResult.provideStatus,
+        failResult.saleType,
         0,
         "Provide status not true update when auction fail"
       );
@@ -2090,7 +2043,7 @@ contract("TreeAuction", (accounts) => {
       startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
       endTime = await Common.timeInitial(TimeEnumes.hours, 1);
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -2101,33 +2054,33 @@ contract("TreeAuction", (accounts) => {
         }
       );
 
-      let createResult2 = await treeFactoryInstance.treeData.call(treeId);
+      let createResult2 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        createResult2.provideStatus,
+        createResult2.saleType,
         1,
         "Provide status not true update when auction create"
       );
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(1, invalidBidAmount1, refferal1, {
           from: bidderAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
-      await treeAuctionInstance.bid(1, bidAmount1, refferal1, {
+      await auctionInstance.bid(1, bidAmount1, refferal1, {
         from: bidderAccount1,
       });
 
       let firstBidderAfterBid = await wethInstance.balanceOf(bidderAccount1);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(1, invalidBidAmount2, refferal2, {
           from: bidderAccount2,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
-      await treeAuctionInstance.bid(1, bidAmount2, refferal2, {
+      await auctionInstance.bid(1, bidAmount2, refferal2, {
         from: bidderAccount2,
       });
 
@@ -2142,17 +2095,17 @@ contract("TreeAuction", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount2),
         "1.Contract balance is not true"
       );
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(1, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
+          AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
         );
 
       await Common.travelTime(TimeEnumes.hours, 1);
@@ -2189,15 +2142,15 @@ contract("TreeAuction", (accounts) => {
           daiInstance.address,
         ]);
 
-      const auctionDataBeforeEnd = await treeAuctionInstance.auctions.call(1);
+      const auctionDataBeforeEnd = await auctionInstance.auctions.call(1);
 
-      let successEnd = await treeAuctionInstance.endAuction(1, {
+      let successEnd = await auctionInstance.endAuction(1, {
         from: deployerAccount,
       });
 
       //////////////// --------------------------------- check refferal part
 
-      const winnerReferral = await treeAuctionInstance.referrals.call(
+      const winnerReferral = await auctionInstance.referrals.call(
         auctionDataBeforeEnd.bidder,
         1
       );
@@ -2231,7 +2184,7 @@ contract("TreeAuction", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         0,
         "Contract balance not true when auction end"
       );
@@ -2310,10 +2263,10 @@ contract("TreeAuction", (accounts) => {
         "reserveFund2 funds invalid"
       );
 
-      let successResult = await treeFactoryInstance.treeData.call(treeId);
+      let successResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        successResult.provideStatus,
+        successResult.saleType,
         0,
         "Provide status not true update when auction success"
       );
@@ -2363,19 +2316,19 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
+      await auctionInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
@@ -2401,15 +2354,15 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1_1, {
         from: bidderAccount1,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2_1, {
         from: bidderAccount2,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount3_1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount3_1, {
         from: bidderAccount3,
       });
 
@@ -2459,7 +2412,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////////// ---------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -2499,37 +2452,37 @@ contract("TreeAuction", (accounts) => {
 
       ////////////// --------------- check tree data
 
-      let createResult = await treeFactoryInstance.treeData.call(treeId);
+      let createResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        createResult.provideStatus,
+        createResult.saleType,
         1,
         "Provide status not true update when auction create"
       );
       //////////////// ------------- fail to create auction
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
           from: dataManager,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+        .should.be.rejectedWith(AuctionErrorMsg.TREE_STATUS);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(auctionId, web3.utils.toWei("1.5"), zeroAddress, {
           from: bidderAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_BEFORE_START);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_BEFORE_START);
 
       await Common.travelTime(TimeEnumes.minutes, 5);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(auctionId, invalidBidAmount1, zeroAddress, {
           from: bidderAccount1,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
       ///////////////////// --------------- bid for auction
 
-      await treeAuctionInstance.bid(auctionId, bidAmount1_1, zeroAddress, {
+      await auctionInstance.bid(auctionId, bidAmount1_1, zeroAddress, {
         from: bidderAccount1,
       });
 
@@ -2544,7 +2497,7 @@ contract("TreeAuction", (accounts) => {
       await Common.travelTime(TimeEnumes.days, 1);
 
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount1_1),
         "1.Contract balance is not true"
       );
@@ -2554,21 +2507,21 @@ contract("TreeAuction", (accounts) => {
       );
 
       /////////////------------- fail to bid
-      await treeAuctionInstance
+      await auctionInstance
         .bid(auctionId, invalidBidAmount2, zeroAddress, {
           from: bidderAccount2,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
-      await treeAuctionInstance
+      await auctionInstance
         .bid(auctionId, invalidBidAmount3, zeroAddress, {
           from: bidderAccount2,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.BID_VALUE);
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
       /////////////////// ------------ bid for auction
 
-      await treeAuctionInstance.bid(auctionId, bidAmount2_1, zeroAddress, {
+      await auctionInstance.bid(auctionId, bidAmount2_1, zeroAddress, {
         from: bidderAccount2,
       });
 
@@ -2577,7 +2530,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////// ---------------- check contract balance
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount2_1),
         "2.Contract balance is not true"
       );
@@ -2602,7 +2555,7 @@ contract("TreeAuction", (accounts) => {
       );
       ///////////////// -------------- bid for auction
 
-      await treeAuctionInstance.bid(auctionId, bidAmount3_1, zeroAddress, {
+      await auctionInstance.bid(auctionId, bidAmount3_1, zeroAddress, {
         from: bidderAccount3,
       });
 
@@ -2617,7 +2570,7 @@ contract("TreeAuction", (accounts) => {
       );
       ////////// ----------- check contract balance
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount3_1),
         "3.Contract balance is not true"
       );
@@ -2637,11 +2590,11 @@ contract("TreeAuction", (accounts) => {
       await Common.travelTime(TimeEnumes.days, 7);
 
       /////////////--------------------------- give approve from bidderAccount1 for seccend bid
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1_2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1_2, {
         from: bidderAccount1,
       });
 
-      await treeAuctionInstance.bid(auctionId, bidAmount1_2, zeroAddress, {
+      await auctionInstance.bid(auctionId, bidAmount1_2, zeroAddress, {
         from: bidderAccount1,
       });
 
@@ -2665,7 +2618,7 @@ contract("TreeAuction", (accounts) => {
 
       ///////////////----------- check contract balance after bid
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount1_2),
         "4.Contract balance is not true"
       );
@@ -2680,7 +2633,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       const treeDataAfterVerifyUpdate1 =
-        await treeFactoryInstance.treeData.call(treeId);
+        await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
         Number(treeDataAfterVerifyUpdate1.treeStatus),
@@ -2694,12 +2647,12 @@ contract("TreeAuction", (accounts) => {
 
       assert.equal(planterBalance, 0, "1.planter balance not true in treasury");
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(auctionId, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
+          AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
         );
 
       await Common.travelTime(TimeEnumes.days, 1);
@@ -2713,11 +2666,11 @@ contract("TreeAuction", (accounts) => {
       );
 
       /////////////--------------------------- give approve from bidderAccount2 for seccend bid
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2_2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2_2, {
         from: bidderAccount2,
       });
 
-      let tx = await treeAuctionInstance.bid(
+      let tx = await auctionInstance.bid(
         auctionId,
         bidAmount2_2,
         zeroAddress,
@@ -2753,7 +2706,7 @@ contract("TreeAuction", (accounts) => {
 
       //////////////////////// -------------------- check contract balance
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(bidAmount2_2),
         "5.Contract balance is not true"
       );
@@ -2790,18 +2743,18 @@ contract("TreeAuction", (accounts) => {
           daiInstance.address,
         ]);
 
-      let successEnd = await treeAuctionInstance.endAuction(auctionId, {
+      let successEnd = await auctionInstance.endAuction(auctionId, {
         from: userAccount4,
       });
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(treeId, startTime, endTime, initialValue, bidInterval, {
           from: dataManager,
         })
-        .should.be.rejectedWith(TreeAuctionErrorMsg.TREE_STATUS);
+        .should.be.rejectedWith(AuctionErrorMsg.TREE_STATUS);
 
       assert.equal(
-        Number(await wethInstance.balanceOf(treeAuctionInstance.address)),
+        Number(await wethInstance.balanceOf(auctionInstance.address)),
         Number(web3.utils.toWei("0", "Ether")),
         "6.Contract balance is not true"
       );
@@ -3081,23 +3034,23 @@ contract("TreeAuction", (accounts) => {
 
       ////////////////// ------------------- handle address
 
-      await treeAuctionInstance.setTreeFactoryAddress(
+      await auctionInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAuctionInstance.setFinancialModelAddress(
+      await auctionInstance.setFinancialModelAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAuctionInstance.setWethTokenAddress(wethInstance.address, {
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 
-      await treeAuctionInstance.setRegularSellAddress(
+      await auctionInstance.setRegularSellAddress(
         regularSellInstance.address,
         { from: deployerAccount }
       );
@@ -3124,13 +3077,13 @@ contract("TreeAuction", (accounts) => {
 
       //////////////// -----------  fail to create auction
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(treeId1, startTime, endTime, initialPrice, bidInterval, {
           from: dataManager,
         })
@@ -3177,7 +3130,7 @@ contract("TreeAuction", (accounts) => {
       });
 
       //////// ----------- fail to create auction <<invalid-tree>>
-      await treeAuctionInstance
+      await auctionInstance
         .createAuction(
           treeId1,
           Number(startTime),
@@ -3191,17 +3144,17 @@ contract("TreeAuction", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
 
       /////////------------------ add tree
-      await treeFactoryInstance.addTree(treeId1, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId1, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
 
       //////////////// ---------------- create auction
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId1,
         Number(startTime),
         Number(endTime),
@@ -3211,7 +3164,7 @@ contract("TreeAuction", (accounts) => {
         { from: dataManager }
       );
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId2,
         Number(startTime),
         Number(endTime),
@@ -3229,23 +3182,23 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////////////////////////////////////////////////////////////////////
 
-      const initailAuction1 = await treeAuctionInstance.auctions.call(
+      const initailAuction1 = await auctionInstance.auctions.call(
         auctionId1
       );
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1, {
         from: bidderAccount1,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount1, {
+      await wethInstance.approve(auctionInstance.address, bidAmount1, {
         from: bidderAccount2,
       });
 
       //////////// bid 1
 
-      let bidTx1 = await treeAuctionInstance.bid(
+      let bidTx1 = await auctionInstance.bid(
         auctionId1,
         bidAmount1,
         otherRefferer,
@@ -3253,7 +3206,7 @@ contract("TreeAuction", (accounts) => {
           from: bidderAccount1,
         }
       );
-      let bidTx2 = await treeAuctionInstance.bid(
+      let bidTx2 = await auctionInstance.bid(
         auctionId2,
         bidAmount1,
         otherRefferer,
@@ -3284,11 +3237,11 @@ contract("TreeAuction", (accounts) => {
 
       /////////////////// ---------------give approve to auction contract
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: bidderAccount2,
       });
 
-      await wethInstance.approve(treeAuctionInstance.address, bidAmount2, {
+      await wethInstance.approve(auctionInstance.address, bidAmount2, {
         from: bidderAccount1,
       });
 
@@ -3296,7 +3249,7 @@ contract("TreeAuction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.minutes, 55);
 
-      const FinalBidTx1 = await treeAuctionInstance.bid(
+      const FinalBidTx1 = await auctionInstance.bid(
         auctionId1,
         bidAmount2,
         mainRefferer,
@@ -3305,7 +3258,7 @@ contract("TreeAuction", (accounts) => {
         }
       );
 
-      const FinalBidTx2 = await treeAuctionInstance.bid(
+      const FinalBidTx2 = await auctionInstance.bid(
         auctionId2,
         bidAmount2,
         mainRefferer,
@@ -3315,7 +3268,7 @@ contract("TreeAuction", (accounts) => {
       );
 
       const auction1AfterEndTimeIncrease =
-        await treeAuctionInstance.auctions.call(auctionId1);
+        await auctionInstance.auctions.call(auctionId1);
 
       truffleAssert.eventEmitted(FinalBidTx1, "HighestBidIncreased", (ev) => {
         return (
@@ -3424,10 +3377,10 @@ contract("TreeAuction", (accounts) => {
 
       // //------------- end auction
 
-      await treeAuctionInstance
+      await auctionInstance
         .endAuction(auctionId1)
         .should.be.rejectedWith(
-          TreeAuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
+          AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME
         );
 
       await Common.travelTime(TimeEnumes.minutes, 20);
@@ -3460,15 +3413,15 @@ contract("TreeAuction", (accounts) => {
           daiInstance.address,
         ]);
 
-      const auction1BeforeEnd = await treeAuctionInstance.auctions.call(
+      const auction1BeforeEnd = await auctionInstance.auctions.call(
         auctionId1
       );
 
-      const endAuctionTx = await treeAuctionInstance.endAuction(auctionId1);
+      const endAuctionTx = await auctionInstance.endAuction(auctionId1);
 
       /////////////////---------------------- check referral part
 
-      const winnerRefferer1 = await treeAuctionInstance.referrals.call(
+      const winnerRefferer1 = await auctionInstance.referrals.call(
         auction1BeforeEnd.bidder,
         auctionId1
       );
@@ -3584,7 +3537,7 @@ contract("TreeAuction", (accounts) => {
 
       ///////////////////----------------------------- end auction2
 
-      const auction2BeforeEnd = await treeAuctionInstance.auctions.call(
+      const auction2BeforeEnd = await auctionInstance.auctions.call(
         auctionId2
       );
 
@@ -3594,11 +3547,11 @@ contract("TreeAuction", (accounts) => {
           daiInstance.address,
         ]);
 
-      const endAuctionTx2 = await treeAuctionInstance.endAuction(auctionId2);
+      const endAuctionTx2 = await auctionInstance.endAuction(auctionId2);
 
       /////////////////---------------------- check referral part
 
-      const winnerRefferer2 = await treeAuctionInstance.referrals.call(
+      const winnerRefferer2 = await auctionInstance.referrals.call(
         auction2BeforeEnd.bidder,
         auctionId2
       );
@@ -3741,13 +3694,13 @@ contract("TreeAuction", (accounts) => {
         zeroAddress
       );
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId1, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId1, userAccount2, {
         from: dataManager,
       });
-      await treeFactoryInstance.plantTree(treeId1, ipfsHash, 1, 1, {
+      await treeFactoryInstance.plantAssignedTree(treeId1, ipfsHash, 1, 1, {
         from: userAccount2,
       });
-      await treeFactoryInstance.verifyPlant(treeId1, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId1, true, {
         from: dataManager,
       });
       ////////////// ------------------- update tree
@@ -3775,7 +3728,7 @@ contract("TreeAuction", (accounts) => {
       const planterPaidAfterVerify =
         await planterFundsInstnce.plantersPaid.call(treeId1);
 
-      const resultAfterGT = await treeFactoryInstance.treeData.call(treeId1);
+      const resultAfterGT = await treeFactoryInstance.trees.call(treeId1);
 
       const expectedPaidAfterFundPlanter = parseInt(
         Number(

@@ -1,5 +1,5 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const IncrementalSell = artifacts.require("IncrementalSell.sol");
+const IncrementalSale = artifacts.require("IncrementalSale.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
@@ -1084,7 +1084,7 @@ contract("TreeAttribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      iSellInstance = await deployProxy(IncrementalSell, [arInstance.address], {
+      iSellInstance = await deployProxy(IncrementalSale, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1162,7 +1162,7 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
       ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
         from: deployerAccount,
       });
 
@@ -1195,7 +1195,7 @@ contract("TreeAttribute", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.updateOwner(150, userAccount4, 1, {
+      await treeFactoryInstance.mintAssignedTree(150, userAccount4, 1, {
         from: deployerAccount,
       });
 
@@ -1219,7 +1219,7 @@ contract("TreeAttribute", (accounts) => {
           from: buyerRank,
         }
       );
-      await treeFactoryInstance.updateOwner(170, userAccount5, 1, {
+      await treeFactoryInstance.mintAssignedTree(170, userAccount5, 1, {
         from: deployerAccount,
       });
 
@@ -1243,7 +1243,7 @@ contract("TreeAttribute", (accounts) => {
           from: buyerRank,
         }
       );
-      await treeFactoryInstance.updateOwner(999, userAccount5, 1, {
+      await treeFactoryInstance.mintAssignedTree(999, userAccount5, 1, {
         from: deployerAccount,
       });
 
@@ -1267,7 +1267,7 @@ contract("TreeAttribute", (accounts) => {
           from: buyerRank,
         }
       );
-      await treeFactoryInstance.updateOwner(1531, userAccount5, 1, {
+      await treeFactoryInstance.mintAssignedTree(1531, userAccount5, 1, {
         from: deployerAccount,
       });
 
@@ -1281,7 +1281,7 @@ contract("TreeAttribute", (accounts) => {
       );
 
       //----------------------------test tree 2 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.updateOwner(2, userAccount5, 1, {
+      await treeFactoryInstance.mintAssignedTree(2, userAccount5, 1, {
         from: deployerAccount,
       });
 
@@ -1306,7 +1306,7 @@ contract("TreeAttribute", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.updateOwner(51, userAccount5, 1, {
+      await treeFactoryInstance.mintAssignedTree(51, userAccount5, 1, {
         from: deployerAccount,
       });
 
@@ -1339,7 +1339,7 @@ contract("TreeAttribute", (accounts) => {
       );
 
       ////---------------------------createTreeAttributes----------------------
-      await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
         from: deployerAccount,
       });
 
@@ -1415,7 +1415,7 @@ contract("TreeAttribute", (accounts) => {
       });
 
       ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
         from: deployerAccount,
       });
 
@@ -1562,7 +1562,7 @@ contract("TreeAttribute", (accounts) => {
   //   deployerAccount
   // );
   // // ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-  // await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+  // await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(
@@ -1631,7 +1631,7 @@ contract("TreeAttribute", (accounts) => {
   //     from: buyerRank,
   //   }
   // );
-  // await treeFactoryInstance.updateOwner(150, userAccount4, 1, {
+  // await treeFactoryInstance.mintAssignedTree(150, userAccount4, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(
@@ -1729,7 +1729,7 @@ contract("TreeAttribute", (accounts) => {
   //     from: buyerRank,
   //   }
   // );
-  // await treeFactoryInstance.updateOwner(170, userAccount5, 1, {
+  // await treeFactoryInstance.mintAssignedTree(170, userAccount5, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(
@@ -1798,7 +1798,7 @@ contract("TreeAttribute", (accounts) => {
   //     from: buyerRank,
   //   }
   // );
-  // await treeFactoryInstance.updateOwner(999, userAccount5, 1, {
+  // await treeFactoryInstance.mintAssignedTree(999, userAccount5, 1, {
   //   from: deployerAccount,
   // });
   // const eventTx = await treeAttributeInstance.createTreeAttributes(
@@ -1902,7 +1902,7 @@ contract("TreeAttribute", (accounts) => {
   //     from: buyerRank,
   //   }
   // );
-  // await treeFactoryInstance.updateOwner(1531, userAccount5, 1, {
+  // await treeFactoryInstance.mintAssignedTree(1531, userAccount5, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(
@@ -1965,7 +1965,7 @@ contract("TreeAttribute", (accounts) => {
   // let testRank1531 = await treeAttributeInstance.rankOf(userAccount5);
   // assert.equal(Number(testRank1531), 0, "1531-rank is not true");
   // //----------------------------test tree 2 (with rank==0) owner==> userAccounts2----------------------
-  // await treeFactoryInstance.updateOwner(2, userAccount5, 1, {
+  // await treeFactoryInstance.mintAssignedTree(2, userAccount5, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(
@@ -2035,7 +2035,7 @@ contract("TreeAttribute", (accounts) => {
   //     from: buyerRank,
   //   }
   // );
-  // await treeFactoryInstance.updateOwner(51, userAccount5, 1, {
+  // await treeFactoryInstance.mintAssignedTree(51, userAccount5, 1, {
   //   from: deployerAccount,
   // });
   // await treeAttributeInstance.createTreeAttributes(

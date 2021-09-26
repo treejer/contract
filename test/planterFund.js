@@ -22,7 +22,7 @@ const Math = require("./math");
 const {
   TimeEnumes,
   CommonErrorMsg,
-  IncrementalSellErrorMsg,
+  IncrementalSaleErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   GsnErrorMsg,

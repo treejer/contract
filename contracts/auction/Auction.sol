@@ -12,16 +12,16 @@ import "../treasury/IWethFunds.sol";
 import "../gsn/RelayRecipient.sol";
 import "../regularSell/IRegularSell.sol";
 
-/** @title Tree Auction */
+/** @title Auction */
 
-contract TreeAuction is Initializable, RelayRecipient {
+contract Auction is Initializable, RelayRecipient {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private auctionId;
 
-    /** NOTE {isTreeAuction} set inside the initialize to {true} */
+    /** NOTE {isAuction} set inside the initialize to {true} */
 
-    bool public isTreeAuction;
+    bool public isAuction;
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
@@ -30,7 +30,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     IERC20Upgradeable public wethToken;
     IRegularSell public regularSell;
 
-    struct Auction {
+    struct AuctionData {
         uint256 treeId;
         address bidder;
         uint64 startDate;
@@ -39,8 +39,8 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 bidInterval;
     }
 
-    /** NOTE mapping of auctionId to Auction struct */
-    mapping(uint256 => Auction) public auctions;
+    /** NOTE mapping of auctionId to AuctionData struct */
+    mapping(uint256 => AuctionData) public auctions;
 
     /**NOTE mapping of bidder to mapping of auctionId to referral */
     mapping(address => mapping(uint256 => address)) public referrals;
@@ -88,7 +88,7 @@ contract TreeAuction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTreeAuction
+     * @dev initialize accessRestriction contract and set true for isAuction
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
@@ -99,7 +99,7 @@ contract TreeAuction is Initializable, RelayRecipient {
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());
-        isTreeAuction = true;
+        isAuction = true;
         accessRestriction = candidateContract;
     }
 
@@ -195,11 +195,11 @@ contract TreeAuction is Initializable, RelayRecipient {
             "equivalant fund Model not exists"
         );
 
-        uint32 provideStatus = treeFactory.availability(_treeId, 1);
+        uint32 provideStatus = treeFactory.manageSaleType(_treeId, 1);
 
         require(provideStatus == 0, "not available for auction");
 
-        Auction storage auction = auctions[auctionId.current()];
+        AuctionData storage auction = auctions[auctionId.current()];
 
         auction.treeId = _treeId;
         auction.startDate = _startDate;
@@ -224,7 +224,7 @@ contract TreeAuction is Initializable, RelayRecipient {
         uint256 _amount,
         address _referrer
     ) external ifNotPaused {
-        Auction storage _storageAuction = auctions[_auctionId];
+        AuctionData storage _storageAuction = auctions[_auctionId];
 
         require(
             block.timestamp <= _storageAuction.endDate,
@@ -290,7 +290,7 @@ contract TreeAuction is Initializable, RelayRecipient {
      * @param _auctionId id of auction that want to finish.
      */
     function endAuction(uint256 _auctionId) external ifNotPaused {
-        Auction storage auction = auctions[_auctionId];
+        AuctionData storage auction = auctions[_auctionId];
 
         require(auction.endDate > 0, "Auction is unavailable");
 
@@ -328,7 +328,7 @@ contract TreeAuction is Initializable, RelayRecipient {
                 reserveFund2
             );
 
-            treeFactory.updateOwner(auction.treeId, auction.bidder, 2);
+            treeFactory.mintAssignedTree(auction.treeId, auction.bidder, 2);
 
             address _tempReferrer = referrals[auction.bidder][_auctionId];
 
@@ -344,7 +344,7 @@ contract TreeAuction is Initializable, RelayRecipient {
                 _tempReferrer
             );
         } else {
-            treeFactory.updateAvailability(auction.treeId);
+            treeFactory.resetSaleType(auction.treeId);
             emit AuctionEnded(_auctionId, auction.treeId);
         }
 

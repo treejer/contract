@@ -699,34 +699,34 @@ contract("CommunityGifts", (accounts) => {
 
       truffleAssert.eventEmitted(eventTx, "CommuintyGiftSet");
 
-      const treeId11 = await treeFactoryInstance.treeData.call(11);
-      const treeId21 = await treeFactoryInstance.treeData.call(21);
-      const treeId41 = await treeFactoryInstance.treeData.call(41);
-      const treeId51 = await treeFactoryInstance.treeData.call(51);
-      const treeId100 = await treeFactoryInstance.treeData.call(100);
+      const treeId11 = await treeFactoryInstance.trees.call(11);
+      const treeId21 = await treeFactoryInstance.trees.call(21);
+      const treeId41 = await treeFactoryInstance.trees.call(41);
+      const treeId51 = await treeFactoryInstance.trees.call(51);
+      const treeId100 = await treeFactoryInstance.trees.call(100);
 
       assert.equal(
-        Number(treeId11.provideStatus),
+        Number(treeId11.saleType),
         5,
         "provideStatus is not correct"
       );
       assert.equal(
-        Number(treeId21.provideStatus),
+        Number(treeId21.saleType),
         5,
         "provideStatus is not correct"
       );
       assert.equal(
-        Number(treeId41.provideStatus),
+        Number(treeId41.saleType),
         5,
         "provideStatus is not correct"
       );
       assert.equal(
-        Number(treeId51.provideStatus),
+        Number(treeId51.saleType),
         5,
         "provideStatus is not correct"
       );
       assert.equal(
-        Number(treeId100.provideStatus),
+        Number(treeId100.saleType),
         5,
         "provideStatus is not correct"
       );
@@ -885,7 +885,7 @@ contract("CommunityGifts", (accounts) => {
 
       //----------------- fail setGiftsRange because a tree is not free
 
-      await treeFactoryInstance.addTree(treeIdInAuction, "some ipfs hash", {
+      await treeFactoryInstance.listTree(treeIdInAuction, "some ipfs hash", {
         from: dataManager,
       });
 
@@ -895,7 +895,7 @@ contract("CommunityGifts", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.manageProvideStatus(
+      await treeFactoryInstance.manageSaleTypeBatch(
         treeIdInAuction,
         treeIdInAuction + 1,
         5,
@@ -1536,13 +1536,9 @@ contract("CommunityGifts", (accounts) => {
 
       //////////--------------check provide status
 
-      let genTree = await treeFactoryInstance.treeData.call(treeId);
+      let genTree = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(
-        Number(genTree.provideStatus),
-        0,
-        "provideStatus is not correct"
-      );
+      assert.equal(Number(genTree.saleType), 0, "provideStatus is not correct");
 
       //////////--------------check treeAttribute
       let treeAttribute = await treeAttributeInstance.treeAttributes(treeId);
@@ -1818,18 +1814,14 @@ contract("CommunityGifts", (accounts) => {
 
       //////////--------------check provide status
 
-      let genTree = await treeFactoryInstance.treeData.call(11);
+      let genTree = await treeFactoryInstance.trees.call(11);
+
+      assert.equal(Number(genTree.saleType), 0, "provideStatus is not correct");
+
+      let genTree2 = await treeFactoryInstance.trees.call(12);
 
       assert.equal(
-        Number(genTree.provideStatus),
-        0,
-        "provideStatus is not correct"
-      );
-
-      let genTree2 = await treeFactoryInstance.treeData.call(12);
-
-      assert.equal(
-        Number(genTree2.provideStatus),
+        Number(genTree2.saleType),
         0,
         "provideStatus is not correct"
       );
@@ -2114,13 +2106,9 @@ contract("CommunityGifts", (accounts) => {
 
       //////////--------------check provide status
 
-      let genTree = await treeFactoryInstance.treeData.call(treeId);
+      let genTree = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(
-        Number(genTree.provideStatus),
-        0,
-        "provideStatus is not correct"
-      );
+      assert.equal(Number(genTree.saleType), 0, "provideStatus is not correct");
 
       //////////--------------check treeAttribute
       let treeAttribute = await treeAttributeInstance.treeAttributes(treeId);
@@ -2385,17 +2373,17 @@ contract("CommunityGifts", (accounts) => {
 
       //////////--------------check provide status
 
-      let genTree1 = await treeFactoryInstance.treeData.call(treeId1);
-      let genTree2 = await treeFactoryInstance.treeData.call(treeId2);
+      let genTree1 = await treeFactoryInstance.trees.call(treeId1);
+      let genTree2 = await treeFactoryInstance.trees.call(treeId2);
 
       assert.equal(
-        Number(genTree1.provideStatus),
+        Number(genTree1.saleType),
         0,
         "provideStatus is not correct"
       );
 
       assert.equal(
-        Number(genTree2.provideStatus),
+        Number(genTree2.saleType),
         0,
         "provideStatus is not correct"
       );

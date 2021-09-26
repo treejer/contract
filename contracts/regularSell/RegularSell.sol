@@ -261,7 +261,7 @@ contract RegularSell is Initializable, RelayRecipient {
         FundDistribution memory totalFunds;
 
         for (uint256 i = 0; i < _count; i++) {
-            tempLastRegularSold = treeFactory.mintRegularTrees(
+            tempLastRegularSold = treeFactory.mintTree(
                 tempLastRegularSold,
                 _msgSender()
             );
@@ -331,7 +331,7 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 tempLastRegularSold = lastSoldRegularTree;
 
         for (uint256 i = 0; i < _count; i++) {
-            tempLastRegularSold = treeFactory.mintRegularTrees(
+            tempLastRegularSold = treeFactory.mintTree(
                 tempLastRegularSold,
                 _referrer
             );
@@ -377,7 +377,7 @@ contract RegularSell is Initializable, RelayRecipient {
             treePrice
         );
 
-        treeFactory.requestRegularTree(_treeId, _msgSender());
+        treeFactory.mintTreeById(_treeId, _msgSender());
 
         (
             uint16 planterFund,

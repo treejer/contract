@@ -108,15 +108,15 @@ Common.successPlant = async (
     );
   });
 
-  await treeFactoryInstance.addTree(treeId, ipfsHash, {
+  await treeFactoryInstance.listTree(treeId, ipfsHash, {
     from: dataManager,
   });
 
-  await treeFactoryInstance.assignTreeToPlanter(treeId, planterAddress, {
+  await treeFactoryInstance.assignTree(treeId, planterAddress, {
     from: dataManager,
   });
 
-  await treeFactoryInstance.plantTree(
+  await treeFactoryInstance.plantAssignedTree(
     treeId,
     ipfsHash,
     birthDate,
@@ -125,7 +125,7 @@ Common.successPlant = async (
       from: planterAddress,
     }
   );
-  await treeFactoryInstance.verifyPlant(treeId, true, {
+  await treeFactoryInstance.verifyAssignedTree(treeId, true, {
     from: dataManager,
   });
 };
@@ -309,11 +309,11 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await treeFactoryInstance.availability(treeId, 1, {
+  await treeFactoryInstance.manageSaleType(treeId, 1, {
     from: auctionAddress,
   });
 
-  await treeFactoryInstance.updateOwner(treeId, tokenOwner, 2, {
+  await treeFactoryInstance.mintAssignedTree(treeId, tokenOwner, 2, {
     from: auctionAddress,
   });
 
@@ -402,7 +402,7 @@ Common.regularPlantTreeSuccess = async (
     zeroAddress
   );
 
-  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };
@@ -438,7 +438,7 @@ Common.regularPlantTreeSuccessOrganization = async (
     from: organizationAdmin,
   });
 
-  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };

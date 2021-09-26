@@ -36,7 +36,7 @@ const CommonErrorMsg = {
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
 };
 
-const TreeAuctionErrorMsg = {
+const AuctionErrorMsg = {
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
   TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
@@ -78,7 +78,6 @@ const TreasuryManagerErrorMsg = {
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
   INVALID_FUND_MODEL: "invalid fund model",
-  ONLY_AUCTION_OR_INCREAMENTAL: "not IncrementalSell or Auction",
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
   DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
 };
@@ -117,7 +116,7 @@ const RegularSellErrors = {
   INVALID_GIFT_OWNER: "invalid gift owner",
 };
 
-const IncrementalSellErrorMsg = {
+const IncrementalSaleErrorMsg = {
   TREE_TO_SELL: "assign at least one tree",
   INVALID_COUNT: "Count must be lt 100",
   OCCUPIED_TREES: "trees are under Auction",
@@ -126,8 +125,8 @@ const IncrementalSellErrorMsg = {
   INVALID_TREE: "Not enough tree in incremental sell",
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
-  FREE_INCREMENTALSELL_FAIL:
-    "IncrementalSell not exist or count must be lt endTree",
+  FREE_INCREMENTALSALE_FAIL:
+    "IncrementalSale not exist or count must be lt endTree",
 };
 
 const TreeAttributeErrorMsg = {
@@ -159,12 +158,12 @@ const WethFundsErrorMsg = {
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
-  TreeAuctionErrorMsg,
+  AuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   PlanterErrorMsg,
   RegularSellErrors,
-  IncrementalSellErrorMsg,
+  IncrementalSaleErrorMsg,
   TreeAttributeErrorMsg,
   DaiFundsErrorMsg,
   FinancialModelErrorMsg,

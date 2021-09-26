@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6;
 
-/** @title TreeAuction interface */
-interface ITreeAuction {
+/** @title Auction interface */
+interface IAuction {
     /**
-     * @return true in case of TreeAuction contract have been initialized
+     * @return true in case of Auction contract have been initialized
      */
-    function isTreeAuction() external view returns (bool);
+    function isAuction() external view returns (bool);
 
     /**
      * @return AccessRestriction contract address

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.6;
 
-interface IIncrementalSell {
+interface IIncrementalSale {
     /**
-     * @return true if IncrementalSell contract have been initialized
+     * @return true if IncrementalSale contract have been initialized
      */
-    function isIncrementalSell() external view returns (bool);
+    function isIncrementalSale() external view returns (bool);
 
     //TODO: ADD_COMMENT
     function lastSold() external view returns (uint256);
@@ -34,18 +34,15 @@ interface IIncrementalSell {
     /** @return WethToken contract address */
     function wethToken() external view returns (address);
 
-    /** @return TreeAuction contract address */
-    function treeAuction() external view returns (address);
-
     /**
-     * @dev return incrementalPrice struct data
-     * @return startTree
-     * @return endTree
+     * @dev return incrementalSaleData struct data
+     * @return startTreeId
+     * @return endTreeId
      * @return initialPrice
-     * @return increaseStep
-     * @return increaseRatio
+     * @return increments
+     * @return priceJump
      */
-    function incrementalPrice()
+    function incrementalSaleData()
         external
         view
         returns (
@@ -85,16 +82,16 @@ interface IIncrementalSell {
     function setTreeAttributesAddress(address _address) external;
 
     /**
-     * @dev admin set a range from {startTree} to {startTree + treeCount}
+     * @dev admin set a range from {startTreeId} to {startTreeId + treeCount}
      * for incremental selles for tree
      * @param _startTree starting treeId
      * @param _initialPrice initialPrice of trees
      * @param _treeCount number of tree in incremental sell
      * @param _steps step to increase tree price
      * @param _incrementRate increment price rate
-     * emit an {IncrementalSellUpdated} event
+     * emit an {IncrementalSaleUpdated} event
      */
-    function addTreeSells(
+    function createIncrementalSale(
         uint256 _startTree,
         uint256 _initialPrice,
         uint64 _treeCount,
@@ -106,9 +103,9 @@ interface IIncrementalSell {
      * @dev admin add {treeCount} tree at the end of incremental sell tree range
      * @param treeCount number of trees added at the end of the incremental sell
      * tree range
-     * emit an {IncrementalSellUpdated} event
+     * emit an {IncrementalSaleUpdated} event
      */
-    function updateIncrementalEnd(uint256 treeCount) external;
+    function updateEndTreeId(uint256 treeCount) external;
 
     //TODO:CHECK_COMMENT
     /**
@@ -119,40 +116,49 @@ interface IIncrementalSell {
      * previous purchase, pays 90% of tree price and gets 10% discount
      * just for this tree. buying another tree give chance to buy
      * the next tree with 10% discount
-     * NOTE emit an {IncrementalTreeSold} event
+     * NOTE emit an {TreeFunded} event
      */
-    function buyTree(uint256 _count, address _referrer) external;
+    function fundTree(uint256 _count, address _referrer) external;
 
     //TODO:ADD_COMMENTS
-    function claimTreeAttributes(uint256 _startTree, uint256 _count) external;
+    function revealAttributes(uint256 _startTree, uint256 _count) external;
 
     //TODO:ADD_COMMENT
-    function freeIncrementalSell(uint256 _count) external;
+    function removeIncrementalSale(uint256 _count) external;
 
-    /** @dev admin can update incrementalPrice
+    /** @dev admin can update incrementalSaleData
      * @param _initialPrice initialPrice of trees
      * @param _increaseStep step to increase tree price
      * @param _increaseRatio increment price rate
-     * NOTE emit a {IncrementalRatesUpdated} event
+     * NOTE emit a {IncrementalSaleDataUpdated} event
      */
-    function updateIncrementalRates(
+    function updateIncrementalSaleData(
         uint256 _initialPrice,
         uint64 _increaseStep,
         uint64 _increaseRatio
     ) external;
 
     /**
-     * @dev emitted when a tree with id {treeId} purchased by {buyer} with amount {amount}
-     * @param treeId purchased tree id
-     * @param buyer buyer of tree
-     * @param amount amount of purchase
+     * @dev emitted when {count} tree starting from id {strtTreeId} purchased by {funder}
+     * with referral {referrer}
+     * @param funder address of funder
+     * @param referrer address of referrer
+     * @param startTreeId starting tree id
+     * @param count count of funded trees
      */
-    event IncrementalTreeSold(uint256 treeId, address buyer, uint256 amount);
+
+    event TreeFunded(
+        address funder,
+        address referrer,
+        uint256 startTreeId,
+        uint256 count
+    );
+
     /**
      * @dev emitted when incremental tree sell added or updated
      */
-    event IncrementalSellUpdated();
+    event IncrementalSaleUpdated();
 
     /** @dev emiited when incremental rates updated */
-    event IncrementalRatesUpdated();
+    event IncrementalSaleDataUpdated();
 }

@@ -194,7 +194,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     ) external onlyDataManager {
         require(_endTreeId > _startTreeId, "invalid range");
 
-        bool check = treeFactory.manageProvideStatus(
+        bool check = treeFactory.manageSaleTypeBatch(
             _startTreeId,
             _endTreeId,
             5
@@ -268,7 +268,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
 
-        treeFactory.updateOwner(treeId, _msgSender(), 3);
+        treeFactory.mintAssignedTree(treeId, _msgSender(), 3);
 
         emit TreeClaimed(treeId);
     }
@@ -312,7 +312,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
 
-        treeFactory.updateOwner(treeId, _giftee, 3);
+        treeFactory.mintAssignedTree(treeId, _giftee, 3);
 
         emit TreeTransfered(treeId);
     }

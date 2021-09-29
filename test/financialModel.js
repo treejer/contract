@@ -268,19 +268,19 @@ contract("Allocation", (accounts) => {
     let expected = [
       {
         startingTreeId: 0,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
       {
         startingTreeId: 1,
-        distributionModelId: 1,
+        allocationDataId: 1,
       },
       {
         startingTreeId: 11,
-        distributionModelId: 2,
+        allocationDataId: 2,
       },
       {
         startingTreeId: 101,
-        distributionModelId: 3,
+        allocationDataId: 3,
       },
     ];
 
@@ -301,9 +301,9 @@ contract("Allocation", (accounts) => {
       );
 
       assert.equal(
-        Number(array.distributionModelId),
-        expected[i].distributionModelId,
-        i + " distributionModelId not true"
+        Number(array.allocationDataId),
+        expected[i].allocationDataId,
+        i + " allocationDataId not true"
       );
     }
 
@@ -438,15 +438,15 @@ contract("Allocation", (accounts) => {
     let expected1 = [
       {
         startingTreeId: 11,
-        distributionModelId: 2,
+        allocationDataId: 2,
       },
       {
         startingTreeId: 101,
-        distributionModelId: 3,
+        allocationDataId: 3,
       },
       {
         startingTreeId: 1000001,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
     ];
 
@@ -459,9 +459,9 @@ contract("Allocation", (accounts) => {
       );
 
       assert.equal(
-        Number(array.distributionModelId),
-        expected1[i].distributionModelId,
-        i + " distributionModelId not true"
+        Number(array.allocationDataId),
+        expected1[i].allocationDataId,
+        i + " allocationDataId not true"
       );
     }
 
@@ -484,23 +484,23 @@ contract("Allocation", (accounts) => {
     let expected = [
       {
         startingTreeId: 0,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
       {
         startingTreeId: 1,
-        distributionModelId: 1,
+        allocationDataId: 1,
       },
       {
         startingTreeId: 11,
-        distributionModelId: 2,
+        allocationDataId: 2,
       },
       {
         startingTreeId: 101,
-        distributionModelId: 3,
+        allocationDataId: 3,
       },
       {
         startingTreeId: 1000001,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
     ];
 
@@ -513,9 +513,9 @@ contract("Allocation", (accounts) => {
       );
 
       assert.equal(
-        Number(array.distributionModelId),
-        expected[i].distributionModelId,
-        i + " distributionModelId not true"
+        Number(array.allocationDataId),
+        expected[i].allocationDataId,
+        i + " allocationDataId not true"
       );
     }
   });
@@ -592,15 +592,15 @@ contract("Allocation", (accounts) => {
     let expected = [
       {
         startingTreeId: 0,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
       {
         startingTreeId: 1,
-        distributionModelId: 1,
+        allocationDataId: 1,
       },
       {
         startingTreeId: 11,
-        distributionModelId: 2,
+        allocationDataId: 2,
       },
     ];
 
@@ -613,9 +613,9 @@ contract("Allocation", (accounts) => {
       );
 
       assert.equal(
-        Number(array.distributionModelId),
-        expected[i].distributionModelId,
-        i + " distributionModelId not true"
+        Number(array.allocationDataId),
+        expected[i].allocationDataId,
+        i + " allocationDataId not true"
       );
     }
 
@@ -690,15 +690,15 @@ contract("Allocation", (accounts) => {
     let expected = [
       {
         startingTreeId: 0,
-        distributionModelId: 1,
+        allocationDataId: 1,
       },
       {
         startingTreeId: 3,
-        distributionModelId: 2,
+        allocationDataId: 2,
       },
       {
         startingTreeId: 10,
-        distributionModelId: 0,
+        allocationDataId: 0,
       },
     ];
 
@@ -711,9 +711,9 @@ contract("Allocation", (accounts) => {
       );
 
       assert.equal(
-        Number(array.distributionModelId),
-        expected[i].distributionModelId,
-        i + " distributionModelId not true"
+        Number(array.allocationDataId),
+        expected[i].allocationDataId,
+        i + " allocationDataId not true"
       );
     }
 

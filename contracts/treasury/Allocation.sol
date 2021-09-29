@@ -38,12 +38,12 @@ contract Allocation is Initializable {
 
     struct AllocationToTree {
         uint256 startingTreeId;
-        uint256 distributionModelId;
+        uint256 allocationDataId;
     }
 
     AllocationToTree[] public allocationToTrees;
 
-    /** NOTE mapping of model id to AllocationData*/
+    /** NOTE mapping of allocationDataId to AllocationData*/
     mapping(uint256 => AllocationData) public allocations;
 
     event AllocationDataAdded(uint256 allocationDataId);
@@ -131,31 +131,31 @@ contract Allocation is Initializable {
      * {_startTreeId} and end at {_endTreeId}
      * @param _startTreeId strating tree id to assign distribution model to
      * @param _endTreeId ending tree id to assign distribution model to
-     * @param _distributionModelId distribution model id to assign
+     * @param _allocationDataId distribution model id to assign
      */
     function assignAllocationToTree(
         uint256 _startTreeId,
         uint256 _endTreeId,
-        uint256 _distributionModelId
+        uint256 _allocationDataId
     ) external onlyDataManager {
         require(
-            allocations[_distributionModelId].exists > 0,
+            allocations[_allocationDataId].exists > 0,
             "Distribution model not found"
         );
 
-        AllocationToTree[] memory localAssigns = allocationToTrees;
+        AllocationToTree[] memory localAllocationToTree = allocationToTrees;
 
         delete allocationToTrees;
 
         uint256 checkFlag = 0;
 
-        for (uint256 i = 0; i < localAssigns.length; i++) {
-            if (localAssigns[i].startingTreeId < _startTreeId) {
-                allocationToTrees.push(localAssigns[i]);
+        for (uint256 i = 0; i < localAllocationToTree.length; i++) {
+            if (localAllocationToTree[i].startingTreeId < _startTreeId) {
+                allocationToTrees.push(localAllocationToTree[i]);
             } else {
                 if (checkFlag == 0) {
                     allocationToTrees.push(
-                        AllocationToTree(_startTreeId, _distributionModelId)
+                        AllocationToTree(_startTreeId, _allocationDataId)
                     );
                     checkFlag = 1;
                 }
@@ -165,26 +165,27 @@ contract Allocation is Initializable {
                         break;
                     }
                     if (
-                        i > 0 && _endTreeId + 1 < localAssigns[i].startingTreeId
+                        i > 0 &&
+                        _endTreeId + 1 < localAllocationToTree[i].startingTreeId
                     ) {
                         allocationToTrees.push(
                             AllocationToTree(
                                 _endTreeId + 1,
-                                localAssigns[i - 1].distributionModelId
+                                localAllocationToTree[i - 1].allocationDataId
                             )
                         );
                         checkFlag = 2;
                     }
                 }
                 if (checkFlag == 2) {
-                    allocationToTrees.push(localAssigns[i]);
+                    allocationToTrees.push(localAllocationToTree[i]);
                 }
             }
         }
 
         if (checkFlag == 0) {
             allocationToTrees.push(
-                AllocationToTree(_startTreeId, _distributionModelId)
+                AllocationToTree(_startTreeId, _allocationDataId)
             );
             if (_endTreeId == 0 && _startTreeId != 0) {
                 checkFlag = 5;
@@ -200,12 +201,12 @@ contract Allocation is Initializable {
         if (checkFlag == 1) {
             if (maxAssignedIndex < _endTreeId) {
                 maxAssignedIndex = _endTreeId;
-            } else if (localAssigns.length > 0) {
+            } else if (localAllocationToTree.length > 0) {
                 allocationToTrees.push(
                     AllocationToTree(
                         _endTreeId + 1,
-                        localAssigns[localAssigns.length - 1]
-                            .distributionModelId
+                        localAllocationToTree[localAllocationToTree.length - 1]
+                            .allocationDataId
                     )
                 );
             }
@@ -229,8 +230,8 @@ contract Allocation is Initializable {
     }
 
     /**
-     * @dev return fundDistribution data of {_treeId}
-     * @param _treeId id of tree to find fundDistribution data
+     * @dev return allocation data of {_treeId}
+     * @param _treeId id of tree to find allocation data
      * @return planterShare
      * @return ambassadorShare
      * @return researchShare
@@ -254,44 +255,44 @@ contract Allocation is Initializable {
             uint16 reserve2Share
         )
     {
-        AllocationData storage fundDistribution;
+        AllocationData storage allocation;
 
         for (uint256 i = 0; i < allocationToTrees.length; i++) {
             if (allocationToTrees[i].startingTreeId > _treeId) {
                 require(i > 0, "invalid fund model");
 
-                fundDistribution = allocations[
-                    allocationToTrees[i - 1].distributionModelId
+                allocation = allocations[
+                    allocationToTrees[i - 1].allocationDataId
                 ];
 
                 return (
-                    fundDistribution.planterShare,
-                    fundDistribution.ambassadorShare,
-                    fundDistribution.researchShare,
-                    fundDistribution.localDevelopmentShare,
-                    fundDistribution.insuranceShare,
-                    fundDistribution.treasuryShare,
-                    fundDistribution.reserve1Share,
-                    fundDistribution.reserve2Share
+                    allocation.planterShare,
+                    allocation.ambassadorShare,
+                    allocation.researchShare,
+                    allocation.localDevelopmentShare,
+                    allocation.insuranceShare,
+                    allocation.treasuryShare,
+                    allocation.reserve1Share,
+                    allocation.reserve2Share
                 );
             }
         }
 
         require(allocationToTrees.length > 0, "invalid fund model");
 
-        fundDistribution = allocations[
-            allocationToTrees[allocationToTrees.length - 1].distributionModelId
+        allocation = allocations[
+            allocationToTrees[allocationToTrees.length - 1].allocationDataId
         ];
 
         return (
-            fundDistribution.planterShare,
-            fundDistribution.ambassadorShare,
-            fundDistribution.researchShare,
-            fundDistribution.localDevelopmentShare,
-            fundDistribution.insuranceShare,
-            fundDistribution.treasuryShare,
-            fundDistribution.reserve1Share,
-            fundDistribution.reserve2Share
+            allocation.planterShare,
+            allocation.ambassadorShare,
+            allocation.researchShare,
+            allocation.localDevelopmentShare,
+            allocation.insuranceShare,
+            allocation.treasuryShare,
+            allocation.reserve1Share,
+            allocation.reserve2Share
         );
     }
 }

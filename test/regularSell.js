@@ -480,7 +480,7 @@ contract("regularSell", (accounts) => {
       );
 
       await regularSellInstance
-        .requestByTreeId(2, zeroAddress, { from: userAccount1 })
+        .fundTreeById(2, zeroAddress, { from: userAccount1 })
         .should.be.rejectedWith(RegularSellErrors.INVALID_TREE);
 
       await daiInstance.resetAcc(userAccount1);
@@ -499,7 +499,7 @@ contract("regularSell", (accounts) => {
       );
 
       await regularSellInstance
-        .requestByTreeId(treeId, zeroAddress, {
+        .fundTreeById(treeId, zeroAddress, {
           from: userAccount1,
         })
         .should.be.rejectedWith(RegularSellErrors.INVALID_AMOUNT);
@@ -517,7 +517,7 @@ contract("regularSell", (accounts) => {
       );
 
       await regularSellInstance
-        .requestByTreeId(treeId, zeroAddress, {
+        .fundTreeById(treeId, zeroAddress, {
           from: userAccount1,
         })
         .should.be.rejectedWith(RegularSellErrors.CommonErrorMsg);
@@ -525,11 +525,13 @@ contract("regularSell", (accounts) => {
       await daiInstance.resetAcc(userAccount1);
     });
 
-    //////------------------------------------ test updateGenesisReferrerGift function
+    //////------------------------------------ test updateReferrerClaimableTreesWeth function
 
-    it("should updateGenesisReferrerGift successfully", async () => {
+    it("should updateReferrerClaimableTreesWeth successfully", async () => {
       await regularSellInstance
-        .updateGenesisReferrerGift(userAccount1, 2, { from: userAccount6 })
+        .updateReferrerClaimableTreesWeth(userAccount1, 2, {
+          from: userAccount6,
+        })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
       await Common.addTreejerContractRole(
@@ -538,9 +540,13 @@ contract("regularSell", (accounts) => {
         deployerAccount
       );
 
-      await regularSellInstance.updateGenesisReferrerGift(userAccount1, 4, {
-        from: userAccount8,
-      });
+      await regularSellInstance.updateReferrerClaimableTreesWeth(
+        userAccount1,
+        4,
+        {
+          from: userAccount8,
+        }
+      );
 
       let user1GiftCount =
         await regularSellInstance.referrerClaimableTreesWeth.call(userAccount1);
@@ -551,9 +557,13 @@ contract("regularSell", (accounts) => {
         "user1 gift count is not correct"
       );
 
-      await regularSellInstance.updateGenesisReferrerGift(userAccount2, 10, {
-        from: userAccount8,
-      });
+      await regularSellInstance.updateReferrerClaimableTreesWeth(
+        userAccount2,
+        10,
+        {
+          from: userAccount8,
+        }
+      );
 
       let user2GiftCount =
         await regularSellInstance.referrerClaimableTreesWeth.call(userAccount2);
@@ -564,9 +574,13 @@ contract("regularSell", (accounts) => {
         "user2 gift count is not correct"
       );
 
-      await regularSellInstance.updateGenesisReferrerGift(userAccount1, 3, {
-        from: userAccount8,
-      });
+      await regularSellInstance.updateReferrerClaimableTreesWeth(
+        userAccount1,
+        3,
+        {
+          from: userAccount8,
+        }
+      );
 
       let user1GiftCount2 =
         await regularSellInstance.referrerClaimableTreesWeth.call(userAccount1);
@@ -686,9 +700,9 @@ contract("regularSell", (accounts) => {
     });
 
     /////----------------------------claim gift
-    it("should fail claim gifts", async () => {
+    it("should fail claimReferralReward", async () => {
       await regularSellInstance
-        .claimGifts({ from: userAccount1 })
+        .claimReferralReward({ from: userAccount1 })
         .should.be.rejectedWith(RegularSellErrors.INVALID_GIFT_OWNER);
     });
   });
@@ -2220,7 +2234,7 @@ contract("regularSell", (accounts) => {
         "1-funder balance not true"
       );
 
-      let requestTx = await regularSellInstance.requestByTreeId(
+      let requestTx = await regularSellInstance.fundTreeById(
         10001,
         userAccount7,
         {
@@ -2238,7 +2252,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await regularSellInstance.requestByTreeId(10002, userAccount7, {
+      await regularSellInstance.fundTreeById(10002, userAccount7, {
         from: userAccount2,
       });
 
@@ -2551,7 +2565,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      const requestTx = await regularSellInstance.requestByTreeId(
+      const requestTx = await regularSellInstance.fundTreeById(
         treeId,
         userAccount3,
         {
@@ -2704,7 +2718,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await regularSellInstance.requestByTreeId(10002, zeroAddress, {
+      await regularSellInstance.fundTreeById(10002, zeroAddress, {
         from: userAccount1,
       });
 
@@ -2721,9 +2735,9 @@ contract("regularSell", (accounts) => {
       await daiInstance.resetAcc(userAccount1);
     });
 
-    /////-----------------------claim gift
+    /////-----------------------claimReferralReward
 
-    it("should claim gifts less than 70 succuesfully", async () => {
+    it("should claimReferralReward less than 70 succuesfully", async () => {
       const planterShare = await web3.utils.toWei("2");
       const referralShare = await web3.utils.toWei("1");
 
@@ -2865,7 +2879,7 @@ contract("regularSell", (accounts) => {
         "user 1 gift after claim is not correct"
       );
 
-      await testRegularSellInstance.updateGenesisReferrerGift(
+      await testRegularSellInstance.updateReferrerClaimableTreesWeth(
         userAccount1,
         20,
         {
@@ -2894,11 +2908,11 @@ contract("regularSell", (accounts) => {
         "user 1 gift before claim is not correct"
       );
 
-      await testRegularSellInstance.claimGifts({ from: userAccount1 });
+      await testRegularSellInstance.claimReferralReward({ from: userAccount1 });
 
       //should fail no gift to claim
       await testRegularSellInstance
-        .claimGifts({ from: userAccount1 })
+        .claimReferralReward({ from: userAccount1 })
         .should.be.rejectedWith(RegularSellErrors.INVALID_GIFT_OWNER);
 
       const user1GiftCountAfterClaim =
@@ -2998,7 +3012,7 @@ contract("regularSell", (accounts) => {
         "user 2 gift before claim is not correct"
       );
 
-      await testRegularSellInstance.claimGifts({ from: userAccount2 });
+      await testRegularSellInstance.claimReferralReward({ from: userAccount2 });
 
       const user2GiftCountAfterClaim =
         await testRegularSellInstance.referrerClaimableTreesDai.call(
@@ -3105,7 +3119,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await testRegularSellInstance.updateGenesisReferrerGift(
+      await testRegularSellInstance.updateReferrerClaimableTreesWeth(
         userAccount3,
         45,
         {
@@ -3134,7 +3148,7 @@ contract("regularSell", (accounts) => {
         "user 3 gift before claim is not correct"
       );
 
-      await testRegularSellInstance.claimGifts({ from: userAccount3 });
+      await testRegularSellInstance.claimReferralReward({ from: userAccount3 });
 
       const user3GiftCountAfterClaim =
         await testRegularSellInstance.referrerClaimableTreesDai.call(
@@ -3219,7 +3233,7 @@ contract("regularSell", (accounts) => {
         "user 3 gift before claim is not correct"
       );
 
-      await testRegularSellInstance.claimGifts({ from: userAccount3 });
+      await testRegularSellInstance.claimReferralReward({ from: userAccount3 });
 
       assert.equal(
         Number(
@@ -3292,7 +3306,7 @@ contract("regularSell", (accounts) => {
       );
     });
 
-    it("2-should claim gifts more than 70 succuesfully", async () => {
+    it("2-should claimReferralReward more than 70 succuesfully", async () => {
       const planterShare = await web3.utils.toWei("2");
       const referralShare = await web3.utils.toWei("1");
 
@@ -3434,7 +3448,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await testRegularSellInstance.updateGenesisReferrerGift(
+      await testRegularSellInstance.updateReferrerClaimableTreesWeth(
         userAccount3,
         25,
         {
@@ -3453,7 +3467,7 @@ contract("regularSell", (accounts) => {
         "user 3 gift before claim is not correct"
       );
 
-      await testRegularSellInstance.claimGifts({ from: userAccount3 });
+      await testRegularSellInstance.claimReferralReward({ from: userAccount3 });
 
       const user3GiftCountAfterClaim =
         await testRegularSellInstance.referrerClaimableTreesDai.call(

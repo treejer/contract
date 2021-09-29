@@ -125,7 +125,7 @@ interface IRegularSell {
      * @param _referrer is address of referrer
      * NOTE emit a {TreeFundedById} event
      */
-    function requestByTreeId(uint256 _treeId, address _referrer) external;
+    function fundTreeById(uint256 _treeId, address _referrer) external;
 
     //TODO: ADD_COMMENT
     function updateReferralTreePayments(
@@ -134,11 +134,11 @@ interface IRegularSell {
     ) external;
 
     //TODO: ADD_COMMENT
-    function updateGenesisReferrerGift(address _referrer, uint256 _count)
+    function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external;
 
     //TODO: ADD_COMMENT
-    function claimGifts() external;
+    function claimReferralReward() external;
 
     /** @dev emited when price of tree change */
     event PriceUpdated(uint256 price);
@@ -172,5 +172,9 @@ interface IRegularSell {
         uint256 referralTreePaymentToAmbassador
     );
     //TODO: ADD_COMMENT
-    event ReferrGiftClaimed(address referrer, uint256 count, uint256 amount);
+    event ReferralRewardClaimed(
+        address referrer,
+        uint256 count,
+        uint256 amount
+    );
 }

@@ -73,7 +73,11 @@ contract RegularSell is Initializable, RelayRecipient {
         uint256 referralTreePaymentToAmbassador
     );
 
-    event ReferrGiftClaimed(address referrer, uint256 count, uint256 amount);
+    event ReferralRewardClaimed(
+        address referrer,
+        uint256 count,
+        uint256 amount
+    );
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -313,11 +317,13 @@ contract RegularSell is Initializable, RelayRecipient {
         lastFundedTreeId = tempLastRegularSold;
 
         if (_referrer != address(0)) {
-            _funcReferrer(_referrer, _count);
+            _calculateReferrerCount(_referrer, _count);
         }
     }
 
-    function _funcReferrer(address _referrer, uint256 _count) private {
+    function _calculateReferrerCount(address _referrer, uint256 _count)
+        private
+    {
         uint256 localReferrerCount = referrerCount[_referrer] + _count;
 
         if (localReferrerCount >= referralTriggerCount) {
@@ -330,7 +336,7 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function _mintReferralTree(uint256 _count, address _referrer) private {
+    function _mintReferralReward(uint256 _count, address _referrer) private {
         uint256 tempLastRegularSold = lastFundedTreeId;
 
         for (uint256 i = 0; i < _count; i++) {
@@ -357,7 +363,7 @@ contract RegularSell is Initializable, RelayRecipient {
      * @param _treeId is the id of tree requested by user
      * @param _referrer is address of referrer
      */
-    function requestByTreeId(uint256 _treeId, address _referrer) external {
+    function fundTreeById(uint256 _treeId, address _referrer) external {
         require(_treeId > lastFundedTreeId, "invalid tree");
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
@@ -399,7 +405,7 @@ contract RegularSell is Initializable, RelayRecipient {
         );
 
         if (_referrer != address(0)) {
-            _funcReferrer(_referrer, 1);
+            _calculateReferrerCount(_referrer, 1);
         }
     }
 
@@ -418,7 +424,7 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function updateGenesisReferrerGift(address _referrer, uint256 _count)
+    function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external
         onlyTreejerContract
     {
@@ -426,7 +432,7 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function claimGifts() external {
+    function claimReferralReward() external {
         uint256 _count = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
 
@@ -473,8 +479,8 @@ contract RegularSell is Initializable, RelayRecipient {
             _amount += wethAmount;
         }
 
-        emit ReferrGiftClaimed(_msgSender(), _count, _amount);
+        emit ReferralRewardClaimed(_msgSender(), _count, _amount);
 
-        _mintReferralTree(_count, _msgSender());
+        _mintReferralReward(_count, _msgSender());
     }
 }

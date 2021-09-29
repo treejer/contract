@@ -16,8 +16,8 @@ interface IIncrementalSale {
     /** @return TreeFactory contract address */
     function treeFactory() external view returns (address);
 
-    /** @return WethFunds contract address */
-    function wethFunds() external view returns (address);
+    /** @return WethFund contract address */
+    function wethFund() external view returns (address);
 
     /** @return Allocation contract address */
     function allocation() external view returns (address);
@@ -69,8 +69,8 @@ interface IIncrementalSale {
     /** @dev set {_address} to TreeFactory  contract address */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set {_address} to WethFunds contract address */
-    function setWethFundsAddress(address _address) external;
+    /** @dev set {_address} to WethFund contract address */
+    function setWethFundAddress(address _address) external;
 
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;

@@ -4,7 +4,7 @@ const TestRegularSale = artifacts.require("TestRegularSale.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
-const WethFunds = artifacts.require("WethFunds.sol");
+const WethFund = artifacts.require("WethFund.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -230,27 +230,27 @@ contract("regularSale", (accounts) => {
         "financial model address set incorect"
       );
 
-      ////---------------------------------set wethFunds Address--------------------------------------------------------
+      ////---------------------------------set wethFund Address--------------------------------------------------------
 
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
       await regularSaleInstance
-        .setWethFundsAddress(wethFundsInstance.address, {
+        .setWethFundAddress(wethFundsInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSaleInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await regularSaleInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
         wethFundsInstance.address,
-        await regularSaleInstance.wethFunds(),
+        await regularSaleInstance.wethFund(),
         "address set incorect"
       );
     });
@@ -2747,13 +2747,13 @@ contract("regularSale", (accounts) => {
       );
 
       ///////////// deploy weth funds and set address
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
-      await testRegularSaleInstance.setWethFundsAddress(
+      await testRegularSaleInstance.setWethFundAddress(
         wethFundsInstance.address,
         {
           from: deployerAccount,
@@ -2863,7 +2863,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiToPlanterSwap()),
+        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
         0,
         "user 1 gift after claim is not correct"
       );
@@ -2927,7 +2927,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiToPlanterSwap()),
+        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20),
         "user 1 gift after claim is not correct"
       );
@@ -3164,7 +3164,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiToPlanterSwap()),
+        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 35),
         "user 1 gift after claim is not correct"
@@ -3250,7 +3250,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiToPlanterSwap()),
+        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 45),
         "user 1 gift after claim is not correct"
@@ -3323,13 +3323,13 @@ contract("regularSale", (accounts) => {
       );
 
       ///////////// deploy weth funds and set address
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
-      await testRegularSaleInstance.setWethFundsAddress(
+      await testRegularSaleInstance.setWethFundAddress(
         wethFundsInstance.address,
         {
           from: deployerAccount,

@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IAllocation.sol";
-import "../treasury/IWethFunds.sol";
+import "../treasury/IWethFund.sol";
 import "../gsn/RelayRecipient.sol";
 import "../regularSale/IRegularSale.sol";
 
@@ -25,7 +25,7 @@ contract Auction is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    IWethFunds public wethFunds;
+    IWethFund public wethFund;
     IAllocation public allocation;
     IERC20Upgradeable public wethToken;
     IRegularSale public regularSale;
@@ -138,14 +138,14 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set WethFunds
-     * @param _address set to the address of wethFunds
+     * @dev admin set WethFund
+     * @param _address set to the address of wethFund
      */
 
-    function setWethFundsAddress(address _address) external onlyAdmin {
-        IWethFunds candidateContract = IWethFunds(_address);
-        require(candidateContract.isWethFunds());
-        wethFunds = candidateContract;
+    function setWethFundAddress(address _address) external onlyAdmin {
+        IWethFund candidateContract = IWethFund(_address);
+        require(candidateContract.isWethFund());
+        wethFund = candidateContract;
     }
 
     /**
@@ -295,7 +295,7 @@ contract Auction is Initializable, RelayRecipient {
 
         if (auction.bidder != address(0)) {
             bool success = wethToken.transfer(
-                address(wethFunds),
+                address(wethFund),
                 auction.highestBid
             );
 
@@ -312,7 +312,7 @@ contract Auction is Initializable, RelayRecipient {
                 uint16 reserve2Share
             ) = allocation.findAllocationData(auction.treeId);
 
-            wethFunds.fundTree(
+            wethFund.fundTree(
                 auction.treeId,
                 auction.highestBid,
                 planterShare,

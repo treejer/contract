@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/IWethFunds.sol";
+import "../treasury/IWethFund.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
@@ -19,7 +19,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    IWethFunds public wethFunds;
+    IWethFund public wethFund;
     IAllocation public allocation;
     ITreeAttribute public treeAttribute;
     IPlanterFund public planterFundContract;
@@ -141,15 +141,15 @@ contract IncrementalSale is Initializable, RelayRecipient {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set wethFunds contract address
-     * @param _address wethFunds contract address
+    /** @dev admin set wethFund contract address
+     * @param _address wethFund contract address
      */
-    function setWethFundsAddress(address _address) external onlyAdmin {
-        IWethFunds candidateContract = IWethFunds(_address);
+    function setWethFundAddress(address _address) external onlyAdmin {
+        IWethFund candidateContract = IWethFund(_address);
 
-        require(candidateContract.isWethFunds());
+        require(candidateContract.isWethFund());
 
-        wethFunds = candidateContract;
+        wethFund = candidateContract;
     }
 
     /** @dev admin set wethToken contract address
@@ -317,7 +317,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             extra -= int64(incPrice.increments);
         }
 
-        //transfer totalPrice to wethFunds
+        //transfer totalPrice to wethFund
         require(
             wethToken.balanceOf(_msgSender()) >= totalPrice,
             "low price paid"
@@ -325,7 +325,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
         bool success = wethToken.transferFrom(
             _msgSender(),
-            address(wethFunds),
+            address(wethFund),
             totalPrice
         );
 
@@ -432,7 +432,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             treeId += 1;
         }
 
-        uint256 daiAmount = wethFunds.incrementalFund(
+        uint256 daiAmount = wethFund.incrementalFund(
             totalFunds.planterFund,
             totalFunds.referralFund,
             totalFunds.treeResearch,

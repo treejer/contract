@@ -150,9 +150,9 @@ const CommunityGiftErrorMsg = {
   INVALID_RANGE: "invalid range",
 };
 
-const WethFundsErrorMsg = {
+const WethFundErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
-  TOTALDAI_INVALID: "totalDaiToPlanterSwap invalid",
+  TOTALDAI_INVALID: "totalDaiDebtToPlanterContract invalid",
 };
 
 module.exports = {
@@ -171,5 +171,5 @@ module.exports = {
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,
-  WethFundsErrorMsg,
+  WethFundErrorMsg,
 };

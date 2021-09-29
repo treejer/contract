@@ -17,7 +17,7 @@ const Math = require("./math");
 const Units = require("ethereumjs-units");
 
 //treasury section
-const WethFunds = artifacts.require("WethFunds.sol");
+const WethFund = artifacts.require("WethFund.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
@@ -179,7 +179,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -276,18 +276,18 @@ contract("IncrementalSale", (accounts) => {
       /////////////////---------------------------------set weth funds address--------------------------------------------------------
 
       await iSaleInstance
-        .setWethFundsAddress(wethFundsInstance.address, {
+        .setWethFundAddress(wethFundsInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSaleInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
         wethFundsInstance.address,
-        await iSaleInstance.wethFunds.call(),
+        await iSaleInstance.wethFund.call(),
         "weth funds address set incorect"
       );
 
@@ -1237,7 +1237,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1269,7 +1269,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
-      await iSaleInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
@@ -1428,53 +1428,53 @@ contract("IncrementalSale", (accounts) => {
       let amount = Number(web3.utils.toWei("0.01"));
 
       let expected = {
-        planterFund: (30 * amount) / 100,
-        referralFund: (12 * amount) / 100,
-        treeResearch: (12 * amount) / 100,
+        planterAmount: (30 * amount) / 100,
+        ambassadorAmount: (12 * amount) / 100,
+        research: (12 * amount) / 100,
         localDevelop: (12 * amount) / 100,
-        rescueFund: (12 * amount) / 100,
-        treejerDevelop: (22 * amount) / 100,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: (12 * amount) / 100,
+        treasury: (22 * amount) / 100,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       //check wethFund totalFunds
       let totalFunds = await wethFundsInstance.totalFunds();
 
       assert.equal(
-        Number(totalFunds.treeResearch),
-        expected.treeResearch,
-        "treeResearch funds invalid"
+        Number(totalFunds.research),
+        expected.research,
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelop),
+        Number(totalFunds.localDevelopment),
         expected.localDevelop,
         "localDevelop funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.rescueFund),
-        expected.rescueFund,
-        "rescueFund funds invalid"
+        Number(totalFunds.insurance),
+        expected.insurance,
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
-        expected.treejerDevelop,
-        "treejerDevelop funds invalid"
+        Number(totalFunds.treasury),
+        expected.treasury,
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund1),
-        expected.reserveFund1,
-        "reserveFund1 funds invalid"
+        Number(totalFunds.reserve1),
+        expected.reserve1,
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund2),
-        expected.reserveFund2,
-        "reserveFund2 funds invalid"
+        Number(totalFunds.reserve2),
+        expected.reserve2,
+        "reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -1491,7 +1491,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
         ),
-        "totalFund planterFund funds invalid"
+        "totalFund planter funds invalid"
       );
 
       assert.equal(
@@ -1507,7 +1507,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid101[1]).times(3000).div(4200)
         ),
-        "planterFund funds invalid"
+        "planter funds invalid"
       );
 
       assert.equal(
@@ -1515,7 +1515,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid101[1]).times(1200).div(4200)
         ),
-        "referralFund funds invalid"
+        "ambassador funds invalid"
       );
 
       ////--------------------------check last sold---------------------
@@ -1680,56 +1680,53 @@ contract("IncrementalSale", (accounts) => {
       let amount2 = Number(web3.utils.toWei("0.201"));
 
       let expected2 = {
-        planterFund: (30 * amount2) / 100,
-        referralFund: (12 * amount2) / 100,
-        treeResearch: (12 * amount2) / 100,
+        planterAmount: (30 * amount2) / 100,
+        ambassadorAmount: (12 * amount2) / 100,
+        research: (12 * amount2) / 100,
         localDevelop: (12 * amount2) / 100,
-        rescueFund: (12 * amount2) / 100,
-        treejerDevelop: (22 * amount2) / 100,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: (12 * amount2) / 100,
+        treasury: (22 * amount2) / 100,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       //check wethFund totalFunds
       let totalFunds2 = await wethFundsInstance.totalFunds();
 
       assert.equal(
-        Number(totalFunds2.treeResearch),
-        Math.add(Number(expected2.treeResearch), Number(expected.treeResearch)),
-        "treeResearch funds invalid"
+        Number(totalFunds2.research),
+        Math.add(Number(expected2.research), Number(expected.research)),
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelop),
+        Number(totalFunds2.localDevelopment),
         Math.add(Number(expected2.localDevelop), Number(expected.localDevelop)),
         "localDevelop funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
-        Math.add(Number(expected2.rescueFund), Number(expected.rescueFund)),
-        "rescueFund funds invalid"
+        Number(totalFunds2.insurance),
+        Math.add(Number(expected2.insurance), Number(expected.insurance)),
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
-        Math.add(
-          Number(expected2.treejerDevelop),
-          Number(expected.treejerDevelop)
-        ),
-        "treejerDevelop funds invalid"
+        Number(totalFunds2.treasury),
+        Math.add(Number(expected2.treasury), Number(expected.treasury)),
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
-        Math.add(Number(expected2.reserveFund1), Number(expected.reserveFund1)),
-        "reserveFund1 funds invalid"
+        Number(totalFunds2.reserve1),
+        Math.add(Number(expected2.reserve1), Number(expected.reserve1)),
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
-        Math.add(Number(expected2.reserveFund2), Number(expected.reserveFund2)),
-        "reserveFund2 funds invalid"
+        Number(totalFunds2.reserve2),
+        Math.add(Number(expected2.reserve2), Number(expected.reserve2)),
+        "reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -1763,7 +1760,7 @@ contract("IncrementalSale", (accounts) => {
                 .div(4200)
             )
         ),
-        "totalFund planterFund funds invalid"
+        "totalFund planter funds invalid"
       );
 
       assert.equal(
@@ -1786,7 +1783,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid121).times(3000).div(4200)
         ),
-        "planterFund funds invalid"
+        "planter funds invalid"
       );
 
       assert.equal(
@@ -1794,7 +1791,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid121).times(1200).div(4200)
         ),
-        "referralFund funds invalid"
+        "ambassador funds invalid"
       );
 
       assert.equal(
@@ -1802,7 +1799,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid102).times(3000).div(4200)
         ),
-        "planterFund funds invalid"
+        "planter funds invalid"
       );
 
       assert.equal(
@@ -1810,7 +1807,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid102).times(1200).div(4200)
         ),
-        "referralFund funds invalid"
+        "ambassador funds invalid"
       );
 
       assert.equal(
@@ -1818,7 +1815,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid110).times(3000).div(4200)
         ),
-        "planterFund funds invalid"
+        "planter funds invalid"
       );
 
       assert.equal(
@@ -1826,7 +1823,7 @@ contract("IncrementalSale", (accounts) => {
         Number(
           Math.Big(expectedSwapTokenAmountTreeid110).times(1200).div(4200)
         ),
-        "referralFund funds invalid"
+        "ambassador funds invalid"
       );
 
       ////--------------------check referral---------------------

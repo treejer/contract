@@ -1217,7 +1217,7 @@ contract("regularSale", (accounts) => {
         let planterFunds2 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         let referralFunds2 =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFunds2),
@@ -1509,7 +1509,7 @@ contract("regularSale", (accounts) => {
         let planterFunds2 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         let referralFunds2 =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFunds2),
@@ -2962,7 +2962,7 @@ contract("regularSale", (accounts) => {
         planterFund =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFund),
@@ -3051,7 +3051,7 @@ contract("regularSale", (accounts) => {
           planterFund2 =
             await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
           referralFund2 =
-            await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+            await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
           assert.equal(Number(planterFund2), 0, "2-planterFund funds invalid");
 
@@ -3064,7 +3064,7 @@ contract("regularSale", (accounts) => {
           planterFund2 =
             await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
           referralFund2 =
-            await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+            await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
           assert.equal(
             Number(planterFund2),
@@ -3194,7 +3194,7 @@ contract("regularSale", (accounts) => {
         planterFund3 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund3 =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFund3),
@@ -3280,7 +3280,7 @@ contract("regularSale", (accounts) => {
         planterFund4 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund4 =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFund4),
@@ -3516,7 +3516,7 @@ contract("regularSale", (accounts) => {
         planterFund =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund =
-          await planterFundsInstnce.treeToReferrerProjectedEarning.call(i);
+          await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(i);
 
         assert.equal(
           Number(planterFund),

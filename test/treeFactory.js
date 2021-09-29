@@ -2788,9 +2788,8 @@ contract("TreeFactory", (accounts) => {
       let pFund = await planterFundInstnce.treeToPlanterProjectedEarning.call(
         treeId
       );
-      let rFund = await planterFundInstnce.treeToReferrerProjectedEarning.call(
-        treeId
-      );
+      let rFund =
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
       let planterPaid = await planterFundInstnce.treeToPlanterTotalClaimed.call(
         treeId
       );
@@ -2917,7 +2916,7 @@ contract("TreeFactory", (accounts) => {
         treeId
       );
       const rFund =
-        await planterFundInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       const planterPaidBeforeVerify =
         await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
@@ -3006,7 +3005,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(
         Number(totalFundsAfterVerify.planter),
-        Math.subtract(Number(totalFundsBefore.planterFund), expectedPaid),
+        Math.subtract(Number(totalFundsBefore.planter), expectedPaid),
         "planter total fund is not ok"
       );
       assert.equal(
@@ -3140,7 +3139,7 @@ contract("TreeFactory", (accounts) => {
         treeId
       );
       const rFund =
-        await planterFundInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       const planterPaidBeforeVerify =
         await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
@@ -3402,7 +3401,7 @@ contract("TreeFactory", (accounts) => {
         treeId
       );
       const rFund =
-        await planterFundInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       const totalFunds1 = await planterFundInstnce.totalBalances.call();
 

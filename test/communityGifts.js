@@ -1475,7 +1475,7 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
       const rFundBefore =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       assert.equal(Number(pFundBefore), 0, "planter fund is not ok");
 
@@ -1549,7 +1549,7 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
       const rFundAfter =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       assert.equal(
         Number(pFundAfter),
@@ -1659,7 +1659,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundBeforeTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundBeforeTree1),
@@ -1677,7 +1679,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
       const rFundBeforeTree2 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId2
+        );
 
       assert.equal(
         Number(pFundBeforeTree2),
@@ -1723,7 +1727,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundAfterTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundAfterTree1),
@@ -1838,7 +1844,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundFinalTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundFinalTree1),
@@ -1856,7 +1864,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
       const rFundFinalTree2 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId2
+        );
 
       assert.equal(
         Number(pFundFinalTree2),
@@ -2048,7 +2058,7 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
       const rFundBefore =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       assert.equal(Number(pFundBefore), 0, "planter fund is not ok");
 
@@ -2112,7 +2122,7 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
       const rFundAfter =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       assert.equal(
         Number(pFundAfter),
@@ -2225,7 +2235,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundBeforeTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundBeforeTree1),
@@ -2243,7 +2255,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
       const rFundBeforeTree2 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId2
+        );
 
       assert.equal(
         Number(pFundBeforeTree2),
@@ -2295,7 +2309,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundAfterTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundAfterTree1),
@@ -2399,7 +2415,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
       const rFundFinalTree1 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
 
       assert.equal(
         Number(pFundFinalTree1),
@@ -2417,7 +2435,9 @@ contract("CommunityGifts", (accounts) => {
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
       const rFundFinalTree2 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId2
+        );
 
       assert.equal(
         Number(pFundFinalTree2),

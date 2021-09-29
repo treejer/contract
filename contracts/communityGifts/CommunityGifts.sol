@@ -266,7 +266,11 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
 
-        planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
+        planterFundContract.updateProjectedEarnings(
+            treeId,
+            planterFund,
+            referralFund
+        );
 
         treeFactory.mintAssignedTree(treeId, _msgSender(), 3);
 
@@ -310,7 +314,11 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
         treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
 
-        planterFundContract.setPlanterFunds(treeId, planterFund, referralFund);
+        planterFundContract.updateProjectedEarnings(
+            treeId,
+            planterFund,
+            referralFund
+        );
 
         treeFactory.mintAssignedTree(treeId, _giftee, 3);
 

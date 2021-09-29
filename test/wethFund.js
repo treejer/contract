@@ -593,7 +593,7 @@ contract("WethFunds", (accounts) => {
 
       let = await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
       let treeToReferrerProjectedEarnings =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(1);
 
       assert.equal(
         Number(totalFund.planter),
@@ -762,7 +762,7 @@ contract("WethFunds", (accounts) => {
       let treeToPlanterProjectedEarnings =
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(0);
       let treeToReferrerProjectedEarnings =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(0);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(0);
 
       assert.equal(
         Number(totalFund.planter),
@@ -877,7 +877,7 @@ contract("WethFunds", (accounts) => {
       let planterFunds2 =
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
       let referralFunds2 =
-        await planterFundsInstnce.treeToReferrerProjectedEarning.call(1);
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(1);
 
       assert.equal(
         Number(totalFund2.planter),

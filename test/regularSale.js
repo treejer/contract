@@ -1150,51 +1150,51 @@ contract("regularSale", (accounts) => {
       let expected = {
         planterFund: (40 * amount) / 100,
         referralFund: (12 * amount) / 100,
-        treeResearch: (12 * amount) / 100,
-        localDevelop: (12 * amount) / 100,
-        rescueFund: (12 * amount) / 100,
-        treejerDevelop: (12 * amount) / 100,
-        reserveFund1: (0 * amount) / 100,
-        reserveFund2: (0 * amount) / 100,
+        research: (12 * amount) / 100,
+        localDevelopment: (12 * amount) / 100,
+        insurance: (12 * amount) / 100,
+        treasury: (12 * amount) / 100,
+        reserve1: (0 * amount) / 100,
+        reserve2: (0 * amount) / 100,
       };
 
       //check wethFund totalFunds treeId2
       let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.treeResearch),
-        expected.treeResearch,
-        "2-treeResearch funds invalid"
+        Number(totalFunds2.research),
+        expected.research,
+        "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelop),
-        expected.localDevelop,
-        "2-localDevelop funds invalid"
+        Number(totalFunds2.localDevelopment),
+        expected.localDevelopment,
+        "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
-        expected.rescueFund,
-        "2-rescueFund funds invalid"
+        Number(totalFunds2.insurance),
+        expected.insurance,
+        "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
-        expected.treejerDevelop,
-        "2-treejerDevelop funds invalid"
+        Number(totalFunds2.treasury),
+        expected.treasury,
+        "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
-        expected.reserveFund1,
-        "2-reserveFund1 funds invalid"
+        Number(totalFunds2.reserve1),
+        expected.reserve1,
+        "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
-        expected.reserveFund2,
-        "2-reserveFund2 funds invalid"
+        Number(totalFunds2.reserve2),
+        expected.reserve2,
+        "2-reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -1442,51 +1442,51 @@ contract("regularSale", (accounts) => {
       let expected = {
         planterFund: (25 * amount) / 100,
         referralFund: (15 * amount) / 100,
-        treeResearch: (12 * amount) / 100,
-        localDevelop: (12 * amount) / 100,
-        rescueFund: (12 * amount) / 100,
-        treejerDevelop: (12 * amount) / 100,
-        reserveFund1: (12 * amount) / 100,
-        reserveFund2: (0 * amount) / 100,
+        research: (12 * amount) / 100,
+        localDevelopment: (12 * amount) / 100,
+        insurance: (12 * amount) / 100,
+        treasury: (12 * amount) / 100,
+        reserve1: (12 * amount) / 100,
+        reserve2: (0 * amount) / 100,
       };
 
       //check wethFund totalFunds treeId2
       let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.treeResearch),
-        expected.treeResearch,
-        "2-treeResearch funds invalid"
+        Number(totalFunds2.research),
+        expected.research,
+        "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelop),
-        expected.localDevelop,
-        "2-localDevelop funds invalid"
+        Number(totalFunds2.localDevelopment),
+        expected.localDevelopment,
+        "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
-        expected.rescueFund,
-        "2-rescueFund funds invalid"
+        Number(totalFunds2.insurance),
+        expected.insurance,
+        "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
-        expected.treejerDevelop,
-        "2-treejerDevelop funds invalid"
+        Number(totalFunds2.treasury),
+        expected.treasury,
+        "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
-        expected.reserveFund1,
-        "2-reserveFund1 funds invalid"
+        Number(totalFunds2.reserve1),
+        expected.reserve1,
+        "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
-        expected.reserveFund2,
-        "2-reserveFund2 funds invalid"
+        Number(totalFunds2.reserve2),
+        expected.reserve2,
+        "2-reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -2321,12 +2321,12 @@ contract("regularSale", (accounts) => {
       let expected = {
         planterFund: Math.divide(Math.mul(30, transferTreePrice), 100),
         referralFund: Math.divide(Math.mul(12, transferTreePrice), 100),
-        treeResearch: Math.divide(Math.mul(12, transferTreePrice), 100),
-        localDevelop: Math.divide(Math.mul(12, transferTreePrice), 100),
-        rescueFund: Math.divide(Math.mul(12, transferTreePrice), 100),
-        treejerDevelop: Math.divide(Math.mul(12, transferTreePrice), 100),
-        reserveFund1: Math.divide(Math.mul(5, transferTreePrice), 100),
-        reserveFund2: Math.divide(Math.mul(5, transferTreePrice), 100),
+        research: Math.divide(Math.mul(12, transferTreePrice), 100),
+        localDevelopment: Math.divide(Math.mul(12, transferTreePrice), 100),
+        insurance: Math.divide(Math.mul(12, transferTreePrice), 100),
+        treasury: Math.divide(Math.mul(12, transferTreePrice), 100),
+        reserve1: Math.divide(Math.mul(5, transferTreePrice), 100),
+        reserve2: Math.divide(Math.mul(5, transferTreePrice), 100),
       };
 
       await fModel.assignAllocationToTree(1, 100000, 0, {
@@ -2464,39 +2464,31 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsBefore.treeResearch),
+        Number(totalFundsBefore.research),
         0,
         "invalid tree research fund"
       );
 
       assert.equal(
-        Number(totalFundsBefore.localDevelop),
+        Number(totalFundsBefore.localDevelopment),
         0,
         "invalid local develop fund"
       );
       assert.equal(
-        Number(totalFundsBefore.rescueFund),
+        Number(totalFundsBefore.insurance),
         0,
         "invalid rescue fund"
       );
 
       assert.equal(
-        Number(totalFundsBefore.treejerDevelop),
+        Number(totalFundsBefore.treasury),
         0,
         "invalid treejer develop fund"
       );
 
-      assert.equal(
-        Number(totalFundsBefore.reserveFund1),
-        0,
-        "invalid other fund1"
-      );
+      assert.equal(Number(totalFundsBefore.reserve1), 0, "invalid other fund1");
 
-      assert.equal(
-        Number(totalFundsBefore.reserveFund2),
-        0,
-        "invalid other fund2"
-      );
+      assert.equal(Number(totalFundsBefore.reserve2), 0, "invalid other fund2");
 
       ////////////////// ---------------- check tree before -----------------------
 
@@ -2671,38 +2663,38 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsAfter.treeResearch),
-        expected.treeResearch,
+        Number(totalFundsAfter.research),
+        expected.research,
         "invalid tree research fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.localDevelop),
-        expected.localDevelop,
+        Number(totalFundsAfter.localDevelopment),
+        expected.localDevelopment,
         "invalid local develop fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.rescueFund),
-        expected.rescueFund,
+        Number(totalFundsAfter.insurance),
+        expected.insurance,
         "invalid rescue fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.treejerDevelop),
-        expected.treejerDevelop,
+        Number(totalFundsAfter.treasury),
+        expected.treasury,
         "invalid treejer develop fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.reserveFund1),
-        expected.reserveFund1,
+        Number(totalFundsAfter.reserve1),
+        expected.reserve1,
         "invalid other fund1"
       );
 
       assert.equal(
-        Number(totalFundsAfter.reserveFund2),
-        expected.reserveFund2,
+        Number(totalFundsAfter.reserve2),
+        expected.reserve2,
         "invalid other fund2"
       );
 

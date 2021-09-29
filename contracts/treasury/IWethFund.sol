@@ -3,7 +3,7 @@
 pragma solidity ^0.8.6;
 
 /** @title WethFund interfce */
-interface IWethFunds {
+interface IWethFund {
     /**
      * @return true in case of WethFund contract have been initialized
      */

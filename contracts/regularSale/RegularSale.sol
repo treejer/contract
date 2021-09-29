@@ -10,7 +10,7 @@ import "../treasury/IDaiFund.sol";
 import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
-import "../treasury/IWethFunds.sol";
+import "../treasury/IWethFund.sol";
 
 /** @title RegularSale contract */
 contract RegularSale is Initializable, RelayRecipient {
@@ -51,7 +51,7 @@ contract RegularSale is Initializable, RelayRecipient {
     IAllocation public allocation;
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
-    IWethFunds public wethFund;
+    IWethFund public wethFund;
 
     event PriceUpdated(uint256 price);
     event TreeFunded(
@@ -203,7 +203,7 @@ contract RegularSale is Initializable, RelayRecipient {
      * @param _address wethFund contract address
      */
     function setWethFundAddress(address _address) external onlyAdmin {
-        IWethFunds candidateContract = IWethFunds(_address);
+        IWethFund candidateContract = IWethFund(_address);
 
         require(candidateContract.isWethFund());
 

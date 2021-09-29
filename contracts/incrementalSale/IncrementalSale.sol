@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/IWethFunds.sol";
+import "../treasury/IWethFund.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
@@ -19,7 +19,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    IWethFunds public wethFund;
+    IWethFund public wethFund;
     IAllocation public allocation;
     ITreeAttribute public treeAttribute;
     IPlanterFund public planterFundContract;
@@ -145,7 +145,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @param _address wethFund contract address
      */
     function setWethFundAddress(address _address) external onlyAdmin {
-        IWethFunds candidateContract = IWethFunds(_address);
+        IWethFund candidateContract = IWethFund(_address);
 
         require(candidateContract.isWethFund());
 

@@ -58,7 +58,7 @@ contract("Auction", (accounts) => {
   let endTime;
   let planterInstance;
   let planterFundsInstnce;
-  let financialModelInstance;
+  let allocationInstance;
   let wethFundsInstance;
   let regularSellInstance;
   let uniswapRouterInstance;
@@ -168,15 +168,11 @@ contract("Auction", (accounts) => {
         }
       );
 
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       regularSellInstance = await deployProxy(
         RegularSell,
@@ -242,20 +238,17 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      ///// ---------------- set financial model
+      ///// ---------------- deploy allocation
 
       await auctionInstance
-        .setAllocationAddress(financialModelInstance.address, {
+        .setAllocationAddress(allocationInstance.address, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       ///// ---------------- set wethToken
 
@@ -320,15 +313,11 @@ contract("Auction", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       treeFactoryInstance = await deployProxy(
         TreeFactory,
@@ -351,12 +340,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
@@ -387,12 +373,9 @@ contract("Auction", (accounts) => {
       let initialValue = web3.utils.toWei("1");
       let bidInterval = web3.utils.toWei("0.1");
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
@@ -411,7 +394,7 @@ contract("Auction", (accounts) => {
         )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -436,7 +419,7 @@ contract("Auction", (accounts) => {
         )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -508,19 +491,16 @@ contract("Auction", (accounts) => {
 
       //////// -----------add auction
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -534,7 +514,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -750,12 +730,9 @@ contract("Auction", (accounts) => {
 
       ////////////// ------------------ handle address
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
@@ -782,7 +759,7 @@ contract("Auction", (accounts) => {
       });
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -796,7 +773,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1066,12 +1043,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
@@ -1086,7 +1060,7 @@ contract("Auction", (accounts) => {
         from: dataManager,
       });
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1100,7 +1074,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1141,15 +1115,11 @@ contract("Auction", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
         initializer: "initialize",
@@ -1224,12 +1194,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
@@ -1286,12 +1253,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
       await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
@@ -1319,7 +1283,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1333,7 +1297,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1477,7 +1441,7 @@ contract("Auction", (accounts) => {
       );
 
       await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
+        allocationInstance.address,
         {
           from: deployerAccount,
         }
@@ -1513,7 +1477,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -1527,7 +1491,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1886,7 +1850,7 @@ contract("Auction", (accounts) => {
       );
 
       await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
+        allocationInstance.address,
         {
           from: deployerAccount,
         }
@@ -1932,7 +1896,7 @@ contract("Auction", (accounts) => {
       );
       /////////////////////////////////// fail to create auction and dm model
 
-      await financialModelInstance
+      await allocationInstance
         .addAllocationData(6500, 1200, 1200, 1200, 1200, 1200, 0, 0, {
           from: dataManager,
         })
@@ -1953,7 +1917,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1967,7 +1931,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2322,7 +2286,7 @@ contract("Auction", (accounts) => {
       );
 
       await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
+        allocationInstance.address,
         {
           from: deployerAccount,
         }
@@ -2384,7 +2348,7 @@ contract("Auction", (accounts) => {
 
       ///////////////////// ---------------- fail to add dm model
 
-      await financialModelInstance
+      await allocationInstance
         .addAllocationData(3500, 1000, 1000, 1500, 1000, 2000, 0, 0, {
           from: userAccount5,
         })
@@ -2392,7 +2356,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3500,
         1000,
         1000,
@@ -2406,7 +2370,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 0, 0, {
         from: dataManager,
       });
 
@@ -3040,7 +3004,7 @@ contract("Auction", (accounts) => {
       );
 
       await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
+        allocationInstance.address,
         {
           from: deployerAccount,
         }
@@ -3091,13 +3055,13 @@ contract("Auction", (accounts) => {
 
       ///////////////////// ---------------- fail to add dm model
 
-      await financialModelInstance
+      await allocationInstance
         .addAllocationData(5000, 1000, 1000, 1000, 1000, 1000, 0, 0, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      await financialModelInstance
+      await allocationInstance
         .addAllocationData(
           5000,
           1000,
@@ -3113,7 +3077,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         5000,
         1000,
         1000,
@@ -3125,7 +3089,7 @@ contract("Auction", (accounts) => {
         { from: dataManager }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 

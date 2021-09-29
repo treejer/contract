@@ -86,7 +86,7 @@ const DaiFundsErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
 };
-const FinancialModelErrorMsg = {
+const AllocationErrorMsg = {
   SUM_INVALID: "sum must be 10000",
   DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
   INVALID_FUND_MODEL: "invalid fund model",
@@ -166,7 +166,7 @@ module.exports = {
   IncrementalSaleErrorMsg,
   TreeAttributeErrorMsg,
   DaiFundsErrorMsg,
-  FinancialModelErrorMsg,
+  AllocationErrorMsg,
   CommunityGiftErrorMsg,
   erc20ErrorMsg,
   GsnErrorMsg,

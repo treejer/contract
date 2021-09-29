@@ -37,7 +37,7 @@ contract("TreeFactory", (accounts) => {
   let arInstance;
 
   let planterInstance;
-  let financialModelInstance;
+  let allocationInstance;
   let planterFundInstnce;
   let daiFundInstance;
   let daiInstance;
@@ -2436,24 +2436,20 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
+      ////////////// ---------- deploy allocation
 
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount1,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -2644,23 +2640,19 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount1,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -2891,23 +2883,19 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -3115,23 +3103,19 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -3323,18 +3307,14 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         fundsPercent.planterFund,
         fundsPercent.referralFund,
         fundsPercent.treeResearch,
@@ -3348,7 +3328,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
       });
 
@@ -4370,23 +4350,19 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -4474,23 +4450,19 @@ contract("TreeFactory", (accounts) => {
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -5648,25 +5620,18 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
-      await auctionInstance.setAllocationAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
-      await financialModelInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -5686,14 +5651,9 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(
-        0,
-        100000,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await allocationInstance.assignTreeFundDistributionModel(0, 100000, 0, {
+        from: dataManager,
+      });
 
       await auctionInstance.createAuction(
         treeId,

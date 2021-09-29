@@ -6,7 +6,7 @@ require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const { CommonErrorMsg, FinancialModelErrorMsg } = require("./enumes");
+const { CommonErrorMsg, AllocationErrorMsg } = require("./enumes");
 
 contract("Allocation", (accounts) => {
   let arInstance;
@@ -67,13 +67,13 @@ contract("Allocation", (accounts) => {
       .addAllocationData(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
       })
-      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
+      .should.be.rejectedWith(AllocationErrorMsg.SUM_INVALID);
 
     await allocationInstance
       .addAllocationData(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
         from: dataManager,
       })
-      .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
+      .should.be.rejectedWith(AllocationErrorMsg.SUM_INVALID);
 
     const eventTx = await allocationInstance.addAllocationData(
       4000,
@@ -738,9 +738,7 @@ contract("Allocation", (accounts) => {
       .assignTreeFundDistributionModel(0, 0, 0, {
         from: dataManager,
       })
-      .should.be.rejectedWith(
-        FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
-      );
+      .should.be.rejectedWith(AllocationErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND);
 
     await allocationInstance.addAllocationData(
       4000,
@@ -817,7 +815,7 @@ contract("Allocation", (accounts) => {
     );
     await allocationInstance
       .findAllocationData(1)
-      .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
+      .should.be.rejectedWith(AllocationErrorMsg.INVALID_FUND_MODEL);
 
     await allocationInstance.assignTreeFundDistributionModel(3, 10, 0, {
       from: dataManager,
@@ -825,7 +823,7 @@ contract("Allocation", (accounts) => {
 
     await allocationInstance
       .findAllocationData(1)
-      .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
+      .should.be.rejectedWith(AllocationErrorMsg.INVALID_FUND_MODEL);
   });
   it("should findAllocationData successfully1", async () => {
     let treeId = 10;

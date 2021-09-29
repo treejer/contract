@@ -269,7 +269,7 @@ Common.successFundTree = async (
   deployerAccount,
   treeFactoryAddress,
   auctionAddress,
-  financialModelInstance,
+  allocationInstance,
   daiFundInstance,
   daiInstance,
   planterFundInstnce,
@@ -286,7 +286,7 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await financialModelInstance.addAllocationData(
+  await allocationInstance.addAllocationData(
     fundsPercent.planterFund,
     fundsPercent.referralFund,
     fundsPercent.treeResearch,
@@ -299,7 +299,7 @@ Common.successFundTree = async (
       from: dataManager,
     }
   );
-  await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
     from: dataManager,
   });
 

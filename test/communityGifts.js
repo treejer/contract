@@ -95,7 +95,7 @@ contract("CommunityGifts", (accounts) => {
   //     unsafeAllowCustomTypes: true,
   //   });
 
-  //   financialModelInstance = await deployProxy(
+  //   allocationInstance = await deployProxy(
   //     Allocation,
   //     [arInstance.address],
   //     {
@@ -1342,15 +1342,11 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      financialModelInstance = await deployProxy(
-        Allocation,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       treeFactoryInstance = await deployProxy(
         TreeFactory,

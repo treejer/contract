@@ -45,8 +45,8 @@ interface IRegularSale {
     /** @return TreeFactory contract address */
     function treeFactory() external view returns (address);
 
-    /** @return DaiFunds contract address */
-    function daiFunds() external view returns (address);
+    /** @return DaiFund contract address */
+    function daiFund() external view returns (address);
 
     /** @return Allocation contract address */
     function allocation() external view returns (address);
@@ -74,11 +74,11 @@ interface IRegularSale {
      */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev admin set daiFunds contract address
-     * @param _address daiFunds contract address
+    /** @dev admin set daiFund contract address
+     * @param _address daiFund contract address
      */
 
-    function setDaiFundsAddress(address _address) external;
+    function setDaiFundAddress(address _address) external;
 
     /** @dev admin set daiToken address
      * @param _address  daiToken  address

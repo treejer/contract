@@ -82,7 +82,7 @@ const TreasuryManagerErrorMsg = {
   DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
 };
 
-const DaiFundsErrorMsg = {
+const DaiFundErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
 };
@@ -165,7 +165,7 @@ module.exports = {
   RegularSaleErrors,
   IncrementalSaleErrorMsg,
   TreeAttributeErrorMsg,
-  DaiFundsErrorMsg,
+  DaiFundErrorMsg,
   AllocationErrorMsg,
   CommunityGiftErrorMsg,
   erc20ErrorMsg,

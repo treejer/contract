@@ -1,0 +1,257 @@
+// SPDX-License-Identifier: GPL-3.0
+
+pragma solidity ^0.8.6;
+
+/** @title DaiFund interfce */
+interface IDaiFund {
+    /**
+     * @return true in case of DaiFund contract have been initialized
+     */
+    function isDaiFund() external view returns (bool);
+
+    /**
+     * @return AccessRestriction contract address
+     */
+    function accessRestriction() external view returns (address);
+
+    /**
+     * @return PlanterFund contract address
+     */
+    function planterFundContract() external view returns (address);
+
+    /**
+     * @return DaiToken contract address
+     */
+    function daiToken() external view returns (address);
+
+    /**
+     * @dev return totalBalances struct data
+     * @return research share
+     * @return localDevelopment share
+     * @return insurance share
+     * @return treasury share
+     * @return reserve1 share
+     * @return reserve2 share
+     */
+    function totalBalances()
+        external
+        view
+        returns (
+            uint256 research,
+            uint256 localDevelopment,
+            uint256 insurance,
+            uint256 treasury,
+            uint256 reserve1,
+            uint256 reserve2
+        );
+
+    /**
+     * @return research address
+     */
+    function researchAddress() external view returns (address);
+
+    /**
+     * @return localDevelopment address
+     */
+    function localDevelopmentAddress() external view returns (address);
+
+    /**
+     * @return insurance address
+     */
+    function insuranceAddress() external view returns (address);
+
+    /**
+     * @return treasury address
+     */
+    function treasuryAddress() external view returns (address);
+
+    /**
+     * @return reserve1 address
+     */
+    function reserve1Address() external view returns (address);
+
+    /**
+     * @return reserve2 address
+     */
+    function reserve2Address() external view returns (address);
+
+    /** @dev set {_address} to DaiToken contract address */
+    function setDaiTokenAddress(address _daiTokenAddress) external;
+
+    /** @dev set {_address} to PlanterFund contract address */
+    function setPlanterFundContractAddress(address _address) external;
+
+    /**
+     * @dev set {_address} to researchAddress
+     */
+    function setResearchAddress(address payable _address) external;
+
+    /**
+     * @dev set {_address} to localDevelopmentAddress
+     */
+    function setLocalDevelopmentAddress(address payable _address) external;
+
+    /**
+     * @dev set {_address} to insuranceAddress
+     */
+    function setInsuranceAddress(address payable _address) external;
+
+    /**
+     * @dev set {_address} to treasuryAddress
+     */
+    function setTreasuryAddress(address payable _address) external;
+
+    /**
+     * @dev set {_address} to reserve1Address
+     */
+    function setReserve1Address(address payable _address) external;
+
+    /**
+     * @dev set {_address} to reserve2Address
+     */
+    function setReserve2Address(address payable _address) external;
+
+    /**
+     * @dev fund a tree by RegularSale contract and based on distribution
+     * model of tree, shares divide beetwen (planter, ambassador, research,
+     * localDevelopment, insurance, treasury, otherFund1 and otherFund2)
+     * and added to the totalBalances of each part,
+     * @param _treeId id of a tree to fund
+     * NOTE planterShare and ambassadorShare share transfer to PlanterFund contract
+     * and add to totalFund section there
+     * NOTE emit a {TreeFunded} event
+     */
+    function fundTree(
+        uint256 _treeId,
+        uint256 _amount,
+        uint16 _planterShare,
+        uint16 _ambassadorShare,
+        uint16 _research,
+        uint16 _localDevelopment,
+        uint16 _insurance,
+        uint16 _treasury,
+        uint16 _reserve1,
+        uint16 _reserve2
+    ) external;
+
+    //TODO : ADD_COMMENT
+    function fundTreeBatch(
+        uint256 _totalPlanterShare,
+        uint256 _totalAmbassadorShare,
+        uint256 _totalResearch,
+        uint256 _totalLocalDevelopment,
+        uint256 _totalInsurance,
+        uint256 _totalTreasury,
+        uint256 _totalReserve1,
+        uint256 _totalReserve2
+    ) external;
+
+    //TODO:ADD_COMMENTS
+    function transferReferrerDai(uint256 _amount) external;
+
+    /**
+     * @dev trnasfer {_amount} from research in {totalBalances} to researchAddress
+     * NOTE emit a {ResearchBalanceWithdrew} event
+     */
+    function withdrawResearchBalance(uint256 _amount, string calldata _reason)
+        external;
+
+    /**
+     * @dev trnasfer {_amount} from localDevelopment in {totalBalances} to localDevelopmentAddress
+     * NOTE emit a {LocalDevelopmentBalanceWithdrew} event
+     */
+    function withdrawLocalDevelopmentBalance(
+        uint256 _amount,
+        string calldata _reason
+    ) external;
+
+    /**
+     * @dev trnasfer {_amount} from insurance in {totalBalances} to insuranceAddress
+     * NOTE emit a {RescueBalanceWithdrew} event
+     */
+    function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
+        external;
+
+    /**
+     * @dev trnasfer {_amount} from treasury in {totalBalances} to treasuryAddress
+     * NOTE emit a {TreasuryBalanceWithdrew} event
+     */
+    function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
+        external;
+
+    /**
+     * @dev trnasfer {_amount} from reserve1 in {totalBalances} to reserve1Address
+     * NOTE emit a {Reserve1BalanceWithdrew} event
+     */
+    function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
+        external;
+
+    /**
+     * @dev trnasfer {_amount} from reserve2 in {totalBalances} to reserve2Address
+     * NOTE emit a {Reserve2BalanceWithdrew} event
+     */
+    function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
+        external;
+
+    /**
+     * @dev emitted when admin withdraw tree research balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event ResearchBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw local develop balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event LocalDevelopmentBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw rescue balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event RescueBalanceWithdrew(uint256 amount, address account, string reason);
+    /**
+     * @dev emitted when admin withdraw treejer develop balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event TreasuryBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw reserve balance1 balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event Reserve1BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+
+    /**
+     * @dev emitted when admin withdraw reserve balance2 balance
+     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     */
+    event Reserve2BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+
+    /**
+     * @dev emitted when a tree funded with total amount of {amount} and with
+     * planter share of {planterShare}
+     * {treeId} is id of tree that is funded
+     */
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+
+    //TODO: ADD_COMMENT
+    event TreeFundedBatch();
+}

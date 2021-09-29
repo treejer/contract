@@ -1413,7 +1413,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(wethFundsBalanceAfter),
         Number(web3.utils.toWei(".0058")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -1661,7 +1661,7 @@ contract("IncrementalSale", (accounts) => {
           Number(web3.utils.toWei(".0058")),
           Number(web3.utils.toWei("0.11658"))
         ),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(

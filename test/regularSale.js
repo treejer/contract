@@ -15,7 +15,7 @@ const Units = require("ethereumjs-units");
 const Math = require("./math");
 
 //treasury section
-const DaiFunds = artifacts.require("DaiFunds.sol");
+const DaiFund = artifacts.require("DaiFund.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
@@ -42,7 +42,7 @@ contract("regularSale", (accounts) => {
   let treasuryInstance;
 
   let fModel;
-  let daiFundsInstance;
+  let daiFundInstance;
   let planterFundsInstnce;
   let daiInstance;
   let wethFundsInstance;
@@ -102,7 +102,7 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -173,18 +173,18 @@ contract("regularSale", (accounts) => {
       ////---------------------------------set dai funds address--------------
 
       await regularSaleInstance
-        .setDaiFundsAddress(daiFundsInstance.address, {
+        .setDaiFundAddress(daiFundInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        daiFundsInstance.address,
-        await regularSaleInstance.daiFunds(),
+        daiFundInstance.address,
+        await regularSaleInstance.daiFund(),
         "dai funds address set incorect"
       );
 
@@ -737,7 +737,7 @@ contract("regularSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -800,7 +800,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -812,13 +812,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -851,7 +851,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -980,7 +980,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -992,13 +992,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -1031,7 +1031,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -1088,8 +1088,8 @@ contract("regularSale", (accounts) => {
         );
       });
 
-      const daiFundsBalanceAfter = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter = await daiInstance.balanceOf(
@@ -1101,9 +1101,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter),
+        Number(daiFundBalanceAfter),
         Number(web3.utils.toWei("23.52")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -1143,7 +1143,7 @@ contract("regularSale", (accounts) => {
         "2-funder balance not true"
       );
 
-      // check funds (planterFund && DaiFunds)
+      // check funds (planterFund && DaiFund)
 
       let amount = Number(web3.utils.toWei("49"));
 
@@ -1159,7 +1159,7 @@ contract("regularSale", (accounts) => {
       };
 
       //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundsInstance.totalFunds();
+      let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalFunds2.treeResearch),
@@ -1274,7 +1274,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -1286,13 +1286,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -1325,7 +1325,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -1380,8 +1380,8 @@ contract("regularSale", (accounts) => {
         );
       });
 
-      const daiFundsBalanceAfter = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter = await daiInstance.balanceOf(
@@ -1393,9 +1393,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter),
+        Number(daiFundBalanceAfter),
         Number(web3.utils.toWei("33.6")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -1435,7 +1435,7 @@ contract("regularSale", (accounts) => {
         "2-funder balance not true"
       );
 
-      // check funds (planterFund && DaiFunds)
+      // check funds (planterFund && DaiFund)
 
       let amount = Number(web3.utils.toWei("56"));
 
@@ -1451,7 +1451,7 @@ contract("regularSale", (accounts) => {
       };
 
       //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundsInstance.totalFunds();
+      let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalFunds2.treeResearch),
@@ -1555,7 +1555,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -1567,13 +1567,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -1606,7 +1606,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -1670,8 +1670,8 @@ contract("regularSale", (accounts) => {
         "2-funder balance not true"
       );
 
-      const daiFundsBalanceAfter1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter1 = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter1 = await daiInstance.balanceOf(
@@ -1683,9 +1683,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter1),
+        Number(daiFundBalanceAfter1),
         Number(web3.utils.toWei("3.36")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -1767,8 +1767,8 @@ contract("regularSale", (accounts) => {
         "4-funder balance not true"
       );
 
-      const daiFundsBalanceAfter2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter2 = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
@@ -1780,9 +1780,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter2),
+        Number(daiFundBalanceAfter2),
         Number(web3.utils.toWei("6.72")),
-        "2-daiFunds balance not true"
+        "2-daiFund balance not true"
       );
 
       assert.equal(
@@ -1864,8 +1864,8 @@ contract("regularSale", (accounts) => {
         "3-funder balance not true"
       );
 
-      const daiFundsBalanceAfter3 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter3 = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter3 = await daiInstance.balanceOf(
@@ -1877,9 +1877,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter3),
+        Number(daiFundBalanceAfter3),
         Number(web3.utils.toWei("10.08")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -1948,7 +1948,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -1960,13 +1960,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -1999,7 +1999,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -2137,7 +2137,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -2149,13 +2149,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -2188,7 +2188,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -2358,7 +2358,7 @@ contract("regularSale", (accounts) => {
         { from: deployerAccount }
       );
 
-      await regularSaleInstance.setDaiFundsAddress(daiFundsInstance.address, {
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -2370,13 +2370,13 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -2409,7 +2409,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -2448,7 +2448,7 @@ contract("regularSale", (accounts) => {
 
       /////////////--------------------- check total fund before request
 
-      const totalFundsBefore = await daiFundsInstance.totalFunds();
+      const totalFundsBefore = await daiFundInstance.totalBalances();
       const totalPlanterFundsBefore = await planterFundsInstnce.totalBalances();
 
       assert.equal(
@@ -2512,8 +2512,8 @@ contract("regularSale", (accounts) => {
 
       ///////////////////////////---------------------- check treasury and regular sell balance after request
 
-      const daiFundsBalanceBefore = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceBefore = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceBefore = await daiInstance.balanceOf(
@@ -2524,11 +2524,7 @@ contract("regularSale", (accounts) => {
         regularSaleInstance.address
       );
 
-      assert.equal(
-        Number(daiFundsBalanceBefore),
-        0,
-        "daiFunds balance not true"
-      );
+      assert.equal(Number(daiFundBalanceBefore), 0, "daiFund balance not true");
 
       assert.equal(
         Number(planterFundsBalanceBefore),
@@ -2608,8 +2604,8 @@ contract("regularSale", (accounts) => {
 
       ///////////////////////////---------------------- check treasury and regular sell balance after request
 
-      const daiFundsBalanceAfter = await daiInstance.balanceOf(
-        daiFundsInstance.address
+      const daiFundBalanceAfter = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       const planterFundsBalanceAfter = await daiInstance.balanceOf(
@@ -2621,9 +2617,9 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(daiFundsBalanceAfter),
+        Number(daiFundBalanceAfter),
         Number(web3.utils.toWei("5.8")),
-        "daiFunds balance not true"
+        "daiFund balance not true"
       );
 
       assert.equal(
@@ -2658,7 +2654,7 @@ contract("regularSale", (accounts) => {
 
       ////////////////// ---------------------- check total fund after request
 
-      const totalFundsAfter = await daiFundsInstance.totalFunds();
+      const totalFundsAfter = await daiFundInstance.totalBalances();
 
       const totalPlanterFundsAfter = await planterFundsInstnce.totalBalances();
 
@@ -2772,25 +2768,22 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
 
-      await testRegularSaleInstance.setDaiFundsAddress(
-        daiFundsInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await testRegularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
 
       //////////////------------- setup
 
@@ -2829,11 +2822,11 @@ contract("regularSale", (accounts) => {
       });
 
       await daiInstance.setMint(
-        daiFundsInstance.address,
+        daiFundInstance.address,
         web3.utils.toWei("1000")
       );
 
-      await daiFundsInstance.regularFund(
+      await daiFundInstance.fundTreeBatch(
         web3.utils.toWei("1"),
         0,
         0,
@@ -3351,25 +3344,22 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      //-------------daiFundsInstance
+      //-------------daiFundInstance
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
 
-      await testRegularSaleInstance.setDaiFundsAddress(
-        daiFundsInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await testRegularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
 
       await testRegularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
@@ -3432,11 +3422,11 @@ contract("regularSale", (accounts) => {
       });
 
       await daiInstance.setMint(
-        daiFundsInstance.address,
+        daiFundInstance.address,
         web3.utils.toWei("1000")
       );
 
-      await daiFundsInstance.regularFund(
+      await daiFundInstance.fundTreeBatch(
         web3.utils.toWei("1"),
         0,
         0,

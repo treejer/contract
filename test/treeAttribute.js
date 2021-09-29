@@ -42,7 +42,7 @@ const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
 contract("TreeAttribute", (accounts) => {
-  let iSellInstance;
+  let iSaleInstance;
   let arInstance;
 
   let treeAttributeInstance;
@@ -1084,7 +1084,7 @@ contract("TreeAttribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      iSellInstance = await deployProxy(IncrementalSale, [arInstance.address], {
+      iSaleInstance = await deployProxy(IncrementalSale, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1112,11 +1112,11 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSellInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundsAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 
-      await iSellInstance.setWethTokenAddress(wethInstance.address, {
+      await iSaleInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
 

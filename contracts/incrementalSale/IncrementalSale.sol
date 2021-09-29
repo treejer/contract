@@ -88,7 +88,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isIncrementalSell
+     * @dev initialize accessRestriction contract and set true for isIncrementalSale
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)

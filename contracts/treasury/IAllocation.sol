@@ -19,17 +19,17 @@ interface IAllocation {
      */
     function accessRestriction() external view returns (address);
 
-    /** return assignModel data for index {_index} of assingModel array
-     * for example from startingId of allocationToTrees[0] to startingId of
-     * allocationToTrees[1] belong to distributionModelId of assingModels[0]
-     * @return startingTreeId is starting tree with model distributionModelId
-     * @return distributionModelId for index {_index} of assignModel array
+    /** return allocationToTrees data for index {_index} of allocationToTrees
+     * array for example from startingId of allocationToTrees[0] to startingId of
+     * allocationToTrees[1] belong to allocationDataId of allocationToTrees[0]
+     * @return startingTreeId is starting tree with model allocationDataId
+     * @return allocationDataId for index {_index} of allocationToTrees array
      */
     function allocationToTrees(uint256 _index)
         external
-        returns (uint256 startingTreeId, uint256 distributionModelId);
+        returns (uint256 startingTreeId, uint256 allocationDataId);
 
-    /** return allocations data based on _distributionModelId
+    /** return allocations data based on _allocationDataId
      * @return planterShare
      * @return ambassadorShare
      * @return researchShare
@@ -38,9 +38,9 @@ interface IAllocation {
      * @return treasuryShare
      * @return reserve1Share
      * @return reserve2Share
-     * @return exists is true when there is a allocations for _distributionModelId
+     * @return exists is true when there is a allocations for _allocationDataId
      */
-    function allocations(uint256 _distributionModelId)
+    function allocations(uint256 _allocationDataId)
         external
         view
         returns (
@@ -56,27 +56,27 @@ interface IAllocation {
         );
 
     /**
-     * @dev admin add a model for funding distribution that sum of the
+     * @dev admin add allocation data that sum of the
      * inputs must be 10000
-     * @param _planter planter share
-     * @param _referral referral share
-     * @param _treeResearch tree research share
-     * @param _localDevelop local develop share
-     * @param _rescueFund rescue share
-     * @param _treejerDevelop treejer develop share
-     * @param _reserveFund1 reserve fund1 share
-     * @param _reserveFund2 reserve fund2 share
+     * @param _planterShare planter share
+     * @param _ambassadorShare ambassador share
+     * @param _researchShare research share
+     * @param _localDevelopmentShare local development share
+     * @param _insuranceShare insurance share
+     * @param _treasuryShare treasury share
+     * @param _reserve1Share reserve1 share
+     * @param _reserve2Share reserve2 share
      * NOTE emit a {AllocationDataAdded} event
      */
     function addAllocationData(
-        uint16 _planter,
-        uint16 _referral,
-        uint16 _treeResearch,
-        uint16 _localDevelop,
-        uint16 _rescueFund,
-        uint16 _treejerDevelop,
-        uint16 _reserveFund1,
-        uint16 _reserveFund2
+        uint16 _planterShare,
+        uint16 _ambassadorShare,
+        uint16 _researchShare,
+        uint16 _localDevelopmentShare,
+        uint16 _insuranceShare,
+        uint16 _treasuryShare,
+        uint16 _reserve1Share,
+        uint16 _reserve2Share
     ) external;
 
     /**
@@ -84,25 +84,25 @@ interface IAllocation {
      * {_startTreeId} and end at {_endTreeId}
      * @param _startTreeId strating tree id to assign distribution model to
      * @param _endTreeId ending tree id to assign distribution model to
-     * @param _distributionModelId distribution model id to assign
+     * @param _allocationDataId allocation data id to assign
      * NOTE emit a {AllocationToTreeAssigned} event
      */
     function assignAllocationToTree(
         uint256 _startTreeId,
         uint256 _endTreeId,
-        uint256 _distributionModelId
+        uint256 _allocationDataId
     ) external;
 
     /**
      * @dev check if there is distribution model for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a distributionModel
-     * @return true in case of distributionModel existance for {_treeId} and false otherwise
+     * @param _treeId id of a tree to check if there is a allocationData
+     * @return true in case of allocationData existance for {_treeId} and false otherwise
      */
     function exists(uint256 _treeId) external view returns (bool);
 
     /**
-     * @dev return fundDistribution data of {_treeId}
-     * @param _treeId id of tree to find fundDistribution data
+     * @dev return allocation data of {_treeId}
+     * @param _treeId id of tree to find allocation data
      * @return planterShare
      * @return ambassadorShare
      * @return researchShare
@@ -126,13 +126,13 @@ interface IAllocation {
         );
 
     /**
-     * @dev emitted when a Distribution model added with {modelId}
+     * @dev emitted when a AllocationData added with {allocationDataId}
      */
 
     event AllocationDataAdded(uint256 allocationDataId);
 
     /**
-     * @dev emitted when FundDistributionModel assigned to a range of tree
+     * @dev emitted when AllocationData assigned to a range of tree
      */
 
     event AllocationToTreeAssigned(uint256 allocationToTreesLength);

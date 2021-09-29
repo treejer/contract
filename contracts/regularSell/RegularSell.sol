@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFunds.sol";
-import "../treasury/IFinancialModel.sol";
+import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
 import "../treasury/IWethFunds.sol";
@@ -46,7 +46,7 @@ contract RegularSell is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IDaiFunds public daiFunds;
-    IFinancialModel public financialModel;
+    IAllocation public allocation;
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
     IWethFunds public wethFunds;
@@ -186,13 +186,13 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set FinancialModel contract address
-     * @param _address set to the address of financialModel
+     * @dev admin set Allocation contract address
+     * @param _address set to the address of Allocation
      */
-    function setFinancialModelAddress(address _address) external onlyAdmin {
-        IFinancialModel candidateContract = IFinancialModel(_address);
-        require(candidateContract.isFinancialModel());
-        financialModel = candidateContract;
+    function setAllocationAddress(address _address) external onlyAdmin {
+        IAllocation candidateContract = IAllocation(_address);
+        require(candidateContract.isAllocation());
+        allocation = candidateContract;
     }
 
     /** @dev admin set planterFund contract address
@@ -267,29 +267,31 @@ contract RegularSell is Initializable, RelayRecipient {
             );
 
             (
-                uint16 planterFund,
-                uint16 referralFund,
-                uint16 treeResearch,
-                uint16 localDevelop,
-                uint16 rescueFund,
-                uint16 treejerDevelop,
-                uint16 reserveFund1,
-                uint16 reserveFund2
-            ) = financialModel.findTreeDistribution(tempLastRegularSold);
+                uint16 planterShare,
+                uint16 ambassadorShare,
+                uint16 researchShare,
+                uint16 localDevelopmentShare,
+                uint16 insuranceShare,
+                uint16 treasuryShare,
+                uint16 reserve1Share,
+                uint16 reserve2Share
+            ) = allocation.findTreeDistribution(tempLastRegularSold);
 
-            totalFunds.planterFund += (treePrice * planterFund) / 10000;
-            totalFunds.referralFund += (treePrice * referralFund) / 10000;
-            totalFunds.treeResearch += (treePrice * treeResearch) / 10000;
-            totalFunds.localDevelop += (treePrice * localDevelop) / 10000;
-            totalFunds.rescueFund += (treePrice * rescueFund) / 10000;
-            totalFunds.treejerDevelop += (treePrice * treejerDevelop) / 10000;
-            totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
-            totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
+            totalFunds.planterFund += (treePrice * planterShare) / 10000;
+            totalFunds.referralFund += (treePrice * ambassadorShare) / 10000;
+            totalFunds.treeResearch += (treePrice * researchShare) / 10000;
+            totalFunds.localDevelop +=
+                (treePrice * localDevelopmentShare) /
+                10000;
+            totalFunds.rescueFund += (treePrice * insuranceShare) / 10000;
+            totalFunds.treejerDevelop += (treePrice * treasuryShare) / 10000;
+            totalFunds.reserveFund1 += (treePrice * reserve1Share) / 10000;
+            totalFunds.reserveFund2 += (treePrice * reserve2Share) / 10000;
 
             planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                (treePrice * planterFund) / 10000,
-                (treePrice * referralFund) / 10000
+                (treePrice * planterShare) / 10000,
+                (treePrice * ambassadorShare) / 10000
             );
 
             emit RegularMint(_msgSender(), tempLastRegularSold, treePrice);
@@ -380,27 +382,27 @@ contract RegularSell is Initializable, RelayRecipient {
         treeFactory.mintTreeById(_treeId, _msgSender());
 
         (
-            uint16 planterFund,
-            uint16 referralFund,
-            uint16 treeResearch,
-            uint16 localDevelop,
-            uint16 rescueFund,
-            uint16 treejerDevelop,
-            uint16 reserveFund1,
-            uint16 reserveFund2
-        ) = financialModel.findTreeDistribution(_treeId);
+            uint16 planterShare,
+            uint16 ambassadorShare,
+            uint16 researchShare,
+            uint16 localDevelopmentShare,
+            uint16 insuranceShare,
+            uint16 treasuryShare,
+            uint16 reserve1Share,
+            uint16 reserve2Share
+        ) = allocation.findTreeDistribution(_treeId);
 
         daiFunds.fundTree(
             _treeId,
             treePrice,
-            planterFund,
-            referralFund,
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            planterShare,
+            ambassadorShare,
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
         );
 
         if (_referrer != address(0)) {

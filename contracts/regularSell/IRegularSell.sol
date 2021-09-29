@@ -91,7 +91,7 @@ interface IRegularSell {
     /** @dev admin set financialModel contract address
      * @param _address financialModel contract address
      */
-    function setFinancialModelAddress(address _address) external;
+    function setAllocationAddress(address _address) external;
 
     /** @dev admin set planterFund contract address
      * @param _address planterFund contract address

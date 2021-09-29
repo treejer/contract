@@ -3334,7 +3334,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         fundsPercent.planterFund,
         fundsPercent.referralFund,
         fundsPercent.treeResearch,
@@ -5659,14 +5659,14 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,

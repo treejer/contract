@@ -286,7 +286,7 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await financialModelInstance.addFundDistributionModel(
+  await financialModelInstance.addAllocationData(
     fundsPercent.planterFund,
     fundsPercent.referralFund,
     fundsPercent.treeResearch,

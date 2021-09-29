@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/IFinancialModel.sol";
+import "../treasury/IAllocation.sol";
 import "../treasury/IWethFunds.sol";
 import "../gsn/RelayRecipient.sol";
 import "../regularSell/IRegularSell.sol";
@@ -26,7 +26,7 @@ contract Auction is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IWethFunds public wethFunds;
-    IFinancialModel public financialModel;
+    IAllocation public allocation;
     IERC20Upgradeable public wethToken;
     IRegularSell public regularSell;
 
@@ -127,14 +127,14 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set FinancialModel
-     * @param _address set to the address of financialModel
+     * @dev admin set Allocation
+     * @param _address set to the address of Allocation
      */
 
-    function setFinancialModelAddress(address _address) external onlyAdmin {
-        IFinancialModel candidateContract = IFinancialModel(_address);
-        require(candidateContract.isFinancialModel());
-        financialModel = candidateContract;
+    function setAllocationAddress(address _address) external onlyAdmin {
+        IAllocation candidateContract = IAllocation(_address);
+        require(candidateContract.isAllocation());
+        allocation = candidateContract;
     }
 
     /**
@@ -191,7 +191,7 @@ contract Auction is Initializable, RelayRecipient {
         uint256 _bidInterval
     ) external ifNotPaused onlyDataManager {
         require(
-            financialModel.distributionModelExistance(_treeId),
+            allocation.distributionModelExistance(_treeId),
             "equivalant fund Model not exists"
         );
 
@@ -305,27 +305,27 @@ contract Auction is Initializable, RelayRecipient {
             require(success, "unsuccessful transfer");
 
             (
-                uint16 planterFund,
-                uint16 referralFund,
-                uint16 treeResearch,
-                uint16 localDevelop,
-                uint16 rescueFund,
-                uint16 treejerDevelop,
-                uint16 reserveFund1,
-                uint16 reserveFund2
-            ) = financialModel.findTreeDistribution(auction.treeId);
+                uint16 planterShare,
+                uint16 ambassadorShare,
+                uint16 researchShare,
+                uint16 localDevelopmentShare,
+                uint16 insuranceShare,
+                uint16 treasuryShare,
+                uint16 reserve1Share,
+                uint16 reserve2Share
+            ) = allocation.findTreeDistribution(auction.treeId);
 
             wethFunds.fundTree(
                 auction.treeId,
                 auction.highestBid,
-                planterFund,
-                referralFund,
-                treeResearch,
-                localDevelop,
-                rescueFund,
-                treejerDevelop,
-                reserveFund1,
-                reserveFund2
+                planterShare,
+                ambassadorShare,
+                researchShare,
+                localDevelopmentShare,
+                insuranceShare,
+                treasuryShare,
+                reserve1Share,
+                reserve2Share
             );
 
             treeFactory.mintAssignedTree(auction.treeId, auction.bidder, 2);

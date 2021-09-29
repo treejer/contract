@@ -493,19 +493,9 @@ contract("WethFunds", (accounts) => {
       );
 
       ////--------------add and assign DistributionModel for tree
-      await fModel.addFundDistributionModel(
-        4000,
-        2000,
-        1000,
-        1000,
-        1000,
-        1000,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 2000, 1000, 1000, 1000, 1000, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(0, 10, 0, {
         from: dataManager,
@@ -662,21 +652,11 @@ contract("WethFunds", (accounts) => {
       );
 
       ////--------------add and assign DistributionModel for tree
-      await fModel.addFundDistributionModel(
-        4000,
-        2000,
-        1000,
-        1000,
-        1000,
-        1000,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 2000, 1000, 1000, 1000, 1000, 0, 0, {
+        from: dataManager,
+      });
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         2000,
         1500,
         1200,
@@ -953,7 +933,7 @@ contract("WethFunds", (accounts) => {
     it("fundTree should be fail (invalid access)", async () => {
       let amount = web3.utils.toWei(".531", "Ether");
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         2000,
         1500,
         1200,
@@ -1041,7 +1021,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1365,7 +1345,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1643,7 +1623,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1922,7 +1902,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -2208,7 +2188,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -2487,7 +2467,7 @@ contract("WethFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,

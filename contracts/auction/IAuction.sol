@@ -66,7 +66,7 @@ interface IAuction {
     function setTreeFactoryAddress(address _address) external;
 
     /** @dev set {_address} to FinancialModel contract address */
-    function setFinancialModelAddress(address _address) external;
+    function setAllocationAddress(address _address) external;
 
     /** @dev set {_address} to WethFunds contract address */
     function setWethFundsAddress(address _address) external;

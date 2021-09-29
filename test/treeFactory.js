@@ -2397,8 +2397,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -2603,8 +2603,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -2827,8 +2827,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -3049,8 +3049,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -3259,8 +3259,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -3327,8 +3327,8 @@ contract("TreeFactory", (accounts) => {
       await allocationInstance.addAllocationData(
         fundsPercent.planterFund,
         fundsPercent.referralFund,
-        fundsPercent.treeResearch,
-        fundsPercent.localDevelop,
+        fundsPercent.research,
+        fundsPercent.localDevelopment,
         fundsPercent.rescueFund,
         fundsPercent.treejerDevelop,
         fundsPercent.reserveFund1,
@@ -3384,8 +3384,8 @@ contract("TreeFactory", (accounts) => {
         fundTreeAmount,
         fundsPercent.planterFund,
         fundsPercent.referralFund,
-        fundsPercent.treeResearch,
-        fundsPercent.localDevelop,
+        fundsPercent.research,
+        fundsPercent.localDevelopment,
         fundsPercent.rescueFund,
         fundsPercent.treejerDevelop,
         fundsPercent.reserveFund1,
@@ -3573,7 +3573,7 @@ contract("TreeFactory", (accounts) => {
         "planter balance is not ok"
       );
 
-      //// because there is no refferal , referral share added to totalFunds.localDevelop
+      //// because there is no refferal , referral share added to totalFunds.localDevelopment
       assert.equal(
         Number(totalFunds3.localDevelopment),
         expectedReferralPaid,
@@ -4312,8 +4312,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,
@@ -4413,8 +4413,8 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
+        research: 1000,
+        localDevelopment: 1000,
         rescueFund: 1000,
         treejerDevelop: 1000,
         reserveFund1: 0,

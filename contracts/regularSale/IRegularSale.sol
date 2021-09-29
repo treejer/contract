@@ -57,8 +57,8 @@ interface IRegularSale {
     /** @return PlanterFund contract address */
     function planterFundContract() external view returns (address);
 
-    /** @return WethFunds contract address */
-    function wethFunds() external view returns (address);
+    /** @return WethFund contract address */
+    function wethFund() external view returns (address);
 
     /** @dev admin set trusted forwarder address */
     function setTrustedForwarder(address _address) external;
@@ -95,10 +95,10 @@ interface IRegularSale {
      */
     function setPlanterFundAddress(address _address) external;
 
-    /** @dev admin set wethFunds contract address
-     * @param _address wethFunds contract address
+    /** @dev admin set wethFund contract address
+     * @param _address wethFund contract address
      */
-    function setWethFundsAddress(address _address) external;
+    function setWethFundAddress(address _address) external;
 
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree

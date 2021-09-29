@@ -51,7 +51,7 @@ contract RegularSale is Initializable, RelayRecipient {
     IAllocation public allocation;
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
-    IWethFunds public wethFunds;
+    IWethFunds public wethFund;
 
     event PriceUpdated(uint256 price);
     event TreeFunded(
@@ -212,15 +212,15 @@ contract RegularSale is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
-    /** @dev admin set wethFunds contract address
-     * @param _address wethFunds contract address
+    /** @dev admin set wethFund contract address
+     * @param _address wethFund contract address
      */
-    function setWethFundsAddress(address _address) external onlyAdmin {
+    function setWethFundAddress(address _address) external onlyAdmin {
         IWethFunds candidateContract = IWethFunds(_address);
 
-        require(candidateContract.isWethFunds());
+        require(candidateContract.isWethFund());
 
-        wethFunds = candidateContract;
+        wethFund = candidateContract;
     }
 
     /** @dev admin set the price of trees that are sold regular
@@ -477,7 +477,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
             referrerClaimableTreesWeth[_msgSender()] -= uint256(-x);
 
-            wethFunds.updateDaiSwap(wethAmount);
+            wethFund.updateDaiSwap(wethAmount);
 
             _amount += wethAmount;
         }

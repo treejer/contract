@@ -2913,7 +2913,7 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         Number(totalFunds.localDevelopment),
         totalReferralFund,
-        "localDevelop balance is not ok 1"
+        "localDevelopment balance is not ok 1"
       );
 
       assert.equal(
@@ -2986,7 +2986,7 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         totalReferralFund,
         Number(totalFunds2.localDevelopment),
-        "localDevelop blance is not ok 2"
+        "localDevelopment blance is not ok 2"
       );
 
       const txFee = await Common.getTransactionFee(tx);
@@ -3102,7 +3102,7 @@ contract("PlanterFund", (accounts) => {
       //     Number(accountlocalDevelopBalance2),
       //     Number(web3.utils.toWei("0.3"))
       //   ),
-      //   "localDevelop balance is not ok 3"
+      //   "localDevelopment balance is not ok 3"
       // );
     });
 

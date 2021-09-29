@@ -6,7 +6,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
-const WethFunds = artifacts.require("WethFunds.sol");
+const WethFund = artifacts.require("WethFund.sol");
 const RegularSale = artifacts.require("RegularSale.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
@@ -184,7 +184,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -292,13 +292,13 @@ contract("Auction", (accounts) => {
         "address set incorect"
       );
 
-      ///// ---------------- set wethFunds
+      ///// ---------------- set wethFund
 
-      await auctionInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await auctionInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
       await auctionInstance
-        .setWethFundsAddress(wethFundsInstance.address, {
+        .setWethFundAddress(wethFundsInstance.address, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
@@ -1121,7 +1121,7 @@ contract("Auction", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1190,7 +1190,7 @@ contract("Auction", (accounts) => {
         wethFundsInstance.address,
         deployerAccount
       );
-      await auctionInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await auctionInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 
@@ -1602,8 +1602,8 @@ contract("Auction", (accounts) => {
       let expected = {
         planterFund: Math.divide(Math.mul(40, amount), 100),
         referralFund: Math.divide(Math.mul(12, amount), 100),
-        treeResearch: Math.divide(Math.mul(12, amount), 100),
-        localDevelop: Math.divide(Math.mul(12, amount), 100),
+        research: Math.divide(Math.mul(12, amount), 100),
+        localDevelopment: Math.divide(Math.mul(12, amount), 100),
         rescueFund: Math.divide(Math.mul(12, amount), 100),
         treejerDevelop: Math.divide(Math.mul(12, amount), 100),
         reserveFund1: 0,
@@ -1611,8 +1611,8 @@ contract("Auction", (accounts) => {
       };
 
       const wethFundsShare = Math.add(
-        expected.treeResearch,
-        expected.localDevelop,
+        expected.research,
+        expected.localDevelopment,
         expected.rescueFund,
         expected.treejerDevelop,
         expected.reserveFund1,
@@ -1674,7 +1674,7 @@ contract("Auction", (accounts) => {
       assert.equal(
         Number(await wethInstance.balanceOf(wethFundsInstance.address)),
         wethFundsShare,
-        "1.WethFunds contract balance not true"
+        "1.WethFund contract balance not true"
       );
 
       assert.equal(
@@ -1726,15 +1726,15 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treeResearch),
-        expected.treeResearch,
-        "treeResearch funds invalid"
+        Number(totalFundsWethFunds.research),
+        expected.research,
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelop),
-        expected.localDevelop,
-        "localDevelop funds invalid"
+        Number(totalFundsWethFunds.localDevelopment),
+        expected.localDevelopment,
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
@@ -2066,8 +2066,8 @@ contract("Auction", (accounts) => {
       let expected = {
         planterFund: Math.divide(Math.mul(30, Number(bidAmount2)), 100),
         referralFund: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
-        treeResearch: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
-        localDevelop: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
+        research: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
+        localDevelopment: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
         rescueFund: Math.divide(Math.mul(12, Number(bidAmount2)), 100),
         treejerDevelop: Math.divide(Math.mul(22, Number(bidAmount2)), 100),
         reserveFund1: 0,
@@ -2075,8 +2075,8 @@ contract("Auction", (accounts) => {
       };
 
       const wethFundsShare = Math.add(
-        expected.treeResearch,
-        expected.localDevelop,
+        expected.research,
+        expected.localDevelopment,
         expected.rescueFund,
         expected.treejerDevelop,
         expected.reserveFund1,
@@ -2186,15 +2186,15 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treeResearch),
-        expected.treeResearch,
-        "treeResearch funds invalid"
+        Number(totalFundsWethFunds.research),
+        expected.research,
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelop),
-        expected.localDevelop,
-        "localDevelop funds invalid"
+        Number(totalFundsWethFunds.localDevelopment),
+        expected.localDevelopment,
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
@@ -2666,8 +2666,8 @@ contract("Auction", (accounts) => {
       let expected = {
         planterFund: Math.divide(Math.mul(35, Number(bidAmount2_2)), 100),
         referralFund: Math.divide(Math.mul(10, Number(bidAmount2_2)), 100),
-        treeResearch: Math.divide(Math.mul(10, Number(bidAmount2_2)), 100),
-        localDevelop: Math.divide(Math.mul(15, Number(bidAmount2_2)), 100),
+        research: Math.divide(Math.mul(10, Number(bidAmount2_2)), 100),
+        localDevelopment: Math.divide(Math.mul(15, Number(bidAmount2_2)), 100),
         rescueFund: Math.divide(Math.mul(10, Number(bidAmount2_2)), 100),
         treejerDevelop: Math.divide(Math.mul(20, Number(bidAmount2_2)), 100),
         reserveFund1: 0,
@@ -2675,8 +2675,8 @@ contract("Auction", (accounts) => {
       };
 
       const wethFundsShare = Math.add(
-        expected.treeResearch,
-        expected.localDevelop,
+        expected.research,
+        expected.localDevelopment,
         expected.rescueFund,
         expected.treejerDevelop,
         expected.reserveFund1,
@@ -2768,15 +2768,15 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treeResearch),
-        expected.treeResearch,
-        "treeResearch funds invalid"
+        Number(totalFundsWethFunds.research),
+        expected.research,
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelop),
-        expected.localDevelop,
-        "localDevelop funds invalid"
+        Number(totalFundsWethFunds.localDevelopment),
+        expected.localDevelopment,
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
@@ -3279,14 +3279,14 @@ contract("Auction", (accounts) => {
         "invalid ambassador fund"
       );
       assert.equal(
-        Number(totalFundWethFundBeforeAuction1End.treeResearch),
+        Number(totalFundWethFundBeforeAuction1End.research),
         0,
-        "invalid treeResearch"
+        "invalid research"
       );
       assert.equal(
-        Number(totalFundWethFundBeforeAuction1End.localDevelop),
+        Number(totalFundWethFundBeforeAuction1End.localDevelopment),
         0,
-        "invalid localDevelop"
+        "invalid localDevelopment"
       );
       assert.equal(
         Number(totalFundWethFundBeforeAuction1End.rescueFund),
@@ -3320,8 +3320,11 @@ contract("Auction", (accounts) => {
       const expectedPayValue = {
         planterFund: Math.divide(Math.mul(Number(bidAmount2), 5000), 10000),
         referralFund: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
-        treeResearch: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
-        localDevelop: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
+        research: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
+        localDevelopment: Math.divide(
+          Math.mul(Number(bidAmount2), 1000),
+          10000
+        ),
         rescueFund: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
         treejerDevelop: Math.divide(Math.mul(Number(bidAmount2), 1000), 10000),
         reserveFund1: 0,
@@ -3329,9 +3332,9 @@ contract("Auction", (accounts) => {
       };
 
       const wethFundsShare = Math.add(
-        expectedPayValue.treeResearch,
+        expectedPayValue.research,
         expectedPayValue.treejerDevelop,
-        expectedPayValue.localDevelop,
+        expectedPayValue.localDevelopment,
         expectedPayValue.rescueFund,
         expectedPayValue.reserveFund1,
         expectedPayValue.reserveFund2
@@ -3411,14 +3414,14 @@ contract("Auction", (accounts) => {
         "invalid ambassador fund"
       );
       assert.equal(
-        Number(totalFundWethFundAfterAuction1End.treeResearch),
-        expectedPayValue.treeResearch,
-        "invalid treeResearch"
+        Number(totalFundWethFundAfterAuction1End.research),
+        expectedPayValue.research,
+        "invalid research"
       );
       assert.equal(
-        Number(totalFundWethFundAfterAuction1End.localDevelop),
-        expectedPayValue.localDevelop,
-        "invalid localDevelop"
+        Number(totalFundWethFundAfterAuction1End.localDevelopment),
+        expectedPayValue.localDevelopment,
+        "invalid localDevelopment"
       );
       assert.equal(
         Number(totalFundWethFundAfterAuction1End.rescueFund),
@@ -3556,14 +3559,14 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundWethFundAfterAuction2End.treeResearch),
-        Math.mul(expectedPayValue.treeResearch, 2),
-        "invalid treeResearch"
+        Number(totalFundWethFundAfterAuction2End.research),
+        Math.mul(expectedPayValue.research, 2),
+        "invalid research"
       );
       assert.equal(
-        Number(totalFundWethFundAfterAuction2End.localDevelop),
-        Math.mul(expectedPayValue.localDevelop, 2),
-        "invalid localDevelop"
+        Number(totalFundWethFundAfterAuction2End.localDevelopment),
+        Math.mul(expectedPayValue.localDevelopment, 2),
+        "invalid localDevelopment"
       );
       assert.equal(
         Number(totalFundWethFundAfterAuction2End.rescueFund),

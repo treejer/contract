@@ -4,7 +4,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
 //treasury section
-const WethFunds = artifacts.require("WethFunds.sol");
+const WethFund = artifacts.require("WethFund.sol");
 
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
@@ -1090,7 +1090,7 @@ contract("TreeAttribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      wethFundsInstance = await deployProxy(WethFunds, [arInstance.address], {
+      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1112,7 +1112,7 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSaleInstance.setWethFundsAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
         from: deployerAccount,
       });
 

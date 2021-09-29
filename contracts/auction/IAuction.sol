@@ -19,9 +19,9 @@ interface IAuction {
     function treeFactory() external view returns (address);
 
     /**
-     * @return WethFunds contract address
+     * @return WethFund contract address
      */
-    function wethFunds() external view returns (address);
+    function wethFund() external view returns (address);
 
     /**
      * @return Allocation contract address
@@ -68,8 +68,8 @@ interface IAuction {
     /** @dev set {_address} to Allocation contract address */
     function setAllocationAddress(address _address) external;
 
-    /** @dev set {_address} to WethFunds contract address */
-    function setWethFundsAddress(address _address) external;
+    /** @dev set {_address} to WethFund contract address */
+    function setWethFundAddress(address _address) external;
 
     /** @dev set {_address} to RegularSale contract address */
     function setRegularSaleAddress(address _address) external;

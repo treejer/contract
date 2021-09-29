@@ -9,11 +9,11 @@ import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
 import "./interfaces/IUniswapV2Router02New.sol";
 
-/** @title WethFunds Contract */
+/** @title WethFund Contract */
 
-contract WethFunds is Initializable {
-    /** NOTE {isWethFunds} set inside the initialize to {true} */
-    bool public isWethFunds;
+contract WethFund is Initializable {
+    /** NOTE {isWethFund} set inside the initialize to {true} */
+    bool public isWethFund;
 
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
@@ -24,13 +24,13 @@ contract WethFunds is Initializable {
     address public daiAddress;
 
     //TODO:ADD_COMMENT
-    uint256 public totalDaiToPlanterSwap;
+    uint256 public totalDaiDebtToPlanterContract;
 
-    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
+    /** NOTE {totalBalances} is struct of TotalFund that keep total share of
      * treeResearch, localDevelop,rescueFund,treejerDeveop,reserveFund1
      * and reserveFund2
      */
-    TotalFunds public totalFunds;
+    TotalBalances public totalBalances;
 
     address public treeResearchAddress;
     address public localDevelopAddress;
@@ -39,13 +39,13 @@ contract WethFunds is Initializable {
     address public reserveFundAddress1;
     address public reserveFundAddress2;
 
-    struct TotalFunds {
-        uint256 treeResearch;
-        uint256 localDevelop;
-        uint256 rescueFund;
-        uint256 treejerDevelop;
-        uint256 reserveFund1;
-        uint256 reserveFund2;
+    struct TotalBalances {
+        uint256 research;
+        uint256 localDevelopment;
+        uint256 insurance;
+        uint256 treasury;
+        uint256 reserve1;
+        uint256 reserve2;
     }
 
     event TreeResearchBalanceWithdrawn(
@@ -119,7 +119,7 @@ contract WethFunds is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isWethFunds
+     * @dev initialize accessRestriction contract and set true for isWethFund
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
@@ -132,7 +132,7 @@ contract WethFunds is Initializable {
 
         require(candidateContract.isAccessRestriction());
 
-        isWethFunds = true;
+        isWethFund = true;
         accessRestriction = candidateContract;
     }
 
@@ -268,7 +268,7 @@ contract WethFunds is Initializable {
      * @dev fund a tree by IncrementalSale or Auction contract and based on distribution
      * model of tree, shares divide beetwen (planter, referral, treeResearch,
      * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
-     * and added to the totalFunds of each part,
+     * and added to the totalBalances of each part,
      * @param _treeId id of a tree to fund
      * NOTE planterFund and referralFund share first swap to daiToken and then
      * transfer to PlanterFund contract and add to totalFund section there
@@ -285,17 +285,17 @@ contract WethFunds is Initializable {
         uint16 _reserveFund1,
         uint16 _reserveFund2
     ) external onlyTreejerContract {
-        totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
+        totalBalances.research += (_amount * _treeResearch) / 10000;
 
-        totalFunds.localDevelop += (_amount * _localDevelop) / 10000;
+        totalBalances.localDevelopment += (_amount * _localDevelop) / 10000;
 
-        totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
+        totalBalances.insurance += (_amount * _rescueFund) / 10000;
 
-        totalFunds.treejerDevelop += (_amount * _treejerDevelop) / 10000;
+        totalBalances.treasury += (_amount * _treejerDevelop) / 10000;
 
-        totalFunds.reserveFund1 += (_amount * _reserveFund1) / 10000;
+        totalBalances.reserve1 += (_amount * _reserveFund1) / 10000;
 
-        totalFunds.reserveFund2 += (_amount * _reserveFund2) / 10000;
+        totalBalances.reserve2 += (_amount * _reserveFund2) / 10000;
 
         _swap(_treeId, _amount, _planterFund, _referralFund);
     }
@@ -313,11 +313,11 @@ contract WethFunds is Initializable {
         validAddress(treeResearchAddress)
     {
         require(
-            _amount <= totalFunds.treeResearch && _amount > 0,
+            _amount <= totalBalances.research && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.treeResearch -= _amount;
+        totalBalances.research -= _amount;
 
         bool success = wethToken.transfer(treeResearchAddress, _amount);
 
@@ -343,11 +343,11 @@ contract WethFunds is Initializable {
         validAddress(localDevelopAddress)
     {
         require(
-            _amount <= totalFunds.localDevelop && _amount > 0,
+            _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.localDevelop -= _amount;
+        totalBalances.localDevelopment -= _amount;
 
         bool success = wethToken.transfer(localDevelopAddress, _amount);
 
@@ -373,11 +373,11 @@ contract WethFunds is Initializable {
         validAddress(rescueFundAddress)
     {
         require(
-            _amount <= totalFunds.rescueFund && _amount > 0,
+            _amount <= totalBalances.insurance && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.rescueFund -= _amount;
+        totalBalances.insurance -= _amount;
 
         bool success = wethToken.transfer(rescueFundAddress, _amount);
 
@@ -399,11 +399,11 @@ contract WethFunds is Initializable {
         validAddress(treejerDevelopAddress)
     {
         require(
-            _amount <= totalFunds.treejerDevelop && _amount > 0,
+            _amount <= totalBalances.treasury && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.treejerDevelop -= _amount;
+        totalBalances.treasury -= _amount;
 
         bool success = wethToken.transfer(treejerDevelopAddress, _amount);
 
@@ -429,11 +429,11 @@ contract WethFunds is Initializable {
         validAddress(reserveFundAddress1)
     {
         require(
-            _amount <= totalFunds.reserveFund1 && _amount > 0,
+            _amount <= totalBalances.reserve1 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.reserveFund1 -= _amount;
+        totalBalances.reserve1 -= _amount;
 
         bool success = wethToken.transfer(reserveFundAddress1, _amount);
 
@@ -455,11 +455,11 @@ contract WethFunds is Initializable {
         validAddress(reserveFundAddress2)
     {
         require(
-            _amount <= totalFunds.reserveFund2 && _amount > 0,
+            _amount <= totalBalances.reserve2 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.reserveFund2 -= _amount;
+        totalBalances.reserve2 -= _amount;
 
         bool success = wethToken.transfer(reserveFundAddress2, _amount);
 
@@ -478,17 +478,17 @@ contract WethFunds is Initializable {
         uint256 _totalReserveFund1,
         uint256 _totalReserveFund2
     ) external onlyTreejerContract returns (uint256) {
-        totalFunds.treeResearch += _totalTreeResearch;
+        totalBalances.research += _totalTreeResearch;
 
-        totalFunds.localDevelop += _totalLocalDevelop;
+        totalBalances.localDevelopment += _totalLocalDevelop;
 
-        totalFunds.rescueFund += _totalRescueFund;
+        totalBalances.insurance += _totalRescueFund;
 
-        totalFunds.treejerDevelop += _totalTreejerDevelop;
+        totalBalances.treasury += _totalTreejerDevelop;
 
-        totalFunds.reserveFund1 += _totalReserveFund1;
+        totalBalances.reserve1 += _totalReserveFund1;
 
-        totalFunds.reserveFund2 += _totalReserveFund2;
+        totalBalances.reserve2 += _totalReserveFund2;
 
         uint256 sumFund = _totalPlanterFund + _totalReferralFund;
 
@@ -504,14 +504,11 @@ contract WethFunds is Initializable {
         external
         onlyScript
     {
-        require(
-            _wethMaxUse <= totalFunds.treejerDevelop,
-            "Liquidity not enough"
-        );
+        require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
 
         require(
-            _totalDaiSwap > 0 && _totalDaiSwap <= totalDaiToPlanterSwap,
-            "totalDaiToPlanterSwap invalid"
+            _totalDaiSwap > 0 && _totalDaiSwap <= totalDaiDebtToPlanterContract,
+            "totalDaiDebtToPlanterContract invalid"
         );
 
         address[] memory path;
@@ -534,13 +531,13 @@ contract WethFunds is Initializable {
 
         emit SwapToPlanterFund(_wethMaxUse, _totalDaiSwap, amounts[0]);
 
-        totalDaiToPlanterSwap -= _totalDaiSwap;
-        totalFunds.treejerDevelop -= amounts[0];
+        totalDaiDebtToPlanterContract -= _totalDaiSwap;
+        totalBalances.treasury -= amounts[0];
     }
 
     //TODO: ADD_COMMENT
     function updateDaiSwap(uint256 _amount) external onlyTreejerContract {
-        totalDaiToPlanterSwap += _amount;
+        totalDaiDebtToPlanterContract += _amount;
     }
 
     /** @dev private function to swap {_amount} wethToken to daiToken

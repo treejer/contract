@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.6;
 
-/** @title WethFunds interfce */
+/** @title WethFund interfce */
 interface IWethFunds {
     /**
-     * @return true in case of WethFunds contract have been initialized
+     * @return true in case of WethFund contract have been initialized
      */
-    function isWethFunds() external view returns (bool);
+    function isWethFund() external view returns (bool);
 
     /**
      * @return AccessRestriction contract address
@@ -35,7 +35,7 @@ interface IWethFunds {
     function daiAddress() external view returns (address);
 
     //TODO:ADD_COMMENT
-    function totalDaiToPlanterSwap() external view returns (uint256);
+    function totalDaiDebtToPlanterContract() external view returns (uint256);
 
     /**
      * @dev return totalFunds struct data

@@ -25,7 +25,7 @@ contract Auction is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    IWethFunds public wethFunds;
+    IWethFunds public wethFund;
     IAllocation public allocation;
     IERC20Upgradeable public wethToken;
     IRegularSale public regularSale;
@@ -138,14 +138,14 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set WethFunds
-     * @param _address set to the address of wethFunds
+     * @dev admin set WethFund
+     * @param _address set to the address of wethFund
      */
 
-    function setWethFundsAddress(address _address) external onlyAdmin {
+    function setWethFundAddress(address _address) external onlyAdmin {
         IWethFunds candidateContract = IWethFunds(_address);
-        require(candidateContract.isWethFunds());
-        wethFunds = candidateContract;
+        require(candidateContract.isWethFund());
+        wethFund = candidateContract;
     }
 
     /**
@@ -295,7 +295,7 @@ contract Auction is Initializable, RelayRecipient {
 
         if (auction.bidder != address(0)) {
             bool success = wethToken.transfer(
-                address(wethFunds),
+                address(wethFund),
                 auction.highestBid
             );
 
@@ -312,7 +312,7 @@ contract Auction is Initializable, RelayRecipient {
                 uint16 reserve2Share
             ) = allocation.findAllocationData(auction.treeId);
 
-            wethFunds.fundTree(
+            wethFund.fundTree(
                 auction.treeId,
                 auction.highestBid,
                 planterShare,

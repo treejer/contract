@@ -299,7 +299,7 @@ Common.successFundTree = async (
       from: dataManager,
     }
   );
-  await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  await allocationInstance.assignAllocationToTree(0, 10, 0, {
     from: dataManager,
   });
 

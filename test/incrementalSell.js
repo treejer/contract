@@ -455,7 +455,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(110, 10000, 1, {
+      await fModel.assignAllocationToTree(110, 10000, 1, {
         from: dataManager,
       });
 
@@ -501,7 +501,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 1, {
+      await fModel.assignAllocationToTree(100, 10000, 1, {
         from: dataManager,
       });
 
@@ -547,7 +547,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -686,7 +686,7 @@ contract("IncrementalSale", (accounts) => {
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -934,7 +934,7 @@ contract("IncrementalSale", (accounts) => {
 
     ///////////// --------------------------------- updateEndTreeId --------------------------------
     it("Should updateEndTreeId succesfully", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1103,7 +1103,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1333,7 +1333,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount timeout", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2020,7 +2020,7 @@ contract("IncrementalSale", (accounts) => {
     ////----------------------------------------------------test updateIncrementalSaleData------------------------------
 
     it("updateIncrementalSaleData should be work successfully", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2230,7 +2230,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2293,7 +2293,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("low price paid for the tree without discount", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
       await iSellInstance.createIncrementalSale(
@@ -2330,7 +2330,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree work successfully(1 tree => 1 step)", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2386,7 +2386,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_COUNT)", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2442,7 +2442,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_TREE)", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2494,7 +2494,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount usage", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2583,7 +2583,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2660,7 +2660,7 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2755,7 +2755,7 @@ contract("IncrementalSale", (accounts) => {
 
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
-      await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
+      await fModel.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 

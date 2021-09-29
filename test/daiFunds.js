@@ -370,7 +370,7 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -579,11 +579,11 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(11, 20, 1, {
+      await fModel.assignAllocationToTree(11, 20, 1, {
         from: dataManager,
       });
 
@@ -832,7 +832,7 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1191,7 +1191,7 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1439,7 +1439,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1677,7 +1677,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1916,7 +1916,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2155,7 +2155,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2399,7 +2399,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2639,7 +2639,7 @@ contract("DaiFunds", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignTreeFundDistributionModel(0, 10, 0, {
+      await fModel.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 

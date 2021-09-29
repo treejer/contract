@@ -781,7 +781,7 @@ contract("regularSell", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(1, 1000000, 0, {
+      await fModel.assignAllocationToTree(1, 1000000, 0, {
         from: dataManager,
       });
 
@@ -962,7 +962,7 @@ contract("regularSell", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
+      await fModel.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -1253,7 +1253,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
+      await fModel.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -1532,7 +1532,7 @@ contract("regularSell", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(10001, 10003, 0, {
+      await fModel.assignAllocationToTree(10001, 10003, 0, {
         from: dataManager,
       });
 
@@ -1923,7 +1923,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
+      await fModel.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -2105,7 +2105,7 @@ contract("regularSell", (accounts) => {
         from: dataManager,
       });
 
-      await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
+      await fModel.assignAllocationToTree(1, 100000, 0, {
         from: dataManager,
       });
 
@@ -2325,7 +2325,7 @@ contract("regularSell", (accounts) => {
         reserveFund2: Math.divide(Math.mul(5, transferTreePrice), 100),
       };
 
-      await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
+      await fModel.assignAllocationToTree(1, 100000, 0, {
         from: dataManager,
       });
 

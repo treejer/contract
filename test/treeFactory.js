@@ -3328,7 +3328,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -5651,7 +5651,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 100000, 0, {
+      await allocationInstance.assignAllocationToTree(0, 100000, 0, {
         from: dataManager,
       });
 

@@ -419,7 +419,7 @@ contract("Auction", (accounts) => {
         )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -514,7 +514,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -773,7 +773,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1074,7 +1074,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1297,7 +1297,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1491,7 +1491,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1931,7 +1931,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2370,7 +2370,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 0, 0, {
+      await allocationInstance.assignAllocationToTree(0, 0, 0, {
         from: dataManager,
       });
 
@@ -3089,7 +3089,7 @@ contract("Auction", (accounts) => {
         { from: dataManager }
       );
 
-      await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 

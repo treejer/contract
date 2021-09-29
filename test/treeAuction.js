@@ -1694,7 +1694,7 @@ contract("Auction", (accounts) => {
         "winner referral is not correct"
       );
 
-      const giftCount = await regularSellInstance.genesisReferrerGifts.call(
+      const giftCount = await regularSellInstance.referrerClaimableTreesWeth.call(
         winnerReferral
       );
 
@@ -2158,10 +2158,10 @@ contract("Auction", (accounts) => {
       assert.equal(winnerReferral, refferal2, "winner referral is not correct");
 
       const giftCountWinner =
-        await regularSellInstance.genesisReferrerGifts.call(winnerReferral);
+        await regularSellInstance.referrerClaimableTreesWeth.call(winnerReferral);
 
       const giftCountRefferal1 =
-        await regularSellInstance.genesisReferrerGifts.call(refferal1);
+        await regularSellInstance.referrerClaimableTreesWeth.call(refferal1);
 
       assert.equal(
         Number(giftCountWinner),
@@ -3433,12 +3433,12 @@ contract("Auction", (accounts) => {
       );
 
       const winnerGiftCount1 =
-        await regularSellInstance.genesisReferrerGifts.call(winnerRefferer1);
+        await regularSellInstance.referrerClaimableTreesWeth.call(winnerRefferer1);
 
       assert.equal(Number(winnerGiftCount1), 1, "winner gift count is not ok");
 
       const otherReffereGiftCount1 =
-        await regularSellInstance.genesisReferrerGifts.call(otherRefferer);
+        await regularSellInstance.referrerClaimableTreesWeth.call(otherRefferer);
       assert.equal(
         Number(otherReffereGiftCount1),
         0,
@@ -3562,11 +3562,11 @@ contract("Auction", (accounts) => {
       );
 
       const winnerGiftCount2 =
-        await regularSellInstance.genesisReferrerGifts.call(winnerRefferer2);
+        await regularSellInstance.referrerClaimableTreesWeth.call(winnerRefferer2);
       assert.equal(Number(winnerGiftCount2), 2, "winner gift count is not ok");
 
       const otherReffereGiftCount2 =
-        await regularSellInstance.genesisReferrerGifts.call(otherRefferer);
+        await regularSellInstance.referrerClaimableTreesWeth.call(otherRefferer);
       assert.equal(
         Number(otherReffereGiftCount2),
         0,

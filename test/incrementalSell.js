@@ -1883,9 +1883,8 @@ contract("IncrementalSale", (accounts) => {
 
       ////--------------------check referral---------------------
 
-      let referralCount = await regularSellInstance.genesisReferrerGifts.call(
-        userAccount6
-      );
+      let referralCount =
+        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount6);
 
       assert.equal(Number(referralCount), 20, "Referral not true");
 
@@ -1954,9 +1953,8 @@ contract("IncrementalSale", (accounts) => {
 
       ////--------------------check referral---------------------
 
-      let referralCount2 = await regularSellInstance.genesisReferrerGifts.call(
-        userAccount6
-      );
+      let referralCount2 =
+        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount6);
 
       assert.equal(Number(referralCount2), 35, "Referral not true");
 
@@ -1991,9 +1989,8 @@ contract("IncrementalSale", (accounts) => {
 
       ////--------------------check referral---------------------
 
-      let referralCount3 = await regularSellInstance.genesisReferrerGifts.call(
-        zeroAddress
-      );
+      let referralCount3 =
+        await regularSellInstance.referrerClaimableTreesWeth.call(zeroAddress);
 
       assert.equal(Number(referralCount3), 0, "3-Referral not true");
 
@@ -2031,9 +2028,8 @@ contract("IncrementalSale", (accounts) => {
 
       ////--------------------check referral---------------------
 
-      let referralCount4 = await regularSellInstance.genesisReferrerGifts.call(
-        userAccount5
-      );
+      let referralCount4 =
+        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount5);
 
       assert.equal(Number(referralCount4), 34, "4-Referral not true");
 
@@ -2340,7 +2336,9 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(
-          await regularSellInstance.genesisReferrerGifts.call(userAccount3)
+          await regularSellInstance.referrerClaimableTreesWeth.call(
+            userAccount3
+          )
         ),
         20,
         "Referral not true"
@@ -2348,7 +2346,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(
-          await regularSellInstance.genesisReferrerGifts.call(zeroAddress)
+          await regularSellInstance.referrerClaimableTreesWeth.call(zeroAddress)
         ),
         0,
         "2-Referral not true"

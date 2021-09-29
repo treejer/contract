@@ -13,24 +13,25 @@ import "../treasury/IWethFunds.sol";
 
 /** @title RegularSell contract */
 contract RegularSell is Initializable, RelayRecipient {
-    uint256 public lastSoldRegularTree;
-    uint256 public treePrice;
+    uint256 public lastFundedTreeId;
+    uint256 public price;
 
     /** NOTE {isRegularSell} set inside the initialize to {true} */
     bool public isRegularSell;
 
     /** NOTE regular planter fund amount */
-    uint256 public regularPlanterFund;
+    uint256 public referralTreePaymentToPlanter;
 
     /** NOTE regular referral fund amount */
-    uint256 public regularReferralFund;
+    uint256 public referralTreePaymentToAmbassador;
 
     //TODO: ADD_COMMENT
-    uint256 public perRegularBuys;
+    uint256 public referralTriggerCount;
 
-    mapping(address => uint256) public genesisReferrerGifts;
-    mapping(address => uint256) public regularReferrerGifts;
-    mapping(address => uint256) public referrerRegularCount;
+    mapping(address => uint256) public referrerClaimableTreesWeth;
+    mapping(address => uint256) public referrerClaimableTreesDai;
+
+    mapping(address => uint256) public referrerCount;
 
     struct FundDistribution {
         uint256 planterFund;
@@ -51,25 +52,25 @@ contract RegularSell is Initializable, RelayRecipient {
     IPlanterFund public planterFundContract;
     IWethFunds public wethFunds;
 
-    event TreePriceUpdated(uint256 price);
-    event RegularTreeRequsted(
+    event PriceUpdated(uint256 price);
+    event TreeFunded(
         address buyer,
         address referrer,
         uint256 count,
         uint256 amount
     );
-    event RegularMint(address buyer, uint256 treeId, uint256 treePrice);
-    event RegularTreeRequstedById(
+    event RegularMint(address buyer, uint256 treeId, uint256 price);
+    event TreeFundedById(
         address buyer,
         address referrer,
         uint256 treeId,
         uint256 amount
     );
-    event LastSoldRegularTreeUpdated(uint256 lastSoldRegularTree);
-    event GiftPerRegularBuyUpdated(uint256 count);
-    event RegularPlanterFundSet(
-        uint256 regularPlanterFund,
-        uint256 regularReferralFund
+    event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
+    event ReferralTriggerCountUpdated(uint256 count);
+    event ReferralTreePaymentsUpdated(
+        uint256 referralTreePaymentToPlanter,
+        uint256 referralTreePaymentToAmbassador
     );
 
     event ReferrGiftClaimed(address referrer, uint256 count, uint256 amount);
@@ -100,7 +101,7 @@ contract RegularSell is Initializable, RelayRecipient {
 
     /**
      * @dev initialize accessRestriction contract and set true for isRegularSell
-     * set {_price} to tree price and set 10000 to lastSoldRegularTree
+     * set {_price} to tree price and set 10000 to lastFundedTreeId
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      * @param _price initial tree price
      */
@@ -115,13 +116,13 @@ contract RegularSell is Initializable, RelayRecipient {
         accessRestriction = candidateContract;
 
         isRegularSell = true;
-        lastSoldRegularTree = 10000;
+        lastFundedTreeId = 10000;
 
-        perRegularBuys = 20;
-        treePrice = _price;
+        referralTriggerCount = 20;
+        price = _price;
 
-        emit GiftPerRegularBuyUpdated(20);
-        emit TreePriceUpdated(_price);
+        emit ReferralTriggerCountUpdated(20);
+        emit PriceUpdated(_price);
     }
 
     /**
@@ -136,19 +137,19 @@ contract RegularSell is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
-    /** @dev data manager can update lastSoldRegularTree */
-    function setLastSoldRegularTree(uint256 _lastSoldRegularTree)
+    /** @dev data manager can update lastFundedTreeId */
+    function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
         onlyDataManager
     {
         require(
-            _lastSoldRegularTree > lastSoldRegularTree,
+            _lastFundedTreeId > lastFundedTreeId,
             "Input must be gt last tree sold"
         );
 
-        lastSoldRegularTree = _lastSoldRegularTree;
+        lastFundedTreeId = _lastFundedTreeId;
 
-        emit LastSoldRegularTreeUpdated(_lastSoldRegularTree);
+        emit LastFundedTreeIdUpdated(_lastFundedTreeId);
     }
 
     /** @dev admin set treeFactory contract address
@@ -220,26 +221,29 @@ contract RegularSell is Initializable, RelayRecipient {
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      */
-    function setPrice(uint256 _price) external onlyDataManager {
-        treePrice = _price;
-        emit TreePriceUpdated(_price);
+    function updatePrice(uint256 _price) external onlyDataManager {
+        price = _price;
+        emit PriceUpdated(_price);
     }
 
     //TODO: ADD_COMMENT
-    function setGiftPerRegularBuys(uint256 _count) external onlyDataManager {
-        perRegularBuys = _count;
-        emit GiftPerRegularBuyUpdated(_count);
+    function updateReferralTriggerCount(uint256 _count)
+        external
+        onlyDataManager
+    {
+        referralTriggerCount = _count;
+        emit ReferralTriggerCountUpdated(_count);
     }
 
     /** @dev request {_count} trees and the paid amount must be more than
-     * {_count * treePrice }
+     * {_count * price }
      * @param _count is the number of trees requested by user
      * @param _referrer is address of refferer
      */
-    function requestTrees(uint256 _count, address _referrer) external {
+    function fundTree(uint256 _count, address _referrer) external {
         require(_count > 0 && _count < 101, "invalid count");
 
-        uint256 totalPrice = treePrice * _count;
+        uint256 totalPrice = price * _count;
 
         require(
             daiToken.balanceOf(_msgSender()) >= totalPrice,
@@ -254,9 +258,9 @@ contract RegularSell is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        emit RegularTreeRequsted(_msgSender(), _referrer, _count, totalPrice);
+        emit TreeFunded(_msgSender(), _referrer, _count, totalPrice);
 
-        uint256 tempLastRegularSold = lastSoldRegularTree;
+        uint256 tempLastRegularSold = lastFundedTreeId;
 
         FundDistribution memory totalFunds;
 
@@ -277,22 +281,22 @@ contract RegularSell is Initializable, RelayRecipient {
                 uint16 reserveFund2
             ) = financialModel.findTreeDistribution(tempLastRegularSold);
 
-            totalFunds.planterFund += (treePrice * planterFund) / 10000;
-            totalFunds.referralFund += (treePrice * referralFund) / 10000;
-            totalFunds.treeResearch += (treePrice * treeResearch) / 10000;
-            totalFunds.localDevelop += (treePrice * localDevelop) / 10000;
-            totalFunds.rescueFund += (treePrice * rescueFund) / 10000;
-            totalFunds.treejerDevelop += (treePrice * treejerDevelop) / 10000;
-            totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
-            totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
+            totalFunds.planterFund += (price * planterFund) / 10000;
+            totalFunds.referralFund += (price * referralFund) / 10000;
+            totalFunds.treeResearch += (price * treeResearch) / 10000;
+            totalFunds.localDevelop += (price * localDevelop) / 10000;
+            totalFunds.rescueFund += (price * rescueFund) / 10000;
+            totalFunds.treejerDevelop += (price * treejerDevelop) / 10000;
+            totalFunds.reserveFund1 += (price * reserveFund1) / 10000;
+            totalFunds.reserveFund2 += (price * reserveFund2) / 10000;
 
             planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                (treePrice * planterFund) / 10000,
-                (treePrice * referralFund) / 10000
+                (price * planterFund) / 10000,
+                (price * referralFund) / 10000
             );
 
-            emit RegularMint(_msgSender(), tempLastRegularSold, treePrice);
+            emit RegularMint(_msgSender(), tempLastRegularSold, price);
         }
 
         daiFunds.regularFund(
@@ -306,7 +310,7 @@ contract RegularSell is Initializable, RelayRecipient {
             totalFunds.reserveFund2
         );
 
-        lastSoldRegularTree = tempLastRegularSold;
+        lastFundedTreeId = tempLastRegularSold;
 
         if (_referrer != address(0)) {
             _funcReferrer(_referrer, _count);
@@ -314,21 +318,20 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     function _funcReferrer(address _referrer, uint256 _count) private {
-        uint256 localReferrerRegularCount = referrerRegularCount[_referrer] +
-            _count;
+        uint256 localReferrerCount = referrerCount[_referrer] + _count;
 
-        if (localReferrerRegularCount >= perRegularBuys) {
-            uint256 temp = localReferrerRegularCount / perRegularBuys;
-            localReferrerRegularCount -= temp * perRegularBuys;
-            regularReferrerGifts[_referrer] += temp;
+        if (localReferrerCount >= referralTriggerCount) {
+            uint256 temp = localReferrerCount / referralTriggerCount;
+            localReferrerCount -= temp * referralTriggerCount;
+            referrerClaimableTreesDai[_referrer] += temp;
         }
 
-        referrerRegularCount[_referrer] = localReferrerRegularCount;
+        referrerCount[_referrer] = localReferrerCount;
     }
 
     //TODO: ADD_COMMENT
     function _mintReferralTree(uint256 _count, address _referrer) private {
-        uint256 tempLastRegularSold = lastSoldRegularTree;
+        uint256 tempLastRegularSold = lastFundedTreeId;
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintTree(
@@ -338,44 +341,36 @@ contract RegularSell is Initializable, RelayRecipient {
 
             planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                regularPlanterFund,
-                regularReferralFund
+                referralTreePaymentToPlanter,
+                referralTreePaymentToAmbassador
             );
 
-            emit RegularMint(_referrer, tempLastRegularSold, treePrice);
+            emit RegularMint(_referrer, tempLastRegularSold, price);
         }
 
-        lastSoldRegularTree = tempLastRegularSold;
+        lastFundedTreeId = tempLastRegularSold;
     }
 
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
-     * {treePrice} and the {_treeId} must be more than {lastSoldRegularTree} to
+     * {price} and the {_treeId} must be more than {lastFundedTreeId} to
      * make sure that has not been sold before
      * @param _treeId is the id of tree requested by user
      * @param _referrer is address of referrer
      */
     function requestByTreeId(uint256 _treeId, address _referrer) external {
-        require(_treeId > lastSoldRegularTree, "invalid tree");
+        require(_treeId > lastFundedTreeId, "invalid tree");
 
-        require(
-            daiToken.balanceOf(_msgSender()) >= treePrice,
-            "invalid amount"
-        );
+        require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
 
         bool success = daiToken.transferFrom(
             _msgSender(),
             address(daiFunds),
-            treePrice
+            price
         );
 
         require(success, "unsuccessful transfer");
 
-        emit RegularTreeRequstedById(
-            _msgSender(),
-            _referrer,
-            _treeId,
-            treePrice
-        );
+        emit TreeFundedById(_msgSender(), _referrer, _treeId, price);
 
         treeFactory.mintTreeById(_treeId, _msgSender());
 
@@ -392,7 +387,7 @@ contract RegularSell is Initializable, RelayRecipient {
 
         daiFunds.fundTree(
             _treeId,
-            treePrice,
+            price,
             planterFund,
             referralFund,
             treeResearch,
@@ -409,14 +404,17 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
-    function setRegularPlanterFund(
-        uint256 _regularPlanterFund,
-        uint256 _regularReferralFund
+    function updateReferralTreePayments(
+        uint256 _referralTreePaymentToPlanter,
+        uint256 _referralTreePaymentToAmbassador
     ) external onlyDataManager {
-        regularPlanterFund = _regularPlanterFund;
-        regularReferralFund = _regularReferralFund;
+        referralTreePaymentToPlanter = _referralTreePaymentToPlanter;
+        referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
 
-        emit RegularPlanterFundSet(_regularPlanterFund, _regularReferralFund);
+        emit ReferralTreePaymentsUpdated(
+            _referralTreePaymentToPlanter,
+            _referralTreePaymentToAmbassador
+        );
     }
 
     //TODO: ADD_COMMENT
@@ -424,13 +422,13 @@ contract RegularSell is Initializable, RelayRecipient {
         external
         onlyTreejerContract
     {
-        genesisReferrerGifts[_referrer] += _count;
+        referrerClaimableTreesWeth[_referrer] += _count;
     }
 
     //TODO: ADD_COMMENT
     function claimGifts() external {
-        uint256 _count = regularReferrerGifts[_msgSender()] +
-            genesisReferrerGifts[_msgSender()];
+        uint256 _count = referrerClaimableTreesDai[_msgSender()] +
+            referrerClaimableTreesWeth[_msgSender()];
 
         require(_count > 0, "invalid gift owner");
 
@@ -438,31 +436,37 @@ contract RegularSell is Initializable, RelayRecipient {
             _count = 45;
         }
 
-        int256 x = int256(regularReferrerGifts[_msgSender()]) - int256(_count);
+        int256 x = int256(referrerClaimableTreesDai[_msgSender()]) -
+            int256(_count);
 
         uint256 _amount = 0;
 
         if (x > -1) {
-            _amount = _count * (regularPlanterFund + regularReferralFund);
+            _amount =
+                _count *
+                (referralTreePaymentToPlanter +
+                    referralTreePaymentToAmbassador);
 
-            regularReferrerGifts[_msgSender()] -= _count;
+            referrerClaimableTreesDai[_msgSender()] -= _count;
 
             daiFunds.refererTransferDai(_amount);
         } else {
-            if (regularReferrerGifts[_msgSender()] > 0) {
+            if (referrerClaimableTreesDai[_msgSender()] > 0) {
                 _amount =
-                    regularReferrerGifts[_msgSender()] *
-                    (regularPlanterFund + regularReferralFund);
+                    referrerClaimableTreesDai[_msgSender()] *
+                    (referralTreePaymentToPlanter +
+                        referralTreePaymentToAmbassador);
 
-                regularReferrerGifts[_msgSender()] = 0;
+                referrerClaimableTreesDai[_msgSender()] = 0;
 
                 daiFunds.refererTransferDai(_amount);
             }
 
             uint256 wethAmount = uint256(-x) *
-                (regularPlanterFund + regularReferralFund);
+                (referralTreePaymentToPlanter +
+                    referralTreePaymentToAmbassador);
 
-            genesisReferrerGifts[_msgSender()] -= uint256(-x);
+            referrerClaimableTreesWeth[_msgSender()] -= uint256(-x);
 
             wethFunds.updateDaiSwap(wethAmount);
 

@@ -7,6 +7,6 @@ contract TestRegularSell is RegularSell {
     function updateRegularReferrerGift(address _referrer, uint256 _count)
         external
     {
-        regularReferrerGifts[_referrer] += _count;
+        referrerClaimableTreesDai[_referrer] += _count;
     }
 }

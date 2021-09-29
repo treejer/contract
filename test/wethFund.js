@@ -589,31 +589,32 @@ contract("WethFunds", (accounts) => {
 
       ////--------------------------check fund planter
 
-      let totalFund = await planterFundsInstnce.totalFunds.call();
+      let totalFund = await planterFundsInstnce.totalBalances.call();
 
-      let planterFunds = await planterFundsInstnce.planterFunds.call(1);
-      let referralFunds = await planterFundsInstnce.referralFunds.call(1);
+      let = await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
+      let treeToReferrerProjectedEarnings =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(1);
 
       assert.equal(
-        Number(totalFund.planterFund),
+        Number(totalFund.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
-        "totalFund planterFund funds invalid"
+        "totalFund planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFund.referralFund),
+        Number(totalFund.ambassador),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
-        "totalFund referralFund funds invalid"
+        "totalFund ambassador funds invalid"
       );
 
       assert.equal(
-        Number(planterFunds),
+        Number(treeToPlanterProjectedEarnings),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
         "planterFund funds invalid"
       );
 
       assert.equal(
-        Number(referralFunds),
+        Number(treeToReferrerProjectedEarnings),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
         "referralFund funds invalid"
       );
@@ -756,31 +757,33 @@ contract("WethFunds", (accounts) => {
 
       ////--------------------------check fund planter
 
-      let totalFund = await planterFundsInstnce.totalFunds.call();
+      let totalFund = await planterFundsInstnce.totalBalances.call();
 
-      let planterFunds = await planterFundsInstnce.planterFunds.call(0);
-      let referralFunds = await planterFundsInstnce.referralFunds.call(0);
+      let treeToPlanterProjectedEarnings =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(0);
+      let treeToReferrerProjectedEarnings =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(0);
 
       assert.equal(
-        Number(totalFund.planterFund),
+        Number(totalFund.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
-        "totalFund planterFund funds invalid"
+        "totalFund planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFund.referralFund),
+        Number(totalFund.ambassador),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
-        "totalFund referralFund funds invalid"
+        "totalFund ambassador funds invalid"
       );
 
       assert.equal(
-        Number(planterFunds),
+        Number(treeToPlanterProjectedEarnings),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000)),
         "planterFund funds invalid"
       );
 
       assert.equal(
-        Number(referralFunds),
+        Number(treeToReferrerProjectedEarnings),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(2000).div(6000)),
         "referralFund funds invalid"
       );
@@ -869,24 +872,26 @@ contract("WethFunds", (accounts) => {
 
       ////--------------------------check fund planter
 
-      let totalFund2 = await planterFundsInstnce.totalFunds.call();
+      let totalFund2 = await planterFundsInstnce.totalBalances.call();
 
-      let planterFunds2 = await planterFundsInstnce.planterFunds.call(1);
-      let referralFunds2 = await planterFundsInstnce.referralFunds.call(1);
+      let planterFunds2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
+      let referralFunds2 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(1);
 
       assert.equal(
-        Number(totalFund2.planterFund),
+        Number(totalFund2.planter),
         Number(
           Math.Big(expectedSwapTokenAmountTreeId2[1])
             .times(2000)
             .div(3500)
             .plus(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(6000))
         ),
-        "2-totalFund planterFund funds invalid"
+        "2-totalFund planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFund2.referralFund),
+        Number(totalFund2.ambassador),
         Number(
           Math.Big(expectedSwapTokenAmount[1])
             .times(2000)
@@ -895,7 +900,7 @@ contract("WethFunds", (accounts) => {
               Math.Big(expectedSwapTokenAmountTreeId2[1]).times(1500).div(3500)
             )
         ),
-        "2-totalFund referralFund funds invalid"
+        "2-totalFund ambassador funds invalid"
       );
 
       assert.equal(

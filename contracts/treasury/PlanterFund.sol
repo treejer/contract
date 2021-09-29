@@ -15,31 +15,31 @@ import "../gsn/RelayRecipient.sol";
 contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE {isPlanterFund} set inside the initialize to {true} */
     bool public isPlanterFund;
-    uint256 public withdrawThreshold;
+    uint256 public minWithdrawable;
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
     IERC20Upgradeable public daiToken;
 
-    struct TotalFunds {
-        uint256 planterFund;
-        uint256 referralFund;
-        uint256 localDevelop;
+    struct TotalBalances {
+        uint256 planter;
+        uint256 ambassador;
+        uint256 localDevelopment;
     }
 
-    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
-     * planterFund, referralFund, localDevelop
+    /** NOTE {totalBalances} is struct of TotalFund that keep total share of
+     * planter ambassador, localDevelopment
      */
-    TotalFunds public totalFunds;
+    TotalBalances public totalBalances;
 
-    /** NOTE mapping of treeId to planterFunds*/
-    mapping(uint256 => uint256) public planterFunds;
+    /** NOTE mapping of treeId to planterProjectedEarning*/
+    mapping(uint256 => uint256) public treeToPlanterProjectedEarning;
 
-    /** NOTE mapping of treeId to referralFunds*/
-    mapping(uint256 => uint256) public referralFunds;
+    /** NOTE mapping of treeId to referrerProjectedEarning*/
+    mapping(uint256 => uint256) public treeToReferrerProjectedEarning;
 
-    /** NOTE  mpping of treeId to planterPaid balance*/
-    mapping(uint256 => uint256) public plantersPaid;
+    /** NOTE  mpping of treeId to treeToPlanterTotalClaimed balance*/
+    mapping(uint256 => uint256) public treeToPlanterTotalClaimed;
 
     /** NOTE mapping of planter address to planter balance*/
     mapping(address => uint256) public balances;
@@ -104,7 +104,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         require(candidateContract.isAccessRestriction());
 
         isPlanterFund = true;
-        withdrawThreshold = .5 ether;
+        minWithdrawable = .5 ether;
         accessRestriction = candidateContract;
     }
 
@@ -147,26 +147,26 @@ contract PlanterFund is Initializable, RelayRecipient {
      * @param _amount is withdraw treshold
      */
     function setWithdrawThreshold(uint256 _amount) external onlyDataManager {
-        withdrawThreshold = _amount;
+        minWithdrawable = _amount;
 
         emit WithdrawThresholdSet();
     }
 
     /**
-     * @dev set planterFunds and refferalFunds of a tree with id {_treeId}
-     * and add {_planterFund} to planterFund part of totalFunds and add
-     * {_referralFund} to referralFund part of totalFunds
+     * @dev set treeToPlanterProjectedEarning and refferalFunds of a tree with id {_treeId}
+     * and add {_planterFund} to planterFund part of totalBalances and add
+     * {_referralFund} to referralFund part of totalBalances
      */
     function setPlanterFunds(
         uint256 _treeId,
         uint256 _planterFund,
         uint256 _referralFund
     ) external onlyTreejerContract {
-        planterFunds[_treeId] = _planterFund;
-        referralFunds[_treeId] = _referralFund;
+        treeToPlanterProjectedEarning[_treeId] = _planterFund;
+        treeToReferrerProjectedEarning[_treeId] = _referralFund;
 
-        totalFunds.planterFund += _planterFund;
-        totalFunds.referralFund += _referralFund;
+        totalBalances.planter += _planterFund;
+        totalBalances.ambassador += _referralFund;
 
         emit PlanterFundSet(_treeId, _planterFund, _referralFund);
     }
@@ -183,7 +183,10 @@ contract PlanterFund is Initializable, RelayRecipient {
         address _planterId,
         uint64 _treeStatus
     ) external onlyTreejerContract {
-        require(planterFunds[_treeId] > 0, "planter fund not exist");
+        require(
+            treeToPlanterProjectedEarning[_treeId] > 0,
+            "planter fund not exist"
+        );
 
         (
             bool getBool,
@@ -199,29 +202,32 @@ contract PlanterFund is Initializable, RelayRecipient {
                 //25920 = 30 * 24 * 36
 
                 totalPayablePlanter =
-                    planterFunds[_treeId] -
-                    plantersPaid[_treeId];
+                    treeToPlanterProjectedEarning[_treeId] -
+                    treeToPlanterTotalClaimed[_treeId];
             } else {
                 totalPayablePlanter =
-                    ((planterFunds[_treeId] * _treeStatus) / 25920) -
-                    plantersPaid[_treeId];
+                    ((treeToPlanterProjectedEarning[_treeId] * _treeStatus) /
+                        25920) -
+                    treeToPlanterTotalClaimed[_treeId];
             }
 
             if (totalPayablePlanter > 0) {
-                uint256 totalPayableRefferal = (referralFunds[_treeId] *
-                    totalPayablePlanter) / planterFunds[_treeId];
+                uint256 totalPayableRefferal = (treeToReferrerProjectedEarning[
+                    _treeId
+                ] * totalPayablePlanter) /
+                    treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
-                totalFunds.referralFund -= totalPayableRefferal;
+                totalBalances.ambassador -= totalPayableRefferal;
 
                 if (gottenReferralAddress == address(0)) {
-                    totalFunds.localDevelop += totalPayableRefferal;
+                    totalBalances.localDevelopment += totalPayableRefferal;
                 } else {
                     balances[gottenReferralAddress] += totalPayableRefferal;
                 }
 
-                totalFunds.planterFund -= totalPayablePlanter;
+                totalBalances.planter -= totalPayablePlanter;
 
                 //Organization calculation section
                 uint256 fullPortion = 10000;
@@ -232,7 +238,7 @@ contract PlanterFund is Initializable, RelayRecipient {
 
                 //planter calculation section
 
-                plantersPaid[_treeId] += totalPayablePlanter;
+                treeToPlanterTotalClaimed[_treeId] += totalPayablePlanter;
 
                 balances[_planterId] +=
                     (totalPayablePlanter * gottenPortion) /
@@ -255,7 +261,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
         require(
-            _amount <= balances[_msgSender()] && _amount >= withdrawThreshold,
+            _amount <= balances[_msgSender()] && _amount >= minWithdrawable,
             "insufficient amount"
         );
 

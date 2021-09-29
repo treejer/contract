@@ -1471,30 +1471,32 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund before
 
-      const pFundBefore = await planterFundsInstnce.planterFunds.call(treeId);
+      const pFundBefore =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
-      const rFundBefore = await planterFundsInstnce.referralFunds.call(treeId);
+      const rFundBefore =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
       assert.equal(Number(pFundBefore), 0, "planter fund is not ok");
 
       assert.equal(Number(rFundBefore), 0, "referral fund is not ok");
 
-      const pfTotalFundBefore = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundBefore = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundBefore.planterFund),
+        Number(pfTotalFundBefore.planter),
         0,
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.referralFund),
+        Number(pfTotalFundBefore.ambassador),
         0,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.localDevelop),
+        Number(pfTotalFundBefore.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -1543,9 +1545,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////////////// ---------------- check planter fund values after claim
 
-      const pFundAfter = await planterFundsInstnce.planterFunds.call(treeId);
+      const pFundAfter =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
-      const rFundAfter = await planterFundsInstnce.referralFunds.call(treeId);
+      const rFundAfter =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
       assert.equal(
         Number(pFundAfter),
@@ -1559,22 +1563,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok"
       );
 
-      const pfTotalFundAfter = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundAfter = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundAfter.planterFund),
+        Number(pfTotalFundAfter.planter),
         Number(planterShareOfTree),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.referralFund),
+        Number(pfTotalFundAfter.ambassador),
         Number(referralShareOfTree),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.localDevelop),
+        Number(pfTotalFundAfter.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -1651,13 +1655,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund before
 
-      const pFundBeforeTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundBeforeTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundBeforeTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundBeforeTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundBeforeTree1),
@@ -1671,13 +1673,11 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pFundBeforeTree2 = await planterFundsInstnce.planterFunds.call(
-        treeId2
-      );
+      const pFundBeforeTree2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
-      const rFundBeforeTree2 = await planterFundsInstnce.referralFunds.call(
-        treeId2
-      );
+      const rFundBeforeTree2 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
 
       assert.equal(
         Number(pFundBeforeTree2),
@@ -1691,22 +1691,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree 2"
       );
 
-      const pfTotalFundBefore = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundBefore = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundBefore.planterFund),
+        Number(pfTotalFundBefore.planter),
         0,
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.referralFund),
+        Number(pfTotalFundBefore.ambassador),
         0,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.localDevelop),
+        Number(pfTotalFundBefore.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -1719,13 +1719,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund after claim
 
-      const pFundAfterTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundAfterTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundAfterTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundAfterTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundAfterTree1),
@@ -1739,22 +1737,23 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pfTotalFundAfterTree1 = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundAfterTree1 =
+        await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.planterFund),
+        Number(pfTotalFundAfterTree1.planter),
         Number(planterShareOfTree),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.referralFund),
+        Number(pfTotalFundAfterTree1.ambassador),
         Number(referralShareOfTree),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.localDevelop),
+        Number(pfTotalFundAfterTree1.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -1835,13 +1834,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund after final claim
 
-      const pFundFinalTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundFinalTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundFinalTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundFinalTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundFinalTree1),
@@ -1855,13 +1852,11 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pFundFinalTree2 = await planterFundsInstnce.planterFunds.call(
-        treeId2
-      );
+      const pFundFinalTree2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
-      const rFundFinalTree2 = await planterFundsInstnce.referralFunds.call(
-        treeId2
-      );
+      const rFundFinalTree2 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
 
       assert.equal(
         Number(pFundFinalTree2),
@@ -1875,22 +1870,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree2"
       );
 
-      const pfTotalFundFinal = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundFinal = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundFinal.planterFund),
+        Number(pfTotalFundFinal.planter),
         Math.mul(Number(planterShareOfTree), 2),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundFinal.referralFund),
+        Number(pfTotalFundFinal.ambassador),
         Math.mul(Number(referralShareOfTree), 2),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundFinal.localDevelop),
+        Number(pfTotalFundFinal.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -2049,30 +2044,32 @@ contract("CommunityGifts", (accounts) => {
       const treeId = startTree; //tree to be claimed
 
       ////////////// check planter fund values before claim
-      const pFundBefore = await planterFundsInstnce.planterFunds.call(treeId);
+      const pFundBefore =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
-      const rFundBefore = await planterFundsInstnce.referralFunds.call(treeId);
+      const rFundBefore =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
       assert.equal(Number(pFundBefore), 0, "planter fund is not ok");
 
       assert.equal(Number(rFundBefore), 0, "referral fund is not ok");
 
-      const pfTotalFundBefore = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundBefore = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundBefore.planterFund),
+        Number(pfTotalFundBefore.planter),
         0,
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.referralFund),
+        Number(pfTotalFundBefore.ambassador),
         0,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.localDevelop),
+        Number(pfTotalFundBefore.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -2111,9 +2108,11 @@ contract("CommunityGifts", (accounts) => {
       assert.equal(treeAttribute.exists, 1, "treeAttribute is not true update");
 
       ////////////// check planter fund values after transfer
-      const pFundAfter = await planterFundsInstnce.planterFunds.call(treeId);
+      const pFundAfter =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
-      const rFundAfter = await planterFundsInstnce.referralFunds.call(treeId);
+      const rFundAfter =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
       assert.equal(
         Number(pFundAfter),
@@ -2127,22 +2126,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok"
       );
 
-      const pfTotalFundAfter = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundAfter = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundAfter.planterFund),
+        Number(pfTotalFundAfter.planter),
         Number(planterShareOfTree),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.referralFund),
+        Number(pfTotalFundAfter.ambassador),
         Number(referralShareOfTree),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.localDevelop),
+        Number(pfTotalFundAfter.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -2222,13 +2221,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund before transfer
 
-      const pFundBeforeTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundBeforeTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundBeforeTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundBeforeTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundBeforeTree1),
@@ -2242,13 +2239,11 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pFundBeforeTree2 = await planterFundsInstnce.planterFunds.call(
-        treeId2
-      );
+      const pFundBeforeTree2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
-      const rFundBeforeTree2 = await planterFundsInstnce.referralFunds.call(
-        treeId2
-      );
+      const rFundBeforeTree2 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
 
       assert.equal(
         Number(pFundBeforeTree2),
@@ -2262,22 +2257,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree 2"
       );
 
-      const pfTotalFundBefore = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundBefore = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundBefore.planterFund),
+        Number(pfTotalFundBefore.planter),
         0,
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.referralFund),
+        Number(pfTotalFundBefore.ambassador),
         0,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.localDevelop),
+        Number(pfTotalFundBefore.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -2296,13 +2291,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund after transfer11
 
-      const pFundAfterTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundAfterTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundAfterTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundAfterTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundAfterTree1),
@@ -2316,22 +2309,23 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pfTotalFundAfterTree1 = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundAfterTree1 =
+        await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.planterFund),
+        Number(pfTotalFundAfterTree1.planter),
         Number(planterShareOfTree),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.referralFund),
+        Number(pfTotalFundAfterTree1.ambassador),
         Number(referralShareOfTree),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundAfterTree1.localDevelop),
+        Number(pfTotalFundAfterTree1.localDevelopment),
         0,
         "local develop total fund is not ok"
       );
@@ -2401,13 +2395,11 @@ contract("CommunityGifts", (accounts) => {
 
       //////// ----------------- check plnter fund after both transfer
 
-      const pFundFinalTree1 = await planterFundsInstnce.planterFunds.call(
-        treeId1
-      );
+      const pFundFinalTree1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
 
-      const rFundFinalTree1 = await planterFundsInstnce.referralFunds.call(
-        treeId1
-      );
+      const rFundFinalTree1 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId1);
 
       assert.equal(
         Number(pFundFinalTree1),
@@ -2421,13 +2413,11 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree1"
       );
 
-      const pFundFinalTree2 = await planterFundsInstnce.planterFunds.call(
-        treeId2
-      );
+      const pFundFinalTree2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
 
-      const rFundFinalTree2 = await planterFundsInstnce.referralFunds.call(
-        treeId2
-      );
+      const rFundFinalTree2 =
+        await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId2);
 
       assert.equal(
         Number(pFundFinalTree2),
@@ -2441,22 +2431,22 @@ contract("CommunityGifts", (accounts) => {
         "referral fund is not ok for tree 2"
       );
 
-      const pfTotalFundFinal = await planterFundsInstnce.totalFunds.call();
+      const pfTotalFundFinal = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(pfTotalFundFinal.planterFund),
+        Number(pfTotalFundFinal.planter),
         Math.mul(Number(planterShareOfTree), 2),
         "planter total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundFinal.referralFund),
+        Number(pfTotalFundFinal.ambassador),
         Math.mul(Number(referralShareOfTree), 2),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
 
       assert.equal(
-        Number(pfTotalFundBefore.localDevelop),
+        Number(pfTotalFundBefore.localDevelopment),
         0,
         "local develop total fund is not ok"
       );

@@ -10,7 +10,7 @@ interface IPlanterFund {
     function isPlanterFund() external view returns (bool);
 
     /** @return minimum amount to withdraw */
-    function withdrawThreshold() external view returns (uint256);
+    function minWithdrawable() external view returns (uint256);
 
     /**
      * @return AccessRestriction contract address
@@ -29,33 +29,42 @@ interface IPlanterFund {
 
     /**
      * @dev return totalFunds struct data
-     * @return planterFund share
-     * @return referralFund share
-     * @return localDevelop share
+     * @return planter total balance
+     * @return ambassador total balance
+     * @return localDevelopment total balance
      */
-    function totalFunds()
+    function totalBalances()
         external
         view
         returns (
-            uint256 planterFund,
-            uint256 referralFund,
-            uint256 localDevelop
+            uint256 planter,
+            uint256 ambassador,
+            uint256 localDevelopment
         );
 
     /**
-     * @return planterFunds of {_treeId}
+     * @return treeToPlanterProjectedEarning of {_treeId}
      */
-    function planterFunds(uint256 _treeId) external view returns (uint256);
+    function treeToPlanterProjectedEarning(uint256 _treeId)
+        external
+        view
+        returns (uint256);
 
     /**
-     * @return referralFunds of {_treeId}
+     * @return treeToReferrerProjectedEarning of {_treeId}
      */
-    function referralFunds(uint256 _treeId) external view returns (uint256);
+    function treeToReferrerProjectedEarning(uint256 _treeId)
+        external
+        view
+        returns (uint256);
 
     /**
-     * @return plantersPaid of {_treeId}
+     * @return treeToPlanterTotalClaimed of {_treeId}
      */
-    function plantersPaid(uint256 _treeId) external view returns (uint256);
+    function treeToPlanterTotalClaimed(uint256 _treeId)
+        external
+        view
+        returns (uint256);
 
     /**
      * @return balance of {_planterAddress}
@@ -74,7 +83,7 @@ interface IPlanterFund {
     /** @dev admin can set the minimum amount to withdraw
      * @param _amount is withdraw treshold
      */
-    function setWithdrawThreshold(uint256 _amount) external;
+    function updateWithdrawableAmount(uint256 _amount) external;
 
     /**
      * @dev set planterFunds and refferalFunds of a tree with id {_treeId}

@@ -1695,11 +1695,11 @@ contract("Auction", (accounts) => {
       );
 
       //check treasury updated true
-      let pFund = await planterFundsInstnce.planterFunds.call(treeId);
+      let pFund = await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
 
-      let rFund = await planterFundsInstnce.referralFunds.call(treeId);
+      let rFund = await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundsInstnce.totalFunds();
+      let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
 
       let totalFundsWethFunds = await wethFundsInstance.totalFunds();
 
@@ -2154,10 +2154,10 @@ contract("Auction", (accounts) => {
       );
 
       //check treasury updated true
-      let pFund = await planterFundsInstnce.planterFunds.call(treeId);
-      let rFund = await planterFundsInstnce.referralFunds.call(treeId);
+      let pFund = await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
+      let rFund = await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundsInstnce.totalFunds();
+      let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
 
       let totalFundsWethFunds = await wethFundsInstance.totalFunds();
 
@@ -2750,10 +2750,10 @@ contract("Auction", (accounts) => {
       assert.equal(addressGetToken, bidderAccount2, "token not true mint");
 
       //check treasury updated true
-      let pFund = await planterFundsInstnce.planterFunds.call(treeId);
-      let rFund = await planterFundsInstnce.referralFunds.call(treeId);
+      let pFund = await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId);
+      let rFund = await planterFundsInstnce.treeToReferrerProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundsInstnce.totalFunds();
+      let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
       let totalFundsWethFunds = await wethFundsInstance.totalFunds();
 
       assert.equal(
@@ -2841,7 +2841,7 @@ contract("Auction", (accounts) => {
         "2.planter balance not true in treasury"
       );
 
-      let plantersPaidTreeId0_1 = await planterFundsInstnce.plantersPaid.call(
+      let plantersPaidTreeId0_1 = await planterFundsInstnce.treeToPlanterTotalClaimed.call(
         treeId
       );
 
@@ -2902,11 +2902,11 @@ contract("Auction", (accounts) => {
         "4.planter balance not true in treasury"
       );
 
-      let plantersPaidTreeId0_2 = await planterFundsInstnce.plantersPaid.call(
+      let plantersPaidTreeId0_2 = await planterFundsInstnce.treeToPlanterTotalClaimed.call(
         treeId
       );
 
-      let planterFundsTreeId0_2 = await planterFundsInstnce.planterFunds.call(
+      let planterFundsTreeId0_2 = await planterFundsInstnce.treeToPlanterProjectedEarning.call(
         treeId
       );
 
@@ -3279,7 +3279,7 @@ contract("Auction", (accounts) => {
         wethFundsInstance.address
       );
       const totalFundPlanterFundBeforeAuction1End =
-        await planterFundsInstnce.totalFunds();
+        await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundBeforeAuction1End =
         await wethFundsInstance.totalFunds();
@@ -3424,7 +3424,7 @@ contract("Auction", (accounts) => {
       assert.equal(tokenOwner, userAccount7, "token owner not correct");
 
       const totalFundPlanterFundAfterAuction1End =
-        await planterFundsInstnce.totalFunds();
+        await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundAfterAuction1End =
         await wethFundsInstance.totalFunds();
@@ -3555,7 +3555,7 @@ contract("Auction", (accounts) => {
       );
 
       const totalFundPlanterFundAfterAuction2End =
-        await planterFundsInstnce.totalFunds();
+        await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundAfterAuction2End =
         await wethFundsInstance.totalFunds();
@@ -3687,10 +3687,10 @@ contract("Auction", (accounts) => {
 
       //////////////// ---------------------- check total funds value
 
-      const totalFundsAfterFundPlanter = await planterFundsInstnce.totalFunds();
+      const totalFundsAfterFundPlanter = await planterFundsInstnce.totalBalances();
 
       const planterPaidAfterVerify =
-        await planterFundsInstnce.plantersPaid.call(treeId1);
+        await planterFundsInstnce.treeToPlanterTotalClaimed.call(treeId1);
 
       const resultAfterGT = await treeFactoryInstance.trees.call(treeId1);
 

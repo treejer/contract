@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";

@@ -5,7 +5,7 @@ const Auction = artifacts.require("Auction.sol");
 
 const Planter = artifacts.require("Planter.sol");
 const Dai = artifacts.require("Dai.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const DaiFunds = artifacts.require("DaiFunds.sol");
 const assert = require("chai").assert;
@@ -2439,7 +2439,7 @@ contract("TreeFactory", (accounts) => {
       ////////////// ---------- deploy financial model
 
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -2646,7 +2646,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -2893,7 +2893,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -3117,7 +3117,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -3325,7 +3325,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -4372,7 +4372,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -4476,7 +4476,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -5650,7 +5650,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy financial model
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",

@@ -19,8 +19,8 @@ interface IIncrementalSale {
     /** @return WethFunds contract address */
     function wethFunds() external view returns (address);
 
-    /** @return FinancialModel contract address */
-    function financialModel() external view returns (address);
+    /** @return Allocation contract address */
+    function allocation() external view returns (address);
 
     /** @return TreeAttribute contract address */
     function treeAttribute() external view returns (address);
@@ -75,7 +75,7 @@ interface IIncrementalSale {
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;
 
-    /** @dev set {_address} to FinancialModel contract address */
+    /** @dev set {_address} to Allocation contract address */
     function setAllocationAddress(address _address) external;
 
     /** @dev set {_address} to TreeAttributes contract address */

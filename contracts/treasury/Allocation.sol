@@ -8,7 +8,7 @@ import "../access/IAccessRestriction.sol";
 
 pragma abicoder v2;
 
-/** @title FinancialModel Contract */
+/** @title Allocation Contract */
 
 contract Allocation is Initializable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -220,11 +220,7 @@ contract Allocation is Initializable {
      * @return true in case of distributionModel existance for {_treeId} and false otherwise
      */
 
-    function distributionModelExistance(uint256 _treeId)
-        external
-        view
-        returns (bool)
-    {
+    function exists(uint256 _treeId) external view returns (bool) {
         if (allocationToTrees.length == 0) {
             return false;
         }
@@ -244,7 +240,7 @@ contract Allocation is Initializable {
      * @return reserve1Share
      * @return reserve2Share
      */
-    function findTreeDistribution(uint256 _treeId)
+    function findAllocationData(uint256 _treeId)
         external
         view
         returns (
@@ -296,30 +292,6 @@ contract Allocation is Initializable {
             fundDistribution.treasuryShare,
             fundDistribution.reserve1Share,
             fundDistribution.reserve2Share
-        );
-    }
-
-    /**
-     * @dev return fundDistribution id of {_treeId}
-     * @param _treeId id of tree to find allocationToTrees of it
-     * @return id of fundDistiubution
-     */
-    function getFindDistributionModelId(uint256 _treeId)
-        external
-        view
-        returns (uint256)
-    {
-        for (uint256 i = 0; i < allocationToTrees.length; i++) {
-            if (allocationToTrees[i].startingTreeId > _treeId) {
-                require(i > 0, "invalid fund model");
-                return (allocationToTrees[i - 1].distributionModelId);
-            }
-        }
-
-        require(allocationToTrees.length > 0, "invalid fund model");
-
-        return (
-            allocationToTrees[allocationToTrees.length - 1].distributionModelId
         );
     }
 }

@@ -225,7 +225,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         require(_startTree > 100, "trees are under Auction");
         require(_steps > 0, "incremental period should be positive");
         require(
-            allocation.distributionModelExistance(_startTree),
+            allocation.exists(_startTree),
             "equivalant fund Model not exists"
         );
 
@@ -414,7 +414,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 uint16 treasuryShare,
                 uint16 reserve1Share,
                 uint16 reserve2Share
-            ) = allocation.findTreeDistribution(treeId);
+            ) = allocation.findAllocationData(treeId);
 
             totalFunds.planterFund += (treePrice * planterShare) / 10000;
             totalFunds.referralFund += (treePrice * ambassadorShare) / 10000;

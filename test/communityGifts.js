@@ -2,7 +2,7 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const CommunityGifts = artifacts.require("CommunityGifts.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Tree = artifacts.require("Tree.sol");
 const Dai = artifacts.require("Dai.sol");
@@ -96,7 +96,7 @@ contract("CommunityGifts", (accounts) => {
   //   });
 
   //   financialModelInstance = await deployProxy(
-  //     FinancialModel,
+  //     Allocation,
   //     [arInstance.address],
   //     {
   //       initializer: "initialize",
@@ -1343,7 +1343,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",

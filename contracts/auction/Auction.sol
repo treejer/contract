@@ -190,10 +190,7 @@ contract Auction is Initializable, RelayRecipient {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external ifNotPaused onlyDataManager {
-        require(
-            allocation.distributionModelExistance(_treeId),
-            "equivalant fund Model not exists"
-        );
+        require(allocation.exists(_treeId), "equivalant fund Model not exists");
 
         uint32 provideStatus = treeFactory.manageSaleType(_treeId, 1);
 
@@ -313,7 +310,7 @@ contract Auction is Initializable, RelayRecipient {
                 uint16 treasuryShare,
                 uint16 reserve1Share,
                 uint16 reserve2Share
-            ) = allocation.findTreeDistribution(auction.treeId);
+            ) = allocation.findAllocationData(auction.treeId);
 
             wethFunds.fundTree(
                 auction.treeId,

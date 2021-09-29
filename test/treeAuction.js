@@ -7,7 +7,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const WethFunds = artifacts.require("WethFunds.sol");
-const RegularSell = artifacts.require("RegularSell.sol");
+const RegularSale = artifacts.require("RegularSale.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 var Dai = artifacts.require("Dai.sol");
@@ -60,7 +60,7 @@ contract("Auction", (accounts) => {
   let planterFundsInstnce;
   let allocationInstance;
   let wethFundsInstance;
-  let regularSellInstance;
+  let regularSaleInstance;
   let uniswapRouterInstance;
   let factoryInstance;
   let wethInstance;
@@ -174,8 +174,8 @@ contract("Auction", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
         {
           initializer: "initialize",
@@ -277,18 +277,18 @@ contract("Auction", (accounts) => {
       ///// ---------------- set regular sell
 
       await auctionInstance
-        .setRegularSellAddress(regularSellInstance.address, {
+        .setRegularSaleAddress(regularSaleInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await auctionInstance.setRegularSellAddress(regularSellInstance.address, {
+      await auctionInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        regularSellInstance.address,
-        await auctionInstance.regularSell.call(),
+        regularSaleInstance.address,
+        await auctionInstance.regularSale.call(),
         "address set incorect"
       );
 
@@ -1220,8 +1220,8 @@ contract("Auction", (accounts) => {
     });
 
     it("should end auction and fail in invalid situations", async () => {
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
         {
           initializer: "initialize",
@@ -1230,7 +1230,7 @@ contract("Auction", (accounts) => {
         }
       );
 
-      await auctionInstance.setRegularSellAddress(regularSellInstance.address, {
+      await auctionInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
 
@@ -1637,8 +1637,8 @@ contract("Auction", (accounts) => {
 
       /////////// --------------- check referral for zero address
 
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
         {
           initializer: "initialize",
@@ -1658,7 +1658,7 @@ contract("Auction", (accounts) => {
         "winner referral is not correct"
       );
 
-      const giftCount = await regularSellInstance.referrerClaimableTreesWeth.call(
+      const giftCount = await regularSaleInstance.referrerClaimableTreesWeth.call(
         winnerReferral
       );
 
@@ -1811,8 +1811,8 @@ contract("Auction", (accounts) => {
     // ---------------------------------------complex test (auction and treeFactory and treasury)-------------------------------------
 
     it("complex test 1 with referral", async () => {
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
         {
           initializer: "initialize",
@@ -1860,8 +1860,8 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setRegularSellAddress(
-        regularSellInstance.address,
+      await auctionInstance.setRegularSaleAddress(
+        regularSaleInstance.address,
         { from: deployerAccount }
       );
 
@@ -2122,10 +2122,10 @@ contract("Auction", (accounts) => {
       assert.equal(winnerReferral, refferal2, "winner referral is not correct");
 
       const giftCountWinner =
-        await regularSellInstance.referrerClaimableTreesWeth.call(winnerReferral);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(winnerReferral);
 
       const giftCountRefferal1 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(refferal1);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(refferal1);
 
       assert.equal(
         Number(giftCountWinner),
@@ -2968,8 +2968,8 @@ contract("Auction", (accounts) => {
     });
 
     it("complex test 3 ( complete auction done ) ", async () => {
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
         {
           initializer: "initialize",
@@ -3014,8 +3014,8 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setRegularSellAddress(
-        regularSellInstance.address,
+      await auctionInstance.setRegularSaleAddress(
+        regularSaleInstance.address,
         { from: deployerAccount }
       );
 
@@ -3397,12 +3397,12 @@ contract("Auction", (accounts) => {
       );
 
       const winnerGiftCount1 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(winnerRefferer1);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(winnerRefferer1);
 
       assert.equal(Number(winnerGiftCount1), 1, "winner gift count is not ok");
 
       const otherReffereGiftCount1 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(otherRefferer);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(otherRefferer);
       assert.equal(
         Number(otherReffereGiftCount1),
         0,
@@ -3526,11 +3526,11 @@ contract("Auction", (accounts) => {
       );
 
       const winnerGiftCount2 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(winnerRefferer2);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(winnerRefferer2);
       assert.equal(Number(winnerGiftCount2), 2, "winner gift count is not ok");
 
       const otherReffereGiftCount2 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(otherRefferer);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(otherRefferer);
       assert.equal(
         Number(otherReffereGiftCount2),
         0,

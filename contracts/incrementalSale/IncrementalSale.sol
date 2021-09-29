@@ -9,7 +9,7 @@ import "../treasury/IWethFunds.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
-import "../regularSell/IRegularSell.sol";
+import "../regularSale/IRegularSale.sol";
 import "../gsn/RelayRecipient.sol";
 
 contract IncrementalSale is Initializable, RelayRecipient {
@@ -23,7 +23,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     IAllocation public allocation;
     ITreeAttribute public treeAttribute;
     IPlanterFund public planterFundContract;
-    IRegularSell public regularSell;
+    IRegularSale public regularSale;
     IERC20Upgradeable public wethToken;
 
     struct IncrementalSaleData {
@@ -126,10 +126,10 @@ contract IncrementalSale is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
-    function setRegularSellAddress(address _address) external onlyAdmin {
-        IRegularSell candidateContract = IRegularSell(_address);
-        require(candidateContract.isRegularSell());
-        regularSell = candidateContract;
+    function setRegularSaleAddress(address _address) external onlyAdmin {
+        IRegularSale candidateContract = IRegularSale(_address);
+        require(candidateContract.isRegularSale());
+        regularSale = candidateContract;
     }
 
     /** @dev admin set TreeFactory contract address
@@ -453,7 +453,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         );
 
         if (_referrer != address(0)) {
-            regularSell.updateReferrerClaimableTreesWeth(_referrer, _count);
+            regularSale.updateReferrerClaimableTreesWeth(_referrer, _count);
         }
 
         return treeId;

@@ -12,13 +12,13 @@ import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
 import "../treasury/IWethFunds.sol";
 
-/** @title RegularSell contract */
-contract RegularSell is Initializable, RelayRecipient {
+/** @title RegularSale contract */
+contract RegularSale is Initializable, RelayRecipient {
     uint256 public lastFundedTreeId;
     uint256 public price;
 
-    /** NOTE {isRegularSell} set inside the initialize to {true} */
-    bool public isRegularSell;
+    /** NOTE {isRegularSale} set inside the initialize to {true} */
+    bool public isRegularSale;
 
     /** NOTE regular planter fund amount */
     uint256 public referralTreePaymentToPlanter;
@@ -105,7 +105,7 @@ contract RegularSell is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isRegularSell
+     * @dev initialize accessRestriction contract and set true for isRegularSale
      * set {_price} to tree price and set 10000 to lastFundedTreeId
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      * @param _price initial tree price
@@ -120,7 +120,7 @@ contract RegularSell is Initializable, RelayRecipient {
         require(candidateContract.isAccessRestriction());
         accessRestriction = candidateContract;
 
-        isRegularSell = true;
+        isRegularSale = true;
         lastFundedTreeId = 10000;
 
         referralTriggerCount = 20;

@@ -6,7 +6,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Auction = artifacts.require("Auction.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
-const RegularSell = artifacts.require("RegularSell.sol");
+const RegularSale = artifacts.require("RegularSale.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -68,7 +68,7 @@ contract("IncrementalSale", (accounts) => {
   let fModel;
   let planterFundsInstnce;
   let treeAttributeInstance;
-  let regularSellInstance;
+  let regularSaleInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -191,8 +191,8 @@ contract("IncrementalSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, treePrice],
         {
           initializer: "initialize",
@@ -330,21 +330,21 @@ contract("IncrementalSale", (accounts) => {
         await iSellInstance.allocation.call(),
         "financial model address set incorect"
       );
-      /////////////////---------------------------------set regularSellInstance address--------------------------------------------------------
+      /////////////////---------------------------------set regularSaleInstance address--------------------------------------------------------
       await iSellInstance
-        .setRegularSellAddress(regularSellInstance.address, {
+        .setRegularSaleAddress(regularSaleInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSellInstance.setRegularSellAddress(regularSellInstance.address, {
+      await iSellInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        regularSellInstance.address,
-        await iSellInstance.regularSell.call(),
-        "regularSell address set incorect"
+        regularSaleInstance.address,
+        await iSellInstance.regularSale.call(),
+        "regularSale address set incorect"
       );
     });
   });
@@ -1256,8 +1256,8 @@ contract("IncrementalSale", (accounts) => {
           unsafeAllowCustomTypes: true,
         }
       );
-      regularSellInstance = await deployProxy(
-        RegularSell,
+      regularSaleInstance = await deployProxy(
+        RegularSale,
         [arInstance.address, treePrice],
         {
           initializer: "initialize",
@@ -1278,7 +1278,7 @@ contract("IncrementalSale", (accounts) => {
       await iSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
-      await iSellInstance.setRegularSellAddress(regularSellInstance.address, {
+      await iSellInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
       await iSellInstance.setPlanterFundAddress(planterFundsInstnce.address, {
@@ -1824,7 +1824,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------check referral---------------------
 
       let referralCount =
-        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount6);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(userAccount6);
 
       assert.equal(Number(referralCount), 20, "Referral not true");
 
@@ -1894,7 +1894,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------check referral---------------------
 
       let referralCount2 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount6);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(userAccount6);
 
       assert.equal(Number(referralCount2), 35, "Referral not true");
 
@@ -1930,7 +1930,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------check referral---------------------
 
       let referralCount3 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(zeroAddress);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(zeroAddress);
 
       assert.equal(Number(referralCount3), 0, "3-Referral not true");
 
@@ -1969,7 +1969,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------check referral---------------------
 
       let referralCount4 =
-        await regularSellInstance.referrerClaimableTreesWeth.call(userAccount5);
+        await regularSaleInstance.referrerClaimableTreesWeth.call(userAccount5);
 
       assert.equal(Number(referralCount4), 34, "4-Referral not true");
 
@@ -2266,7 +2266,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(
-          await regularSellInstance.referrerClaimableTreesWeth.call(
+          await regularSaleInstance.referrerClaimableTreesWeth.call(
             userAccount3
           )
         ),
@@ -2276,7 +2276,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(
-          await regularSellInstance.referrerClaimableTreesWeth.call(zeroAddress)
+          await regularSaleInstance.referrerClaimableTreesWeth.call(zeroAddress)
         ),
         0,
         "2-Referral not true"

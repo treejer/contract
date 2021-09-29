@@ -10,7 +10,7 @@ import "../tree/ITreeFactory.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IWethFunds.sol";
 import "../gsn/RelayRecipient.sol";
-import "../regularSell/IRegularSell.sol";
+import "../regularSale/IRegularSale.sol";
 
 /** @title Auction */
 
@@ -28,7 +28,7 @@ contract Auction is Initializable, RelayRecipient {
     IWethFunds public wethFunds;
     IAllocation public allocation;
     IERC20Upgradeable public wethToken;
-    IRegularSell public regularSell;
+    IRegularSale public regularSale;
 
     struct AuctionData {
         uint256 treeId;
@@ -149,14 +149,14 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set RegularSell
-     * @param _address set to the address of regularSell
+     * @dev admin set RegularSale
+     * @param _address set to the address of regularSale
      */
 
-    function setRegularSellAddress(address _address) external onlyAdmin {
-        IRegularSell candidateContract = IRegularSell(_address);
-        require(candidateContract.isRegularSell());
-        regularSell = candidateContract;
+    function setRegularSaleAddress(address _address) external onlyAdmin {
+        IRegularSale candidateContract = IRegularSale(_address);
+        require(candidateContract.isRegularSale());
+        regularSale = candidateContract;
     }
 
     /**
@@ -330,7 +330,7 @@ contract Auction is Initializable, RelayRecipient {
             address _tempReferrer = referrals[auction.bidder][_auctionId];
 
             if (_tempReferrer != address(0)) {
-                regularSell.updateReferrerClaimableTreesWeth(_tempReferrer, 1);
+                regularSale.updateReferrerClaimableTreesWeth(_tempReferrer, 1);
             }
 
             emit AuctionSettled(

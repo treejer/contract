@@ -216,7 +216,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev fund a tree by RegularSell contract and based on distribution
+     * @dev fund a tree by RegularSale contract and based on distribution
      * model of tree, shares divide beetwen (planter, referral, treeResearch,
      * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
      * and added to the totalFunds of each part,

@@ -612,7 +612,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     /**
      * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
-     * This function is called only by the regularSell contract
+     * This function is called only by the regularSale contract
      * @param _lastSold The last tree sold in the regular
      * @param _owner Owner of a new tree sold in Regular
      * @return The last tree sold after update
@@ -648,7 +648,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     /**
      * @dev Request to buy a tree with a specific Id already planted and this function transfer ownership to funder
-     * This function is called only by the regularSell contract
+     * This function is called only by the regularSale contract
      * @param _treeId Tree with special Id (The Id must be larger than the last tree sold)
      * @param _owner Owner of a new tree sold in Regular
      */

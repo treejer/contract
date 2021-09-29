@@ -1,9 +1,9 @@
 // // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
-import "./../../regularSell/RegularSell.sol";
+import "./../../regularSale/RegularSale.sol";
 
-contract TestRegularSell is RegularSell {
+contract TestRegularSale is RegularSale {
     function updateRegularReferrerGift(address _referrer, uint256 _count)
         external
     {

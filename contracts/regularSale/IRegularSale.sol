@@ -2,8 +2,8 @@
 
 pragma solidity >=0.7.6;
 
-/** @title RegularSell interfce */
-interface IRegularSell {
+/** @title RegularSale interfce */
+interface IRegularSale {
     /** @return last sold regular tree */
     function lastFundedTreeId() external view returns (uint256);
 
@@ -11,9 +11,9 @@ interface IRegularSell {
     function price() external view returns (uint256);
 
     /**
-     * @return true if RegularSell contract have been initialized
+     * @return true if RegularSale contract have been initialized
      */
-    function isRegularSell() external view returns (bool);
+    function isRegularSale() external view returns (bool);
 
     /** @return regular planter fund amount */
     function referralTreePaymentToPlanter() external view returns (uint256);

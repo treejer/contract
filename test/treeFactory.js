@@ -5004,7 +5004,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(addressGetToken3, userAccount6, "3-address not true");
     });
 
-    it("mintRegularTrees should be fail(only RegularSellContract call)", async () => {
+    it("mintRegularTrees should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5775,7 +5775,7 @@ contract("TreeFactory", (accounts) => {
       );
     });
 
-    it("requestRegularTree should be fail(only RegularSellContract call)", async () => {
+    it("requestRegularTree should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;

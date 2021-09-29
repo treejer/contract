@@ -34,9 +34,9 @@ interface IAuction {
     function wethToken() external view returns (address);
 
     /**
-     * @return RegularSell contract address
+     * @return RegularSale contract address
      */
-    function regularSell() external view returns (address);
+    function regularSale() external view returns (address);
 
     /**
      *@dev return data of an auction with auction id
@@ -71,8 +71,8 @@ interface IAuction {
     /** @dev set {_address} to WethFunds contract address */
     function setWethFundsAddress(address _address) external;
 
-    /** @dev set {_address} to RegularSell contract address */
-    function setRegularSellAddress(address _address) external;
+    /** @dev set {_address} to RegularSale contract address */
+    function setRegularSaleAddress(address _address) external;
 
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;

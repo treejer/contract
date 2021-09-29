@@ -28,8 +28,8 @@ interface IIncrementalSale {
     /** @return PlanterFund contract address */
     function planterFundContract() external view returns (address);
 
-    /** @return RegularSell contract address */
-    function regularSell() external view returns (address);
+    /** @return RegularSale contract address */
+    function regularSale() external view returns (address);
 
     /** @return WethToken contract address */
     function wethToken() external view returns (address);
@@ -63,8 +63,8 @@ interface IIncrementalSale {
     /** @dev set {_address} to PlanterFund contract address */
     function setPlanterFundAddress(address _address) external;
 
-    /** @dev set {_address} to RegularSell contract address */
-    function setRegularSellAddress(address _address) external;
+    /** @dev set {_address} to RegularSale contract address */
+    function setRegularSaleAddress(address _address) external;
 
     /** @dev set {_address} to TreeFactory  contract address */
     function setTreeFactoryAddress(address _address) external;

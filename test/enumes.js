@@ -108,7 +108,7 @@ const PlanterErrorMsg = {
   ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
 };
 
-const RegularSellErrors = {
+const RegularSaleErrors = {
   INVALID_TREE: "invalid tree",
   INVALID_AMOUNT: "invalid amount",
   INVALID_COUNT: "invalid count",
@@ -162,7 +162,7 @@ module.exports = {
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   PlanterErrorMsg,
-  RegularSellErrors,
+  RegularSaleErrors,
   IncrementalSaleErrorMsg,
   TreeAttributeErrorMsg,
   DaiFundsErrorMsg,

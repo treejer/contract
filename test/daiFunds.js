@@ -356,7 +356,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////--------------add and assign DistributionModel for tree
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -551,7 +551,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////--------------add and assign DistributionModel for tree
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund1,
         referralFund1,
         treeResearch1,
@@ -565,7 +565,7 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund2,
         referralFund2,
         treeResearch2,
@@ -818,7 +818,7 @@ contract("DaiFunds", (accounts) => {
 
       //////-------------------- handle dm model
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1177,7 +1177,7 @@ contract("DaiFunds", (accounts) => {
 
       ////////------------------- handle dm models
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1426,7 +1426,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1664,7 +1664,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -1903,7 +1903,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -2142,7 +2142,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -2386,7 +2386,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,
@@ -2626,7 +2626,7 @@ contract("DaiFunds", (accounts) => {
       });
 
       ///////// ------------------ handle dm model
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         planterFund,
         referralFund,
         treeResearch,

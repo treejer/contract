@@ -76,7 +76,7 @@ interface IIncrementalSale {
     function setWethTokenAddress(address _address) external;
 
     /** @dev set {_address} to FinancialModel contract address */
-    function setFinancialModelAddress(address _address) external;
+    function setAllocationAddress(address _address) external;
 
     /** @dev set {_address} to TreeAttributes contract address */
     function setTreeAttributesAddress(address _address) external;

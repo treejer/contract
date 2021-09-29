@@ -215,12 +215,12 @@ contract("regularSell", (accounts) => {
       ////---------------------------------set FinancialModel Address--------------------------------------------------------
 
       await regularSellInstance
-        .setFinancialModelAddress(fModel.address, {
+        .setAllocationAddress(fModel.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -763,19 +763,9 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(1, 1000000, 0, {
         from: dataManager,
@@ -804,7 +794,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -954,19 +944,9 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(10001, 10007, 0, {
         from: dataManager,
@@ -994,7 +974,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -1245,7 +1225,7 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         2500,
         1500,
         1200,
@@ -1286,7 +1266,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -1534,19 +1514,9 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(10001, 10003, 0, {
         from: dataManager,
@@ -1575,7 +1545,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -1925,7 +1895,7 @@ contract("regularSell", (accounts) => {
     it("test gsn [ @skip-on-coverage ]", async () => {
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         4000,
         1200,
         1200,
@@ -1968,7 +1938,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -2117,19 +2087,9 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(1, 100000, 0, {
         from: dataManager,
@@ -2167,7 +2127,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -2325,7 +2285,7 @@ contract("regularSell", (accounts) => {
 
       ////////////// ------------------- handle fund distribution model ----------------------
 
-      await fModel.addFundDistributionModel(
+      await fModel.addAllocationData(
         3000,
         1200,
         1200,
@@ -2388,7 +2348,7 @@ contract("regularSell", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSellInstance.setFinancialModelAddress(fModel.address, {
+      await regularSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 

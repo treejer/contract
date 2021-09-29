@@ -316,12 +316,12 @@ contract("IncrementalSale", (accounts) => {
 
       /////////////////---------------------------------set financialModel address--------------------------------------------------------
       await iSellInstance
-        .setFinancialModelAddress(fModel.address, {
+        .setAllocationAddress(fModel.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSellInstance.setFinancialModelAddress(fModel.address, {
+      await iSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -387,7 +387,7 @@ contract("IncrementalSale", (accounts) => {
       await iSellInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSellInstance.setFinancialModelAddress(fModel.address, {
+      await iSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -410,19 +410,9 @@ contract("IncrementalSale", (accounts) => {
       );
 
       /////----------------add distributionModel
-      await fModel.addFundDistributionModel(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
+        from: dataManager,
+      });
     });
 
     /////////////////---------------------------------test createIncrementalSale function--------------------------------------------------------
@@ -461,19 +451,9 @@ contract("IncrementalSale", (accounts) => {
 
       /////-----added incrementalSell should have equivalant fund distribution model
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(110, 10000, 1, {
         from: dataManager,
@@ -502,7 +482,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(fModel.address, {
+      await auctionInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -514,32 +494,12 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(100, 10000, 1, {
         from: dataManager,
@@ -583,19 +543,9 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
         from: dataManager,
@@ -1141,7 +1091,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(fModel.address, {
+      await auctionInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -1149,7 +1099,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSellInstance.setFinancialModelAddress(fModel.address, {
+      await iSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
 
@@ -1325,7 +1275,7 @@ contract("IncrementalSale", (accounts) => {
       await iSellInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSellInstance.setFinancialModelAddress(fModel.address, {
+      await iSellInstance.setAllocationAddress(fModel.address, {
         from: deployerAccount,
       });
       await iSellInstance.setRegularSellAddress(regularSellInstance.address, {
@@ -1377,19 +1327,9 @@ contract("IncrementalSale", (accounts) => {
         deployerAccount
       );
       /////----------------add distributionModel
-      await fModel.addFundDistributionModel(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
+        from: dataManager,
+      });
     });
 
     it("check discount timeout", async () => {
@@ -2286,19 +2226,9 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.addFundDistributionModel(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
         from: dataManager,
@@ -2649,19 +2579,9 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await fModel.addFundDistributionModel(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
         from: dataManager,
@@ -2736,19 +2656,9 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await fModel.addFundDistributionModel(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
+        from: dataManager,
+      });
 
       await fModel.assignTreeFundDistributionModel(100, 10000, 0, {
         from: dataManager,

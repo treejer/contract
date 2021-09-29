@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.6;
 
-/** @title FinancialModel interfce */
-interface IFinancialModel {
+/** @title Allocation interfce */
+interface IAllocation {
     /**
-     * @return true in case of FinancialModel contract have been initialized
+     * @return true in case of Allocation contract have been initialized
      */
-    function isFinancialModel() external view returns (bool);
+    function isAllocation() external view returns (bool);
 
     /**
      * @return maxAssignedIndex
@@ -20,16 +20,16 @@ interface IFinancialModel {
     function accessRestriction() external view returns (address);
 
     /** return assignModel data for index {_index} of assingModel array
-     * for example from startingId of assignModels[0] to startingId of
-     * assignModels[1] belong to distributionModelId of assingModels[0]
+     * for example from startingId of allocationToTrees[0] to startingId of
+     * allocationToTrees[1] belong to distributionModelId of assingModels[0]
      * @return startingTreeId is starting tree with model distributionModelId
      * @return distributionModelId for index {_index} of assignModel array
      */
-    function assignModels(uint256 _index)
+    function allocationToTrees(uint256 _index)
         external
         returns (uint256 startingTreeId, uint256 distributionModelId);
 
-    /** return fundDistributions data based on _distributionModelId
+    /** return allocations data based on _distributionModelId
      * @return planterFund share
      * @return referralFund share
      * @return treeResearch share
@@ -38,9 +38,9 @@ interface IFinancialModel {
      * @return treejerDevelop share
      * @return reserveFund1 share
      * @return reserveFund2 share
-     * @return exists is true when there is a fundDistributions for _distributionModelId
+     * @return exists is true when there is a allocations for _distributionModelId
      */
-    function fundDistributions(uint256 _distributionModelId)
+    function allocations(uint256 _distributionModelId)
         external
         view
         returns (
@@ -66,9 +66,9 @@ interface IFinancialModel {
      * @param _treejerDevelop treejer develop share
      * @param _reserveFund1 reserve fund1 share
      * @param _reserveFund2 reserve fund2 share
-     * NOTE emit a {DistributionModelAdded} event
+     * NOTE emit a {AllocationDataAdded} event
      */
-    function addFundDistributionModel(
+    function addAllocationData(
         uint16 _planter,
         uint16 _referral,
         uint16 _treeResearch,
@@ -85,9 +85,9 @@ interface IFinancialModel {
      * @param _startTreeId strating tree id to assign distribution model to
      * @param _endTreeId ending tree id to assign distribution model to
      * @param _distributionModelId distribution model id to assign
-     * NOTE emit a {FundDistributionModelAssigned} event
+     * NOTE emit a {AllocationToTreeAssigned} event
      */
-    function assignTreeFundDistributionModel(
+    function assignAllocationToTree(
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint256 _distributionModelId
@@ -142,11 +142,11 @@ interface IFinancialModel {
      * @dev emitted when a Distribution model added with {modelId}
      */
 
-    event DistributionModelAdded(uint256 modelId);
+    event AllocationDataAdded(uint256 allocationDataId);
 
     /**
      * @dev emitted when FundDistributionModel assigned to a range of tree
      */
 
-    event FundDistributionModelAssigned(uint256 assignModelsLength);
+    event AllocationToTreeAssigned(uint256 allocationToTreesLength);
 }

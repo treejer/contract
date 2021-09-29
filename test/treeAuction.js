@@ -245,12 +245,12 @@ contract("Auction", (accounts) => {
       ///// ---------------- set financial model
 
       await auctionInstance
-        .setFinancialModelAddress(financialModelInstance.address, {
+        .setAllocationAddress(financialModelInstance.address, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -351,7 +351,7 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -387,7 +387,7 @@ contract("Auction", (accounts) => {
       let initialValue = web3.utils.toWei("1");
       let bidInterval = web3.utils.toWei("0.1");
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -411,7 +411,7 @@ contract("Auction", (accounts) => {
         )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -508,7 +508,7 @@ contract("Auction", (accounts) => {
 
       //////// -----------add auction
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -520,7 +520,7 @@ contract("Auction", (accounts) => {
       });
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -750,7 +750,7 @@ contract("Auction", (accounts) => {
 
       ////////////// ------------------ handle address
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -782,7 +782,7 @@ contract("Auction", (accounts) => {
       });
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1066,7 +1066,7 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1086,7 +1086,7 @@ contract("Auction", (accounts) => {
         from: dataManager,
       });
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1224,7 +1224,7 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1286,7 +1286,7 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1319,7 +1319,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1476,7 +1476,7 @@ contract("Auction", (accounts) => {
         { from: deployerAccount }
       );
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1513,7 +1513,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -1885,7 +1885,7 @@ contract("Auction", (accounts) => {
         { from: deployerAccount }
       );
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -1933,7 +1933,7 @@ contract("Auction", (accounts) => {
       /////////////////////////////////// fail to create auction and dm model
 
       await financialModelInstance
-        .addFundDistributionModel(6500, 1200, 1200, 1200, 1200, 1200, 0, 0, {
+        .addAllocationData(6500, 1200, 1200, 1200, 1200, 1200, 0, 0, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.SUM_INVALID);
@@ -1953,7 +1953,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -2321,7 +2321,7 @@ contract("Auction", (accounts) => {
         { from: deployerAccount }
       );
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -2385,14 +2385,14 @@ contract("Auction", (accounts) => {
       ///////////////////// ---------------- fail to add dm model
 
       await financialModelInstance
-        .addFundDistributionModel(3500, 1000, 1000, 1500, 1000, 2000, 0, 0, {
+        .addAllocationData(3500, 1000, 1000, 1500, 1000, 2000, 0, 0, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         3500,
         1000,
         1000,
@@ -3039,7 +3039,7 @@ contract("Auction", (accounts) => {
         { from: deployerAccount }
       );
 
-      await auctionInstance.setFinancialModelAddress(
+      await auctionInstance.setAllocationAddress(
         financialModelInstance.address,
         {
           from: deployerAccount,
@@ -3092,13 +3092,13 @@ contract("Auction", (accounts) => {
       ///////////////////// ---------------- fail to add dm model
 
       await financialModelInstance
-        .addFundDistributionModel(5000, 1000, 1000, 1000, 1000, 1000, 0, 0, {
+        .addAllocationData(5000, 1000, 1000, 1000, 1000, 1000, 0, 0, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       await financialModelInstance
-        .addFundDistributionModel(
+        .addAllocationData(
           5000,
           1000,
           1000,
@@ -3113,7 +3113,7 @@ contract("Auction", (accounts) => {
 
       //////////////////// ----------------- handle dm model
 
-      await financialModelInstance.addFundDistributionModel(
+      await financialModelInstance.addAllocationData(
         5000,
         1000,
         1000,

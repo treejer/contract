@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFunds.sol";
-import "../treasury/IFinancialModel.sol";
+import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/ITreeAttribute.sol";
 import "../regularSell/IRegularSell.sol";
@@ -20,7 +20,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IWethFunds public wethFunds;
-    IFinancialModel public financialModel;
+    IAllocation public allocation;
     ITreeAttribute public treeAttribute;
     IPlanterFund public planterFundContract;
     IRegularSell public regularSell;
@@ -165,13 +165,13 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set FinancialModelAddress
-     * @param _address set to the address of financialModel
+     * @dev admin set Allocation address
+     * @param _address set to the address of Allocation
      */
-    function setFinancialModelAddress(address _address) external onlyAdmin {
-        IFinancialModel candidateContract = IFinancialModel(_address);
-        require(candidateContract.isFinancialModel());
-        financialModel = candidateContract;
+    function setAllocationAddress(address _address) external onlyAdmin {
+        IAllocation candidateContract = IAllocation(_address);
+        require(candidateContract.isAllocation());
+        allocation = candidateContract;
     }
 
     /**
@@ -225,7 +225,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         require(_startTree > 100, "trees are under Auction");
         require(_steps > 0, "incremental period should be positive");
         require(
-            financialModel.distributionModelExistance(_startTree),
+            allocation.distributionModelExistance(_startTree),
             "equivalant fund Model not exists"
         );
 
@@ -406,24 +406,26 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 10000;
 
             (
-                uint16 planterFund,
-                uint16 referralFund,
-                uint16 treeResearch,
-                uint16 localDevelop,
-                uint16 rescueFund,
-                uint16 treejerDevelop,
-                uint16 reserveFund1,
-                uint16 reserveFund2
-            ) = financialModel.findTreeDistribution(treeId);
+                uint16 planterShare,
+                uint16 ambassadorShare,
+                uint16 researchShare,
+                uint16 localDevelopmentShare,
+                uint16 insuranceShare,
+                uint16 treasuryShare,
+                uint16 reserve1Share,
+                uint16 reserve2Share
+            ) = allocation.findTreeDistribution(treeId);
 
-            totalFunds.planterFund += (treePrice * planterFund) / 10000;
-            totalFunds.referralFund += (treePrice * referralFund) / 10000;
-            totalFunds.treeResearch += (treePrice * treeResearch) / 10000;
-            totalFunds.localDevelop += (treePrice * localDevelop) / 10000;
-            totalFunds.rescueFund += (treePrice * rescueFund) / 10000;
-            totalFunds.treejerDevelop += (treePrice * treejerDevelop) / 10000;
-            totalFunds.reserveFund1 += (treePrice * reserveFund1) / 10000;
-            totalFunds.reserveFund2 += (treePrice * reserveFund2) / 10000;
+            totalFunds.planterFund += (treePrice * planterShare) / 10000;
+            totalFunds.referralFund += (treePrice * ambassadorShare) / 10000;
+            totalFunds.treeResearch += (treePrice * researchShare) / 10000;
+            totalFunds.localDevelop +=
+                (treePrice * localDevelopmentShare) /
+                10000;
+            totalFunds.rescueFund += (treePrice * insuranceShare) / 10000;
+            totalFunds.treejerDevelop += (treePrice * treasuryShare) / 10000;
+            totalFunds.reserveFund1 += (treePrice * reserve1Share) / 10000;
+            totalFunds.reserveFund2 += (treePrice * reserve2Share) / 10000;
 
             treeFactory.mintAssignedTree(treeId, totalFunds.buyer, 1);
 

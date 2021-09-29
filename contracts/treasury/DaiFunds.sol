@@ -17,54 +17,50 @@ contract DaiFunds is Initializable {
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public daiToken;
 
-    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
-     * treeResearch, localDevelop,rescueFund,treejerDeveop,reserveFund1
-     * and reserveFund2
+    /** NOTE {totalBalances} is struct of TotalFund that keep total share of
+     * research, localDevelopment,insurance,treejerDeveop,reserve1
+     * and reserve2
      */
-    TotalFunds public totalFunds;
+    TotalBalances public totalBalances;
 
-    address public treeResearchAddress;
-    address public localDevelopAddress;
-    address public rescueFundAddress;
-    address public treejerDevelopAddress;
-    address public reserveFundAddress1;
-    address public reserveFundAddress2;
+    address public researchAddress;
+    address public localDevelopmentAddress;
+    address public insuranceAddress;
+    address public treasuryAddress;
+    address public reserve1Address;
+    address public reserve2Address;
 
-    struct TotalFunds {
-        uint256 treeResearch;
-        uint256 localDevelop;
-        uint256 rescueFund;
-        uint256 treejerDevelop;
-        uint256 reserveFund1;
-        uint256 reserveFund2;
+    struct TotalBalances {
+        uint256 research;
+        uint256 localDevelopment;
+        uint256 insurance;
+        uint256 treasury;
+        uint256 reserve1;
+        uint256 reserve2;
     }
 
-    event TreeResearchBalanceWithdrawn(
+    event ResearchBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event LocalDevelopBalanceWithdrawn(
+    event LocalDevelopmentBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event RescueBalanceWithdrawn(
+    event RescueBalanceWithdrew(uint256 amount, address account, string reason);
+    event TreasuryBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event TreejerDevelopBalanceWithdrawn(
+    event Reserve1BalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event ReserveBalanceWithdrawn1(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event ReserveBalanceWithdrawn2(
+    event Reserve2BalanceWithdrew(
         uint256 amount,
         address account,
         string reason
@@ -72,7 +68,7 @@ contract DaiFunds is Initializable {
 
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
-    event RegularFunded();
+    event TreeFundedBatch();
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -144,163 +140,167 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin set treeResearch address to fund
+     * @dev admin set research address to fund
      * @param _address tree research address
      */
-    function setTreeResearchAddress(address payable _address)
+    function setResearchAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        treeResearchAddress = _address;
+        researchAddress = _address;
     }
 
     /**
-     * @dev admin set localDevelop address to fund
+     * @dev admin set localDevelopment address to fund
      * @param _address local develop address
      */
-    function setLocalDevelopAddress(address payable _address)
+    function setLocalDevelopmentAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        localDevelopAddress = _address;
+        localDevelopmentAddress = _address;
     }
 
     /**
      * @dev admin set rescue address to fund
      * @param _address rescue fund address
      */
-    function setRescueFundAddress(address payable _address)
+    function setInsuranceAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        rescueFundAddress = _address;
+        insuranceAddress = _address;
     }
 
     /**
-     * @dev admin set treejerDevelop address to fund
+     * @dev admin set treasury address to fund
      * @param _address treejer develop address
      */
-    function setTreejerDevelopAddress(address payable _address)
+    function setTreasuryAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        treejerDevelopAddress = _address;
+        treasuryAddress = _address;
     }
 
     /**
-     * @dev admin set reserveFund1 address to fund
-     * @param _address reserveFund1 address
+     * @dev admin set reserve1 address to fund
+     * @param _address reserve1 address
      */
-    function setReserveFund1Address(address payable _address)
+    function setReserve1Address(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        reserveFundAddress1 = _address;
+        reserve1Address = _address;
     }
 
     /**
-     * @dev admin set reserveFund2 address to fund
-     * @param _address reserveFund2 address
+     * @dev admin set reserve2 address to fund
+     * @param _address reserve2 address
      */
-    function setReserveFund2Address(address payable _address)
+    function setReserve2Address(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        reserveFundAddress2 = _address;
+        reserve2Address = _address;
     }
 
     /**
      * @dev fund a tree by RegularSale contract and based on distribution
-     * model of tree, shares divide beetwen (planter, referral, treeResearch,
-     * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
-     * and added to the totalFunds of each part,
+     * model of tree, shares divide beetwen (planter, referral, research,
+     * localDevelopment, insurance, treasury, reserve1 and reserve2)
+     * and added to the totalBalances of each part,
      * @param _treeId id of a tree to fund
-     * NOTE planterFund and referralFund share transfer to PlanterFund contract
+     * NOTE planterShare and ambassadorShare share transfer to PlanterFund contract
      * and add to totalFund section there
      */
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
-        uint16 _planterFund,
-        uint16 _referralFund,
-        uint16 _treeResearch,
-        uint16 _localDevelop,
-        uint16 _rescueFund,
-        uint16 _treejerDevelop,
-        uint16 _reserveFund1,
-        uint16 _reserveFund2
+        uint16 _planterShare,
+        uint16 _ambassadorShare,
+        uint16 _research,
+        uint16 _localDevelopment,
+        uint16 _insurance,
+        uint16 _treasury,
+        uint16 _reserve1,
+        uint16 _reserve2
     ) external onlyTreejerContract {
-        totalFunds.rescueFund += (_amount * _rescueFund) / 10000;
+        totalBalances.insurance += (_amount * _insurance) / 10000;
 
-        totalFunds.localDevelop += (_amount * _localDevelop) / 10000;
+        totalBalances.localDevelopment += (_amount * _localDevelopment) / 10000;
 
-        totalFunds.reserveFund1 += (_amount * _reserveFund1) / 10000;
+        totalBalances.reserve1 += (_amount * _reserve1) / 10000;
 
-        totalFunds.reserveFund2 += (_amount * _reserveFund2) / 10000;
+        totalBalances.reserve2 += (_amount * _reserve2) / 10000;
 
-        totalFunds.treejerDevelop += (_amount * _treejerDevelop) / 10000;
+        totalBalances.treasury += (_amount * _treasury) / 10000;
 
-        totalFunds.treeResearch += (_amount * _treeResearch) / 10000;
+        totalBalances.research += (_amount * _research) / 10000;
 
-        uint256 planterFund = (_amount * _planterFund) / 10000;
-        uint256 referralFund = (_amount * _referralFund) / 10000;
+        uint256 planterShare = (_amount * _planterShare) / 10000;
+        uint256 ambassadorShare = (_amount * _ambassadorShare) / 10000;
 
         bool success = daiToken.transfer(
             address(planterFundContract),
-            planterFund + referralFund
+            planterShare + ambassadorShare
         );
 
         require(success, "unsuccessful transfer");
 
-        planterFundContract.setPlanterFunds(_treeId, planterFund, referralFund);
+        planterFundContract.setPlanterFunds(
+            _treeId,
+            planterShare,
+            ambassadorShare
+        );
 
-        emit TreeFunded(_treeId, _amount, planterFund + referralFund);
+        emit TreeFunded(_treeId, _amount, planterShare + ambassadorShare);
     }
 
     //TODO : ADD_COMMENT
-    function regularFund(
-        uint256 _totalPlanterFund,
-        uint256 _totalReferralFund,
-        uint256 _totalTreeResearch,
-        uint256 _totalLocalDevelop,
-        uint256 _totalRescueFund,
-        uint256 _totalTreejerDevelop,
-        uint256 _totalReserveFund1,
-        uint256 _totalReserveFund2
+    function fundTreeBatch(
+        uint256 _totalPlanterShare,
+        uint256 _totalAmbassadorShare,
+        uint256 _totalResearch,
+        uint256 _totalLocalDevelopment,
+        uint256 _totalInsurance,
+        uint256 _totalTreasury,
+        uint256 _totalReserve1,
+        uint256 _totalReserve2
     ) external onlyTreejerContract {
-        totalFunds.treeResearch += _totalTreeResearch;
+        totalBalances.research += _totalResearch;
 
-        totalFunds.localDevelop += _totalLocalDevelop;
+        totalBalances.localDevelopment += _totalLocalDevelopment;
 
-        totalFunds.rescueFund += _totalRescueFund;
+        totalBalances.insurance += _totalInsurance;
 
-        totalFunds.treejerDevelop += _totalTreejerDevelop;
+        totalBalances.treasury += _totalTreasury;
 
-        totalFunds.reserveFund1 += _totalReserveFund1;
+        totalBalances.reserve1 += _totalReserve1;
 
-        totalFunds.reserveFund2 += _totalReserveFund2;
+        totalBalances.reserve2 += _totalReserve2;
 
         bool success = daiToken.transfer(
             address(planterFundContract),
-            _totalPlanterFund + _totalReferralFund
+            _totalPlanterShare + _totalAmbassadorShare
         );
 
         require(success, "unsuccessful transfer");
 
-        emit RegularFunded();
+        emit TreeFundedBatch();
     }
 
     //TODO:ADD_COMMENTS
-    function refererTransferDai(uint256 _amount) external onlyTreejerContract {
-        require(totalFunds.treejerDevelop >= _amount, "Liquidity not enough");
+    function transferReferrerDai(uint256 _amount) external onlyTreejerContract {
+        require(totalBalances.treasury >= _amount, "Liquidity not enough");
 
-        totalFunds.treejerDevelop -= _amount;
+        totalBalances.treasury -= _amount;
 
         bool success = daiToken.transfer(address(planterFundContract), _amount);
 
@@ -308,170 +308,160 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treeResearch totalFund in case of
-     * valid {_amount}  and daiToken transfer to {treeResearchAddress}
+     * @dev admin withdraw {_amount} from research totalFund in case of
+     * valid {_amount}  and daiToken transfer to {researchAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreeResearch(uint256 _amount, string calldata _reason)
+    function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(treeResearchAddress)
+        validAddress(researchAddress)
     {
         require(
-            _amount <= totalFunds.treeResearch && _amount > 0,
+            _amount <= totalBalances.research && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.treeResearch -= _amount;
+        totalBalances.research -= _amount;
 
-        bool success = daiToken.transfer(treeResearchAddress, _amount);
+        bool success = daiToken.transfer(researchAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit TreeResearchBalanceWithdrawn(
+        emit ResearchBalanceWithdrew(_amount, researchAddress, _reason);
+    }
+
+    /**
+     * @dev admin withdraw {_amount} from localDevelopment totalFund in case of
+     * valid {_amount} and daiToken transfer to {localDevelopmentAddress}
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawLocalDevelopmentBalance(
+        uint256 _amount,
+        string calldata _reason
+    ) external ifNotPaused onlyAdmin validAddress(localDevelopmentAddress) {
+        require(
+            _amount <= totalBalances.localDevelopment && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalBalances.localDevelopment -= _amount;
+
+        bool success = daiToken.transfer(localDevelopmentAddress, _amount);
+
+        require(success, "unsuccessful transfer");
+
+        emit LocalDevelopmentBalanceWithdrew(
             _amount,
-            treeResearchAddress,
+            localDevelopmentAddress,
             _reason
         );
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelop totalFund in case of
-     * valid {_amount} and daiToken transfer to {localDevelopAddress}
+     * @dev admin withdraw {_amount} from insurance totalFund in case of
+     * valid {_amount} and daiToken transfer to {insuranceAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawLocalDevelop(uint256 _amount, string calldata _reason)
+    function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(localDevelopAddress)
+        validAddress(insuranceAddress)
     {
         require(
-            _amount <= totalFunds.localDevelop && _amount > 0,
+            _amount <= totalBalances.insurance && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.localDevelop -= _amount;
+        totalBalances.insurance -= _amount;
 
-        bool success = daiToken.transfer(localDevelopAddress, _amount);
+        bool success = daiToken.transfer(insuranceAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit LocalDevelopBalanceWithdrawn(
-            _amount,
-            localDevelopAddress,
-            _reason
-        );
+        emit RescueBalanceWithdrew(_amount, insuranceAddress, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from rescueFund totalFund in case of
-     * valid {_amount} and daiToken transfer to {rescueFundAddress}
+     * @dev admin withdraw {_amount} from treasury totalFund in case of
+     * valid {_amount} and daiToken transfer to {treasuryAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawRescueFund(uint256 _amount, string calldata _reason)
+    function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(rescueFundAddress)
+        validAddress(treasuryAddress)
     {
         require(
-            _amount <= totalFunds.rescueFund && _amount > 0,
+            _amount <= totalBalances.treasury && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.rescueFund -= _amount;
+        totalBalances.treasury -= _amount;
 
-        bool success = daiToken.transfer(rescueFundAddress, _amount);
+        bool success = daiToken.transfer(treasuryAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
+        emit TreasuryBalanceWithdrew(_amount, treasuryAddress, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of
-     * valid {_amount} and daiToken transfer to {treejerDevelopAddress}
+     * @dev admin withdraw {_amount} from reserve1 totalFund in case of
+     * valid {_amount} and daiToken transfer to {reserve1Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreejerDevelop(uint256 _amount, string calldata _reason)
+    function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(treejerDevelopAddress)
+        validAddress(reserve1Address)
     {
         require(
-            _amount <= totalFunds.treejerDevelop && _amount > 0,
+            _amount <= totalBalances.reserve1 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.treejerDevelop -= _amount;
+        totalBalances.reserve1 -= _amount;
 
-        bool success = daiToken.transfer(treejerDevelopAddress, _amount);
+        bool success = daiToken.transfer(reserve1Address, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit TreejerDevelopBalanceWithdrawn(
-            _amount,
-            treejerDevelopAddress,
-            _reason
-        );
+        emit Reserve1BalanceWithdrew(_amount, reserve1Address, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of
-     * valid {_amount} and daiToken transfer to {reserveFundAddress1}
+     * @dev admin withdraw {_amount} from reserve2 totalFund in case of
+     * valid {_amount} and daiToken transfer to {reserve2Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawReserveFund1(uint256 _amount, string calldata _reason)
+    function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(reserveFundAddress1)
+        validAddress(reserve2Address)
     {
         require(
-            _amount <= totalFunds.reserveFund1 && _amount > 0,
+            _amount <= totalBalances.reserve2 && _amount > 0,
             "insufficient amount"
         );
 
-        totalFunds.reserveFund1 -= _amount;
+        totalBalances.reserve2 -= _amount;
 
-        bool success = daiToken.transfer(reserveFundAddress1, _amount);
-
-        require(success, "unsuccessful transfer");
-
-        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
-    }
-
-    /**
-     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of
-     * valid {_amount} and daiToken transfer to {reserveFundAddress2}
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
-    function withdrawReserveFund2(uint256 _amount, string calldata _reason)
-        external
-        ifNotPaused
-        onlyAdmin
-        validAddress(reserveFundAddress2)
-    {
-        require(
-            _amount <= totalFunds.reserveFund2 && _amount > 0,
-            "insufficient amount"
-        );
-
-        totalFunds.reserveFund2 -= _amount;
-
-        bool success = daiToken.transfer(reserveFundAddress2, _amount);
+        bool success = daiToken.transfer(reserve2Address, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
 }

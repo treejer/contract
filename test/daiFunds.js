@@ -118,172 +118,175 @@ contract("DaiFunds", (accounts) => {
         planterFundsInstnce.address,
         "Set planter fund contract address not true"
       );
-      //-------------------------------setTreeResearchAddress test-------------------------------------------------------
-      let treeResearchAddress = userAccount4;
+      //-------------------------------setResearchAddress test-------------------------------------------------------
+      let researchAddress = userAccount4;
 
-      await daiFundsInstance.setTreeResearchAddress(treeResearchAddress, {
+      await daiFundsInstance.setResearchAddress(researchAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.treeResearchAddress(),
-        treeResearchAddress,
-        "Set treeResearchAddress address not true"
+        await daiFundsInstance.researchAddress(),
+        researchAddress,
+        "Set researchAddress address not true"
       );
 
-      //------------------------setTreeResearchAddress should be fail (invalid access)---------------------------------
-      treeResearchAddress = userAccount4;
+      //------------------------setResearchAddress should be fail (invalid access)---------------------------------
+      researchAddress = userAccount4;
 
       await daiFundsInstance
-        .setTreeResearchAddress(treeResearchAddress, {
+        .setResearchAddress(researchAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .setTreeResearchAddress(zeroAddress, {
+        .setResearchAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      //-------------------------------setLocalDevelopAddress should be fail (invalid access)----------------------------
-      let localDevelopAddress = userAccount4;
+      //-------------------------------setLocalDevelopmentAddress should be fail (invalid access)----------------------------
+      let localDevelopmentAddress = userAccount4;
 
       await daiFundsInstance
-        .setLocalDevelopAddress(localDevelopAddress, {
+        .setLocalDevelopmentAddress(localDevelopmentAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .setLocalDevelopAddress(zeroAddress, {
+        .setLocalDevelopmentAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
-      localDevelopAddress = userAccount4;
+      //-------------------------------setLocalDevelopmentAddress test-------------------------------------------------------
+      localDevelopmentAddress = userAccount4;
 
-      await daiFundsInstance.setLocalDevelopAddress(localDevelopAddress, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        await daiFundsInstance.localDevelopAddress(),
-        localDevelopAddress,
-        "Set localDevelopAddress address not true"
+      await daiFundsInstance.setLocalDevelopmentAddress(
+        localDevelopmentAddress,
+        {
+          from: deployerAccount,
+        }
       );
 
-      //-----------------------------setRescueFundAddress should be fail (invalid access)---------------------------------
-      let rescueFundAddress = userAccount4;
-
-      await daiFundsInstance
-        .setRescueFundAddress(rescueFundAddress, {
-          from: userAccount5,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await daiFundsInstance
-        .setRescueFundAddress(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      //-----------------------------setRescueFundAddress should be success---------------------------------
-      rescueFundAddress = userAccount4;
-
-      await daiFundsInstance.setRescueFundAddress(rescueFundAddress, {
-        from: deployerAccount,
-      });
-
       assert.equal(
-        await daiFundsInstance.rescueFundAddress(),
-        rescueFundAddress,
-        "Set rescueFundAddress address not true"
+        await daiFundsInstance.localDevelopmentAddress(),
+        localDevelopmentAddress,
+        "Set localDevelopmentAddress address not true"
       );
 
-      //--------------------------setTreejerDevelopAddress should be fail (invalid access)--------------------
-
-      let treejerDevelopAddress = userAccount4;
+      //-----------------------------setInsuranceAddress should be fail (invalid access)---------------------------------
+      let insuranceAddress = userAccount4;
 
       await daiFundsInstance
-        .setTreejerDevelopAddress(treejerDevelopAddress, {
+        .setInsuranceAddress(insuranceAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .setTreejerDevelopAddress(zeroAddress, {
+        .setInsuranceAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      //--------------------------setTreejerDevelopAddress should be success--------------------
+      //-----------------------------setInsuranceAddress should be success---------------------------------
+      insuranceAddress = userAccount4;
 
-      treejerDevelopAddress = userAccount4;
-
-      await daiFundsInstance.setTreejerDevelopAddress(treejerDevelopAddress, {
+      await daiFundsInstance.setInsuranceAddress(insuranceAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.treejerDevelopAddress(),
-        treejerDevelopAddress,
-        "Set treejerDevelopAddress address not true"
+        await daiFundsInstance.insuranceAddress(),
+        insuranceAddress,
+        "Set insuranceAddress address not true"
       );
 
-      //-------------------setReserveFund1Address should be fail (invalid access)-------------------
-      let reserveFundAddress1 = userAccount4;
+      //--------------------------setTreasuryAddress should be fail (invalid access)--------------------
+
+      let treasuryAddress = userAccount4;
 
       await daiFundsInstance
-        .setReserveFund1Address(reserveFundAddress1, {
+        .setTreasuryAddress(treasuryAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .setReserveFund1Address(zeroAddress, {
+        .setTreasuryAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-      //--------------------------------setReserveFund1Address should be success-----------------------
-      reserveFundAddress1 = userAccount4;
 
-      await daiFundsInstance.setReserveFund1Address(reserveFundAddress1, {
+      //--------------------------setTreasuryAddress should be success--------------------
+
+      treasuryAddress = userAccount4;
+
+      await daiFundsInstance.setTreasuryAddress(treasuryAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.reserveFundAddress1(),
-        reserveFundAddress1,
-        "Set reserveFundAddress1 address not true"
+        await daiFundsInstance.treasuryAddress(),
+        treasuryAddress,
+        "Set treasuryAddress address not true"
       );
-      //----------------------------------------setReserveFund2Address should be fail (invalid access)-----------------------------------
-      let reserveFundAddress2 = userAccount4;
+
+      //-------------------setReserve1Address should be fail (invalid access)-------------------
+      let reserve1Address = userAccount4;
 
       await daiFundsInstance
-        .setReserveFund2Address(reserveFundAddress2, {
+        .setReserve1Address(reserve1Address, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .setReserveFund2Address(zeroAddress, {
+        .setReserve1Address(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+      //--------------------------------setReserve1Address should be success-----------------------
+      reserve1Address = userAccount4;
 
-      //-------------------------------------setReserveFund2Address should be success------------------------------------------------
-      reserveFundAddress2 = userAccount4;
-
-      await daiFundsInstance.setReserveFund2Address(reserveFundAddress2, {
+      await daiFundsInstance.setReserve1Address(reserve1Address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.reserveFundAddress2(),
-        reserveFundAddress2,
-        "Set reserveFundAddress2 address not true"
+        await daiFundsInstance.reserve1Address(),
+        reserve1Address,
+        "Set reserve1Address address not true"
+      );
+      //----------------------------------------setReserve2Address should be fail (invalid access)-----------------------------------
+      let reserve2Address = userAccount4;
+
+      await daiFundsInstance
+        .setReserve2Address(reserve2Address, {
+          from: userAccount5,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await daiFundsInstance
+        .setReserve2Address(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      //-------------------------------------setReserve2Address should be success------------------------------------------------
+      reserve2Address = userAccount4;
+
+      await daiFundsInstance.setReserve2Address(reserve2Address, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        await daiFundsInstance.reserve2Address(),
+        reserve2Address,
+        "Set reserve2Address address not true"
       );
     });
   });
@@ -333,14 +336,14 @@ contract("DaiFunds", (accounts) => {
       const treeId = 1;
       let amount = web3.utils.toWei("1", "Ether");
 
-      const planterFund = 4000;
-      const referralFund = 2000;
-      const treeResearch = 1000;
-      const localDevelop = 1000;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const planterShare = 4000;
+      const ambassadorShare = 2000;
+      const research = 1000;
+      const localDevelopment = 1000;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
       ////--------------check set role----------------
       await Common.addTreejerContractRole(
@@ -357,14 +360,14 @@ contract("DaiFunds", (accounts) => {
 
       ////--------------add and assign DistributionModel for tree
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -381,26 +384,26 @@ contract("DaiFunds", (accounts) => {
       const eventTx = await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount3 }
       );
 
       let expected = {
-        planterFund: (planterFund * amount) / 10000,
-        referralFund: (referralFund * amount) / 10000,
-        treeResearch: (treeResearch * amount) / 10000,
-        localDevelop: (localDevelop * amount) / 10000,
-        rescueFund: (rescueFund * amount) / 10000,
-        treejerDevelop: (treejerDevelop * amount) / 10000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        planterShare: (planterShare * amount) / 10000,
+        ambassadorShare: (ambassadorShare * amount) / 10000,
+        research: (research * amount) / 10000,
+        localDevelopment: (localDevelopment * amount) / 10000,
+        insurance: (insurance * amount) / 10000,
+        treasury: (treasury * amount) / 10000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
@@ -409,8 +412,8 @@ contract("DaiFunds", (accounts) => {
           Number(ev.amount) == Number(amount) &&
           Number(ev.planterPart) ==
             Math.add(
-              Number(expected.planterFund),
-              Number(expected.referralFund)
+              Number(expected.planterShare),
+              Number(expected.ambassadorShare)
             )
         );
       });
@@ -426,91 +429,92 @@ contract("DaiFunds", (accounts) => {
       assert.equal(
         Number(daiFundBalance),
         Math.add(
-          expected.localDevelop,
-          expected.rescueFund,
-          expected.reserveFund1,
-          expected.reserveFund1,
-          expected.reserveFund2,
-          expected.treeResearch,
-          expected.treejerDevelop
+          expected.localDevelopment,
+          expected.insurance,
+          expected.reserve1,
+          expected.reserve1,
+          expected.reserve2,
+          expected.research,
+          expected.treasury
         )
       );
 
       assert.equal(
         Number(planterFundBalance),
-        Math.add(expected.planterFund, expected.referralFund)
+        Math.add(expected.planterShare, expected.ambassadorShare)
       );
 
-      //check daiFund totalFunds
-      let totalFundsDaiFunds = await daiFundsInstance.totalFunds();
+      //check daiFund totalBalances
+      let totalBalancesDaiFunds = await daiFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFundsDaiFunds.treeResearch),
-        expected.treeResearch,
-        "treeResearch funds invalid"
-      );
-
-      assert.equal(
-        Number(totalFundsDaiFunds.localDevelop),
-        expected.localDevelop,
-        "localDevelop funds invalid"
+        Number(totalBalancesDaiFunds.research),
+        expected.research,
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.rescueFund),
-        expected.rescueFund,
-        "rescueFund funds invalid"
+        Number(totalBalancesDaiFunds.localDevelopment),
+        expected.localDevelopment,
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.treejerDevelop),
-        expected.treejerDevelop,
-        "treejerDevelop funds invalid"
+        Number(totalBalancesDaiFunds.insurance),
+        expected.insurance,
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.reserveFund1),
-        expected.reserveFund1,
-        "reserveFund1 funds invalid"
+        Number(totalBalancesDaiFunds.treasury),
+        expected.treasury,
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.reserveFund2),
-        expected.reserveFund2,
-        "reserveFund2 funds invalid"
+        Number(totalBalancesDaiFunds.reserve1),
+        expected.reserve1,
+        "reserve1 funds invalid"
       );
 
-      // check planterFunds and referralFunds in planterFund
+      assert.equal(
+        Number(totalBalancesDaiFunds.reserve2),
+        expected.reserve2,
+        "reserve2 funds invalid"
+      );
 
-      let pFund = await planterFundsInstnce.planterFunds.call(treeId);
-      let rFund = await planterFundsInstnce.referralFunds.call(treeId);
+      // check planterShare and ambassadorShare in planterShare
+
+      let pShare = await planterFundsInstnce.planterShare.call(treeId);
+      let aShare = await planterFundsInstnce.ambassadorShare.call(treeId);
 
       assert.equal(
-        Number(pFund),
-        expected.planterFund,
+        Number(pShare),
+        expected.planterShare,
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(rFund),
-        expected.referralFund,
-        "referral funds invalid"
+        Number(aShare),
+        expected.ambassadorShare,
+        "ambassador funds invalid"
       );
 
-      //check fund planter totalFunds
+      //check fund planter totalBalances
 
-      let totalFundsPlanterFund = await planterFundsInstnce.totalFunds.call();
+      let totalBalancesPlanterFund =
+        await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsPlanterFund.planterFund),
-        expected.planterFund,
+        Number(totalBalancesPlanterFund.planterShare),
+        expected.planterShare,
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsPlanterFund.referralFund),
-        expected.referralFund,
-        "referral funds invalid"
+        Number(totalBalancesPlanterFund.ambassadorShare),
+        expected.ambassadorShare,
+        "ambassador funds invalid"
       );
     });
     it("Should fundTree work successfully for 2 tree fund", async () => {
@@ -519,23 +523,23 @@ contract("DaiFunds", (accounts) => {
       let amount1 = web3.utils.toWei("1", "Ether");
       let amount2 = web3.utils.toWei("0.5", "Ether");
 
-      const planterFund1 = 4000;
-      const referralFund1 = 2000;
-      const treeResearch1 = 1000;
-      const localDevelop1 = 1000;
-      const rescueFund1 = 1000;
-      const treejerDevelop1 = 1000;
-      const reserveFund1_1 = 0;
-      const reserveFund2_1 = 0;
+      const planterShare1 = 4000;
+      const ambassadorShare1 = 2000;
+      const research1 = 1000;
+      const localDevelopment1 = 1000;
+      const insurance1 = 1000;
+      const treasury1 = 1000;
+      const reserve1_1 = 0;
+      const reserve2_1 = 0;
 
-      const planterFund2 = 4000;
-      const referralFund2 = 2000;
-      const treeResearch2 = 1000;
-      const localDevelop2 = 1000;
-      const rescueFund2 = 1000;
-      const treejerDevelop2 = 1000;
-      const reserveFund1_2 = 0;
-      const reserveFund2_2 = 0;
+      const planterShare2 = 4000;
+      const ambassadorShare2 = 2000;
+      const research2 = 1000;
+      const localDevelopment2 = 1000;
+      const insurance2 = 1000;
+      const treasury2 = 1000;
+      const reserve1_2 = 0;
+      const reserve2_2 = 0;
 
       ////--------------check set role----------------
       await Common.addTreejerContractRole(
@@ -552,28 +556,28 @@ contract("DaiFunds", (accounts) => {
 
       ////--------------add and assign DistributionModel for tree
       await fModel.addAllocationData(
-        planterFund1,
-        referralFund1,
-        treeResearch1,
-        localDevelop1,
-        rescueFund1,
-        treejerDevelop1,
-        reserveFund1_1,
-        reserveFund2_1,
+        planterShare1,
+        ambassadorShare1,
+        research1,
+        localDevelopment1,
+        insurance1,
+        treasury1,
+        reserve1_1,
+        reserve2_1,
         {
           from: dataManager,
         }
       );
 
       await fModel.addAllocationData(
-        planterFund2,
-        referralFund2,
-        treeResearch2,
-        localDevelop2,
-        rescueFund2,
-        treejerDevelop2,
-        reserveFund1_2,
-        reserveFund2_2,
+        planterShare2,
+        ambassadorShare2,
+        research2,
+        localDevelopment2,
+        insurance2,
+        treasury2,
+        reserve1_2,
+        reserve2_2,
         {
           from: dataManager,
         }
@@ -595,51 +599,51 @@ contract("DaiFunds", (accounts) => {
       const eventTx1 = await daiFundsInstance.fundTree(
         treeId1,
         amount1,
-        planterFund1,
-        referralFund1,
-        treeResearch1,
-        localDevelop1,
-        rescueFund1,
-        treejerDevelop1,
-        reserveFund1_1,
-        reserveFund2_1,
+        planterShare1,
+        ambassadorShare1,
+        research1,
+        localDevelopment1,
+        insurance1,
+        treasury1,
+        reserve1_1,
+        reserve2_1,
         { from: userAccount3 }
       );
 
       const eventTx2 = await daiFundsInstance.fundTree(
         treeId2,
         amount2,
-        planterFund2,
-        referralFund2,
-        treeResearch2,
-        localDevelop2,
-        rescueFund2,
-        treejerDevelop2,
-        reserveFund1_2,
-        reserveFund2_2,
+        planterShare2,
+        ambassadorShare2,
+        research2,
+        localDevelopment2,
+        insurance2,
+        treasury2,
+        reserve1_2,
+        reserve2_2,
         { from: userAccount3 }
       );
 
       let expected1 = {
-        planterFund: (planterFund1 * amount1) / 10000,
-        referralFund: (referralFund1 * amount1) / 10000,
-        treeResearch: (treeResearch1 * amount1) / 10000,
-        localDevelop: (localDevelop1 * amount1) / 10000,
-        rescueFund: (rescueFund1 * amount1) / 10000,
-        treejerDevelop: (treejerDevelop1 * amount1) / 10000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        planterShare: (planterShare1 * amount1) / 10000,
+        ambassadorShare: (ambassadorShare1 * amount1) / 10000,
+        research: (research1 * amount1) / 10000,
+        localDevelopment: (localDevelopment1 * amount1) / 10000,
+        insurance: (insurance1 * amount1) / 10000,
+        treasury: (treasury1 * amount1) / 10000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       let expected2 = {
-        planterFund: (planterFund2 * amount2) / 10000,
-        referralFund: (referralFund2 * amount2) / 10000,
-        treeResearch: (treeResearch2 * amount2) / 10000,
-        localDevelop: (localDevelop2 * amount2) / 10000,
-        rescueFund: (rescueFund2 * amount2) / 10000,
-        treejerDevelop: (treejerDevelop2 * amount2) / 10000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        planterShare: (planterShare2 * amount2) / 10000,
+        ambassadorShare: (ambassadorShare2 * amount2) / 10000,
+        research: (research2 * amount2) / 10000,
+        localDevelopment: (localDevelopment2 * amount2) / 10000,
+        insurance: (insurance2 * amount2) / 10000,
+        treasury: (treasury2 * amount2) / 10000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
@@ -648,8 +652,8 @@ contract("DaiFunds", (accounts) => {
           Number(ev.amount) == Number(amount1) &&
           Number(ev.planterPart) ==
             Math.add(
-              Number(expected1.planterFund),
-              Number(expected1.referralFund)
+              Number(expected1.planterShare),
+              Number(expected1.ambassadorShare)
             )
         );
       });
@@ -660,8 +664,8 @@ contract("DaiFunds", (accounts) => {
           Number(ev.amount) == Number(amount2) &&
           Number(ev.planterPart) ==
             Math.add(
-              Number(expected2.planterFund),
-              Number(expected2.referralFund)
+              Number(expected2.planterShare),
+              Number(expected2.ambassadorShare)
             )
         );
       });
@@ -677,20 +681,20 @@ contract("DaiFunds", (accounts) => {
       assert.equal(
         Number(daiFundBalance),
         Math.add(
-          expected1.localDevelop,
-          expected1.rescueFund,
-          expected1.reserveFund1,
-          expected1.reserveFund1,
-          expected1.reserveFund2,
-          expected1.treeResearch,
-          expected1.treejerDevelop,
-          expected2.localDevelop,
-          expected2.rescueFund,
-          expected2.reserveFund1,
-          expected2.reserveFund1,
-          expected2.reserveFund2,
-          expected2.treeResearch,
-          expected2.treejerDevelop
+          expected1.localDevelopment,
+          expected1.insurance,
+          expected1.reserve1,
+          expected1.reserve1,
+          expected1.reserve2,
+          expected1.research,
+          expected1.treasury,
+          expected2.localDevelopment,
+          expected2.insurance,
+          expected2.reserve1,
+          expected2.reserve1,
+          expected2.reserve2,
+          expected2.research,
+          expected2.treasury
         ),
         "daiFund balance is not correct"
       );
@@ -698,98 +702,99 @@ contract("DaiFunds", (accounts) => {
       assert.equal(
         Number(planterFundBalance),
         Math.add(
-          expected1.planterFund,
-          expected1.referralFund,
-          expected2.planterFund,
-          expected2.referralFund
+          expected1.planterShare,
+          expected1.ambassadorShare,
+          expected2.planterShare,
+          expected2.ambassadorShare
         ),
-        "planterFund balance is not correct"
+        "planterShare balance is not correct"
       );
 
-      //check daiFund totalFunds
-      let totalFundsDaiFunds = await daiFundsInstance.totalFunds();
+      //check daiFund totalBalances
+      let totalBalancesDaiFunds = await daiFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFundsDaiFunds.treeResearch),
-        Math.add(expected1.treeResearch, expected2.treeResearch),
-        "treeResearch funds invalid"
-      );
-
-      assert.equal(
-        Number(totalFundsDaiFunds.localDevelop),
-        Math.add(expected1.localDevelop, expected2.localDevelop),
-        "localDevelop funds invalid"
+        Number(totalBalancesDaiFunds.research),
+        Math.add(expected1.research, expected2.research),
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.rescueFund),
-        Math.add(expected1.rescueFund, expected2.rescueFund),
-        "rescueFund funds invalid"
+        Number(totalBalancesDaiFunds.localDevelopment),
+        Math.add(expected1.localDevelopment, expected2.localDevelopment),
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.treejerDevelop),
-        Math.add(expected1.treejerDevelop, expected2.treejerDevelop),
-        "treejerDevelop funds invalid"
+        Number(totalBalancesDaiFunds.insurance),
+        Math.add(expected1.insurance, expected2.insurance),
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.reserveFund1),
-        Math.add(expected1.reserveFund1, expected2.reserveFund1),
-        "reserveFund1 funds invalid"
+        Number(totalBalancesDaiFunds.treasury),
+        Math.add(expected1.treasury, expected2.treasury),
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsDaiFunds.reserveFund2),
-        Math.add(expected1.reserveFund2, expected2.reserveFund2),
-        "reserveFund2 funds invalid"
+        Number(totalBalancesDaiFunds.reserve1),
+        Math.add(expected1.reserve1, expected2.reserve1),
+        "reserve1 funds invalid"
       );
 
-      // check planterFunds and referralFunds in planterFund
+      assert.equal(
+        Number(totalBalancesDaiFunds.reserve2),
+        Math.add(expected1.reserve2, expected2.reserve2),
+        "reserve2 funds invalid"
+      );
 
-      let pFund1 = await planterFundsInstnce.planterFunds.call(treeId1);
-      let rFund1 = await planterFundsInstnce.referralFunds.call(treeId1);
-      let pFund2 = await planterFundsInstnce.planterFunds.call(treeId2);
-      let rFund2 = await planterFundsInstnce.referralFunds.call(treeId2);
+      // check planterShare and ambassadorShare in planterShare
+
+      let pShare1 = await planterFundsInstnce.planterShare.call(treeId1);
+      let aShare1 = await planterFundsInstnce.ambassadorShare.call(treeId1);
+      let pShare2 = await planterFundsInstnce.planterShare.call(treeId2);
+      let aShare2 = await planterFundsInstnce.ambassadorShare.call(treeId2);
 
       assert.equal(
-        Number(pFund1),
-        expected1.planterFund,
+        Number(pShare1),
+        expected1.planterShare,
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(rFund1),
-        expected1.referralFund,
-        "referral funds invalid"
+        Number(aShare1),
+        expected1.ambassadorShare,
+        "ambassador funds invalid"
       );
 
       assert.equal(
-        Number(pFund2),
-        expected2.planterFund,
+        Number(pShare2),
+        expected2.planterShare,
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(rFund2),
-        expected2.referralFund,
-        "referral funds invalid"
+        Number(aShare2),
+        expected2.ambassadorShare,
+        "ambassador funds invalid"
       );
 
-      //check fund planter totalFunds
+      //check fund planter totalBalances
 
-      let totalFundsPlanterFund = await planterFundsInstnce.totalFunds.call();
+      let totalBalancesPlanterFund =
+        await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsPlanterFund.planterFund),
-        Math.add(expected1.planterFund, expected2.planterFund),
+        Number(totalBalancesPlanterFund.planterShare),
+        Math.add(expected1.planterShare, expected2.planterShare),
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsPlanterFund.referralFund),
-        Math.add(expected1.referralFund, expected2.referralFund),
-        "referral funds invalid"
+        Number(totalBalancesPlanterFund.ambassadorShare),
+        Math.add(expected1.ambassadorShare, expected2.ambassadorShare),
+        "ambassador funds invalid"
       );
     });
 
@@ -799,14 +804,14 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 3000;
-      const referralFund = 1000;
-      const treeResearch = 1000;
-      const localDevelop = 1000;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 1000;
-      const reserveFund2 = 1000;
+      const planterShare = 3000;
+      const ambassadorShare = 1000;
+      const research = 1000;
+      const localDevelopment = 1000;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 1000;
+      const reserve2 = 1000;
 
       ///////////--------------------- add roles
 
@@ -819,14 +824,14 @@ contract("DaiFunds", (accounts) => {
       //////-------------------- handle dm model
 
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -847,14 +852,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -862,43 +867,47 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
       );
 
-      await daiFundsInstance.setTreeResearchAddress(userAccount3, {
+      await daiFundsInstance.setResearchAddress(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawResearchBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawTreeResearch(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawResearchBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawTreeResearch(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawResearchBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawTreeResearch(
+      await daiFundsInstance.withdrawResearchBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -908,9 +917,13 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawResearchBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
@@ -918,30 +931,42 @@ contract("DaiFunds", (accounts) => {
 
       /////////////-------------------------------------should fail local develop withdraw------------------/////
 
-      await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      await daiFundsInstance.setLocalDevelopmentAddress(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawLocalDevelop(web3.utils.toWei("0"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawLocalDevelop(web3.utils.toWei("3"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("3"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawLocalDevelop(
+      await daiFundsInstance.withdrawLocalDevelopmentBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -951,9 +976,13 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
@@ -961,30 +990,34 @@ contract("DaiFunds", (accounts) => {
 
       /////////////-------------------------------------should fail rescue fund withdraw------------------/////
 
-      await daiFundsInstance.setRescueFundAddress(userAccount3, {
+      await daiFundsInstance.setInsuranceAddress(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawRescueFund(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawInsuranceBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawRescueFund(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawInsuranceBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawRescueFund(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawInsuranceBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawRescueFund(
+      await daiFundsInstance.withdrawInsuranceBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -994,9 +1027,13 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawRescueFund(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawInsuranceBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
@@ -1004,30 +1041,34 @@ contract("DaiFunds", (accounts) => {
 
       /////////////-------------------------------------should fail treejer develop withdraw------------------/////
 
-      await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
+      await daiFundsInstance.setTreasuryAddress(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawTreejerDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawTreasuryBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawTreejerDevelop(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawTreasuryBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawTreejerDevelop(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawTreasuryBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawTreejerDevelop(
+      await daiFundsInstance.withdrawTreasuryBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1037,9 +1078,13 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawTreejerDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawTreasuryBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
@@ -1047,30 +1092,34 @@ contract("DaiFunds", (accounts) => {
 
       /////////////-------------------------------------should fail reserve fund1 withdraw------------------/////
 
-      await daiFundsInstance.setReserveFund1Address(userAccount3, {
+      await daiFundsInstance.setReserve1Address(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawReserveFund1(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawReserve1Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawReserveFund1(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawReserve1Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawReserveFund1(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawReserve1Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawReserveFund1(
+      await daiFundsInstance.withdrawReserve1Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1080,39 +1129,47 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawReserveFund1(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawReserve1Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail reserve fund2 withdraw------------------/////
-      await daiFundsInstance.setReserveFund2Address(userAccount3, {
+      await daiFundsInstance.setReserve2Address(userAccount3, {
         from: deployerAccount,
       });
 
       await daiFundsInstance
-        .withdrawReserveFund2(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawReserve2Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await daiFundsInstance
-        .withdrawReserveFund2(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawReserve2Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       await daiFundsInstance
-        .withdrawReserveFund2(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawReserve2Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawReserveFund2(
+      await daiFundsInstance.withdrawReserve2Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1122,9 +1179,13 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------- should fail
       await daiFundsInstance
-        .withdrawReserveFund2(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawReserve2Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
     });
 
@@ -1132,14 +1193,14 @@ contract("DaiFunds", (accounts) => {
       ///-------------------------------- should withdraw local develop succussfully ---------------------------------------
       const treeId = 1;
       const amount = web3.utils.toWei("2");
-      const planterFund = 3000;
-      const referralFund = 500;
-      const treeResearch = 2000;
-      const localDevelop = 500;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 1000;
-      const reserveFund2 = 1000;
+      const planterShare = 3000;
+      const ambassadorShare = 500;
+      const research = 2000;
+      const localDevelopment = 500;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 1000;
+      const reserve2 = 1000;
 
       //////// -------------------- add roles
 
@@ -1151,41 +1212,41 @@ contract("DaiFunds", (accounts) => {
 
       ////////////------------------- set addresses
 
-      await daiFundsInstance.setLocalDevelopAddress(userAccount3, {
+      await daiFundsInstance.setLocalDevelopmentAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setTreeResearchAddress(userAccount3, {
+      await daiFundsInstance.setResearchAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setRescueFundAddress(userAccount3, {
+      await daiFundsInstance.setInsuranceAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setTreejerDevelopAddress(userAccount3, {
+      await daiFundsInstance.setTreasuryAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setReserveFund1Address(userAccount3, {
+      await daiFundsInstance.setReserve1Address(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setReserveFund2Address(userAccount3, {
+      await daiFundsInstance.setReserve2Address(userAccount3, {
         from: deployerAccount,
       });
 
       ////////------------------- handle dm models
 
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1202,19 +1263,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawLocalDevelop(
+      await daiFundsInstance.withdrawLocalDevelopmentBalance(
         web3.utils.toWei("0.05"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1232,19 +1293,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawRescueFund(
+      await daiFundsInstance.withdrawInsuranceBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1263,19 +1324,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawTreejerDevelop(
+      await daiFundsInstance.withdrawTreasuryBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1294,19 +1355,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawReserveFund1(
+      await daiFundsInstance.withdrawReserve1Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1325,19 +1386,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawReserveFund2(
+      await daiFundsInstance.withdrawReserve2Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1356,19 +1417,19 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         { from: userAccount6 }
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawTreeResearch(
+      await daiFundsInstance.withdrawResearchBalance(
         web3.utils.toWei("0.4"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1382,18 +1443,18 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("3");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 2000;
-      const localDevelop = 500;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
-      const treeResearchAddress = userAccount3;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 2000;
+      const localDevelopment = 500;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
+      const researchAddress = userAccount3;
 
-      const totalTreeResearchFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), treeResearch),
+      const totalResearchFunded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), research),
         10000
       );
 
@@ -1401,12 +1462,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1421,20 +1482,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setTreeResearchAddress(treeResearchAddress, {
+      await daiFundsInstance.setResearchAddress(researchAddress, {
         from: deployerAccount,
       });
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1454,14 +1515,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1469,14 +1530,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1487,7 +1548,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1496,40 +1557,36 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalTreeResearchFunded,
-        Number(totalFunds1.treeResearch),
+        totalResearchFunded,
+        Number(totalBalances1.research),
         "tree research total fund1 is not ok"
       );
 
-      const treeResearchBalnance1 = await daiInstance.balanceOf(
-        treeResearchAddress
-      );
+      const researchBalnance1 = await daiInstance.balanceOf(researchAddress);
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.2");
 
-      const tx = await daiFundsInstance.withdrawTreeResearch(
+      const tx = await daiFundsInstance.withdrawResearchBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "TreeResearchBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "ResearchBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == treeResearchAddress &&
+          ev.account == researchAddress &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const treeResearchBalnance2 = await daiInstance.balanceOf(
-        treeResearchAddress
-      );
+      const researchBalnance2 = await daiInstance.balanceOf(researchAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw1),
@@ -1539,16 +1596,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treeResearch),
-          Number(totalFunds2.treeResearch)
+          Number(totalBalances1.research),
+          Number(totalBalances2.research)
         ),
         Number(withdrawBalance1),
         "tree research total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(treeResearchBalnance2),
-        Math.add(Number(treeResearchBalnance1), Number(withdrawBalance1)),
+        Number(researchBalnance2),
+        Math.add(Number(researchBalnance1), Number(withdrawBalance1)),
         "tree research account balance is not ok after withdraw1"
       );
 
@@ -1556,29 +1613,27 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.3");
 
-      const tx2 = await daiFundsInstance.withdrawTreeResearch(
+      const tx2 = await daiFundsInstance.withdrawResearchBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "TreeResearchBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx2, "ResearchBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == treeResearchAddress &&
+          ev.account == researchAddress &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const treeResearchBalnance3 = await daiInstance.balanceOf(
-        treeResearchAddress
-      );
+      const researchBalnance3 = await daiInstance.balanceOf(researchAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw2),
@@ -1591,8 +1646,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treeResearch),
-          Number(totalFunds3.treeResearch)
+          Number(totalBalances1.research),
+          Number(totalBalances3.research)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "tree research total fund is not ok after withdraw1"
@@ -1600,16 +1655,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalTreeResearchFunded,
+          totalResearchFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.treeResearch),
+        Number(totalBalances3.research),
         "tree research total fund3 is not ok"
       );
 
       assert.equal(
-        Number(treeResearchBalnance3),
-        Math.add(Number(treeResearchBalnance2), Number(withdrawBalance2)),
+        Number(researchBalnance3),
+        Math.add(Number(researchBalnance2), Number(withdrawBalance2)),
         "tree research account balance is not ok after withdraw2"
       );
     });
@@ -1620,18 +1675,18 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 1500;
-      const localDevelop = 1000;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
-      const localDevelopAddress = userAccount3;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 1500;
+      const localDevelopment = 1000;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
+      const localDevelopmentAddress = userAccount3;
 
-      const totalLocalDevelopFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), localDevelop),
+      const totalLocalDevelopmentFunded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), localDevelopment),
         10000
       );
 
@@ -1639,12 +1694,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1659,20 +1714,23 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setLocalDevelopAddress(localDevelopAddress, {
-        from: deployerAccount,
-      });
+      await daiFundsInstance.setLocalDevelopmentAddress(
+        localDevelopmentAddress,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1692,14 +1750,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1707,14 +1765,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1725,7 +1783,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1734,39 +1792,43 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalLocalDevelopFunded,
-        Number(totalFunds1.localDevelop),
+        totalLocalDevelopmentFunded,
+        Number(totalBalances1.localDevelopment),
         "local develop total fund1 is not ok"
       );
 
-      const localDevelopBalnance1 = await daiInstance.balanceOf(
-        localDevelopAddress
+      const localDevelopmentBalnance1 = await daiInstance.balanceOf(
+        localDevelopmentAddress
       );
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawLocalDevelop(
+      const tx = await daiFundsInstance.withdrawLocalDevelopmentBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == localDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      truffleAssert.eventEmitted(
+        tx,
+        "LocalDevelopmentBalanceWithdrew",
+        (ev) => {
+          return (
+            Number(ev.amount) == Number(withdrawBalance1) &&
+            ev.account == localDevelopmentAddress &&
+            ev.reason == withdrawReason
+          );
+        }
+      );
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const localDevelopBalnance2 = await daiInstance.balanceOf(
-        localDevelopAddress
+      const localDevelopmentBalnance2 = await daiInstance.balanceOf(
+        localDevelopmentAddress
       );
 
       assert.equal(
@@ -1777,16 +1839,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.localDevelop),
-          Number(totalFunds2.localDevelop)
+          Number(totalBalances1.localDevelopment),
+          Number(totalBalances2.localDevelopment)
         ),
         Number(withdrawBalance1),
         "local develop total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(localDevelopBalnance2),
-        Math.add(Number(localDevelopBalnance1), Number(withdrawBalance1)),
+        Number(localDevelopmentBalnance2),
+        Math.add(Number(localDevelopmentBalnance1), Number(withdrawBalance1)),
         "local develop account balance is not ok after withdraw1"
       );
 
@@ -1794,28 +1856,32 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawLocalDevelop(
+      const tx2 = await daiFundsInstance.withdrawLocalDevelopmentBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == localDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      });
+      truffleAssert.eventEmitted(
+        tx2,
+        "LocalDevelopmentBalanceWithdrew",
+        (ev) => {
+          return (
+            Number(ev.amount) == Number(withdrawBalance2) &&
+            ev.account == localDevelopmentAddress &&
+            ev.reason == withdrawReason
+          );
+        }
+      );
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const localDevelopBalnance3 = await daiInstance.balanceOf(
-        localDevelopAddress
+      const localDevelopmentBalnance3 = await daiInstance.balanceOf(
+        localDevelopmentAddress
       );
 
       assert.equal(
@@ -1829,8 +1895,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.localDevelop),
-          Number(totalFunds3.localDevelop)
+          Number(totalBalances1.localDevelopment),
+          Number(totalBalances3.localDevelopment)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "local develop total fund is not ok after withdraw1"
@@ -1838,16 +1904,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalLocalDevelopFunded,
+          totalLocalDevelopmentFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.localDevelop),
+        Number(totalBalances3.localDevelopment),
         "local develop total fund3 is not ok"
       );
 
       assert.equal(
-        Number(localDevelopBalnance3),
-        Math.add(Number(localDevelopBalnance2), Number(withdrawBalance2)),
+        Number(localDevelopmentBalnance3),
+        Math.add(Number(localDevelopmentBalnance2), Number(withdrawBalance2)),
         "local develop account balance is not ok after withdraw2"
       );
     });
@@ -1858,19 +1924,19 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 1000;
-      const localDevelop = 1500;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 1000;
+      const localDevelopment = 1500;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const rescueFundAddress = userAccount3;
+      const insuranceAddress = userAccount3;
 
-      const totalRescueFundFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), rescueFund),
+      const totalInsuranceFunded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), insurance),
         10000
       );
 
@@ -1878,12 +1944,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1898,20 +1964,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setRescueFundAddress(rescueFundAddress, {
+      await daiFundsInstance.setInsuranceAddress(insuranceAddress, {
         from: deployerAccount,
       });
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1931,14 +1997,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1946,14 +2012,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1964,7 +2030,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1973,40 +2039,36 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalRescueFundFunded,
-        Number(totalFunds1.rescueFund),
+        totalInsuranceFunded,
+        Number(totalBalances1.insurance),
         "rescue fund total fund1 is not ok"
       );
 
-      const rescueFundBalnance1 = await daiInstance.balanceOf(
-        rescueFundAddress
-      );
+      const insuranceBalnance1 = await daiInstance.balanceOf(insuranceAddress);
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawRescueFund(
+      const tx = await daiFundsInstance.withdrawInsuranceBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "RescueBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "RescueBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == rescueFundAddress &&
+          ev.account == insuranceAddress &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const rescueFundBalnance2 = await daiInstance.balanceOf(
-        rescueFundAddress
-      );
+      const insuranceBalnance2 = await daiInstance.balanceOf(insuranceAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw1),
@@ -2016,16 +2078,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.rescueFund),
-          Number(totalFunds2.rescueFund)
+          Number(totalBalances1.insurance),
+          Number(totalBalances2.insurance)
         ),
         Number(withdrawBalance1),
         "rescue fund total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(rescueFundBalnance2),
-        Math.add(Number(rescueFundBalnance1), Number(withdrawBalance1)),
+        Number(insuranceBalnance2),
+        Math.add(Number(insuranceBalnance1), Number(withdrawBalance1)),
         "rescue fund account balance is not ok after withdraw1"
       );
 
@@ -2033,29 +2095,27 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawRescueFund(
+      const tx2 = await daiFundsInstance.withdrawInsuranceBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == rescueFundAddress &&
+          ev.account == insuranceAddress &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const rescueFundBalnance3 = await daiInstance.balanceOf(
-        rescueFundAddress
-      );
+      const insuranceBalnance3 = await daiInstance.balanceOf(insuranceAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw2),
@@ -2068,8 +2128,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.rescueFund),
-          Number(totalFunds3.rescueFund)
+          Number(totalBalances1.insurance),
+          Number(totalBalances3.insurance)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "rescue fund total fund is not ok after withdraw1"
@@ -2077,16 +2137,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalRescueFundFunded,
+          totalInsuranceFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.rescueFund),
+        Number(totalBalances3.insurance),
         "rescue fund total fund3 is not ok"
       );
 
       assert.equal(
-        Number(rescueFundBalnance3),
-        Math.add(Number(rescueFundBalnance2), Number(withdrawBalance2)),
+        Number(insuranceBalnance3),
+        Math.add(Number(insuranceBalnance2), Number(withdrawBalance2)),
         "rescue fund account balance is not ok after withdraw2"
       );
     });
@@ -2097,19 +2157,19 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 1000;
-      const localDevelop = 1500;
-      const rescueFund = 1000;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 1000;
+      const localDevelopment = 1500;
+      const insurance = 1000;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const treejerDevelopAddress = userAccount3;
+      const treasuryAddress = userAccount3;
 
-      const totalTreejerDevelopFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), treejerDevelop),
+      const totalTreasuryFunded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), treasury),
         10000
       );
 
@@ -2117,12 +2177,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -2137,20 +2197,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setTreejerDevelopAddress(treejerDevelopAddress, {
+      await daiFundsInstance.setTreasuryAddress(treasuryAddress, {
         from: deployerAccount,
       });
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -2170,14 +2230,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2185,14 +2245,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2203,7 +2263,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2212,40 +2272,36 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalTreejerDevelopFunded,
-        Number(totalFunds1.treejerDevelop),
+        totalTreasuryFunded,
+        Number(totalBalances1.treasury),
         "treejer develop total fund1 is not ok"
       );
 
-      const treejerDevelopBalnance1 = await daiInstance.balanceOf(
-        treejerDevelopAddress
-      );
+      const treasuryBalnance1 = await daiInstance.balanceOf(treasuryAddress);
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawTreejerDevelop(
+      const tx = await daiFundsInstance.withdrawTreasuryBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreasuryBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == treejerDevelopAddress &&
+          ev.account == treasuryAddress &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const treejerDevelopBalnance2 = await daiInstance.balanceOf(
-        treejerDevelopAddress
-      );
+      const treasuryBalnance2 = await daiInstance.balanceOf(treasuryAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw1),
@@ -2255,16 +2311,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treejerDevelop),
-          Number(totalFunds2.treejerDevelop)
+          Number(totalBalances1.treasury),
+          Number(totalBalances2.treasury)
         ),
         Number(withdrawBalance1),
         "treejer develop total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(treejerDevelopBalnance2),
-        Math.add(Number(treejerDevelopBalnance1), Number(withdrawBalance1)),
+        Number(treasuryBalnance2),
+        Math.add(Number(treasuryBalnance1), Number(withdrawBalance1)),
         "treejer develop account balance is not ok after withdraw1"
       );
 
@@ -2272,33 +2328,27 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawTreejerDevelop(
+      const tx2 = await daiFundsInstance.withdrawTreasuryBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(
-        tx2,
-        "TreejerDevelopBalanceWithdrawn",
-        (ev) => {
-          return (
-            Number(ev.amount) == Number(withdrawBalance2) &&
-            ev.account == treejerDevelopAddress &&
-            ev.reason == withdrawReason
-          );
-        }
-      );
+      truffleAssert.eventEmitted(tx2, "TreasuryBalanceWithdrew", (ev) => {
+        return (
+          Number(ev.amount) == Number(withdrawBalance2) &&
+          ev.account == treasuryAddress &&
+          ev.reason == withdrawReason
+        );
+      });
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const treejerDevelopBalnance3 = await daiInstance.balanceOf(
-        treejerDevelopAddress
-      );
+      const treasuryBalnance3 = await daiInstance.balanceOf(treasuryAddress);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw2),
@@ -2311,8 +2361,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treejerDevelop),
-          Number(totalFunds3.treejerDevelop)
+          Number(totalBalances1.treasury),
+          Number(totalBalances3.treasury)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "treejer develop total fund is not ok after withdraw1"
@@ -2320,16 +2370,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalTreejerDevelopFunded,
+          totalTreasuryFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.treejerDevelop),
+        Number(totalBalances3.treasury),
         "treejer develop total fund3 is not ok"
       );
 
       assert.equal(
-        Number(treejerDevelopBalnance3),
-        Math.add(Number(treejerDevelopBalnance2), Number(withdrawBalance2)),
+        Number(treasuryBalnance3),
+        Math.add(Number(treasuryBalnance2), Number(withdrawBalance2)),
         "treejer develop account balance is not ok after withdraw2"
       );
     });
@@ -2341,19 +2391,19 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 1000;
-      const localDevelop = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 0;
-      const reserveFund1 = 1000;
-      const reserveFund2 = 0;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 1000;
+      const localDevelopment = 1000;
+      const insurance = 1500;
+      const treasury = 0;
+      const reserve1 = 1000;
+      const reserve2 = 0;
 
-      const reserveFund1Address = userAccount3;
+      const reserve1Address = userAccount3;
 
-      const totalReserveFund1Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund1),
+      const totalReserve1Funded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve1),
         10000
       );
 
@@ -2361,12 +2411,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -2381,20 +2431,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setReserveFund1Address(reserveFund1Address, {
+      await daiFundsInstance.setReserve1Address(reserve1Address, {
         from: deployerAccount,
       });
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -2414,14 +2464,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2429,14 +2479,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2447,7 +2497,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2456,40 +2506,36 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalReserveFund1Funded,
-        Number(totalFunds1.reserveFund1),
+        totalReserve1Funded,
+        Number(totalBalances1.reserve1),
         "reserve fund1 total fund1 is not ok"
       );
 
-      const reserveFund1Balnance1 = await daiInstance.balanceOf(
-        reserveFund1Address
-      );
+      const reserve1Balnance1 = await daiInstance.balanceOf(reserve1Address);
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawReserveFund1(
+      const tx = await daiFundsInstance.withdrawReserve1Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn1", (ev) => {
+      truffleAssert.eventEmitted(tx, "Reserve1BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == reserveFund1Address &&
+          ev.account == reserve1Address &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const reserveFund1Balnance2 = await daiInstance.balanceOf(
-        reserveFund1Address
-      );
+      const reserve1Balnance2 = await daiInstance.balanceOf(reserve1Address);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw1),
@@ -2499,16 +2545,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund1),
-          Number(totalFunds2.reserveFund1)
+          Number(totalBalances1.reserve1),
+          Number(totalBalances2.reserve1)
         ),
         Number(withdrawBalance1),
         "reserve fund1 total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(reserveFund1Balnance2),
-        Math.add(Number(reserveFund1Balnance1), Number(withdrawBalance1)),
+        Number(reserve1Balnance2),
+        Math.add(Number(reserve1Balnance1), Number(withdrawBalance1)),
         "reserve fund1 account balance is not ok after withdraw1"
       );
 
@@ -2516,29 +2562,27 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawReserveFund1(
+      const tx2 = await daiFundsInstance.withdrawReserve1Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn1", (ev) => {
+      truffleAssert.eventEmitted(tx2, "Reserve1BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == reserveFund1Address &&
+          ev.account == reserve1Address &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const reserveFund1Balnance3 = await daiInstance.balanceOf(
-        reserveFund1Address
-      );
+      const reserve1Balnance3 = await daiInstance.balanceOf(reserve1Address);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw2),
@@ -2551,8 +2595,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund1),
-          Number(totalFunds3.reserveFund1)
+          Number(totalBalances1.reserve1),
+          Number(totalBalances3.reserve1)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund1 total fund is not ok after withdraw1"
@@ -2560,16 +2604,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalReserveFund1Funded,
+          totalReserve1Funded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.reserveFund1),
+        Number(totalBalances3.reserve1),
         "reserve fund1 total fund3 is not ok"
       );
 
       assert.equal(
-        Number(reserveFund1Balnance3),
-        Math.add(Number(reserveFund1Balnance2), Number(withdrawBalance2)),
+        Number(reserve1Balnance3),
+        Math.add(Number(reserve1Balnance2), Number(withdrawBalance2)),
         "reserve fund1 account balance is not ok after withdraw2"
       );
     });
@@ -2581,19 +2625,19 @@ contract("DaiFunds", (accounts) => {
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
       const amount1 = web3.utils.toWei("1");
-      const planterFund = 5000;
-      const referralFund = 500;
-      const treeResearch = 1000;
-      const localDevelop = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 0;
-      const reserveFund1 = 0;
-      const reserveFund2 = 1000;
+      const planterShare = 5000;
+      const ambassadorShare = 500;
+      const research = 1000;
+      const localDevelopment = 1000;
+      const insurance = 1500;
+      const treasury = 0;
+      const reserve1 = 0;
+      const reserve2 = 1000;
 
-      const reserveFund2Address = userAccount3;
+      const reserve2Address = userAccount3;
 
-      const totalReserveFund2Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund2),
+      const totalReserve2Funded = Math.divide(
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve2),
         10000
       );
 
@@ -2601,12 +2645,12 @@ contract("DaiFunds", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            treeResearch,
-            localDevelop,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            research,
+            localDevelopment,
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -2621,20 +2665,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setReserveFund2Address(reserveFund2Address, {
+      await daiFundsInstance.setReserve2Address(reserve2Address, {
         from: deployerAccount,
       });
 
       ///////// ------------------ handle dm model
       await fModel.addAllocationData(
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -2654,14 +2698,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId,
         amount,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2669,14 +2713,14 @@ contract("DaiFunds", (accounts) => {
       await daiFundsInstance.fundTree(
         treeId2,
         amount1,
-        planterFund,
-        referralFund,
-        treeResearch,
-        localDevelop,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        planterShare,
+        ambassadorShare,
+        research,
+        localDevelopment,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2687,7 +2731,7 @@ contract("DaiFunds", (accounts) => {
         daiFundsInstance.address
       );
 
-      const totalFunds1 = await daiFundsInstance.totalFunds();
+      const totalBalances1 = await daiFundsInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2696,40 +2740,36 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        totalReserveFund2Funded,
-        Number(totalFunds1.reserveFund2),
+        totalReserve2Funded,
+        Number(totalBalances1.reserve2),
         "reserve fund2 total fund1 is not ok"
       );
 
-      const reserveFund2Balnance1 = await daiInstance.balanceOf(
-        reserveFund2Address
-      );
+      const reserve2Balnance1 = await daiInstance.balanceOf(reserve2Address);
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawReserveFund2(
+      const tx = await daiFundsInstance.withdrawReserve2Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn2", (ev) => {
+      truffleAssert.eventEmitted(tx, "Reserve2BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == reserveFund2Address &&
+          ev.account == reserve2Address &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await daiFundsInstance.totalFunds();
+      const totalBalances2 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const reserveFund2Balnance2 = await daiInstance.balanceOf(
-        reserveFund2Address
-      );
+      const reserve2Balnance2 = await daiInstance.balanceOf(reserve2Address);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw1),
@@ -2739,16 +2779,16 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund2),
-          Number(totalFunds2.reserveFund2)
+          Number(totalBalances1.reserve2),
+          Number(totalBalances2.reserve2)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
       );
 
       assert.equal(
-        Number(reserveFund2Balnance2),
-        Math.add(Number(reserveFund2Balnance1), Number(withdrawBalance1)),
+        Number(reserve2Balnance2),
+        Math.add(Number(reserve2Balnance1), Number(withdrawBalance1)),
         "reserve fund2 account balance is not ok after withdraw1"
       );
 
@@ -2756,29 +2796,27 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawReserveFund2(
+      const tx2 = await daiFundsInstance.withdrawReserve2Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn2", (ev) => {
+      truffleAssert.eventEmitted(tx2, "Reserve2BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == reserveFund2Address &&
+          ev.account == reserve2Address &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await daiFundsInstance.totalFunds();
+      const totalBalances3 = await daiFundsInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
         daiFundsInstance.address
       );
 
-      const reserveFund2Balnance3 = await daiInstance.balanceOf(
-        reserveFund2Address
-      );
+      const reserve2Balnance3 = await daiInstance.balanceOf(reserve2Address);
 
       assert.equal(
         Number(contractBalanceAfterWithdraw2),
@@ -2791,8 +2829,8 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund2),
-          Number(totalFunds3.reserveFund2)
+          Number(totalBalances1.reserve2),
+          Number(totalBalances3.reserve2)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2800,45 +2838,45 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalReserveFund2Funded,
+          totalReserve2Funded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.reserveFund2),
+        Number(totalBalances3.reserve2),
         "reserve fund2 total fund3 is not ok"
       );
 
       assert.equal(
-        Number(reserveFund2Balnance3),
-        Math.add(Number(reserveFund2Balnance2), Number(withdrawBalance2)),
+        Number(reserve2Balnance3),
+        Math.add(Number(reserve2Balnance2), Number(withdrawBalance2)),
         "reserve fund2 account balance is not ok after withdraw2"
       );
     });
-    ////-------------------------test regularFund-----------------------------------
+    ////-------------------------test fundTreeBatch-----------------------------------
 
-    it("2.Should regularFund work successfully", async () => {
+    it("2.Should fundTreeBatch work successfully", async () => {
       const treeId = 0;
       const treeId2 = 1;
 
       let amount = web3.utils.toWei(".531", "Ether");
 
-      const totalPlanterFund1 = web3.utils.toWei("5");
-      const totalReferralFund1 = web3.utils.toWei("4");
-      const totalTreeResearch1 = web3.utils.toWei("2");
-      const totalLocalDevelop1 = web3.utils.toWei("1");
-      const totalRescueFund1 = web3.utils.toWei("2");
-      const totalTreejerDevelop1 = web3.utils.toWei("2");
-      const totalReserveFund1_1 = web3.utils.toWei("2.5");
-      const totalReserveFund2_1 = web3.utils.toWei("1");
+      const totalPlanterShare1 = web3.utils.toWei("5");
+      const totalAmbassadorShare1 = web3.utils.toWei("4");
+      const totalResearch1 = web3.utils.toWei("2");
+      const totalLocalDevelopment1 = web3.utils.toWei("1");
+      const totalInsurance1 = web3.utils.toWei("2");
+      const totalTreasury1 = web3.utils.toWei("2");
+      const totalReserve1_1 = web3.utils.toWei("2.5");
+      const totalReserve2_1 = web3.utils.toWei("1");
       const total1 = web3.utils.toWei("19.5"); //total amount of above shares
 
-      const totalPlanterFund2 = web3.utils.toWei("7");
-      const totalReferralFund2 = web3.utils.toWei("2");
-      const totalTreeResearch2 = web3.utils.toWei("1");
-      const totalLocalDevelop2 = web3.utils.toWei("3");
-      const totalRescueFund2 = web3.utils.toWei("4");
-      const totalTreejerDevelop2 = web3.utils.toWei("2");
-      const totalReserveFund1_2 = web3.utils.toWei("1.5");
-      const totalReserveFund2_2 = web3.utils.toWei("1.5");
+      const totalPlanterShare2 = web3.utils.toWei("7");
+      const totalAmbassadorShare2 = web3.utils.toWei("2");
+      const totalResearch2 = web3.utils.toWei("1");
+      const totalLocalDevelopment2 = web3.utils.toWei("3");
+      const totalInsurance2 = web3.utils.toWei("4");
+      const totalTreasury2 = web3.utils.toWei("2");
+      const totalReserve1_2 = web3.utils.toWei("1.5");
+      const totalReserve2_2 = web3.utils.toWei("1.5");
       const total2 = web3.utils.toWei("19"); //total amount of above shares
 
       ////--------------check set role----------------
@@ -2860,57 +2898,57 @@ contract("DaiFunds", (accounts) => {
 
       ////--------------------call fund tree by auction----------------
 
-      const eventTx1 = await daiFundsInstance.regularFund(
-        totalPlanterFund1,
-        totalReferralFund1,
-        totalTreeResearch1,
-        totalLocalDevelop1,
-        totalRescueFund1,
-        totalTreejerDevelop1,
-        totalReserveFund1_1,
-        totalReserveFund2_1,
+      const eventTx1 = await daiFundsInstance.fundTreeBatch(
+        totalPlanterShare1,
+        totalAmbassadorShare1,
+        totalResearch1,
+        totalLocalDevelopment1,
+        totalInsurance1,
+        totalTreasury1,
+        totalReserve1_1,
+        totalReserve2_1,
         { from: userAccount3 }
       );
 
-      truffleAssert.eventEmitted(eventTx1, "RegularFunded");
+      truffleAssert.eventEmitted(eventTx1, "TreeFundedBatch");
 
-      //check daiFund totalFunds treeId1
-      let totalFunds = await daiFundsInstance.totalFunds();
+      //check daiFund totalBalances treeId1
+      let totalBalances = await daiFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds.treeResearch),
-        Number(totalTreeResearch1),
-        "treeResearch funds invalid"
+        Number(totalBalances.research),
+        Number(totalResearch1),
+        "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelop),
-        Number(totalLocalDevelop1),
-        "localDevelop funds invalid"
+        Number(totalBalances.localDevelopment),
+        Number(totalLocalDevelopment1),
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.rescueFund),
-        Number(totalRescueFund1),
-        "rescueFund funds invalid"
+        Number(totalBalances.insurance),
+        Number(totalInsurance1),
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
-        Number(totalTreejerDevelop1),
-        "treejerDevelop funds invalid"
+        Number(totalBalances.treasury),
+        Number(totalTreasury1),
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund1),
-        Number(totalReserveFund1_1),
-        "reserveFund1 funds invalid"
+        Number(totalBalances.reserve1),
+        Number(totalReserve1_1),
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund2),
-        Number(totalReserveFund2_1),
-        "reserveFund2 funds invalid"
+        Number(totalBalances.reserve2),
+        Number(totalReserve2_1),
+        "reserve2 funds invalid"
       );
 
       ////------------check planter fund contract balance
@@ -2920,63 +2958,63 @@ contract("DaiFunds", (accounts) => {
 
       assert.equal(
         Number(contractBalance),
-        Number(Math.Big(totalPlanterFund1).plus(totalReferralFund1)),
+        Number(Math.Big(totalPlanterShare1).plus(totalAmbassadorShare1)),
         "Contract balance not true"
       );
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      const eventTx2 = await daiFundsInstance.regularFund(
-        totalPlanterFund2,
-        totalReferralFund2,
-        totalTreeResearch2,
-        totalLocalDevelop2,
-        totalRescueFund2,
-        totalTreejerDevelop2,
-        totalReserveFund1_2,
-        totalReserveFund2_2,
+      const eventTx2 = await daiFundsInstance.fundTreeBatch(
+        totalPlanterShare2,
+        totalAmbassadorShare2,
+        totalResearch2,
+        totalLocalDevelopment2,
+        totalInsurance2,
+        totalTreasury2,
+        totalReserve1_2,
+        totalReserve2_2,
         { from: userAccount3 }
       );
 
-      truffleAssert.eventEmitted(eventTx2, "RegularFunded");
+      truffleAssert.eventEmitted(eventTx2, "TreeFundedBatch");
 
-      // //check daiFund totalFunds treeId2
-      let totalFunds2 = await daiFundsInstance.totalFunds();
+      // //check daiFund totalBalances treeId2
+      let totalBalances2 = await daiFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.treeResearch),
-        Math.add(totalTreeResearch1, totalTreeResearch2),
-        "2-treeResearch funds invalid"
+        Number(totalBalances2.research),
+        Math.add(totalResearch1, totalResearch2),
+        "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelop),
-        Math.add(totalLocalDevelop1, totalLocalDevelop2),
-        "2-localDevelop funds invalid"
+        Number(totalBalances2.localDevelopment),
+        Math.add(totalLocalDevelopment1, totalLocalDevelopment2),
+        "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
-        Math.add(totalRescueFund1, totalRescueFund2),
-        "2-rescueFund funds invalid"
+        Number(totalBalances2.insurance),
+        Math.add(totalInsurance1, totalInsurance2),
+        "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
-        Math.add(totalTreejerDevelop1, totalTreejerDevelop2),
-        "2-treejerDevelop funds invalid"
+        Number(totalBalances2.treasury),
+        Math.add(totalTreasury1, totalTreasury2),
+        "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
-        Math.add(totalReserveFund1_1, totalReserveFund1_2),
-        "2-reserveFund1 funds invalid"
+        Number(totalBalances2.reserve1),
+        Math.add(totalReserve1_1, totalReserve1_2),
+        "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
-        Math.add(totalReserveFund2_1, totalReserveFund2_2),
-        "2-reserveFund2 funds invalid"
+        Number(totalBalances2.reserve2),
+        Math.add(totalReserve2_1, totalReserve2_2),
+        "2-reserve2 funds invalid"
       );
 
       ////------------check planter fund contract balance
@@ -2987,21 +3025,21 @@ contract("DaiFunds", (accounts) => {
       assert.equal(
         Number(contractBalance2),
         Number(
-          Math.Big(totalPlanterFund2)
-            .plus(totalReferralFund2)
-            .plus(totalPlanterFund1)
-            .plus(totalReferralFund1)
+          Math.Big(totalPlanterShare2)
+            .plus(totalAmbassadorShare2)
+            .plus(totalPlanterShare1)
+            .plus(totalAmbassadorShare1)
         ),
         "2-Contract balance not true"
       );
     });
 
-    it("should refererTransferDai succussfully and fail in invalid situation", async () => {
+    it("should transferReferrerDai succussfully and fail in invalid situation", async () => {
       await daiInstance.setMint(
         daiFundsInstance.address,
         await web3.utils.toWei("16")
       );
-      await daiFundsInstance.regularFund(
+      await daiFundsInstance.fundTreeBatch(
         await web3.utils.toWei("2"),
         await web3.utils.toWei("2"),
         await web3.utils.toWei("2"),
@@ -3024,11 +3062,11 @@ contract("DaiFunds", (accounts) => {
         "planter fund balance is not ok"
       );
 
-      const totalFundsBeforeTransfer1 =
-        await daiFundsInstance.totalFunds.call();
+      const totalBalancesBeforeTransfer1 =
+        await daiFundsInstance.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsBeforeTransfer1.treejerDevelop),
+        Number(totalBalancesBeforeTransfer1.treasury),
         Number(await web3.utils.toWei("2")),
         "treejer develop is not ok"
       );
@@ -3039,18 +3077,18 @@ contract("DaiFunds", (accounts) => {
       const transferAmount4 = await web3.utils.toWei("0.5");
 
       await daiFundsInstance
-        .refererTransferDai(transferAmount1, { from: dataManager })
+        .transferReferrerDai(transferAmount1, { from: dataManager })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      await daiFundsInstance.refererTransferDai(transferAmount1, {
+      await daiFundsInstance.transferReferrerDai(transferAmount1, {
         from: userAccount6,
       });
 
-      const totalFundsBeforeTransfer2 =
-        await daiFundsInstance.totalFunds.call();
+      const totalBalancesBeforeTransfer2 =
+        await daiFundsInstance.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsBeforeTransfer2.treejerDevelop),
+        Number(totalBalancesBeforeTransfer2.treasury),
         Number(await web3.utils.toWei("1")),
         "treejer develop is not ok"
       );
@@ -3065,15 +3103,15 @@ contract("DaiFunds", (accounts) => {
         "planter fund balance is not ok"
       );
 
-      await daiFundsInstance.refererTransferDai(transferAmount2, {
+      await daiFundsInstance.transferReferrerDai(transferAmount2, {
         from: userAccount6,
       });
 
-      const totalFundsBeforeTransfer3 =
-        await daiFundsInstance.totalFunds.call();
+      const totalBalancesBeforeTransfer3 =
+        await daiFundsInstance.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsBeforeTransfer3.treejerDevelop),
+        Number(totalBalancesBeforeTransfer3.treasury),
         Number(await web3.utils.toWei("0.5")),
         "treejer develop is not ok"
       );
@@ -3089,19 +3127,20 @@ contract("DaiFunds", (accounts) => {
       );
 
       await daiFundsInstance
-        .refererTransferDai(transferAmount3, {
+        .transferReferrerDai(transferAmount3, {
           from: userAccount6,
         })
         .should.be.rejectedWith(DaiFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
 
-      await daiFundsInstance.refererTransferDai(transferAmount4, {
+      await daiFundsInstance.transferReferrerDai(transferAmount4, {
         from: userAccount6,
       });
 
-      const totalFundsAfterTransfer4 = await daiFundsInstance.totalFunds.call();
+      const totalBalancesAfterTransfer4 =
+        await daiFundsInstance.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsAfterTransfer4.treejerDevelop),
+        Number(totalBalancesAfterTransfer4.treasury),
         0,
         "treejer develop is not ok"
       );

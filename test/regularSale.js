@@ -2829,7 +2829,7 @@ contract("regularSale", (accounts) => {
         web3.utils.toWei("1000")
       );
 
-      await daiFundsInstance.regularFund(
+      await daiFundsInstance.fundTreeBatch(
         web3.utils.toWei("1"),
         0,
         0,
@@ -3422,7 +3422,7 @@ contract("regularSale", (accounts) => {
         web3.utils.toWei("1000")
       );
 
-      await daiFundsInstance.regularFund(
+      await daiFundsInstance.fundTreeBatch(
         web3.utils.toWei("1"),
         0,
         0,

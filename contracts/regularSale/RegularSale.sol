@@ -304,7 +304,7 @@ contract RegularSale is Initializable, RelayRecipient {
             emit RegularMint(_msgSender(), tempLastRegularSold, price);
         }
 
-        daiFunds.regularFund(
+        daiFunds.fundTreeBatch(
             totalFunds.planterFund,
             totalFunds.referralFund,
             totalFunds.treeResearch,
@@ -456,7 +456,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
             referrerClaimableTreesDai[_msgSender()] -= _count;
 
-            daiFunds.refererTransferDai(_amount);
+            daiFunds.transferReferrerDai(_amount);
         } else {
             if (referrerClaimableTreesDai[_msgSender()] > 0) {
                 _amount =
@@ -466,7 +466,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
                 referrerClaimableTreesDai[_msgSender()] = 0;
 
-                daiFunds.refererTransferDai(_amount);
+                daiFunds.transferReferrerDai(_amount);
             }
 
             uint256 wethAmount = uint256(-x) *

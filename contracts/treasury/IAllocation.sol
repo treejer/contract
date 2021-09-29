@@ -30,28 +30,28 @@ interface IAllocation {
         returns (uint256 startingTreeId, uint256 distributionModelId);
 
     /** return allocations data based on _distributionModelId
-     * @return planterFund share
-     * @return referralFund share
-     * @return treeResearch share
-     * @return localDevelop share
-     * @return rescueFund share
-     * @return treejerDevelop share
-     * @return reserveFund1 share
-     * @return reserveFund2 share
+     * @return planterShare
+     * @return ambassadorShare
+     * @return researchShare
+     * @return localDevelopmentShare
+     * @return insuranceShare
+     * @return treasuryShare
+     * @return reserve1Share
+     * @return reserve2Share
      * @return exists is true when there is a allocations for _distributionModelId
      */
     function allocations(uint256 _distributionModelId)
         external
         view
         returns (
-            uint16 planterFund,
-            uint16 referralFund,
-            uint16 treeResearch,
-            uint16 localDevelop,
-            uint16 rescueFund,
-            uint16 treejerDevelop,
-            uint16 reserveFund1,
-            uint16 reserveFund2,
+            uint16 planterShare,
+            uint16 ambassadorShare,
+            uint16 researchShare,
+            uint16 localDevelopmentShare,
+            uint16 insuranceShare,
+            uint16 treasuryShare,
+            uint16 reserve1Share,
+            uint16 reserve2Share,
             uint16 exists
         );
 
@@ -103,26 +103,26 @@ interface IAllocation {
     /**
      * @dev return fundDistribution data of {_treeId}
      * @param _treeId id of tree to find fundDistribution data
-     * @return planterFund share
-     * @return referralFund share
-     * @return treeResearch share
-     * @return localDevelop share
-     * @return rescueFund share
-     * @return treejerDevelop share
-     * @return reserveFund1 share
-     * @return reserveFund2 share
+     * @return planterShare
+     * @return ambassadorShare
+     * @return researchShare
+     * @return localDevelopmentShare
+     * @return insuranceShare
+     * @return treasuryShare
+     * @return reserve1Share
+     * @return reserve2Share
      */
     function findAllocationData(uint256 _treeId)
         external
         returns (
-            uint16 planterFund,
-            uint16 referralFund,
-            uint16 treeResearch,
-            uint16 localDevelop,
-            uint16 rescueFund,
-            uint16 treejerDevelop,
-            uint16 reserveFund1,
-            uint16 reserveFund2
+            uint16 planterShare,
+            uint16 ambassadorShare,
+            uint16 researchShare,
+            uint16 localDevelopmentShare,
+            uint16 insuranceShare,
+            uint16 treasuryShare,
+            uint16 reserve1Share,
+            uint16 reserve2Share
         );
 
     /**

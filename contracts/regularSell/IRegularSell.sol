@@ -48,8 +48,8 @@ interface IRegularSell {
     /** @return DaiFunds contract address */
     function daiFunds() external view returns (address);
 
-    /** @return FinancialModel contract address */
-    function financialModel() external view returns (address);
+    /** @return Allocation contract address */
+    function allocation() external view returns (address);
 
     /** @return DaiToken contract address */
     function daiToken() external view returns (address);
@@ -85,8 +85,8 @@ interface IRegularSell {
      */
     function setDaiTokenAddress(address _address) external;
 
-    /** @dev admin set financialModel contract address
-     * @param _address financialModel contract address
+    /** @dev admin set Allocation contract address
+     * @param _address Allocation contract address
      */
     function setAllocationAddress(address _address) external;
 

@@ -3,7 +3,7 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 
 const WethFunds = artifacts.require("WethFunds");
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -138,7 +138,7 @@ contract("WethFunds", (accounts) => {
   //     unsafeAllowCustomTypes: true,
   //   });
 
-  //   fModel = await deployProxy(FinancialModel, [arInstance.address], {
+  //   fModel = await deployProxy(Allocation, [arInstance.address], {
   //     initializer: "initialize",
   //     from: deployerAccount,
   //     unsafeAllowCustomTypes: true,
@@ -170,7 +170,7 @@ contract("WethFunds", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -440,7 +440,7 @@ contract("WethFunds", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,

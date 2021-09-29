@@ -279,7 +279,7 @@ contract RegularSell is Initializable, RelayRecipient {
                 uint16 treejerDevelop,
                 uint16 reserveFund1,
                 uint16 reserveFund2
-            ) = allocation.findTreeDistribution(tempLastRegularSold);
+            ) = allocation.findAllocationData(tempLastRegularSold);
 
             totalFunds.planterFund += (price * planterFund) / 10000;
             totalFunds.referralFund += (price * referralFund) / 10000;
@@ -383,7 +383,7 @@ contract RegularSell is Initializable, RelayRecipient {
             uint16 treasuryShare,
             uint16 reserve1Share,
             uint16 reserve2Share
-        ) = allocation.findTreeDistribution(_treeId);
+        ) = allocation.findAllocationData(_treeId);
 
         daiFunds.fundTree(
             _treeId,

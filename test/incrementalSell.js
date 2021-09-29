@@ -18,7 +18,7 @@ const Units = require("ethereumjs-units");
 
 //treasury section
 const WethFunds = artifacts.require("WethFunds.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
 var Dai = artifacts.require("Dai.sol");
@@ -185,7 +185,7 @@ contract("IncrementalSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -314,7 +314,7 @@ contract("IncrementalSale", (accounts) => {
         "weth token address set incorect"
       );
 
-      /////////////////---------------------------------set financialModel address--------------------------------------------------------
+      /////////////////---------------------------------set allocation address--------------------------------------------------------
       await iSellInstance
         .setAllocationAddress(fModel.address, {
           from: userAccount1,
@@ -327,7 +327,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         fModel.address,
-        await iSellInstance.financialModel.call(),
+        await iSellInstance.allocation.call(),
         "financial model address set incorect"
       );
       /////////////////---------------------------------set regularSellInstance address--------------------------------------------------------
@@ -373,7 +373,7 @@ contract("IncrementalSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1242,7 +1242,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,

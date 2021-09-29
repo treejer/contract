@@ -8,7 +8,7 @@ const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const WethFunds = artifacts.require("WethFunds.sol");
 const RegularSell = artifacts.require("RegularSell.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 var Dai = artifacts.require("Dai.sol");
 var Weth = artifacts.require("Weth.sol");
@@ -169,7 +169,7 @@ contract("Auction", (accounts) => {
       );
 
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -321,7 +321,7 @@ contract("Auction", (accounts) => {
       });
 
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -1142,7 +1142,7 @@ contract("Auction", (accounts) => {
       });
 
       financialModelInstance = await deployProxy(
-        FinancialModel,
+        Allocation,
         [arInstance.address],
         {
           initializer: "initialize",

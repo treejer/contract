@@ -98,10 +98,7 @@ interface IAllocation {
      * @param _treeId id of a tree to check if there is a distributionModel
      * @return true in case of distributionModel existance for {_treeId} and false otherwise
      */
-    function distributionModelExistance(uint256 _treeId)
-        external
-        view
-        returns (bool);
+    function exists(uint256 _treeId) external view returns (bool);
 
     /**
      * @dev return fundDistribution data of {_treeId}
@@ -115,7 +112,7 @@ interface IAllocation {
      * @return reserveFund1 share
      * @return reserveFund2 share
      */
-    function findTreeDistribution(uint256 _treeId)
+    function findAllocationData(uint256 _treeId)
         external
         returns (
             uint16 planterFund,
@@ -127,16 +124,6 @@ interface IAllocation {
             uint16 reserveFund1,
             uint16 reserveFund2
         );
-
-    /**
-     * @dev return fundDistribution id of {_treeId}
-     * @param _treeId id of tree to find fundDistribution id of it.
-     * @return id of fundDistiubution
-     */
-    function getFindDistributionModelId(uint256 _treeId)
-        external
-        view
-        returns (uint256);
 
     /**
      * @dev emitted when a Distribution model added with {modelId}

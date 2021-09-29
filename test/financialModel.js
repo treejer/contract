@@ -1,5 +1,5 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -8,9 +8,9 @@ const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { CommonErrorMsg, FinancialModelErrorMsg } = require("./enumes");
 
-contract("FinancialModel", (accounts) => {
+contract("Allocation", (accounts) => {
   let arInstance;
-  let financialModelInstance;
+  let allocationInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -34,15 +34,11 @@ contract("FinancialModel", (accounts) => {
   });
 
   beforeEach(async () => {
-    financialModelInstance = await deployProxy(
-      FinancialModel,
-      [arInstance.address],
-      {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      }
-    );
+    allocationInstance = await deployProxy(Allocation, [arInstance.address], {
+      initializer: "initialize",
+      from: deployerAccount,
+      unsafeAllowCustomTypes: true,
+    });
   });
 
   afterEach(async () => {});
@@ -50,7 +46,7 @@ contract("FinancialModel", (accounts) => {
   // //----------------------------------------- deploy successfully -----------------------------------------//
 
   it("deploys successfully", async () => {
-    const address = financialModelInstance.address;
+    const address = allocationInstance.address;
     assert.notEqual(address, 0x0);
     assert.notEqual(address, "");
     assert.notEqual(address, null);
@@ -60,26 +56,26 @@ contract("FinancialModel", (accounts) => {
   //--------------------------------addAllocationData test-----------------------------------------------
   it("addAllocationData should be success and fail in invalid situation", async () => {
     //////////////---------------- fail invalid access
-    await financialModelInstance
+    await allocationInstance
       .addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: userAccount1,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     /////////----------- fail sum must be 10000
-    await financialModelInstance
+    await allocationInstance
       .addAllocationData(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
       })
       .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
 
-    await financialModelInstance
+    await allocationInstance
       .addAllocationData(3000, 1200, 1200, 1200, 1200, 1200, 300, 300, {
         from: dataManager,
       })
       .should.be.rejectedWith(FinancialModelErrorMsg.SUM_INVALID);
 
-    const eventTx = await financialModelInstance.addAllocationData(
+    const eventTx = await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -97,7 +93,7 @@ contract("FinancialModel", (accounts) => {
       return ev.allocationDataId == 0;
     });
 
-    let result = await financialModelInstance.allocations.call(0);
+    let result = await allocationInstance.allocations.call(0);
 
     assert.equal(
       Number(result.planterShare),
@@ -150,7 +146,7 @@ contract("FinancialModel", (accounts) => {
 
   //--------------------------------------------assignTreeFundDistributionModel test------------------------------------
   it("1.assignTreeFundDistributionModel should be success", async () => {
-    const addTx1 = await financialModelInstance.addAllocationData(
+    const addTx1 = await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -164,7 +160,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    const addTx2 = await financialModelInstance.addAllocationData(
+    const addTx2 = await allocationInstance.addAllocationData(
       3000,
       2200,
       1200,
@@ -178,7 +174,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    const addTx3 = await financialModelInstance.addAllocationData(
+    const addTx3 = await allocationInstance.addAllocationData(
       2000,
       2200,
       2200,
@@ -192,7 +188,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    const addTx4 = await financialModelInstance.addAllocationData(
+    const addTx4 = await allocationInstance.addAllocationData(
       1000,
       2200,
       2200,
@@ -222,30 +218,41 @@ contract("FinancialModel", (accounts) => {
       return ev.allocationDataId == 3;
     });
 
-    const assignTx1 =
-      await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+    const assignTx1 = await allocationInstance.assignTreeFundDistributionModel(
+      0,
+      0,
+      0,
+      {
         from: dataManager,
-      });
+      }
+    );
 
-    const assignTx2 =
-      await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
+    const assignTx2 = await allocationInstance.assignTreeFundDistributionModel(
+      1,
+      10,
+      1,
+      {
         from: dataManager,
-      });
+      }
+    );
 
-    const assignTx3 =
-      await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
+    const assignTx3 = await allocationInstance.assignTreeFundDistributionModel(
+      11,
+      100,
+      2,
+      {
         from: dataManager,
-      });
+      }
+    );
 
-    const assignTx4 =
-      await financialModelInstance.assignTreeFundDistributionModel(
-        101,
-        1000000,
-        3,
-        {
-          from: dataManager,
-        }
-      );
+    const assignTx4 = await allocationInstance.assignTreeFundDistributionModel(
+      101,
+      1000000,
+      3,
+      {
+        from: dataManager,
+      }
+    );
 
     truffleAssert.eventEmitted(assignTx1, "AllocationToTreeAssigned", (ev) => {
       return ev.allocationToTreesLength == 1;
@@ -282,8 +289,7 @@ contract("FinancialModel", (accounts) => {
       },
     ];
 
-    let resultMaxAssignedIndex =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex),
@@ -292,7 +298,7 @@ contract("FinancialModel", (accounts) => {
     );
 
     for (let i = 0; i < 4; i++) {
-      let array = await financialModelInstance.allocationToTrees(i);
+      let array = await allocationInstance.allocationToTrees(i);
       assert.equal(
         Number(array.startingTreeId),
         expected[i].startingTreeId,
@@ -306,17 +312,11 @@ contract("FinancialModel", (accounts) => {
       );
     }
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      1000001,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
+    await allocationInstance.assignTreeFundDistributionModel(1000001, 0, 0, {
+      from: dataManager,
+    });
 
-    let resultMaxAssignedIndex2 =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex2 = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex2),
@@ -326,7 +326,7 @@ contract("FinancialModel", (accounts) => {
   });
 
   it("5.assignTreeFundDistributionModel should be success", async () => {
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -340,7 +340,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       3000,
       2200,
       1200,
@@ -354,16 +354,15 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(10, 100, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(10, 100, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 0, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(1, 0, 1, {
       from: dataManager,
     });
 
-    let resultMaxAssignedIndex1 =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex1 = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex1),
@@ -373,7 +372,7 @@ contract("FinancialModel", (accounts) => {
   });
 
   it("2.assignTreeFundDistributionModel should be success", async () => {
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -387,7 +386,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       3000,
       2200,
       1200,
@@ -401,7 +400,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       2000,
       2200,
       2200,
@@ -415,7 +414,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       1000,
       2200,
       2200,
@@ -429,25 +428,15 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      1000001,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
+    await allocationInstance.assignTreeFundDistributionModel(1000001, 0, 0, {
+      from: dataManager,
+    });
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      101,
-      1000000,
-      3,
-      {
-        from: dataManager,
-      }
-    );
+    await allocationInstance.assignTreeFundDistributionModel(101, 1000000, 3, {
+      from: dataManager,
+    });
 
-    await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
+    await allocationInstance.assignTreeFundDistributionModel(11, 100, 2, {
       from: dataManager,
     });
 
@@ -467,7 +456,7 @@ contract("FinancialModel", (accounts) => {
     ];
 
     for (let i = 0; i < 3; i++) {
-      let array = await financialModelInstance.allocationToTrees(i);
+      let array = await allocationInstance.allocationToTrees(i);
       assert.equal(
         Number(array.startingTreeId),
         expected1[i].startingTreeId,
@@ -481,16 +470,15 @@ contract("FinancialModel", (accounts) => {
       );
     }
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(1, 10, 1, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 0, 0, {
       from: dataManager,
     });
 
-    let resultMaxAssignedIndex1 =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex1 = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex1),
@@ -522,7 +510,7 @@ contract("FinancialModel", (accounts) => {
     ];
 
     for (let i = 0; i < 5; i++) {
-      let array = await financialModelInstance.allocationToTrees(i);
+      let array = await allocationInstance.allocationToTrees(i);
       assert.equal(
         Number(array.startingTreeId),
         expected[i].startingTreeId,
@@ -538,7 +526,7 @@ contract("FinancialModel", (accounts) => {
   });
 
   it("3.assignTreeFundDistributionModel should be success", async () => {
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -552,7 +540,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       3000,
       2200,
       1200,
@@ -566,7 +554,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       2000,
       2200,
       2200,
@@ -580,7 +568,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       1000,
       2200,
       2200,
@@ -594,15 +582,15 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
+    await allocationInstance.assignTreeFundDistributionModel(11, 100, 2, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 0, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(1, 10, 1, {
       from: dataManager,
     });
 
@@ -622,7 +610,7 @@ contract("FinancialModel", (accounts) => {
     ];
 
     for (let i = 0; i < 3; i++) {
-      let array = await financialModelInstance.allocationToTrees(i);
+      let array = await allocationInstance.allocationToTrees(i);
       assert.equal(
         Number(array.startingTreeId),
         expected[i].startingTreeId,
@@ -636,8 +624,7 @@ contract("FinancialModel", (accounts) => {
       );
     }
 
-    let resultMaxAssignedIndex1 =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex1 = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex1),
@@ -647,7 +634,7 @@ contract("FinancialModel", (accounts) => {
   });
 
   it("4.assignTreeFundDistributionModel should be success", async () => {
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -661,7 +648,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       3000,
       2200,
       1200,
@@ -675,7 +662,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       2000,
       2200,
       2200,
@@ -689,19 +676,19 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 2, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(1, 2, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 5, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 5, 1, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(8, 10, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(8, 10, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(3, 9, 2, {
+    await allocationInstance.assignTreeFundDistributionModel(3, 9, 2, {
       from: dataManager,
     });
 
@@ -721,7 +708,7 @@ contract("FinancialModel", (accounts) => {
     ];
 
     for (let i = 0; i < 3; i++) {
-      let array = await financialModelInstance.allocationToTrees(i);
+      let array = await allocationInstance.allocationToTrees(i);
       assert.equal(
         Number(array.startingTreeId),
         expected[i].startingTreeId,
@@ -735,8 +722,7 @@ contract("FinancialModel", (accounts) => {
       );
     }
 
-    let resultMaxAssignedIndex1 =
-      await financialModelInstance.maxAssignedIndex();
+    let resultMaxAssignedIndex1 = await allocationInstance.maxAssignedIndex();
 
     assert.equal(
       Number(resultMaxAssignedIndex1),
@@ -748,7 +734,7 @@ contract("FinancialModel", (accounts) => {
   it("assignTreeFundDistributionModel should be reject", async () => {
     ///////////------------ fail Distribution model not found
 
-    await financialModelInstance
+    await allocationInstance
       .assignTreeFundDistributionModel(0, 0, 0, {
         from: dataManager,
       })
@@ -756,7 +742,7 @@ contract("FinancialModel", (accounts) => {
         FinancialModelErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND
       );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -770,7 +756,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance
+    await allocationInstance
       .assignTreeFundDistributionModel(0, 0, 0, {
         from: userAccount1,
       })
@@ -779,13 +765,13 @@ contract("FinancialModel", (accounts) => {
 
   //--------------------------------------------------- DistributionModelOfTreeNotExist ------------------------------------
   it("Check DistributionModelOfTreeNotExist event", async () => {
-    let hasModel0 = await financialModelInstance.distributionModelExistance(0);
+    let hasModel0 = await allocationInstance.exists(0);
 
     assert.equal(hasModel0, false, "hasModel not true");
 
     let amount = web3.utils.toWei("1", "Ether");
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -799,26 +785,24 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(4, 10, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(4, 10, 0, {
       from: dataManager,
     });
-    let hasModel1 = await financialModelInstance.distributionModelExistance(1);
+    let hasModel1 = await allocationInstance.exists(1);
 
-    let hasModel7 = await financialModelInstance.distributionModelExistance(7);
+    let hasModel7 = await allocationInstance.exists(7);
 
-    let hasModel11 = await financialModelInstance.distributionModelExistance(
-      11
-    );
+    let hasModel11 = await allocationInstance.exists(11);
 
     assert.equal(hasModel1, false, "hasModel not true");
     assert.equal(hasModel7, true, "hasModel not true");
     assert.equal(hasModel11, true, "hasModel not true");
   });
 
-  //------------------------------------------- findTreeDistribution ----------------------------------------
+  //------------------------------------------- findAllocationData ----------------------------------------
 
   it("fundTree should be fail (invalid fund model)", async () => {
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       4000,
       1200,
       1200,
@@ -831,19 +815,19 @@ contract("FinancialModel", (accounts) => {
         from: dataManager,
       }
     );
-    await financialModelInstance
-      .findTreeDistribution(1)
+    await allocationInstance
+      .findAllocationData(1)
       .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
 
-    await financialModelInstance.assignTreeFundDistributionModel(3, 10, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(3, 10, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance
-      .findTreeDistribution(1)
+    await allocationInstance
+      .findAllocationData(1)
       .should.be.rejectedWith(FinancialModelErrorMsg.INVALID_FUND_MODEL);
   });
-  it("should findTreeDistribution successfully1", async () => {
+  it("should findAllocationData successfully1", async () => {
     let treeId = 10;
 
     const planterShare = 4000;
@@ -855,7 +839,7 @@ contract("FinancialModel", (accounts) => {
     const reserveFund1 = 0;
     const reserveFund2 = 0;
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare,
       ambassadorShare,
       treeResearch,
@@ -869,15 +853,13 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: dataManager,
     });
 
-    let dmModel = await financialModelInstance.findTreeDistribution.call(
-      treeId
-    );
+    let dmModel = await allocationInstance.findAllocationData.call(treeId);
 
-    const eventTx1 = await financialModelInstance.findTreeDistribution(treeId);
+    const eventTx1 = await allocationInstance.findAllocationData(treeId);
 
     assert.equal(
       Number(dmModel.planterShare),
@@ -927,10 +909,8 @@ contract("FinancialModel", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    let dmModel100 = await financialModelInstance.findTreeDistribution.call(
-      100
-    );
-    let eventTx2 = await financialModelInstance.findTreeDistribution(100);
+    let dmModel100 = await allocationInstance.findAllocationData.call(100);
+    let eventTx2 = await allocationInstance.findAllocationData(100);
 
     assert.equal(
       Number(dmModel100.planterShare),
@@ -1002,7 +982,7 @@ contract("FinancialModel", (accounts) => {
     const reserveFund1_2 = 500;
     const reserveFund2_2 = 500;
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare1,
       ambassadorShare1,
       treeResearch1,
@@ -1016,7 +996,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare2,
       ambassadorShare2,
       treeResearch2,
@@ -1030,17 +1010,15 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 10, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 20, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(1, 20, 1, {
       from: dataManager,
     });
 
-    let dmModel2 = await financialModelInstance.findTreeDistribution.call(
-      treeId2
-    );
+    let dmModel2 = await allocationInstance.findAllocationData.call(treeId2);
 
     assert.equal(
       Number(dmModel2.planterShare),
@@ -1090,9 +1068,7 @@ contract("FinancialModel", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    let dmModel1 = await financialModelInstance.findTreeDistribution.call(
-      treeId1
-    );
+    let dmModel1 = await allocationInstance.findAllocationData.call(treeId1);
 
     assert.equal(
       Number(dmModel1.planterShare),
@@ -1198,7 +1174,7 @@ contract("FinancialModel", (accounts) => {
     const reserveFund1_6 = 0;
     const reserveFund2_6 = 0;
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare1,
       ambassadorShare1,
       treeResearch1,
@@ -1212,7 +1188,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare2,
       ambassadorShare2,
       treeResearch2,
@@ -1226,7 +1202,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare3,
       ambassadorShare3,
       treeResearch3,
@@ -1240,7 +1216,7 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare4,
       ambassadorShare4,
       treeResearch4,
@@ -1254,30 +1230,25 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      101,
-      1000000,
-      3,
-      {
-        from: dataManager,
-      }
-    );
-
-    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
+    await allocationInstance.assignTreeFundDistributionModel(101, 1000000, 3, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(11, 100, 2, {
+    await allocationInstance.assignTreeFundDistributionModel(0, 0, 0, {
       from: dataManager,
     });
 
-    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 1, {
+    await allocationInstance.assignTreeFundDistributionModel(11, 100, 2, {
+      from: dataManager,
+    });
+
+    await allocationInstance.assignTreeFundDistributionModel(1, 10, 1, {
       from: dataManager,
     });
 
     //check treeId 0 model is 0
 
-    const dmModel0 = await financialModelInstance.findTreeDistribution.call(0);
+    const dmModel0 = await allocationInstance.findAllocationData.call(0);
 
     assert.equal(
       Number(dmModel0.planterShare),
@@ -1327,7 +1298,7 @@ contract("FinancialModel", (accounts) => {
       "reserveFund2 funds invalid"
     );
     //check treeId 1 model is 2
-    const dmModel1 = await financialModelInstance.findTreeDistribution.call(1);
+    const dmModel1 = await allocationInstance.findAllocationData.call(1);
 
     assert.equal(
       Number(dmModel1.planterShare),
@@ -1379,7 +1350,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 5 model is 2
 
-    const dmModel5 = await financialModelInstance.findTreeDistribution.call(5);
+    const dmModel5 = await allocationInstance.findAllocationData.call(5);
 
     assert.equal(
       Number(dmModel5.planterShare),
@@ -1431,9 +1402,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 10 model is 2
 
-    const dmModel10 = await financialModelInstance.findTreeDistribution.call(
-      10
-    );
+    const dmModel10 = await allocationInstance.findAllocationData.call(10);
 
     assert.equal(
       Number(dmModel10.planterShare),
@@ -1484,9 +1453,7 @@ contract("FinancialModel", (accounts) => {
     );
 
     //check treeId 11 model is 3
-    const dmModel11 = await financialModelInstance.findTreeDistribution.call(
-      11
-    );
+    const dmModel11 = await allocationInstance.findAllocationData.call(11);
 
     assert.equal(
       Number(dmModel11.planterShare),
@@ -1538,9 +1505,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 99 model is 3
 
-    const dmModel99 = await financialModelInstance.findTreeDistribution.call(
-      99
-    );
+    const dmModel99 = await allocationInstance.findAllocationData.call(99);
 
     assert.equal(
       Number(dmModel99.planterShare),
@@ -1592,9 +1557,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 100 model is 3
 
-    const dmModel100 = await financialModelInstance.findTreeDistribution.call(
-      100
-    );
+    const dmModel100 = await allocationInstance.findAllocationData.call(100);
 
     assert.equal(
       Number(dmModel100.planterShare),
@@ -1646,9 +1609,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 101 model is 4
 
-    const dmModel101 = await financialModelInstance.findTreeDistribution.call(
-      101
-    );
+    const dmModel101 = await allocationInstance.findAllocationData.call(101);
 
     assert.equal(
       Number(dmModel101.planterShare),
@@ -1700,9 +1661,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 1500 model is 4
 
-    const dmModel1500 = await financialModelInstance.findTreeDistribution.call(
-      1500
-    );
+    const dmModel1500 = await allocationInstance.findAllocationData.call(1500);
 
     assert.equal(
       Number(dmModel1500.planterShare),
@@ -1754,8 +1713,9 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 1000000 model is 4
 
-    const dmModel1000000 =
-      await financialModelInstance.findTreeDistribution.call(1000000);
+    const dmModel1000000 = await allocationInstance.findAllocationData.call(
+      1000000
+    );
 
     assert.equal(
       Number(dmModel1000000.planterShare),
@@ -1805,7 +1765,7 @@ contract("FinancialModel", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare5,
       ambassadorShare5,
       treeResearch5,
@@ -1819,19 +1779,12 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(
-      5000,
-      10000,
-      4,
-      {
-        from: dataManager,
-      }
-    );
+    await allocationInstance.assignTreeFundDistributionModel(5000, 10000, 4, {
+      from: dataManager,
+    });
 
     //check treeId 4999 model is 4
-    const dmModel4999 = await financialModelInstance.findTreeDistribution.call(
-      4999
-    );
+    const dmModel4999 = await allocationInstance.findAllocationData.call(4999);
 
     assert.equal(
       Number(dmModel4999.planterShare),
@@ -1883,9 +1836,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 5000 model is 5
 
-    const dmModel5000 = await financialModelInstance.findTreeDistribution.call(
-      5000
-    );
+    const dmModel5000 = await allocationInstance.findAllocationData.call(5000);
 
     assert.equal(
       Number(dmModel5000.planterShare),
@@ -1937,9 +1888,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 6000 model is 5
 
-    const dmModel6000 = await financialModelInstance.findTreeDistribution.call(
-      6000
-    );
+    const dmModel6000 = await allocationInstance.findAllocationData.call(6000);
 
     assert.equal(
       Number(dmModel6000.planterShare),
@@ -1991,7 +1940,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 10000 model is 5
 
-    const dmModel10000 = await financialModelInstance.findTreeDistribution.call(
+    const dmModel10000 = await allocationInstance.findAllocationData.call(
       10000
     );
 
@@ -2044,7 +1993,7 @@ contract("FinancialModel", (accounts) => {
     );
 
     //check treeId 10001 model is 4
-    const dmModel10001 = await financialModelInstance.findTreeDistribution.call(
+    const dmModel10001 = await allocationInstance.findAllocationData.call(
       10001
     );
 
@@ -2096,7 +2045,7 @@ contract("FinancialModel", (accounts) => {
       "reserveFund2 funds invalid"
     );
 
-    await financialModelInstance.addAllocationData(
+    await allocationInstance.addAllocationData(
       planterShare6,
       ambassadorShare6,
       treeResearch6,
@@ -2110,12 +2059,12 @@ contract("FinancialModel", (accounts) => {
       }
     );
 
-    await financialModelInstance.assignTreeFundDistributionModel(4, 10, 5, {
+    await allocationInstance.assignTreeFundDistributionModel(4, 10, 5, {
       from: dataManager,
     });
 
     //check treeId 4 model is 6
-    const dmModel4 = await financialModelInstance.findTreeDistribution.call(4);
+    const dmModel4 = await allocationInstance.findAllocationData.call(4);
     assert.equal(
       Number(dmModel4.planterShare),
       planterShare6,
@@ -2165,9 +2114,7 @@ contract("FinancialModel", (accounts) => {
     );
 
     //check treeId 10_2 model is 6
-    const dmModel10_2 = await financialModelInstance.findTreeDistribution.call(
-      10
-    );
+    const dmModel10_2 = await allocationInstance.findAllocationData.call(10);
 
     assert.equal(
       Number(dmModel10_2.planterShare),
@@ -2219,9 +2166,7 @@ contract("FinancialModel", (accounts) => {
 
     //check treeId 11_2 model is 3
 
-    const dmModel11_2 = await financialModelInstance.findTreeDistribution.call(
-      11
-    );
+    const dmModel11_2 = await allocationInstance.findAllocationData.call(11);
     assert.equal(
       Number(dmModel11_2.planterShare),
       planterShare3,
@@ -2319,88 +2264,5 @@ contract("FinancialModel", (accounts) => {
       reserveFund2_2,
       "reserveFund2 funds invalid"
     );
-  });
-
-  ////////--------------------------- test getFindDistributionModelId --------------------------
-  it("1.getFindDistributionModelId should be success", async () => {
-    const addTx1 = await financialModelInstance.addAllocationData(
-      4000,
-      1200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    const addTx2 = await financialModelInstance.addAllocationData(
-      3000,
-      2200,
-      1200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    const addTx3 = await financialModelInstance.addAllocationData(
-      2000,
-      2200,
-      2200,
-      1200,
-      1200,
-      1200,
-      0,
-      0,
-      {
-        from: dataManager,
-      }
-    );
-
-    await financialModelInstance.assignTreeFundDistributionModel(0, 0, 0, {
-      from: dataManager,
-    });
-
-    let modelId = await financialModelInstance.getFindDistributionModelId(0);
-
-    assert.equal(modelId, 0, "1.modelId not true");
-
-    ///////////////
-
-    await financialModelInstance.assignTreeFundDistributionModel(1, 10, 2, {
-      from: dataManager,
-    });
-
-    let modelId2 = await financialModelInstance.getFindDistributionModelId(2);
-
-    assert.equal(modelId2, 2, "2.modelId not true");
-
-    ///////////////
-
-    await financialModelInstance.assignTreeFundDistributionModel(10, 100, 1, {
-      from: dataManager,
-    });
-
-    let modelId3 = await financialModelInstance.getFindDistributionModelId(15);
-
-    assert.equal(modelId3, 1, "3.modelId not true");
-
-    let modelId4 = await financialModelInstance.getFindDistributionModelId(3);
-
-    assert.equal(modelId4, 2, "4.modelId not true");
-
-    let modelId5 = await financialModelInstance.getFindDistributionModelId(
-      1050
-    );
-
-    assert.equal(modelId5, 1, "4.modelId not true");
   });
 });

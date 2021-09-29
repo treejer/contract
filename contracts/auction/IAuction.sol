@@ -24,9 +24,9 @@ interface IAuction {
     function wethFunds() external view returns (address);
 
     /**
-     * @return FinancialModel contract address
+     * @return Allocation contract address
      */
-    function financialModel() external view returns (address);
+    function allocation() external view returns (address);
 
     /**
      * @return WethToken contract address
@@ -65,7 +65,7 @@ interface IAuction {
     /** @dev set {_address} to TreeFactory contract address */
     function setTreeFactoryAddress(address _address) external;
 
-    /** @dev set {_address} to FinancialModel contract address */
+    /** @dev set {_address} to Allocation contract address */
     function setAllocationAddress(address _address) external;
 
     /** @dev set {_address} to WethFunds contract address */

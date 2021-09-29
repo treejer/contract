@@ -16,7 +16,7 @@ const Math = require("./math");
 
 //treasury section
 const DaiFunds = artifacts.require("DaiFunds.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
+const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
 
@@ -108,7 +108,7 @@ contract("regularSell", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -212,7 +212,7 @@ contract("regularSell", (accounts) => {
         "dai token address set incorect"
       );
 
-      ////---------------------------------set FinancialModel Address--------------------------------------------------------
+      ////---------------------------------set Allocation Address--------------------------------------------------------
 
       await regularSellInstance
         .setAllocationAddress(fModel.address, {
@@ -226,7 +226,7 @@ contract("regularSell", (accounts) => {
 
       assert.equal(
         fModel.address,
-        await regularSellInstance.financialModel(),
+        await regularSellInstance.allocation(),
         "financial model address set incorect"
       );
 
@@ -270,7 +270,7 @@ contract("regularSell", (accounts) => {
         }
       );
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -729,7 +729,7 @@ contract("regularSell", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(FinancialModel, [arInstance.address], {
+      fModel = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,

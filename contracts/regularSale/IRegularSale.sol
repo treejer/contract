@@ -63,12 +63,6 @@ interface IRegularSale {
     /** @dev admin set trusted forwarder address */
     function setTrustedForwarder(address _address) external;
 
-    /**
-     * @dev data manager can update lastFundedTreeId
-     * emit a {LastFundedTreeIdUpdated} event
-     */
-    function updateLastFundedTreeId(uint256 _lastFundedTreeId) external;
-
     /** @dev admin set treeFactory contract address
      * @param _address treeFactory contract address
      */
@@ -100,14 +94,19 @@ interface IRegularSale {
      */
     function setWethFundsAddress(address _address) external;
 
+    // **** FUNDTREE SECTION ****
+
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      * NOTE emit a {PriceUpdated} event
      */
     function updatePrice(uint256 _price) external;
 
-    //TODO: ADD_COMMENT
-    function updateReferralTriggerCount(uint256 _count) external;
+    /**
+     * @dev data manager can update lastFundedTreeId
+     * emit a {LastFundedTreeIdUpdated} event
+     */
+    function updateLastFundedTreeId(uint256 _lastFundedTreeId) external;
 
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * price }
@@ -127,11 +126,16 @@ interface IRegularSale {
      */
     function fundTreeById(uint256 _treeId, address _referrer) external;
 
+    // **** REFERRAL SECTION ****
+
     //TODO: ADD_COMMENT
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
     ) external;
+
+    //TODO: ADD_COMMENT
+    function updateReferralTriggerCount(uint256 _count) external;
 
     //TODO: ADD_COMMENT
     function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)

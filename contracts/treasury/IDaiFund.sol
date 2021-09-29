@@ -126,18 +126,18 @@ interface IDaiFund {
         uint256 _amount,
         uint16 _planterShare,
         uint16 _ambassadorShare,
-        uint16 _research,
-        uint16 _localDevelopment,
-        uint16 _insurance,
-        uint16 _treasury,
-        uint16 _reserve1,
-        uint16 _reserve2
+        uint16 _researchShare,
+        uint16 _localDevelopmentShare,
+        uint16 _insuranceShare,
+        uint16 _treasuryShare,
+        uint16 _reserve1Share,
+        uint16 _reserve2Share
     ) external;
 
     //TODO : ADD_COMMENT
     function fundTreeBatch(
-        uint256 _totalPlanterShare,
-        uint256 _totalAmbassadorShare,
+        uint256 _totalPlanterAmount,
+        uint256 _totalAmbassadorAmount,
         uint256 _totalResearch,
         uint256 _totalLocalDevelopment,
         uint256 _totalInsurance,

@@ -481,10 +481,13 @@ contract("DaiFund", (accounts) => {
         "reserve2 funds invalid"
       );
 
-      // check planterShare and ambassadorShare in planterShare
+      // check planterShare and ambassadorShare in planterFunds
 
-      let pShare = await planterFundsInstnce.planterShare.call(treeId);
-      let aShare = await planterFundsInstnce.ambassadorShare.call(treeId);
+      let pShare = await planterFundsInstnce.treeToPlanterProjectedEarning.call(
+        treeId
+      );
+      let aShare =
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       assert.equal(
         Number(pShare),
@@ -504,13 +507,13 @@ contract("DaiFund", (accounts) => {
         await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalBalancesPlanterFund.planterShare),
+        Number(totalBalancesPlanterFund.planter),
         expected.planterShare,
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesPlanterFund.ambassadorShare),
+        Number(totalBalancesPlanterFund.ambassador),
         expected.ambassadorShare,
         "ambassador funds invalid"
       );
@@ -745,12 +748,20 @@ contract("DaiFund", (accounts) => {
         "reserve2 funds invalid"
       );
 
-      // check planterShare and ambassadorShare in planterShare
+      // check planterShare and ambassadorShare in planterFund
 
-      let pShare1 = await planterFundsInstnce.planterShare.call(treeId1);
-      let aShare1 = await planterFundsInstnce.ambassadorShare.call(treeId1);
-      let pShare2 = await planterFundsInstnce.planterShare.call(treeId2);
-      let aShare2 = await planterFundsInstnce.ambassadorShare.call(treeId2);
+      let pShare1 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId1);
+      let aShare1 =
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId1
+        );
+      let pShare2 =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(treeId2);
+      let aShare2 =
+        await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(
+          treeId2
+        );
 
       assert.equal(
         Number(pShare1),
@@ -782,13 +793,13 @@ contract("DaiFund", (accounts) => {
         await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalBalancesPlanterFund.planterShare),
+        Number(totalBalancesPlanterFund.planter),
         Math.add(expected1.planterShare, expected2.planterShare),
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesPlanterFund.ambassadorShare),
+        Number(totalBalancesPlanterFund.ambassador),
         Math.add(expected1.ambassadorShare, expected2.ambassadorShare),
         "ambassador funds invalid"
       );

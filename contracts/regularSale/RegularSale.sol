@@ -34,15 +34,15 @@ contract RegularSale is Initializable, RelayRecipient {
 
     mapping(address => uint256) public referrerCount;
 
-    struct FundDistribution {
-        uint256 planterFund;
-        uint256 referralFund;
-        uint256 treeResearch;
-        uint256 localDevelop;
-        uint256 rescueFund;
-        uint256 treejerDevelop;
-        uint256 reserveFund1;
-        uint256 reserveFund2;
+    struct TotalBalances {
+        uint256 planter;
+        uint256 ambassador;
+        uint256 research;
+        uint256 localDevelopment;
+        uint256 insurance;
+        uint256 treasury;
+        uint256 reserve1;
+        uint256 reserve2;
     }
 
     IAccessRestriction public accessRestriction;
@@ -267,7 +267,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
         uint256 tempLastRegularSold = lastFundedTreeId;
 
-        FundDistribution memory totalFunds;
+        TotalBalances memory totalBalances;
 
         for (uint256 i = 0; i < _count; i++) {
             tempLastRegularSold = treeFactory.mintTree(
@@ -276,43 +276,45 @@ contract RegularSale is Initializable, RelayRecipient {
             );
 
             (
-                uint16 planterFund,
-                uint16 referralFund,
-                uint16 treeResearch,
-                uint16 localDevelop,
-                uint16 rescueFund,
-                uint16 treejerDevelop,
-                uint16 reserveFund1,
-                uint16 reserveFund2
+                uint16 planterShare,
+                uint16 ambassadorShare,
+                uint16 researchShare,
+                uint16 localDevelopmentShare,
+                uint16 insuranceShare,
+                uint16 treasuryShare,
+                uint16 reserve1Share,
+                uint16 reserve2Share
             ) = allocation.findAllocationData(tempLastRegularSold);
 
-            totalFunds.planterFund += (price * planterFund) / 10000;
-            totalFunds.referralFund += (price * referralFund) / 10000;
-            totalFunds.treeResearch += (price * treeResearch) / 10000;
-            totalFunds.localDevelop += (price * localDevelop) / 10000;
-            totalFunds.rescueFund += (price * rescueFund) / 10000;
-            totalFunds.treejerDevelop += (price * treejerDevelop) / 10000;
-            totalFunds.reserveFund1 += (price * reserveFund1) / 10000;
-            totalFunds.reserveFund2 += (price * reserveFund2) / 10000;
+            totalBalances.planter += (price * planterShare) / 10000;
+            totalBalances.ambassador += (price * ambassadorShare) / 10000;
+            totalBalances.research += (price * researchShare) / 10000;
+            totalBalances.localDevelopment +=
+                (price * localDevelopmentShare) /
+                10000;
+            totalBalances.insurance += (price * insuranceShare) / 10000;
+            totalBalances.treasury += (price * treasuryShare) / 10000;
+            totalBalances.reserve1 += (price * reserve1Share) / 10000;
+            totalBalances.reserve2 += (price * reserve2Share) / 10000;
 
             planterFundContract.setPlanterFunds(
                 tempLastRegularSold,
-                (price * planterFund) / 10000,
-                (price * referralFund) / 10000
+                (price * planterShare) / 10000,
+                (price * ambassadorShare) / 10000
             );
 
             emit RegularMint(_msgSender(), tempLastRegularSold, price);
         }
 
         daiFund.fundTreeBatch(
-            totalFunds.planterFund,
-            totalFunds.referralFund,
-            totalFunds.treeResearch,
-            totalFunds.localDevelop,
-            totalFunds.rescueFund,
-            totalFunds.treejerDevelop,
-            totalFunds.reserveFund1,
-            totalFunds.reserveFund2
+            totalBalances.planter,
+            totalBalances.ambassador,
+            totalBalances.research,
+            totalBalances.localDevelopment,
+            totalBalances.insurance,
+            totalBalances.treasury,
+            totalBalances.reserve1,
+            totalBalances.reserve2
         );
 
         lastFundedTreeId = tempLastRegularSold;
@@ -385,7 +387,7 @@ contract RegularSale is Initializable, RelayRecipient {
             uint16 planterShare,
             uint16 ambassadorShare,
             uint16 researchShare,
-            uint16 localDevelopmentShare,
+            uint16 localDevelopmentmentShare,
             uint16 insuranceShare,
             uint16 treasuryShare,
             uint16 reserve1Share,
@@ -398,7 +400,7 @@ contract RegularSale is Initializable, RelayRecipient {
             planterShare,
             ambassadorShare,
             researchShare,
-            localDevelopmentShare,
+            localDevelopmentmentShare,
             insuranceShare,
             treasuryShare,
             reserve1Share,

@@ -1159,7 +1159,7 @@ contract("regularSale", (accounts) => {
       };
 
       //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundInstance.totalFunds();
+      let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalFunds2.treeResearch),
@@ -1449,7 +1449,7 @@ contract("regularSale", (accounts) => {
       };
 
       //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundInstance.totalFunds();
+      let totalFunds2 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalFunds2.treeResearch),
@@ -2444,8 +2444,8 @@ contract("regularSale", (accounts) => {
 
       /////////////--------------------- check total fund before request
 
-      const totalFundsBefore = await daiFundInstance.totalFunds();
-      const totalPlanterFundsBefore = await planterFundsInstnce.totalFunds();
+      const totalFundsBefore = await daiFundInstance.totalBalances();
+      const totalPlanterFundsBefore = await planterFundsInstnce.totalBalances();
 
       assert.equal(
         Number(totalPlanterFundsBefore.planterFund),
@@ -2650,9 +2650,9 @@ contract("regularSale", (accounts) => {
 
       ////////////////// ---------------------- check total fund after request
 
-      const totalFundsAfter = await daiFundInstance.totalFunds();
+      const totalFundsAfter = await daiFundInstance.totalBalances();
 
-      const totalPlanterFundsAfter = await planterFundsInstnce.totalFunds();
+      const totalPlanterFundsAfter = await planterFundsInstnce.totalBalances();
 
       assert.equal(
         Number(totalPlanterFundsAfter.planterFund),

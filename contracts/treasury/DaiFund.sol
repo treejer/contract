@@ -225,48 +225,50 @@ contract DaiFund is Initializable {
         uint256 _amount,
         uint16 _planterShare,
         uint16 _ambassadorShare,
-        uint16 _research,
-        uint16 _localDevelopment,
-        uint16 _insurance,
-        uint16 _treasury,
-        uint16 _reserve1,
-        uint16 _reserve2
+        uint16 _researchShare,
+        uint16 _localDevelopmentShare,
+        uint16 _insuranceShare,
+        uint16 _treasuryShare,
+        uint16 _reserve1Share,
+        uint16 _reserve2Share
     ) external onlyTreejerContract {
-        totalBalances.insurance += (_amount * _insurance) / 10000;
+        totalBalances.insurance += (_amount * _insuranceShare) / 10000;
 
-        totalBalances.localDevelopment += (_amount * _localDevelopment) / 10000;
+        totalBalances.localDevelopment +=
+            (_amount * _localDevelopmentShare) /
+            10000;
 
-        totalBalances.reserve1 += (_amount * _reserve1) / 10000;
+        totalBalances.reserve1 += (_amount * _reserve1Share) / 10000;
 
-        totalBalances.reserve2 += (_amount * _reserve2) / 10000;
+        totalBalances.reserve2 += (_amount * _reserve2Share) / 10000;
 
-        totalBalances.treasury += (_amount * _treasury) / 10000;
+        totalBalances.treasury += (_amount * _treasuryShare) / 10000;
 
-        totalBalances.research += (_amount * _research) / 10000;
+        totalBalances.research += (_amount * _researchShare) / 10000;
 
-        uint256 planterShare = (_amount * _planterShare) / 10000;
-        uint256 ambassadorShare = (_amount * _ambassadorShare) / 10000;
+        uint256 planterAmount = (_amount * _planterShare) / 10000;
+        uint256 ambassadorAmount = (_amount * _ambassadorShare) / 10000;
 
         bool success = daiToken.transfer(
             address(planterFundContract),
-            planterShare + ambassadorShare
+            planterAmount + ambassadorAmount
         );
 
         require(success, "unsuccessful transfer");
 
         planterFundContract.updateProjectedEarnings(
             _treeId,
-            planterShare,
-            ambassadorShare
+            planterAmount,
+            ambassadorAmount
         );
 
-        emit TreeFunded(_treeId, _amount, planterShare + ambassadorShare);
+        emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
 
     //TODO : ADD_COMMENT
     function fundTreeBatch(
-        uint256 _totalPlanterShare,
-        uint256 _totalAmbassadorShare,
+        uint256 _totalPlanterAmount,
+        uint256 _totalAmbassadorAmount,
         uint256 _totalResearch,
         uint256 _totalLocalDevelopment,
         uint256 _totalInsurance,
@@ -288,7 +290,7 @@ contract DaiFund is Initializable {
 
         bool success = daiToken.transfer(
             address(planterFundContract),
-            _totalPlanterShare + _totalAmbassadorShare
+            _totalPlanterAmount + _totalAmbassadorAmount
         );
 
         require(success, "unsuccessful transfer");

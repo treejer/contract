@@ -130,6 +130,8 @@ contract RegularSale is Initializable, RelayRecipient {
         emit PriceUpdated(_price);
     }
 
+    // **** SET ADDRESS SECTION ****
+
     /**
      * @dev admin set trusted forwarder address
      * @param _address set to {trustedForwarder}
@@ -140,21 +142,6 @@ contract RegularSale is Initializable, RelayRecipient {
         validAddress(_address)
     {
         trustedForwarder = _address;
-    }
-
-    /** @dev data manager can update lastFundedTreeId */
-    function updateLastFundedTreeId(uint256 _lastFundedTreeId)
-        external
-        onlyDataManager
-    {
-        require(
-            _lastFundedTreeId > lastFundedTreeId,
-            "Input must be gt last tree sold"
-        );
-
-        lastFundedTreeId = _lastFundedTreeId;
-
-        emit LastFundedTreeIdUpdated(_lastFundedTreeId);
     }
 
     /** @dev admin set treeFactory contract address
@@ -223,6 +210,8 @@ contract RegularSale is Initializable, RelayRecipient {
         wethFund = candidateContract;
     }
 
+    // **** FUNDTREE SECTION ****
+
     /** @dev admin set the price of trees that are sold regular
      * @param _price price of tree
      */
@@ -231,13 +220,19 @@ contract RegularSale is Initializable, RelayRecipient {
         emit PriceUpdated(_price);
     }
 
-    //TODO: ADD_COMMENT
-    function updateReferralTriggerCount(uint256 _count)
+    /** @dev data manager can update lastFundedTreeId */
+    function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
         onlyDataManager
     {
-        referralTriggerCount = _count;
-        emit ReferralTriggerCountUpdated(_count);
+        require(
+            _lastFundedTreeId > lastFundedTreeId,
+            "Input must be gt last tree sold"
+        );
+
+        lastFundedTreeId = _lastFundedTreeId;
+
+        emit LastFundedTreeIdUpdated(_lastFundedTreeId);
     }
 
     /** @dev request {_count} trees and the paid amount must be more than
@@ -324,42 +319,6 @@ contract RegularSale is Initializable, RelayRecipient {
         }
     }
 
-    function _calculateReferrerCount(address _referrer, uint256 _count)
-        private
-    {
-        uint256 localReferrerCount = referrerCount[_referrer] + _count;
-
-        if (localReferrerCount >= referralTriggerCount) {
-            uint256 temp = localReferrerCount / referralTriggerCount;
-            localReferrerCount -= temp * referralTriggerCount;
-            referrerClaimableTreesDai[_referrer] += temp;
-        }
-
-        referrerCount[_referrer] = localReferrerCount;
-    }
-
-    //TODO: ADD_COMMENT
-    function _mintReferralReward(uint256 _count, address _referrer) private {
-        uint256 tempLastRegularSold = lastFundedTreeId;
-
-        for (uint256 i = 0; i < _count; i++) {
-            tempLastRegularSold = treeFactory.mintTree(
-                tempLastRegularSold,
-                _referrer
-            );
-
-            planterFundContract.updateProjectedEarnings(
-                tempLastRegularSold,
-                referralTreePaymentToPlanter,
-                referralTreePaymentToAmbassador
-            );
-
-            emit RegularMint(_referrer, tempLastRegularSold, price);
-        }
-
-        lastFundedTreeId = tempLastRegularSold;
-    }
-
     /** @dev request  tree with id {_treeId} and the paid amount must be more than
      * {price} and the {_treeId} must be more than {lastFundedTreeId} to
      * make sure that has not been sold before
@@ -412,6 +371,8 @@ contract RegularSale is Initializable, RelayRecipient {
         }
     }
 
+    // **** REFERRAL SECTION ****
+
     //TODO: ADD_COMMENT
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
@@ -427,11 +388,34 @@ contract RegularSale is Initializable, RelayRecipient {
     }
 
     //TODO: ADD_COMMENT
+    function updateReferralTriggerCount(uint256 _count)
+        external
+        onlyDataManager
+    {
+        referralTriggerCount = _count;
+        emit ReferralTriggerCountUpdated(_count);
+    }
+
+    //TODO: ADD_COMMENT
     function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external
         onlyTreejerContract
     {
         referrerClaimableTreesWeth[_referrer] += _count;
+    }
+
+    function _calculateReferrerCount(address _referrer, uint256 _count)
+        private
+    {
+        uint256 localReferrerCount = referrerCount[_referrer] + _count;
+
+        if (localReferrerCount >= referralTriggerCount) {
+            uint256 temp = localReferrerCount / referralTriggerCount;
+            localReferrerCount -= temp * referralTriggerCount;
+            referrerClaimableTreesDai[_referrer] += temp;
+        }
+
+        referrerCount[_referrer] = localReferrerCount;
     }
 
     //TODO: ADD_COMMENT
@@ -485,5 +469,27 @@ contract RegularSale is Initializable, RelayRecipient {
         emit ReferralRewardClaimed(_msgSender(), _count, _amount);
 
         _mintReferralReward(_count, _msgSender());
+    }
+
+    //TODO: ADD_COMMENT
+    function _mintReferralReward(uint256 _count, address _referrer) private {
+        uint256 tempLastRegularSold = lastFundedTreeId;
+
+        for (uint256 i = 0; i < _count; i++) {
+            tempLastRegularSold = treeFactory.mintTree(
+                tempLastRegularSold,
+                _referrer
+            );
+
+            planterFundContract.updateProjectedEarnings(
+                tempLastRegularSold,
+                referralTreePaymentToPlanter,
+                referralTreePaymentToAmbassador
+            );
+
+            emit RegularMint(_referrer, tempLastRegularSold, price);
+        }
+
+        lastFundedTreeId = tempLastRegularSold;
     }
 }

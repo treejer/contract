@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.6;
 
-/** @title DaiFunds interfce */
-interface IDaiFunds {
+/** @title DaiFund interfce */
+interface IDaiFund {
     /**
-     * @return true in case of DaiFunds contract have been initialized
+     * @return true in case of DaiFund contract have been initialized
      */
-    function isDaiFunds() external view returns (bool);
+    function isDaiFund() external view returns (bool);
 
     /**
      * @return AccessRestriction contract address

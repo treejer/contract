@@ -1,5 +1,5 @@
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const DaiFunds = artifacts.require("DaiFunds.sol");
+const DaiFund = artifacts.require("DaiFund.sol");
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
@@ -10,11 +10,11 @@ const Math = require("./math");
 
 var Dai = artifacts.require("Dai.sol");
 
-const { CommonErrorMsg, DaiFundsErrorMsg } = require("./enumes");
+const { CommonErrorMsg, DaiFundErrorMsg } = require("./enumes");
 
 const Common = require("./common");
 
-contract("DaiFunds", (accounts) => {
+contract("DaiFund", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -27,7 +27,7 @@ contract("DaiFunds", (accounts) => {
   const userAccount8 = accounts[9];
 
   let arInstance;
-  let daiFundsInstance;
+  let daiFundInstance;
   let fModel;
 
   let daiInstance;
@@ -61,7 +61,7 @@ contract("DaiFunds", (accounts) => {
     before(async () => {
       /////////////---------------------- deploy contracts ------------------- //////////////
 
-      daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -80,33 +80,33 @@ contract("DaiFunds", (accounts) => {
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
     });
 
-    it("set daiFundsInstance address and fail in invalid situation", async () => {
+    it("set daiFundInstance address and fail in invalid situation", async () => {
       /////////////------------------------------------ set Dai Token address ----------------------------------------//
-      await daiFundsInstance
+      await daiFundInstance
         .setDaiTokenAddress(daiInstance.address, { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setDaiTokenAddress(zeroAddress, { from: deployerAccount })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.daiToken.call(),
+        await daiFundInstance.daiToken.call(),
         daiInstance.address,
         "Set dai contract address not true"
       );
       /////////////------------------------------------ set PlanterFund Contract address ----------------------------------------//
-      await daiFundsInstance
+      await daiFundInstance
         .setPlanterFundContractAddress(planterFundsInstnce.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -114,19 +114,19 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        await daiFundsInstance.planterFundContract.call(),
+        await daiFundInstance.planterFundContract.call(),
         planterFundsInstnce.address,
         "Set planter fund contract address not true"
       );
       //-------------------------------setResearchAddress test-------------------------------------------------------
       let researchAddress = userAccount4;
 
-      await daiFundsInstance.setResearchAddress(researchAddress, {
+      await daiFundInstance.setResearchAddress(researchAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.researchAddress(),
+        await daiFundInstance.researchAddress(),
         researchAddress,
         "Set researchAddress address not true"
       );
@@ -134,13 +134,13 @@ contract("DaiFunds", (accounts) => {
       //------------------------setResearchAddress should be fail (invalid access)---------------------------------
       researchAddress = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setResearchAddress(researchAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setResearchAddress(zeroAddress, {
           from: deployerAccount,
         })
@@ -149,13 +149,13 @@ contract("DaiFunds", (accounts) => {
       //-------------------------------setLocalDevelopmentAddress should be fail (invalid access)----------------------------
       let localDevelopmentAddress = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setLocalDevelopmentAddress(localDevelopmentAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setLocalDevelopmentAddress(zeroAddress, {
           from: deployerAccount,
         })
@@ -164,7 +164,7 @@ contract("DaiFunds", (accounts) => {
       //-------------------------------setLocalDevelopmentAddress test-------------------------------------------------------
       localDevelopmentAddress = userAccount4;
 
-      await daiFundsInstance.setLocalDevelopmentAddress(
+      await daiFundInstance.setLocalDevelopmentAddress(
         localDevelopmentAddress,
         {
           from: deployerAccount,
@@ -172,7 +172,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       assert.equal(
-        await daiFundsInstance.localDevelopmentAddress(),
+        await daiFundInstance.localDevelopmentAddress(),
         localDevelopmentAddress,
         "Set localDevelopmentAddress address not true"
       );
@@ -180,13 +180,13 @@ contract("DaiFunds", (accounts) => {
       //-----------------------------setInsuranceAddress should be fail (invalid access)---------------------------------
       let insuranceAddress = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setInsuranceAddress(insuranceAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setInsuranceAddress(zeroAddress, {
           from: deployerAccount,
         })
@@ -195,12 +195,12 @@ contract("DaiFunds", (accounts) => {
       //-----------------------------setInsuranceAddress should be success---------------------------------
       insuranceAddress = userAccount4;
 
-      await daiFundsInstance.setInsuranceAddress(insuranceAddress, {
+      await daiFundInstance.setInsuranceAddress(insuranceAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.insuranceAddress(),
+        await daiFundInstance.insuranceAddress(),
         insuranceAddress,
         "Set insuranceAddress address not true"
       );
@@ -209,13 +209,13 @@ contract("DaiFunds", (accounts) => {
 
       let treasuryAddress = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setTreasuryAddress(treasuryAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setTreasuryAddress(zeroAddress, {
           from: deployerAccount,
         })
@@ -225,12 +225,12 @@ contract("DaiFunds", (accounts) => {
 
       treasuryAddress = userAccount4;
 
-      await daiFundsInstance.setTreasuryAddress(treasuryAddress, {
+      await daiFundInstance.setTreasuryAddress(treasuryAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.treasuryAddress(),
+        await daiFundInstance.treasuryAddress(),
         treasuryAddress,
         "Set treasuryAddress address not true"
       );
@@ -238,13 +238,13 @@ contract("DaiFunds", (accounts) => {
       //-------------------setReserve1Address should be fail (invalid access)-------------------
       let reserve1Address = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setReserve1Address(reserve1Address, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setReserve1Address(zeroAddress, {
           from: deployerAccount,
         })
@@ -252,25 +252,25 @@ contract("DaiFunds", (accounts) => {
       //--------------------------------setReserve1Address should be success-----------------------
       reserve1Address = userAccount4;
 
-      await daiFundsInstance.setReserve1Address(reserve1Address, {
+      await daiFundInstance.setReserve1Address(reserve1Address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.reserve1Address(),
+        await daiFundInstance.reserve1Address(),
         reserve1Address,
         "Set reserve1Address address not true"
       );
       //----------------------------------------setReserve2Address should be fail (invalid access)-----------------------------------
       let reserve2Address = userAccount4;
 
-      await daiFundsInstance
+      await daiFundInstance
         .setReserve2Address(reserve2Address, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .setReserve2Address(zeroAddress, {
           from: deployerAccount,
         })
@@ -279,12 +279,12 @@ contract("DaiFunds", (accounts) => {
       //-------------------------------------setReserve2Address should be success------------------------------------------------
       reserve2Address = userAccount4;
 
-      await daiFundsInstance.setReserve2Address(reserve2Address, {
+      await daiFundInstance.setReserve2Address(reserve2Address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await daiFundsInstance.reserve2Address(),
+        await daiFundInstance.reserve2Address(),
         reserve2Address,
         "Set reserve2Address address not true"
       );
@@ -295,7 +295,7 @@ contract("DaiFunds", (accounts) => {
     beforeEach(async () => {
       /////////////---------------------- deploy contracts ------------------- //////////////
 
-      daiFundsInstance = await deployProxy(DaiFunds, [arInstance.address], {
+      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -320,11 +320,11 @@ contract("DaiFunds", (accounts) => {
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       /////////////---------------------- set address ------------------- //////////////
-      await daiFundsInstance.setDaiTokenAddress(daiInstance.address, {
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setPlanterFundContractAddress(
+      await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         { from: deployerAccount }
       );
@@ -354,7 +354,7 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -377,11 +377,11 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      const eventTx = await daiFundsInstance.fundTree(
+      const eventTx = await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -418,9 +418,7 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      let daiFundBalance = await daiInstance.balanceOf(
-        daiFundsInstance.address
-      );
+      let daiFundBalance = await daiInstance.balanceOf(daiFundInstance.address);
 
       const planterFundBalance = await daiInstance.balanceOf(
         planterFundsInstnce.address
@@ -445,40 +443,40 @@ contract("DaiFunds", (accounts) => {
       );
 
       //check daiFund totalBalances
-      let totalBalancesDaiFunds = await daiFundsInstance.totalBalances();
+      let totalBalancesDaiFund = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalBalancesDaiFunds.research),
+        Number(totalBalancesDaiFund.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.localDevelopment),
+        Number(totalBalancesDaiFund.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.insurance),
+        Number(totalBalancesDaiFund.insurance),
         expected.insurance,
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.treasury),
+        Number(totalBalancesDaiFund.treasury),
         expected.treasury,
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.reserve1),
+        Number(totalBalancesDaiFund.reserve1),
         expected.reserve1,
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.reserve2),
+        Number(totalBalancesDaiFund.reserve2),
         expected.reserve2,
         "reserve2 funds invalid"
       );
@@ -550,7 +548,7 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -591,12 +589,12 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
-      await daiInstance.setMint(daiFundsInstance.address, amount2);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount2);
 
       ////--------------------call fund tree by auction----------------
-      const eventTx1 = await daiFundsInstance.fundTree(
+      const eventTx1 = await daiFundInstance.fundTree(
         treeId1,
         amount1,
         planterShare1,
@@ -610,7 +608,7 @@ contract("DaiFunds", (accounts) => {
         { from: userAccount3 }
       );
 
-      const eventTx2 = await daiFundsInstance.fundTree(
+      const eventTx2 = await daiFundInstance.fundTree(
         treeId2,
         amount2,
         planterShare2,
@@ -670,9 +668,7 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      let daiFundBalance = await daiInstance.balanceOf(
-        daiFundsInstance.address
-      );
+      let daiFundBalance = await daiInstance.balanceOf(daiFundInstance.address);
 
       const planterFundBalance = await daiInstance.balanceOf(
         planterFundsInstnce.address
@@ -711,40 +707,40 @@ contract("DaiFunds", (accounts) => {
       );
 
       //check daiFund totalBalances
-      let totalBalancesDaiFunds = await daiFundsInstance.totalBalances();
+      let totalBalancesDaiFund = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalBalancesDaiFunds.research),
+        Number(totalBalancesDaiFund.research),
         Math.add(expected1.research, expected2.research),
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.localDevelopment),
+        Number(totalBalancesDaiFund.localDevelopment),
         Math.add(expected1.localDevelopment, expected2.localDevelopment),
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.insurance),
+        Number(totalBalancesDaiFund.insurance),
         Math.add(expected1.insurance, expected2.insurance),
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.treasury),
+        Number(totalBalancesDaiFund.treasury),
         Math.add(expected1.treasury, expected2.treasury),
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.reserve1),
+        Number(totalBalancesDaiFund.reserve1),
         Math.add(expected1.reserve1, expected2.reserve1),
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalBalancesDaiFunds.reserve2),
+        Number(totalBalancesDaiFund.reserve2),
         Math.add(expected1.reserve2, expected2.reserve2),
         "reserve2 funds invalid"
       );
@@ -817,7 +813,7 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
@@ -841,15 +837,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       //////////--------------- fund tree -------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -864,7 +860,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -880,11 +876,11 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      await daiFundsInstance.setResearchAddress(userAccount3, {
+      await daiFundInstance.setResearchAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawResearchBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -894,20 +890,20 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawResearchBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawResearchBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawResearchBalance(
+      await daiFundInstance.withdrawResearchBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -916,7 +912,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawResearchBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -924,18 +920,18 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail local develop withdraw------------------/////
 
-      await daiFundsInstance.setLocalDevelopmentAddress(userAccount3, {
+      await daiFundInstance.setLocalDevelopmentAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawLocalDevelopmentBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -945,7 +941,7 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawLocalDevelopmentBalance(
           web3.utils.toWei("0"),
           "reason to withdraw",
@@ -953,9 +949,9 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawLocalDevelopmentBalance(
           web3.utils.toWei("3"),
           "reason to withdraw",
@@ -963,10 +959,10 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawLocalDevelopmentBalance(
+      await daiFundInstance.withdrawLocalDevelopmentBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -975,7 +971,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawLocalDevelopmentBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -983,18 +979,18 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail rescue fund withdraw------------------/////
 
-      await daiFundsInstance.setInsuranceAddress(userAccount3, {
+      await daiFundInstance.setInsuranceAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawInsuranceBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1004,20 +1000,20 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawInsuranceBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawInsuranceBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawInsuranceBalance(
+      await daiFundInstance.withdrawInsuranceBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1026,7 +1022,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawInsuranceBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1034,18 +1030,18 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail treejer develop withdraw------------------/////
 
-      await daiFundsInstance.setTreasuryAddress(userAccount3, {
+      await daiFundInstance.setTreasuryAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawTreasuryBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1055,20 +1051,20 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawTreasuryBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawTreasuryBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawTreasuryBalance(
+      await daiFundInstance.withdrawTreasuryBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1077,7 +1073,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawTreasuryBalance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1085,18 +1081,18 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail reserve fund1 withdraw------------------/////
 
-      await daiFundsInstance.setReserve1Address(userAccount3, {
+      await daiFundInstance.setReserve1Address(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve1Balance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1106,20 +1102,20 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve1Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve1Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawReserve1Balance(
+      await daiFundInstance.withdrawReserve1Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1128,7 +1124,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve1Balance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1136,17 +1132,17 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //
       //
 
       /////////////-------------------------------------should fail reserve fund2 withdraw------------------/////
-      await daiFundsInstance.setReserve2Address(userAccount3, {
+      await daiFundInstance.setReserve2Address(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve2Balance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1156,20 +1152,20 @@ contract("DaiFunds", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve2Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve2Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
-      await daiFundsInstance.withdrawReserve2Balance(
+      await daiFundInstance.withdrawReserve2Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         {
@@ -1178,7 +1174,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       ////////////------------- should fail
-      await daiFundsInstance
+      await daiFundInstance
         .withdrawReserve2Balance(
           web3.utils.toWei("0.2"),
           "reason to withdraw",
@@ -1186,7 +1182,7 @@ contract("DaiFunds", (accounts) => {
             from: deployerAccount,
           }
         )
-        .should.be.rejectedWith(DaiFundsErrorMsg.INSUFFICIENT_AMOUNT);
+        .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
     });
 
     it("should withdraw address succussfully", async () => {
@@ -1206,33 +1202,33 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       ////////////------------------- set addresses
 
-      await daiFundsInstance.setLocalDevelopmentAddress(userAccount3, {
+      await daiFundInstance.setLocalDevelopmentAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setResearchAddress(userAccount3, {
+      await daiFundInstance.setResearchAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setInsuranceAddress(userAccount3, {
+      await daiFundInstance.setInsuranceAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setTreasuryAddress(userAccount3, {
+      await daiFundInstance.setTreasuryAddress(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setReserve1Address(userAccount3, {
+      await daiFundInstance.setReserve1Address(userAccount3, {
         from: deployerAccount,
       });
 
-      await daiFundsInstance.setReserve2Address(userAccount3, {
+      await daiFundInstance.setReserve2Address(userAccount3, {
         from: deployerAccount,
       });
 
@@ -1256,11 +1252,11 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1275,7 +1271,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawLocalDevelopmentBalance(
+      await daiFundInstance.withdrawLocalDevelopmentBalance(
         web3.utils.toWei("0.05"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1286,11 +1282,11 @@ contract("DaiFunds", (accounts) => {
 
       ////-------------------------------------- should withdraw rescue fund succussfully -----------------------------------------
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1305,7 +1301,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawInsuranceBalance(
+      await daiFundInstance.withdrawInsuranceBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1317,11 +1313,11 @@ contract("DaiFunds", (accounts) => {
 
       ////-------------------------------------- should withdraw treejer develop succussfully -----------------------------------------
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1336,7 +1332,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawTreasuryBalance(
+      await daiFundInstance.withdrawTreasuryBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1348,11 +1344,11 @@ contract("DaiFunds", (accounts) => {
 
       ////-------------------------------------- should withdraw reserve fund1 succussfully -----------------------------------------
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1367,7 +1363,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawReserve1Balance(
+      await daiFundInstance.withdrawReserve1Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1379,11 +1375,11 @@ contract("DaiFunds", (accounts) => {
 
       ////-------------------------------------- should withdraw reserve fund2 succussfully -----------------------------------------
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1398,7 +1394,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawReserve2Balance(
+      await daiFundInstance.withdrawReserve2Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1410,11 +1406,11 @@ contract("DaiFunds", (accounts) => {
 
       ////-------------------------------------- should withdraw Tree Research succussfully -----------------------------------------
 
-      ////---------------transfer dai for daiFundsInstance-------------------
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      ////---------------transfer dai for daiFundInstance-------------------
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1429,7 +1425,7 @@ contract("DaiFunds", (accounts) => {
       );
       /////////// ------------withdraw balance
 
-      await daiFundsInstance.withdrawResearchBalance(
+      await daiFundInstance.withdrawResearchBalance(
         web3.utils.toWei("0.4"),
         "reason to withdraw",
         { from: deployerAccount }
@@ -1477,12 +1473,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setResearchAddress(researchAddress, {
+      await daiFundInstance.setResearchAddress(researchAddress, {
         from: deployerAccount,
       });
 
@@ -1504,15 +1500,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1527,7 +1523,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -1545,10 +1541,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1567,7 +1563,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.2");
 
-      const tx = await daiFundsInstance.withdrawResearchBalance(
+      const tx = await daiFundInstance.withdrawResearchBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -1580,10 +1576,10 @@ contract("DaiFunds", (accounts) => {
           ev.reason == withdrawReason
         );
       });
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const researchBalnance2 = await daiInstance.balanceOf(researchAddress);
@@ -1613,7 +1609,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.3");
 
-      const tx2 = await daiFundsInstance.withdrawResearchBalance(
+      const tx2 = await daiFundInstance.withdrawResearchBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -1627,10 +1623,10 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const researchBalnance3 = await daiInstance.balanceOf(researchAddress);
@@ -1709,12 +1705,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setLocalDevelopmentAddress(
+      await daiFundInstance.setLocalDevelopmentAddress(
         localDevelopmentAddress,
         {
           from: deployerAccount,
@@ -1739,15 +1735,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -1762,7 +1758,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -1780,10 +1776,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1804,7 +1800,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawLocalDevelopmentBalance(
+      const tx = await daiFundInstance.withdrawLocalDevelopmentBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -1821,10 +1817,10 @@ contract("DaiFunds", (accounts) => {
           );
         }
       );
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const localDevelopmentBalnance2 = await daiInstance.balanceOf(
@@ -1856,7 +1852,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawLocalDevelopmentBalance(
+      const tx2 = await daiFundInstance.withdrawLocalDevelopmentBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -1874,10 +1870,10 @@ contract("DaiFunds", (accounts) => {
         }
       );
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const localDevelopmentBalnance3 = await daiInstance.balanceOf(
@@ -1959,12 +1955,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setInsuranceAddress(insuranceAddress, {
+      await daiFundInstance.setInsuranceAddress(insuranceAddress, {
         from: deployerAccount,
       });
 
@@ -1986,15 +1982,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -2009,7 +2005,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -2027,10 +2023,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2049,7 +2045,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawInsuranceBalance(
+      const tx = await daiFundInstance.withdrawInsuranceBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -2062,10 +2058,10 @@ contract("DaiFunds", (accounts) => {
           ev.reason == withdrawReason
         );
       });
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const insuranceBalnance2 = await daiInstance.balanceOf(insuranceAddress);
@@ -2095,7 +2091,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawInsuranceBalance(
+      const tx2 = await daiFundInstance.withdrawInsuranceBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -2109,10 +2105,10 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const insuranceBalnance3 = await daiInstance.balanceOf(insuranceAddress);
@@ -2192,12 +2188,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setTreasuryAddress(treasuryAddress, {
+      await daiFundInstance.setTreasuryAddress(treasuryAddress, {
         from: deployerAccount,
       });
 
@@ -2219,15 +2215,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -2242,7 +2238,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -2260,10 +2256,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2282,7 +2278,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawTreasuryBalance(
+      const tx = await daiFundInstance.withdrawTreasuryBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -2295,10 +2291,10 @@ contract("DaiFunds", (accounts) => {
           ev.reason == withdrawReason
         );
       });
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const treasuryBalnance2 = await daiInstance.balanceOf(treasuryAddress);
@@ -2328,7 +2324,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawTreasuryBalance(
+      const tx2 = await daiFundInstance.withdrawTreasuryBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -2342,10 +2338,10 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const treasuryBalnance3 = await daiInstance.balanceOf(treasuryAddress);
@@ -2426,12 +2422,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setReserve1Address(reserve1Address, {
+      await daiFundInstance.setReserve1Address(reserve1Address, {
         from: deployerAccount,
       });
 
@@ -2453,15 +2449,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -2476,7 +2472,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -2494,10 +2490,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2516,7 +2512,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawReserve1Balance(
+      const tx = await daiFundInstance.withdrawReserve1Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -2529,10 +2525,10 @@ contract("DaiFunds", (accounts) => {
           ev.reason == withdrawReason
         );
       });
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const reserve1Balnance2 = await daiInstance.balanceOf(reserve1Address);
@@ -2562,7 +2558,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawReserve1Balance(
+      const tx2 = await daiFundInstance.withdrawReserve1Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -2576,10 +2572,10 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const reserve1Balnance3 = await daiInstance.balanceOf(reserve1Address);
@@ -2660,12 +2656,12 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
       /////////// ------------------ set addresses
-      await daiFundsInstance.setReserve2Address(reserve2Address, {
+      await daiFundInstance.setReserve2Address(reserve2Address, {
         from: deployerAccount,
       });
 
@@ -2687,15 +2683,15 @@ contract("DaiFunds", (accounts) => {
         from: dataManager,
       });
 
-      //////////---------------transfer dai for daiFundsInstance-------------------
+      //////////---------------transfer dai for daiFundInstance-------------------
 
-      await daiInstance.setMint(daiFundsInstance.address, amount);
+      await daiInstance.setMint(daiFundInstance.address, amount);
 
-      await daiInstance.setMint(daiFundsInstance.address, amount1);
+      await daiInstance.setMint(daiFundInstance.address, amount1);
 
       ////////---------------fund trees-------------------
 
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId,
         amount,
         planterShare,
@@ -2710,7 +2706,7 @@ contract("DaiFunds", (accounts) => {
           from: userAccount6,
         }
       );
-      await daiFundsInstance.fundTree(
+      await daiFundInstance.fundTree(
         treeId2,
         amount1,
         planterShare,
@@ -2728,10 +2724,10 @@ contract("DaiFunds", (accounts) => {
 
       // -------------------------- check data before withdraw -----------------
       const contractBalanceAfterFund = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
-      const totalBalances1 = await daiFundsInstance.totalBalances();
+      const totalBalances1 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2750,7 +2746,7 @@ contract("DaiFunds", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await daiFundsInstance.withdrawReserve2Balance(
+      const tx = await daiFundInstance.withdrawReserve2Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -2763,10 +2759,10 @@ contract("DaiFunds", (accounts) => {
           ev.reason == withdrawReason
         );
       });
-      const totalBalances2 = await daiFundsInstance.totalBalances();
+      const totalBalances2 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const reserve2Balnance2 = await daiInstance.balanceOf(reserve2Address);
@@ -2796,7 +2792,7 @@ contract("DaiFunds", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await daiFundsInstance.withdrawReserve2Balance(
+      const tx2 = await daiFundInstance.withdrawReserve2Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
@@ -2810,10 +2806,10 @@ contract("DaiFunds", (accounts) => {
         );
       });
 
-      const totalBalances3 = await daiFundsInstance.totalBalances();
+      const totalBalances3 = await daiFundInstance.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf(
-        daiFundsInstance.address
+        daiFundInstance.address
       );
 
       const reserve2Balnance3 = await daiInstance.balanceOf(reserve2Address);
@@ -2888,17 +2884,17 @@ contract("DaiFunds", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        daiFundsInstance.address,
+        daiFundInstance.address,
         deployerAccount
       );
 
-      ////---------------transfer dai for daiFunds-------------------
-      await daiInstance.setMint(daiFundsInstance.address, total1);
-      await daiInstance.setMint(daiFundsInstance.address, total2);
+      ////---------------transfer dai for daiFund-------------------
+      await daiInstance.setMint(daiFundInstance.address, total1);
+      await daiInstance.setMint(daiFundInstance.address, total2);
 
       ////--------------------call fund tree by auction----------------
 
-      const eventTx1 = await daiFundsInstance.fundTreeBatch(
+      const eventTx1 = await daiFundInstance.fundTreeBatch(
         totalPlanterShare1,
         totalAmbassadorShare1,
         totalResearch1,
@@ -2913,7 +2909,7 @@ contract("DaiFunds", (accounts) => {
       truffleAssert.eventEmitted(eventTx1, "TreeFundedBatch");
 
       //check daiFund totalBalances treeId1
-      let totalBalances = await daiFundsInstance.totalBalances();
+      let totalBalances = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalBalances.research),
@@ -2964,7 +2960,7 @@ contract("DaiFunds", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      const eventTx2 = await daiFundsInstance.fundTreeBatch(
+      const eventTx2 = await daiFundInstance.fundTreeBatch(
         totalPlanterShare2,
         totalAmbassadorShare2,
         totalResearch2,
@@ -2979,7 +2975,7 @@ contract("DaiFunds", (accounts) => {
       truffleAssert.eventEmitted(eventTx2, "TreeFundedBatch");
 
       // //check daiFund totalBalances treeId2
-      let totalBalances2 = await daiFundsInstance.totalBalances();
+      let totalBalances2 = await daiFundInstance.totalBalances();
 
       assert.equal(
         Number(totalBalances2.research),
@@ -3036,10 +3032,10 @@ contract("DaiFunds", (accounts) => {
 
     it("should transferReferrerDai succussfully and fail in invalid situation", async () => {
       await daiInstance.setMint(
-        daiFundsInstance.address,
+        daiFundInstance.address,
         await web3.utils.toWei("16")
       );
-      await daiFundsInstance.fundTreeBatch(
+      await daiFundInstance.fundTreeBatch(
         await web3.utils.toWei("2"),
         await web3.utils.toWei("2"),
         await web3.utils.toWei("2"),
@@ -3063,7 +3059,7 @@ contract("DaiFunds", (accounts) => {
       );
 
       const totalBalancesBeforeTransfer1 =
-        await daiFundsInstance.totalBalances.call();
+        await daiFundInstance.totalBalances.call();
 
       assert.equal(
         Number(totalBalancesBeforeTransfer1.treasury),
@@ -3076,16 +3072,16 @@ contract("DaiFunds", (accounts) => {
       const transferAmount3 = await web3.utils.toWei("1");
       const transferAmount4 = await web3.utils.toWei("0.5");
 
-      await daiFundsInstance
+      await daiFundInstance
         .transferReferrerDai(transferAmount1, { from: dataManager })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      await daiFundsInstance.transferReferrerDai(transferAmount1, {
+      await daiFundInstance.transferReferrerDai(transferAmount1, {
         from: userAccount6,
       });
 
       const totalBalancesBeforeTransfer2 =
-        await daiFundsInstance.totalBalances.call();
+        await daiFundInstance.totalBalances.call();
 
       assert.equal(
         Number(totalBalancesBeforeTransfer2.treasury),
@@ -3103,12 +3099,12 @@ contract("DaiFunds", (accounts) => {
         "planter fund balance is not ok"
       );
 
-      await daiFundsInstance.transferReferrerDai(transferAmount2, {
+      await daiFundInstance.transferReferrerDai(transferAmount2, {
         from: userAccount6,
       });
 
       const totalBalancesBeforeTransfer3 =
-        await daiFundsInstance.totalBalances.call();
+        await daiFundInstance.totalBalances.call();
 
       assert.equal(
         Number(totalBalancesBeforeTransfer3.treasury),
@@ -3126,18 +3122,18 @@ contract("DaiFunds", (accounts) => {
         "planter fund balance is not ok"
       );
 
-      await daiFundsInstance
+      await daiFundInstance
         .transferReferrerDai(transferAmount3, {
           from: userAccount6,
         })
-        .should.be.rejectedWith(DaiFundsErrorMsg.LIQUDITY_NOT_ENOUGH);
+        .should.be.rejectedWith(DaiFundErrorMsg.LIQUDITY_NOT_ENOUGH);
 
-      await daiFundsInstance.transferReferrerDai(transferAmount4, {
+      await daiFundInstance.transferReferrerDai(transferAmount4, {
         from: userAccount6,
       });
 
       const totalBalancesAfterTransfer4 =
-        await daiFundsInstance.totalBalances.call();
+        await daiFundInstance.totalBalances.call();
 
       assert.equal(
         Number(totalBalancesAfterTransfer4.treasury),

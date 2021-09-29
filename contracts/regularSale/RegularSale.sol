@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../treasury/IDaiFunds.sol";
+import "../treasury/IDaiFund.sol";
 import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
@@ -47,7 +47,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    IDaiFunds public daiFunds;
+    IDaiFund public daiFund;
     IAllocation public allocation;
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
@@ -168,15 +168,15 @@ contract RegularSale is Initializable, RelayRecipient {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set daiFunds contract address
-     * @param _address daiFunds contract address
+    /** @dev admin set daiFund contract address
+     * @param _address daiFund contract address
      */
-    function setDaiFundsAddress(address _address) external onlyAdmin {
-        IDaiFunds candidateContract = IDaiFunds(_address);
+    function setDaiFundAddress(address _address) external onlyAdmin {
+        IDaiFund candidateContract = IDaiFund(_address);
 
-        require(candidateContract.isDaiFunds());
+        require(candidateContract.isDaiFund());
 
-        daiFunds = candidateContract;
+        daiFund = candidateContract;
     }
 
     /** @dev admin set daiToken contract address
@@ -257,7 +257,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
         bool success = daiToken.transferFrom(
             _msgSender(),
-            address(daiFunds),
+            address(daiFund),
             totalPrice
         );
 
@@ -304,7 +304,7 @@ contract RegularSale is Initializable, RelayRecipient {
             emit RegularMint(_msgSender(), tempLastRegularSold, price);
         }
 
-        daiFunds.fundTreeBatch(
+        daiFund.fundTreeBatch(
             totalFunds.planterFund,
             totalFunds.referralFund,
             totalFunds.treeResearch,
@@ -371,7 +371,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
         bool success = daiToken.transferFrom(
             _msgSender(),
-            address(daiFunds),
+            address(daiFund),
             price
         );
 
@@ -392,7 +392,7 @@ contract RegularSale is Initializable, RelayRecipient {
             uint16 reserve2Share
         ) = allocation.findAllocationData(_treeId);
 
-        daiFunds.fundTree(
+        daiFund.fundTree(
             _treeId,
             price,
             planterShare,
@@ -456,7 +456,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
             referrerClaimableTreesDai[_msgSender()] -= _count;
 
-            daiFunds.transferReferrerDai(_amount);
+            daiFund.transferReferrerDai(_amount);
         } else {
             if (referrerClaimableTreesDai[_msgSender()] > 0) {
                 _amount =
@@ -466,7 +466,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
                 referrerClaimableTreesDai[_msgSender()] = 0;
 
-                daiFunds.transferReferrerDai(_amount);
+                daiFund.transferReferrerDai(_amount);
             }
 
             uint256 wethAmount = uint256(-x) *

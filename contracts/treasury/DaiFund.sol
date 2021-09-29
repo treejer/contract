@@ -8,10 +8,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
 
-/** @title DaiFunds Contract */
-contract DaiFunds is Initializable {
-    /** NOTE {isDaiFunds} set inside the initialize to {true} */
-    bool public isDaiFunds;
+/** @title DaiFund Contract */
+contract DaiFund is Initializable {
+    /** NOTE {isDaiFund} set inside the initialize to {true} */
+    bool public isDaiFund;
 
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
@@ -94,7 +94,7 @@ contract DaiFunds is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isDaiFunds
+     * @dev initialize accessRestriction contract and set true for isDaiFund
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
@@ -107,7 +107,7 @@ contract DaiFunds is Initializable {
 
         require(candidateContract.isAccessRestriction());
 
-        isDaiFunds = true;
+        isDaiFund = true;
         accessRestriction = candidateContract;
     }
 

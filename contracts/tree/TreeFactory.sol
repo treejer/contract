@@ -403,7 +403,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             tree.treeSpecs = updateGenTree.updateSpecs;
 
             if (treeToken.exists(_treeId)) {
-                planterFund.fundPlanter(
+                planterFund.updatePlanterTotalClaimed(
                     _treeId,
                     tree.planterAddress,
                     tree.treeStatus

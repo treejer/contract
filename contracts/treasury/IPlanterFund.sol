@@ -51,9 +51,9 @@ interface IPlanterFund {
         returns (uint256);
 
     /**
-     * @return treeToReferrerProjectedEarning of {_treeId}
+     * @return treeToAmbassadorProjectedEarning of {_treeId}
      */
-    function treeToReferrerProjectedEarning(uint256 _treeId)
+    function treeToAmbassadorProjectedEarning(uint256 _treeId)
         external
         view
         returns (uint256);
@@ -81,32 +81,32 @@ interface IPlanterFund {
     function setDaiTokenAddress(address _address) external;
 
     /** @dev admin can set the minimum amount to withdraw
-     * @param _amount is withdraw treshold
+     * @param _amount is min withdrawable amount
      */
     function updateWithdrawableAmount(uint256 _amount) external;
 
     /**
-     * @dev set planterFunds and refferalFunds of a tree with id {_treeId}
-     * and add {_planterFund} to planterFund part of totalFunds and add
-     * {_referralFund} to referralFund part of totalFunds
-     * NOTE emit a {PlanterFundSet} event
+     * @dev set treeToPlanterProjectedEarning and treeToAmbassadorProjectedEarning
+     * of a tree with id {_treeId} and add {_planterAmount} to plante part of
+     * totalBalances and add {_ambassadorAmount} to _ambassador part of totalBalances
+     * NOTE emit a {ProjectedEarningUpdated} event
      */
-    function setPlanterFunds(
+    function updateProjectedEarnings(
         uint256 _treeId,
-        uint256 _planterFund,
-        uint256 _referralFund
+        uint256 _planterAmount,
+        uint256 _ambassadorAmount
     ) external;
 
     /**
      * @dev based on the {_treeStatus} planter charged in every tree update verifying
      * @param _treeId id of a tree to fund
-     * @param _planterId  address of planter to fund
+     * @param _planterAddress  address of planter to fund
      * @param _treeStatus status of tree
-     * NOTE emit a {PlanterFunded} event
+     * NOTE emit a {PlanterTotalClaimedUpdated} event
      */
-    function fundPlanter(
+    function updatePlanterTotalClaimed(
         uint256 _treeId,
-        address _planterId,
+        address _planterAddress,
         uint64 _treeStatus
     ) external;
 
@@ -114,37 +114,37 @@ interface IPlanterFund {
      * @dev planter withdraw {_amount} from planter's balances in case of
      * valid {_amount} and daiToken transfer to planters address (to msgSender())
      * @param _amount amount to withdraw
-     * NOTE emit a {PlanterBalanceWithdrawn} event
+     * NOTE emit a {BalanceWithdrew} event
      */
-    function withdrawPlanterBalance(uint256 _amount) external;
+    function withdrawBalance(uint256 _amount) external;
 
     /**
-     * @dev emitted when a planter {planterId} funded {amount} for tree
-     * with id {treeId}
+     * @dev emitted when a planter {planterAddress} funded {amount} for tree
+     * with id {treeId} and ambassadorAddress {ambassadorAddress}
      */
-    event PlanterFunded(
+    event PlanterTotalClaimedUpdated(
         uint256 treeId,
-        address planterId,
+        address planterAddress,
         uint256 amount,
-        address referral
+        address ambassadorAddress
     );
 
     /**
      * @dev emitted when a planter by address {account} withdraw {amount}
      * from balance
      */
-    event PlanterBalanceWithdrawn(uint256 amount, address account);
+    event BalanceWithdrew(uint256 amount, address account);
 
     /**
-     * @dev emitted when planterFund set for tree with id {treeId} with 
-     planter amount {planterAmount} and referral amount {referralAmount}
+     * @dev emitted when ProjectedEarning set for tree with id {treeId} with 
+     planter amount {planterAmount} and ambassador amount {ambassadorAmount}
      */
-    event PlanterFundSet(
+    event ProjectedEarningUpdated(
         uint256 treeId,
         uint256 planterAmount,
-        uint256 referralAmount
+        uint256 ambassadorAmount
     );
 
     //TODO:ADD_COMMENT
-    event WithdrawThresholdSet();
+    event MinWithdrawableAmountUpdated();
 }

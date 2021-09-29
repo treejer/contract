@@ -254,7 +254,7 @@ contract DaiFund is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        planterFundContract.setPlanterFunds(
+        planterFundContract.updateProjectedEarnings(
             _treeId,
             planterShare,
             ambassadorShare

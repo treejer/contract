@@ -297,7 +297,7 @@ contract RegularSale is Initializable, RelayRecipient {
             totalBalances.reserve1 += (price * reserve1Share) / 10000;
             totalBalances.reserve2 += (price * reserve2Share) / 10000;
 
-            planterFundContract.setPlanterFunds(
+            planterFundContract.updateProjectedEarnings(
                 tempLastRegularSold,
                 (price * planterShare) / 10000,
                 (price * ambassadorShare) / 10000
@@ -348,7 +348,7 @@ contract RegularSale is Initializable, RelayRecipient {
                 _referrer
             );
 
-            planterFundContract.setPlanterFunds(
+            planterFundContract.updateProjectedEarnings(
                 tempLastRegularSold,
                 referralTreePaymentToPlanter,
                 referralTreePaymentToAmbassador

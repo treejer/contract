@@ -485,7 +485,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 (steps * incPrice.initialPrice * incPrice.priceJump) /
                 10000;
 
-            planterFundContract.setPlanterFunds(
+            planterFundContract.updateProjectedEarnings(
                 treeId,
                 (planterDai * treePrice) / _totalPrice,
                 (referralDai * treePrice) / _totalPrice

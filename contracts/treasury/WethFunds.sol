@@ -569,7 +569,7 @@ contract WethFunds is Initializable {
 
         uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
 
-        planterFundContract.setPlanterFunds(
+        planterFundContract.updateProjectedEarnings(
             _treeId,
             (_planterFund * amount) / sumPercent,
             (_referralFund * amount) / sumPercent

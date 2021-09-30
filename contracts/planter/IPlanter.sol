@@ -15,7 +15,7 @@ interface IPlanter {
 
     /**
      * @dev return planter data of {_planterAddress}
-     * @return _type
+     * @return _planterType
      * @return status
      * @return countryCode
      * @return score
@@ -28,7 +28,7 @@ interface IPlanter {
         external
         view
         returns (
-            uint8 _type,
+            uint8 _planterType,
             uint8 status,
             uint16 countryCode,
             uint32 score,
@@ -54,9 +54,9 @@ interface IPlanter {
     function setTrustedForwarder(address _address) external;
 
     /**
-     * @dev based on {_type} a planter can join as individual planter or
+     * @dev based on {_planterType} a planter can join as individual planter or
      * member of an organization
-     * @param _type 1 for individual and 3 for member organization
+     * @param _planterType 1 for individual and 3 for member organization
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
@@ -67,7 +67,7 @@ interface IPlanter {
      * NOTE emit a {PlanterJoined} event
      */
     function join(
-        uint8 _type,
+        uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -78,7 +78,7 @@ interface IPlanter {
     //TODO: ADD_COMMENT
     function joinByAdmin(
         address _planterAddress,
-        uint8 _type,
+        uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -87,7 +87,7 @@ interface IPlanter {
     ) external;
 
     /**
-     * @dev admin add a plater as organization (type 2) so type 3
+     * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.
      * @param _organizationAddress address of organization planter
      * @param _longitude longitude value
@@ -107,21 +107,21 @@ interface IPlanter {
     ) external;
 
     /**
-     * @dev planter with type 1 , 3 can update their type using this
+     * @dev planter with planterType 1 , 3 can update their planterType using this
      * function.
-     * type 3 (member of organization) can change to
-     * type 1 (individual planter) with input value {_type}
+     * planterType 3 (member of organization) can change to
+     * planterType 1 (individual planter) with input value {_planterType}
      * of 1 and zeroAddress as {_organizationAddress}
      * or choose other organization to be member of with
-     * input value {_type} of 3 and {_organizationAddress}.
-     * type 1 can only change to type 3 with input value
+     * input value {_planterType} of 3 and {_organizationAddress}.
+     * planterType 1 can only change to planterType 3 with input value
      * {_planterAddress} of 3 and {_organizationAddress}
-     * if planter type 3 choose another oraganization
-     * or type 1 chage to type 3, they must be accepted by the
+     * if planter planterType 3 choose another oraganization
+     * or planterType 1 chage to planterType 3, they must be accepted by the
      * organization to be an active planter
      * NOTE emit a {PlanterUpdated} event
      */
-    function updatePlanterType(uint8 _type, address _organizationAddress)
+    function updatePlanterType(uint8 _planterType, address _organizationAddress)
         external;
 
     /** @dev organization can accept planter to be it's member or reject
@@ -155,7 +155,7 @@ interface IPlanter {
     /** @dev oragnization can update planterPayment rules of it's members
      * @param _planterAddress address of planter
      * @param _planterAutomaticPaymentPortion payment portion value
-     * NOTE only organization (type = 2) can call this function
+     * NOTE only organization (planterType = 2) can call this function
      * NOTE emit a {OrganizationMemberShareUpdated} event
      */
     function updateOrganizationMemberShare(
@@ -222,7 +222,7 @@ interface IPlanter {
     /** @dev emitted when an organization join with address {organizationId} */
     event OrganizationJoined(address organizationId);
 
-    /** @dev emitted when a planters data updated (supplyCap , type) */
+    /** @dev emitted when a planters data updated (supplyCap , planterType) */
     event PlanterUpdated(address planter);
 
     /**

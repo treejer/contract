@@ -46,9 +46,9 @@ contract PlanterFund is Initializable, RelayRecipient {
 
     event PlanterTotalClaimedUpdated(
         uint256 treeId,
-        address planterAddress,
+        address planter,
         uint256 amount,
-        address ambassadorAddress
+        address ambassador
     );
     event BalanceWithdrew(uint256 amount, address account);
     event ProjectedEarningUpdated(
@@ -181,13 +181,13 @@ contract PlanterFund is Initializable, RelayRecipient {
     /**
      * @dev based on the {_treeStatus} planter charged in every tree update verifying
      * @param _treeId id of a tree to fund
-     * @param _planterAddress  address of planter to fund
+     * @param _planter  address of planter to fund
      * @param _treeStatus status of tree
      */
 
     function updatePlanterTotalClaimed(
         uint256 _treeId,
-        address _planterAddress,
+        address _planter,
         uint64 _treeStatus
     ) external onlyTreejerContract {
         require(
@@ -196,13 +196,13 @@ contract PlanterFund is Initializable, RelayRecipient {
         );
 
         (
-            bool getBool,
-            address gottenOrganizationAddress,
-            address gottenReferralAddress,
-            uint256 gottenPortion
-        ) = planterContract.getOrganizationMemberData(_planterAddress);
+            bool exists,
+            address organizationAddress,
+            address ambassadorAddress,
+            uint256 share
+        ) = planterContract.getOrganizationMemberData(_planter);
 
-        if (getBool) {
+        if (exists) {
             uint256 totalPayablePlanter;
 
             if (_treeStatus > 25920) {
@@ -219,19 +219,19 @@ contract PlanterFund is Initializable, RelayRecipient {
             }
 
             if (totalPayablePlanter > 0) {
-                uint256 totalPayableRefferal = (treeToAmbassadorProjectedEarning[
+                uint256 totalPayableAmbassador = (treeToAmbassadorProjectedEarning[
                         _treeId
                     ] * totalPayablePlanter) /
                         treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
-                totalBalances.ambassador -= totalPayableRefferal;
+                totalBalances.ambassador -= totalPayableAmbassador;
 
-                if (gottenReferralAddress == address(0)) {
-                    totalBalances.localDevelopment += totalPayableRefferal;
+                if (ambassadorAddress == address(0)) {
+                    totalBalances.localDevelopment += totalPayableAmbassador;
                 } else {
-                    balances[gottenReferralAddress] += totalPayableRefferal;
+                    balances[ambassadorAddress] += totalPayableAmbassador;
                 }
 
                 totalBalances.planter -= totalPayablePlanter;
@@ -239,23 +239,23 @@ contract PlanterFund is Initializable, RelayRecipient {
                 //Organization calculation section
                 uint256 fullPortion = 10000;
 
-                balances[gottenOrganizationAddress] +=
-                    (totalPayablePlanter * (fullPortion - gottenPortion)) /
+                balances[organizationAddress] +=
+                    (totalPayablePlanter * (fullPortion - share)) /
                     fullPortion;
 
                 //planter calculation section
 
                 treeToPlanterTotalClaimed[_treeId] += totalPayablePlanter;
 
-                balances[_planterAddress] +=
-                    (totalPayablePlanter * gottenPortion) /
+                balances[_planter] +=
+                    (totalPayablePlanter * share) /
                     fullPortion;
 
                 emit PlanterTotalClaimedUpdated(
                     _treeId,
-                    _planterAddress,
+                    _planter,
                     totalPayablePlanter,
-                    gottenReferralAddress
+                    ambassadorAddress
                 );
             }
         }

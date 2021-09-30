@@ -67,9 +67,9 @@ interface IPlanterFund {
         returns (uint256);
 
     /**
-     * @return balance of {_planterAddress}
+     * @return balance of {_planter}
      */
-    function balances(address _planterAddress) external view returns (uint256);
+    function balances(address _planter) external view returns (uint256);
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -100,13 +100,13 @@ interface IPlanterFund {
     /**
      * @dev based on the {_treeStatus} planter charged in every tree update verifying
      * @param _treeId id of a tree to fund
-     * @param _planterAddress  address of planter to fund
+     * @param _planter address of planter to fund
      * @param _treeStatus status of tree
      * NOTE emit a {PlanterTotalClaimedUpdated} event
      */
     function updatePlanterTotalClaimed(
         uint256 _treeId,
-        address _planterAddress,
+        address _planter,
         uint64 _treeStatus
     ) external;
 
@@ -119,14 +119,14 @@ interface IPlanterFund {
     function withdrawBalance(uint256 _amount) external;
 
     /**
-     * @dev emitted when a planter {planterAddress} funded {amount} for tree
-     * with id {treeId} and ambassadorAddress {ambassadorAddress}
+     * @dev emitted when a {planter} funded {amount} for tree
+     * with id {treeId} and with address of {ambassador}
      */
     event PlanterTotalClaimedUpdated(
         uint256 treeId,
-        address planterAddress,
+        address planter,
         uint256 amount,
-        address ambassadorAddress
+        address ambassador
     );
 
     /**

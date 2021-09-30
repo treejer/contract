@@ -188,7 +188,7 @@ contract("Planter", (accounts) => {
 
     let planter1 = await planterInstance.planters.call(userAccount2);
 
-    assert.equal(Number(planter1.type), 1, "type not true");
+    assert.equal(Number(planter1.planterType), 1, "planterType not true");
     assert.equal(Number(planter1.status), 1, "status not true");
     assert.equal(Number(planter1.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter1.longitude), 1, "longitude not true");
@@ -216,7 +216,7 @@ contract("Planter", (accounts) => {
 
     let planter2 = await planterInstance.planters.call(userAccount3);
 
-    assert.equal(Number(planter2.type), 1, "type not true");
+    assert.equal(Number(planter2.planterType), 1, "planterType not true");
     assert.equal(Number(planter2.status), 1, "status not true");
     assert.equal(Number(planter2.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter2.longitude), 1, "longitude not true");
@@ -256,7 +256,7 @@ contract("Planter", (accounts) => {
 
     let planter3 = await planterInstance.planters.call(userAccount5);
 
-    assert.equal(Number(planter3.type), 3, "type not true");
+    assert.equal(Number(planter3.planterType), 3, "planterType not true");
     assert.equal(Number(planter3.status), 0, "status not true");
     assert.equal(Number(planter3.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter3.longitude), 1, "longitude not true");
@@ -313,7 +313,7 @@ contract("Planter", (accounts) => {
 
     let planter4 = await planterInstance.planters.call(userAccount1);
 
-    assert.equal(Number(planter4.type), 3, "type not true");
+    assert.equal(Number(planter4.planterType), 3, "planterType not true");
     assert.equal(Number(planter4.status), 0, "status not true");
     assert.equal(Number(planter4.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter4.longitude), 1, "longitude not true");
@@ -434,7 +434,7 @@ contract("Planter", (accounts) => {
 
     let planter1 = await planterInstance.planters.call(userAccount2);
 
-    assert.equal(Number(planter1.type), 1, "type not true");
+    assert.equal(Number(planter1.planterType), 1, "planterType not true");
     assert.equal(Number(planter1.status), 1, "status not true");
     assert.equal(Number(planter1.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter1.longitude), 1, "longitude not true");
@@ -465,7 +465,7 @@ contract("Planter", (accounts) => {
 
     let planter2 = await planterInstance.planters.call(userAccount3);
 
-    assert.equal(Number(planter2.type), 1, "type not true");
+    assert.equal(Number(planter2.planterType), 1, "planterType not true");
     assert.equal(Number(planter2.status), 1, "status not true");
     assert.equal(Number(planter2.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter2.longitude), 1, "longitude not true");
@@ -508,7 +508,7 @@ contract("Planter", (accounts) => {
 
     let planter3 = await planterInstance.planters.call(userAccount5);
 
-    assert.equal(Number(planter3.type), 3, "type not true");
+    assert.equal(Number(planter3.planterType), 3, "planterType not true");
     assert.equal(Number(planter3.status), 1, "status not true");
     assert.equal(Number(planter3.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter3.longitude), 1, "longitude not true");
@@ -568,7 +568,7 @@ contract("Planter", (accounts) => {
 
     let planter4 = await planterInstance.planters.call(userAccount1);
 
-    assert.equal(Number(planter4.type), 3, "type not true");
+    assert.equal(Number(planter4.planterType), 3, "planterType not true");
     assert.equal(Number(planter4.status), 1, "status not true");
     assert.equal(Number(planter4.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter4.longitude), 1, "longitude not true");
@@ -618,7 +618,7 @@ contract("Planter", (accounts) => {
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    ////////////// ------- fail type not allowed value
+    ////////////// ------- fail planterType not allowed value
 
     await planterInstance
       .joinByAdmin(userAccount2, 5, 12, 24, 12, userAccount3, userAccount4, {
@@ -682,7 +682,7 @@ contract("Planter", (accounts) => {
 
     let planter = await planterInstance.planters.call(userAccount4);
 
-    assert.equal(Number(planter.type), 2, "type not true");
+    assert.equal(Number(planter.planterType), 2, "planterType not true");
     assert.equal(Number(planter.status), 1, "status not true");
     assert.equal(Number(planter.supplyCap), 1000, "supplyCap not true");
     assert.equal(Number(planter.longitude), 1, "longitude not true");
@@ -713,7 +713,7 @@ contract("Planter", (accounts) => {
 
     let planter = await planterInstance.planters.call(userAccount4);
 
-    assert.equal(Number(planter.type), 2, "type not true");
+    assert.equal(Number(planter.planterType), 2, "planterType not true");
     assert.equal(Number(planter.status), 1, "status not true");
     assert.equal(Number(planter.supplyCap), 1000, "supplyCap not true");
     assert.equal(Number(planter.longitude), 1, "longitude not true");
@@ -806,7 +806,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     let organizationAddressBefore = await planterInstance.memberOf.call(
@@ -842,7 +842,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     assert.equal(PlanterTypeAfter, 1, "PlanterTypeAfter not true");
@@ -885,7 +885,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     assert.equal(PlanterTypeBefore, 3, "PlanterTypeBefore not true");
@@ -911,7 +911,7 @@ contract("Planter", (accounts) => {
     });
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     assert.equal(PlanterTypeAfter, 3, "PlanterTypeAfter not true");
@@ -959,7 +959,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     assert.equal(PlanterTypeBefore, 1, "PlanterTypeBefore not true");
@@ -975,7 +975,7 @@ contract("Planter", (accounts) => {
     });
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).type
+      (await planterInstance.planters.call(userAccount2)).planterType
     );
 
     assert.equal(PlanterTypeAfter, 3, "PlanterTypeAfter not true");
@@ -1001,7 +1001,7 @@ contract("Planter", (accounts) => {
     });
   });
 
-  it("updatePlanterType should be fail because invalid type in change", async () => {
+  it("updatePlanterType should be fail because invalid planterType in change", async () => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
@@ -1098,7 +1098,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
 
-    /////////// ------------ fail because type invalid
+    /////////// ------------ fail because planterType invalid
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1157,7 +1157,11 @@ contract("Planter", (accounts) => {
     const planterBefore = await planterInstance.planters.call(userAccount2);
     const memberOfBefore = await planterInstance.memberOf.call(userAccount2);
     assert.equal(Number(planterBefore.status.toString()), 0, "invalid status");
-    assert.equal(Number(planterBefore.type.toString()), 3, "invalid type");
+    assert.equal(
+      Number(planterBefore.planterType.toString()),
+      3,
+      "invalid planterType"
+    );
 
     assert.equal(memberOfBefore, userAccount1, "invalid memberOf");
 
@@ -1173,7 +1177,11 @@ contract("Planter", (accounts) => {
     const memberOfAfter = await planterInstance.memberOf.call(userAccount2);
 
     assert.equal(Number(planterAfter.status.toString()), 1, "invalid status");
-    assert.equal(Number(planterAfter.type.toString()), 3, "invalid type");
+    assert.equal(
+      Number(planterAfter.planterType.toString()),
+      3,
+      "invalid planterType"
+    );
 
     assert.equal(memberOfAfter, userAccount1, "invalid memberOf");
 
@@ -1199,7 +1207,11 @@ contract("Planter", (accounts) => {
     const planterBefore2 = await planterInstance.planters.call(userAccount4);
     const memberOfBefore2 = await planterInstance.memberOf.call(userAccount4);
     assert.equal(Number(planterBefore2.status.toString()), 0, "invalid status");
-    assert.equal(Number(planterBefore2.type.toString()), 3, "invalid type");
+    assert.equal(
+      Number(planterBefore2.planterType.toString()),
+      3,
+      "invalid planterType"
+    );
 
     assert.equal(memberOfBefore2, userAccount3, "invalid memberOf");
 
@@ -1215,7 +1227,11 @@ contract("Planter", (accounts) => {
     const memberOfAfter2 = await planterInstance.memberOf.call(userAccount4);
 
     assert.equal(Number(planterAfter2.status.toString()), 1, "invalid status");
-    assert.equal(Number(planterAfter2.type.toString()), 1, "invalid type");
+    assert.equal(
+      Number(planterAfter2.planterType.toString()),
+      1,
+      "invalid planterType"
+    );
 
     assert.equal(memberOfAfter2, 0x0, "invalid memberOf");
 
@@ -1591,7 +1607,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because type is not > 0"
+            "it must return false because planterType is not > 0"
           );
         }
       }
@@ -1631,7 +1647,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because planter != assignee in type=1"
+            "it must return false because planter != assignee in planterType=1"
           );
         }
       }
@@ -1670,13 +1686,13 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because planter != assignee in type=2"
+            "it must return false because planter != assignee in planterType=2"
           );
         }
       }
     );
   });
-  it("should return false when type=3 (1)", async () => {
+  it("should return false when planterType=3 (1)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -1720,13 +1736,13 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because another one want to plant a tree that assign to another one in same organization in type=3"
+            "it must return false because another one want to plant a tree that assign to another one in same organization in planterType=3"
           );
         }
       }
     );
   });
-  it("should return false when type=3 (2)", async () => {
+  it("should return false when planterType=3 (2)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -1770,7 +1786,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because organization want to plant a tree that assign to another one in same organization in type=3"
+            "it must return false because organization want to plant a tree that assign to another one in same organization in planterType=3"
           );
         }
       }

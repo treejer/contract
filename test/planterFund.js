@@ -571,10 +571,10 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundP1, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount2 &&
+          ev.planter == userAccount2 &&
           Number(ev.amount) ==
             Math.divide(Math.mul(planterFund, treeStatus1), finalStatus) &&
-          ev.ambassadorAddress == userAccount3
+          ev.ambassador == userAccount3
         );
       });
 
@@ -681,13 +681,13 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundP3, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount2 &&
+          ev.planter == userAccount2 &&
           Number(ev.amount) ==
             Math.subtract(
               Math.divide(Math.mul(planterFund, treeStatus2), finalStatus),
               planterPaid2
             ) &&
-          ev.ambassadorAddress == userAccount3
+          ev.ambassador == userAccount3
         );
       });
 
@@ -745,13 +745,13 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundP4, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount2 &&
+          ev.planter == userAccount2 &&
           Number(ev.amount) ==
             Math.subtract(
               Math.divide(Math.mul(planterFund, treeStatus3), finalStatus),
               planterPaid3
             ) &&
-          ev.ambassadorAddress == userAccount3
+          ev.ambassador == userAccount3
         );
       });
 
@@ -809,13 +809,13 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundP5, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount2 &&
+          ev.planter == userAccount2 &&
           Number(ev.amount) ==
             Math.subtract(
               Math.divide(Math.mul(planterFund, treeStatus4), finalStatus),
               planterPaid4
             ) &&
-          ev.ambassadorAddress == userAccount3
+          ev.ambassador == userAccount3
         );
       });
 
@@ -1659,9 +1659,9 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundP, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           Number(ev.treeId) == treeId &&
-          ev.planterAddress == userAccount2 &&
+          ev.planter == userAccount2 &&
           Number(ev.amount) == planterTotalFunded &&
-          ev.ambassadorAddress == userAccount3
+          ev.ambassador == userAccount3
         );
       });
 
@@ -1815,9 +1815,9 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundTx, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount3 &&
+          ev.planter == userAccount3 &&
           Number(ev.amount) == Number(planterFund) &&
-          ev.ambassadorAddress == userAccount4
+          ev.ambassador == userAccount4
         );
       });
 
@@ -1937,9 +1937,9 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundTx, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount3 &&
+          ev.planter == userAccount3 &&
           Number(ev.amount) == Number(planterFund) &&
-          ev.ambassadorAddress == userAccount4
+          ev.ambassador == userAccount4
         );
       });
 
@@ -2893,9 +2893,9 @@ contract("PlanterFund", (accounts) => {
       truffleAssert.eventEmitted(fundTx, "PlanterTotalClaimedUpdated", (ev) => {
         return (
           ev.treeId == treeId &&
-          ev.planterAddress == userAccount3 &&
+          ev.planter == userAccount3 &&
           Number(ev.amount) == Number(planterFund) &&
-          ev.ambassadorAddress == zeroAddress
+          ev.ambassador == zeroAddress
         );
       });
 

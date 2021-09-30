@@ -233,11 +233,7 @@ contract("TreeFactory", (accounts) => {
 
       let result1 = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(
-        result1.planterAddress,
-        0x0,
-        "invalid planter id in add tree"
-      );
+      assert.equal(result1.planter, 0x0, "invalid planter id in add tree");
       assert.equal(Number(result1.species), 0, "incorrect treeType");
       assert.equal(Number(result1.saleType), 0, "incorrect provide status");
       assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
@@ -390,7 +386,7 @@ contract("TreeFactory", (accounts) => {
       //////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        result1.planterAddress,
+        result1.planter,
         userAccount2,
         "invalid planter id in add tree"
       );
@@ -418,7 +414,7 @@ contract("TreeFactory", (accounts) => {
       ///////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        result2.planterAddress,
+        result2.planter,
         userAccount3,
         "invalid planter id in add tree"
       );
@@ -704,7 +700,7 @@ contract("TreeFactory", (accounts) => {
       /////////////////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResult.planterAddress,
+        treeFactoryResult.planter,
         userAccount2,
         "invalid planter id in add tree"
       );
@@ -1147,7 +1143,7 @@ contract("TreeFactory", (accounts) => {
       ///////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResult.planterAddress,
+        treeFactoryResult.planter,
         userAccount2,
         "plnter id is incorrect"
       );
@@ -1223,7 +1219,7 @@ contract("TreeFactory", (accounts) => {
       /////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResultAfterVerify.planterAddress,
+        treeFactoryResultAfterVerify.planter,
         userAccount2,
         "plnter id is incorrect"
       );
@@ -1303,7 +1299,7 @@ contract("TreeFactory", (accounts) => {
       let treeFactoryResult2 = await treeFactoryInstance.trees.call(treeId2);
 
       assert.equal(
-        treeFactoryResult2.planterAddress,
+        treeFactoryResult2.planter,
         userAccount3,
         "plnter id is incorrect"
       );
@@ -1372,7 +1368,7 @@ contract("TreeFactory", (accounts) => {
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResultAfterVerify2.planterAddress,
+        treeFactoryResultAfterVerify2.planter,
         userAccount3,
         "plnter id is incorrect"
       );
@@ -5112,7 +5108,7 @@ contract("TreeFactory", (accounts) => {
         "plantDate not true"
       );
 
-      assert.equal(result.planterAddress, planter, "planter address not true");
+      assert.equal(result.planter, planter, "planter address not true");
 
       let planterPlantedCount = (await planterInstance.planters.call(planter))
         .plantedCount;
@@ -5195,7 +5191,7 @@ contract("TreeFactory", (accounts) => {
         "plantDate not true"
       );
 
-      assert.equal(result.planterAddress, planter, "planter address not true");
+      assert.equal(result.planter, planter, "planter address not true");
 
       let planterPlantedCount = (await planterInstance.planters.call(planter))
         .plantedCount;
@@ -5307,9 +5303,9 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterAddress,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
@@ -5387,9 +5383,9 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterAddress,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
@@ -5442,11 +5438,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(genTree.treeSpecs, "", "treeSpecs not true update");
 
-      assert.equal(
-        genTree.planterAddress,
-        zeroAddress,
-        "planterAddress not true update"
-      );
+      assert.equal(genTree.planter, zeroAddress, "planter not true update");
 
       truffleAssert.eventEmitted(eventTx, "TreeRejected", (ev) => {
         return ev.treeId == 0;
@@ -5522,9 +5514,9 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterAddress,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");

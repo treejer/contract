@@ -32,7 +32,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     uint256 public treeUpdateInterval;
 
     struct TreeData {
-        address planterAddress;
+        address planter;
         uint256 species;
         uint16 mintOrigin;
         uint16 countryCode;
@@ -53,7 +53,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint64 plantDate;
         uint64 countryCode;
         uint64 otherData;
-        address planterAddress;
+        address planter;
         string treeSpecs;
     }
     /** NOTE mapping of treeId to Tree Struct */
@@ -235,7 +235,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             "can't assign tree to planter"
         );
 
-        tempTree.planterAddress = _planterId;
+        tempTree.planter = _planterId;
 
         emit TreeAssigned(_treeId);
     }
@@ -259,13 +259,13 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         bool _canPlant = planter.manageAssignedTreePermission(
             _msgSender(),
-            tempGenTree.planterAddress
+            tempGenTree.planter
         );
 
         require(_canPlant, "planting permission denied");
 
-        if (_msgSender() != tempGenTree.planterAddress) {
-            tempGenTree.planterAddress = _msgSender();
+        if (_msgSender() != tempGenTree.planter) {
+            tempGenTree.planter = _msgSender();
         }
 
         TreeUpdate storage updateGenTree = treeUpdates[_treeId];
@@ -295,13 +295,13 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(tempGenTree.treeStatus == 3, "invalid tree status");
 
         require(
-            tempGenTree.planterAddress != _msgSender(),
+            tempGenTree.planter != _msgSender(),
             "Planter of tree can't accept update"
         );
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(tempGenTree.planterAddress, _msgSender()),
+                planter.canVerify(tempGenTree.planter, _msgSender()),
             "invalid access to verify"
         );
 
@@ -316,7 +316,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         } else {
             tempGenTree.treeStatus = 2;
             tempUpdateGenTree.updateStatus = 2;
-            planter.reducePlantedCount(tempGenTree.planterAddress);
+            planter.reducePlantedCount(tempGenTree.planter);
 
             emit AssignedTreeRejected(_treeId);
         }
@@ -329,7 +329,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function updateTree(uint256 _treeId, string memory _treeSpecs) external {
         require(
-            trees[_treeId].planterAddress == _msgSender(),
+            trees[_treeId].planter == _msgSender(),
             "Only Planter of tree can send update"
         );
 
@@ -369,7 +369,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         ifNotPaused
     {
         require(
-            trees[_treeId].planterAddress != _msgSender(),
+            trees[_treeId].planter != _msgSender(),
             "Planter of tree can't verify update"
         );
 
@@ -382,7 +382,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(trees[_treeId].planterAddress, _msgSender()),
+                planter.canVerify(trees[_treeId].planter, _msgSender()),
             "invalid access to verify"
         );
 
@@ -405,7 +405,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             if (treeToken.exists(_treeId)) {
                 planterFund.updatePlanterTotalClaimed(
                     _treeId,
-                    tree.planterAddress,
+                    tree.planter,
                     tree.treeStatus
                 );
             }
@@ -515,7 +515,7 @@ contract TreeFactory is Initializable, RelayRecipient {
                         tempTree.birthDate,
                         tempTree.treeSpecs,
                         tempTree.treeStatus,
-                        tempTree.planterAddress,
+                        tempTree.planter,
                         tempUpdateTree.updateSpecs
                     )
                 )
@@ -566,13 +566,13 @@ contract TreeFactory is Initializable, RelayRecipient {
         TempTree storage regularTree = tempTrees[_regularTreeId];
 
         require(
-            regularTree.planterAddress != _msgSender(),
+            regularTree.planter != _msgSender(),
             "Planter of tree can't verify update"
         );
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(regularTree.planterAddress, _msgSender()),
+                planter.canVerify(regularTree.planter, _msgSender()),
             "invalid access to verify"
         );
 
@@ -596,7 +596,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             tree.countryCode = uint16(regularTree.countryCode);
             tree.birthDate = regularTree.birthDate;
             tree.treeSpecs = regularTree.treeSpecs;
-            tree.planterAddress = regularTree.planterAddress;
+            tree.planter = regularTree.planter;
             tree.treeStatus = 4;
 
             if (!treeToken.exists(lastRegualarTreeId)) {

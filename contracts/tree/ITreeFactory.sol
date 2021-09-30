@@ -26,7 +26,7 @@ interface ITreeFactory {
     function treeUpdateInterval() external view returns (uint256);
 
     /** return Tree data of {_treeId}
-     * @return planterAddress
+     * @return planter
      * @return treeType
      * @return mintStatus
      * @return countryCode
@@ -65,7 +65,7 @@ interface ITreeFactory {
      * @return plantDate
      * @return countryCode
      * @return otherData
-     * @return planterAddress
+     * @return planter
      * @return treeSpecs
      */
     function tempTrees(uint256 _regularTreeId)

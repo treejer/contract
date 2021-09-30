@@ -217,11 +217,11 @@ contract DaiFund is Initializable {
 
     /**
      * @dev fund a tree by RegularSale contract and based on distribution
-     * model of tree, shares divide beetwen (planter, referral, research,
+     * model of tree, shares divide beetwen (planter, ambassador, research,
      * localDevelopment, insurance, treasury, reserve1 and reserve2)
      * and added to the totalBalances of each part,
      * @param _treeId id of a tree to fund
-     * NOTE planterShare and ambassadorShare share transfer to PlanterFund contract
+     * NOTE planter and ambassador share transfer to PlanterFund contract
      * and add to totalFund section there
      */
     function fundTree(
@@ -314,7 +314,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from research totalFund in case of
+     * @dev admin withdraw {_amount} from research totalBalances in case of
      * valid {_amount}  and daiToken transfer to {researchAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
@@ -340,7 +340,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelopment totalFund in case of
+     * @dev admin withdraw {_amount} from localDevelopment totalBalances in case of
      * valid {_amount} and daiToken transfer to {localDevelopmentAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
@@ -368,7 +368,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from insurance totalFund in case of
+     * @dev admin withdraw {_amount} from insurance totalBalances in case of
      * valid {_amount} and daiToken transfer to {insuranceAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
@@ -394,7 +394,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treasury totalFund in case of
+     * @dev admin withdraw {_amount} from treasury totalBalances in case of
      * valid {_amount} and daiToken transfer to {treasuryAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
@@ -420,7 +420,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve1 totalFund in case of
+     * @dev admin withdraw {_amount} from reserve1 totalBalances in case of
      * valid {_amount} and daiToken transfer to {reserve1Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
@@ -446,7 +446,7 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve2 totalFund in case of
+     * @dev admin withdraw {_amount} from reserve2 totalBalances in case of
      * valid {_amount} and daiToken transfer to {reserve2Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw

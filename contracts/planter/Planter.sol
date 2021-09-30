@@ -18,7 +18,7 @@ contract Planter is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
 
     struct PlanterData {
-        uint8 type;
+        uint8 planterType;
         uint8 status;
         uint16 countryCode;
         uint32 score;
@@ -38,7 +38,8 @@ contract Planter is Initializable, RelayRecipient {
     mapping(address => address) public memberOf;
 
     /** NOTE mapping of organizationAddress to mapping of planterAddress to portionValue */
-    mapping(address => mapping(address => uint256)) public organizationMemberShare;
+    mapping(address => mapping(address => uint256))
+        public organizationMemberShare;
 
     event PlanterJoined(address planter);
     event OrganizationJoined(address organization);
@@ -62,7 +63,7 @@ contract Planter is Initializable, RelayRecipient {
     /** NOTE modifier for check _planterAddress is exist*/
     modifier existPlanter(address _planterAddress) {
         require(
-            planters[_planterAddress].type > 0,
+            planters[_planterAddress].planterType > 0,
             "planter does not exist"
         );
         _;
@@ -74,10 +75,10 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check msg.sender type is organization*/
+    /** NOTE modifier for check msg.sender planterType is organization*/
     modifier onlyOrganization() {
         require(
-            planters[_msgSender()].type == 2,
+            planters[_msgSender()].planterType == 2,
             "Planter is not organization"
         );
         _;
@@ -118,9 +119,9 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev based on {_type} a planter can join as individual planter or
+     * @dev based on {_planterType} a planter can join as individual planter or
      * member of an organization
-     * @param _type 1 for individual and 3 for member of organization
+     * @param _planterType 1 for individual and 3 for member of organization
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
@@ -130,7 +131,7 @@ contract Planter is Initializable, RelayRecipient {
      * accept planter, planter status set to active
      */
     function join(
-        uint8 _type,
+        uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -139,18 +140,18 @@ contract Planter is Initializable, RelayRecipient {
     ) external {
         require(
             accessRestriction.isPlanter(_msgSender()) &&
-                planters[_msgSender()].type == 0,
+                planters[_msgSender()].planterType == 0,
             "User exist or not planter"
         );
 
         require(
-            _type == 1 || _type == 3,
-            "type not allowed values"
+            _planterType == 1 || _planterType == 3,
+            "planterType not allowed values"
         );
 
-        if (_type == 3) {
+        if (_planterType == 3) {
             require(
-                planters[_organizationAddress].type == 2,
+                planters[_organizationAddress].planterType == 2,
                 "organization address not valid"
             );
         }
@@ -167,14 +168,14 @@ contract Planter is Initializable, RelayRecipient {
 
         uint8 status = 1;
 
-        if (_type == 3) {
+        if (_planterType == 3) {
             memberOf[_msgSender()] = _organizationAddress;
             status = 0;
         }
 
         PlanterData storage planter = planters[_msgSender()];
 
-        planter.type = _type;
+        planter.planterType = _planterType;
         planter.status = status;
         planter.countryCode = _countryCode;
         planter.supplyCap = 100;
@@ -187,7 +188,7 @@ contract Planter is Initializable, RelayRecipient {
     //TODO: ADD_COMMENT
     function joinByAdmin(
         address _planterAddress,
-        uint8 _type,
+        uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -196,18 +197,18 @@ contract Planter is Initializable, RelayRecipient {
     ) external onlyDataManager {
         require(
             accessRestriction.isPlanter(_planterAddress) &&
-                planters[_planterAddress].type == 0,
+                planters[_planterAddress].planterType == 0,
             "User exist or not planter"
         );
 
         require(
-            _type == 1 || _type == 3,
-            "type not allowed values"
+            _planterType == 1 || _planterType == 3,
+            "planterType not allowed values"
         );
 
-        if (_type == 3) {
+        if (_planterType == 3) {
             require(
-                planters[_organizationAddress].type == 2,
+                planters[_organizationAddress].planterType == 2,
                 "organization address not valid"
             );
 
@@ -226,7 +227,7 @@ contract Planter is Initializable, RelayRecipient {
 
         PlanterData storage planter = planters[_planterAddress];
 
-        planter.type = _type;
+        planter.planterType = _planterType;
         planter.status = 1;
         planter.countryCode = _countryCode;
         planter.supplyCap = 100;
@@ -237,7 +238,7 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin add a plater as organization (type 2) so type 3
+     * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.
      * @param _organizationAddress address of organization planter
      * @param _longitude longitude value
@@ -255,7 +256,7 @@ contract Planter is Initializable, RelayRecipient {
         address _invitedBy
     ) external onlyDataManager {
         require(
-            planters[_organizationAddress].type == 0 &&
+            planters[_organizationAddress].planterType == 0 &&
                 accessRestriction.isPlanter(_organizationAddress),
             "User exist or not planter"
         );
@@ -272,7 +273,7 @@ contract Planter is Initializable, RelayRecipient {
 
         PlanterData storage planter = planters[_organizationAddress];
 
-        planter.type = 2;
+        planter.planterType = 2;
         planter.status = 1;
         planter.countryCode = _countryCode;
         planter.supplyCap = _supplyCap;
@@ -285,26 +286,26 @@ contract Planter is Initializable, RelayRecipient {
     //TODO:remove this function??
 
     /**
-     * @dev planter with type 1 , 3 can update their type using this
+     * @dev planter with planterType 1 , 3 can update their planterType using this
      * function.
-     * type 3 (member of organization) can change to
-     * type 1 (individual planter) with input value {_type}
+     * planterType 3 (member of organization) can change to
+     * planterType 1 (individual planter) with input value {_planterType}
      * of 1 and zeroAddress as {_organizationAddress}
      * or choose other organization to be member of with
-     * input value {_type} of 3 and {_organizationAddress}.
-     * type 1 can only change to type 3 with input value
+     * input value {_planterType} of 3 and {_organizationAddress}.
+     * planterType 1 can only change to planterType 3 with input value
      * {_planterAddress} of 3 and {_organizationAddress}
-     * if planter type 3 choose another oraganization
-     * or type 1 chage to type 3, they must be accepted by the
+     * if planter planterType 3 choose another oraganization
+     * or planterType 1 chage to planterType 3, they must be accepted by the
      * organization to be an active planter
      */
-    function updatePlanterType(uint8 _type, address _organizationAddress)
+    function updatePlanterType(uint8 _planterType, address _organizationAddress)
         external
         existPlanter(_msgSender())
     {
         require(
-            _type == 1 || _type == 3,
-            "type not allowed values"
+            _planterType == 1 || _planterType == 3,
+            "planterType not allowed values"
         );
 
         PlanterData storage planter = planters[_msgSender()];
@@ -314,11 +315,11 @@ contract Planter is Initializable, RelayRecipient {
             "invalid planter status"
         );
 
-        require(planter.type != 2, "Caller is organizationPlanter");
+        require(planter.planterType != 2, "Caller is organizationPlanter");
 
-        if (_type == 3) {
+        if (_planterType == 3) {
             require(
-                planters[_organizationAddress].type == 2,
+                planters[_organizationAddress].planterType == 2,
                 "organization address not valid"
             );
 
@@ -326,9 +327,9 @@ contract Planter is Initializable, RelayRecipient {
 
             planter.status = 0;
         } else {
-            require(planter.type == 3, "invalid type in change");
+            require(planter.planterType == 3, "invalid planterType in change");
 
-            if (planter.type == 3) {
+            if (planter.planterType == 3) {
                 memberOf[_msgSender()] = address(0);
             }
 
@@ -337,7 +338,7 @@ contract Planter is Initializable, RelayRecipient {
             }
         }
 
-        planter.type = _type;
+        planter.planterType = _planterType;
 
         emit PlanterUpdated(_msgSender());
     }
@@ -364,7 +365,7 @@ contract Planter is Initializable, RelayRecipient {
             emit AcceptedByOrganization(_planterAddress);
         } else {
             planter.status = 1;
-            planter.type = 1;
+            planter.planterType = 1;
             memberOf[_planterAddress] = address(0);
 
             emit RejectedByOrganization(_planterAddress);
@@ -399,10 +400,10 @@ contract Planter is Initializable, RelayRecipient {
         address _assignedPlanterAddress
     ) external onlyTreejerContract returns (bool) {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        if (tempPlanter.type > 0) {
+        if (tempPlanter.planterType > 0) {
             if (
                 _planterAddress == _assignedPlanterAddress ||
-                (tempPlanter.type == 3 &&
+                (tempPlanter.planterType == 3 &&
                     memberOf[_planterAddress] == _assignedPlanterAddress)
             ) {
                 if (
@@ -425,7 +426,7 @@ contract Planter is Initializable, RelayRecipient {
     /** @dev oragnization can update planterPayment rules of it's members
      * @param _planterAddress address of planter
      * @param _planterAutomaticPaymentPortion payment portion value
-     * NOTE only organization (type = 2) can call this function
+     * NOTE only organization (planterType = 2) can call this function
      */
     function updateOrganizationMemberShare(
         address _planterAddress,
@@ -465,12 +466,12 @@ contract Planter is Initializable, RelayRecipient {
         )
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
-        if (tempPlanter.status == 4 || tempPlanter.type == 0) {
+        if (tempPlanter.status == 4 || tempPlanter.planterType == 0) {
             return (false, address(0), address(0), 0);
         } else {
             if (
-                tempPlanter.type == 1 ||
-                tempPlanter.type == 2 ||
+                tempPlanter.planterType == 1 ||
+                tempPlanter.planterType == 2 ||
                 tempPlanter.status == 0
             ) {
                 return (true, address(0), invitedBy[_planterAddress], 10000);
@@ -542,15 +543,15 @@ contract Planter is Initializable, RelayRecipient {
         view
         returns (bool)
     {
-        uint8 _type = planters[_planterAddress].type;
+        uint8 _planterType = planters[_planterAddress].planterType;
 
         uint8 _verifierStatus = planters[_verifier].status;
 
-        if (_type > 1) {
+        if (_planterType > 1) {
             if (_verifierStatus == 1 || _verifierStatus == 2) {
-                if (_type == 2) {
+                if (_planterType == 2) {
                     return memberOf[_verifier] == _planterAddress;
-                } else if (_type == 3) {
+                } else if (_planterType == 3) {
                     return
                         memberOf[_verifier] == memberOf[_planterAddress] ||
                         memberOf[_planterAddress] == _verifier;
@@ -571,6 +572,6 @@ contract Planter is Initializable, RelayRecipient {
     {
         PlanterData storage tempPlanter = planters[_planterAddress];
 
-        return tempPlanter.status == 1 || tempPlanter.type == 2;
+        return tempPlanter.status == 1 || tempPlanter.planterType == 2;
     }
 }

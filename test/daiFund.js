@@ -386,12 +386,12 @@ contract("DaiFund", (accounts) => {
         amount,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         { from: userAccount3 }
       );
 
@@ -1460,7 +1460,7 @@ contract("DaiFund", (accounts) => {
       const researchAddress = userAccount3;
 
       const totalResearchFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), research),
+        Math.mul(Math.add(Number(amount), Number(amount1)), researchShare),
         10000
       );
 
@@ -1544,7 +1544,6 @@ contract("DaiFund", (accounts) => {
         treasuryShare,
         reserve1Share,
         reserve2Share,
-        Share,
         {
           from: userAccount6,
         }
@@ -1693,7 +1692,10 @@ contract("DaiFund", (accounts) => {
       const localDevelopmentAddress = userAccount3;
 
       const totalLocalDevelopmentFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), localDevelopment),
+        Math.mul(
+          Math.add(Number(amount), Number(amount1)),
+          localDevelopmentShare
+        ),
         10000
       );
 
@@ -1933,17 +1935,17 @@ contract("DaiFund", (accounts) => {
       const amount1 = web3.utils.toWei("1");
       const planterShare = 5000;
       const ambassadorShare = 500;
-      const research = 1000;
-      const localDevelopment = 1500;
-      const insurance = 1000;
-      const treasury = 1000;
-      const reserve1 = 0;
-      const reserve2 = 0;
+      const researchShare = 1000;
+      const localDevelopmentShare = 1500;
+      const insuranceShare = 1000;
+      const treasuryShare = 1000;
+      const reserve1Share = 0;
+      const reserve2Share = 0;
 
       const insuranceAddress = userAccount3;
 
       const totalInsuranceFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), insurance),
+        Math.mul(Math.add(Number(amount), Number(amount1)), insuranceShare),
         10000
       );
 
@@ -1951,12 +1953,12 @@ contract("DaiFund", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            research,
-            localDevelopment,
-            insurance,
-            treasury,
-            reserve1,
-            reserve2
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
           )
         ),
         10000
@@ -1979,12 +1981,12 @@ contract("DaiFund", (accounts) => {
       await fModel.addAllocationData(
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: dataManager,
         }
@@ -2006,12 +2008,12 @@ contract("DaiFund", (accounts) => {
         amount,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2021,12 +2023,12 @@ contract("DaiFund", (accounts) => {
         amount1,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2166,17 +2168,17 @@ contract("DaiFund", (accounts) => {
       const amount1 = web3.utils.toWei("1");
       const planterShare = 5000;
       const ambassadorShare = 500;
-      const research = 1000;
-      const localDevelopment = 1500;
-      const insurance = 1000;
-      const treasury = 1000;
-      const reserve1 = 0;
-      const reserve2 = 0;
+      const researchShare = 1000;
+      const localDevelopmentShare = 1500;
+      const insuranceShare = 1000;
+      const treasuryShare = 1000;
+      const reserve1Share = 0;
+      const reserve2Share = 0;
 
       const treasuryAddress = userAccount3;
 
       const totalTreasuryFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), treasury),
+        Math.mul(Math.add(Number(amount), Number(amount1)), treasuryShare),
         10000
       );
 
@@ -2184,12 +2186,12 @@ contract("DaiFund", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            research,
-            localDevelopment,
-            insurance,
-            treasury,
-            reserve1,
-            reserve2
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
           )
         ),
         10000
@@ -2212,12 +2214,12 @@ contract("DaiFund", (accounts) => {
       await fModel.addAllocationData(
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: dataManager,
         }
@@ -2239,12 +2241,12 @@ contract("DaiFund", (accounts) => {
         amount,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2254,12 +2256,12 @@ contract("DaiFund", (accounts) => {
         amount1,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2400,17 +2402,17 @@ contract("DaiFund", (accounts) => {
       const amount1 = web3.utils.toWei("1");
       const planterShare = 5000;
       const ambassadorShare = 500;
-      const research = 1000;
-      const localDevelopment = 1000;
-      const insurance = 1500;
-      const treasury = 0;
-      const reserve1 = 1000;
-      const reserve2 = 0;
+      const researchShare = 1000;
+      const localDevelopmentShare = 1000;
+      const insuranceShare = 1500;
+      const treasuryShare = 0;
+      const reserve1Share = 1000;
+      const reserve2Share = 0;
 
       const reserve1Address = userAccount3;
 
       const totalReserve1Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserve1),
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve1Share),
         10000
       );
 
@@ -2418,12 +2420,12 @@ contract("DaiFund", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            research,
-            localDevelopment,
-            insurance,
-            treasury,
-            reserve1,
-            reserve2
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
           )
         ),
         10000
@@ -2446,12 +2448,12 @@ contract("DaiFund", (accounts) => {
       await fModel.addAllocationData(
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: dataManager,
         }
@@ -2473,12 +2475,12 @@ contract("DaiFund", (accounts) => {
         amount,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2488,12 +2490,12 @@ contract("DaiFund", (accounts) => {
         amount1,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2634,17 +2636,17 @@ contract("DaiFund", (accounts) => {
       const amount1 = web3.utils.toWei("1");
       const planterShare = 5000;
       const ambassadorShare = 500;
-      const research = 1000;
-      const localDevelopment = 1000;
-      const insurance = 1500;
-      const treasury = 0;
-      const reserve1 = 0;
-      const reserve2 = 1000;
+      const researchShare = 1000;
+      const localDevelopmentShare = 1000;
+      const insuranceShare = 1500;
+      const treasuryShare = 0;
+      const reserve1Share = 0;
+      const reserve2Share = 1000;
 
       const reserve2Address = userAccount3;
 
       const totalReserve2Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserve2),
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve2Share),
         10000
       );
 
@@ -2652,12 +2654,12 @@ contract("DaiFund", (accounts) => {
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           Math.add(
-            research,
-            localDevelopment,
-            insurance,
-            treasury,
-            reserve1,
-            reserve2
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
           )
         ),
         10000
@@ -2680,12 +2682,12 @@ contract("DaiFund", (accounts) => {
       await fModel.addAllocationData(
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: dataManager,
         }
@@ -2707,12 +2709,12 @@ contract("DaiFund", (accounts) => {
         amount,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2722,12 +2724,12 @@ contract("DaiFund", (accounts) => {
         amount1,
         planterShare,
         ambassadorShare,
-        research,
-        localDevelopment,
-        insurance,
-        treasury,
-        reserve1,
-        reserve2,
+        researchShare,
+        localDevelopmentShare,
+        insuranceShare,
+        treasuryShare,
+        reserve1Share,
+        reserve2Share,
         {
           from: userAccount6,
         }
@@ -2866,8 +2868,8 @@ contract("DaiFund", (accounts) => {
 
       let amount = web3.utils.toWei(".531", "Ether");
 
-      const totalPlanterShare1 = web3.utils.toWei("5");
-      const totalAmbassadorShare1 = web3.utils.toWei("4");
+      const totalPlanterAmount1 = web3.utils.toWei("5");
+      const totalAmbassadorAmount1 = web3.utils.toWei("4");
       const totalResearch1 = web3.utils.toWei("2");
       const totalLocalDevelopment1 = web3.utils.toWei("1");
       const totalInsurance1 = web3.utils.toWei("2");
@@ -2876,8 +2878,8 @@ contract("DaiFund", (accounts) => {
       const totalReserve2_1 = web3.utils.toWei("1");
       const total1 = web3.utils.toWei("19.5"); //total amount of above shares
 
-      const totalPlanterShare2 = web3.utils.toWei("7");
-      const totalAmbassadorShare2 = web3.utils.toWei("2");
+      const totalPlanterAmount2 = web3.utils.toWei("7");
+      const totalAmbassadorAmount2 = web3.utils.toWei("2");
       const totalResearch2 = web3.utils.toWei("1");
       const totalLocalDevelopment2 = web3.utils.toWei("3");
       const totalInsurance2 = web3.utils.toWei("4");
@@ -2906,8 +2908,8 @@ contract("DaiFund", (accounts) => {
       ////--------------------call fund tree by auction----------------
 
       const eventTx1 = await daiFundInstance.fundTreeBatch(
-        totalPlanterShare1,
-        totalAmbassadorShare1,
+        totalPlanterAmount1,
+        totalAmbassadorAmount1,
         totalResearch1,
         totalLocalDevelopment1,
         totalInsurance1,
@@ -2965,15 +2967,15 @@ contract("DaiFund", (accounts) => {
 
       assert.equal(
         Number(contractBalance),
-        Number(Math.Big(totalPlanterShare1).plus(totalAmbassadorShare1)),
+        Number(Math.Big(totalPlanterAmount1).plus(totalAmbassadorAmount1)),
         "Contract balance not true"
       );
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
       const eventTx2 = await daiFundInstance.fundTreeBatch(
-        totalPlanterShare2,
-        totalAmbassadorShare2,
+        totalPlanterAmount2,
+        totalAmbassadorAmount2,
         totalResearch2,
         totalLocalDevelopment2,
         totalInsurance2,
@@ -3032,10 +3034,10 @@ contract("DaiFund", (accounts) => {
       assert.equal(
         Number(contractBalance2),
         Number(
-          Math.Big(totalPlanterShare2)
-            .plus(totalAmbassadorShare2)
-            .plus(totalPlanterShare1)
-            .plus(totalAmbassadorShare1)
+          Math.Big(totalPlanterAmount2)
+            .plus(totalAmbassadorAmount2)
+            .plus(totalPlanterAmount1)
+            .plus(totalAmbassadorAmount1)
         ),
         "2-Contract balance not true"
       );

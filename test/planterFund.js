@@ -1633,17 +1633,17 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      const totalFunds = await planterFundInstance.totalBalances();
+      const totalBalances = await planterFundInstance.totalBalances();
 
       assert.equal(
         Math.add(planterFund, planterFund2),
-        Number(totalFunds.planter),
+        Number(totalBalances.planter),
         "invalid planter total funds"
       );
 
       assert.equal(
         Math.add(referralFund, referralFund2),
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         "invalid referral total funds"
       );
 
@@ -2244,11 +2244,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(0, Number(referralBalance4), "referral blance is not ok 3");
 
-      const totalFunds = await planterFundInstance.totalBalances();
+      const totalBalances = await planterFundInstance.totalBalances();
 
       assert.equal(
         0,
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         "totalReferralFund is not ok 3"
       );
 
@@ -2795,17 +2795,17 @@ contract("PlanterFund", (accounts) => {
         "referral blance is not ok 3"
       );
 
-      const totalFunds = await planterFundInstance.totalBalances();
+      const totalBalances = await planterFundInstance.totalBalances();
 
       assert.equal(
         0,
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         "totalReferralFund is not ok 3"
       );
 
       assert.equal(
         0,
-        Number(totalFunds.planter),
+        Number(totalBalances.planter),
         "totalPalnterFund is not ok 3"
       );
 
@@ -2902,7 +2902,7 @@ contract("PlanterFund", (accounts) => {
       const OrganizationPlanterBalance1 =
         await planterFundInstance.balances.call(userAccount3);
 
-      const totalFunds = await planterFundInstance.totalBalances();
+      const totalBalances = await planterFundInstance.totalBalances();
 
       assert.equal(
         Number(OrganizationPlanterBalance1),
@@ -2911,13 +2911,13 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFunds.localDevelopment),
+        Number(totalBalances.localDevelopment),
         totalReferralFund,
         "localDevelopment balance is not ok 1"
       );
 
       assert.equal(
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         0,
         "total referrar fund is not ok"
       );

@@ -461,7 +461,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
             referrerClaimableTreesWeth[_msgSender()] -= uint256(-x);
 
-            wethFund.updateDaiSwap(wethAmount);
+            wethFund.updateDaiDebtToPlanterContract(wethAmount);
 
             _amount += wethAmount;
         }

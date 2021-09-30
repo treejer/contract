@@ -28,7 +28,7 @@ interface IPlanterFund {
     function daiToken() external view returns (address);
 
     /**
-     * @dev return totalFunds struct data
+     * @dev return totalBalances struct data
      * @return planter total balance
      * @return ambassador total balance
      * @return localDevelopment total balance

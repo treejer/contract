@@ -2399,10 +2399,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       const fundTreeAmount = web3.utils.toWei("0.1");
@@ -2605,10 +2605,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -2829,10 +2829,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("0.219");
 
@@ -3051,10 +3051,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       const fundTreeAmount = web3.utils.toWei("1");
@@ -3261,10 +3261,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -3329,10 +3329,10 @@ contract("TreeFactory", (accounts) => {
         fundsPercent.referralFund,
         fundsPercent.research,
         fundsPercent.localDevelopment,
-        fundsPercent.rescueFund,
-        fundsPercent.treejerDevelop,
-        fundsPercent.reserveFund1,
-        fundsPercent.reserveFund2,
+        fundsPercent.insurance,
+        fundsPercent.treasury,
+        fundsPercent.reserve1,
+        fundsPercent.reserve2,
         {
           from: dataManager,
         }
@@ -3386,10 +3386,10 @@ contract("TreeFactory", (accounts) => {
         fundsPercent.referralFund,
         fundsPercent.research,
         fundsPercent.localDevelopment,
-        fundsPercent.rescueFund,
-        fundsPercent.treejerDevelop,
-        fundsPercent.reserveFund1,
-        fundsPercent.reserveFund2,
+        fundsPercent.insurance,
+        fundsPercent.treasury,
+        fundsPercent.reserve1,
+        fundsPercent.reserve2,
         {
           from: userAccount5,
         }
@@ -3573,7 +3573,7 @@ contract("TreeFactory", (accounts) => {
         "planter balance is not ok"
       );
 
-      //// because there is no refferal , referral share added to totalFunds.localDevelopment
+      //// because there is no referral , referral share added to totalBalances.localDevelopment
       assert.equal(
         Number(totalFunds3.localDevelopment),
         expectedReferralPaid,
@@ -4314,10 +4314,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -4415,10 +4415,10 @@ contract("TreeFactory", (accounts) => {
         referralFund: 1000,
         research: 1000,
         localDevelopment: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 

@@ -1431,48 +1431,48 @@ contract("IncrementalSale", (accounts) => {
         planterAmount: (30 * amount) / 100,
         ambassadorAmount: (12 * amount) / 100,
         research: (12 * amount) / 100,
-        localDevelop: (12 * amount) / 100,
+        localDevelopment: (12 * amount) / 100,
         insurance: (12 * amount) / 100,
         treasury: (22 * amount) / 100,
         reserve1: 0,
         reserve2: 0,
       };
 
-      //check wethFund totalFunds
-      let totalFunds = await wethFundsInstance.totalFunds();
+      //check wethFund totalBalances
+      let totalBalances = await wethFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds.research),
+        Number(totalBalances.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelopment),
-        expected.localDevelop,
-        "localDevelop funds invalid"
+        Number(totalBalances.localDevelopment),
+        expected.localDevelopment,
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.insurance),
+        Number(totalBalances.insurance),
         expected.insurance,
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treasury),
+        Number(totalBalances.treasury),
         expected.treasury,
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserve1),
+        Number(totalBalances.reserve1),
         expected.reserve1,
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserve2),
+        Number(totalBalances.reserve2),
         expected.reserve2,
         "reserve2 funds invalid"
       );
@@ -1683,48 +1683,51 @@ contract("IncrementalSale", (accounts) => {
         planterAmount: (30 * amount2) / 100,
         ambassadorAmount: (12 * amount2) / 100,
         research: (12 * amount2) / 100,
-        localDevelop: (12 * amount2) / 100,
+        localDevelopment: (12 * amount2) / 100,
         insurance: (12 * amount2) / 100,
         treasury: (22 * amount2) / 100,
         reserve1: 0,
         reserve2: 0,
       };
 
-      //check wethFund totalFunds
-      let totalFunds2 = await wethFundsInstance.totalFunds();
+      //check wethFund totalBalances
+      let totalBalances2 = await wethFundsInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.research),
+        Number(totalBalances2.research),
         Math.add(Number(expected2.research), Number(expected.research)),
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelopment),
-        Math.add(Number(expected2.localDevelop), Number(expected.localDevelop)),
-        "localDevelop funds invalid"
+        Number(totalBalances2.localDevelopment),
+        Math.add(
+          Number(expected2.localDevelopment),
+          Number(expected.localDevelopment)
+        ),
+        "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.insurance),
+        Number(totalBalances2.insurance),
         Math.add(Number(expected2.insurance), Number(expected.insurance)),
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treasury),
+        Number(totalBalances2.treasury),
         Math.add(Number(expected2.treasury), Number(expected.treasury)),
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve1),
+        Number(totalBalances2.reserve1),
         Math.add(Number(expected2.reserve1), Number(expected.reserve1)),
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve2),
+        Number(totalBalances2.reserve2),
         Math.add(Number(expected2.reserve2), Number(expected.reserve2)),
         "reserve2 funds invalid"
       );

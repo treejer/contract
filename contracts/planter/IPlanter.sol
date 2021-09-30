@@ -14,7 +14,7 @@ interface IPlanter {
     function accessRestriction() external view returns (address);
 
     /**
-     * @dev return planter data of {_planterAddress}
+     * @dev return planter data of {_planter}
      * @return _planterType
      * @return status
      * @return countryCode
@@ -24,7 +24,7 @@ interface IPlanter {
      * @return longitude
      * @return latitude
      */
-    function planters(address _planterAddress)
+    function planters(address _planter)
         external
         view
         returns (
@@ -38,17 +38,17 @@ interface IPlanter {
             uint64 latitude
         );
 
-    /** @return referral address of {_planterAddress} */
-    function invitedBy(address _planterAddress) external view returns (address);
+    /** @return referral address of {_planter} */
+    function invitedBy(address _planter) external view returns (address);
 
-    /** @return organization address of {_planterAddress} */
-    function memberOf(address _planterAddress) external view returns (address);
+    /** @return organization address of {_planter} */
+    function memberOf(address _planter) external view returns (address);
 
-    /** @return payment portion of {_planterAddress} in {_organizationAddress} */
-    function organizationMemberShare(
-        address _organizationAddress,
-        address _planterAddress
-    ) external view returns (uint256);
+    /** @return payment portion of {_planter} in {_organization} */
+    function organizationMemberShare(address _organization, address _planter)
+        external
+        view
+        returns (uint256);
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -61,7 +61,7 @@ interface IPlanter {
      * @param _latitude latitude value
      * @param _countryCode country code
      * @param _invitedBy address of referral
-     * @param _organizationAddress address of organization to be member of
+     * @param _organization address of organization to be member of
      * NOTE if join as a member of an organization, when that organization
      * accept planter, planter status set to active
      * NOTE emit a {PlanterJoined} event
@@ -72,24 +72,24 @@ interface IPlanter {
         uint64 _latitude,
         uint16 _countryCode,
         address _invitedBy,
-        address _organizationAddress
+        address _organization
     ) external;
 
     //TODO: ADD_COMMENT
     function joinByAdmin(
-        address _planterAddress,
+        address _planter,
         uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
         address _invitedBy,
-        address _organizationAddress
+        address _organization
     ) external;
 
     /**
      * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.
-     * @param _organizationAddress address of organization planter
+     * @param _organization address of organization planter
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
@@ -98,7 +98,7 @@ interface IPlanter {
      * NOTE emit a {OrganizationJoined} event
      */
     function joinOrganization(
-        address _organizationAddress,
+        address _organization,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
@@ -111,65 +111,62 @@ interface IPlanter {
      * function.
      * planterType 3 (member of organization) can change to
      * planterType 1 (individual planter) with input value {_planterType}
-     * of 1 and zeroAddress as {_organizationAddress}
+     * of 1 and zeroAddress as {_organization}
      * or choose other organization to be member of with
-     * input value {_planterType} of 3 and {_organizationAddress}.
+     * input value {_planterType} of 3 and {_organization}.
      * planterType 1 can only change to planterType 3 with input value
-     * {_planterAddress} of 3 and {_organizationAddress}
+     * {_planter} of 3 and {_organization}
      * if planter planterType 3 choose another oraganization
      * or planterType 1 chage to planterType 3, they must be accepted by the
      * organization to be an active planter
      * NOTE emit a {PlanterUpdated} event
      */
-    function updatePlanterType(uint8 _planterType, address _organizationAddress)
+    function updatePlanterType(uint8 _planterType, address _organization)
         external;
 
     /** @dev organization can accept planter to be it's member or reject
-     * @param _planterAddress address of planter
+     * @param _planter address of planter
      * @param _acceptance accept or reject
      * NOTE emit a {AcceptedByOrganization} or {RejectedByOrganization} event
      */
-    function acceptPlanterFromOrganization(
-        address _planterAddress,
-        bool _acceptance
-    ) external;
+    function acceptPlanterFromOrganization(address _planter, bool _acceptance)
+        external;
 
-    /** @dev admin update supplyCap of planter {_planterAddress}
-     * @param _planterAddress address of planter to update supplyCap
+    /** @dev admin update supplyCap of planter {_planter}
+     * @param _planter address of planter to update supplyCap
      * @param _supplyCap supplyCap that set to planter supplyCap
      * NOTE emit a {PlanterUpdated} event
      */
-    function updateSupplyCap(address _planterAddress, uint32 _supplyCap)
-        external;
+    function updateSupplyCap(address _planter, uint32 _supplyCap) external;
 
     /** @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
-     * @param _planterAddress address of planter who want to plant tree
+     * @param _planter address of planter who want to plant tree
      * @param _assignedPlanterAddress address of planter that tree assigned to
      * @return if a planter can plant a tree or not
      */
     function manageAssignedTreePermission(
-        address _planterAddress,
+        address _planter,
         address _assignedPlanterAddress
     ) external returns (bool);
 
     /** @dev oragnization can update planterPayment rules of it's members
-     * @param _planterAddress address of planter
+     * @param _planter address of planter
      * @param _planterAutomaticPaymentPortion payment portion value
      * NOTE only organization (planterType = 2) can call this function
      * NOTE emit a {OrganizationMemberShareUpdated} event
      */
     function updateOrganizationMemberShare(
-        address _planterAddress,
+        address _planter,
         uint256 _planterAutomaticPaymentPortion
     ) external;
 
     /** @dev return planter paymentPortion for an accepted organizationPlanter
-     * @param _planterAddress address of planter to get payment portion
+     * @param _planter address of planter to get payment portion
      * @return {true} as first param in valid planter case and seccond param is
-     * address of organization that {_planterAddress} is member of it.
+     * address of organization that {_planter} is member of it.
      * and third param is address of referral and the last one is portion value
      */
-    function getOrganizationMemberData(address _planterAddress)
+    function getOrganizationMemberData(address _planter)
         external
         view
         returns (
@@ -179,42 +176,37 @@ interface IPlanter {
             uint256
         );
 
-    /** @dev when tree plant of {_planterAddress} rejected plantedCount of {_planterAddress}
+    /** @dev when tree plant of {_planter} rejected plantedCount of {_planter}
      * must reduce 1 time and if planter status is full supplyCap {2} update it to active {1}
-     * @param _planterAddress address of planter
+     * @param _planter address of planter
      * NOTE only treeFactory contract can call this function
      */
-    function reducePlantedCount(address _planterAddress) external;
+    function reducePlantedCount(address _planter) external;
 
-    /** @dev check that planter {_planterAddress} can plant regular tree
-     * @param _planterAddress address of planter
+    /** @dev check that planter {_planter} can plant regular tree
+     * @param _planter address of planter
      * NOTE treeFactory contract can call this function
      * NOTE change status to full supplyCap if plantedCount be equal with
      * planter supplyCap after increase plantedCount by 1
      * @return true in case of planter status is active {1}
      */
-    function manageTreePermission(address _planterAddress)
-        external
-        returns (bool);
+    function manageTreePermission(address _planter) external returns (bool);
 
-    /** @dev check that {_verifier} can verify plant or update requests of {_planterAddress}
-     * @param _planterAddress address of planter
+    /** @dev check that {_verifier} can verify plant or update requests of {_planter}
+     * @param _planter address of planter
      * @param _verifier address of verifier
-     * @return true in case of {_verifier} can verify {_planterAddress} and false otherwise
+     * @return true in case of {_verifier} can verify {_planter} and false otherwise
      */
-    function canVerify(address _planterAddress, address _verifier)
+    function canVerify(address _planter, address _verifier)
         external
         view
         returns (bool);
 
-    /** @dev check allowance to assign tree to planter {_planterAddress}
-     * @param _planterAddress address of assignee planter
+    /** @dev check allowance to assign tree to planter {_planter}
+     * @param _planter address of assignee planter
      * @return true in case of active planter or orgnization planter and false otherwise
      */
-    function canAssignTree(address _planterAddress)
-        external
-        view
-        returns (bool);
+    function canAssignTree(address _planter) external view returns (bool);
 
     /** @dev emitted when a planter join with address {planter} */
     event PlanterJoined(address planter);

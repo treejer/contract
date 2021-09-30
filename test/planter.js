@@ -280,7 +280,7 @@ contract("Planter", (accounts) => {
     );
 
     truffleAssert.eventEmitted(eventTx3, "OrganizationJoined", (ev) => {
-      return userAccount6 == ev.organizationId;
+      return userAccount6 == ev.organization;
     });
 
     truffleAssert.eventEmitted(eventTx4, "PlanterJoined", (ev) => {
@@ -337,7 +337,7 @@ contract("Planter", (accounts) => {
     );
 
     truffleAssert.eventEmitted(eventTx5, "OrganizationJoined", (ev) => {
-      return userAccount8 == ev.organizationId;
+      return userAccount8 == ev.organization;
     });
 
     truffleAssert.eventEmitted(eventTx6, "PlanterJoined", (ev) => {
@@ -532,7 +532,7 @@ contract("Planter", (accounts) => {
     );
 
     truffleAssert.eventEmitted(eventTx3, "OrganizationJoined", (ev) => {
-      return userAccount6 == ev.organizationId;
+      return userAccount6 == ev.organization;
     });
 
     truffleAssert.eventEmitted(eventTx4, "PlanterJoined", (ev) => {
@@ -592,7 +592,7 @@ contract("Planter", (accounts) => {
     );
 
     truffleAssert.eventEmitted(eventTx5, "OrganizationJoined", (ev) => {
-      return userAccount8 == ev.organizationId;
+      return userAccount8 == ev.organization;
     });
 
     truffleAssert.eventEmitted(eventTx6, "PlanterJoined", (ev) => {
@@ -723,7 +723,7 @@ contract("Planter", (accounts) => {
     assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
 
     truffleAssert.eventEmitted(eventTx, "OrganizationJoined", (ev) => {
-      return userAccount4 == ev.organizationId;
+      return userAccount4 == ev.organization;
     });
   });
 

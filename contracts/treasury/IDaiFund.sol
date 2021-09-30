@@ -167,7 +167,7 @@ interface IDaiFund {
 
     /**
      * @dev trnasfer {_amount} from insurance in {totalBalances} to insuranceAddress
-     * NOTE emit a {RescueBalanceWithdrew} event
+     * NOTE emit a {InsuranceBalanceWithdrew} event
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external;
@@ -215,7 +215,11 @@ interface IDaiFund {
      * @dev emitted when admin withdraw rescue balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage
      */
-    event RescueBalanceWithdrew(uint256 amount, address account, string reason);
+    event InsuranceBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
     /**
      * @dev emitted when admin withdraw treejer develop balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage

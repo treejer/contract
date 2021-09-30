@@ -2064,7 +2064,7 @@ contract("DaiFund", (accounts) => {
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "RescueBalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(tx, "InsuranceBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
           ev.account == insuranceAddress &&
@@ -2110,7 +2110,7 @@ contract("DaiFund", (accounts) => {
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(tx2, "InsuranceBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
           ev.account == insuranceAddress &&

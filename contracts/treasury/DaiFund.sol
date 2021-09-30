@@ -49,7 +49,11 @@ contract DaiFund is Initializable {
         address account,
         string reason
     );
-    event RescueBalanceWithdrew(uint256 amount, address account, string reason);
+    event InsuranceBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
     event TreasuryBalanceWithdrew(
         uint256 amount,
         address account,
@@ -386,7 +390,7 @@ contract DaiFund is Initializable {
 
         require(success, "unsuccessful transfer");
 
-        emit RescueBalanceWithdrew(_amount, insuranceAddress, _reason);
+        emit InsuranceBalanceWithdrew(_amount, insuranceAddress, _reason);
     }
 
     /**

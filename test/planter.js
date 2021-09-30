@@ -105,7 +105,7 @@ contract("Planter", (accounts) => {
   //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
   //   let tx = await contractPlanter
-  //     .planterJoin(
+  //     .join(
   //       1,
   //       longitude,
   //       latitude,
@@ -119,7 +119,7 @@ contract("Planter", (accounts) => {
   //     from: deployerAccount,
   //   });
 
-  //   await contractPlanter.planterJoin(
+  //   await contractPlanter.join(
   //     1,
   //     longitude,
   //     latitude,
@@ -172,10 +172,10 @@ contract("Planter", (accounts) => {
       "address set incorrect"
     );
   });
-  /////////////////---------------------------------planterJoin--------------------------------------------------------
+  /////////////////---------------------------------join--------------------------------------------------------
 
-  it("planterJoin should work successfully", async () => {
-    ////////////// ------------ planterJoin should be work successfully without refferedBy and organizationAddress
+  it("join should work successfully", async () => {
+    ////////////// ------------ join should be work successfully without invitedBy and organizationAddress
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     const eventTx1 = await Common.joinSimplePlanter(
@@ -188,20 +188,20 @@ contract("Planter", (accounts) => {
 
     let planter1 = await planterInstance.planters.call(userAccount2);
 
-    assert.equal(Number(planter1.planterType), 1, "planterType not true");
+    assert.equal(Number(planter1.type), 1, "type not true");
     assert.equal(Number(planter1.status), 1, "status not true");
-    assert.equal(Number(planter1.capacity), 100, "capacity not true");
+    assert.equal(Number(planter1.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter1.longitude), 1, "longitude not true");
     assert.equal(Number(planter1.latitude), 2, "latitude not true");
     assert.equal(Number(planter1.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter1.score), 0, "score not true");
     assert.equal(Number(planter1.plantedCount), 0, "plantedCount not true");
 
-    truffleAssert.eventEmitted(eventTx1, "PlanterJoin", (ev) => {
-      return userAccount2 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx1, "PlanterJoined", (ev) => {
+      return userAccount2 == ev.planter;
     });
 
-    ////////////////// ---------------------- planterJoin should be work successfully with refferedBy and without organizationAddress
+    ////////////////// ---------------------- join should be work successfully with invitedBy and without organizationAddress
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -216,24 +216,24 @@ contract("Planter", (accounts) => {
 
     let planter2 = await planterInstance.planters.call(userAccount3);
 
-    assert.equal(Number(planter2.planterType), 1, "planterType not true");
+    assert.equal(Number(planter2.type), 1, "type not true");
     assert.equal(Number(planter2.status), 1, "status not true");
-    assert.equal(Number(planter2.capacity), 100, "capacity not true");
+    assert.equal(Number(planter2.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter2.longitude), 1, "longitude not true");
     assert.equal(Number(planter2.latitude), 2, "latitude not true");
     assert.equal(Number(planter2.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter2.score), 0, "score not true");
     assert.equal(Number(planter2.plantedCount), 0, "plantedCount not true");
 
-    let reffered1 = await planterInstance.refferedBy.call(userAccount3);
+    let reffered1 = await planterInstance.invitedBy.call(userAccount3);
 
-    assert.equal(reffered1, userAccount4, "refferedBy not true set");
+    assert.equal(reffered1, userAccount4, "invitedBy not true set");
 
-    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
-      return userAccount3 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx2, "PlanterJoined", (ev) => {
+      return userAccount3 == ev.planter;
     });
 
-    /////////////////////-------------------------planterJoin should be work successfully with organizationAddress and without refferedBy
+    /////////////////////-------------------------join should be work successfully with organizationAddress and without invitedBy
     //planter address
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
     //organization address
@@ -256,18 +256,18 @@ contract("Planter", (accounts) => {
 
     let planter3 = await planterInstance.planters.call(userAccount5);
 
-    assert.equal(Number(planter3.planterType), 3, "planterType not true");
+    assert.equal(Number(planter3.type), 3, "type not true");
     assert.equal(Number(planter3.status), 0, "status not true");
-    assert.equal(Number(planter3.capacity), 100, "capacity not true");
+    assert.equal(Number(planter3.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter3.longitude), 1, "longitude not true");
     assert.equal(Number(planter3.latitude), 2, "latitude not true");
     assert.equal(Number(planter3.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter3.score), 0, "score not true");
     assert.equal(Number(planter3.plantedCount), 0, "plantedCount not true");
 
-    let reffered2 = await planterInstance.refferedBy.call(userAccount5);
+    let reffered2 = await planterInstance.invitedBy.call(userAccount5);
 
-    assert.equal(reffered2, zeroAddress, "refferedBy not true set");
+    assert.equal(reffered2, zeroAddress, "invitedBy not true set");
 
     let organizationAddress1 = await planterInstance.memberOf.call(
       userAccount5
@@ -279,15 +279,15 @@ contract("Planter", (accounts) => {
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx3, "OrganizationJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx3, "OrganizationJoined", (ev) => {
       return userAccount6 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx4, "PlanterJoin", (ev) => {
-      return userAccount5 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx4, "PlanterJoined", (ev) => {
+      return userAccount5 == ev.planter;
     });
 
-    /////////////////////////------------------ planterJoin should be work successfully with refferedBy and organizationAddress
+    /////////////////////////------------------ join should be work successfully with invitedBy and organizationAddress
 
     //planter address
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -313,18 +313,18 @@ contract("Planter", (accounts) => {
 
     let planter4 = await planterInstance.planters.call(userAccount1);
 
-    assert.equal(Number(planter4.planterType), 3, "planterType not true");
+    assert.equal(Number(planter4.type), 3, "type not true");
     assert.equal(Number(planter4.status), 0, "status not true");
-    assert.equal(Number(planter4.capacity), 100, "capacity not true");
+    assert.equal(Number(planter4.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter4.longitude), 1, "longitude not true");
     assert.equal(Number(planter4.latitude), 2, "latitude not true");
     assert.equal(Number(planter4.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter4.score), 0, "score not true");
     assert.equal(Number(planter4.plantedCount), 0, "plantedCount not true");
 
-    let reffered3 = await planterInstance.refferedBy.call(userAccount1);
+    let reffered3 = await planterInstance.invitedBy.call(userAccount1);
 
-    assert.equal(reffered3, userAccount7, "refferedBy not true set");
+    assert.equal(reffered3, userAccount7, "invitedBy not true set");
 
     let organizationAddress2 = await planterInstance.memberOf.call(
       userAccount1
@@ -336,26 +336,26 @@ contract("Planter", (accounts) => {
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx5, "OrganizationJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx5, "OrganizationJoined", (ev) => {
       return userAccount8 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx6, "PlanterJoin", (ev) => {
-      return userAccount1 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx6, "PlanterJoined", (ev) => {
+      return userAccount1 == ev.planter;
     });
   });
 
-  it("planterJoin should be fail", async () => {
+  it("join should be fail", async () => {
     ///////////// fail user not planter
     planterInstance
-      .planterJoin(1, 12, 24, 12, zeroAddress, zeroAddress, {
+      .join(1, 12, 24, 12, zeroAddress, zeroAddress, {
         from: userAccount2,
       })
       .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    ////////////// ------- fail planterType not allowed value
+    ////////////// ------- fail type not allowed value
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -411,17 +411,17 @@ contract("Planter", (accounts) => {
     ).should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
   });
 
-  /////////////////---------------------------------planterJoinByAdmin--------------------------------------------------------
+  /////////////////---------------------------------joinByAdmin--------------------------------------------------------
 
-  it("planterJoinByAdmin should work successfully", async () => {
+  it("joinByAdmin should work successfully", async () => {
     const longitude = 1;
     const latitude = 2;
     const countryCode = 10;
 
-    ////////////// ------------ planterJoin should be work successfully without refferedBy and organizationAddress
+    ////////////// ------------ join should be work successfully without invitedBy and organizationAddress
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    const eventTx1 = await planterInstance.planterJoinByAdmin(
+    const eventTx1 = await planterInstance.joinByAdmin(
       userAccount2,
       1,
       longitude,
@@ -434,25 +434,25 @@ contract("Planter", (accounts) => {
 
     let planter1 = await planterInstance.planters.call(userAccount2);
 
-    assert.equal(Number(planter1.planterType), 1, "planterType not true");
+    assert.equal(Number(planter1.type), 1, "type not true");
     assert.equal(Number(planter1.status), 1, "status not true");
-    assert.equal(Number(planter1.capacity), 100, "capacity not true");
+    assert.equal(Number(planter1.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter1.longitude), 1, "longitude not true");
     assert.equal(Number(planter1.latitude), 2, "latitude not true");
     assert.equal(Number(planter1.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter1.score), 0, "score not true");
     assert.equal(Number(planter1.plantedCount), 0, "plantedCount not true");
 
-    truffleAssert.eventEmitted(eventTx1, "PlanterJoin", (ev) => {
-      return userAccount2 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx1, "PlanterJoined", (ev) => {
+      return userAccount2 == ev.planter;
     });
 
-    ////////////////// ---------------------- planterJoin should be work successfully with refferedBy and without organizationAddress
+    ////////////////// ---------------------- join should be work successfully with invitedBy and without organizationAddress
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
-    const eventTx2 = await planterInstance.planterJoinByAdmin(
+    const eventTx2 = await planterInstance.joinByAdmin(
       userAccount3,
       1,
       longitude,
@@ -465,24 +465,24 @@ contract("Planter", (accounts) => {
 
     let planter2 = await planterInstance.planters.call(userAccount3);
 
-    assert.equal(Number(planter2.planterType), 1, "planterType not true");
+    assert.equal(Number(planter2.type), 1, "type not true");
     assert.equal(Number(planter2.status), 1, "status not true");
-    assert.equal(Number(planter2.capacity), 100, "capacity not true");
+    assert.equal(Number(planter2.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter2.longitude), 1, "longitude not true");
     assert.equal(Number(planter2.latitude), 2, "latitude not true");
     assert.equal(Number(planter2.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter2.score), 0, "score not true");
     assert.equal(Number(planter2.plantedCount), 0, "plantedCount not true");
 
-    let reffered1 = await planterInstance.refferedBy.call(userAccount3);
+    let reffered1 = await planterInstance.invitedBy.call(userAccount3);
 
-    assert.equal(reffered1, userAccount4, "refferedBy not true set");
+    assert.equal(reffered1, userAccount4, "invitedBy not true set");
 
-    truffleAssert.eventEmitted(eventTx2, "PlanterJoin", (ev) => {
-      return userAccount3 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx2, "PlanterJoined", (ev) => {
+      return userAccount3 == ev.planter;
     });
 
-    /////////////////////-------------------------planterJoin should be work successfully with organizationAddress and without refferedBy
+    /////////////////////-------------------------join should be work successfully with organizationAddress and without invitedBy
     //planter address
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
     //organization address
@@ -495,7 +495,7 @@ contract("Planter", (accounts) => {
       dataManager
     );
 
-    const eventTx4 = await planterInstance.planterJoinByAdmin(
+    const eventTx4 = await planterInstance.joinByAdmin(
       userAccount5,
       3,
       longitude,
@@ -508,18 +508,18 @@ contract("Planter", (accounts) => {
 
     let planter3 = await planterInstance.planters.call(userAccount5);
 
-    assert.equal(Number(planter3.planterType), 3, "planterType not true");
+    assert.equal(Number(planter3.type), 3, "type not true");
     assert.equal(Number(planter3.status), 1, "status not true");
-    assert.equal(Number(planter3.capacity), 100, "capacity not true");
+    assert.equal(Number(planter3.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter3.longitude), 1, "longitude not true");
     assert.equal(Number(planter3.latitude), 2, "latitude not true");
     assert.equal(Number(planter3.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter3.score), 0, "score not true");
     assert.equal(Number(planter3.plantedCount), 0, "plantedCount not true");
 
-    let reffered2 = await planterInstance.refferedBy.call(userAccount5);
+    let reffered2 = await planterInstance.invitedBy.call(userAccount5);
 
-    assert.equal(reffered2, zeroAddress, "refferedBy not true set");
+    assert.equal(reffered2, zeroAddress, "invitedBy not true set");
 
     let organizationAddress1 = await planterInstance.memberOf.call(
       userAccount5
@@ -531,15 +531,15 @@ contract("Planter", (accounts) => {
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx3, "OrganizationJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx3, "OrganizationJoined", (ev) => {
       return userAccount6 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx4, "PlanterJoin", (ev) => {
-      return userAccount5 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx4, "PlanterJoined", (ev) => {
+      return userAccount5 == ev.planter;
     });
 
-    /////////////////////////------------------ planterJoin should be work successfully with refferedBy and organizationAddress
+    /////////////////////////------------------ join should be work successfully with invitedBy and organizationAddress
 
     //planter address
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -555,7 +555,7 @@ contract("Planter", (accounts) => {
       dataManager
     );
 
-    const eventTx6 = await planterInstance.planterJoinByAdmin(
+    const eventTx6 = await planterInstance.joinByAdmin(
       userAccount1,
       3,
       longitude,
@@ -568,18 +568,18 @@ contract("Planter", (accounts) => {
 
     let planter4 = await planterInstance.planters.call(userAccount1);
 
-    assert.equal(Number(planter4.planterType), 3, "planterType not true");
+    assert.equal(Number(planter4.type), 3, "type not true");
     assert.equal(Number(planter4.status), 1, "status not true");
-    assert.equal(Number(planter4.capacity), 100, "capacity not true");
+    assert.equal(Number(planter4.supplyCap), 100, "supplyCap not true");
     assert.equal(Number(planter4.longitude), 1, "longitude not true");
     assert.equal(Number(planter4.latitude), 2, "latitude not true");
     assert.equal(Number(planter4.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter4.score), 0, "score not true");
     assert.equal(Number(planter4.plantedCount), 0, "plantedCount not true");
 
-    let reffered3 = await planterInstance.refferedBy.call(userAccount1);
+    let reffered3 = await planterInstance.invitedBy.call(userAccount1);
 
-    assert.equal(reffered3, userAccount7, "refferedBy not true set");
+    assert.equal(reffered3, userAccount7, "invitedBy not true set");
 
     let organizationAddress2 = await planterInstance.memberOf.call(
       userAccount1
@@ -591,118 +591,64 @@ contract("Planter", (accounts) => {
       "organizationAddress not true set"
     );
 
-    truffleAssert.eventEmitted(eventTx5, "OrganizationJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx5, "OrganizationJoined", (ev) => {
       return userAccount8 == ev.organizationId;
     });
 
-    truffleAssert.eventEmitted(eventTx6, "PlanterJoin", (ev) => {
-      return userAccount1 == ev.planterId;
+    truffleAssert.eventEmitted(eventTx6, "PlanterJoined", (ev) => {
+      return userAccount1 == ev.planter;
     });
   });
 
-  it("planterJoinByAdmin should be fail", async () => {
+  it("joinByAdmin should be fail", async () => {
     ///////////////// -------------- fail because caller is not data manager
 
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        1,
-        12,
-        24,
-        12,
-        zeroAddress,
-        zeroAddress,
-        {
-          from: userAccount3,
-        }
-      )
+      .joinByAdmin(userAccount2, 1, 12, 24, 12, zeroAddress, zeroAddress, {
+        from: userAccount3,
+      })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
     ///////////// fail user not planter
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        1,
-        12,
-        24,
-        12,
-        zeroAddress,
-        zeroAddress,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 1, 12, 24, 12, zeroAddress, zeroAddress, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
 
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-    ////////////// ------- fail planterType not allowed value
+    ////////////// ------- fail type not allowed value
 
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        5,
-        12,
-        24,
-        12,
-        userAccount3,
-        userAccount4,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 5, 12, 24, 12, userAccount3, userAccount4, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTERTYPE_ALLOWED_VALUE);
 
     ///////////// --------------- fail organization address not valid
 
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        3,
-        12,
-        24,
-        12,
-        userAccount3,
-        userAccount4,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 3, 12, 24, 12, userAccount3, userAccount4, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.ORGANIZATION_NOT_VALID);
 
     ///////// --------------- reffered not true 1- equal to planter address 2-not planter
 
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        1,
-        12,
-        24,
-        12,
-        userAccount2,
-        zeroAddress,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 1, 12, 24, 12, userAccount2, zeroAddress, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
 
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        1,
-        12,
-        24,
-        12,
-        userAccount4,
-        zeroAddress,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 1, 12, 24, 12, userAccount4, zeroAddress, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.REFFERED_NOT_TRUE);
 
-    await planterInstance.planterJoinByAdmin(
+    await planterInstance.joinByAdmin(
       userAccount2,
       1,
       12,
@@ -716,24 +662,15 @@ contract("Planter", (accounts) => {
     );
     ///////////// fail because userAccount2 is exist
     await planterInstance
-      .planterJoinByAdmin(
-        userAccount2,
-        1,
-        12,
-        24,
-        12,
-        zeroAddress,
-        zeroAddress,
-        {
-          from: dataManager,
-        }
-      )
+      .joinByAdmin(userAccount2, 1, 12, 24, 12, zeroAddress, zeroAddress, {
+        from: dataManager,
+      })
       .should.be.rejectedWith(PlanterErrorMsg.ONLY_PLANTER);
   });
 
-  //---------------------------------------organizationJoin-------------------------
+  //---------------------------------------joinOrganization-------------------------
 
-  it("organizationJoin should be work successfully without refferedBy", async () => {
+  it("joinOrganization should be work successfully without invitedBy", async () => {
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
 
     await Common.joinOrganizationPlanter(
@@ -745,9 +682,9 @@ contract("Planter", (accounts) => {
 
     let planter = await planterInstance.planters.call(userAccount4);
 
-    assert.equal(Number(planter.planterType), 2, "planterType not true");
+    assert.equal(Number(planter.type), 2, "type not true");
     assert.equal(Number(planter.status), 1, "status not true");
-    assert.equal(Number(planter.capacity), 1000, "capacity not true");
+    assert.equal(Number(planter.supplyCap), 1000, "supplyCap not true");
     assert.equal(Number(planter.longitude), 1, "longitude not true");
     assert.equal(Number(planter.latitude), 2, "latitude not true");
     assert.equal(Number(planter.countryCode), 10, "countryCode not true");
@@ -755,13 +692,13 @@ contract("Planter", (accounts) => {
     assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
   });
 
-  it("organizationJoin should be work successfully with refferedBy", async () => {
+  it("joinOrganization should be work successfully with invitedBy", async () => {
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
-    let reffered = await planterInstance.refferedBy.call(userAccount4);
+    let reffered = await planterInstance.invitedBy.call(userAccount4);
 
-    assert.equal(reffered, zeroAddress, "refferedBy not true set");
+    assert.equal(reffered, zeroAddress, "invitedBy not true set");
 
     const eventTx = await Common.joinOrganizationPlanter(
       planterInstance,
@@ -770,27 +707,27 @@ contract("Planter", (accounts) => {
       dataManager
     );
 
-    let refferedAfter = await planterInstance.refferedBy.call(userAccount4);
+    let refferedAfter = await planterInstance.invitedBy.call(userAccount4);
 
-    assert.equal(refferedAfter, userAccount3, "refferedBy not true set");
+    assert.equal(refferedAfter, userAccount3, "invitedBy not true set");
 
     let planter = await planterInstance.planters.call(userAccount4);
 
-    assert.equal(Number(planter.planterType), 2, "planterType not true");
+    assert.equal(Number(planter.type), 2, "type not true");
     assert.equal(Number(planter.status), 1, "status not true");
-    assert.equal(Number(planter.capacity), 1000, "capacity not true");
+    assert.equal(Number(planter.supplyCap), 1000, "supplyCap not true");
     assert.equal(Number(planter.longitude), 1, "longitude not true");
     assert.equal(Number(planter.latitude), 2, "latitude not true");
     assert.equal(Number(planter.countryCode), 10, "countryCode not true");
     assert.equal(Number(planter.score), 0, "score not true");
     assert.equal(Number(planter.plantedCount), 0, "plantedCount not true");
 
-    truffleAssert.eventEmitted(eventTx, "OrganizationJoin", (ev) => {
+    truffleAssert.eventEmitted(eventTx, "OrganizationJoined", (ev) => {
       return userAccount4 == ev.organizationId;
     });
   });
 
-  it("organizationJoin should be fail", async () => {
+  it("joinOrganization should be fail", async () => {
     ///////////----------- fail because user not planter
 
     await Common.joinOrganizationPlanter(
@@ -869,7 +806,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     let organizationAddressBefore = await planterInstance.memberOf.call(
@@ -905,7 +842,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     assert.equal(PlanterTypeAfter, 1, "PlanterTypeAfter not true");
@@ -913,7 +850,7 @@ contract("Planter", (accounts) => {
     assert.equal(statusAfter, 1, "statusAfter not true");
 
     truffleAssert.eventEmitted(eventTx, "PlanterUpdated", (ev) => {
-      return userAccount2 == ev.planterId;
+      return userAccount2 == ev.planter;
     });
   });
 
@@ -948,7 +885,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     assert.equal(PlanterTypeBefore, 3, "PlanterTypeBefore not true");
@@ -974,7 +911,7 @@ contract("Planter", (accounts) => {
     });
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     assert.equal(PlanterTypeAfter, 3, "PlanterTypeAfter not true");
@@ -996,7 +933,7 @@ contract("Planter", (accounts) => {
     assert.equal(statusAfter, 0, "statusAfter not true");
 
     truffleAssert.eventEmitted(eventTx, "PlanterUpdated", (ev) => {
-      return userAccount2 == ev.planterId;
+      return userAccount2 == ev.planter;
     });
   });
 
@@ -1022,7 +959,7 @@ contract("Planter", (accounts) => {
     );
 
     let PlanterTypeBefore = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     assert.equal(PlanterTypeBefore, 1, "PlanterTypeBefore not true");
@@ -1038,7 +975,7 @@ contract("Planter", (accounts) => {
     });
 
     let PlanterTypeAfter = Number(
-      (await planterInstance.planters.call(userAccount2)).planterType
+      (await planterInstance.planters.call(userAccount2)).type
     );
 
     assert.equal(PlanterTypeAfter, 3, "PlanterTypeAfter not true");
@@ -1060,11 +997,11 @@ contract("Planter", (accounts) => {
     assert.equal(statusAfter, 0, "statusAfter not true");
 
     truffleAssert.eventEmitted(eventTx, "PlanterUpdated", (ev) => {
-      return userAccount2 == ev.planterId;
+      return userAccount2 == ev.planter;
     });
   });
 
-  it("updatePlanterType should be fail because invalid planterType in change", async () => {
+  it("updatePlanterType should be fail because invalid type in change", async () => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
@@ -1106,7 +1043,7 @@ contract("Planter", (accounts) => {
       from: userAccount4,
     });
 
-    await planterInstance.updateCapacity(userAccount2, 1, {
+    await planterInstance.updateSupplyCap(userAccount2, 1, {
       from: dataManager,
     });
 
@@ -1116,9 +1053,13 @@ contract("Planter", (accounts) => {
       deployerAccount
     );
 
-    await planterInstance.plantingPermission(userAccount2, userAccount2, {
-      from: deployerAccount,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount2,
+      userAccount2,
+      {
+        from: deployerAccount,
+      }
+    );
 
     await planterInstance
       .updatePlanterType(1, zeroAddress, {
@@ -1157,7 +1098,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
 
-    /////////// ------------ fail because planterType invalid
+    /////////// ------------ fail because type invalid
 
     await Common.joinSimplePlanter(
       planterInstance,
@@ -1216,11 +1157,7 @@ contract("Planter", (accounts) => {
     const planterBefore = await planterInstance.planters.call(userAccount2);
     const memberOfBefore = await planterInstance.memberOf.call(userAccount2);
     assert.equal(Number(planterBefore.status.toString()), 0, "invalid status");
-    assert.equal(
-      Number(planterBefore.planterType.toString()),
-      3,
-      "invalid type"
-    );
+    assert.equal(Number(planterBefore.type.toString()), 3, "invalid type");
 
     assert.equal(memberOfBefore, userAccount1, "invalid memberOf");
 
@@ -1236,16 +1173,12 @@ contract("Planter", (accounts) => {
     const memberOfAfter = await planterInstance.memberOf.call(userAccount2);
 
     assert.equal(Number(planterAfter.status.toString()), 1, "invalid status");
-    assert.equal(
-      Number(planterAfter.planterType.toString()),
-      3,
-      "invalid type"
-    );
+    assert.equal(Number(planterAfter.type.toString()), 3, "invalid type");
 
     assert.equal(memberOfAfter, userAccount1, "invalid memberOf");
 
     truffleAssert.eventEmitted(eventTx, "AcceptedByOrganization", (ev) => {
-      return userAccount2 == ev.planterId;
+      return userAccount2 == ev.planter;
     });
 
     ///////// -------------- check data (reject)
@@ -1266,11 +1199,7 @@ contract("Planter", (accounts) => {
     const planterBefore2 = await planterInstance.planters.call(userAccount4);
     const memberOfBefore2 = await planterInstance.memberOf.call(userAccount4);
     assert.equal(Number(planterBefore2.status.toString()), 0, "invalid status");
-    assert.equal(
-      Number(planterBefore2.planterType.toString()),
-      3,
-      "invalid type"
-    );
+    assert.equal(Number(planterBefore2.type.toString()), 3, "invalid type");
 
     assert.equal(memberOfBefore2, userAccount3, "invalid memberOf");
 
@@ -1286,16 +1215,12 @@ contract("Planter", (accounts) => {
     const memberOfAfter2 = await planterInstance.memberOf.call(userAccount4);
 
     assert.equal(Number(planterAfter2.status.toString()), 1, "invalid status");
-    assert.equal(
-      Number(planterAfter2.planterType.toString()),
-      1,
-      "invalid type"
-    );
+    assert.equal(Number(planterAfter2.type.toString()), 1, "invalid type");
 
     assert.equal(memberOfAfter2, 0x0, "invalid memberOf");
 
     truffleAssert.eventEmitted(eventTx2, "RejectedByOrganization", (ev) => {
-      return userAccount4 == ev.planterId;
+      return userAccount4 == ev.planter;
     });
   });
 
@@ -1360,9 +1285,9 @@ contract("Planter", (accounts) => {
       .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
   });
 
-  ///////////// ---------------------------------------------- update capacity -------------------------------------
+  ///////////// ---------------------------------------------- update supplyCap -------------------------------------
 
-  it("should check data after update capacity", async () => {
+  it("should check data after update supplyCap", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addTreejerContractRole(
       arInstance,
@@ -1382,17 +1307,17 @@ contract("Planter", (accounts) => {
     );
 
     assert.equal(
-      Number(planterBeforeUpdate.capacity),
+      Number(planterBeforeUpdate.supplyCap),
       100,
-      "planter capacity is incorrect"
+      "planter supplyCap is incorrect"
     );
 
-    const eventTx1 = await planterInstance.updateCapacity(userAccount1, 2, {
+    const eventTx1 = await planterInstance.updateSupplyCap(userAccount1, 2, {
       from: dataManager,
     });
 
     truffleAssert.eventEmitted(eventTx1, "PlanterUpdated", (ev) => {
-      return ev.planterId == userAccount1;
+      return ev.planter == userAccount1;
     });
 
     const planterAfterUpdate = await planterInstance.planters.call(
@@ -1400,14 +1325,18 @@ contract("Planter", (accounts) => {
     );
 
     assert.equal(
-      Number(planterAfterUpdate.capacity),
+      Number(planterAfterUpdate.supplyCap),
       2,
-      "capacity update incorrect"
+      "supplyCap update incorrect"
     );
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     const planterAfterPlant1 = await planterInstance.planters.call(
       userAccount1
@@ -1419,9 +1348,13 @@ contract("Planter", (accounts) => {
       "planter after plant 1 status is not ok"
     );
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     const planterAfterPlant2 = await planterInstance.planters.call(
       userAccount1
@@ -1433,12 +1366,12 @@ contract("Planter", (accounts) => {
       "planter after plant 2 status is not ok"
     );
 
-    const eventTx2 = await planterInstance.updateCapacity(userAccount1, 5, {
+    const eventTx2 = await planterInstance.updateSupplyCap(userAccount1, 5, {
       from: dataManager,
     });
 
     truffleAssert.eventEmitted(eventTx2, "PlanterUpdated", (ev) => {
-      return ev.planterId == userAccount1;
+      return ev.planter == userAccount1;
     });
 
     const planterAfterFinalUpdate = await planterInstance.planters.call(
@@ -1446,19 +1379,19 @@ contract("Planter", (accounts) => {
     );
 
     assert.equal(
-      Number(planterAfterFinalUpdate.capacity),
+      Number(planterAfterFinalUpdate.supplyCap),
       5,
-      "capacity update incorrect after finall update"
+      "supplyCap update incorrect after finall update"
     );
 
     assert.equal(
       Number(planterAfterFinalUpdate.status),
       1,
-      "planter status after final update capacity is not ok"
+      "planter status after final update supplyCap is not ok"
     );
   });
 
-  it("should fail update capacity", async () => {
+  it("should fail update supplyCap", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addTreejerContractRole(
       arInstance,
@@ -1472,34 +1405,46 @@ contract("Planter", (accounts) => {
       zeroAddress,
       zeroAddress
     );
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
     ///////////////------------ fail because caller is not admin
     await planterInstance
-      .updateCapacity(userAccount1, 2, {
+      .updateSupplyCap(userAccount1, 2, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
     //////////////////////////-------------fail: planter not exist
     await planterInstance
-      .updateCapacity(userAccount4, 2, {
+      .updateSupplyCap(userAccount4, 2, {
         from: dataManager,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
-    /////////////////----------- update capacity
-    await planterInstance.updateCapacity(userAccount1, 3, {
+    /////////////////----------- update supplyCap
+    await planterInstance.updateSupplyCap(userAccount1, 3, {
       from: dataManager,
     });
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
     await planterInstance
-      .updateCapacity(userAccount1, 1, {
+      .updateSupplyCap(userAccount1, 1, {
         from: dataManager,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_CAPACITY);
@@ -1537,15 +1482,23 @@ contract("Planter", (accounts) => {
       userAccount3
     );
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
-    await planterInstance.plantingPermission(userAccount3, userAccount4, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount3,
+      userAccount4,
+      {
+        from: userAccount2,
+      }
+    );
   });
-  it("should check data after give planting permision to be correct 1 (checking capacity limit)", async () => {
+  it("should check data after give planting permision to be correct 1 (checking supplyCap limit)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addTreejerContractRole(
       arInstance,
@@ -1564,22 +1517,30 @@ contract("Planter", (accounts) => {
 
     assert.equal(Number(planter1.plantedCount), 0, "incorrect plantedCount");
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
     const planter2 = await planterInstance.planters.call(userAccount1);
 
     assert.equal(Number(planter2.plantedCount), 1, "incorrect plantedCount");
     assert.equal(Number(planter2.status), 1, "planter status must be 1");
 
-    ///////////-------------------- update capacity
-    await planterInstance.updateCapacity(userAccount1, 2, {
+    ///////////-------------------- update supplyCap
+    await planterInstance.updateSupplyCap(userAccount1, 2, {
       from: dataManager,
     });
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     const planter3 = await planterInstance.planters.call(userAccount1);
 
@@ -1588,10 +1549,14 @@ contract("Planter", (accounts) => {
     assert.equal(Number(planter3.status), 2, "planter status must be 2");
 
     ////////////////// function must return false it dont give permision
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount1,
       userAccount1,
       { from: userAccount2 },
@@ -1615,7 +1580,7 @@ contract("Planter", (accounts) => {
       deployerAccount
     );
 
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount3,
       userAccount3,
       { from: userAccount2 },
@@ -1626,7 +1591,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because planterType is not > 0"
+            "it must return false because type is not > 0"
           );
         }
       }
@@ -1655,7 +1620,7 @@ contract("Planter", (accounts) => {
       zeroAddress,
       zeroAddress
     );
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount3,
       userAccount1,
       { from: userAccount2 },
@@ -1666,7 +1631,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because planter != assignee in planterType=1"
+            "it must return false because planter != assignee in type=1"
           );
         }
       }
@@ -1694,7 +1659,7 @@ contract("Planter", (accounts) => {
       userAccount1
     );
 
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount3,
       userAccount1,
       { from: userAccount2 },
@@ -1705,13 +1670,13 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because planter != assignee in planterType=2"
+            "it must return false because planter != assignee in type=2"
           );
         }
       }
     );
   });
-  it("should return false when planterType=3 (1)", async () => {
+  it("should return false when type=3 (1)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -1744,7 +1709,7 @@ contract("Planter", (accounts) => {
       userAccount1
     );
     /////////---------------- return false because another one in organization want to plant but assigned to another one
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount3,
       userAccount4,
       { from: userAccount2 },
@@ -1755,13 +1720,13 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because another one want to plant a tree that assign to another one in same organization in planterType=3"
+            "it must return false because another one want to plant a tree that assign to another one in same organization in type=3"
           );
         }
       }
     );
   });
-  it("should return false when planterType=3 (2)", async () => {
+  it("should return false when type=3 (2)", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
     await Common.addPlanter(arInstance, userAccount4, deployerAccount);
@@ -1794,7 +1759,7 @@ contract("Planter", (accounts) => {
       userAccount1
     );
     /////////---------------- return false because organization want to plant but assigned to another one
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount1,
       userAccount4,
       { from: userAccount2 },
@@ -1805,7 +1770,7 @@ contract("Planter", (accounts) => {
           assert.equal(
             result,
             false,
-            "it must return false because organization want to plant a tree that assign to another one in same organization in planterType=3"
+            "it must return false because organization want to plant a tree that assign to another one in same organization in type=3"
           );
         }
       }
@@ -1836,7 +1801,7 @@ contract("Planter", (accounts) => {
     const planter1 = await planterInstance.planters.call(userAccount2);
     assert.equal(Number(planter1.plantedCount), 0, "incorrect plantedCount");
     //////////////////// should return false because status is not zero
-    await planterInstance.plantingPermission.call(
+    await planterInstance.manageAssignedTreePermission.call(
       userAccount2,
       userAccount2,
       { from: userAccount3 },
@@ -1870,7 +1835,7 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance
-      .plantingPermission(userAccount1, userAccount1, {
+      .manageAssignedTreePermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -1933,11 +1898,11 @@ contract("Planter", (accounts) => {
       from: userAccount1,
     });
     ////////////////--------------- check before any update
-    const rule1_3_1 = await planterInstance.organizationRules.call(
+    const rule1_3_1 = await planterInstance.organizationMemberShare.call(
       userAccount1,
       userAccount3
     );
-    const rule2_4_1 = await planterInstance.organizationRules.call(
+    const rule2_4_1 = await planterInstance.organizationMemberShare.call(
       userAccount2,
       userAccount4
     );
@@ -1955,7 +1920,7 @@ contract("Planter", (accounts) => {
     );
 
     ////////////////////--------------------- update1
-    const eventTx1 = await planterInstance.updateOrganizationPlanterPayment(
+    const eventTx1 = await planterInstance.updateOrganizationMemberShare(
       userAccount3,
       2000,
       {
@@ -1963,7 +1928,7 @@ contract("Planter", (accounts) => {
       }
     );
 
-    const eventTx2 = await planterInstance.updateOrganizationPlanterPayment(
+    const eventTx2 = await planterInstance.updateOrganizationMemberShare(
       userAccount5,
       5000,
       {
@@ -1971,7 +1936,7 @@ contract("Planter", (accounts) => {
       }
     );
 
-    const eventTx3 = await planterInstance.updateOrganizationPlanterPayment(
+    const eventTx3 = await planterInstance.updateOrganizationMemberShare(
       userAccount4,
       4000,
       {
@@ -1981,22 +1946,22 @@ contract("Planter", (accounts) => {
 
     ///////////////////-------------------check after update 1
 
-    const rule1_3_2 = await planterInstance.organizationRules.call(
+    const rule1_3_2 = await planterInstance.organizationMemberShare.call(
       userAccount1,
       userAccount3
     );
 
-    const rule2_4_2 = await planterInstance.organizationRules.call(
+    const rule2_4_2 = await planterInstance.organizationMemberShare.call(
       userAccount2,
       userAccount4
     );
 
-    const rule1_5_2 = await planterInstance.organizationRules.call(
+    const rule1_5_2 = await planterInstance.organizationMemberShare.call(
       userAccount1,
       userAccount5
     );
 
-    const rule2_3 = await planterInstance.organizationRules.call(
+    const rule2_3 = await planterInstance.organizationMemberShare.call(
       userAccount2,
       userAccount3
     );
@@ -2025,21 +1990,33 @@ contract("Planter", (accounts) => {
       "payment portion for rule2_3 must be zero because user2 belongs to organiztion4"
     );
 
-    truffleAssert.eventEmitted(eventTx1, "PortionUpdated", (ev) => {
-      return userAccount3 == ev.planterId;
-    });
+    truffleAssert.eventEmitted(
+      eventTx1,
+      "OrganizationMemberShareUpdated",
+      (ev) => {
+        return userAccount3 == ev.planter;
+      }
+    );
 
-    truffleAssert.eventEmitted(eventTx2, "PortionUpdated", (ev) => {
-      return userAccount5 == ev.planterId;
-    });
+    truffleAssert.eventEmitted(
+      eventTx2,
+      "OrganizationMemberShareUpdated",
+      (ev) => {
+        return userAccount5 == ev.planter;
+      }
+    );
 
-    truffleAssert.eventEmitted(eventTx3, "PortionUpdated", (ev) => {
-      return userAccount4 == ev.planterId;
-    });
+    truffleAssert.eventEmitted(
+      eventTx3,
+      "OrganizationMemberShareUpdated",
+      (ev) => {
+        return userAccount4 == ev.planter;
+      }
+    );
 
     ///////////////////-------------------update 2
 
-    const eventTx4 = await planterInstance.updateOrganizationPlanterPayment(
+    const eventTx4 = await planterInstance.updateOrganizationMemberShare(
       userAccount3,
       3000,
       {
@@ -2048,12 +2025,12 @@ contract("Planter", (accounts) => {
     );
     ///////////////////-------------------check after update 2
 
-    const rule1_3_3 = await planterInstance.organizationRules.call(
+    const rule1_3_3 = await planterInstance.organizationMemberShare.call(
       userAccount1,
       userAccount3
     );
 
-    const rule1_5_3 = await planterInstance.organizationRules.call(
+    const rule1_5_3 = await planterInstance.organizationMemberShare.call(
       userAccount1,
       userAccount5
     );
@@ -2070,9 +2047,13 @@ contract("Planter", (accounts) => {
       "invalid payment portion after update2 for rule1_5_3"
     );
 
-    truffleAssert.eventEmitted(eventTx4, "PortionUpdated", (ev) => {
-      return userAccount3 == ev.planterId;
-    });
+    truffleAssert.eventEmitted(
+      eventTx4,
+      "OrganizationMemberShareUpdated",
+      (ev) => {
+        return userAccount3 == ev.planter;
+      }
+    );
   });
 
   it("should fail update orgnization planter", async () => {
@@ -2117,26 +2098,26 @@ contract("Planter", (accounts) => {
     );
     /////////////////// ----------------- fail: planter not exist
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount6, 2000, {
+      .updateOrganizationMemberShare(userAccount6, 2000, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
     ////////////////// --------------------- caller is not planter organization
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount3, 2000, {
+      .updateOrganizationMemberShare(userAccount3, 2000, {
         from: userAccount4,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_ORGANIZATION);
 
     ///////////////////// -------------------fail: planter status is 0
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount3, 2000, {
+      .updateOrganizationMemberShare(userAccount3, 2000, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER_STATUS);
     //////////////////////////--------------------- fail:planter is independent and is not member of that organization
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount5, 2000, {
+      .updateOrganizationMemberShare(userAccount5, 2000, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER);
@@ -2148,7 +2129,7 @@ contract("Planter", (accounts) => {
     /////////////////// ------------------ fail: plater address not in oragization
 
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount3, 2000, {
+      .updateOrganizationMemberShare(userAccount3, 2000, {
         from: userAccount2,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER);
@@ -2156,7 +2137,7 @@ contract("Planter", (accounts) => {
     ///////////////////----------------------- fail: input portion is more than 10000
 
     await planterInstance
-      .updateOrganizationPlanterPayment(userAccount3, 11000, {
+      .updateOrganizationMemberShare(userAccount3, 11000, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PAYMENT_PORTION);
@@ -2171,7 +2152,7 @@ contract("Planter", (accounts) => {
     await Common.addPlanter(arInstance, userAccount5, deployerAccount);
 
     const user2PortionBeforeJoin =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount2);
+      await planterInstance.getOrganizationMemberData.call(userAccount2);
 
     assert.equal(
       user2PortionBeforeJoin["0"],
@@ -2217,7 +2198,7 @@ contract("Planter", (accounts) => {
     );
 
     const user2PortionAfterJoin =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount2);
+      await planterInstance.getOrganizationMemberData.call(userAccount2);
 
     assert.equal(user2PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(
@@ -2237,7 +2218,7 @@ contract("Planter", (accounts) => {
     );
 
     const user1PortionAfterJoin =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount1);
+      await planterInstance.getOrganizationMemberData.call(userAccount1);
 
     assert.equal(user1PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user1PortionAfterJoin["1"], 0x0, "invalid organaizer address");
@@ -2249,7 +2230,7 @@ contract("Planter", (accounts) => {
     );
 
     const user3PortionAfterJoin =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+      await planterInstance.getOrganizationMemberData.call(userAccount3);
 
     assert.equal(user3PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user3PortionAfterJoin["1"], 0x0, "invalid organaizer address");
@@ -2265,7 +2246,7 @@ contract("Planter", (accounts) => {
     });
 
     const user3PortionAferAccept =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+      await planterInstance.getOrganizationMemberData.call(userAccount3);
 
     assert.equal(user3PortionAferAccept["0"], true, "invalid bool");
     assert.equal(
@@ -2280,7 +2261,7 @@ contract("Planter", (accounts) => {
       "invalid payment portion /:"
     );
 
-    const eventTx = await planterInstance.updateOrganizationPlanterPayment(
+    const eventTx = await planterInstance.updateOrganizationMemberShare(
       userAccount3,
       2000,
       {
@@ -2288,12 +2269,16 @@ contract("Planter", (accounts) => {
       }
     );
 
-    truffleAssert.eventEmitted(eventTx, "PortionUpdated", (ev) => {
-      return userAccount3 == ev.planterId;
-    });
+    truffleAssert.eventEmitted(
+      eventTx,
+      "OrganizationMemberShareUpdated",
+      (ev) => {
+        return userAccount3 == ev.planter;
+      }
+    );
 
     const user3PortionAfterUpdate =
-      await planterInstance.getPlanterPaymentPortion.call(userAccount3);
+      await planterInstance.getOrganizationMemberData.call(userAccount3);
 
     assert.equal(user3PortionAfterUpdate["0"], true, "invalid bool");
     assert.equal(
@@ -2327,28 +2312,36 @@ contract("Planter", (accounts) => {
       zeroAddress
     );
 
-    await planterInstance.updateCapacity(userAccount1, 3, {
+    await planterInstance.updateSupplyCap(userAccount1, 3, {
       from: dataManager,
     });
     ///////////// -------------- fail invalid access
     await planterInstance
-      .plantingPermission(userAccount1, userAccount1, {
+      .manageAssignedTreePermission(userAccount1, userAccount1, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
     //////////// -------------- fail planter not exist
     await planterInstance
-      .reducePlantCount(userAccount4, { from: userAccount2 })
+      .reducePlantedCount(userAccount4, { from: userAccount2 })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     const planter1 = await planterInstance.planters.call(userAccount1);
 
@@ -2356,7 +2349,7 @@ contract("Planter", (accounts) => {
 
     assert.equal(Number(planter1.status), 1, "status must be 1");
 
-    await planterInstance.reducePlantCount(userAccount1, {
+    await planterInstance.reducePlantedCount(userAccount1, {
       from: userAccount2,
     });
 
@@ -2366,17 +2359,25 @@ contract("Planter", (accounts) => {
 
     assert.equal(Number(planter2.status), 1, "status must be 1");
 
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
-    await planterInstance.plantingPermission(userAccount1, userAccount1, {
-      from: userAccount2,
-    });
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
+    await planterInstance.manageAssignedTreePermission(
+      userAccount1,
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     const planter3 = await planterInstance.planters.call(userAccount1);
     assert.equal(Number(planter3.plantedCount), 3, "planted count must be 3");
     assert.equal(Number(planter3.status), 2, "status must be 2");
-    await planterInstance.reducePlantCount(userAccount1, {
+    await planterInstance.reducePlantedCount(userAccount1, {
       from: userAccount2,
     });
     const planter4 = await planterInstance.planters.call(userAccount1);
@@ -2386,7 +2387,7 @@ contract("Planter", (accounts) => {
 
   /////////// ---------------------------- planter check ---------------------------------------------------------
 
-  it("check planterCheck return value", async () => {
+  it("check manageTreePermission return value", async () => {
     //////////// ------------ return true
 
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
@@ -2405,9 +2406,12 @@ contract("Planter", (accounts) => {
       zeroAddress
     );
 
-    const result1 = await planterInstance.planterCheck.call(userAccount1, {
-      from: userAccount2,
-    });
+    const result1 = await planterInstance.manageTreePermission.call(
+      userAccount1,
+      {
+        from: userAccount2,
+      }
+    );
 
     assert.equal(result1, true, "it must return true");
 
@@ -2423,20 +2427,25 @@ contract("Planter", (accounts) => {
       zeroAddress
     );
 
-    await planterInstance.updateCapacity(userAccount3, 1, {
+    await planterInstance.updateSupplyCap(userAccount3, 1, {
       from: dataManager,
     });
 
-    await planterInstance.planterCheck(userAccount3, { from: userAccount2 });
-
-    const result2 = await planterInstance.planterCheck.call(userAccount3, {
+    await planterInstance.manageTreePermission(userAccount3, {
       from: userAccount2,
     });
+
+    const result2 = await planterInstance.manageTreePermission.call(
+      userAccount3,
+      {
+        from: userAccount2,
+      }
+    );
 
     assert.equal(result2, false, "it must return false");
   });
 
-  it("should check data to be correct when call planterCheck function and fail in invaid situation", async () => {
+  it("should check data to be correct when call manageTreePermission function and fail in invaid situation", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
     await Common.joinSimplePlanter(
@@ -2448,11 +2457,11 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance
-      .planterCheck(userAccount3, { from: userAccount2 })
+      .manageTreePermission(userAccount3, { from: userAccount2 })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
 
     await planterInstance
-      .planterCheck(userAccount1, { from: userAccount3 })
+      .manageTreePermission(userAccount1, { from: userAccount3 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
     await Common.addTreejerContractRole(
@@ -2461,18 +2470,22 @@ contract("Planter", (accounts) => {
       deployerAccount
     );
 
-    await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
+    await planterInstance.manageTreePermission(userAccount1, {
+      from: userAccount2,
+    });
 
     const planter1 = await planterInstance.planters.call(userAccount1);
 
     assert.equal(planter1.status, 1, "status is incorrect");
     assert.equal(planter1.plantedCount, 1, "plant count is incorrect");
 
-    await planterInstance.updateCapacity(userAccount1, 2, {
+    await planterInstance.updateSupplyCap(userAccount1, 2, {
       from: dataManager,
     });
 
-    await planterInstance.planterCheck(userAccount1, { from: userAccount2 });
+    await planterInstance.manageTreePermission(userAccount1, {
+      from: userAccount2,
+    });
 
     const planter2 = await planterInstance.planters.call(userAccount1);
 

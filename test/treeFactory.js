@@ -529,7 +529,7 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////////////// ------------------ update planter (userAccount1) capacity to 1 and plant a tree to change planter status to 2
 
-      await planterInstance.updateCapacity(userAccount1, 1, {
+      await planterInstance.updateSupplyCap(userAccount1, 1, {
         from: dataManager,
       });
 
@@ -562,7 +562,7 @@ contract("TreeFactory", (accounts) => {
           TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER
         );
 
-      await planterInstance.updateCapacity(userAccount3, 1, {
+      await planterInstance.updateSupplyCap(userAccount3, 1, {
         from: dataManager,
       });
 
@@ -593,7 +593,7 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      await planterInstance.updateCapacity(userAccount2, 1, {
+      await planterInstance.updateSupplyCap(userAccount2, 1, {
         from: dataManager,
       });
 
@@ -620,7 +620,7 @@ contract("TreeFactory", (accounts) => {
 
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      await planterInstance.updateCapacity(userAccount3, 2, {
+      await planterInstance.updateSupplyCap(userAccount3, 2, {
         from: dataManager,
       });
 
@@ -928,7 +928,7 @@ contract("TreeFactory", (accounts) => {
 
       ///////////////////------------------ update planter usrAccount4 capacity to 1 so he can plant just 1 tree
 
-      await planterInstance.updateCapacity(userAccount4, 1, {
+      await planterInstance.updateSupplyCap(userAccount4, 1, {
         from: dataManager,
       });
 
@@ -990,7 +990,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////////------------- update capacity to 5 and now an plant
 
-      await planterInstance.updateCapacity(userAccount4, 5, {
+      await planterInstance.updateSupplyCap(userAccount4, 5, {
         from: dataManager,
       });
 

@@ -231,7 +231,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         require(tempTree.treeStatus == 2, "invalid tree to assign");
 
         require(
-            planter.canAssignTreeToPlanter(_planterId),
+            planter.canAssignTree(_planterId),
             "can't assign tree to planter"
         );
 
@@ -257,7 +257,7 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         require(tempGenTree.treeStatus == 2, "invalid tree status for plant");
 
-        bool _canPlant = planter.plantingPermission(
+        bool _canPlant = planter.manageAssignedTreePermission(
             _msgSender(),
             tempGenTree.planterAddress
         );
@@ -316,7 +316,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         } else {
             tempGenTree.treeStatus = 2;
             tempUpdateGenTree.updateStatus = 2;
-            planter.reducePlantCount(tempGenTree.planterAddress);
+            planter.reducePlantedCount(tempGenTree.planterAddress);
 
             emit AssignedTreeRejected(_treeId);
         }
@@ -539,7 +539,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint64 _birthDate,
         uint16 _countryCode
     ) external {
-        require(planter.planterCheck(_msgSender()));
+        require(planter.manageTreePermission(_msgSender()));
 
         tempTrees[pendingRegularTreeId.current()] = TempTree(
             _birthDate,

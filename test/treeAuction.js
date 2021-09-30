@@ -3623,7 +3623,7 @@ contract("Auction", (accounts) => {
 
       /////////////----------------------- plant treeId1
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,

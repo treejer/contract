@@ -142,7 +142,7 @@ contract("PlanterFund", (accounts) => {
       }
     );
 
-    await Common.successPlanterJoin(
+    await Common.successJoin(
       arInstance,
       deployerAccount,
       planterInstance,
@@ -528,7 +528,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -926,7 +926,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount4,
@@ -935,7 +935,7 @@ contract("PlanterFund", (accounts) => {
         dataManager
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -1185,7 +1185,7 @@ contract("PlanterFund", (accounts) => {
 
       // // ///////////
       let planterPortion2 = 7500;
-      await planterInstance.updateOrganizationPlanterPayment(
+      await planterInstance.updateOrganizationMemberShare(
         userAccount2,
         planterPortion2,
         {
@@ -1419,7 +1419,7 @@ contract("PlanterFund", (accounts) => {
       );
       /////////////////
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount5,
@@ -1601,7 +1601,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -1717,7 +1717,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -1765,7 +1765,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -1894,7 +1894,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -2043,7 +2043,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -2280,7 +2280,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount5,
@@ -2289,7 +2289,7 @@ contract("PlanterFund", (accounts) => {
         dataManager
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -2399,7 +2399,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount5,
@@ -2408,7 +2408,7 @@ contract("PlanterFund", (accounts) => {
         dataManager
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -2493,7 +2493,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount5,
@@ -2502,7 +2502,7 @@ contract("PlanterFund", (accounts) => {
         dataManager
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,
@@ -2849,7 +2849,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successOrganizationPlanterJoin(
+      await Common.successJoinOrganization(
         arInstance,
         planterInstance,
         userAccount3,
@@ -3122,7 +3122,7 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      await Common.successPlanterJoin(
+      await Common.successJoin(
         arInstance,
         deployerAccount,
         planterInstance,

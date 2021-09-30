@@ -200,7 +200,7 @@ contract PlanterFund is Initializable, RelayRecipient {
             address gottenOrganizationAddress,
             address gottenReferralAddress,
             uint256 gottenPortion
-        ) = planterContract.getPlanterPaymentPortion(_planterAddress);
+        ) = planterContract.getOrganizationMemberData(_planterAddress);
 
         if (getBool) {
             uint256 totalPayablePlanter;

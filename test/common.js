@@ -140,7 +140,7 @@ Common.joinSimplePlanter = async (
   const latitude = 2;
   const countryCode = 10;
 
-  const tx = await planterInstance.planterJoin(
+  const tx = await planterInstance.join(
     planterType,
     longitude,
     latitude,
@@ -162,7 +162,7 @@ Common.joinOrganizationPlanter = async (
   let latitude = 2;
   const countryCode = 10;
   const capcity = 1000;
-  const tx = await instance.organizationJoin(
+  const tx = await instance.joinOrganization(
     organizationAddress,
     longitude,
     latitude,
@@ -186,7 +186,7 @@ Common.joinSimplePlanterFromTreeFactory = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await planterInstance.planterJoin(
+  await planterInstance.join(
     planterType,
     longitude,
     latitude,
@@ -204,7 +204,7 @@ Common.getTransactionFee = async (tx) => {
   return Math.mul(gasPrice, gasUsed);
 };
 
-Common.successPlanterJoin = async (
+Common.successJoin = async (
   arInstance,
   adminAccount,
   planterInstance,
@@ -223,7 +223,7 @@ Common.successPlanterJoin = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await planterInstance.planterJoin(
+  await planterInstance.join(
     planterType,
     longitude,
     latitude,
@@ -234,7 +234,7 @@ Common.successPlanterJoin = async (
   );
 };
 
-Common.successOrganizationPlanterJoin = async (
+Common.successJoinOrganization = async (
   arInstance,
   instance,
   organizationAddress,
@@ -253,7 +253,7 @@ Common.successOrganizationPlanterJoin = async (
   const countryCode = 10;
   const capcity = 1000;
 
-  await instance.organizationJoin(
+  await instance.joinOrganization(
     organizationAddress,
     longitude,
     latitude,
@@ -373,7 +373,7 @@ Common.acceptPlanterByOrganization = async (
     from: organizationAddress,
   });
 
-  await planterInstance.updateOrganizationPlanterPayment(
+  await planterInstance.updateOrganizationMemberShare(
     planterAddress,
     planterProtion,
     {

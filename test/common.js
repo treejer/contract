@@ -291,10 +291,10 @@ Common.successFundTree = async (
     fundsPercent.referralFund,
     fundsPercent.research,
     fundsPercent.localDevelopment,
-    fundsPercent.rescueFund,
-    fundsPercent.treejerDevelop,
-    fundsPercent.reserveFund1,
-    fundsPercent.reserveFund2,
+    fundsPercent.insurance,
+    fundsPercent.treasury,
+    fundsPercent.reserve1,
+    fundsPercent.reserve2,
     {
       from: dataManager,
     }
@@ -353,10 +353,10 @@ Common.successFundTree = async (
     fundsPercent.referralFund,
     fundsPercent.research,
     fundsPercent.localDevelopment,
-    fundsPercent.rescueFund,
-    fundsPercent.treejerDevelop,
-    fundsPercent.reserveFund1,
-    fundsPercent.reserveFund2,
+    fundsPercent.insurance,
+    fundsPercent.treasury,
+    fundsPercent.reserve1,
+    fundsPercent.reserve2,
     {
       from: auctionAddress,
     }

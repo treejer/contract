@@ -26,18 +26,18 @@ contract WethFund is Initializable {
     //TODO:ADD_COMMENT
     uint256 public totalDaiDebtToPlanterContract;
 
-    /** NOTE {totalBalances} is struct of TotalFund that keep total share of
-     * treeResearch, localDevelop,rescueFund,treejerDeveop,reserveFund1
-     * and reserveFund2
+    /** NOTE {totalBalances} is struct of TotalBalances that keep total share of
+     * research, localDevelopment,insurance,treasury,reserve1
+     * and reserve2
      */
     TotalBalances public totalBalances;
 
-    address public treeResearchAddress;
-    address public localDevelopAddress;
-    address public rescueFundAddress;
-    address public treejerDevelopAddress;
-    address public reserveFundAddress1;
-    address public reserveFundAddress2;
+    address public researchAddress;
+    address public localDevelopmentAddress;
+    address public insuranceAddress;
+    address public treasuryAddress;
+    address public reserve1Address;
+    address public reserve2Address;
 
     struct TotalBalances {
         uint256 research;
@@ -48,41 +48,41 @@ contract WethFund is Initializable {
         uint256 reserve2;
     }
 
-    event TreeResearchBalanceWithdrawn(
+    event ResearchBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event LocalDevelopBalanceWithdrawn(
+    event LocalDevelopmentBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event RescueBalanceWithdrawn(
+    event InsuranceBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event TreejerDevelopBalanceWithdrawn(
+    event TreasuryBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event ReserveBalanceWithdrawn1(
+    event Reserve1BalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
-    event ReserveBalanceWithdrawn2(
+    event Reserve2BalanceWithdrew(
         uint256 amount,
         address account,
         string reason
     );
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
-    event IncrementalFunded();
+    event TreeFundedBatch();
 
-    event SwapToPlanterFund(
+    event DaiDebtToPlanterContractPaid(
         uint256 wethMaxUse,
         uint256 daiAmount,
         uint256 wethAmount
@@ -193,124 +193,126 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin set treeResearch  address to fund
-     * @param _address tree research address
+     * @dev admin set research address to fund
+     * @param _address research address
      */
-    function setTreeResearchAddress(address payable _address)
+    function setResearchAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        treeResearchAddress = _address;
+        researchAddress = _address;
     }
 
     /**
-     * @dev admin set localDevelop  address to fund
+     * @dev admin set localDevelopment address to fund
      * @param _address local develop address
      */
-    function setLocalDevelopAddress(address payable _address)
+    function setLocalDevelopmentAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        localDevelopAddress = _address;
+        localDevelopmentAddress = _address;
     }
 
     /**
-     * @dev admin set rescue address to fund
-     * @param _address rescue fund address
+     * @dev admin set insurance address to fund
+     * @param _address insurance address
      */
-    function setRescueFundAddress(address payable _address)
+    function setInsuranceAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        rescueFundAddress = _address;
+        insuranceAddress = _address;
     }
 
     /**
-     * @dev admin set treejerDevelop  address to fund
+     * @dev admin set treasury address to fund
      * @param _address treejer develop address
      */
-    function setTreejerDevelopAddress(address payable _address)
+    function setTreasuryAddress(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        treejerDevelopAddress = _address;
+        treasuryAddress = _address;
     }
 
     /**
-     * @dev admin set reserveFund1  address to fund
-     * @param _address reserveFund1 address
+     * @dev admin set reserve1 address to fund
+     * @param _address reserve1 address
      */
-    function setReserveFund1Address(address payable _address)
+    function setReserve1Address(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        reserveFundAddress1 = _address;
+        reserve1Address = _address;
     }
 
     /**
-     * @dev admin set reserveFund2  address to fund
-     * @param _address reserveFund2 address
+     * @dev admin set reserve2 address to fund
+     * @param _address reserve2 address
      */
-    function setReserveFund2Address(address payable _address)
+    function setReserve2Address(address payable _address)
         external
         onlyAdmin
         validAddress(_address)
     {
-        reserveFundAddress2 = _address;
+        reserve2Address = _address;
     }
 
     /**
      * @dev fund a tree by IncrementalSale or Auction contract and based on distribution
-     * model of tree, shares divide beetwen (planter, referral, treeResearch,
-     * localDevelop, rescueFund, treejerDevelop, reserveFund1 and reserveFund2)
+     * model of tree, shares divide beetwen (planter, ambassador, research,
+     * localDevelopment, insurance, treasury, reserve1 and reserve2)
      * and added to the totalBalances of each part,
      * @param _treeId id of a tree to fund
-     * NOTE planterFund and referralFund share first swap to daiToken and then
-     * transfer to PlanterFund contract and add to totalFund section there
+     * NOTE planter and ambassador share first swap to daiToken and then
+     * transfer to PlanterFund contract and add to totalBalances section there
      */
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
-        uint16 _planterFund,
-        uint16 _referralFund,
-        uint16 _treeResearch,
-        uint16 _localDevelop,
-        uint16 _rescueFund,
-        uint16 _treejerDevelop,
-        uint16 _reserveFund1,
-        uint16 _reserveFund2
+        uint16 _planterShare,
+        uint16 _ambassadorShare,
+        uint16 _researchShare,
+        uint16 _localDevelopmentShare,
+        uint16 _insuranceShare,
+        uint16 _treasuryShare,
+        uint16 _reserve1Share,
+        uint16 _reserve2Share
     ) external onlyTreejerContract {
-        totalBalances.research += (_amount * _treeResearch) / 10000;
+        totalBalances.research += (_amount * _researchShare) / 10000;
 
-        totalBalances.localDevelopment += (_amount * _localDevelop) / 10000;
+        totalBalances.localDevelopment +=
+            (_amount * _localDevelopmentShare) /
+            10000;
 
-        totalBalances.insurance += (_amount * _rescueFund) / 10000;
+        totalBalances.insurance += (_amount * _insuranceShare) / 10000;
 
-        totalBalances.treasury += (_amount * _treejerDevelop) / 10000;
+        totalBalances.treasury += (_amount * _treasuryShare) / 10000;
 
-        totalBalances.reserve1 += (_amount * _reserveFund1) / 10000;
+        totalBalances.reserve1 += (_amount * _reserve1Share) / 10000;
 
-        totalBalances.reserve2 += (_amount * _reserveFund2) / 10000;
+        totalBalances.reserve2 += (_amount * _reserve2Share) / 10000;
 
-        _swap(_treeId, _amount, _planterFund, _referralFund);
+        _swapPlanterShare(_treeId, _amount, _planterShare, _ambassadorShare);
     }
 
     /**
-     * @dev admin withdraw {_amount} from treeResearch totalFund in case of
-     * valid {_amount}  and wethToken transfer to {treeResearchAddress}
+     * @dev admin withdraw {_amount} from research totalBalances in case of
+     * valid {_amount}  and wethToken transfer to {researchAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreeResearch(uint256 _amount, string calldata _reason)
+    function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(treeResearchAddress)
+        validAddress(researchAddress)
     {
         require(
             _amount <= totalBalances.research && _amount > 0,
@@ -319,29 +321,23 @@ contract WethFund is Initializable {
 
         totalBalances.research -= _amount;
 
-        bool success = wethToken.transfer(treeResearchAddress, _amount);
+        bool success = wethToken.transfer(researchAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit TreeResearchBalanceWithdrawn(
-            _amount,
-            treeResearchAddress,
-            _reason
-        );
+        emit ResearchBalanceWithdrew(_amount, researchAddress, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelop totalFund in case of
-     * valid {_amount} and wethToken transfer to {localDevelopAddress}
+     * @dev admin withdraw {_amount} from localDevelopment totalBalances in case of
+     * valid {_amount} and wethToken transfer to {localDevelopmentAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawLocalDevelop(uint256 _amount, string calldata _reason)
-        external
-        ifNotPaused
-        onlyAdmin
-        validAddress(localDevelopAddress)
-    {
+    function withdrawLocalDevelopmentBalance(
+        uint256 _amount,
+        string calldata _reason
+    ) external ifNotPaused onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
@@ -349,28 +345,28 @@ contract WethFund is Initializable {
 
         totalBalances.localDevelopment -= _amount;
 
-        bool success = wethToken.transfer(localDevelopAddress, _amount);
+        bool success = wethToken.transfer(localDevelopmentAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit LocalDevelopBalanceWithdrawn(
+        emit LocalDevelopmentBalanceWithdrew(
             _amount,
-            localDevelopAddress,
+            localDevelopmentAddress,
             _reason
         );
     }
 
     /**
-     * @dev admin withdraw {_amount} from rescueFund totalFund in case of
-     * valid {_amount} and wethToken transfer to {rescueFundAddress}
+     * @dev admin withdraw {_amount} from insurance totalBalances in case of
+     * valid {_amount} and wethToken transfer to {insuranceAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawRescueFund(uint256 _amount, string calldata _reason)
+    function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(rescueFundAddress)
+        validAddress(insuranceAddress)
     {
         require(
             _amount <= totalBalances.insurance && _amount > 0,
@@ -379,24 +375,24 @@ contract WethFund is Initializable {
 
         totalBalances.insurance -= _amount;
 
-        bool success = wethToken.transfer(rescueFundAddress, _amount);
+        bool success = wethToken.transfer(insuranceAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit RescueBalanceWithdrawn(_amount, rescueFundAddress, _reason);
+        emit InsuranceBalanceWithdrew(_amount, insuranceAddress, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from treejerDevelop totalFund in case of
-     * valid {_amount} and wethToken transfer to {treejerDevelopAddress}
+     * @dev admin withdraw {_amount} from treasury totalBalances in case of
+     * valid {_amount} and wethToken transfer to {treasuryAddress}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawTreejerDevelop(uint256 _amount, string calldata _reason)
+    function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(treejerDevelopAddress)
+        validAddress(treasuryAddress)
     {
         require(
             _amount <= totalBalances.treasury && _amount > 0,
@@ -405,28 +401,24 @@ contract WethFund is Initializable {
 
         totalBalances.treasury -= _amount;
 
-        bool success = wethToken.transfer(treejerDevelopAddress, _amount);
+        bool success = wethToken.transfer(treasuryAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit TreejerDevelopBalanceWithdrawn(
-            _amount,
-            treejerDevelopAddress,
-            _reason
-        );
+        emit TreasuryBalanceWithdrew(_amount, treasuryAddress, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund1 totalFund in case of
-     * valid {_amount} and wethToken transfer to {reserveFundAddress1}
+     * @dev admin withdraw {_amount} from reserve1 totalBalances in case of
+     * valid {_amount} and wethToken transfer to {reserve1Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawReserveFund1(uint256 _amount, string calldata _reason)
+    function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(reserveFundAddress1)
+        validAddress(reserve1Address)
     {
         require(
             _amount <= totalBalances.reserve1 && _amount > 0,
@@ -435,24 +427,24 @@ contract WethFund is Initializable {
 
         totalBalances.reserve1 -= _amount;
 
-        bool success = wethToken.transfer(reserveFundAddress1, _amount);
+        bool success = wethToken.transfer(reserve1Address, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit ReserveBalanceWithdrawn1(_amount, reserveFundAddress1, _reason);
+        emit Reserve1BalanceWithdrew(_amount, reserve1Address, _reason);
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserveFund2 totalFund in case of
-     * valid {_amount} and wethToken transfer to {reserveFundAddress2}
+     * @dev admin withdraw {_amount} from reserve2 totalBalances in case of
+     * valid {_amount} and wethToken transfer to {reserve2Address}
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawReserveFund2(uint256 _amount, string calldata _reason)
+    function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
         ifNotPaused
         onlyAdmin
-        validAddress(reserveFundAddress2)
+        validAddress(reserve2Address)
     {
         require(
             _amount <= totalBalances.reserve2 && _amount > 0,
@@ -461,49 +453,49 @@ contract WethFund is Initializable {
 
         totalBalances.reserve2 -= _amount;
 
-        bool success = wethToken.transfer(reserveFundAddress2, _amount);
+        bool success = wethToken.transfer(reserve2Address, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit ReserveBalanceWithdrawn2(_amount, reserveFundAddress2, _reason);
+        emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
 
-    function incrementalFund(
-        uint256 _totalPlanterFund,
-        uint256 _totalReferralFund,
-        uint256 _totalTreeResearch,
-        uint256 _totalLocalDevelop,
-        uint256 _totalRescueFund,
-        uint256 _totalTreejerDevelop,
-        uint256 _totalReserveFund1,
-        uint256 _totalReserveFund2
+    function fundTreeBatch(
+        uint256 _totalPlanterAmount,
+        uint256 _totalAmbassadorAmount,
+        uint256 _totalResearch,
+        uint256 _totalLocalDevelopment,
+        uint256 _totalInsurance,
+        uint256 _totalTreasury,
+        uint256 _totalReserve1,
+        uint256 _totalReserve2
     ) external onlyTreejerContract returns (uint256) {
-        totalBalances.research += _totalTreeResearch;
+        totalBalances.research += _totalResearch;
 
-        totalBalances.localDevelopment += _totalLocalDevelop;
+        totalBalances.localDevelopment += _totalLocalDevelopment;
 
-        totalBalances.insurance += _totalRescueFund;
+        totalBalances.insurance += _totalInsurance;
 
-        totalBalances.treasury += _totalTreejerDevelop;
+        totalBalances.treasury += _totalTreasury;
 
-        totalBalances.reserve1 += _totalReserveFund1;
+        totalBalances.reserve1 += _totalReserve1;
 
-        totalBalances.reserve2 += _totalReserveFund2;
+        totalBalances.reserve2 += _totalReserve2;
 
-        uint256 sumFund = _totalPlanterFund + _totalReferralFund;
+        uint256 sumFund = _totalPlanterAmount + _totalAmbassadorAmount;
 
         uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
 
-        emit IncrementalFunded();
+        emit TreeFundedBatch();
 
         return amount;
     }
 
     //TODO: ADD_COMMENT
-    function swapDaiToPlanters(uint256 _wethMaxUse, uint256 _totalDaiSwap)
-        external
-        onlyScript
-    {
+    function payDaiDebtToPlanterContract(
+        uint256 _wethMaxUse,
+        uint256 _totalDaiSwap
+    ) external onlyScript {
         require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
 
         require(
@@ -529,34 +521,41 @@ contract WethFund is Initializable {
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
 
-        emit SwapToPlanterFund(_wethMaxUse, _totalDaiSwap, amounts[0]);
+        emit DaiDebtToPlanterContractPaid(
+            _wethMaxUse,
+            _totalDaiSwap,
+            amounts[0]
+        );
 
         totalDaiDebtToPlanterContract -= _totalDaiSwap;
         totalBalances.treasury -= amounts[0];
     }
 
     //TODO: ADD_COMMENT
-    function updateDaiSwap(uint256 _amount) external onlyTreejerContract {
+    function updateDaiDebtToPlanterContract(uint256 _amount)
+        external
+        onlyTreejerContract
+    {
         totalDaiDebtToPlanterContract += _amount;
     }
 
     /** @dev private function to swap {_amount} wethToken to daiToken
      * @param _treeId id of tree that funded
      * @param _amount amount to swap
-     * @param _planterFund planter share
-     * @param _referralFund referral share
+     * @param _planterShare planter share
+     * @param _ambassadorShare ambassador share
      */
-    function _swap(
+    function _swapPlanterShare(
         uint256 _treeId,
         uint256 _amount,
-        uint16 _planterFund,
-        uint16 _referralFund
+        uint16 _planterShare,
+        uint16 _ambassadorShare
     ) private {
-        uint256 planterFund = (_amount * _planterFund) / 10000;
-        uint256 referralFund = (_amount * _referralFund) / 10000;
+        uint256 planterFund = (_amount * _planterShare) / 10000;
+        uint256 ambassadorFund = (_amount * _ambassadorShare) / 10000;
 
-        uint256 sumFund = planterFund + referralFund;
-        uint16 sumPercent = _planterFund + _referralFund;
+        uint256 sumFund = planterFund + ambassadorFund;
+        uint16 sumPercent = _planterShare + _ambassadorShare;
 
         address[] memory path;
         path = new address[](2);
@@ -568,11 +567,11 @@ contract WethFund is Initializable {
 
         planterFundContract.updateProjectedEarnings(
             _treeId,
-            (_planterFund * amount) / sumPercent,
-            (_referralFund * amount) / sumPercent
+            (_planterShare * amount) / sumPercent,
+            (_ambassadorShare * amount) / sumPercent
         );
 
-        emit TreeFunded(_treeId, _amount, planterFund + referralFund);
+        emit TreeFunded(_treeId, _amount, planterFund + ambassadorFund);
     }
 
     //TODO: ADD_COMMENT

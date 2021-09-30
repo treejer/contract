@@ -126,7 +126,7 @@ interface IAuction {
     /**
      * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
      * {winner} is the final bidder of auction and {amount} is the auction's highestBid
-     * and {referrer} is the address of refferer
+     * and {referrer} is the address of referrer
      */
 
     event AuctionSettled(

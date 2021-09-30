@@ -285,149 +285,149 @@ contract("WethFund", (accounts) => {
     });
 
     it("should set fund addresses and fail in invalid situation", async () => {
-      //-------------------------------setTreeResearchAddress test-------------------------------------------------------
-      let treeResearchAddress = userAccount4;
+      //-------------------------------setResearchAddress test-------------------------------------------------------
+      let researchAddress = userAccount4;
 
       await wethFund
-        .setTreeResearchAddress(userAccount4, {
+        .setResearchAddress(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setTreeResearchAddress(zeroAddress, {
+        .setResearchAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setTreeResearchAddress(userAccount4, {
+      await wethFund.setResearchAddress(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.treeResearchAddress(),
+        await wethFund.researchAddress(),
         userAccount4,
-        "Set treeResearchAddress address not true"
+        "Set researchAddress address not true"
       );
 
-      //-------------------------------setLocalDevelopAddress test-------------------------------------------------------
+      //-------------------------------setLocalDevelopmentAddress test-------------------------------------------------------
 
       await wethFund
-        .setLocalDevelopAddress(userAccount4, {
+        .setLocalDevelopmentAddress(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setLocalDevelopAddress(zeroAddress, {
+        .setLocalDevelopmentAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setLocalDevelopAddress(userAccount4, {
+      await wethFund.setLocalDevelopmentAddress(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.localDevelopAddress(),
+        await wethFund.localDevelopmentAddress(),
         userAccount4,
-        "Set localDevelopAddress address not true"
+        "Set localDevelopmentAddress address not true"
       );
 
-      //-------------------------------setRescueFundAddress test-------------------------------------------------------
+      //-------------------------------setInsuranceAddress test-------------------------------------------------------
 
       await wethFund
-        .setRescueFundAddress(userAccount4, {
+        .setInsuranceAddress(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setRescueFundAddress(zeroAddress, {
+        .setInsuranceAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setRescueFundAddress(userAccount4, {
+      await wethFund.setInsuranceAddress(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.rescueFundAddress(),
+        await wethFund.insuranceAddress(),
         userAccount4,
-        "Set rescueFundAddress address not true"
+        "Set insuranceAddress address not true"
       );
 
-      //-------------------------------setTreejerDevelopAddress test-------------------------------------------------------
+      //-------------------------------setTreasuryAddress test-------------------------------------------------------
 
       await wethFund
-        .setTreejerDevelopAddress(userAccount4, {
+        .setTreasuryAddress(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setTreejerDevelopAddress(zeroAddress, {
+        .setTreasuryAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setTreejerDevelopAddress(userAccount4, {
+      await wethFund.setTreasuryAddress(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.treejerDevelopAddress(),
+        await wethFund.treasuryAddress(),
         userAccount4,
-        "Set treejerDevelopAddress address not true"
+        "Set treasuryAddress address not true"
       );
 
-      //-------------------------------setReserveFund1Address test-------------------------------------------------------
+      //-------------------------------setReserve1Address test-------------------------------------------------------
 
       await wethFund
-        .setReserveFund1Address(userAccount4, {
+        .setReserve1Address(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setReserveFund1Address(zeroAddress, {
+        .setReserve1Address(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setReserveFund1Address(userAccount4, {
+      await wethFund.setReserve1Address(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.reserveFundAddress1(),
+        await wethFund.reserve1Address(),
         userAccount4,
-        "Set reserveFundAddress1 address not true"
+        "Set reserve1Address address not true"
       );
 
-      //-------------------------------setReserveFund2Address test-------------------------------------------------------
+      //-------------------------------setReserve2Address test-------------------------------------------------------
 
       await wethFund
-        .setReserveFund2Address(userAccount4, {
+        .setReserve2Address(userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setReserveFund2Address(zeroAddress, {
+        .setReserve2Address(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await wethFund.setReserveFund2Address(userAccount4, {
+      await wethFund.setReserve2Address(userAccount4, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await wethFund.reserveFundAddress2(),
+        await wethFund.reserve2Address(),
         userAccount4,
-        "Set reserveFundAddress2 address not true"
+        "Set reserve2Address address not true"
       );
     });
   });
@@ -531,10 +531,10 @@ contract("WethFund", (accounts) => {
         referralFund: (20 * amount) / 100,
         research: (10 * amount) / 100,
         localDevelopment: (10 * amount) / 100,
-        rescueFund: (10 * amount) / 100,
-        treejerDevelop: (10 * amount) / 100,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: (10 * amount) / 100,
+        treasury: (10 * amount) / 100,
+        reserve1: 0,
+        reserve2: 0,
       };
       truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
         return (
@@ -548,50 +548,52 @@ contract("WethFund", (accounts) => {
         );
       });
 
-      //check wethFund totalFunds
-      let totalFunds = await wethFund.totalFunds();
+      //check wethFund totalBalances
+      let totalBalances = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds.research),
+        Number(totalBalances.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelopment),
+        Number(totalBalances.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.rescueFund),
-        expected.rescueFund,
-        "rescueFund funds invalid"
+        Number(totalBalances.insurance),
+        expected.insurance,
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
-        expected.treejerDevelop,
-        "treejerDevelop funds invalid"
+        Number(totalBalances.treasury),
+        expected.treasury,
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund1),
-        expected.reserveFund1,
-        "reserveFund1 funds invalid"
+        Number(totalBalances.reserve1),
+        expected.reserve1,
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund2),
-        expected.reserveFund2,
-        "reserveFund2 funds invalid"
+        Number(totalBalances.reserve2),
+        expected.reserve2,
+        "reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
 
       let totalFund = await planterFundsInstnce.totalBalances.call();
 
-      let = await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
+      let treeToPlanterProjectedEarnings =
+        await planterFundsInstnce.treeToPlanterProjectedEarning.call(1);
+
       let treeToReferrerProjectedEarnings =
         await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(1);
 
@@ -710,49 +712,49 @@ contract("WethFund", (accounts) => {
         referralFund: (20 * amount) / 100,
         research: (10 * amount) / 100,
         localDevelopment: (10 * amount) / 100,
-        rescueFund: (10 * amount) / 100,
-        treejerDevelop: (10 * amount) / 100,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        insurance: (10 * amount) / 100,
+        treasury: (10 * amount) / 100,
+        reserve1: 0,
+        reserve2: 0,
       };
 
-      //check wethFund totalFunds treeId1
-      let totalFunds = await wethFund.totalFunds();
+      //check wethFund totalBalances treeId1
+      let totalBalances = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds.research),
+        Number(totalBalances.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelopment),
+        Number(totalBalances.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.rescueFund),
-        expected.rescueFund,
-        "rescueFund funds invalid"
+        Number(totalBalances.insurance),
+        expected.insurance,
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
-        expected.treejerDevelop,
-        "treejerDevelop funds invalid"
+        Number(totalBalances.treasury),
+        expected.treasury,
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund1),
-        expected.reserveFund1,
-        "reserveFund1 funds invalid"
+        Number(totalBalances.reserve1),
+        expected.reserve1,
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund2),
-        expected.reserveFund2,
-        "reserveFund2 funds invalid"
+        Number(totalBalances.reserve2),
+        expected.reserve2,
+        "reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -825,49 +827,49 @@ contract("WethFund", (accounts) => {
         referralFund: (15 * amountTreeId2) / 100,
         research: (12 * amountTreeId2) / 100,
         localDevelopment: (14 * amountTreeId2) / 100,
-        rescueFund: (16 * amountTreeId2) / 100,
-        treejerDevelop: (11 * amountTreeId2) / 100,
-        reserveFund1: (6 * amountTreeId2) / 100,
-        reserveFund2: (6 * amountTreeId2) / 100,
+        insurance: (16 * amountTreeId2) / 100,
+        treasury: (11 * amountTreeId2) / 100,
+        reserve1: (6 * amountTreeId2) / 100,
+        reserve2: (6 * amountTreeId2) / 100,
       };
 
-      //check wethFund totalFunds treeId2
-      let totalFunds2 = await wethFund.totalFunds();
+      //check wethFund totalBalances treeId2
+      let totalBalances2 = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.research),
+        Number(totalBalances2.research),
         Math.add(expected.research, expectedTreeId.research),
         "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         Math.add(expected.localDevelopment, expectedTreeId.localDevelopment),
         "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
-        Math.add(expected.rescueFund, expectedTreeId.rescueFund),
-        "2-rescueFund funds invalid"
+        Number(totalBalances2.insurance),
+        Math.add(expected.insurance, expectedTreeId.insurance),
+        "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
-        Math.add(expected.treejerDevelop, expectedTreeId.treejerDevelop),
-        "2-treejerDevelop funds invalid"
+        Number(totalBalances2.treasury),
+        Math.add(expected.treasury, expectedTreeId.treasury),
+        "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
-        Math.add(expected.reserveFund1, expectedTreeId.reserveFund1),
-        "2-reserveFund1 funds invalid"
+        Number(totalBalances2.reserve1),
+        Math.add(expected.reserve1, expectedTreeId.reserve1),
+        "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
-        Math.add(expected.reserveFund2, expectedTreeId.reserveFund2),
-        "2-reserveFund2 funds invalid"
+        Number(totalBalances2.reserve2),
+        Math.add(expected.reserve2, expectedTreeId.reserve2),
+        "2-reserve2 funds invalid"
       );
 
       ////--------------------------check fund planter
@@ -974,12 +976,12 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const insurance = 1500;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const treeResearchAddress = userAccount3;
+      const researchAddress = userAccount3;
 
       const totalTreeResearchFunded = Math.divide(
         Math.mul(Math.add(Number(amount), Number(amount1)), research),
@@ -992,10 +994,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1021,7 +1023,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setTreeResearchAddress(treeResearchAddress, {
+      await wethFund.setResearchAddress(researchAddress, {
         from: deployerAccount,
       });
 
@@ -1031,10 +1033,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1058,10 +1060,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1073,10 +1075,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1085,19 +1087,23 @@ contract("WethFund", (accounts) => {
       //////////////////////// fail to withdraw
 
       await wethFund
-        .withdrawTreeResearch(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawResearchBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawTreeResearch(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawResearchBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawTreeResearch(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawResearchBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -1107,10 +1113,10 @@ contract("WethFund", (accounts) => {
         referralFund: (referralFund * amount) / 10000,
         research: (research * amount) / 10000,
         localDevelopment: (localDevelopment * amount) / 10000,
-        rescueFund: (rescueFund * amount) / 10000,
-        treejerDevelop: (treejerDevelop * amount) / 10000,
-        reserveFund1: (reserveFund1 * amount) / 10000,
-        reserveFund2: (reserveFund2 * amount) / 10000,
+        insurance: (insurance * amount) / 10000,
+        treasury: (treasury * amount) / 10000,
+        reserve1: (reserve1 * amount) / 10000,
+        reserve2: (reserve2 * amount) / 10000,
       };
 
       let expected2 = {
@@ -1118,10 +1124,10 @@ contract("WethFund", (accounts) => {
         referralFund: (referralFund * amount1) / 10000,
         research: (research * amount1) / 10000,
         localDevelopment: (localDevelopment * amount1) / 10000,
-        rescueFund: (rescueFund * amount1) / 10000,
-        treejerDevelop: (treejerDevelop * amount1) / 10000,
-        reserveFund1: (reserveFund1 * amount1) / 10000,
-        reserveFund2: (reserveFund2 * amount1) / 10000,
+        insurance: (insurance * amount1) / 10000,
+        treasury: (treasury * amount1) / 10000,
+        reserve1: (reserve1 * amount1) / 10000,
+        reserve2: (reserve2 * amount1) / 10000,
       };
 
       truffleAssert.eventEmitted(eventTx1, "TreeFunded", (ev) => {
@@ -1153,7 +1159,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1163,18 +1169,18 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalTreeResearchFunded,
-        Number(totalFunds1.research),
+        Number(totalBalances1.research),
         "research total fund1 is not ok"
       );
 
       const treeResearchBalnance1 = await wethInstance.balanceOf(
-        treeResearchAddress
+        researchAddress
       );
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawTreeResearch(
+      const tx = await wethFund.withdrawResearchBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
@@ -1182,26 +1188,30 @@ contract("WethFund", (accounts) => {
 
       ////////////------------- should fail after withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawTreeResearch(web3.utils.toWei("0.25"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawResearchBalance(
+          web3.utils.toWei("0.25"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      truffleAssert.eventEmitted(tx, "TreeResearchBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "ResearchBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == treeResearchAddress &&
+          ev.account == researchAddress &&
           ev.reason == withdrawReason
         );
       });
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const treeResearchBalnance2 = await wethInstance.balanceOf(
-        treeResearchAddress
+        researchAddress
       );
 
       assert.equal(
@@ -1212,8 +1222,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.research),
-          Number(totalFunds2.research)
+          Number(totalBalances1.research),
+          Number(totalBalances2.research)
         ),
         Number(withdrawBalance1),
         "research total fund is not ok after withdraw1"
@@ -1229,28 +1239,28 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawTreeResearch(
+      const tx2 = await wethFund.withdrawResearchBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "TreeResearchBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx2, "ResearchBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == treeResearchAddress &&
+          ev.account == researchAddress &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const treeResearchBalnance3 = await wethInstance.balanceOf(
-        treeResearchAddress
+        researchAddress
       );
 
       assert.equal(
@@ -1264,8 +1274,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.research),
-          Number(totalFunds3.research)
+          Number(totalBalances1.research),
+          Number(totalBalances3.research)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "research total fund is not ok after withdraw1"
@@ -1276,7 +1286,7 @@ contract("WethFund", (accounts) => {
           totalTreeResearchFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.research),
+        Number(totalBalances3.research),
         "research total fund3 is not ok"
       );
 
@@ -1298,12 +1308,12 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const insurance = 1500;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const localDevelopAddress = userAccount3;
+      const localDevelopmentAddress = userAccount3;
 
       const totalLocalDevelopFunded = Math.divide(
         Math.mul(Math.add(Number(amount), Number(amount1)), localDevelopment),
@@ -1316,10 +1326,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1345,7 +1355,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setLocalDevelopAddress(localDevelopAddress, {
+      await wethFund.setLocalDevelopmentAddress(localDevelopmentAddress, {
         from: deployerAccount,
       });
 
@@ -1355,10 +1365,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1382,10 +1392,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1397,10 +1407,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1408,21 +1418,33 @@ contract("WethFund", (accounts) => {
       ///////////////////// ---------------- fail to withdraw
 
       await wethFund
-        .withdrawLocalDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawLocalDevelop(web3.utils.toWei("0"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawLocalDevelop(web3.utils.toWei("3"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("3"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       // -------------------------- check data before withdraw -----------------
@@ -1430,7 +1452,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1440,46 +1462,54 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalLocalDevelopFunded,
-        Number(totalFunds1.localDevelopment),
+        Number(totalBalances1.localDevelopment),
         "reserve fund1 total fund1 is not ok"
       );
 
       const localDevelopBalnance1 = await wethInstance.balanceOf(
-        localDevelopAddress
+        localDevelopmentAddress
       );
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawLocalDevelop(
+      const tx = await wethFund.withdrawLocalDevelopmentBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "LocalDevelopBalanceWithdrawn", (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == localDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      });
+      truffleAssert.eventEmitted(
+        tx,
+        "LocalDevelopmentBalanceWithdrew",
+        (ev) => {
+          return (
+            Number(ev.amount) == Number(withdrawBalance1) &&
+            ev.account == localDevelopmentAddress &&
+            ev.reason == withdrawReason
+          );
+        }
+      );
 
       ////////////------------- should fail after withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawLocalDevelop(web3.utils.toWei("0.25"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0.25"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const localDevelopBalnance2 = await wethInstance.balanceOf(
-        localDevelopAddress
+        localDevelopmentAddress
       );
 
       assert.equal(
@@ -1490,8 +1520,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.localDevelopment),
-          Number(totalFunds2.localDevelopment)
+          Number(totalBalances1.localDevelopment),
+          Number(totalBalances2.localDevelopment)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -1507,28 +1537,32 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawLocalDevelop(
+      const tx2 = await wethFund.withdrawLocalDevelopmentBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "LocalDevelopBalanceWithdrawn", (ev) => {
-        return (
-          Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == localDevelopAddress &&
-          ev.reason == withdrawReason
-        );
-      });
+      truffleAssert.eventEmitted(
+        tx2,
+        "LocalDevelopmentBalanceWithdrew",
+        (ev) => {
+          return (
+            Number(ev.amount) == Number(withdrawBalance2) &&
+            ev.account == localDevelopmentAddress &&
+            ev.reason == withdrawReason
+          );
+        }
+      );
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const localDevelopBalnance3 = await wethInstance.balanceOf(
-        localDevelopAddress
+        localDevelopmentAddress
       );
 
       assert.equal(
@@ -1542,8 +1576,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.localDevelopment),
-          Number(totalFunds3.localDevelopment)
+          Number(totalBalances1.localDevelopment),
+          Number(totalBalances3.localDevelopment)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -1554,7 +1588,7 @@ contract("WethFund", (accounts) => {
           totalLocalDevelopFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.localDevelopment),
+        Number(totalBalances3.localDevelopment),
         "reserve fund2 total fund3 is not ok"
       );
 
@@ -1576,15 +1610,15 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const insurance = 1500;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const rescueFundAddress = userAccount3;
+      const insuranceAddress = userAccount3;
 
       const totalRescueFundFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), rescueFund),
+        Math.mul(Math.add(Number(amount), Number(amount1)), insurance),
         10000
       );
 
@@ -1594,10 +1628,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1623,7 +1657,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setRescueFundAddress(rescueFundAddress, {
+      await wethFund.setInsuranceAddress(insuranceAddress, {
         from: deployerAccount,
       });
 
@@ -1633,10 +1667,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1660,10 +1694,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1675,10 +1709,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1687,19 +1721,23 @@ contract("WethFund", (accounts) => {
       ///////////////////-------------------- fail to withdraw
 
       await wethFund
-        .withdrawRescueFund(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawInsuranceBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawRescueFund(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawInsuranceBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawRescueFund(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawInsuranceBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -1709,7 +1747,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1719,46 +1757,50 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalRescueFundFunded,
-        Number(totalFunds1.rescueFund),
+        Number(totalBalances1.insurance),
         "reserve fund1 total fund1 is not ok"
       );
 
       const rescueFundBalnance1 = await wethInstance.balanceOf(
-        rescueFundAddress
+        insuranceAddress
       );
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawRescueFund(
+      const tx = await wethFund.withdrawInsuranceBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "RescueBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "InsuranceBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == rescueFundAddress &&
+          ev.account == insuranceAddress &&
           ev.reason == withdrawReason
         );
       });
 
       ////////////------------- should fail after withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawRescueFund(web3.utils.toWei("0.4"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawInsuranceBalance(
+          web3.utils.toWei("0.4"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const rescueFundBalnance2 = await wethInstance.balanceOf(
-        rescueFundAddress
+        insuranceAddress
       );
 
       assert.equal(
@@ -1769,8 +1811,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.rescueFund),
-          Number(totalFunds2.rescueFund)
+          Number(totalBalances1.insurance),
+          Number(totalBalances2.insurance)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -1786,28 +1828,28 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawRescueFund(
+      const tx2 = await wethFund.withdrawInsuranceBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "RescueBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx2, "InsuranceBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
-          ev.account == rescueFundAddress &&
+          ev.account == insuranceAddress &&
           ev.reason == withdrawReason
         );
       });
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const rescueFundBalnance3 = await wethInstance.balanceOf(
-        rescueFundAddress
+        insuranceAddress
       );
 
       assert.equal(
@@ -1821,8 +1863,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.rescueFund),
-          Number(totalFunds3.rescueFund)
+          Number(totalBalances1.insurance),
+          Number(totalBalances3.insurance)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -1833,7 +1875,7 @@ contract("WethFund", (accounts) => {
           totalRescueFundFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.rescueFund),
+        Number(totalBalances3.insurance),
         "reserve fund2 total fund3 is not ok"
       );
 
@@ -1855,15 +1897,15 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 1000;
-      const reserveFund1 = 0;
-      const reserveFund2 = 0;
+      const insurance = 1500;
+      const treasury = 1000;
+      const reserve1 = 0;
+      const reserve2 = 0;
 
-      const treejerDevelopAddress = userAccount3;
+      const treasuryAddress = userAccount3;
 
       const totalTreejerDevelopFunded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), treejerDevelop),
+        Math.mul(Math.add(Number(amount), Number(amount1)), treasury),
         10000
       );
 
@@ -1873,10 +1915,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -1902,7 +1944,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setTreejerDevelopAddress(treejerDevelopAddress, {
+      await wethFund.setTreasuryAddress(treasuryAddress, {
         from: deployerAccount,
       });
 
@@ -1912,10 +1954,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -1939,10 +1981,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1954,10 +1996,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -1965,19 +2007,23 @@ contract("WethFund", (accounts) => {
 
       /////////////// ---------------- fail to withdraw
       await wethFund
-        .withdrawTreejerDevelop(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawTreasuryBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawTreejerDevelop(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawTreasuryBalance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawTreejerDevelop(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawTreasuryBalance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -1987,7 +2033,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -1997,34 +2043,34 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalTreejerDevelopFunded,
-        Number(totalFunds1.treejerDevelop),
+        Number(totalBalances1.treasury),
         "reserve fund1 total fund1 is not ok"
       );
 
       const treejerDevelopBalnance1 = await wethInstance.balanceOf(
-        treejerDevelopAddress
+        treasuryAddress
       );
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawTreejerDevelop(
+      const tx = await wethFund.withdrawTreasuryBalance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "TreejerDevelopBalanceWithdrawn", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreasuryBalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
-          ev.account == treejerDevelopAddress &&
+          ev.account == treasuryAddress &&
           ev.reason == withdrawReason
         );
       });
 
       ////////////------------- should fail withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawTreejerDevelop(
+        .withdrawTreasuryBalance(
           web3.utils.toWei("0.25"),
           "reason to withdraw",
           {
@@ -2033,14 +2079,14 @@ contract("WethFund", (accounts) => {
         )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const treejerDevelopBalnance2 = await wethInstance.balanceOf(
-        treejerDevelopAddress
+        treasuryAddress
       );
 
       assert.equal(
@@ -2051,8 +2097,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treejerDevelop),
-          Number(totalFunds2.treejerDevelop)
+          Number(totalBalances1.treasury),
+          Number(totalBalances2.treasury)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2068,32 +2114,28 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawTreejerDevelop(
+      const tx2 = await wethFund.withdrawTreasuryBalance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(
-        tx2,
-        "TreejerDevelopBalanceWithdrawn",
-        (ev) => {
-          return (
-            Number(ev.amount) == Number(withdrawBalance2) &&
-            ev.account == treejerDevelopAddress &&
-            ev.reason == withdrawReason
-          );
-        }
-      );
+      truffleAssert.eventEmitted(tx2, "TreasuryBalanceWithdrew", (ev) => {
+        return (
+          Number(ev.amount) == Number(withdrawBalance2) &&
+          ev.account == treasuryAddress &&
+          ev.reason == withdrawReason
+        );
+      });
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
       );
 
       const treejerDevelopBalnance3 = await wethInstance.balanceOf(
-        treejerDevelopAddress
+        treasuryAddress
       );
 
       assert.equal(
@@ -2107,8 +2149,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.treejerDevelop),
-          Number(totalFunds3.treejerDevelop)
+          Number(totalBalances1.treasury),
+          Number(totalBalances3.treasury)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2119,7 +2161,7 @@ contract("WethFund", (accounts) => {
           totalTreejerDevelopFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.treejerDevelop),
+        Number(totalBalances3.treasury),
         "reserve fund2 total fund3 is not ok"
       );
 
@@ -2141,15 +2183,15 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 0;
-      const reserveFund1 = 1000;
-      const reserveFund2 = 0;
+      const insurance = 1500;
+      const treasury = 0;
+      const reserve1 = 1000;
+      const reserve2 = 0;
 
       const reserveFund1Address = userAccount3;
 
       const totalReserveFund1Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund1),
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve1),
         10000
       );
 
@@ -2159,10 +2201,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -2188,7 +2230,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setReserveFund1Address(reserveFund1Address, {
+      await wethFund.setReserve1Address(reserveFund1Address, {
         from: deployerAccount,
       });
 
@@ -2198,10 +2240,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -2225,10 +2267,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2240,10 +2282,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2252,19 +2294,23 @@ contract("WethFund", (accounts) => {
       ////////////////////////// --------------------- fail to withdraw
 
       await wethFund
-        .withdrawReserveFund1(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawReserve1Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawReserveFund1(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawReserve1Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawReserveFund1(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawReserve1Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -2274,7 +2320,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2284,7 +2330,7 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalReserveFund1Funded,
-        Number(totalFunds1.reserveFund1),
+        Number(totalBalances1.reserve1),
         "reserve fund1 total fund1 is not ok"
       );
 
@@ -2295,13 +2341,13 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawReserveFund1(
+      const tx = await wethFund.withdrawReserve1Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn1", (ev) => {
+      truffleAssert.eventEmitted(tx, "Reserve1BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
           ev.account == reserveFund1Address &&
@@ -2311,12 +2357,16 @@ contract("WethFund", (accounts) => {
 
       ////////////------------- should fail withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawReserveFund1(web3.utils.toWei("0.25"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawReserve1Balance(
+          web3.utils.toWei("0.25"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
@@ -2334,8 +2384,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund1),
-          Number(totalFunds2.reserveFund1)
+          Number(totalBalances1.reserve1),
+          Number(totalBalances2.reserve1)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2351,13 +2401,13 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawReserveFund1(
+      const tx2 = await wethFund.withdrawReserve1Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn1", (ev) => {
+      truffleAssert.eventEmitted(tx2, "Reserve1BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
           ev.account == reserveFund1Address &&
@@ -2365,7 +2415,7 @@ contract("WethFund", (accounts) => {
         );
       });
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
@@ -2386,8 +2436,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund1),
-          Number(totalFunds3.reserveFund1)
+          Number(totalBalances1.reserve1),
+          Number(totalBalances3.reserve1)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2398,7 +2448,7 @@ contract("WethFund", (accounts) => {
           totalReserveFund1Funded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.reserveFund1),
+        Number(totalBalances3.reserve1),
         "reserve fund2 total fund3 is not ok"
       );
 
@@ -2420,15 +2470,15 @@ contract("WethFund", (accounts) => {
       const referralFund = 500;
       const research = 1000;
       const localDevelopment = 1000;
-      const rescueFund = 1500;
-      const treejerDevelop = 0;
-      const reserveFund1 = 0;
-      const reserveFund2 = 1000;
+      const insurance = 1500;
+      const treasury = 0;
+      const reserve1 = 0;
+      const reserve2 = 1000;
 
       const reserveFund2Address = userAccount3;
 
       const totalReserveFund2Funded = Math.divide(
-        Math.mul(Math.add(Number(amount), Number(amount1)), reserveFund2),
+        Math.mul(Math.add(Number(amount), Number(amount1)), reserve2),
         10000
       );
 
@@ -2438,10 +2488,10 @@ contract("WethFund", (accounts) => {
           Math.add(
             research,
             localDevelopment,
-            rescueFund,
-            treejerDevelop,
-            reserveFund1,
-            reserveFund2
+            insurance,
+            treasury,
+            reserve1,
+            reserve2
           )
         ),
         10000
@@ -2467,7 +2517,7 @@ contract("WethFund", (accounts) => {
       );
 
       /////////// ------------------ set addresses
-      await wethFund.setReserveFund2Address(reserveFund2Address, {
+      await wethFund.setReserve2Address(reserveFund2Address, {
         from: deployerAccount,
       });
 
@@ -2477,10 +2527,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: dataManager,
         }
@@ -2504,10 +2554,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2519,10 +2569,10 @@ contract("WethFund", (accounts) => {
         referralFund,
         research,
         localDevelopment,
-        rescueFund,
-        treejerDevelop,
-        reserveFund1,
-        reserveFund2,
+        insurance,
+        treasury,
+        reserve1,
+        reserve2,
         {
           from: userAccount6,
         }
@@ -2530,19 +2580,23 @@ contract("WethFund", (accounts) => {
 
       /////////////////// --------------------- fail to withdraw
       await wethFund
-        .withdrawReserveFund2(web3.utils.toWei("0.2"), "reason to withdraw", {
-          from: userAccount7,
-        })
+        .withdrawReserve2Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: userAccount7,
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .withdrawReserveFund2(web3.utils.toWei("0"), "reason to withdraw", {
+        .withdrawReserve2Balance(web3.utils.toWei("0"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       await wethFund
-        .withdrawReserveFund2(web3.utils.toWei("3"), "reason to withdraw", {
+        .withdrawReserve2Balance(web3.utils.toWei("3"), "reason to withdraw", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -2552,7 +2606,7 @@ contract("WethFund", (accounts) => {
         wethFund.address
       );
 
-      const totalFunds1 = await wethFund.totalFunds();
+      const totalBalances1 = await wethFund.totalBalances();
 
       assert.equal(
         Number(contractBalanceAfterFund),
@@ -2562,7 +2616,7 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         totalReserveFund2Funded,
-        Number(totalFunds1.reserveFund2),
+        Number(totalBalances1.reserve2),
         "reserve fund2 total fund1 is not ok"
       );
 
@@ -2573,13 +2627,13 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
-      const tx = await wethFund.withdrawReserveFund2(
+      const tx = await wethFund.withdrawReserve2Balance(
         withdrawBalance1,
         withdrawReason,
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx, "ReserveBalanceWithdrawn2", (ev) => {
+      truffleAssert.eventEmitted(tx, "Reserve2BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance1) &&
           ev.account == reserveFund2Address &&
@@ -2589,12 +2643,16 @@ contract("WethFund", (accounts) => {
 
       ////////////------------- should fail withdraw some balance and then try to withdraw
       await wethFund
-        .withdrawReserveFund2(web3.utils.toWei("0.25"), "reason to withdraw", {
-          from: deployerAccount,
-        })
+        .withdrawReserve2Balance(
+          web3.utils.toWei("0.25"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
-      const totalFunds2 = await wethFund.totalFunds();
+      const totalBalances2 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw1 = await wethInstance.balanceOf(
         wethFund.address
@@ -2612,8 +2670,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund2),
-          Number(totalFunds2.reserveFund2)
+          Number(totalBalances1.reserve2),
+          Number(totalBalances2.reserve2)
         ),
         Number(withdrawBalance1),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2629,13 +2687,13 @@ contract("WethFund", (accounts) => {
 
       const withdrawBalance2 = web3.utils.toWei("0.2");
 
-      const tx2 = await wethFund.withdrawReserveFund2(
+      const tx2 = await wethFund.withdrawReserve2Balance(
         withdrawBalance2,
         "reason to withdraw",
         { from: deployerAccount }
       );
 
-      truffleAssert.eventEmitted(tx2, "ReserveBalanceWithdrawn2", (ev) => {
+      truffleAssert.eventEmitted(tx2, "Reserve2BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == Number(withdrawBalance2) &&
           ev.account == reserveFund2Address &&
@@ -2643,7 +2701,7 @@ contract("WethFund", (accounts) => {
         );
       });
 
-      const totalFunds3 = await wethFund.totalFunds();
+      const totalBalances3 = await wethFund.totalBalances();
 
       const contractBalanceAfterWithdraw2 = await wethInstance.balanceOf(
         wethFund.address
@@ -2664,8 +2722,8 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          Number(totalFunds1.reserveFund2),
-          Number(totalFunds3.reserveFund2)
+          Number(totalBalances1.reserve2),
+          Number(totalBalances3.reserve2)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
         "reserve fund2 total fund is not ok after withdraw1"
@@ -2676,7 +2734,7 @@ contract("WethFund", (accounts) => {
           totalReserveFund2Funded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
-        Number(totalFunds3.reserveFund2),
+        Number(totalBalances3.reserve2),
         "reserve fund2 total fund3 is not ok"
       );
 
@@ -2687,7 +2745,7 @@ contract("WethFund", (accounts) => {
       );
     });
 
-    it("2.Should incrementalFund work successfully", async () => {
+    it("2.Should fundTreeBatch work successfully", async () => {
       const totalPlanterFund1 = web3.utils.toWei("5");
       const totalReferralFund1 = web3.utils.toWei("4");
       const totalTreeResearch1 = web3.utils.toWei("2");
@@ -2735,7 +2793,7 @@ contract("WethFund", (accounts) => {
 
       ////////////// fail to call incremental fund because caller is not treejer contract
       await wethFund
-        .incrementalFund(
+        .fundTreeBatch(
           totalPlanterFund1,
           totalReferralFund1,
           totalTreeResearch1,
@@ -2748,7 +2806,7 @@ contract("WethFund", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      const eventTx1 = await wethFund.incrementalFund(
+      const eventTx1 = await wethFund.fundTreeBatch(
         totalPlanterFund1,
         totalReferralFund1,
         totalTreeResearch1,
@@ -2760,45 +2818,45 @@ contract("WethFund", (accounts) => {
         { from: userAccount3 }
       );
 
-      truffleAssert.eventEmitted(eventTx1, "IncrementalFunded");
+      truffleAssert.eventEmitted(eventTx1, "TreeFundedBatch");
 
-      //check wethFund totalFunds treeId1
-      let totalFunds = await wethFund.totalFunds();
+      //check wethFund totalBalances treeId1
+      let totalBalances = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds.research),
+        Number(totalBalances.research),
         Number(totalTreeResearch1),
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.localDevelopment),
+        Number(totalBalances.localDevelopment),
         Number(totalLocalDevelop1),
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.rescueFund),
+        Number(totalBalances.insurance),
         Number(totalRescueFund1),
-        "rescueFund funds invalid"
+        "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
+        Number(totalBalances.treasury),
         Number(totalTreejerDevelop1),
-        "treejerDevelop funds invalid"
+        "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund1),
+        Number(totalBalances.reserve1),
         Number(totalReserveFund1_1),
-        "reserveFund1 funds invalid"
+        "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds.reserveFund2),
+        Number(totalBalances.reserve2),
         Number(totalReserveFund2_1),
-        "reserveFund2 funds invalid"
+        "reserve2 funds invalid"
       );
 
       ////------------check planter fund contract balance
@@ -2819,7 +2877,7 @@ contract("WethFund", (accounts) => {
           daiInstance.address,
         ]);
 
-      const eventTx2 = await wethFund.incrementalFund(
+      const eventTx2 = await wethFund.fundTreeBatch(
         totalPlanterFund2,
         totalReferralFund2,
         totalTreeResearch2,
@@ -2831,45 +2889,45 @@ contract("WethFund", (accounts) => {
         { from: userAccount3 }
       );
 
-      truffleAssert.eventEmitted(eventTx2, "IncrementalFunded");
+      truffleAssert.eventEmitted(eventTx2, "TreeFundedBatch");
 
-      // //check wethFund totalFunds treeId2
-      let totalFunds2 = await wethFund.totalFunds();
+      // //check wethFund totalBalances treeId2
+      let totalBalances2 = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.research),
+        Number(totalBalances2.research),
         Math.add(totalTreeResearch1, totalTreeResearch2),
         "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         Math.add(totalLocalDevelop1, totalLocalDevelop2),
         "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.rescueFund),
+        Number(totalBalances2.insurance),
         Math.add(totalRescueFund1, totalRescueFund2),
-        "2-rescueFund funds invalid"
+        "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treejerDevelop),
+        Number(totalBalances2.treasury),
         Math.add(totalTreejerDevelop1, totalTreejerDevelop2),
-        "2-treejerDevelop funds invalid"
+        "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund1),
+        Number(totalBalances2.reserve1),
         Math.add(totalReserveFund1_1, totalReserveFund1_2),
-        "2-reserveFund1 funds invalid"
+        "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserveFund2),
+        Number(totalBalances2.reserve2),
         Math.add(totalReserveFund2_1, totalReserveFund2_2),
-        "2-reserveFund2 funds invalid"
+        "2-reserve2 funds invalid"
       );
 
       ////------------check planter fund contract balance
@@ -2888,9 +2946,9 @@ contract("WethFund", (accounts) => {
       );
     });
 
-    ///////---------------------------------- test updateDaiSwap -----------------------
+    ///////---------------------------------- test updateDaiDebtToPlanterContract -----------------------
 
-    it("Should updateDaiSwap work successFully and fail in invalid situation ", async () => {
+    it("Should updateDaiDebtToPlanterContract work successFully and fail in invalid situation ", async () => {
       await Common.addTreejerContractRole(
         arInstance,
         userAccount3,
@@ -2899,14 +2957,17 @@ contract("WethFund", (accounts) => {
 
       //////////////// --------------------- fail because caller is not treejer contract
       await wethFund
-        .updateDaiSwap(web3.utils.toWei("12", "Ether"), {
+        .updateDaiDebtToPlanterContract(web3.utils.toWei("12", "Ether"), {
           from: userAccount4,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      await wethFund.updateDaiSwap(web3.utils.toWei("12", "Ether"), {
-        from: userAccount3,
-      });
+      await wethFund.updateDaiDebtToPlanterContract(
+        web3.utils.toWei("12", "Ether"),
+        {
+          from: userAccount3,
+        }
+      );
 
       assert.equal(
         Number(await wethFund.totalDaiDebtToPlanterContract()),
@@ -2915,9 +2976,9 @@ contract("WethFund", (accounts) => {
       );
     });
 
-    ///////---------------------------------- test swapDaiToPlanters -----------------------
+    ///////---------------------------------- test payDaiDebtToPlanterContract -----------------------
 
-    it("Should swapDaiToPlanters work successfully", async () => {
+    it("Should payDaiDebtToPlanterContract work successfully", async () => {
       const totalTreejerDevelop2 = web3.utils.toWei("2");
 
       ////--------------check set role----------------
@@ -2939,23 +3000,16 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.incrementalFund(
-        0,
-        0,
-        0,
-        0,
-        0,
-        totalTreejerDevelop2,
-        0,
-        0,
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+        from: userAccount3,
+      });
+
+      await wethFund.updateDaiDebtToPlanterContract(
+        web3.utils.toWei("1000", "Ether"),
         {
           from: userAccount3,
         }
       );
-
-      await wethFund.updateDaiSwap(web3.utils.toWei("1000", "Ether"), {
-        from: userAccount3,
-      });
       const totalDaiDebtToPlanterContractBeforeSwap =
         await wethFund.totalDaiDebtToPlanterContract();
 
@@ -2971,7 +3025,7 @@ contract("WethFund", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
-      const eventTx = await wethFund.swapDaiToPlanters(
+      const eventTx = await wethFund.payDaiDebtToPlanterContract(
         expectedSwapTokenAmountTreeId2[0],
         web3.utils.toWei("500", "Ether"),
         {
@@ -2979,13 +3033,18 @@ contract("WethFund", (accounts) => {
         }
       );
 
-      truffleAssert.eventEmitted(eventTx, "SwapToPlanterFund", (ev) => {
-        return (
-          Number(ev.wethMaxUse) == Number(expectedSwapTokenAmountTreeId2[0]) &&
-          Number(ev.daiAmount) == Number(web3.utils.toWei("500", "Ether")) &&
-          Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
-        );
-      });
+      truffleAssert.eventEmitted(
+        eventTx,
+        "DaiDebtToPlanterContractPaid",
+        (ev) => {
+          return (
+            Number(ev.wethMaxUse) ==
+              Number(expectedSwapTokenAmountTreeId2[0]) &&
+            Number(ev.daiAmount) == Number(web3.utils.toWei("500", "Ether")) &&
+            Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
+          );
+        }
+      );
 
       ////------------check planter fund contract balance
       let planterFundBalance = await daiInstance.balanceOf(
@@ -3017,20 +3076,20 @@ contract("WethFund", (accounts) => {
         "totalDaiDebtToPlanterContract not true"
       );
 
-      let totalFunds = await wethFund.totalFunds();
+      let totalBalances = await wethFund.totalBalances();
 
       assert.equal(
-        Number(totalFunds.treejerDevelop),
+        Number(totalBalances.treasury),
         Number(
           Math.Big(totalTreejerDevelop2).minus(
             expectedSwapTokenAmountTreeId2[0]
           )
         ),
-        "treejerDevelop funds invalid"
+        "treasury funds invalid"
       );
     });
 
-    it("Should swapDaiToPlanters reject (Liquidity not enough)", async () => {
+    it("Should payDaiDebtToPlanterContract reject (Liquidity not enough)", async () => {
       const totalTreejerDevelop2 = web3.utils.toWei("1.9");
 
       ////--------------check set role----------------
@@ -3052,23 +3111,16 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.incrementalFund(
-        0,
-        0,
-        0,
-        0,
-        0,
-        totalTreejerDevelop2,
-        0,
-        0,
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+        from: userAccount3,
+      });
+
+      await wethFund.updateDaiDebtToPlanterContract(
+        web3.utils.toWei("4000", "Ether"),
         {
           from: userAccount3,
         }
       );
-
-      await wethFund.updateDaiSwap(web3.utils.toWei("4000", "Ether"), {
-        from: userAccount3,
-      });
 
       let expectedSwapTokenAmountTreeId2 =
         await uniswapRouterInstance.getAmountsIn.call(
@@ -3077,7 +3129,7 @@ contract("WethFund", (accounts) => {
         );
 
       await wethFund
-        .swapDaiToPlanters(
+        .payDaiDebtToPlanterContract(
           expectedSwapTokenAmountTreeId2[0],
           web3.utils.toWei("4000", "Ether"),
           {
@@ -3087,7 +3139,7 @@ contract("WethFund", (accounts) => {
         .should.be.rejectedWith(WethFundErrorMsg.LIQUDITY_NOT_ENOUGH);
     });
 
-    it("Should swapDaiToPlanters reject (totalDaiDebtToPlanterContract not be zero) and when caller is not script", async () => {
+    it("Should payDaiDebtToPlanterContract reject (totalDaiDebtToPlanterContract not be zero) and when caller is not script", async () => {
       const totalTreejerDevelop2 = web3.utils.toWei("2");
 
       ////--------------check set role----------------
@@ -3109,19 +3161,9 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.incrementalFund(
-        0,
-        0,
-        0,
-        0,
-        0,
-        totalTreejerDevelop2,
-        0,
-        0,
-        {
-          from: userAccount3,
-        }
-      );
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreejerDevelop2, 0, 0, {
+        from: userAccount3,
+      });
 
       let expectedSwapTokenAmountTreeId2 =
         await uniswapRouterInstance.getAmountsIn.call(
@@ -3130,7 +3172,7 @@ contract("WethFund", (accounts) => {
         );
       ////////////////// fail because caller is not script role
       await wethFund
-        .swapDaiToPlanters(
+        .payDaiDebtToPlanterContract(
           expectedSwapTokenAmountTreeId2[0],
           web3.utils.toWei("1000", "Ether"),
           {
@@ -3140,14 +3182,17 @@ contract("WethFund", (accounts) => {
         .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
 
       await wethFund
-        .swapDaiToPlanters(expectedSwapTokenAmountTreeId2[0], 0, {
+        .payDaiDebtToPlanterContract(expectedSwapTokenAmountTreeId2[0], 0, {
           from: buyerRank,
         })
         .should.be.rejectedWith(WethFundErrorMsg.TOTALDAI_INVALID);
 
-      await wethFund.updateDaiSwap(web3.utils.toWei("1000", "Ether"), {
-        from: userAccount3,
-      });
+      await wethFund.updateDaiDebtToPlanterContract(
+        web3.utils.toWei("1000", "Ether"),
+        {
+          from: userAccount3,
+        }
+      );
 
       assert.equal(
         await wethFund.totalDaiDebtToPlanterContract(),
@@ -3156,7 +3201,7 @@ contract("WethFund", (accounts) => {
       );
 
       await wethFund
-        .swapDaiToPlanters(
+        .payDaiDebtToPlanterContract(
           expectedSwapTokenAmountTreeId2[0],
           web3.utils.toWei("2000", "Ether"),
           {
@@ -3165,7 +3210,7 @@ contract("WethFund", (accounts) => {
         )
         .should.be.rejectedWith(WethFundErrorMsg.TOTALDAI_INVALID);
 
-      let eventTx = await wethFund.swapDaiToPlanters(
+      let eventTx = await wethFund.payDaiDebtToPlanterContract(
         expectedSwapTokenAmountTreeId2[0],
         web3.utils.toWei("1000", "Ether"),
         {
@@ -3179,13 +3224,18 @@ contract("WethFund", (accounts) => {
         "totalDaiDebtToPlanterContract not true"
       );
 
-      truffleAssert.eventEmitted(eventTx, "SwapToPlanterFund", (ev) => {
-        return (
-          Number(ev.wethMaxUse) == Number(expectedSwapTokenAmountTreeId2[0]) &&
-          Number(ev.daiAmount) == Number(web3.utils.toWei("1000", "Ether")) &&
-          Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
-        );
-      });
+      truffleAssert.eventEmitted(
+        eventTx,
+        "DaiDebtToPlanterContractPaid",
+        (ev) => {
+          return (
+            Number(ev.wethMaxUse) ==
+              Number(expectedSwapTokenAmountTreeId2[0]) &&
+            Number(ev.daiAmount) == Number(web3.utils.toWei("1000", "Ether")) &&
+            Number(ev.wethAmount) == Number(expectedSwapTokenAmountTreeId2[0])
+          );
+        }
+      );
     });
   });
 });

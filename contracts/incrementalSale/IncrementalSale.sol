@@ -432,7 +432,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             treeId += 1;
         }
 
-        uint256 daiAmount = wethFund.incrementalFund(
+        uint256 daiAmount = wethFund.fundTreeBatch(
             totalFunds.planterFund,
             totalFunds.referralFund,
             totalFunds.treeResearch,

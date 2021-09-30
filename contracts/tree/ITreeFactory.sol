@@ -17,7 +17,7 @@ interface ITreeFactory {
     function planterFund() external view returns (address);
 
     /** @return Planter contract address */
-    function planter() external view returns (address);
+    function planterContract() external view returns (address);
 
     /** @return lastRegularPlantedTree */
     function lastRegualarTreeId() external view returns (uint256);
@@ -68,7 +68,7 @@ interface ITreeFactory {
      * @return planter
      * @return treeSpecs
      */
-    function tempTrees(uint256 _regularTreeId)
+    function tempTrees(uint256 _tempTreeId)
         external
         view
         returns (
@@ -87,7 +87,7 @@ interface ITreeFactory {
     function setPlanterFundAddress(address _address) external;
 
     /** @dev set {_address} to Planter contract address */
-    function setPlanterAddress(address _address) external;
+    function setPlanterContractAddress(address _address) external;
 
     /** @dev set {_address} to TreeToken contract address */
     function setTreeTokenAddress(address _address) external;
@@ -101,20 +101,19 @@ interface ITreeFactory {
     /**
      * @dev admin add tree
      * @param _treeId id of tree to add
-     * @param _treeDescription tree description
+     * @param _treeSpecs tree specs
      * NOTE emited a {TreeListed} event
      */
-    function listTree(uint256 _treeId, string calldata _treeDescription)
-        external;
+    function listTree(uint256 _treeId, string calldata _treeSpecs) external;
 
     /**
      * @dev admin assign an existing tree to planter
      * @param _treeId id of tree to assign
-     * @param _planterId assignee planter
+     * @param _planter assignee planter
      * NOTE tree must be not planted
      * NOTE emited a {TreeAssigned} event
      */
-    function assignTree(uint256 _treeId, address _planterId) external;
+    function assignTree(uint256 _treeId, address _planter) external;
 
     /**
      * @dev planter with permission to plant, can plan their tree
@@ -161,18 +160,18 @@ interface ITreeFactory {
 
     /**
      * @dev check if a tree is valid to take part in an auction
-     * set {_provideType} to provideStatus when tree is not in use
+     * set {_saleType} to provideStatus when tree is not in use
      * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
      */
-    function manageSaleType(uint256 _treeId, uint32 _provideType)
+    function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         returns (uint32);
 
-    /** @dev mint {_treeId} to {_ownerId} and set mintStatus to {_mintStatus} and privdeStatus to 0  */
+    /** @dev mint {_treeId} to {_funder} and set mintStatus to {_mintOrigin} and privdeStatus to 0  */
     function mintAssignedTree(
         uint256 _treeId,
-        address _ownerId,
-        uint16 _mintStatus
+        address _funder,
+        uint16 _mintOrigin
     ) external;
 
     /** @dev exit a {_treeId} from auction */
@@ -184,15 +183,15 @@ interface ITreeFactory {
 
     /**
      * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
-     * and end at {_endTreeId} by setting {_provideStatus} to provideStatus
+     * and end at {_endTreeId} by setting {_saleType} to provideStatus
      */
     function manageSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
-        uint32 _provideStatus
+        uint32 _saleType
     ) external returns (bool);
 
-    function checkMintOrigin(uint256 _treeId, address _buyer)
+    function checkMintOrigin(uint256 _treeId, address _funder)
         external
         view
         returns (bool, bytes32);
@@ -216,20 +215,20 @@ interface ITreeFactory {
     /**
      * @dev In this function, the admin approves or rejects the pending trees
      * After calling this function, if the tree is approved the tree information will be transferred to the {trees}
-     * @param _regularTreeId _regularTreeId
+     * @param _tempTreeId _tempTreeId
      * @param _isVerified Tree approved or not
      * NOTE emited a {TreeVerified} or {TreeRejected} event
      */
-    function verifyTree(uint256 _regularTreeId, bool _isVerified) external;
+    function verifyTree(uint256 _tempTreeId, bool _isVerified) external;
 
     /**
      * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
      * This function is called only by the regularSale contract
-     * @param _lastSold The last tree sold in the regular
-     * @param _owner Owner of a new tree sold in Regular
+     * @param _lastFundedTreeId The last tree sold in the regular
+     * @param _funder funder of a new tree sold in Regular
      * @return The last tree sold after update
      */
-    function mintTree(uint256 _lastSold, address _owner)
+    function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
         returns (uint256);
 
@@ -237,9 +236,9 @@ interface ITreeFactory {
      * @dev Request to buy a tree with a specific Id already planted and this function transfer ownership to funder
      * This function is called only by the regularSale contract
      * @param _treeId Tree with special Id (The Id must be larger than the last tree sold)
-     * @param _owner Owner of a new tree sold in Regular
+     * @param _funder funder of a new tree sold in Regular
      */
-    function mintTreeById(uint256 _treeId, address _owner) external;
+    function mintTreeById(uint256 _treeId, address _funder) external;
 
     /**
      * @dev script role update {_treeSpecs} of {_treeId}

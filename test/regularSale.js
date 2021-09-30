@@ -831,9 +831,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1011,9 +1014,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1073,7 +1079,7 @@ contract("regularSale", (accounts) => {
       for (let i = 10001; i <= 10007; i++) {
         truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
           return (
-            ev.buyer == funder &&
+            ev.funder == funder &&
             ev.treeId == i &&
             Number(ev.price) == Number(web3.utils.toWei("7"))
           );
@@ -1083,7 +1089,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx, "TreeFunded", (ev) => {
         return (
           Number(ev.count) == 7 &&
-          ev.buyer == funder &&
+          ev.funder == funder &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 7)
         );
       });
@@ -1305,9 +1311,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1375,7 +1384,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx, "TreeFunded", (ev) => {
         return (
           Number(ev.count) == 7 &&
-          ev.buyer == funder &&
+          ev.funder == funder &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("8"), 7)
         );
       });
@@ -1586,9 +1595,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1657,7 +1669,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx1, "TreeFunded", (ev) => {
         return (
           Number(ev.count) == 1 &&
-          ev.buyer == funder1 &&
+          ev.funder == funder1 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -1754,7 +1766,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx2, "TreeFunded", (ev) => {
         return (
           Number(ev.count) == 1 &&
-          ev.buyer == funder2 &&
+          ev.funder == funder2 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -1849,7 +1861,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx, "TreeFunded", (ev) => {
         return (
           Number(ev.count) == 1 &&
-          ev.buyer == funder3 &&
+          ev.funder == funder3 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -1979,7 +1991,7 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
+      await treeFactoryInstance.setPlanterContractAddress(planterInstance.address, {
         from: deployerAccount,
       });
 
@@ -2168,9 +2180,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -2284,7 +2299,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx, "TreeFundedById", (ev) => {
         return (
           Number(ev.treeId) == 10001 &&
-          ev.buyer == userAccount1 &&
+          ev.funder == userAccount1 &&
           Number(ev.amount) == Number(web3.utils.toWei("7"))
         );
       });
@@ -2389,9 +2404,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -2579,7 +2597,7 @@ contract("regularSale", (accounts) => {
       truffleAssert.eventEmitted(requestTx, "TreeFundedById", (ev) => {
         return (
           Number(ev.treeId) == treeId &&
-          ev.buyer == userAccount1 &&
+          ev.funder == userAccount1 &&
           Number(ev.amount) == Number(web3.utils.toWei("10"))
         );
       });

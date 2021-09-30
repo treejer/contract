@@ -55,14 +55,14 @@ contract RegularSale is Initializable, RelayRecipient {
 
     event PriceUpdated(uint256 price);
     event TreeFunded(
-        address buyer,
+        address funder,
         address referrer,
         uint256 count,
         uint256 amount
     );
-    event RegularMint(address buyer, uint256 treeId, uint256 price);
+    event RegularMint(address funder, uint256 treeId, uint256 price);
     event TreeFundedById(
-        address buyer,
+        address funder,
         address referrer,
         uint256 treeId,
         uint256 amount
@@ -260,13 +260,13 @@ contract RegularSale is Initializable, RelayRecipient {
 
         emit TreeFunded(_msgSender(), _referrer, _count, totalPrice);
 
-        uint256 tempLastRegularSold = lastFundedTreeId;
+        uint256 tempLastFundedTreeId = lastFundedTreeId;
 
         TotalBalances memory totalBalances;
 
         for (uint256 i = 0; i < _count; i++) {
-            tempLastRegularSold = treeFactory.mintTree(
-                tempLastRegularSold,
+            tempLastFundedTreeId = treeFactory.mintTree(
+                tempLastFundedTreeId,
                 _msgSender()
             );
 
@@ -279,7 +279,7 @@ contract RegularSale is Initializable, RelayRecipient {
                 uint16 treasuryShare,
                 uint16 reserve1Share,
                 uint16 reserve2Share
-            ) = allocation.findAllocationData(tempLastRegularSold);
+            ) = allocation.findAllocationData(tempLastFundedTreeId);
 
             totalBalances.planter += (price * planterShare) / 10000;
             totalBalances.ambassador += (price * ambassadorShare) / 10000;
@@ -293,12 +293,12 @@ contract RegularSale is Initializable, RelayRecipient {
             totalBalances.reserve2 += (price * reserve2Share) / 10000;
 
             planterFundContract.updateProjectedEarnings(
-                tempLastRegularSold,
+                tempLastFundedTreeId,
                 (price * planterShare) / 10000,
                 (price * ambassadorShare) / 10000
             );
 
-            emit RegularMint(_msgSender(), tempLastRegularSold, price);
+            emit RegularMint(_msgSender(), tempLastFundedTreeId, price);
         }
 
         daiFund.fundTreeBatch(
@@ -312,7 +312,7 @@ contract RegularSale is Initializable, RelayRecipient {
             totalBalances.reserve2
         );
 
-        lastFundedTreeId = tempLastRegularSold;
+        lastFundedTreeId = tempLastFundedTreeId;
 
         if (_referrer != address(0)) {
             _calculateReferrerCount(_referrer, _count);
@@ -407,89 +407,95 @@ contract RegularSale is Initializable, RelayRecipient {
     function _calculateReferrerCount(address _referrer, uint256 _count)
         private
     {
-        uint256 localReferrerCount = referrerCount[_referrer] + _count;
+        uint256 tempReferrerCount = referrerCount[_referrer] + _count;
 
-        if (localReferrerCount >= referralTriggerCount) {
-            uint256 temp = localReferrerCount / referralTriggerCount;
-            localReferrerCount -= temp * referralTriggerCount;
-            referrerClaimableTreesDai[_referrer] += temp;
+        if (tempReferrerCount >= referralTriggerCount) {
+            uint256 toClaimCount = tempReferrerCount / referralTriggerCount;
+            tempReferrerCount -= toClaimCount * referralTriggerCount;
+            referrerClaimableTreesDai[_referrer] += toClaimCount;
         }
 
-        referrerCount[_referrer] = localReferrerCount;
+        referrerCount[_referrer] = tempReferrerCount;
     }
 
     //TODO: ADD_COMMENT
     function claimReferralReward() external {
-        uint256 _count = referrerClaimableTreesDai[_msgSender()] +
+        uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
 
-        require(_count > 0, "invalid gift owner");
+        require(claimableTreesCount > 0, "invalid gift owner");
 
-        if (_count > 45) {
-            _count = 45;
+        if (claimableTreesCount > 45) {
+            claimableTreesCount = 45;
         }
 
-        int256 x = int256(referrerClaimableTreesDai[_msgSender()]) -
-            int256(_count);
+        int256 difference = int256(referrerClaimableTreesDai[_msgSender()]) -
+            int256(claimableTreesCount);
 
-        uint256 _amount = 0;
+        uint256 totalPrice = 0;
 
-        if (x > -1) {
-            _amount =
-                _count *
+        if (difference > -1) {
+            totalPrice =
+                claimableTreesCount *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
 
-            referrerClaimableTreesDai[_msgSender()] -= _count;
+            referrerClaimableTreesDai[_msgSender()] -= claimableTreesCount;
 
-            daiFund.transferReferrerDai(_amount);
+            daiFund.transferReferrerDai(totalPrice);
         } else {
             if (referrerClaimableTreesDai[_msgSender()] > 0) {
-                _amount =
+                totalPrice =
                     referrerClaimableTreesDai[_msgSender()] *
                     (referralTreePaymentToPlanter +
                         referralTreePaymentToAmbassador);
 
                 referrerClaimableTreesDai[_msgSender()] = 0;
 
-                daiFund.transferReferrerDai(_amount);
+                daiFund.transferReferrerDai(totalPrice);
             }
 
-            uint256 wethAmount = uint256(-x) *
+            uint256 claimableTreesWethTotalPrice = uint256(-difference) *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
 
-            referrerClaimableTreesWeth[_msgSender()] -= uint256(-x);
+            referrerClaimableTreesWeth[_msgSender()] -= uint256(-difference);
 
-            wethFund.updateDaiDebtToPlanterContract(wethAmount);
+            wethFund.updateDaiDebtToPlanterContract(
+                claimableTreesWethTotalPrice
+            );
 
-            _amount += wethAmount;
+            totalPrice += claimableTreesWethTotalPrice;
         }
 
-        emit ReferralRewardClaimed(_msgSender(), _count, _amount);
+        emit ReferralRewardClaimed(
+            _msgSender(),
+            claimableTreesCount,
+            totalPrice
+        );
 
-        _mintReferralReward(_count, _msgSender());
+        _mintReferralReward(claimableTreesCount, _msgSender());
     }
 
     //TODO: ADD_COMMENT
     function _mintReferralReward(uint256 _count, address _referrer) private {
-        uint256 tempLastRegularSold = lastFundedTreeId;
+        uint256 tempLastFundedTreeId = lastFundedTreeId;
 
         for (uint256 i = 0; i < _count; i++) {
-            tempLastRegularSold = treeFactory.mintTree(
-                tempLastRegularSold,
+            tempLastFundedTreeId = treeFactory.mintTree(
+                tempLastFundedTreeId,
                 _referrer
             );
 
             planterFundContract.updateProjectedEarnings(
-                tempLastRegularSold,
+                tempLastFundedTreeId,
                 referralTreePaymentToPlanter,
                 referralTreePaymentToAmbassador
             );
 
-            emit RegularMint(_referrer, tempLastRegularSold, price);
+            emit RegularMint(_referrer, tempLastFundedTreeId, price);
         }
 
-        lastFundedTreeId = tempLastRegularSold;
+        lastFundedTreeId = tempLastFundedTreeId;
     }
 }

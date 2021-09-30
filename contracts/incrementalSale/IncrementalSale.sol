@@ -43,7 +43,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 treasury;
         uint256 reserve1;
         uint256 reserve2;
-        address buyer;
+        address funder;
     }
 
     /** NOTE {incrementalSaleData} is struct of IncrementalSaleData that store
@@ -291,20 +291,21 @@ contract IncrementalSale is Initializable, RelayRecipient {
             "Not enough tree in incremental sell"
         );
 
-        uint256 treeId = lastSold + 1;
+        uint256 tempLastSold = lastSold + 1;
 
-        uint256 y = (treeId - incSaleData.startTreeId) / incSaleData.increments;
+        uint256 y = (tempLastSold - incSaleData.startTreeId) /
+            incSaleData.increments;
 
         uint256 z = (y + 1) *
             incSaleData.increments +
             incSaleData.startTreeId -
-            treeId;
+            tempLastSold;
 
-        uint256 nowPrice = incSaleData.initialPrice +
+        uint256 tempLastSoldPrice = incSaleData.initialPrice +
             (y * incSaleData.initialPrice * incSaleData.priceJump) /
             10000;
 
-        uint256 totalPrice = _count * nowPrice;
+        uint256 totalPrice = _count * tempLastSoldPrice;
 
         int256 extra = int256(_count) - int256(z);
 
@@ -331,17 +332,17 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        treeId = _setAllocation(
-            treeId,
+        tempLastSold = _setAllocation(
+            tempLastSold,
             _count,
             _msgSender(),
             _referrer,
             totalPrice
         );
 
-        lastSold = treeId - 1;
+        lastSold = tempLastSold - 1;
 
-        emit TreeFunded(_msgSender(), _referrer, treeId - _count, _count);
+        emit TreeFunded(_msgSender(), _referrer, tempLastSold - _count, _count);
     }
 
     //TODO:ADD_COMMENTS
@@ -350,12 +351,12 @@ contract IncrementalSale is Initializable, RelayRecipient {
         for (uint256 i = 0; i < _count; i++) {
             treeId = _startTreeId + i;
 
-            (bool ms, bytes32 randTree) = treeFactory.checkMintOrigin(
+            (bool isValid, bytes32 randTree) = treeFactory.checkMintOrigin(
                 treeId,
                 _msgSender()
             );
 
-            require(ms, "no need to tree attributes");
+            require(isValid, "no need to tree attributes");
 
             treeAttribute.createTreeAttributes(treeId, randTree, _msgSender());
         }
@@ -383,9 +384,9 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     function _setAllocation(
-        uint256 _startTreeId,
+        uint256 _tempLastSold,
         uint256 _count,
-        address _buyer,
+        address _funder,
         address _referrer,
         uint256 _totalPrice
     ) private returns (uint256) {
@@ -393,12 +394,12 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
         TotalBalances memory totalBalances;
 
-        uint256 treeId = _startTreeId;
+        uint256 tempLastSold = _tempLastSold;
 
-        totalBalances.buyer = _buyer;
+        totalBalances.funder = _funder;
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (treeId - incSaleData.startTreeId) /
+            uint256 steps = (tempLastSold - incSaleData.startTreeId) /
                 incSaleData.increments;
 
             uint256 treePrice = incSaleData.initialPrice +
@@ -414,7 +415,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 uint16 treasuryShare,
                 uint16 reserve1Share,
                 uint16 reserve2Share
-            ) = allocation.findAllocationData(treeId);
+            ) = allocation.findAllocationData(tempLastSold);
 
             totalBalances.planter += (treePrice * planterShare) / 10000;
             totalBalances.ambassador += (treePrice * ambassadorShare) / 10000;
@@ -427,9 +428,9 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1 += (treePrice * reserve1Share) / 10000;
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
-            treeFactory.mintAssignedTree(treeId, totalBalances.buyer, 1);
+            treeFactory.mintAssignedTree(tempLastSold, totalBalances.funder, 1);
 
-            treeId += 1;
+            tempLastSold += 1;
         }
 
         uint256 daiAmount = wethFund.fundTreeBatch(
@@ -444,7 +445,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         );
 
         _setPlanterAllocation(
-            _startTreeId,
+            _tempLastSold,
             _count,
             daiAmount,
             totalBalances.planter,
@@ -456,29 +457,29 @@ contract IncrementalSale is Initializable, RelayRecipient {
             regularSale.updateReferrerClaimableTreesWeth(_referrer, _count);
         }
 
-        return treeId;
+        return tempLastSold;
     }
 
     function _setPlanterAllocation(
-        uint256 _startTreeId,
+        uint256 _tempLastSold,
         uint256 _count,
         uint256 _daiAmount,
-        uint256 _planterFund,
-        uint256 _referralFund,
+        uint256 _planterAmount,
+        uint256 _ambassadorAmount,
         uint256 _totalPrice
     ) private {
-        uint256 planterDai = (_daiAmount * _planterFund) /
-            (_planterFund + _referralFund);
+        uint256 planterDaiAmount = (_daiAmount * _planterAmount) /
+            (_planterAmount + _ambassadorAmount);
 
-        uint256 referralDai = (_daiAmount * _referralFund) /
-            (_planterFund + _referralFund);
+        uint256 ambassadorDaiAmount = (_daiAmount * _ambassadorAmount) /
+            (_planterAmount + _ambassadorAmount);
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        uint256 treeId = _startTreeId;
+        uint256 tempLastSold = _tempLastSold;
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (treeId - incSaleData.startTreeId) /
+            uint256 steps = (tempLastSold - incSaleData.startTreeId) /
                 incSaleData.increments;
 
             uint256 treePrice = incSaleData.initialPrice +
@@ -486,12 +487,12 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 10000;
 
             planterFundContract.updateProjectedEarnings(
-                treeId,
-                (planterDai * treePrice) / _totalPrice,
-                (referralDai * treePrice) / _totalPrice
+                tempLastSold,
+                (planterDaiAmount * treePrice) / _totalPrice,
+                (ambassadorDaiAmount * treePrice) / _totalPrice
             );
 
-            treeId += 1;
+            tempLastSold += 1;
         }
     }
 }

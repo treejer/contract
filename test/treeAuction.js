@@ -1202,9 +1202,12 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       await Common.addTreejerContractRole(
         arInstance,

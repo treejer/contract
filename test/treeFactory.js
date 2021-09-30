@@ -101,9 +101,12 @@ contract("TreeFactory", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     it("deploys successfully and check addresses", async () => {
@@ -154,12 +157,17 @@ contract("TreeFactory", (accounts) => {
 
       ////////////------------------------------------ set planter address ----------------------------------------//
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       await treeFactoryInstance
-        .setPlanterAddress(planterInstance.address, { from: userAccount1 })
+        .setPlanterContractAddress(planterInstance.address, {
+          from: userAccount1,
+        })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       ////////////////////------------------------------------ tree token address ----------------------------------------//
@@ -324,9 +332,12 @@ contract("TreeFactory", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
     });
     //////////// tests
 
@@ -2132,9 +2143,12 @@ contract("TreeFactory", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     it("Should update tree work successfully", async () => {

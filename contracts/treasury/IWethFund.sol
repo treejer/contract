@@ -212,7 +212,7 @@ interface IWethFund {
     //TODO: ADD_COMMENT
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
-        uint256 _totalDaiSwap
+        uint256 _daiAmountToSwap
     ) external;
 
     //TODO: ADD_COMMENT

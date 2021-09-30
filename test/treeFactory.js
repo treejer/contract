@@ -573,7 +573,7 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
         from: userAccount2,
       });
 
@@ -975,7 +975,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
       //////////////------------------ accept user to organiztion
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
@@ -1039,7 +1039,7 @@ contract("TreeFactory", (accounts) => {
 
       /////////////-------------- accept user account5 as planter to organization 3 but it should be fail because tree asigned to userAccount4 in organization 3
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
@@ -1057,7 +1057,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       ///////////////////////////--------------------- accept user from other org and must be fail because not assignee
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
@@ -1510,10 +1510,10 @@ contract("TreeFactory", (accounts) => {
         userAccount3
       );
       //////////////----------------- accept org planter
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
       await Common.addTreejerContractRole(
@@ -1705,19 +1705,19 @@ contract("TreeFactory", (accounts) => {
 
       ///////////////---------------- accept org planter by org
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
@@ -1850,15 +1850,15 @@ contract("TreeFactory", (accounts) => {
 
       ///////////////---------------- accept org planter by org
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
@@ -1988,15 +1988,15 @@ contract("TreeFactory", (accounts) => {
       });
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
@@ -3775,19 +3775,19 @@ contract("TreeFactory", (accounts) => {
       });
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -3900,15 +3900,15 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -3980,7 +3980,7 @@ contract("TreeFactory", (accounts) => {
         .verifyUpdate(treeId, true, { from: userAccount5 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
@@ -4065,19 +4065,19 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -4226,19 +4226,19 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -5168,7 +5168,7 @@ contract("TreeFactory", (accounts) => {
         organizationAdmin
       );
 
-      await planterInstance.acceptPlanterFromOrganization(planter, true, {
+      await planterInstance.acceptPlanterByOrganization(planter, true, {
         from: organizationAdmin,
       });
 
@@ -5937,7 +5937,7 @@ contract("TreeFactory", (accounts) => {
     //     userAccount1
     //   );
 
-    //   await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+    //   await planterInstance.acceptPlanterByOrganization(userAccount2, true, {
     //     from: userAccount1,
     //   });
 

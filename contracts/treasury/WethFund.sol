@@ -482,24 +482,27 @@ contract WethFund is Initializable {
 
         totalBalances.reserve2 += _totalReserve2;
 
-        uint256 sumFund = _totalPlanterAmount + _totalAmbassadorAmount;
+        uint256 sumAmount = _totalPlanterAmount + _totalAmbassadorAmount;
 
-        uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
+        uint256 daiAmount = sumAmount > 0
+            ? _swapExactTokensForTokens(sumAmount)
+            : 0;
 
         emit TreeFundedBatch();
 
-        return amount;
+        return daiAmount;
     }
 
     //TODO: ADD_COMMENT
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
-        uint256 _totalDaiSwap
+        uint256 _daiAmountToSwap
     ) external onlyScript {
         require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
 
         require(
-            _totalDaiSwap > 0 && _totalDaiSwap <= totalDaiDebtToPlanterContract,
+            _daiAmountToSwap > 0 &&
+                _daiAmountToSwap <= totalDaiDebtToPlanterContract,
             "totalDaiDebtToPlanterContract invalid"
         );
 
@@ -514,7 +517,7 @@ contract WethFund is Initializable {
         require(success, "unsuccessful approve");
 
         uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
-            _totalDaiSwap,
+            _daiAmountToSwap,
             _wethMaxUse,
             path,
             address(planterFundContract),
@@ -523,11 +526,11 @@ contract WethFund is Initializable {
 
         emit DaiDebtToPlanterContractPaid(
             _wethMaxUse,
-            _totalDaiSwap,
+            _daiAmountToSwap,
             amounts[0]
         );
 
-        totalDaiDebtToPlanterContract -= _totalDaiSwap;
+        totalDaiDebtToPlanterContract -= _daiAmountToSwap;
         totalBalances.treasury -= amounts[0];
     }
 
@@ -551,11 +554,11 @@ contract WethFund is Initializable {
         uint16 _planterShare,
         uint16 _ambassadorShare
     ) private {
-        uint256 planterFund = (_amount * _planterShare) / 10000;
-        uint256 ambassadorFund = (_amount * _ambassadorShare) / 10000;
+        uint256 planterAmount = (_amount * _planterShare) / 10000;
+        uint256 ambassadorAmount = (_amount * _ambassadorShare) / 10000;
 
-        uint256 sumFund = planterFund + ambassadorFund;
-        uint16 sumPercent = _planterShare + _ambassadorShare;
+        uint256 sumAmount = planterAmount + ambassadorAmount;
+        uint16 sumShare = _planterShare + _ambassadorShare;
 
         address[] memory path;
         path = new address[](2);
@@ -563,15 +566,17 @@ contract WethFund is Initializable {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        uint256 amount = sumFund > 0 ? _swapExactTokensForTokens(sumFund) : 0;
+        uint256 daiAmount = sumAmount > 0
+            ? _swapExactTokensForTokens(sumAmount)
+            : 0;
 
         planterFundContract.updateProjectedEarnings(
             _treeId,
-            (_planterShare * amount) / sumPercent,
-            (_ambassadorShare * amount) / sumPercent
+            (_planterShare * daiAmount) / sumShare,
+            (_ambassadorShare * daiAmount) / sumShare
         );
 
-        emit TreeFunded(_treeId, _amount, planterFund + ambassadorFund);
+        emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
 
     //TODO: ADD_COMMENT

@@ -15,8 +15,6 @@ contract Allocation is Initializable {
 
     CountersUpgradeable.Counter private allocationCount;
 
-    uint256 constant MAX_UINT256 = type(uint256).max;
-
     /** NOTE {isAllocation} set inside the initialize to {true} */
     bool public isAllocation;
 
@@ -143,69 +141,69 @@ contract Allocation is Initializable {
             "Distribution model not found"
         );
 
-        AllocationToTree[] memory localAllocationToTree = allocationToTrees;
+        AllocationToTree[] memory tempAllocationToTree = allocationToTrees;
 
         delete allocationToTrees;
 
-        uint256 checkFlag = 0;
+        uint256 flag = 0;
 
-        for (uint256 i = 0; i < localAllocationToTree.length; i++) {
-            if (localAllocationToTree[i].startingTreeId < _startTreeId) {
-                allocationToTrees.push(localAllocationToTree[i]);
+        for (uint256 i = 0; i < tempAllocationToTree.length; i++) {
+            if (tempAllocationToTree[i].startingTreeId < _startTreeId) {
+                allocationToTrees.push(tempAllocationToTree[i]);
             } else {
-                if (checkFlag == 0) {
+                if (flag == 0) {
                     allocationToTrees.push(
                         AllocationToTree(_startTreeId, _allocationDataId)
                     );
-                    checkFlag = 1;
+                    flag = 1;
                 }
-                if (checkFlag == 1) {
+                if (flag == 1) {
                     if (_endTreeId == 0 && _startTreeId != 0) {
-                        checkFlag = 5;
+                        flag = 5;
                         break;
                     }
                     if (
                         i > 0 &&
-                        _endTreeId + 1 < localAllocationToTree[i].startingTreeId
+                        _endTreeId + 1 < tempAllocationToTree[i].startingTreeId
                     ) {
                         allocationToTrees.push(
                             AllocationToTree(
                                 _endTreeId + 1,
-                                localAllocationToTree[i - 1].allocationDataId
+                                tempAllocationToTree[i - 1].allocationDataId
                             )
                         );
-                        checkFlag = 2;
+                        flag = 2;
                     }
                 }
-                if (checkFlag == 2) {
-                    allocationToTrees.push(localAllocationToTree[i]);
+                if (flag == 2) {
+                    allocationToTrees.push(tempAllocationToTree[i]);
                 }
             }
         }
 
-        if (checkFlag == 0) {
+        if (flag == 0) {
             allocationToTrees.push(
                 AllocationToTree(_startTreeId, _allocationDataId)
             );
             if (_endTreeId == 0 && _startTreeId != 0) {
-                checkFlag = 5;
+                flag = 5;
             } else {
-                checkFlag = 1;
+                flag = 1;
             }
         }
 
-        if (checkFlag == 5) {
-            maxAssignedIndex = MAX_UINT256;
+        if (flag == 5) {
+            maxAssignedIndex = type(uint256).max;
         }
 
-        if (checkFlag == 1) {
+        if (flag == 1) {
             if (maxAssignedIndex < _endTreeId) {
                 maxAssignedIndex = _endTreeId;
-            } else if (localAllocationToTree.length > 0) {
+            } else if (tempAllocationToTree.length > 0) {
                 allocationToTrees.push(
                     AllocationToTree(
                         _endTreeId + 1,
-                        localAllocationToTree[localAllocationToTree.length - 1]
+                        tempAllocationToTree[tempAllocationToTree.length - 1]
                             .allocationDataId
                     )
                 );
@@ -255,44 +253,44 @@ contract Allocation is Initializable {
             uint16 reserve2Share
         )
     {
-        AllocationData storage allocation;
+        AllocationData storage allocationData;
 
         for (uint256 i = 0; i < allocationToTrees.length; i++) {
             if (allocationToTrees[i].startingTreeId > _treeId) {
                 require(i > 0, "invalid fund model");
 
-                allocation = allocations[
+                allocationData = allocations[
                     allocationToTrees[i - 1].allocationDataId
                 ];
 
                 return (
-                    allocation.planterShare,
-                    allocation.ambassadorShare,
-                    allocation.researchShare,
-                    allocation.localDevelopmentShare,
-                    allocation.insuranceShare,
-                    allocation.treasuryShare,
-                    allocation.reserve1Share,
-                    allocation.reserve2Share
+                    allocationData.planterShare,
+                    allocationData.ambassadorShare,
+                    allocationData.researchShare,
+                    allocationData.localDevelopmentShare,
+                    allocationData.insuranceShare,
+                    allocationData.treasuryShare,
+                    allocationData.reserve1Share,
+                    allocationData.reserve2Share
                 );
             }
         }
 
         require(allocationToTrees.length > 0, "invalid fund model");
 
-        allocation = allocations[
+        allocationData = allocations[
             allocationToTrees[allocationToTrees.length - 1].allocationDataId
         ];
 
         return (
-            allocation.planterShare,
-            allocation.ambassadorShare,
-            allocation.researchShare,
-            allocation.localDevelopmentShare,
-            allocation.insuranceShare,
-            allocation.treasuryShare,
-            allocation.reserve1Share,
-            allocation.reserve2Share
+            allocationData.planterShare,
+            allocationData.ambassadorShare,
+            allocationData.researchShare,
+            allocationData.localDevelopmentShare,
+            allocationData.insuranceShare,
+            allocationData.treasuryShare,
+            allocationData.reserve1Share,
+            allocationData.reserve2Share
         );
     }
 }

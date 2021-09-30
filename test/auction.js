@@ -1702,7 +1702,7 @@ contract("Auction", (accounts) => {
 
       let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
 
-      let totalFundsWethFunds = await wethFundsInstance.totalFunds();
+      let totalFundsWethFunds = await wethFundsInstance.totalBalances();
 
       assert.equal(
         Number(pFund),
@@ -1764,7 +1764,7 @@ contract("Auction", (accounts) => {
         "reserve2 funds invalid"
       );
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount8,
       });
 
@@ -2156,7 +2156,7 @@ contract("Auction", (accounts) => {
 
       let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
 
-      let totalFundsWethFunds = await wethFundsInstance.totalFunds();
+      let totalFundsWethFunds = await wethFundsInstance.totalBalances();
 
       assert.equal(
         Number(await daiInstance.balanceOf(planterFundsInstnce.address)),
@@ -2744,7 +2744,7 @@ contract("Auction", (accounts) => {
         await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       let totalFundsPlanterFunds = await planterFundsInstnce.totalBalances();
-      let totalFundsWethFunds = await wethFundsInstance.totalFunds();
+      let totalFundsWethFunds = await wethFundsInstance.totalBalances();
 
       assert.equal(
         Number(pFund),
@@ -2913,7 +2913,7 @@ contract("Auction", (accounts) => {
         "2.treasury balance not true"
       );
 
-      let totalFunds2 = await wethFundsInstance.totalFunds();
+      let totalFunds2 = await wethFundsInstance.totalBalances();
 
       let treejerDevelopBalance = totalFunds2.treasury;
       let ownerAccountBalanceBefore = await wethInstance.balanceOf(
@@ -3255,7 +3255,7 @@ contract("Auction", (accounts) => {
         await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundBeforeAuction1End =
-        await wethFundsInstance.totalFunds();
+        await wethFundsInstance.totalBalances();
 
       //////////////// ------------------  check contract funds before end auction
 
@@ -3403,7 +3403,7 @@ contract("Auction", (accounts) => {
         await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundAfterAuction1End =
-        await wethFundsInstance.totalFunds();
+        await wethFundsInstance.totalBalances();
 
       ///------------ check totalFunds after auction end
       assert.equal(
@@ -3536,7 +3536,7 @@ contract("Auction", (accounts) => {
         await planterFundsInstnce.totalBalances();
 
       const totalFundWethFundAfterAuction2End =
-        await wethFundsInstance.totalFunds();
+        await wethFundsInstance.totalBalances();
 
       ///------------ check totalFunds after auction end
 

@@ -129,7 +129,7 @@ interface IPlanter {
      * @param _acceptance accept or reject
      * NOTE emit a {AcceptedByOrganization} or {RejectedByOrganization} event
      */
-    function acceptPlanterFromOrganization(address _planter, bool _acceptance)
+    function acceptPlanterByOrganization(address _planter, bool _acceptance)
         external;
 
     /** @dev admin update supplyCap of planter {_planter}
@@ -151,13 +151,13 @@ interface IPlanter {
 
     /** @dev oragnization can update planterPayment rules of it's members
      * @param _planter address of planter
-     * @param _planterAutomaticPaymentPortion payment portion value
+     * @param _organizationMemberShareAmount payment portion value
      * NOTE only organization (planterType = 2) can call this function
      * NOTE emit a {OrganizationMemberShareUpdated} event
      */
     function updateOrganizationMemberShare(
         address _planter,
-        uint256 _planterAutomaticPaymentPortion
+        uint256 _organizationMemberShareAmount
     ) external;
 
     /** @dev return planter paymentPortion for an accepted organizationPlanter

@@ -369,7 +369,7 @@ Common.acceptPlanterByOrganization = async (
   planterAddress,
   planterProtion
 ) => {
-  await planterInstance.acceptPlanterFromOrganization(planterAddress, true, {
+  await planterInstance.acceptPlanterByOrganization(planterAddress, true, {
     from: organizationAddress,
   });
 
@@ -434,7 +434,7 @@ Common.regularPlantTreeSuccessOrganization = async (
     zeroAddress,
     organizationAdmin
   );
-  await planterInstance.acceptPlanterFromOrganization(planter, true, {
+  await planterInstance.acceptPlanterByOrganization(planter, true, {
     from: organizationAdmin,
   });
 

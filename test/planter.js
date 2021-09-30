@@ -1039,7 +1039,7 @@ contract("Planter", (accounts) => {
       userAccount4
     );
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount2, true, {
       from: userAccount4,
     });
 
@@ -1135,7 +1135,7 @@ contract("Planter", (accounts) => {
 
   ////// ---------------------------------------------  accept planter from organization  --------------------------------------------------
 
-  it("should check data to be correct after acceptPlanterFromOrganization", async () => {
+  it("should check data to be correct after acceptPlanterByOrganization", async () => {
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     await Common.addPlanter(arInstance, userAccount3, deployerAccount);
@@ -1165,7 +1165,7 @@ contract("Planter", (accounts) => {
 
     assert.equal(memberOfBefore, userAccount1, "invalid memberOf");
 
-    const eventTx = await planterInstance.acceptPlanterFromOrganization(
+    const eventTx = await planterInstance.acceptPlanterByOrganization(
       userAccount2,
       true,
       {
@@ -1215,7 +1215,7 @@ contract("Planter", (accounts) => {
 
     assert.equal(memberOfBefore2, userAccount3, "invalid memberOf");
 
-    const eventTx2 = await planterInstance.acceptPlanterFromOrganization(
+    const eventTx2 = await planterInstance.acceptPlanterByOrganization(
       userAccount4,
       false,
       {
@@ -1275,27 +1275,27 @@ contract("Planter", (accounts) => {
     );
 
     await planterInstance
-      .acceptPlanterFromOrganization(userAccount3, true, {
+      .acceptPlanterByOrganization(userAccount3, true, {
         from: userAccount4,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_ORGANIZATION);
 
     await planterInstance
-      .acceptPlanterFromOrganization(userAccount6, true, {
+      .acceptPlanterByOrganization(userAccount6, true, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
 
     await planterInstance
-      .acceptPlanterFromOrganization(userAccount4, true, { from: userAccount1 })
+      .acceptPlanterByOrganization(userAccount4, true, { from: userAccount1 })
       .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
       from: userAccount1,
     });
 
     await planterInstance
-      .acceptPlanterFromOrganization(userAccount3, true, {
+      .acceptPlanterByOrganization(userAccount3, true, {
         from: userAccount1,
       })
       .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
@@ -1903,14 +1903,14 @@ contract("Planter", (accounts) => {
     );
 
     //////////////// ---------- accept planter
-    await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
       from: userAccount1,
     });
-    await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
       from: userAccount2,
     });
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
       from: userAccount1,
     });
     ////////////////--------------- check before any update
@@ -2138,7 +2138,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER);
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
       from: userAccount1,
     });
 
@@ -2257,7 +2257,7 @@ contract("Planter", (accounts) => {
       "invalid payment portion"
     );
 
-    await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+    await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
       from: userAccount1,
     });
 

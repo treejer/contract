@@ -203,58 +203,60 @@ contract PlanterFund is Initializable, RelayRecipient {
         ) = planterContract.getOrganizationMemberData(_planter);
 
         if (exists) {
-            uint256 totalPayablePlanter;
+            uint256 totalPayableAmountToPlanter;
 
             if (_treeStatus > 25920) {
                 //25920 = 30 * 24 * 36
 
-                totalPayablePlanter =
+                totalPayableAmountToPlanter =
                     treeToPlanterProjectedEarning[_treeId] -
                     treeToPlanterTotalClaimed[_treeId];
             } else {
-                totalPayablePlanter =
+                totalPayableAmountToPlanter =
                     ((treeToPlanterProjectedEarning[_treeId] * _treeStatus) /
                         25920) -
                     treeToPlanterTotalClaimed[_treeId];
             }
 
-            if (totalPayablePlanter > 0) {
-                uint256 totalPayableAmbassador = (treeToAmbassadorProjectedEarning[
+            if (totalPayableAmountToPlanter > 0) {
+                uint256 totalPayableAmountToAmbassador = (treeToAmbassadorProjectedEarning[
                         _treeId
-                    ] * totalPayablePlanter) /
+                    ] * totalPayableAmountToPlanter) /
                         treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
-                totalBalances.ambassador -= totalPayableAmbassador;
+                totalBalances.ambassador -= totalPayableAmountToAmbassador;
 
                 if (ambassadorAddress == address(0)) {
-                    totalBalances.localDevelopment += totalPayableAmbassador;
+                    totalBalances
+                        .localDevelopment += totalPayableAmountToAmbassador;
                 } else {
-                    balances[ambassadorAddress] += totalPayableAmbassador;
+                    balances[
+                        ambassadorAddress
+                    ] += totalPayableAmountToAmbassador;
                 }
 
-                totalBalances.planter -= totalPayablePlanter;
-
-                //Organization calculation section
-                uint256 fullPortion = 10000;
+                totalBalances.planter -= totalPayableAmountToPlanter;
 
                 balances[organizationAddress] +=
-                    (totalPayablePlanter * (fullPortion - share)) /
-                    fullPortion;
+                    (totalPayableAmountToPlanter * (10000 - share)) /
+                    10000;
 
                 //planter calculation section
 
-                treeToPlanterTotalClaimed[_treeId] += totalPayablePlanter;
+                treeToPlanterTotalClaimed[
+                    _treeId
+                ] += totalPayableAmountToPlanter;
 
                 balances[_planter] +=
-                    (totalPayablePlanter * share) /
-                    fullPortion;
+                    (totalPayableAmountToPlanter * share) /
+                    10000;
 
                 emit PlanterTotalClaimedUpdated(
                     _treeId,
                     _planter,
-                    totalPayablePlanter,
+                    totalPayableAmountToPlanter,
                     ambassadorAddress
                 );
             }

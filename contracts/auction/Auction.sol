@@ -192,17 +192,17 @@ contract Auction is Initializable, RelayRecipient {
     ) external ifNotPaused onlyDataManager {
         require(allocation.exists(_treeId), "equivalant fund Model not exists");
 
-        uint32 provideStatus = treeFactory.manageSaleType(_treeId, 1);
+        uint32 saleType = treeFactory.manageSaleType(_treeId, 1);
 
-        require(provideStatus == 0, "not available for auction");
+        require(saleType == 0, "not available for auction");
 
-        AuctionData storage auction = auctions[auctionId.current()];
+        AuctionData storage auctionData = auctions[auctionId.current()];
 
-        auction.treeId = _treeId;
-        auction.startDate = _startDate;
-        auction.endDate = _endDate;
-        auction.highestBid = _intialPrice;
-        auction.bidInterval = _bidInterval;
+        auctionData.treeId = _treeId;
+        auctionData.startDate = _startDate;
+        auctionData.endDate = _endDate;
+        auctionData.highestBid = _intialPrice;
+        auctionData.bidInterval = _bidInterval;
 
         emit AuctionCreated(auctionId.current());
 
@@ -221,20 +221,20 @@ contract Auction is Initializable, RelayRecipient {
         uint256 _amount,
         address _referrer
     ) external ifNotPaused {
-        AuctionData storage _storageAuction = auctions[_auctionId];
+        AuctionData storage auctionData = auctions[_auctionId];
 
         require(
-            block.timestamp <= _storageAuction.endDate,
+            block.timestamp <= auctionData.endDate,
             "auction already ended"
         );
 
         require(
-            block.timestamp >= _storageAuction.startDate,
+            block.timestamp >= auctionData.startDate,
             "auction not started"
         );
 
         require(
-            _amount >= _storageAuction.highestBid + _storageAuction.bidInterval,
+            _amount >= auctionData.highestBid + auctionData.bidInterval,
             "invalid amount"
         );
 
@@ -258,15 +258,15 @@ contract Auction is Initializable, RelayRecipient {
             referrals[_msgSender()][_auctionId] = _referrer;
         }
 
-        address oldBidder = _storageAuction.bidder;
-        uint256 oldBid = _storageAuction.highestBid;
+        address oldBidder = auctionData.bidder;
+        uint256 oldBid = auctionData.highestBid;
 
-        _storageAuction.highestBid = _amount;
-        _storageAuction.bidder = _msgSender();
+        auctionData.highestBid = _amount;
+        auctionData.bidder = _msgSender();
 
         emit HighestBidIncreased(
             _auctionId,
-            _storageAuction.treeId,
+            auctionData.treeId,
             _msgSender(),
             _amount,
             _referrer
@@ -287,16 +287,19 @@ contract Auction is Initializable, RelayRecipient {
      * @param _auctionId id of auction that want to finish.
      */
     function endAuction(uint256 _auctionId) external ifNotPaused {
-        AuctionData storage auction = auctions[_auctionId];
+        AuctionData storage auctionData = auctions[_auctionId];
 
-        require(auction.endDate > 0, "Auction is unavailable");
+        require(auctionData.endDate > 0, "Auction is unavailable");
 
-        require(block.timestamp >= auction.endDate, "Auction not yet ended");
+        require(
+            block.timestamp >= auctionData.endDate,
+            "Auction not yet ended"
+        );
 
-        if (auction.bidder != address(0)) {
+        if (auctionData.bidder != address(0)) {
             bool success = wethToken.transfer(
                 address(wethFund),
-                auction.highestBid
+                auctionData.highestBid
             );
 
             require(success, "unsuccessful transfer");
@@ -310,11 +313,11 @@ contract Auction is Initializable, RelayRecipient {
                 uint16 treasuryShare,
                 uint16 reserve1Share,
                 uint16 reserve2Share
-            ) = allocation.findAllocationData(auction.treeId);
+            ) = allocation.findAllocationData(auctionData.treeId);
 
             wethFund.fundTree(
-                auction.treeId,
-                auction.highestBid,
+                auctionData.treeId,
+                auctionData.highestBid,
                 planterShare,
                 ambassadorShare,
                 researchShare,
@@ -325,24 +328,33 @@ contract Auction is Initializable, RelayRecipient {
                 reserve2Share
             );
 
-            treeFactory.mintAssignedTree(auction.treeId, auction.bidder, 2);
+            treeFactory.mintAssignedTree(
+                auctionData.treeId,
+                auctionData.bidder,
+                2
+            );
 
-            address _tempReferrer = referrals[auction.bidder][_auctionId];
+            address referrerOfWinner = referrals[auctionData.bidder][
+                _auctionId
+            ];
 
-            if (_tempReferrer != address(0)) {
-                regularSale.updateReferrerClaimableTreesWeth(_tempReferrer, 1);
+            if (referrerOfWinner != address(0)) {
+                regularSale.updateReferrerClaimableTreesWeth(
+                    referrerOfWinner,
+                    1
+                );
             }
 
             emit AuctionSettled(
                 _auctionId,
-                auction.treeId,
-                auction.bidder,
-                auction.highestBid,
-                _tempReferrer
+                auctionData.treeId,
+                auctionData.bidder,
+                auctionData.highestBid,
+                referrerOfWinner
             );
         } else {
-            treeFactory.resetSaleType(auction.treeId);
-            emit AuctionEnded(_auctionId, auction.treeId);
+            treeFactory.resetSaleType(auctionData.treeId);
+            emit AuctionEnded(_auctionId, auctionData.treeId);
         }
 
         delete auctions[_auctionId];

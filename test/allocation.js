@@ -727,7 +727,7 @@ contract("Allocation", (accounts) => {
   });
 
   it("assignAllocationToTree should be reject", async () => {
-    ///////////------------ fail Distribution model not found
+    ///////////------------ fail allocation data not found
 
     await allocationInstance
       .assignAllocationToTree(0, 0, 0, {
@@ -756,13 +756,11 @@ contract("Allocation", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
   });
 
-  //--------------------------------------------------- DistributionModelOfTreeNotExist ------------------------------------
-  it("Check DistributionModelOfTreeNotExist event", async () => {
+  //--------------------------------------------------- exists ------------------------------------
+  it("Check AllocationDataExist event", async () => {
     let hasModel0 = await allocationInstance.exists(0);
 
     assert.equal(hasModel0, false, "hasModel not true");
-
-    let amount = web3.utils.toWei("1", "Ether");
 
     await allocationInstance.addAllocationData(
       4000,
@@ -794,7 +792,7 @@ contract("Allocation", (accounts) => {
 
   //------------------------------------------- findAllocationData ----------------------------------------
 
-  it("fundTree should be fail (invalid fund model)", async () => {
+  it("findAllocationData should be fail (invalid fund model)", async () => {
     await allocationInstance.addAllocationData(
       4000,
       1200,
@@ -852,7 +850,7 @@ contract("Allocation", (accounts) => {
 
     let dmModel = await allocationInstance.findAllocationData.call(treeId);
 
-    const eventTx1 = await allocationInstance.findAllocationData(treeId);
+    await allocationInstance.findAllocationData(treeId);
 
     assert.equal(
       Number(dmModel.planterShare),
@@ -863,94 +861,94 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel.ambassadorShare),
       ambassadorShare,
-      "referral funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel.researchShare),
       researchShare,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel.localDevelopmentShare),
       localDevelopmentShare,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel.insuranceShare),
       insuranceShare,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel.treasuryShare),
       treasuryShare,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel.reserve1Share),
       reserve1Share,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel.reserve2Share),
       reserve2Share,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     let dmModel100 = await allocationInstance.findAllocationData.call(100);
-    let eventTx2 = await allocationInstance.findAllocationData(100);
+    await allocationInstance.findAllocationData(100);
 
     assert.equal(
       Number(dmModel100.planterShare),
       planterShare,
-      "planter funds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel100.ambassadorShare),
       ambassadorShare,
-      "referral funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel100.researchShare),
       researchShare,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel100.localDevelopmentShare),
       localDevelopmentShare,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel100.insuranceShare),
       insuranceShare,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel100.treasuryShare),
       treasuryShare,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel100.reserve1Share),
       reserve1Share,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel100.reserve2Share),
       reserve2Share,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
   });
 
@@ -1016,49 +1014,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel2.planterShare),
       planterShare2,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel2.ambassadorShare),
       ambassadorShare2,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel2.researchShare),
       researchShare2,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel2.localDevelopmentShare),
       localDevelopmentShare2,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel2.insuranceShare),
       insuranceShare2,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel2.treasuryShare),
       treasuryShare2,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel2.reserve1Share),
       reserve1Share2,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel2.reserve2Share),
       reserve2Share2,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     let dmModel1 = await allocationInstance.findAllocationData.call(treeId1);
@@ -1072,43 +1070,43 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel1.ambassadorShare),
       ambassadorShare1,
-      "2.ambassadorShare funds invalid"
+      "2.ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel1.researchShare),
       researchShare1,
-      "2.researchShare funds invalid"
+      "2.research share invalid"
     );
 
     assert.equal(
       Number(dmModel1.localDevelopmentShare),
       localDevelopmentShare1,
-      "2.localDevelopmentShare funds invalid"
+      "2.localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel1.insuranceShare),
       rescueFund1,
-      "2.insuranceShare funds invalid"
+      "2.insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1.treasuryShare),
       treejerDevelop1,
-      "2.treasuryShare funds invalid"
+      "2.treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve1Share),
       reserve1Share1,
-      "2.reserve1Share funds invalid"
+      "2.reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve2Share),
       reserve2Share1,
-      "2.reserve2Share funds invalid"
+      "2.reserve2 share invalid"
     );
   });
 
@@ -1246,49 +1244,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel0.planterShare),
       planterShare1,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel0.ambassadorShare),
       ambassadorShare1,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel0.researchShare),
       researchShare1,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel0.localDevelopmentShare),
       localDevelopmentShare1,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel0.insuranceShare),
       rescueFund1,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel0.treasuryShare),
       treejerDevelop1,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel0.reserve1Share),
       reserve1Share1,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel0.reserve2Share),
       reserve2Share1,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
     //check treeId 1 model is 2
     const dmModel1 = await allocationInstance.findAllocationData.call(1);
@@ -1296,49 +1294,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel1.planterShare),
       planterShare2,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel1.ambassadorShare),
       ambassadorShare2,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel1.researchShare),
       researchShare2,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel1.localDevelopmentShare),
       localDevelopmentShare2,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel1.insuranceShare),
       insuranceShare2,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1.treasuryShare),
       treasuryShare2,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve1Share),
       reserve1Share2,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve2Share),
       reserve2Share2,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 5 model is 2
@@ -1348,49 +1346,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel5.planterShare),
       planterShare2,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel5.ambassadorShare),
       ambassadorShare2,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel5.researchShare),
       researchShare2,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel5.localDevelopmentShare),
       localDevelopmentShare2,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel5.insuranceShare),
       insuranceShare2,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel5.treasuryShare),
       treasuryShare2,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel5.reserve1Share),
       reserve1Share2,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel5.reserve2Share),
       reserve2Share2,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 10 model is 2
@@ -1400,49 +1398,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel10.planterShare),
       planterShare2,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel10.ambassadorShare),
       ambassadorShare2,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel10.researchShare),
       researchShare2,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel10.localDevelopmentShare),
       localDevelopmentShare2,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel10.insuranceShare),
       insuranceShare2,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel10.treasuryShare),
       treasuryShare2,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel10.reserve1Share),
       reserve1Share2,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel10.reserve2Share),
       reserve2Share2,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 11 model is 3
@@ -1451,49 +1449,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel11.planterShare),
       planterShare3,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel11.ambassadorShare),
       ambassadorShare3,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel11.researchShare),
       researchShare3,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel11.localDevelopmentShare),
       localDevelopmentShare3,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel11.insuranceShare),
       insuranceShare3,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel11.treasuryShare),
       treasuryShare3,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel11.reserve1Share),
       reserve1Share3,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel11.reserve2Share),
       reserve2Share3,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 99 model is 3
@@ -1503,49 +1501,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel99.planterShare),
       planterShare3,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel99.ambassadorShare),
       ambassadorShare3,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel99.researchShare),
       researchShare3,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel99.localDevelopmentShare),
       localDevelopmentShare3,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel99.insuranceShare),
       insuranceShare3,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel99.treasuryShare),
       treasuryShare3,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel99.reserve1Share),
       reserve1Share3,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel99.reserve2Share),
       reserve2Share3,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 100 model is 3
@@ -1555,49 +1553,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel100.planterShare),
       planterShare3,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel100.ambassadorShare),
       ambassadorShare3,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel100.researchShare),
       researchShare3,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel100.localDevelopmentShare),
       localDevelopmentShare3,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel100.insuranceShare),
       insuranceShare3,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel100.treasuryShare),
       treasuryShare3,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel100.reserve1Share),
       reserve1Share3,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel100.reserve2Share),
       reserve2Share3,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 101 model is 4
@@ -1607,49 +1605,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel101.planterShare),
       planterShare4,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel101.ambassadorShare),
       ambassadorShare4,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel101.researchShare),
       researchShare4,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel101.localDevelopmentShare),
       localDevelopmentShare4,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel101.insuranceShare),
       insuranceShare4,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel101.treasuryShare),
       treasuryShare4,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel101.reserve1Share),
       reserve1Share4,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel101.reserve2Share),
       reserve2Share4,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 1500 model is 4
@@ -1659,49 +1657,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel1500.planterShare),
       planterShare4,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.ambassadorShare),
       ambassadorShare4,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.researchShare),
       researchShare4,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.localDevelopmentShare),
       localDevelopmentShare4,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.insuranceShare),
       insuranceShare4,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.treasuryShare),
       treasuryShare4,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.reserve1Share),
       reserve1Share4,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel1500.reserve2Share),
       reserve2Share4,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 1000000 model is 4
@@ -1713,49 +1711,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel1000000.planterShare),
       planterShare4,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.ambassadorShare),
       ambassadorShare4,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.researchShare),
       researchShare4,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.localDevelopmentShare),
       localDevelopmentShare4,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.insuranceShare),
       insuranceShare4,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.treasuryShare),
       treasuryShare4,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.reserve1Share),
       reserve1Share4,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel1000000.reserve2Share),
       reserve2Share4,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     await allocationInstance.addAllocationData(
@@ -1782,49 +1780,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel4999.planterShare),
       planterShare4,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.ambassadorShare),
       ambassadorShare4,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.researchShare),
       researchShare4,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.localDevelopmentShare),
       localDevelopmentShare4,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.insuranceShare),
       insuranceShare4,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.treasuryShare),
       treasuryShare4,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.reserve1Share),
       reserve1Share4,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel4999.reserve2Share),
       reserve2Share4,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 5000 model is 5
@@ -1834,49 +1832,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel5000.planterShare),
       planterShare5,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.ambassadorShare),
       ambassadorShare5,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.researchShare),
       researchShare5,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.localDevelopmentShare),
       localDevelopmentShare5,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.insuranceShare),
       insuranceShare5,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.treasuryShare),
       treasuryShare5,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.reserve1Share),
       reserve1Share5,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel5000.reserve2Share),
       reserve2Share5,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 6000 model is 5
@@ -1886,49 +1884,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel6000.planterShare),
       planterShare5,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.ambassadorShare),
       ambassadorShare5,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.researchShare),
       researchShare5,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.localDevelopmentShare),
       localDevelopmentShare5,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.insuranceShare),
       insuranceShare5,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.treasuryShare),
       treasuryShare5,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.reserve1Share),
       reserve1Share5,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel6000.reserve2Share),
       reserve2Share5,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 10000 model is 5
@@ -1940,49 +1938,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel10000.planterShare),
       planterShare5,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.ambassadorShare),
       ambassadorShare5,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.researchShare),
       researchShare5,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.localDevelopmentShare),
       localDevelopmentShare5,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.insuranceShare),
       insuranceShare5,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.treasuryShare),
       treasuryShare5,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.reserve1Share),
       reserve1Share5,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel10000.reserve2Share),
       reserve2Share5,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 10001 model is 4
@@ -1993,49 +1991,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel10001.planterShare),
       planterShare4,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.ambassadorShare),
       ambassadorShare4,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.researchShare),
       researchShare4,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.localDevelopmentShare),
       localDevelopmentShare4,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.insuranceShare),
       insuranceShare4,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.treasuryShare),
       treasuryShare4,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.reserve1Share),
       reserve1Share4,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel10001.reserve2Share),
       reserve2Share4,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     await allocationInstance.addAllocationData(
@@ -2061,49 +2059,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel4.planterShare),
       planterShare6,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel4.ambassadorShare),
       ambassadorShare6,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel4.researchShare),
       researchShare6,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel4.localDevelopmentShare),
       localDevelopmentShare6,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel4.insuranceShare),
       insuranceShare6,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel4.treasuryShare),
       treasuryShare6,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel4.reserve1Share),
       reserve1Share6,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel4.reserve2Share),
       reserve2Share6,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 10_2 model is 6
@@ -2112,49 +2110,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel10_2.planterShare),
       planterShare6,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.ambassadorShare),
       ambassadorShare6,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.researchShare),
       researchShare6,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.localDevelopmentShare),
       localDevelopmentShare6,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.insuranceShare),
       insuranceShare6,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.treasuryShare),
       treasuryShare6,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.reserve1Share),
       reserve1Share6,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel10_2.reserve2Share),
       reserve2Share6,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 11_2 model is 3
@@ -2163,49 +2161,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel11_2.planterShare),
       planterShare3,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.ambassadorShare),
       ambassadorShare3,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.researchShare),
       researchShare3,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.localDevelopmentShare),
       localDevelopmentShare3,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.insuranceShare),
       insuranceShare3,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.treasuryShare),
       treasuryShare3,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.reserve1Share),
       reserve1Share3,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel11_2.reserve2Share),
       reserve2Share3,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
 
     //check treeId 3 model is 2
@@ -2213,49 +2211,49 @@ contract("Allocation", (accounts) => {
     assert.equal(
       Number(dmModel1.planterShare),
       planterShare2,
-      "planterShare totalFunds invalid"
+      "planter share invalid"
     );
 
     assert.equal(
       Number(dmModel1.ambassadorShare),
       ambassadorShare2,
-      "ambassadorShare funds invalid"
+      "ambassador share invalid"
     );
 
     assert.equal(
       Number(dmModel1.researchShare),
       researchShare2,
-      "researchShare funds invalid"
+      "research share invalid"
     );
 
     assert.equal(
       Number(dmModel1.localDevelopmentShare),
       localDevelopmentShare2,
-      "localDevelopmentShare funds invalid"
+      "localDevelopment share invalid"
     );
 
     assert.equal(
       Number(dmModel1.insuranceShare),
       insuranceShare2,
-      "insuranceShare funds invalid"
+      "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1.treasuryShare),
       treasuryShare2,
-      "treasuryShare funds invalid"
+      "treasury share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve1Share),
       reserve1Share2,
-      "reserve1Share funds invalid"
+      "reserve1 share invalid"
     );
 
     assert.equal(
       Number(dmModel1.reserve2Share),
       reserve2Share2,
-      "reserve2Share funds invalid"
+      "reserve2 share invalid"
     );
   });
 });

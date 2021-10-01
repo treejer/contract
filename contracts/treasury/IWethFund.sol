@@ -153,6 +153,27 @@ interface IWethFund {
         uint16 _reserve2Share
     ) external;
 
+    //TODO: ADD_COMMENT
+    function fundTreeBatch(
+        uint256 _totalPlanterAmount,
+        uint256 _totalAmbassadorAmount,
+        uint256 _totalResearch,
+        uint256 _totalLocalDevelopment,
+        uint256 _totalInsurance,
+        uint256 _totalTreasury,
+        uint256 _totalReserve1,
+        uint256 _totalReserve2
+    ) external returns (uint256);
+
+    //TODO: ADD_COMMENT
+    function payDaiDebtToPlanterContract(
+        uint256 _wethMaxUse,
+        uint256 _daiAmountToSwap
+    ) external;
+
+    //TODO: ADD_COMMENT
+    function updateDaiDebtToPlanterContract(uint256 _amount) external;
+
     /**
      * @dev trnasfer {_amount} from research in {totalBalances} to researchAddress
      * NOTE emit a {ResearchBalanceWithdrew} event
@@ -196,27 +217,6 @@ interface IWethFund {
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external;
-
-    //TODO: ADD_COMMENT
-    function fundTreeBatch(
-        uint256 _totalPlanterAmount,
-        uint256 _totalAmbassadorAmount,
-        uint256 _totalResearch,
-        uint256 _totalLocalDevelopment,
-        uint256 _totalInsurance,
-        uint256 _totalTreasury,
-        uint256 _totalReserve1,
-        uint256 _totalReserve2
-    ) external returns (uint256);
-
-    //TODO: ADD_COMMENT
-    function payDaiDebtToPlanterContract(
-        uint256 _wethMaxUse,
-        uint256 _daiAmountToSwap
-    ) external;
-
-    //TODO: ADD_COMMENT
-    function updateDaiDebtToPlanterContract(uint256 _amount) external;
 
     /**
      * @dev emitted when admin withdraw  research balance

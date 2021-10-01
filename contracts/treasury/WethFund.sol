@@ -302,6 +302,88 @@ contract WethFund is Initializable {
         _swapPlanterShare(_treeId, _amount, _planterShare, _ambassadorShare);
     }
 
+    function fundTreeBatch(
+        uint256 _totalPlanterAmount,
+        uint256 _totalAmbassadorAmount,
+        uint256 _totalResearch,
+        uint256 _totalLocalDevelopment,
+        uint256 _totalInsurance,
+        uint256 _totalTreasury,
+        uint256 _totalReserve1,
+        uint256 _totalReserve2
+    ) external onlyTreejerContract returns (uint256) {
+        totalBalances.research += _totalResearch;
+
+        totalBalances.localDevelopment += _totalLocalDevelopment;
+
+        totalBalances.insurance += _totalInsurance;
+
+        totalBalances.treasury += _totalTreasury;
+
+        totalBalances.reserve1 += _totalReserve1;
+
+        totalBalances.reserve2 += _totalReserve2;
+
+        uint256 sumAmount = _totalPlanterAmount + _totalAmbassadorAmount;
+
+        uint256 daiAmount = sumAmount > 0
+            ? _swapExactTokensForTokens(sumAmount)
+            : 0;
+
+        emit TreeFundedBatch();
+
+        return daiAmount;
+    }
+
+    //TODO: ADD_COMMENT
+    function payDaiDebtToPlanterContract(
+        uint256 _wethMaxUse,
+        uint256 _daiAmountToSwap
+    ) external onlyScript {
+        require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
+
+        require(
+            _daiAmountToSwap > 0 &&
+                _daiAmountToSwap <= totalDaiDebtToPlanterContract,
+            "totalDaiDebtToPlanterContract invalid"
+        );
+
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = address(wethToken);
+        path[1] = daiAddress;
+
+        bool success = wethToken.approve(address(uniswapRouter), _wethMaxUse);
+
+        require(success, "unsuccessful approve");
+
+        uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
+            _daiAmountToSwap,
+            _wethMaxUse,
+            path,
+            address(planterFundContract),
+            block.timestamp + 1800 // 30 * 60 (30 min)
+        );
+
+        emit DaiDebtToPlanterContractPaid(
+            _wethMaxUse,
+            _daiAmountToSwap,
+            amounts[0]
+        );
+
+        totalDaiDebtToPlanterContract -= _daiAmountToSwap;
+        totalBalances.treasury -= amounts[0];
+    }
+
+    //TODO: ADD_COMMENT
+    function updateDaiDebtToPlanterContract(uint256 _amount)
+        external
+        onlyTreejerContract
+    {
+        totalDaiDebtToPlanterContract += _amount;
+    }
+
     /**
      * @dev admin withdraw {_amount} from research totalBalances in case of
      * valid {_amount}  and wethToken transfer to {researchAddress}
@@ -458,88 +540,6 @@ contract WethFund is Initializable {
         require(success, "unsuccessful transfer");
 
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
-    }
-
-    function fundTreeBatch(
-        uint256 _totalPlanterAmount,
-        uint256 _totalAmbassadorAmount,
-        uint256 _totalResearch,
-        uint256 _totalLocalDevelopment,
-        uint256 _totalInsurance,
-        uint256 _totalTreasury,
-        uint256 _totalReserve1,
-        uint256 _totalReserve2
-    ) external onlyTreejerContract returns (uint256) {
-        totalBalances.research += _totalResearch;
-
-        totalBalances.localDevelopment += _totalLocalDevelopment;
-
-        totalBalances.insurance += _totalInsurance;
-
-        totalBalances.treasury += _totalTreasury;
-
-        totalBalances.reserve1 += _totalReserve1;
-
-        totalBalances.reserve2 += _totalReserve2;
-
-        uint256 sumAmount = _totalPlanterAmount + _totalAmbassadorAmount;
-
-        uint256 daiAmount = sumAmount > 0
-            ? _swapExactTokensForTokens(sumAmount)
-            : 0;
-
-        emit TreeFundedBatch();
-
-        return daiAmount;
-    }
-
-    //TODO: ADD_COMMENT
-    function payDaiDebtToPlanterContract(
-        uint256 _wethMaxUse,
-        uint256 _daiAmountToSwap
-    ) external onlyScript {
-        require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
-
-        require(
-            _daiAmountToSwap > 0 &&
-                _daiAmountToSwap <= totalDaiDebtToPlanterContract,
-            "totalDaiDebtToPlanterContract invalid"
-        );
-
-        address[] memory path;
-        path = new address[](2);
-
-        path[0] = address(wethToken);
-        path[1] = daiAddress;
-
-        bool success = wethToken.approve(address(uniswapRouter), _wethMaxUse);
-
-        require(success, "unsuccessful approve");
-
-        uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
-            _daiAmountToSwap,
-            _wethMaxUse,
-            path,
-            address(planterFundContract),
-            block.timestamp + 1800 // 30 * 60 (30 min)
-        );
-
-        emit DaiDebtToPlanterContractPaid(
-            _wethMaxUse,
-            _daiAmountToSwap,
-            amounts[0]
-        );
-
-        totalDaiDebtToPlanterContract -= _daiAmountToSwap;
-        totalBalances.treasury -= amounts[0];
-    }
-
-    //TODO: ADD_COMMENT
-    function updateDaiDebtToPlanterContract(uint256 _amount)
-        external
-        onlyTreejerContract
-    {
-        totalDaiDebtToPlanterContract += _amount;
     }
 
     /** @dev private function to swap {_amount} wethToken to daiToken

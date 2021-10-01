@@ -59,6 +59,11 @@ interface IAuction {
             uint256
         );
 
+    function referrals(address _bidder, uint256 _auctionId)
+        external
+        view
+        returns (address);
+
     /** @dev set {_address} to trustedForwarder */
     function setTrustedForwarder(address _address) external;
 

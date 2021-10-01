@@ -169,7 +169,7 @@ interface IRegularSale {
     /** @dev emitted when lastFundedTreeId updated to {lastFundedTreeId}  */
     event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
     //TODO: ADD_COMMENT
-    event ReferralTriggerCountUpdated();
+    event ReferralTriggerCountUpdated(uint256 count);
     //TODO: ADD_COMMENT
     event ReferralTreePaymentsUpdated(
         uint256 referralTreePaymentToPlanter,

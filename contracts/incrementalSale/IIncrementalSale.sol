@@ -95,6 +95,9 @@ interface IIncrementalSale {
         uint64 _priceJump
     ) external;
 
+    //TODO:ADD_COMMENT
+    function removeIncrementalSale(uint256 _count) external;
+
     /**
      * @dev admin add {treeCount} tree at the end of incremental sale tree range
      * @param treeCount number of trees added at the end of the incremental sale
@@ -118,9 +121,6 @@ interface IIncrementalSale {
 
     //TODO:ADD_COMMENTS
     function revealAttributes(uint256 _startTreeId, uint256 _count) external;
-
-    //TODO:ADD_COMMENT
-    function removeIncrementalSale(uint256 _count) external;
 
     /** @dev admin can update incrementalSaleData
      * @param _initialPrice initialPrice of trees

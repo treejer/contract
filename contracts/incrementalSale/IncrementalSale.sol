@@ -182,26 +182,6 @@ contract IncrementalSale is Initializable, RelayRecipient {
         treeAttribute = candidateContract;
     }
 
-    //TODO: ADD_COMMENT
-    function removeIncrementalSale(uint256 _count) external onlyDataManager {
-        IncrementalSaleData storage incSaleData = incrementalSaleData;
-
-        uint256 newStartTreeId = incSaleData.startTreeId + _count;
-
-        require(
-            incSaleData.increments > 0 &&
-                newStartTreeId <= incSaleData.endTreeId,
-            "IncrementalSale not exist or count must be lt endTree"
-        );
-
-        treeFactory.resetSaleTypeBatch(incSaleData.startTreeId, newStartTreeId);
-
-        incSaleData.startTreeId = newStartTreeId;
-        lastSold = newStartTreeId - 1;
-
-        emit IncrementalSaleUpdated();
-    }
-
     /**
      * @dev admin set a range from {startTreeId} to {startTreeId + treeCount}
      * for incremental selles for tree
@@ -252,6 +232,26 @@ contract IncrementalSale is Initializable, RelayRecipient {
         incSaleData.priceJump = _priceJump;
 
         lastSold = _startTreeId - 1;
+
+        emit IncrementalSaleUpdated();
+    }
+
+    //TODO: ADD_COMMENT
+    function removeIncrementalSale(uint256 _count) external onlyDataManager {
+        IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        uint256 newStartTreeId = incSaleData.startTreeId + _count;
+
+        require(
+            incSaleData.increments > 0 &&
+                newStartTreeId <= incSaleData.endTreeId,
+            "IncrementalSale not exist or count must be lt endTree"
+        );
+
+        treeFactory.resetSaleTypeBatch(incSaleData.startTreeId, newStartTreeId);
+
+        incSaleData.startTreeId = newStartTreeId;
+        lastSold = newStartTreeId - 1;
 
         emit IncrementalSaleUpdated();
     }

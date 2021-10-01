@@ -27,10 +27,10 @@ interface ITreeFactory {
 
     /** return Tree data of {_treeId}
      * @return planter
-     * @return treeType
-     * @return mintStatus
+     * @return species
+     * @return mintOrigin
      * @return countryCode
-     * @return provideStatus
+     * @return saleType
      * @return treeStatus
      * @return plantDate
      * @return birthDate

@@ -15,7 +15,7 @@ interface IPlanter {
 
     /**
      * @dev return planter data of {_planter}
-     * @return _planterType
+     * @return planterType
      * @return status
      * @return countryCode
      * @return score
@@ -28,7 +28,7 @@ interface IPlanter {
         external
         view
         returns (
-            uint8 _planterType,
+            uint8 planterType,
             uint8 status,
             uint16 countryCode,
             uint32 score,
@@ -211,8 +211,8 @@ interface IPlanter {
     /** @dev emitted when a planter join with address {planter} */
     event PlanterJoined(address planter);
 
-    /** @dev emitted when an organization join with address {organizationId} */
-    event OrganizationJoined(address organizationId);
+    /** @dev emitted when an organization join with address {organization} */
+    event OrganizationJoined(address organization);
 
     /** @dev emitted when a planters data updated (supplyCap , planterType) */
     event PlanterUpdated(address planter);

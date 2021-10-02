@@ -758,9 +758,9 @@ contract("Allocation", (accounts) => {
 
   //--------------------------------------------------- exists ------------------------------------
   it("Check AllocationDataExist event", async () => {
-    let hasModel0 = await allocationInstance.exists(0);
+    let hasAllocation0 = await allocationInstance.exists(0);
 
-    assert.equal(hasModel0, false, "hasModel not true");
+    assert.equal(hasAllocation0, false, "hasAllocation not true");
 
     await allocationInstance.addAllocationData(
       4000,
@@ -779,15 +779,15 @@ contract("Allocation", (accounts) => {
     await allocationInstance.assignAllocationToTree(4, 10, 0, {
       from: dataManager,
     });
-    let hasModel1 = await allocationInstance.exists(1);
+    let hasAllocation1 = await allocationInstance.exists(1);
 
-    let hasModel7 = await allocationInstance.exists(7);
+    let hasAllocation7 = await allocationInstance.exists(7);
 
-    let hasModel11 = await allocationInstance.exists(11);
+    let hasAllocation11 = await allocationInstance.exists(11);
 
-    assert.equal(hasModel1, false, "hasModel not true");
-    assert.equal(hasModel7, true, "hasModel not true");
-    assert.equal(hasModel11, true, "hasModel not true");
+    assert.equal(hasAllocation1, false, "hasAllocation not true");
+    assert.equal(hasAllocation7, true, "hasAllocation not true");
+    assert.equal(hasAllocation11, true, "hasAllocation not true");
   });
 
   //------------------------------------------- findAllocationData ----------------------------------------
@@ -848,111 +848,115 @@ contract("Allocation", (accounts) => {
       from: dataManager,
     });
 
-    let dmModel = await allocationInstance.findAllocationData.call(treeId);
+    let allocationData = await allocationInstance.findAllocationData.call(
+      treeId
+    );
 
     await allocationInstance.findAllocationData(treeId);
 
     assert.equal(
-      Number(dmModel.planterShare),
+      Number(allocationData.planterShare),
       planterShare,
       "planter funds invalid"
     );
 
     assert.equal(
-      Number(dmModel.ambassadorShare),
+      Number(allocationData.ambassadorShare),
       ambassadorShare,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel.researchShare),
+      Number(allocationData.researchShare),
       researchShare,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel.localDevelopmentShare),
+      Number(allocationData.localDevelopmentShare),
       localDevelopmentShare,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel.insuranceShare),
+      Number(allocationData.insuranceShare),
       insuranceShare,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel.treasuryShare),
+      Number(allocationData.treasuryShare),
       treasuryShare,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel.reserve1Share),
+      Number(allocationData.reserve1Share),
       reserve1Share,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel.reserve2Share),
+      Number(allocationData.reserve2Share),
       reserve2Share,
       "reserve2 share invalid"
     );
 
-    let dmModel100 = await allocationInstance.findAllocationData.call(100);
+    let allocationData100 = await allocationInstance.findAllocationData.call(
+      100
+    );
     await allocationInstance.findAllocationData(100);
 
     assert.equal(
-      Number(dmModel100.planterShare),
+      Number(allocationData100.planterShare),
       planterShare,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.ambassadorShare),
+      Number(allocationData100.ambassadorShare),
       ambassadorShare,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.researchShare),
+      Number(allocationData100.researchShare),
       researchShare,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.localDevelopmentShare),
+      Number(allocationData100.localDevelopmentShare),
       localDevelopmentShare,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.insuranceShare),
+      Number(allocationData100.insuranceShare),
       insuranceShare,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.treasuryShare),
+      Number(allocationData100.treasuryShare),
       treasuryShare,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.reserve1Share),
+      Number(allocationData100.reserve1Share),
       reserve1Share,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.reserve2Share),
+      Number(allocationData100.reserve2Share),
       reserve2Share,
       "reserve2 share invalid"
     );
   });
 
-  it("should findDistrbutionModel2", async () => {
+  it("should findAllocationData2", async () => {
     let treeId1 = 0;
     let treeId2 = 20;
     const planterShare1 = 4000;
@@ -1009,108 +1013,112 @@ contract("Allocation", (accounts) => {
       from: dataManager,
     });
 
-    let dmModel2 = await allocationInstance.findAllocationData.call(treeId2);
+    let allocationData2 = await allocationInstance.findAllocationData.call(
+      treeId2
+    );
 
     assert.equal(
-      Number(dmModel2.planterShare),
+      Number(allocationData2.planterShare),
       planterShare2,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.ambassadorShare),
+      Number(allocationData2.ambassadorShare),
       ambassadorShare2,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.researchShare),
+      Number(allocationData2.researchShare),
       researchShare2,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.localDevelopmentShare),
+      Number(allocationData2.localDevelopmentShare),
       localDevelopmentShare2,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.insuranceShare),
+      Number(allocationData2.insuranceShare),
       insuranceShare2,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.treasuryShare),
+      Number(allocationData2.treasuryShare),
       treasuryShare2,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.reserve1Share),
+      Number(allocationData2.reserve1Share),
       reserve1Share2,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel2.reserve2Share),
+      Number(allocationData2.reserve2Share),
       reserve2Share2,
       "reserve2 share invalid"
     );
 
-    let dmModel1 = await allocationInstance.findAllocationData.call(treeId1);
+    let allocationData1 = await allocationInstance.findAllocationData.call(
+      treeId1
+    );
 
     assert.equal(
-      Number(dmModel1.planterShare),
+      Number(allocationData1.planterShare),
       planterShare1,
       "2.planterShare  invalid"
     );
 
     assert.equal(
-      Number(dmModel1.ambassadorShare),
+      Number(allocationData1.ambassadorShare),
       ambassadorShare1,
       "2.ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.researchShare),
+      Number(allocationData1.researchShare),
       researchShare1,
       "2.research share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.localDevelopmentShare),
+      Number(allocationData1.localDevelopmentShare),
       localDevelopmentShare1,
       "2.localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.insuranceShare),
+      Number(allocationData1.insuranceShare),
       insuranceFund1,
       "2.insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.treasuryShare),
+      Number(allocationData1.treasuryShare),
       treasury1,
       "2.treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve1Share),
+      Number(allocationData1.reserve1Share),
       reserve1Share1,
       "2.reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve2Share),
+      Number(allocationData1.reserve2Share),
       reserve2Share1,
       "2.reserve2 share invalid"
     );
   });
 
-  it("should findDistrubutionModel3", async () => {
+  it("should findAllocationData3", async () => {
     const planterShare1 = 8000;
     const ambassadorShare1 = 0;
     const researchShare1 = 2000;
@@ -1239,519 +1247,530 @@ contract("Allocation", (accounts) => {
 
     //check treeId 0 model is 0
 
-    const dmModel0 = await allocationInstance.findAllocationData.call(0);
+    const allocationData0 = await allocationInstance.findAllocationData.call(0);
 
     assert.equal(
-      Number(dmModel0.planterShare),
+      Number(allocationData0.planterShare),
       planterShare1,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.ambassadorShare),
+      Number(allocationData0.ambassadorShare),
       ambassadorShare1,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.researchShare),
+      Number(allocationData0.researchShare),
       researchShare1,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.localDevelopmentShare),
+      Number(allocationData0.localDevelopmentShare),
       localDevelopmentShare1,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.insuranceShare),
+      Number(allocationData0.insuranceShare),
       insuranceFund1,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.treasuryShare),
+      Number(allocationData0.treasuryShare),
       treasury1,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.reserve1Share),
+      Number(allocationData0.reserve1Share),
       reserve1Share1,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel0.reserve2Share),
+      Number(allocationData0.reserve2Share),
       reserve2Share1,
       "reserve2 share invalid"
     );
     //check treeId 1 model is 2
-    const dmModel1 = await allocationInstance.findAllocationData.call(1);
+    const allocationData1 = await allocationInstance.findAllocationData.call(1);
 
     assert.equal(
-      Number(dmModel1.planterShare),
+      Number(allocationData1.planterShare),
       planterShare2,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.ambassadorShare),
+      Number(allocationData1.ambassadorShare),
       ambassadorShare2,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.researchShare),
+      Number(allocationData1.researchShare),
       researchShare2,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.localDevelopmentShare),
+      Number(allocationData1.localDevelopmentShare),
       localDevelopmentShare2,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.insuranceShare),
+      Number(allocationData1.insuranceShare),
       insuranceShare2,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.treasuryShare),
+      Number(allocationData1.treasuryShare),
       treasuryShare2,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve1Share),
+      Number(allocationData1.reserve1Share),
       reserve1Share2,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve2Share),
+      Number(allocationData1.reserve2Share),
       reserve2Share2,
       "reserve2 share invalid"
     );
 
     //check treeId 5 model is 2
 
-    const dmModel5 = await allocationInstance.findAllocationData.call(5);
+    const allocationData5 = await allocationInstance.findAllocationData.call(5);
 
     assert.equal(
-      Number(dmModel5.planterShare),
+      Number(allocationData5.planterShare),
       planterShare2,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.ambassadorShare),
+      Number(allocationData5.ambassadorShare),
       ambassadorShare2,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.researchShare),
+      Number(allocationData5.researchShare),
       researchShare2,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.localDevelopmentShare),
+      Number(allocationData5.localDevelopmentShare),
       localDevelopmentShare2,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.insuranceShare),
+      Number(allocationData5.insuranceShare),
       insuranceShare2,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.treasuryShare),
+      Number(allocationData5.treasuryShare),
       treasuryShare2,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.reserve1Share),
+      Number(allocationData5.reserve1Share),
       reserve1Share2,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel5.reserve2Share),
+      Number(allocationData5.reserve2Share),
       reserve2Share2,
       "reserve2 share invalid"
     );
 
     //check treeId 10 model is 2
 
-    const dmModel10 = await allocationInstance.findAllocationData.call(10);
+    const allocationData10 = await allocationInstance.findAllocationData.call(
+      10
+    );
 
     assert.equal(
-      Number(dmModel10.planterShare),
+      Number(allocationData10.planterShare),
       planterShare2,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.ambassadorShare),
+      Number(allocationData10.ambassadorShare),
       ambassadorShare2,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.researchShare),
+      Number(allocationData10.researchShare),
       researchShare2,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.localDevelopmentShare),
+      Number(allocationData10.localDevelopmentShare),
       localDevelopmentShare2,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.insuranceShare),
+      Number(allocationData10.insuranceShare),
       insuranceShare2,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.treasuryShare),
+      Number(allocationData10.treasuryShare),
       treasuryShare2,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.reserve1Share),
+      Number(allocationData10.reserve1Share),
       reserve1Share2,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel10.reserve2Share),
+      Number(allocationData10.reserve2Share),
       reserve2Share2,
       "reserve2 share invalid"
     );
 
     //check treeId 11 model is 3
-    const dmModel11 = await allocationInstance.findAllocationData.call(11);
+    const allocationData11 = await allocationInstance.findAllocationData.call(
+      11
+    );
 
     assert.equal(
-      Number(dmModel11.planterShare),
+      Number(allocationData11.planterShare),
       planterShare3,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.ambassadorShare),
+      Number(allocationData11.ambassadorShare),
       ambassadorShare3,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.researchShare),
+      Number(allocationData11.researchShare),
       researchShare3,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.localDevelopmentShare),
+      Number(allocationData11.localDevelopmentShare),
       localDevelopmentShare3,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.insuranceShare),
+      Number(allocationData11.insuranceShare),
       insuranceShare3,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.treasuryShare),
+      Number(allocationData11.treasuryShare),
       treasuryShare3,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.reserve1Share),
+      Number(allocationData11.reserve1Share),
       reserve1Share3,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel11.reserve2Share),
+      Number(allocationData11.reserve2Share),
       reserve2Share3,
       "reserve2 share invalid"
     );
 
     //check treeId 99 model is 3
 
-    const dmModel99 = await allocationInstance.findAllocationData.call(99);
+    const allocationData99 = await allocationInstance.findAllocationData.call(
+      99
+    );
 
     assert.equal(
-      Number(dmModel99.planterShare),
+      Number(allocationData99.planterShare),
       planterShare3,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.ambassadorShare),
+      Number(allocationData99.ambassadorShare),
       ambassadorShare3,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.researchShare),
+      Number(allocationData99.researchShare),
       researchShare3,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.localDevelopmentShare),
+      Number(allocationData99.localDevelopmentShare),
       localDevelopmentShare3,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.insuranceShare),
+      Number(allocationData99.insuranceShare),
       insuranceShare3,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.treasuryShare),
+      Number(allocationData99.treasuryShare),
       treasuryShare3,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.reserve1Share),
+      Number(allocationData99.reserve1Share),
       reserve1Share3,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel99.reserve2Share),
+      Number(allocationData99.reserve2Share),
       reserve2Share3,
       "reserve2 share invalid"
     );
 
     //check treeId 100 model is 3
 
-    const dmModel100 = await allocationInstance.findAllocationData.call(100);
+    const allocationData100 = await allocationInstance.findAllocationData.call(
+      100
+    );
 
     assert.equal(
-      Number(dmModel100.planterShare),
+      Number(allocationData100.planterShare),
       planterShare3,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.ambassadorShare),
+      Number(allocationData100.ambassadorShare),
       ambassadorShare3,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.researchShare),
+      Number(allocationData100.researchShare),
       researchShare3,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.localDevelopmentShare),
+      Number(allocationData100.localDevelopmentShare),
       localDevelopmentShare3,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.insuranceShare),
+      Number(allocationData100.insuranceShare),
       insuranceShare3,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.treasuryShare),
+      Number(allocationData100.treasuryShare),
       treasuryShare3,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.reserve1Share),
+      Number(allocationData100.reserve1Share),
       reserve1Share3,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel100.reserve2Share),
+      Number(allocationData100.reserve2Share),
       reserve2Share3,
       "reserve2 share invalid"
     );
 
     //check treeId 101 model is 4
 
-    const dmModel101 = await allocationInstance.findAllocationData.call(101);
+    const allocationData101 = await allocationInstance.findAllocationData.call(
+      101
+    );
 
     assert.equal(
-      Number(dmModel101.planterShare),
+      Number(allocationData101.planterShare),
       planterShare4,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.ambassadorShare),
+      Number(allocationData101.ambassadorShare),
       ambassadorShare4,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.researchShare),
+      Number(allocationData101.researchShare),
       researchShare4,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.localDevelopmentShare),
+      Number(allocationData101.localDevelopmentShare),
       localDevelopmentShare4,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.insuranceShare),
+      Number(allocationData101.insuranceShare),
       insuranceShare4,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.treasuryShare),
+      Number(allocationData101.treasuryShare),
       treasuryShare4,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.reserve1Share),
+      Number(allocationData101.reserve1Share),
       reserve1Share4,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel101.reserve2Share),
+      Number(allocationData101.reserve2Share),
       reserve2Share4,
       "reserve2 share invalid"
     );
 
     //check treeId 1500 model is 4
 
-    const dmModel1500 = await allocationInstance.findAllocationData.call(1500);
+    const allocationData1500 = await allocationInstance.findAllocationData.call(
+      1500
+    );
 
     assert.equal(
-      Number(dmModel1500.planterShare),
+      Number(allocationData1500.planterShare),
       planterShare4,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.ambassadorShare),
+      Number(allocationData1500.ambassadorShare),
       ambassadorShare4,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.researchShare),
+      Number(allocationData1500.researchShare),
       researchShare4,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.localDevelopmentShare),
+      Number(allocationData1500.localDevelopmentShare),
       localDevelopmentShare4,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.insuranceShare),
+      Number(allocationData1500.insuranceShare),
       insuranceShare4,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.treasuryShare),
+      Number(allocationData1500.treasuryShare),
       treasuryShare4,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.reserve1Share),
+      Number(allocationData1500.reserve1Share),
       reserve1Share4,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel1500.reserve2Share),
+      Number(allocationData1500.reserve2Share),
       reserve2Share4,
       "reserve2 share invalid"
     );
 
     //check treeId 1000000 model is 4
 
-    const dmModel1000000 = await allocationInstance.findAllocationData.call(
-      1000000
-    );
+    const allocationData1000000 =
+      await allocationInstance.findAllocationData.call(1000000);
 
     assert.equal(
-      Number(dmModel1000000.planterShare),
+      Number(allocationData1000000.planterShare),
       planterShare4,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.ambassadorShare),
+      Number(allocationData1000000.ambassadorShare),
       ambassadorShare4,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.researchShare),
+      Number(allocationData1000000.researchShare),
       researchShare4,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.localDevelopmentShare),
+      Number(allocationData1000000.localDevelopmentShare),
       localDevelopmentShare4,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.insuranceShare),
+      Number(allocationData1000000.insuranceShare),
       insuranceShare4,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.treasuryShare),
+      Number(allocationData1000000.treasuryShare),
       treasuryShare4,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.reserve1Share),
+      Number(allocationData1000000.reserve1Share),
       reserve1Share4,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel1000000.reserve2Share),
+      Number(allocationData1000000.reserve2Share),
       reserve2Share4,
       "reserve2 share invalid"
     );
@@ -1775,263 +1794,267 @@ contract("Allocation", (accounts) => {
     });
 
     //check treeId 4999 model is 4
-    const dmModel4999 = await allocationInstance.findAllocationData.call(4999);
+    const allocationData4999 = await allocationInstance.findAllocationData.call(
+      4999
+    );
 
     assert.equal(
-      Number(dmModel4999.planterShare),
+      Number(allocationData4999.planterShare),
       planterShare4,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.ambassadorShare),
+      Number(allocationData4999.ambassadorShare),
       ambassadorShare4,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.researchShare),
+      Number(allocationData4999.researchShare),
       researchShare4,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.localDevelopmentShare),
+      Number(allocationData4999.localDevelopmentShare),
       localDevelopmentShare4,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.insuranceShare),
+      Number(allocationData4999.insuranceShare),
       insuranceShare4,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.treasuryShare),
+      Number(allocationData4999.treasuryShare),
       treasuryShare4,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.reserve1Share),
+      Number(allocationData4999.reserve1Share),
       reserve1Share4,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel4999.reserve2Share),
+      Number(allocationData4999.reserve2Share),
       reserve2Share4,
       "reserve2 share invalid"
     );
 
     //check treeId 5000 model is 5
 
-    const dmModel5000 = await allocationInstance.findAllocationData.call(5000);
+    const allocationData5000 = await allocationInstance.findAllocationData.call(
+      5000
+    );
 
     assert.equal(
-      Number(dmModel5000.planterShare),
+      Number(allocationData5000.planterShare),
       planterShare5,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.ambassadorShare),
+      Number(allocationData5000.ambassadorShare),
       ambassadorShare5,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.researchShare),
+      Number(allocationData5000.researchShare),
       researchShare5,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.localDevelopmentShare),
+      Number(allocationData5000.localDevelopmentShare),
       localDevelopmentShare5,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.insuranceShare),
+      Number(allocationData5000.insuranceShare),
       insuranceShare5,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.treasuryShare),
+      Number(allocationData5000.treasuryShare),
       treasuryShare5,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.reserve1Share),
+      Number(allocationData5000.reserve1Share),
       reserve1Share5,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel5000.reserve2Share),
+      Number(allocationData5000.reserve2Share),
       reserve2Share5,
       "reserve2 share invalid"
     );
 
     //check treeId 6000 model is 5
 
-    const dmModel6000 = await allocationInstance.findAllocationData.call(6000);
+    const allocationData6000 = await allocationInstance.findAllocationData.call(
+      6000
+    );
 
     assert.equal(
-      Number(dmModel6000.planterShare),
+      Number(allocationData6000.planterShare),
       planterShare5,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.ambassadorShare),
+      Number(allocationData6000.ambassadorShare),
       ambassadorShare5,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.researchShare),
+      Number(allocationData6000.researchShare),
       researchShare5,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.localDevelopmentShare),
+      Number(allocationData6000.localDevelopmentShare),
       localDevelopmentShare5,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.insuranceShare),
+      Number(allocationData6000.insuranceShare),
       insuranceShare5,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.treasuryShare),
+      Number(allocationData6000.treasuryShare),
       treasuryShare5,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.reserve1Share),
+      Number(allocationData6000.reserve1Share),
       reserve1Share5,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel6000.reserve2Share),
+      Number(allocationData6000.reserve2Share),
       reserve2Share5,
       "reserve2 share invalid"
     );
 
     //check treeId 10000 model is 5
 
-    const dmModel10000 = await allocationInstance.findAllocationData.call(
-      10000
-    );
+    const allocationData10000 =
+      await allocationInstance.findAllocationData.call(10000);
 
     assert.equal(
-      Number(dmModel10000.planterShare),
+      Number(allocationData10000.planterShare),
       planterShare5,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.ambassadorShare),
+      Number(allocationData10000.ambassadorShare),
       ambassadorShare5,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.researchShare),
+      Number(allocationData10000.researchShare),
       researchShare5,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.localDevelopmentShare),
+      Number(allocationData10000.localDevelopmentShare),
       localDevelopmentShare5,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.insuranceShare),
+      Number(allocationData10000.insuranceShare),
       insuranceShare5,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.treasuryShare),
+      Number(allocationData10000.treasuryShare),
       treasuryShare5,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.reserve1Share),
+      Number(allocationData10000.reserve1Share),
       reserve1Share5,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel10000.reserve2Share),
+      Number(allocationData10000.reserve2Share),
       reserve2Share5,
       "reserve2 share invalid"
     );
 
     //check treeId 10001 model is 4
-    const dmModel10001 = await allocationInstance.findAllocationData.call(
-      10001
-    );
+    const allocationData10001 =
+      await allocationInstance.findAllocationData.call(10001);
 
     assert.equal(
-      Number(dmModel10001.planterShare),
+      Number(allocationData10001.planterShare),
       planterShare4,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.ambassadorShare),
+      Number(allocationData10001.ambassadorShare),
       ambassadorShare4,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.researchShare),
+      Number(allocationData10001.researchShare),
       researchShare4,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.localDevelopmentShare),
+      Number(allocationData10001.localDevelopmentShare),
       localDevelopmentShare4,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.insuranceShare),
+      Number(allocationData10001.insuranceShare),
       insuranceShare4,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.treasuryShare),
+      Number(allocationData10001.treasuryShare),
       treasuryShare4,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.reserve1Share),
+      Number(allocationData10001.reserve1Share),
       reserve1Share4,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel10001.reserve2Share),
+      Number(allocationData10001.reserve2Share),
       reserve2Share4,
       "reserve2 share invalid"
     );
@@ -2055,153 +2078,157 @@ contract("Allocation", (accounts) => {
     });
 
     //check treeId 4 model is 6
-    const dmModel4 = await allocationInstance.findAllocationData.call(4);
+    const allocationData4 = await allocationInstance.findAllocationData.call(4);
     assert.equal(
-      Number(dmModel4.planterShare),
+      Number(allocationData4.planterShare),
       planterShare6,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.ambassadorShare),
+      Number(allocationData4.ambassadorShare),
       ambassadorShare6,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.researchShare),
+      Number(allocationData4.researchShare),
       researchShare6,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.localDevelopmentShare),
+      Number(allocationData4.localDevelopmentShare),
       localDevelopmentShare6,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.insuranceShare),
+      Number(allocationData4.insuranceShare),
       insuranceShare6,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.treasuryShare),
+      Number(allocationData4.treasuryShare),
       treasuryShare6,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.reserve1Share),
+      Number(allocationData4.reserve1Share),
       reserve1Share6,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel4.reserve2Share),
+      Number(allocationData4.reserve2Share),
       reserve2Share6,
       "reserve2 share invalid"
     );
 
     //check treeId 10_2 model is 6
-    const dmModel10_2 = await allocationInstance.findAllocationData.call(10);
+    const allocationData10_2 = await allocationInstance.findAllocationData.call(
+      10
+    );
 
     assert.equal(
-      Number(dmModel10_2.planterShare),
+      Number(allocationData10_2.planterShare),
       planterShare6,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.ambassadorShare),
+      Number(allocationData10_2.ambassadorShare),
       ambassadorShare6,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.researchShare),
+      Number(allocationData10_2.researchShare),
       researchShare6,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.localDevelopmentShare),
+      Number(allocationData10_2.localDevelopmentShare),
       localDevelopmentShare6,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.insuranceShare),
+      Number(allocationData10_2.insuranceShare),
       insuranceShare6,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.treasuryShare),
+      Number(allocationData10_2.treasuryShare),
       treasuryShare6,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.reserve1Share),
+      Number(allocationData10_2.reserve1Share),
       reserve1Share6,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel10_2.reserve2Share),
+      Number(allocationData10_2.reserve2Share),
       reserve2Share6,
       "reserve2 share invalid"
     );
 
     //check treeId 11_2 model is 3
 
-    const dmModel11_2 = await allocationInstance.findAllocationData.call(11);
+    const allocationData11_2 = await allocationInstance.findAllocationData.call(
+      11
+    );
     assert.equal(
-      Number(dmModel11_2.planterShare),
+      Number(allocationData11_2.planterShare),
       planterShare3,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.ambassadorShare),
+      Number(allocationData11_2.ambassadorShare),
       ambassadorShare3,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.researchShare),
+      Number(allocationData11_2.researchShare),
       researchShare3,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.localDevelopmentShare),
+      Number(allocationData11_2.localDevelopmentShare),
       localDevelopmentShare3,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.insuranceShare),
+      Number(allocationData11_2.insuranceShare),
       insuranceShare3,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.treasuryShare),
+      Number(allocationData11_2.treasuryShare),
       treasuryShare3,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.reserve1Share),
+      Number(allocationData11_2.reserve1Share),
       reserve1Share3,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel11_2.reserve2Share),
+      Number(allocationData11_2.reserve2Share),
       reserve2Share3,
       "reserve2 share invalid"
     );
@@ -2209,49 +2236,49 @@ contract("Allocation", (accounts) => {
     //check treeId 3 model is 2
 
     assert.equal(
-      Number(dmModel1.planterShare),
+      Number(allocationData1.planterShare),
       planterShare2,
       "planter share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.ambassadorShare),
+      Number(allocationData1.ambassadorShare),
       ambassadorShare2,
       "ambassador share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.researchShare),
+      Number(allocationData1.researchShare),
       researchShare2,
       "research share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.localDevelopmentShare),
+      Number(allocationData1.localDevelopmentShare),
       localDevelopmentShare2,
       "localDevelopment share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.insuranceShare),
+      Number(allocationData1.insuranceShare),
       insuranceShare2,
       "insurance share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.treasuryShare),
+      Number(allocationData1.treasuryShare),
       treasuryShare2,
       "treasury share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve1Share),
+      Number(allocationData1.reserve1Share),
       reserve1Share2,
       "reserve1 share invalid"
     );
 
     assert.equal(
-      Number(dmModel1.reserve2Share),
+      Number(allocationData1.reserve2Share),
       reserve2Share2,
       "reserve2 share invalid"
     );

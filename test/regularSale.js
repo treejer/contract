@@ -41,7 +41,7 @@ contract("regularSale", (accounts) => {
   let treeTokenInstance;
   let treasuryInstance;
 
-  let fModel;
+  let allocationInstance;
   let daiFundInstance;
   let planterFundsInstnce;
   let daiInstance;
@@ -108,7 +108,7 @@ contract("regularSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -215,19 +215,22 @@ contract("regularSale", (accounts) => {
       ////---------------------------------set Allocation Address--------------------------------------------------------
 
       await regularSaleInstance
-        .setAllocationAddress(fModel.address, {
+        .setAllocationAddress(allocationInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       assert.equal(
-        fModel.address,
+        allocationInstance.address,
         await regularSaleInstance.allocation(),
-        "financial model address set incorect"
+        "allocation address set incorect"
       );
 
       ////---------------------------------set wethFund Address--------------------------------------------------------
@@ -270,7 +273,7 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -743,7 +746,7 @@ contract("regularSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -777,11 +780,21 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(1, 1000000, 0, {
+      await allocationInstance.assignAllocationToTree(1, 1000000, 0, {
         from: dataManager,
       });
 
@@ -808,9 +821,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 
@@ -961,11 +977,21 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(10001, 10007, 0, {
+      await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -991,9 +1017,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 
@@ -1247,7 +1276,7 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         2500,
         1500,
         1200,
@@ -1261,7 +1290,7 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(10001, 10007, 0, {
+      await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -1288,9 +1317,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 
@@ -1541,11 +1573,21 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(10001, 10003, 0, {
+      await allocationInstance.assignAllocationToTree(10001, 10003, 0, {
         from: dataManager,
       });
 
@@ -1572,9 +1614,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 
@@ -1925,7 +1970,7 @@ contract("regularSale", (accounts) => {
     it("test gsn [ @skip-on-coverage ]", async () => {
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -1939,7 +1984,7 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(10001, 10007, 0, {
+      await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
         from: dataManager,
       });
 
@@ -1968,7 +2013,7 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
+      await regularSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
@@ -2117,11 +2162,21 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(1, 100000, 0, {
+      await allocationInstance.assignAllocationToTree(1, 100000, 0, {
         from: dataManager,
       });
 
@@ -2157,9 +2212,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 
@@ -2318,7 +2376,7 @@ contract("regularSale", (accounts) => {
 
       ////////////// ------------------- handle allocation data ----------------------
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -2344,7 +2402,7 @@ contract("regularSale", (accounts) => {
         reserve2: Math.divide(Math.mul(5, transferTreePrice), 100),
       };
 
-      await fModel.assignAllocationToTree(1, 100000, 0, {
+      await allocationInstance.assignAllocationToTree(1, 100000, 0, {
         from: dataManager,
       });
 
@@ -2381,9 +2439,12 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await regularSaleInstance.setAllocationAddress(fModel.address, {
-        from: deployerAccount,
-      });
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       //-------------daiFundInstance
 

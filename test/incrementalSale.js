@@ -328,7 +328,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         alloctionInstance.address,
         await iSaleInstance.allocation.call(),
-        "financial model address set incorect"
+        "allocation address set incorect"
       );
       /////////////////---------------------------------set regularSaleInstance address--------------------------------------------------------
       await iSaleInstance

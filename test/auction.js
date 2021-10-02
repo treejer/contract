@@ -381,7 +381,7 @@ contract("Auction", (accounts) => {
         from: dataManager,
       });
 
-      ////// --------------- fail because of invalid assing model
+      ////// --------------- fail because of invalid assing allocation data
 
       await auctionInstance
         .createAuction(
@@ -1890,7 +1890,7 @@ contract("Auction", (accounts) => {
         planterInstance,
         dataManager
       );
-      /////////////////////////////////// fail to create auction and dm model
+      /////////////////////////////////// fail to create auction and allocation data
 
       await allocationInstance
         .addAllocationData(6500, 1200, 1200, 1200, 1200, 1200, 0, 0, {
@@ -2339,7 +2339,7 @@ contract("Auction", (accounts) => {
         dataManager
       );
 
-      ///////////////////// ---------------- fail to add dm model
+      ///////////////////// ---------------- fail to add allocation data
 
       await allocationInstance
         .addAllocationData(3500, 1000, 1000, 1500, 1000, 2000, 0, 0, {
@@ -3032,7 +3032,7 @@ contract("Auction", (accounts) => {
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL);
 
-      ///////////////////// ---------------- fail to add dm model
+      ///////////////////// ---------------- fail to add allocation data
 
       await allocationInstance
         .addAllocationData(5000, 1000, 1000, 1000, 1000, 1000, 0, 0, {

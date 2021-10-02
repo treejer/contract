@@ -28,7 +28,7 @@ contract("DaiFund", (accounts) => {
 
   let arInstance;
   let daiFundInstance;
-  let fModel;
+  let allocationInstance;
 
   let daiInstance;
   let planterFundsInstnce;
@@ -301,7 +301,7 @@ contract("DaiFund", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -359,7 +359,7 @@ contract("DaiFund", (accounts) => {
       );
 
       ////--------------add and assign AllocationData for tree
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -373,7 +373,7 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -555,7 +555,7 @@ contract("DaiFund", (accounts) => {
       );
 
       ////--------------add and assign allocation data for tree
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         planter1Share,
         ambassador1Share,
         research1Share,
@@ -569,7 +569,7 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         planter2Share,
         ambassador2Share,
         research2Share,
@@ -583,11 +583,11 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
-      await fModel.assignAllocationToTree(11, 20, 1, {
+      await allocationInstance.assignAllocationToTree(11, 20, 1, {
         from: dataManager,
       });
 
@@ -827,9 +827,9 @@ contract("DaiFund", (accounts) => {
         deployerAccount
       );
 
-      //////-------------------- handle dm model
+      //////-------------------- handle allocation data
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -843,7 +843,7 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1242,9 +1242,9 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ////////------------------- handle dm models
+      ////////------------------- handle allocation data
 
-      await fModel.addAllocationData(
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1258,7 +1258,7 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1492,8 +1492,8 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1506,7 +1506,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1730,8 +1730,8 @@ contract("DaiFund", (accounts) => {
         }
       );
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1744,7 +1744,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -1977,8 +1977,8 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1991,7 +1991,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2210,8 +2210,8 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2224,7 +2224,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2444,8 +2444,8 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2458,7 +2458,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -2678,8 +2678,8 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
-      ///////// ------------------ handle dm model
-      await fModel.addAllocationData(
+      ///////// ------------------ handle allocation data
+      await allocationInstance.addAllocationData(
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2692,7 +2692,7 @@ contract("DaiFund", (accounts) => {
           from: dataManager,
         }
       );
-      await fModel.assignAllocationToTree(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 

@@ -119,7 +119,7 @@ contract("AccessRestriction", (accounts) => {
 
     const before = await arInstance.isScript(userAccount1);
 
-    await Common.addBuyerRank(arInstance, userAccount1, deployerAccount);
+    await Common.addScriptRole(arInstance, userAccount1, deployerAccount);
 
     await arInstance.ifScript(userAccount1);
 

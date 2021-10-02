@@ -2495,7 +2495,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsBefore.insurance),
         0,
-        "invalid rescue fund"
+        "invalid insurance fund"
       );
 
       assert.equal(
@@ -2695,7 +2695,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsAfter.insurance),
         expected.insurance,
-        "invalid rescue fund"
+        "invalid insurance fund"
       );
 
       assert.equal(

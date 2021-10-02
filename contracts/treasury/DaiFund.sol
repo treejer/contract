@@ -168,8 +168,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin set rescue address to fund
-     * @param _address rescue fund address
+     * @dev admin set insurance address to fund
+     * @param _address insurance fund address
      */
     function setInsuranceAddress(address payable _address)
         external

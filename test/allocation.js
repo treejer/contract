@@ -959,8 +959,8 @@ contract("Allocation", (accounts) => {
     const ambassadorShare1 = 1200;
     const researchShare1 = 1200;
     const localDevelopmentShare1 = 1200;
-    const rescueFund1 = 1200;
-    const treejerDevelop1 = 1200;
+    const insuranceFund1 = 1200;
+    const treasury1 = 1200;
     const reserve1Share1 = 0;
     const reserve2Share1 = 0;
 
@@ -978,8 +978,8 @@ contract("Allocation", (accounts) => {
       ambassadorShare1,
       researchShare1,
       localDevelopmentShare1,
-      rescueFund1,
-      treejerDevelop1,
+      insuranceFund1,
+      treasury1,
       reserve1Share1,
       reserve2Share1,
       {
@@ -1087,13 +1087,13 @@ contract("Allocation", (accounts) => {
 
     assert.equal(
       Number(dmModel1.insuranceShare),
-      rescueFund1,
+      insuranceFund1,
       "2.insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel1.treasuryShare),
-      treejerDevelop1,
+      treasury1,
       "2.treasury share invalid"
     );
 
@@ -1115,8 +1115,8 @@ contract("Allocation", (accounts) => {
     const ambassadorShare1 = 0;
     const researchShare1 = 2000;
     const localDevelopmentShare1 = 0;
-    const rescueFund1 = 0;
-    const treejerDevelop1 = 0;
+    const insuranceFund1 = 0;
+    const treasury1 = 0;
     const reserve1Share1 = 0;
     const reserve2Share1 = 0;
 
@@ -1170,8 +1170,8 @@ contract("Allocation", (accounts) => {
       ambassadorShare1,
       researchShare1,
       localDevelopmentShare1,
-      rescueFund1,
-      treejerDevelop1,
+      insuranceFund1,
+      treasury1,
       reserve1Share1,
       reserve2Share1,
       {
@@ -1267,13 +1267,13 @@ contract("Allocation", (accounts) => {
 
     assert.equal(
       Number(dmModel0.insuranceShare),
-      rescueFund1,
+      insuranceFund1,
       "insurance share invalid"
     );
 
     assert.equal(
       Number(dmModel0.treasuryShare),
-      treejerDevelop1,
+      treasury1,
       "treasury share invalid"
     );
 

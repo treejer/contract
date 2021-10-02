@@ -212,7 +212,7 @@ interface IDaiFund {
         string reason
     );
     /**
-     * @dev emitted when admin withdraw rescue balance
+     * @dev emitted when admin withdraw insurance balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage
      */
     event InsuranceBalanceWithdrew(

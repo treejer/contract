@@ -136,7 +136,7 @@ contract("TreeAttribute", (accounts) => {
     }
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
+    await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
   });
 
   describe("without financial section", () => {

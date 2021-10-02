@@ -2915,7 +2915,7 @@ contract("Auction", (accounts) => {
 
       let totalFunds2 = await wethFundInstance.totalBalances();
 
-      let treejerDevelopBalance = totalFunds2.treasury;
+      let treasuryBalance = totalFunds2.treasury;
       let ownerAccountBalanceBefore = await wethInstance.balanceOf(
         userAccount6
       );
@@ -2936,16 +2936,13 @@ contract("Auction", (accounts) => {
 
       assert.equal(
         Number(ownerAccountBalanceAfter),
-        Math.add(
-          Number(ownerAccountBalanceBefore),
-          Number(treejerDevelopBalance)
-        ),
+        Math.add(Number(ownerAccountBalanceBefore), Number(treasuryBalance)),
         "1.owner balance not true"
       );
 
       assert.equal(
         await wethInstance.balanceOf(wethFundInstance.address),
-        Math.subtract(wethFundsShare, Number(treejerDevelopBalance)),
+        Math.subtract(wethFundsShare, Number(treasuryBalance)),
         "3.treasury balance not true"
       );
 

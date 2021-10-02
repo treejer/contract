@@ -128,7 +128,7 @@ contract("WethFund", (accounts) => {
     }
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addBuyerRank(arInstance, buyerRank, deployerAccount);
+    await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
   });
 
   // beforeEach(async () => {
@@ -1309,7 +1309,7 @@ contract("WethFund", (accounts) => {
 
       const localDevelopmentAddress = userAccount3;
 
-      const totalLocalDevelopFunded = Math.divide(
+      const totalLocalDevelopmentFunded = Math.divide(
         Math.mul(
           Math.add(Number(amount), Number(amount1)),
           localDevelopmentShare
@@ -1458,7 +1458,7 @@ contract("WethFund", (accounts) => {
       );
 
       assert.equal(
-        totalLocalDevelopFunded,
+        totalLocalDevelopmentFunded,
         Number(totalBalances1.localDevelopment),
         "reserve fund1 total fund1 is not ok"
       );
@@ -1582,7 +1582,7 @@ contract("WethFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalLocalDevelopFunded,
+          totalLocalDevelopmentFunded,
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
         Number(totalBalances3.localDevelopment),

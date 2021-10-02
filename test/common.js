@@ -41,7 +41,7 @@ Common.addDataManager = async (instance, account, adminAccount) => {
   await instance.grantRole(DATA_MANAGER_ROLE, account, { from: adminAccount });
 };
 
-Common.addBuyerRank = async (instance, account, adminAccount) => {
+Common.addScriptRole = async (instance, account, adminAccount) => {
   await instance.grantRole(SCRIPT_ROLE, account, { from: adminAccount });
 };
 

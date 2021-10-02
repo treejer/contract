@@ -994,7 +994,7 @@ contract("DaiFund", (accounts) => {
       //
       //
 
-      /////////////-------------------------------------should fail rescue fund withdraw------------------/////
+      /////////////-------------------------------------should fail insurance fund withdraw------------------/////
 
       await daiFundInstance.setInsuranceAddress(userAccount3, {
         from: deployerAccount,
@@ -1290,7 +1290,7 @@ contract("DaiFund", (accounts) => {
       ///
       ///
 
-      ////-------------------------------------- should withdraw rescue fund succussfully -----------------------------------------
+      ////-------------------------------------- should withdraw insurance fund succussfully -----------------------------------------
 
       ////---------------transfer dai for daiFundInstance-------------------
       await daiInstance.setMint(daiFundInstance.address, amount);
@@ -1927,8 +1927,8 @@ contract("DaiFund", (accounts) => {
       );
     });
 
-    ///// ---------------------------------------------------------------------withdraw rescue fund balance ---------------------------------------------------------------
-    it("check withdraw rescue fund data to be ok", async () => {
+    ///// ---------------------------------------------------------------------withdraw insurance fund balance ---------------------------------------------------------------
+    it("check withdraw insurance fund data to be ok", async () => {
       const treeId = 1;
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
@@ -2050,7 +2050,7 @@ contract("DaiFund", (accounts) => {
       assert.equal(
         totalInsuranceFunded,
         Number(totalBalances1.insurance),
-        "rescue fund total fund1 is not ok"
+        "insurance fund total fund1 is not ok"
       );
 
       const insuranceBalnance1 = await daiInstance.balanceOf(insuranceAddress);
@@ -2091,13 +2091,13 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances2.insurance)
         ),
         Number(withdrawBalance1),
-        "rescue fund total fund is not ok after withdraw1"
+        "insurance fund total fund is not ok after withdraw1"
       );
 
       assert.equal(
         Number(insuranceBalnance2),
         Math.add(Number(insuranceBalnance1), Number(withdrawBalance1)),
-        "rescue fund account balance is not ok after withdraw1"
+        "insurance fund account balance is not ok after withdraw1"
       );
 
       // -------------------- seccond withdraw and check data ------------------------------
@@ -2141,7 +2141,7 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances3.insurance)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
-        "rescue fund total fund is not ok after withdraw1"
+        "insurance fund total fund is not ok after withdraw1"
       );
 
       assert.equal(
@@ -2150,13 +2150,13 @@ contract("DaiFund", (accounts) => {
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
         Number(totalBalances3.insurance),
-        "rescue fund total fund3 is not ok"
+        "insurance fund total fund3 is not ok"
       );
 
       assert.equal(
         Number(insuranceBalnance3),
         Math.add(Number(insuranceBalnance2), Number(withdrawBalance2)),
-        "rescue fund account balance is not ok after withdraw2"
+        "insurance fund account balance is not ok after withdraw2"
       );
     });
 

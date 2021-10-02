@@ -262,7 +262,7 @@ contract("TreeFactory", (accounts) => {
       const treeId = 0;
       const newIpfs = "new ipfs hash";
 
-      await Common.addBuyerRank(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
 
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,

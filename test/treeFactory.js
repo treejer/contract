@@ -2949,20 +2949,20 @@ contract("TreeFactory", (accounts) => {
         "planter paid before verify update is not ok"
       );
 
-      const totalFundsBefore = await planterFundInstnce.totalBalances.call();
+      const totalBalancesBefore = await planterFundInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsBefore.planter),
+        Number(totalBalancesBefore.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsBefore.ambassador),
+        Number(totalBalancesBefore.ambassador),
         referralTotalFund,
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsBefore.localDevelopment),
+        Number(totalBalancesBefore.localDevelopment),
         0,
         "local development total fund is not ok"
       );
@@ -3010,24 +3010,24 @@ contract("TreeFactory", (accounts) => {
         "planter paid after verify is not ok"
       );
 
-      const totalFundsAfterVerify =
+      const totalBalancesAfterVerify =
         await planterFundInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsAfterVerify.planter),
-        Math.subtract(Number(totalFundsBefore.planter), expectedPaid),
+        Number(totalBalancesAfterVerify.planter),
+        Math.subtract(Number(totalBalancesBefore.planter), expectedPaid),
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsAfterVerify.ambassador),
+        Number(totalBalancesAfterVerify.ambassador),
         Math.subtract(
-          Number(totalFundsBefore.ambassador),
+          Number(totalBalancesBefore.ambassador),
           expectedReferralPaid
         ),
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsAfterVerify.localDevelopment),
+        Number(totalBalancesAfterVerify.localDevelopment),
         expectedReferralPaid,
         "local development total fund is not ok"
       );
@@ -3413,7 +3413,7 @@ contract("TreeFactory", (accounts) => {
       const rFund =
         await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
-      const totalFunds1 = await planterFundInstnce.totalBalances.call();
+      const totalBalances1 = await planterFundInstnce.totalBalances.call();
 
       const planterPaidBeforeVerify =
         await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
@@ -3431,17 +3431,17 @@ contract("TreeFactory", (accounts) => {
       ////////////////// ------------ check total funds
 
       assert.equal(
-        Number(totalFunds1.planter),
+        Number(totalBalances1.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds1.ambassador),
+        Number(totalBalances1.ambassador),
         referralTotalFund,
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds1.localDevelopment),
+        Number(totalBalances1.localDevelopment),
         0,
         "local developmentment total fund is not ok"
       );
@@ -3465,22 +3465,22 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      const totalFunds2 = await planterFundInstnce.totalBalances.call();
+      const totalBalances2 = await planterFundInstnce.totalBalances.call();
 
       ////////////////// ------------ check total funds
 
       assert.equal(
-        Number(totalFunds2.planter),
+        Number(totalBalances2.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds2.ambassador),
+        Number(totalBalances2.ambassador),
         referralTotalFund,
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         0,
         "local development total fund is not ok"
       );
@@ -3571,7 +3571,7 @@ contract("TreeFactory", (accounts) => {
         )
       );
 
-      const totalFunds3 = await planterFundInstnce.totalBalances.call();
+      const totalBalances3 = await planterFundInstnce.totalBalances.call();
 
       const planterBalance = await planterFundInstnce.balances.call(
         userAccount2
@@ -3585,18 +3585,18 @@ contract("TreeFactory", (accounts) => {
 
       //// because there is no referral , referral share added to totalBalances.localDevelopment
       assert.equal(
-        Number(totalFunds3.localDevelopment),
+        Number(totalBalances3.localDevelopment),
         expectedReferralPaid,
         "local development total fund is not correct"
       );
 
       assert.equal(
-        Math.add(Number(totalFunds3.planter), expectedPaid),
+        Math.add(Number(totalBalances3.planter), expectedPaid),
         planterTotalFund,
         "planter total fund is not correct"
       );
       assert.equal(
-        Math.add(Number(totalFunds3.ambassador), expectedReferralPaid),
+        Math.add(Number(totalBalances3.ambassador), expectedReferralPaid),
         referralTotalFund,
         "ambassador total fund is not correct"
       );

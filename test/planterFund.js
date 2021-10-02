@@ -360,7 +360,8 @@ contract("PlanterFund", (accounts) => {
           treeId1
         );
 
-      const totalFundsBefore = await planterFundInstance.totalBalances.call();
+      const totalBalancesBefore =
+        await planterFundInstance.totalBalances.call();
 
       assert.equal(Number(planterFundsBefore), 0, "planter fund is not ok");
 
@@ -371,13 +372,13 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsBefore.planter),
+        Number(totalBalancesBefore.planter),
         0,
         "total planter fund is not ok"
       );
 
       assert.equal(
-        Number(totalFundsBefore.ambassador),
+        Number(totalBalancesBefore.ambassador),
         0,
         "total ambassador fund is not ok"
       );
@@ -404,7 +405,7 @@ contract("PlanterFund", (accounts) => {
           treeId1
         );
 
-      const totalFundsAfter = await planterFundInstance.totalBalances.call();
+      const totalBalancesAfter = await planterFundInstance.totalBalances.call();
 
       assert.equal(
         Number(planterFundsAfter),
@@ -419,13 +420,13 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsAfter.planter),
+        Number(totalBalancesAfter.planter),
         planterFund1,
         "total planter fund is not ok"
       );
 
       assert.equal(
-        Number(totalFundsAfter.ambassador),
+        Number(totalBalancesAfter.ambassador),
         ambassadorFund1,
         "total ambassador fund is not ok"
       );
@@ -455,7 +456,8 @@ contract("PlanterFund", (accounts) => {
           treeId2
         );
 
-      const totalFundsAfter2 = await planterFundInstance.totalBalances.call();
+      const totalBalancesAfter2 =
+        await planterFundInstance.totalBalances.call();
 
       assert.equal(
         Number(planterFundsAfter2),
@@ -470,13 +472,13 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsAfter2.planter),
+        Number(totalBalancesAfter2.planter),
         Math.add(planterFund1, planterFund2),
         "total planter fund is not ok"
       );
 
       assert.equal(
-        Number(totalFundsAfter2.ambassador),
+        Number(totalBalancesAfter2.ambassador),
         Math.add(ambassadorFund1, ambassadorFund2),
         "total ambassador fund is not ok"
       );
@@ -1669,7 +1671,7 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      const totalFunds2 = await planterFundInstance.totalBalances();
+      const totalBalances2 = await planterFundInstance.totalBalances();
       let planterPaid =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance = await planterFundInstance.balances(userAccount2);
@@ -1695,13 +1697,13 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         planterFund2,
-        Number(totalFunds2.planter),
+        Number(totalBalances2.planter),
         "total funds2 is not ok"
       );
 
       assert.equal(
         ambassadorFund2,
-        Number(totalFunds2.ambassador),
+        Number(totalBalances2.ambassador),
         "total funds2 ambassador is not ok"
       );
     });
@@ -2979,7 +2981,7 @@ contract("PlanterFund", (accounts) => {
       const accountOrganizationPlanterBalance2 =
         await daiInstance.balanceOf.call(userAccount3);
 
-      const totalFunds2 = await planterFundInstance.totalBalances();
+      const totalBalances2 = await planterFundInstance.totalBalances();
 
       const accountlocalDevelopBalance2 = await daiInstance.balanceOf.call(
         userAccount6
@@ -2993,7 +2995,7 @@ contract("PlanterFund", (accounts) => {
       //TODO: we can check here transfer local development fund and check total funds
       assert.equal(
         totalAmbassadorFund,
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         "localDevelopment blance is not ok 2"
       );
 
@@ -3061,7 +3063,7 @@ contract("PlanterFund", (accounts) => {
       const organizationPlanterBalance3 =
         await planterFundInstance.balances.call(userAccount3);
 
-      const totalFunds3 = await planterFundInstance.totalBalances();
+      const totalBalances3 = await planterFundInstance.totalBalances();
 
       assert.equal(
         0,
@@ -3071,19 +3073,19 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         0,
-        Number(totalFunds3.ambassador),
+        Number(totalBalances3.ambassador),
         "totalAmbassadorFund is not ok 3"
       );
 
       assert.equal(
         0,
-        Number(totalFunds3.planter),
+        Number(totalBalances3.planter),
         "totalPalnterFund is not ok 3"
       );
 
       assert.equal(
         totalAmbassadorFund,
-        Number(totalFunds3.localDevelopment),
+        Number(totalBalances3.localDevelopment),
         "totallocalDevelop is not ok 3"
       );
 

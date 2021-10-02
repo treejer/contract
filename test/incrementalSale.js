@@ -1386,7 +1386,7 @@ contract("IncrementalSale", (accounts) => {
 
       ////////-------------Check PlanterFund and wethFund data after fund tree (treeId==101)
 
-      const wethFundsBalanceAfter = await wethInstance.balanceOf(
+      const wethFundBalanceAfter = await wethInstance.balanceOf(
         wethFundInstance.address
       );
 
@@ -1399,7 +1399,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(wethFundsBalanceAfter),
+        Number(wethFundBalanceAfter),
         Number(web3.utils.toWei(".0058")),
         "daiFund balance not true"
       );
@@ -1631,7 +1631,7 @@ contract("IncrementalSale", (accounts) => {
 
       ////////-------------Check PlanterFund and wethFund data after fund tree (treeId==120)
 
-      const wethFundsBalanceAfter2 = await wethInstance.balanceOf(
+      const wethFundBalanceAfter2 = await wethInstance.balanceOf(
         wethFundInstance.address
       );
 
@@ -1644,7 +1644,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(wethFundsBalanceAfter2),
+        Number(wethFundBalanceAfter2),
         Math.add(
           Number(web3.utils.toWei(".0058")),
           Number(web3.utils.toWei("0.11658"))

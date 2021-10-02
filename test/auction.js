@@ -1613,7 +1613,7 @@ contract("Auction", (accounts) => {
         reserve2: 0,
       };
 
-      const wethFundsShare = Math.add(
+      const wethFundShare = Math.add(
         expected.research,
         expected.localDevelopment,
         expected.insurance,
@@ -1676,7 +1676,7 @@ contract("Auction", (accounts) => {
 
       assert.equal(
         Number(await wethInstance.balanceOf(wethFundInstance.address)),
-        wethFundsShare,
+        wethFundShare,
         "1.WethFund contract balance not true"
       );
 
@@ -1700,9 +1700,9 @@ contract("Auction", (accounts) => {
       let aFund =
         await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundInstnce.totalBalances();
+      let totalBalancesPlanterFunds = await planterFundInstnce.totalBalances();
 
-      let totalFundsWethFunds = await wethFundInstance.totalBalances();
+      let totalBalancesWethFund = await wethFundInstance.totalBalances();
 
       assert.equal(
         Number(pFund),
@@ -1717,49 +1717,49 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.ambassador),
+        Number(totalBalancesPlanterFunds.ambassador),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(1200).div(5200)),
         "ambassador funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.planter),
+        Number(totalBalancesPlanterFunds.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(4000).div(5200)),
         "planter funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.research),
+        Number(totalBalancesWethFund.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelopment),
+        Number(totalBalancesWethFund.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.insurance),
+        Number(totalBalancesWethFund.insurance),
         expected.insurance,
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treasury),
+        Number(totalBalancesWethFund.treasury),
         expected.treasury,
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve1),
+        Number(totalBalancesWethFund.reserve1),
         expected.reserve1,
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve2),
+        Number(totalBalancesWethFund.reserve2),
         expected.reserve2,
         "reserve2 funds invalid"
       );
@@ -2077,7 +2077,7 @@ contract("Auction", (accounts) => {
         reserve2: 0,
       };
 
-      const wethFundsShare = Math.add(
+      const wethFundShare = Math.add(
         expected.research,
         expected.localDevelopment,
         expected.insurance,
@@ -2086,7 +2086,7 @@ contract("Auction", (accounts) => {
         expected.reserve2
       );
 
-      let wethFundsInstanceBeforeAuctionEnd = await wethInstance.balanceOf(
+      let wethFundInstanceBeforeAuctionEnd = await wethInstance.balanceOf(
         wethFundInstance.address
       );
 
@@ -2137,7 +2137,7 @@ contract("Auction", (accounts) => {
 
       assert.equal(
         Number(await wethInstance.balanceOf(wethFundInstance.address)),
-        Math.add(Number(wethFundsInstanceBeforeAuctionEnd), wethFundsShare),
+        Math.add(Number(wethFundInstanceBeforeAuctionEnd), wethFundShare),
         "weth funds transfer not work true"
       );
 
@@ -2154,9 +2154,9 @@ contract("Auction", (accounts) => {
       let aFund =
         await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundInstnce.totalBalances();
+      let totalBalancesPlanterFunds = await planterFundInstnce.totalBalances();
 
-      let totalFundsWethFunds = await wethFundInstance.totalBalances();
+      let totalBalancesWethFund = await wethFundInstance.totalBalances();
 
       assert.equal(
         Number(await daiInstance.balanceOf(planterFundInstnce.address)),
@@ -2177,49 +2177,49 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.planter),
+        Number(totalBalancesPlanterFunds.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(3000).div(4200)),
-        "planter totalFunds invalid"
+        "planter totalBalances invalid"
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.ambassador),
+        Number(totalBalancesPlanterFunds.ambassador),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(1200).div(4200)),
         "ambassador funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.research),
+        Number(totalBalancesWethFund.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelopment),
+        Number(totalBalancesWethFund.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.insurance),
+        Number(totalBalancesWethFund.insurance),
         expected.insurance,
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treasury),
+        Number(totalBalancesWethFund.treasury),
         expected.treasury,
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve1),
+        Number(totalBalancesWethFund.reserve1),
         expected.reserve1,
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve2),
+        Number(totalBalancesWethFund.reserve2),
         expected.reserve2,
         "reserve2 funds invalid"
       );
@@ -2677,7 +2677,7 @@ contract("Auction", (accounts) => {
         reserve2: 0,
       };
 
-      const wethFundsShare = Math.add(
+      const wethFundShare = Math.add(
         expected.research,
         expected.localDevelopment,
         expected.insurance,
@@ -2712,7 +2712,7 @@ contract("Auction", (accounts) => {
 
       assert.equal(
         Number(await wethInstance.balanceOf(wethFundInstance.address)),
-        Number(wethFundsShare),
+        Number(wethFundShare),
         "Treasury contract balance is not true"
       );
 
@@ -2743,8 +2743,8 @@ contract("Auction", (accounts) => {
       let aFund =
         await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
-      let totalFundsPlanterFunds = await planterFundInstnce.totalBalances();
-      let totalFundsWethFunds = await wethFundInstance.totalBalances();
+      let totalBalancesPlanterFunds = await planterFundInstnce.totalBalances();
+      let totalBalancesWethFund = await wethFundInstance.totalBalances();
 
       assert.equal(
         Number(pFund),
@@ -2759,49 +2759,49 @@ contract("Auction", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.planter),
+        Number(totalBalancesPlanterFunds.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(3500).div(4500)),
-        "planter totalFunds invalid"
+        "planter totalBalances invalid"
       );
 
       assert.equal(
-        Number(totalFundsPlanterFunds.ambassador),
+        Number(totalBalancesPlanterFunds.ambassador),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(1000).div(4500)),
         "ambassador funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.research),
+        Number(totalBalancesWethFund.research),
         expected.research,
         "research funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.localDevelopment),
+        Number(totalBalancesWethFund.localDevelopment),
         expected.localDevelopment,
         "localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.insurance),
+        Number(totalBalancesWethFund.insurance),
         expected.insurance,
         "insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.treasury),
+        Number(totalBalancesWethFund.treasury),
         expected.treasury,
         "treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve1),
+        Number(totalBalancesWethFund.reserve1),
         expected.reserve1,
         "reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFundsWethFunds.reserve2),
+        Number(totalBalancesWethFund.reserve2),
         expected.reserve2,
         "reserve2 funds invalid"
       );
@@ -2913,9 +2913,9 @@ contract("Auction", (accounts) => {
         "2.treasury balance not true"
       );
 
-      let totalFunds2 = await wethFundInstance.totalBalances();
+      let totalBalances2 = await wethFundInstance.totalBalances();
 
-      let treasuryBalance = totalFunds2.treasury;
+      let treasuryBalance = totalBalances2.treasury;
       let ownerAccountBalanceBefore = await wethInstance.balanceOf(
         userAccount6
       );
@@ -2925,7 +2925,7 @@ contract("Auction", (accounts) => {
       });
 
       await wethFundInstance.withdrawTreasuryBalance(
-        web3.utils.toWei(totalFunds2.treasury, "wei"),
+        web3.utils.toWei(totalBalances2.treasury, "wei"),
         "reason message",
         {
           from: deployerAccount,
@@ -2942,7 +2942,7 @@ contract("Auction", (accounts) => {
 
       assert.equal(
         await wethInstance.balanceOf(wethFundInstance.address),
-        Math.subtract(wethFundsShare, Number(treasuryBalance)),
+        Math.subtract(wethFundShare, Number(treasuryBalance)),
         "3.treasury balance not true"
       );
 
@@ -3245,7 +3245,7 @@ contract("Auction", (accounts) => {
       const planterFundBalanceBeforeAuction1End = await daiInstance.balanceOf(
         planterFundInstnce.address
       );
-      const wethFundsBalanceBeforeAuction1End = await wethInstance.balanceOf(
+      const wethFundBalanceBeforeAuction1End = await wethInstance.balanceOf(
         wethFundInstance.address
       );
       const totalFundPlanterFundBeforeAuction1End =
@@ -3262,12 +3262,12 @@ contract("Auction", (accounts) => {
         "invalid planter fund contract balance before auction end"
       );
       assert.equal(
-        Number(wethFundsBalanceBeforeAuction1End),
+        Number(wethFundBalanceBeforeAuction1End),
         0,
         "invalid weth fund contract balance before auction end"
       );
 
-      ///------------ check totalFunds before auction end
+      ///------------ check totalBalances before auction end
       assert.equal(
         Number(totalFundPlanterFundBeforeAuction1End.planter),
         0,
@@ -3334,7 +3334,7 @@ contract("Auction", (accounts) => {
         reserve2: 0,
       };
 
-      const wethFundsShare = Math.add(
+      const wethFundShare = Math.add(
         expectedPayValue.research,
         expectedPayValue.treasury,
         expectedPayValue.localDevelopment,
@@ -3387,7 +3387,7 @@ contract("Auction", (accounts) => {
 
       /////////////////////////////// ---------------------------
 
-      const wethFundsBalanceAfterAuction1End = await wethInstance.balanceOf(
+      const wethFundBalanceAfterAuction1End = await wethInstance.balanceOf(
         wethFundInstance.address
       );
 
@@ -3405,7 +3405,7 @@ contract("Auction", (accounts) => {
       const totalFundWethFundAfterAuction1End =
         await wethFundInstance.totalBalances();
 
-      ///------------ check totalFunds after auction end
+      ///------------ check totalBalances after auction end
       assert.equal(
         Number(totalFundPlanterFundAfterAuction1End.planter),
         Number(Math.Big(expectedSwapTokenAmount[1]).times(5000).div(6000)),
@@ -3449,10 +3449,10 @@ contract("Auction", (accounts) => {
       // ///////////------------ check charge treasury contract
       assert.equal(
         Math.subtract(
-          Number(wethFundsBalanceAfterAuction1End),
-          Number(wethFundsBalanceBeforeAuction1End)
+          Number(wethFundBalanceAfterAuction1End),
+          Number(wethFundBalanceBeforeAuction1End)
         ),
-        wethFundsShare,
+        wethFundShare,
         "weth funds contract dont charge correctly"
       );
 
@@ -3522,9 +3522,9 @@ contract("Auction", (accounts) => {
 
       assert.equal(tokenOwner2, userAccount8, "token owner not correct");
 
-      ///////////////// ----------- check planterFund totalFunds
+      ///////////////// ----------- check planterFund totalBalances
 
-      const wethFundsBalanceAfterAuction2End = await wethInstance.balanceOf(
+      const wethFundBalanceAfterAuction2End = await wethInstance.balanceOf(
         wethFundInstance.address
       );
 
@@ -3538,7 +3538,7 @@ contract("Auction", (accounts) => {
       const totalFundWethFundAfterAuction2End =
         await wethFundInstance.totalBalances();
 
-      ///------------ check totalFunds after auction end
+      ///------------ check totalBalances after auction end
 
       assert.equal(
         Number(totalFundPlanterFundAfterAuction2End.planter),
@@ -3595,10 +3595,10 @@ contract("Auction", (accounts) => {
       // ///////////------------ check charge treasury contract
       assert.equal(
         Math.subtract(
-          Number(wethFundsBalanceAfterAuction2End),
-          Number(wethFundsBalanceAfterAuction1End)
+          Number(wethFundBalanceAfterAuction2End),
+          Number(wethFundBalanceAfterAuction1End)
         ),
-        wethFundsShare,
+        wethFundShare,
         "weth funds contract dont charge correctly"
       );
 
@@ -3665,7 +3665,7 @@ contract("Auction", (accounts) => {
 
       //////////////// ---------------------- check total funds value
 
-      const totalFundsAfterFundPlanter =
+      const totalBalancesAfterFundPlanter =
         await planterFundInstnce.totalBalances();
 
       const planterPaidAfterVerify =
@@ -3687,7 +3687,7 @@ contract("Auction", (accounts) => {
         parseInt(
           Number(
             Math.Big(totalFundPlanterFundAfterAuction2End.planter).minus(
-              totalFundsAfterFundPlanter.planter
+              totalBalancesAfterFundPlanter.planter
             )
           )
         ),

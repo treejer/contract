@@ -46,7 +46,7 @@ contract("TreeAttribute", (accounts) => {
   let arInstance;
 
   let treeAttributeInstance;
-  let wethFundsInstance;
+  let wethFundInstance;
   let planterFundsInstnce;
   let wethInstance;
   let daiInstance;
@@ -1090,7 +1090,7 @@ contract("TreeAttribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1112,7 +1112,7 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -1122,25 +1122,25 @@ contract("TreeAttribute", (accounts) => {
 
       ////////////////////////// set weth funds address
 
-      await wethFundsInstance.setPlanterFundContractAddress(
+      await wethFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
 
-      await wethFundsInstance.setUniswapRouterAddress(
+      await wethFundInstance.setUniswapRouterAddress(
         uniswapV2Router02NewAddress,
         {
           from: deployerAccount,
         }
       );
 
-      await wethFundsInstance.setWethTokenAddress(WETHAddress, {
+      await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
 
-      await wethFundsInstance.setDaiAddress(DAIAddress, {
+      await wethFundInstance.setDaiAddress(DAIAddress, {
         from: deployerAccount,
       });
     });

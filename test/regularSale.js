@@ -45,7 +45,7 @@ contract("regularSale", (accounts) => {
   let daiFundInstance;
   let planterFundsInstnce;
   let daiInstance;
-  let wethFundsInstance;
+  let wethFundInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -232,24 +232,24 @@ contract("regularSale", (accounts) => {
 
       ////---------------------------------set wethFund Address--------------------------------------------------------
 
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
       await regularSaleInstance
-        .setWethFundAddress(wethFundsInstance.address, {
+        .setWethFundAddress(wethFundInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSaleInstance.setWethFundAddress(wethFundsInstance.address, {
+      await regularSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        wethFundsInstance.address,
+        wethFundInstance.address,
         await regularSaleInstance.wethFund(),
         "address set incorect"
       );
@@ -1164,41 +1164,41 @@ contract("regularSale", (accounts) => {
         reserve2: (0 * amount) / 100,
       };
 
-      //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundInstance.totalBalances();
+      //check wethFund totalBalances treeId2
+      let totalBalances2 = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.research),
+        Number(totalBalances2.research),
         expected.research,
         "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         expected.localDevelopment,
         "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.insurance),
+        Number(totalBalances2.insurance),
         expected.insurance,
         "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treasury),
+        Number(totalBalances2.treasury),
         expected.treasury,
         "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve1),
+        Number(totalBalances2.reserve1),
         expected.reserve1,
         "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve2),
+        Number(totalBalances2.reserve2),
         expected.reserve2,
         "2-reserve2 funds invalid"
       );
@@ -1459,41 +1459,41 @@ contract("regularSale", (accounts) => {
         reserve2: (0 * amount) / 100,
       };
 
-      //check wethFund totalFunds treeId2
-      let totalFunds2 = await daiFundInstance.totalBalances();
+      //check wethFund totalBalances treeId2
+      let totalBalances2 = await daiFundInstance.totalBalances();
 
       assert.equal(
-        Number(totalFunds2.research),
+        Number(totalBalances2.research),
         expected.research,
         "2-research funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.localDevelopment),
+        Number(totalBalances2.localDevelopment),
         expected.localDevelopment,
         "2-localDevelopment funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.insurance),
+        Number(totalBalances2.insurance),
         expected.insurance,
         "2-insurance funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.treasury),
+        Number(totalBalances2.treasury),
         expected.treasury,
         "2-treasury funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve1),
+        Number(totalBalances2.reserve1),
         expected.reserve1,
         "2-reserve1 funds invalid"
       );
 
       assert.equal(
-        Number(totalFunds2.reserve2),
+        Number(totalBalances2.reserve2),
         expected.reserve2,
         "2-reserve2 funds invalid"
       );
@@ -2466,7 +2466,7 @@ contract("regularSale", (accounts) => {
 
       /////////////--------------------- check total fund before request
 
-      const totalFundsBefore = await daiFundInstance.totalBalances();
+      const totalBalancesBefore = await daiFundInstance.totalBalances();
       const totalPlanterFundsBefore = await planterFundsInstnce.totalBalances();
 
       assert.equal(
@@ -2482,31 +2482,39 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsBefore.research),
+        Number(totalBalancesBefore.research),
         0,
         "invalid research fund"
       );
 
       assert.equal(
-        Number(totalFundsBefore.localDevelopment),
+        Number(totalBalancesBefore.localDevelopment),
         0,
         "invalid local development fund"
       );
       assert.equal(
-        Number(totalFundsBefore.insurance),
+        Number(totalBalancesBefore.insurance),
         0,
         "invalid insurance fund"
       );
 
       assert.equal(
-        Number(totalFundsBefore.treasury),
+        Number(totalBalancesBefore.treasury),
         0,
         "invalid treejer develop fund"
       );
 
-      assert.equal(Number(totalFundsBefore.reserve1), 0, "invalid other fund1");
+      assert.equal(
+        Number(totalBalancesBefore.reserve1),
+        0,
+        "invalid other fund1"
+      );
 
-      assert.equal(Number(totalFundsBefore.reserve2), 0, "invalid other fund2");
+      assert.equal(
+        Number(totalBalancesBefore.reserve2),
+        0,
+        "invalid other fund2"
+      );
 
       ////////////////// ---------------- check tree before -----------------------
 
@@ -2664,7 +2672,7 @@ contract("regularSale", (accounts) => {
 
       ////////////////// ---------------------- check total fund after request
 
-      const totalFundsAfter = await daiFundInstance.totalBalances();
+      const totalBalancesAfter = await daiFundInstance.totalBalances();
 
       const totalPlanterFundsAfter = await planterFundsInstnce.totalBalances();
 
@@ -2681,37 +2689,37 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFundsAfter.research),
+        Number(totalBalancesAfter.research),
         expected.research,
         "invalid research fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.localDevelopment),
+        Number(totalBalancesAfter.localDevelopment),
         expected.localDevelopment,
         "invalid local development fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.insurance),
+        Number(totalBalancesAfter.insurance),
         expected.insurance,
         "invalid insurance fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.treasury),
+        Number(totalBalancesAfter.treasury),
         expected.treasury,
         "invalid treejer develop fund"
       );
 
       assert.equal(
-        Number(totalFundsAfter.reserve1),
+        Number(totalBalancesAfter.reserve1),
         expected.reserve1,
         "invalid other fund1"
       );
 
       assert.equal(
-        Number(totalFundsAfter.reserve2),
+        Number(totalBalancesAfter.reserve2),
         expected.reserve2,
         "invalid other fund2"
       );
@@ -2765,14 +2773,14 @@ contract("regularSale", (accounts) => {
       );
 
       ///////////// deploy weth funds and set address
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
       await testRegularSaleInstance.setWethFundAddress(
-        wethFundsInstance.address,
+        wethFundInstance.address,
         {
           from: deployerAccount,
         }
@@ -2881,7 +2889,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
+        Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
         0,
         "user 1 gift after claim is not correct"
       );
@@ -2945,7 +2953,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
+        Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20),
         "user 1 gift after claim is not correct"
       );
@@ -2987,14 +2995,14 @@ contract("regularSale", (accounts) => {
         );
       }
 
-      let totalFunds = await planterFundsInstnce.totalBalances.call();
+      let totalBalances = await planterFundsInstnce.totalBalances.call();
       assert.equal(
-        Number(totalFunds.planter),
+        Number(totalBalances.planter),
         Math.mul(45, Number(planterShare))
       );
 
       assert.equal(
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         Math.mul(45, Number(referralShare))
       );
 
@@ -3090,14 +3098,14 @@ contract("regularSale", (accounts) => {
         }
       }
 
-      let totalFunds2 = await planterFundsInstnce.totalBalances.call();
+      let totalBalances2 = await planterFundsInstnce.totalBalances.call();
       assert.equal(
-        Number(totalFunds2.planter),
+        Number(totalBalances2.planter),
         Math.mul(55, Number(planterShare))
       );
 
       assert.equal(
-        Number(totalFunds2.ambassador),
+        Number(totalBalances2.ambassador),
         Math.mul(55, Number(referralShare))
       );
 
@@ -3182,7 +3190,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
+        Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 35),
         "user 1 gift after claim is not correct"
@@ -3219,9 +3227,9 @@ contract("regularSale", (accounts) => {
         );
       }
 
-      let totalFunds3 = await planterFundsInstnce.totalBalances.call();
+      let totalBalances3 = await planterFundsInstnce.totalBalances.call();
       assert.equal(
-        Number(totalFunds3.planter),
+        Number(totalBalances3.planter),
         Math.add(
           Math.mul(55, Number(planterShare)),
           Math.mul(45, Number(planterShare2))
@@ -3229,7 +3237,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFunds3.ambassador),
+        Number(totalBalances3.ambassador),
         Math.add(
           Math.mul(55, Number(referralShare)),
           Math.mul(45, Number(referralShare2))
@@ -3268,7 +3276,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(await wethFundsInstance.totalDaiDebtToPlanterContract()),
+        Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
         Math.mul(Math.add(Number(planterShare), Number(referralShare)), 20) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 45),
         "user 1 gift after claim is not correct"
@@ -3305,9 +3313,9 @@ contract("regularSale", (accounts) => {
         );
       }
 
-      let totalFunds4 = await planterFundsInstnce.totalBalances.call();
+      let totalBalances4 = await planterFundsInstnce.totalBalances.call();
       assert.equal(
-        Number(totalFunds4.planter),
+        Number(totalBalances4.planter),
         Math.add(
           Math.mul(55, Number(planterShare)),
           Math.mul(55, Number(planterShare2))
@@ -3315,7 +3323,7 @@ contract("regularSale", (accounts) => {
       );
 
       assert.equal(
-        Number(totalFunds4.ambassador),
+        Number(totalBalances4.ambassador),
         Math.add(
           Math.mul(55, Number(referralShare)),
           Math.mul(55, Number(referralShare2))
@@ -3341,14 +3349,14 @@ contract("regularSale", (accounts) => {
       );
 
       ///////////// deploy weth funds and set address
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
       await testRegularSaleInstance.setWethFundAddress(
-        wethFundsInstance.address,
+        wethFundInstance.address,
         {
           from: deployerAccount,
         }
@@ -3541,14 +3549,14 @@ contract("regularSale", (accounts) => {
         );
       }
 
-      let totalFunds = await planterFundsInstnce.totalBalances.call();
+      let totalBalances = await planterFundsInstnce.totalBalances.call();
       assert.equal(
-        Number(totalFunds.planter),
+        Number(totalBalances.planter),
         Math.mul(45, Number(planterShare))
       );
 
       assert.equal(
-        Number(totalFunds.ambassador),
+        Number(totalBalances.ambassador),
         Math.mul(45, Number(referralShare))
       );
     });

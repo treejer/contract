@@ -203,7 +203,7 @@ interface IDaiFund {
         string reason
     );
     /**
-     * @dev emitted when admin withdraw local develop balance
+     * @dev emitted when admin withdraw local development balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage
      */
     event LocalDevelopmentBalanceWithdrew(

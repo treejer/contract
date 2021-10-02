@@ -2490,7 +2490,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsBefore.localDevelopment),
         0,
-        "invalid local develop fund"
+        "invalid local development fund"
       );
       assert.equal(
         Number(totalFundsBefore.insurance),
@@ -2689,7 +2689,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsAfter.localDevelopment),
         expected.localDevelopment,
-        "invalid local develop fund"
+        "invalid local development fund"
       );
 
       assert.equal(

@@ -157,7 +157,7 @@ contract DaiFund is Initializable {
 
     /**
      * @dev admin set localDevelopment address to fund
-     * @param _address local develop address
+     * @param _address local development address
      */
     function setLocalDevelopmentAddress(address payable _address)
         external

@@ -2944,7 +2944,7 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      //TODO: we can check here transfer local develop fund and check total funds
+      //TODO: we can check here transfer local development fund and check total funds
 
       // const txLocalDevelop = await planterFundInstance.withdrawLocalDevelop(
       //   web3.utils.toWei("0.1"),
@@ -2990,7 +2990,7 @@ contract("PlanterFund", (accounts) => {
         Number(organizationPlanterBalance2),
         "organization planter blance is not ok 2"
       );
-      //TODO: we can check here transfer local develop fund and check total funds
+      //TODO: we can check here transfer local development fund and check total funds
       assert.equal(
         totalAmbassadorFund,
         Number(totalFunds2.localDevelopment),

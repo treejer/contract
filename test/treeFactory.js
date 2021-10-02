@@ -2964,7 +2964,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(totalFundsBefore.localDevelopment),
         0,
-        "local develop total fund is not ok"
+        "local development total fund is not ok"
       );
 
       await Common.travelTime(TimeEnumes.seconds, 7 * 172800); // 7 * 172800 is equal to 7 * 48 hours
@@ -3029,7 +3029,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(totalFundsAfterVerify.localDevelopment),
         expectedReferralPaid,
-        "local develop total fund is not ok"
+        "local development total fund is not ok"
       );
 
       assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
@@ -3443,7 +3443,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(totalFunds1.localDevelopment),
         0,
-        "local development total fund is not ok"
+        "local developmentment total fund is not ok"
       );
       /////////// ------------------ check planter paid
       assert.equal(
@@ -3587,7 +3587,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(totalFunds3.localDevelopment),
         expectedReferralPaid,
-        "local develop total fund is not correct"
+        "local development total fund is not correct"
       );
 
       assert.equal(

@@ -733,7 +733,7 @@ contract("Allocation", (accounts) => {
       .assignAllocationToTree(0, 0, 0, {
         from: dataManager,
       })
-      .should.be.rejectedWith(AllocationErrorMsg.DISTRIBUTION_MODEL_NOT_FOUND);
+      .should.be.rejectedWith(AllocationErrorMsg.ALLOCATION_MODEL_NOT_FOUND);
 
     await allocationInstance.addAllocationData(
       4000,

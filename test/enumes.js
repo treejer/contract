@@ -79,7 +79,7 @@ const TreasuryManagerErrorMsg = {
   SUM_INVALID: "sum must be 10000",
   INVALID_FUND_MODEL: "invalid fund model",
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
-  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
 };
 
 const DaiFundErrorMsg = {
@@ -88,7 +88,7 @@ const DaiFundErrorMsg = {
 };
 const AllocationErrorMsg = {
   SUM_INVALID: "sum must be 10000",
-  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
   INVALID_FUND_MODEL: "invalid fund model",
 };
 

@@ -138,7 +138,7 @@ contract Allocation is Initializable {
     ) external onlyDataManager {
         require(
             allocations[_allocationDataId].exists > 0,
-            "Distribution model not found"
+            "Allocation model not found"
         );
 
         AllocationToTree[] memory tempAllocationToTree = allocationToTrees;

@@ -805,7 +805,7 @@ contract("DaiFund", (accounts) => {
     });
 
     it("check withdraw errors from accounts", async () => {
-      ////----------------------should fail tree research withdraw
+      ////----------------------should fail research withdraw
       const treeId = 1;
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
@@ -935,7 +935,7 @@ contract("DaiFund", (accounts) => {
       //
       //
 
-      /////////////-------------------------------------should fail local develop withdraw------------------/////
+      /////////////-------------------------------------should fail local development withdraw------------------/////
 
       await daiFundInstance.setLocalDevelopmentAddress(userAccount3, {
         from: deployerAccount,
@@ -1196,7 +1196,7 @@ contract("DaiFund", (accounts) => {
     });
 
     it("should withdraw address succussfully", async () => {
-      ///-------------------------------- should withdraw local develop succussfully ---------------------------------------
+      ///-------------------------------- should withdraw local development succussfully ---------------------------------------
       const treeId = 1;
       const amount = web3.utils.toWei("2");
       const planterShare = 3000;
@@ -1414,7 +1414,7 @@ contract("DaiFund", (accounts) => {
 
       ///
 
-      ////-------------------------------------- should withdraw Tree Research succussfully -----------------------------------------
+      ////-------------------------------------- should withdraw Research succussfully -----------------------------------------
 
       ////---------------transfer dai for daiFundInstance-------------------
       await daiInstance.setMint(daiFundInstance.address, amount);
@@ -1442,9 +1442,9 @@ contract("DaiFund", (accounts) => {
       );
     });
 
-    //------------------------------------------withdraw tree research balance -------------------------------------/
+    //------------------------------------------withdraw research balance -------------------------------------/
 
-    it("check withdraw tree research data to be ok", async () => {
+    it("check withdraw research data to be ok", async () => {
       const treeId = 1;
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
@@ -1565,7 +1565,7 @@ contract("DaiFund", (accounts) => {
       assert.equal(
         totalResearchFunded,
         Number(totalBalances1.research),
-        "tree research total fund1 is not ok"
+        "research total fund1 is not ok"
       );
 
       const researchBalnance1 = await daiInstance.balanceOf(researchAddress);
@@ -1606,13 +1606,13 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances2.research)
         ),
         Number(withdrawBalance1),
-        "tree research total fund is not ok after withdraw1"
+        "research total fund is not ok after withdraw1"
       );
 
       assert.equal(
         Number(researchBalnance2),
         Math.add(Number(researchBalnance1), Number(withdrawBalance1)),
-        "tree research account balance is not ok after withdraw1"
+        "research account balance is not ok after withdraw1"
       );
 
       // -------------------- seccond withdraw and check data ------------------------------
@@ -1656,7 +1656,7 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances3.research)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
-        "tree research total fund is not ok after withdraw1"
+        "research total fund is not ok after withdraw1"
       );
 
       assert.equal(
@@ -1665,18 +1665,18 @@ contract("DaiFund", (accounts) => {
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
         Number(totalBalances3.research),
-        "tree research total fund3 is not ok"
+        "research total fund3 is not ok"
       );
 
       assert.equal(
         Number(researchBalnance3),
         Math.add(Number(researchBalnance2), Number(withdrawBalance2)),
-        "tree research account balance is not ok after withdraw2"
+        "research account balance is not ok after withdraw2"
       );
     });
 
-    /////////// --------------------------------------------------------------------withdraw local develop balance ----------------------------------------------------------------
-    it("check withdraw local develop data to be ok", async () => {
+    /////////// --------------------------------------------------------------------withdraw local development balance ----------------------------------------------------------------
+    it("check withdraw local development data to be ok", async () => {
       const treeId = 1;
       const treeId2 = 2;
       const amount = web3.utils.toWei("2");
@@ -1803,7 +1803,7 @@ contract("DaiFund", (accounts) => {
       assert.equal(
         totalLocalDevelopmentFunded,
         Number(totalBalances1.localDevelopment),
-        "local develop total fund1 is not ok"
+        "local development total fund1 is not ok"
       );
 
       const localDevelopmentBalnance1 = await daiInstance.balanceOf(
@@ -1852,13 +1852,13 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances2.localDevelopment)
         ),
         Number(withdrawBalance1),
-        "local develop total fund is not ok after withdraw1"
+        "local development total fund is not ok after withdraw1"
       );
 
       assert.equal(
         Number(localDevelopmentBalnance2),
         Math.add(Number(localDevelopmentBalnance1), Number(withdrawBalance1)),
-        "local develop account balance is not ok after withdraw1"
+        "local development account balance is not ok after withdraw1"
       );
 
       // -------------------- seccond withdraw and check data ------------------------------
@@ -1908,7 +1908,7 @@ contract("DaiFund", (accounts) => {
           Number(totalBalances3.localDevelopment)
         ),
         Math.add(Number(withdrawBalance1), Number(withdrawBalance2)),
-        "local develop total fund is not ok after withdraw1"
+        "local development total fund is not ok after withdraw1"
       );
 
       assert.equal(
@@ -1917,13 +1917,13 @@ contract("DaiFund", (accounts) => {
           Math.add(Number(withdrawBalance1), Number(withdrawBalance2))
         ),
         Number(totalBalances3.localDevelopment),
-        "local develop total fund3 is not ok"
+        "local development total fund3 is not ok"
       );
 
       assert.equal(
         Number(localDevelopmentBalnance3),
         Math.add(Number(localDevelopmentBalnance2), Number(withdrawBalance2)),
-        "local develop account balance is not ok after withdraw2"
+        "local development account balance is not ok after withdraw2"
       );
     });
 

@@ -133,7 +133,7 @@ Common.joinSimplePlanter = async (
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress
 ) => {
   const longitude = 1;
@@ -145,7 +145,7 @@ Common.joinSimplePlanter = async (
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
@@ -155,7 +155,7 @@ Common.joinSimplePlanter = async (
 Common.joinOrganizationPlanter = async (
   instance,
   organizationAddress,
-  refferedBy,
+  invitedBy,
   adminAccount
 ) => {
   let longitude = 1;
@@ -168,7 +168,7 @@ Common.joinOrganizationPlanter = async (
     latitude,
     countryCode,
     capcity,
-    refferedBy,
+    invitedBy,
     { from: adminAccount }
   );
   return tx;
@@ -177,7 +177,7 @@ Common.joinSimplePlanterFromTreeFactory = async (
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress,
   treeFactoryInstance,
   adminAccount
@@ -191,7 +191,7 @@ Common.joinSimplePlanterFromTreeFactory = async (
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
@@ -210,13 +210,13 @@ Common.successJoin = async (
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress
 ) => {
   await Common.addPlanter(arInstance, planterAddress, adminAccount);
 
-  if (refferedBy != zeroAddress) {
-    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  if (invitedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, invitedBy, adminAccount);
   }
 
   let longitude = 1;
@@ -228,7 +228,7 @@ Common.successJoin = async (
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
@@ -238,14 +238,14 @@ Common.successJoinOrganization = async (
   arInstance,
   instance,
   organizationAddress,
-  refferedBy,
+  invitedBy,
   adminAccount,
   dataManager
 ) => {
   await Common.addPlanter(arInstance, organizationAddress, adminAccount);
 
-  if (refferedBy != zeroAddress) {
-    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  if (invitedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, invitedBy, adminAccount);
   }
 
   let longitude = 1;
@@ -259,7 +259,7 @@ Common.successJoinOrganization = async (
     latitude,
     countryCode,
     capcity,
-    refferedBy,
+    invitedBy,
     { from: dataManager }
   );
 };

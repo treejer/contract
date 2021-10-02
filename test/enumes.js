@@ -95,7 +95,7 @@ const AllocationErrorMsg = {
 const PlanterErrorMsg = {
   ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
   ONLY_PLANTER: "User exist or not planter",
-  INVALID_CAPACITY: "invalid supplyCap",
+  INVALID_SUPPLYCAP: "invalid supplyCap",
   PLANTER_NOT_EXIST: "planter does not exist",
   PLANTERTYPE_ALLOWED_VALUE: "planterType not allowed values",
   ORGANIZATION_NOT_VALID: "organization address not valid",

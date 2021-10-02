@@ -534,7 +534,7 @@ contract("TreeFactory", (accounts) => {
         userAccount2
       );
 
-      /////////////////////////// ------------------ update planter (userAccount1) capacity to 1 and plant a tree to change planter status to 2
+      /////////////////////////// ------------------ update planter (userAccount1) supplyCap to 1 and plant a tree to change planter status to 2
 
       await planterInstance.updateSupplyCap(userAccount1, 1, {
         from: dataManager,
@@ -933,7 +933,7 @@ contract("TreeFactory", (accounts) => {
 
       ////////////////// --------------- should fail because of planting permision (assign to type 2 and test with type 3)
 
-      ///////////////////------------------ update planter usrAccount4 capacity to 1 so he can plant just 1 tree
+      ///////////////////------------------ update planter usrAccount4 SupplyCap to 1 so he can plant just 1 tree
 
       await planterInstance.updateSupplyCap(userAccount4, 1, {
         from: dataManager,
@@ -995,7 +995,7 @@ contract("TreeFactory", (accounts) => {
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      ////////////////------------- update capacity to 5 and now an plant
+      ////////////////------------- update SupplyCap to 5 and now an plant
 
       await planterInstance.updateSupplyCap(userAccount4, 5, {
         from: dataManager,

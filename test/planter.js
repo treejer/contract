@@ -1463,7 +1463,7 @@ contract("Planter", (accounts) => {
       .updateSupplyCap(userAccount1, 1, {
         from: dataManager,
       })
-      .should.be.rejectedWith(PlanterErrorMsg.INVALID_CAPACITY);
+      .should.be.rejectedWith(PlanterErrorMsg.INVALID_SUPPLYCAP);
   });
 
   ////////// ---------------------------------------------- give planting permission -------------------------------------

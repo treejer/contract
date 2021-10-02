@@ -215,8 +215,8 @@ contract Allocation is Initializable {
 
     /**
      * @dev check if there is allocation data for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a distributionModel
-     * @return true in case of distributionModel existance for {_treeId} and false otherwise
+     * @param _treeId id of a tree to check if there is a allocation data
+     * @return true in case of allocation data existance for {_treeId} and false otherwise
      */
 
     function exists(uint256 _treeId) external view returns (bool) {

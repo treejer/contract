@@ -409,7 +409,7 @@ contract("IncrementalSale", (accounts) => {
         deployerAccount
       );
 
-      /////----------------add distributionModel
+      /////----------------add allocation data
       await alloctionInstance.addAllocationData(
         3000,
         1200,
@@ -1304,7 +1304,7 @@ contract("IncrementalSale", (accounts) => {
         wethFundInstance.address,
         deployerAccount
       );
-      /////----------------add distributionModel
+      /////----------------add allocation data
       await alloctionInstance.addAllocationData(
         3000,
         1200,

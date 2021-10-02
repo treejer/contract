@@ -492,7 +492,7 @@ contract("WethFund", (accounts) => {
         deployerAccount
       );
 
-      ////--------------add and assign DistributionModel for tree
+      ////--------------add and assign allocation data for tree
       await fModel.addAllocationData(4000, 2000, 1000, 1000, 1000, 1000, 0, 0, {
         from: dataManager,
       });
@@ -654,7 +654,7 @@ contract("WethFund", (accounts) => {
         deployerAccount
       );
 
-      ////--------------add and assign DistributionModel for tree
+      ////--------------add and assign allocation data for tree
       await fModel.addAllocationData(4000, 2000, 1000, 1000, 1000, 1000, 0, 0, {
         from: dataManager,
       });

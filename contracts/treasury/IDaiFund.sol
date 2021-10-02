@@ -112,8 +112,8 @@ interface IDaiFund {
     function setReserve2Address(address payable _address) external;
 
     /**
-     * @dev fund a tree by RegularSale contract and based on distribution
-     * model of tree, shares divide beetwen (planter, ambassador, research,
+     * @dev fund a tree by RegularSale contract and based on allocation data
+     * of tree, shares divide beetwen (planter, ambassador, research,
      * localDevelopment, insurance, treasury, otherFund1 and otherFund2)
      * and added to the totalBalances of each part,
      * @param _treeId id of a tree to fund

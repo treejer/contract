@@ -459,7 +459,7 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
 
-      /////-----added incrementalSale should have equivalant fund distribution model
+      /////-----added incrementalSale should have equivalant allocation data
 
       await alloctionInstance.addAllocationData(
         4000,

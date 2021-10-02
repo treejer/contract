@@ -25,19 +25,19 @@ interface IRegularSale {
     function ReferralTriggerCount() external view returns (uint256);
 
     //TODO:ADD_COMMENT
-    function referrerClaimableTreesWeth(address _refferer)
+    function referrerClaimableTreesWeth(address _referrer)
         external
         view
         returns (uint256);
 
     //TODO:ADD_COMMENT
-    function referrerClaimableTreesDai(address _refferer)
+    function referrerClaimableTreesDai(address _referrer)
         external
         view
         returns (uint256);
 
     //TODO:ADD_COMMENT
-    function referrerCount(address _refferer) external view returns (uint256);
+    function referrerCount(address _referrer) external view returns (uint256);
 
     /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
@@ -111,7 +111,7 @@ interface IRegularSale {
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * price }
      * @param _count is the number of trees requested by user
-     * @param _referrer is address of refferer
+     * @param _referrer is address of referrer
      * NOTE emit a {TreeFunded} event
      * NOTE emit {RegularMint} event for {_count} time
      */

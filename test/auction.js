@@ -2247,7 +2247,7 @@ contract("Auction", (accounts) => {
     });
 
     // check hold auction
-    it("complex test 2", async () => {
+    it("complex test 2 (without referrer)", async () => {
       const treeId = 0;
       const auctionId = 0;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -2951,7 +2951,7 @@ contract("Auction", (accounts) => {
       await wethInstance.resetAcc(bidderAccount3);
     });
 
-    it("complex test 3 ( complete auction done ) ", async () => {
+    it("complex test 3 (complete auction done with referrer)  ", async () => {
       regularSaleInstance = await deployProxy(
         RegularSale,
         [arInstance.address, web3.utils.toWei("7")],
@@ -2974,8 +2974,8 @@ contract("Auction", (accounts) => {
       const bidAmount2 = web3.utils.toWei("2");
       const bidderInitialBalance2 = web3.utils.toWei("6");
       const bidderAccount2 = userAccount7;
-      const mainRefferer = userAccount4;
-      const otherRefferer = userAccount5;
+      const mainReferrer = userAccount4;
+      const otherReferrer = userAccount5;
 
       startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
       endTime = await Common.timeInitial(TimeEnumes.hours, 1);
@@ -3134,7 +3134,7 @@ contract("Auction", (accounts) => {
       let bidTx1 = await auctionInstance.bid(
         auctionId1,
         bidAmount1,
-        otherRefferer,
+        otherReferrer,
         {
           from: bidderAccount1,
         }
@@ -3142,7 +3142,7 @@ contract("Auction", (accounts) => {
       let bidTx2 = await auctionInstance.bid(
         auctionId2,
         bidAmount1,
-        otherRefferer,
+        otherReferrer,
         {
           from: bidderAccount2,
         }
@@ -3154,7 +3154,7 @@ contract("Auction", (accounts) => {
           ev.treeId == treeId1 &&
           ev.bidder == bidderAccount1 &&
           Number(ev.amount) == Number(bidAmount1) &&
-          ev.referrer == otherRefferer
+          ev.referrer == otherReferrer
         );
       });
 
@@ -3164,7 +3164,7 @@ contract("Auction", (accounts) => {
           ev.treeId == treeId2 &&
           ev.bidder == bidderAccount2 &&
           Number(ev.amount) == Number(bidAmount1) &&
-          ev.referrer == otherRefferer
+          ev.referrer == otherReferrer
         );
       });
 
@@ -3185,7 +3185,7 @@ contract("Auction", (accounts) => {
       const FinalBidTx1 = await auctionInstance.bid(
         auctionId1,
         bidAmount2,
-        mainRefferer,
+        mainReferrer,
         {
           from: bidderAccount2,
         }
@@ -3194,7 +3194,7 @@ contract("Auction", (accounts) => {
       const FinalBidTx2 = await auctionInstance.bid(
         auctionId2,
         bidAmount2,
-        mainRefferer,
+        mainReferrer,
         {
           from: bidderAccount1,
         }
@@ -3210,7 +3210,7 @@ contract("Auction", (accounts) => {
           ev.treeId == treeId1 &&
           ev.bidder == bidderAccount2 &&
           Number(ev.amount) == Number(bidAmount2) &&
-          ev.referrer == mainRefferer
+          ev.referrer == mainReferrer
         );
       });
 
@@ -3220,7 +3220,7 @@ contract("Auction", (accounts) => {
           ev.treeId == treeId2 &&
           ev.bidder == bidderAccount1 &&
           Number(ev.amount) == Number(bidAmount2) &&
-          ev.referrer == mainRefferer
+          ev.referrer == mainReferrer
         );
       });
 
@@ -3357,27 +3357,27 @@ contract("Auction", (accounts) => {
 
       /////////////////---------------------- check referral part
 
-      const winnerRefferer1 = await auctionInstance.referrals.call(
+      const winnerReferrer1 = await auctionInstance.referrals.call(
         auction1BeforeEnd.bidder,
         auctionId1
       );
 
       assert.equal(
-        winnerRefferer1,
-        mainRefferer,
-        "winner refferer of auction 0 is not ok"
+        winnerReferrer1,
+        mainReferrer,
+        "winner referrer of auction 0 is not ok"
       );
 
       const winnerGiftCount1 =
         await regularSaleInstance.referrerClaimableTreesWeth.call(
-          winnerRefferer1
+          winnerReferrer1
         );
 
       assert.equal(Number(winnerGiftCount1), 1, "winner gift count is not ok");
 
       const otherReffereGiftCount1 =
         await regularSaleInstance.referrerClaimableTreesWeth.call(
-          otherRefferer
+          otherReferrer
         );
       assert.equal(
         Number(otherReffereGiftCount1),
@@ -3471,7 +3471,7 @@ contract("Auction", (accounts) => {
           Number(ev.treeId) == treeId1 &&
           ev.winner == bidderAccount2 &&
           Number(ev.amount) == Number(bidAmount2) &&
-          ev.referrer == mainRefferer
+          ev.referrer == mainReferrer
         );
       });
 
@@ -3489,25 +3489,25 @@ contract("Auction", (accounts) => {
 
       /////////////////---------------------- check referral part
 
-      const winnerRefferer2 = await auctionInstance.referrals.call(
+      const winnerReferrer2 = await auctionInstance.referrals.call(
         auction2BeforeEnd.bidder,
         auctionId2
       );
       assert.equal(
-        winnerRefferer2,
-        mainRefferer,
-        "winner refferer of auction 0 is not ok"
+        winnerReferrer2,
+        mainReferrer,
+        "winner referrer of auction 0 is not ok"
       );
 
       const winnerGiftCount2 =
         await regularSaleInstance.referrerClaimableTreesWeth.call(
-          winnerRefferer2
+          winnerReferrer2
         );
       assert.equal(Number(winnerGiftCount2), 2, "winner gift count is not ok");
 
       const otherReffereGiftCount2 =
         await regularSaleInstance.referrerClaimableTreesWeth.call(
-          otherRefferer
+          otherReferrer
         );
       assert.equal(
         Number(otherReffereGiftCount2),
@@ -3618,7 +3618,7 @@ contract("Auction", (accounts) => {
           Number(ev.treeId) == treeId2 &&
           ev.winner == bidderAccount1 &&
           Number(ev.amount) == Number(bidAmount2) &&
-          ev.referrer == mainRefferer
+          ev.referrer == mainReferrer
         );
       });
 

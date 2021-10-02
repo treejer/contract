@@ -80,10 +80,10 @@ interface IAllocation {
     ) external;
 
     /**
-     * @dev admin assgign a funding distribution model to trees starting from
+     * @dev admin assgign a funding allocation data to trees starting from
      * {_startTreeId} and end at {_endTreeId}
-     * @param _startTreeId strating tree id to assign distribution model to
-     * @param _endTreeId ending tree id to assign distribution model to
+     * @param _startTreeId strating tree id to assign allocation to
+     * @param _endTreeId ending tree id to assign allocation to
      * @param _allocationDataId allocation data id to assign
      * NOTE emit a {AllocationToTreeAssigned} event
      */
@@ -94,9 +94,9 @@ interface IAllocation {
     ) external;
 
     /**
-     * @dev check if there is distribution model for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a allocationData
-     * @return true in case of allocationData existance for {_treeId} and false otherwise
+     * @dev check if there is allocation data for {_treeId} or not
+     * @param _treeId id of a tree to check if there is a allocation data
+     * @return true in case of allocation data existance for {_treeId} and false otherwise
      */
     function exists(uint256 _treeId) external view returns (bool);
 

@@ -554,7 +554,7 @@ contract("DaiFund", (accounts) => {
         deployerAccount
       );
 
-      ////--------------add and assign DistributionModel for tree
+      ////--------------add and assign allocation data for tree
       await fModel.addAllocationData(
         planter1Share,
         ambassador1Share,

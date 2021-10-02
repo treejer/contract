@@ -775,7 +775,7 @@ contract("regularSale", (accounts) => {
       //mint dai for funder
       await daiInstance.setMint(funder, web3.utils.toWei("10000"));
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
@@ -959,7 +959,7 @@ contract("regularSale", (accounts) => {
       //mint dai for funder
       await daiInstance.setMint(funder, web3.utils.toWei("49"));
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
@@ -1245,7 +1245,7 @@ contract("regularSale", (accounts) => {
       //mint dai for funder
       await daiInstance.setMint(funder, web3.utils.toWei("56"));
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(
         2500,
@@ -1539,7 +1539,7 @@ contract("regularSale", (accounts) => {
       let funder2 = userAccount3;
       let funder3 = userAccount3;
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
@@ -1923,7 +1923,7 @@ contract("regularSale", (accounts) => {
     /*
     ////--------------------------------gsn test--------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(
         4000,
@@ -2115,7 +2115,7 @@ contract("regularSale", (accounts) => {
       const planter = userAccount2;
       const ipfsHash = "some ipfs hash here";
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,
@@ -2316,7 +2316,7 @@ contract("regularSale", (accounts) => {
       const ipfsHash = "some ipfs hash here";
       const treeId = 10001;
 
-      ////////////// ------------------- handle fund distribution model ----------------------
+      ////////////// ------------------- handle allocation data ----------------------
 
       await fModel.addAllocationData(
         3000,

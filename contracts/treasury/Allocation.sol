@@ -73,7 +73,7 @@ contract Allocation is Initializable {
     }
 
     /**
-     * @dev admin add a model for funding distribution that sum of the
+     * @dev admin add a model for allocation data that sum of the
      * inputs must be 10000
      * @param _planterShare planter share
      * @param _ambassadorShare ambassador share
@@ -125,11 +125,11 @@ contract Allocation is Initializable {
     }
 
     /**
-     * @dev admin assign a funding distribution model to trees starting from
+     * @dev admin assign a allocation data to trees starting from
      * {_startTreeId} and end at {_endTreeId}
-     * @param _startTreeId strating tree id to assign distribution model to
-     * @param _endTreeId ending tree id to assign distribution model to
-     * @param _allocationDataId distribution model id to assign
+     * @param _startTreeId strating tree id to assign alloction to
+     * @param _endTreeId ending tree id to assign alloction to
+     * @param _allocationDataId allocation data id to assign
      */
     function assignAllocationToTree(
         uint256 _startTreeId,
@@ -214,9 +214,9 @@ contract Allocation is Initializable {
     }
 
     /**
-     * @dev check if there is distribution model for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a distributionModel
-     * @return true in case of distributionModel existance for {_treeId} and false otherwise
+     * @dev check if there is allocation data for {_treeId} or not
+     * @param _treeId id of a tree to check if there is a allocation data
+     * @return true in case of allocation data existance for {_treeId} and false otherwise
      */
 
     function exists(uint256 _treeId) external view returns (bool) {

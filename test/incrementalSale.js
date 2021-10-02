@@ -409,7 +409,7 @@ contract("IncrementalSale", (accounts) => {
         deployerAccount
       );
 
-      /////----------------add distributionModel
+      /////----------------add allocation data
       await alloctionInstance.addAllocationData(
         3000,
         1200,
@@ -459,7 +459,7 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
 
-      /////-----added incrementalSale should have equivalant fund distribution model
+      /////-----added incrementalSale should have equivalant allocation data
 
       await alloctionInstance.addAllocationData(
         4000,
@@ -1304,7 +1304,7 @@ contract("IncrementalSale", (accounts) => {
         wethFundInstance.address,
         deployerAccount
       );
-      /////----------------add distributionModel
+      /////----------------add allocation data
       await alloctionInstance.addAllocationData(
         3000,
         1200,

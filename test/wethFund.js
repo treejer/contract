@@ -3154,7 +3154,7 @@ contract("WethFund", (accounts) => {
             from: userAccount3,
           }
         )
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
 
       await wethFund
         .payDaiDebtToPlanterContract(expectedSwapTokenAmountTreeId2[0], 0, {

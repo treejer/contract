@@ -296,7 +296,7 @@ contract("TreeFactory", (accounts) => {
         .updateTreeSpecs(treeId, newIpfs, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
     });
   });
 
@@ -2032,9 +2032,9 @@ contract("TreeFactory", (accounts) => {
       });
     });
 
-    ////////////////////------------------------------------ test manageProvideStatus func  ----------------------------------------//
+    ////////////////////------------------------------------ test manageSaleTypeBatch func  ----------------------------------------//
 
-    it("test manageProvideStatus function", async () => {
+    it("test manageSaleTypeBatch function", async () => {
       await Common.addTreejerContractRole(
         arInstance,
         treeFactoryInstance.address,
@@ -2083,7 +2083,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number((await treeFactoryInstance.trees.call(103)).saleType),
         2,
-        "provideStatus not true"
+        "saleType not true"
       );
 
       let result3 = await treeFactoryInstance.manageSaleTypeBatch.call(
@@ -2244,12 +2244,15 @@ contract("TreeFactory", (accounts) => {
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-      const updateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(3, {
-        from: dataManager,
-      });
+      const treeUpdateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(
+        3,
+        {
+          from: dataManager,
+        }
+      );
 
       truffleAssert.eventEmitted(
-        updateIntervalTx1,
+        treeUpdateIntervalTx1,
         "TreeUpdateIntervalChanged"
       );
 
@@ -2261,12 +2264,15 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      const updateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(4, {
-        from: dataManager,
-      });
+      const treeUpdateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(
+        4,
+        {
+          from: dataManager,
+        }
+      );
 
       truffleAssert.eventEmitted(
-        updateIntervalTx2,
+        treeUpdateIntervalTx2,
         "TreeUpdateIntervalChanged"
       );
 
@@ -4643,7 +4649,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         resultAfter.saleType.toNumber(),
         Math.add(resultBefore.saleType.toNumber(), 1),
-        "provideStatus not true update"
+        "saleType not true update"
       );
     });
 
@@ -4707,7 +4713,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         resultBefore.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
 
       await treeFactoryInstance.manageSaleType(1, 3, {
@@ -4719,7 +4725,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
     });
 
@@ -4780,7 +4786,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
 
       let addressGetToken = await treeTokenInstance.ownerOf(1);
@@ -4843,13 +4849,13 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
     });
 
-    //-----------------------------mintRegularTrees---------------------------------
+    //-----------------------------mintTree---------------------------------
 
-    it("mintRegularTrees should be successfully (tree not planted)", async () => {
+    it("mintTree should be successfully (tree not planted)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -4879,7 +4885,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(addressGetToken, userAccount4, "address not true");
     });
 
-    it("mintRegularTrees should be successfully(tree planted)", async () => {
+    it("mintTree should be successfully(tree planted)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -4894,7 +4900,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -4926,7 +4932,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(genTreeBefore.saleType),
         4,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
       await treeFactoryInstance.mintTree(10000, userAccount4, {
@@ -4948,7 +4954,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(genTreeAfter.saleType),
         0,
-        "provideStatusAfter not true update"
+        "saleTypeAfter not true update"
       );
     });
 
@@ -4967,7 +4973,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5015,7 +5021,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(genTreeBefore.saleType),
         0,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
       await treeFactoryInstance.mintTree(10002, userAccount6, {
@@ -5027,7 +5033,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(addressGetToken3, userAccount6, "3-address not true");
     });
 
-    it("mintRegularTrees should be fail(only RegularSaleContract call)", async () => {
+    it("mintTree should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5042,7 +5048,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5066,9 +5072,9 @@ contract("TreeFactory", (accounts) => {
 
     /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
 
-    // //--------------------------regularPlantTree test----------------------------------------------
+    // //--------------------------plantTree test----------------------------------------------
 
-    it("regularPlantTree should be success (Individual Planter)", async () => {
+    it("plantTree should be success (Individual Planter)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5138,7 +5144,7 @@ contract("TreeFactory", (accounts) => {
       });
     });
 
-    it("regularPlantTree should be success (Planter of organization)", async () => {
+    it("plantTree should be success (Planter of organization)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5221,7 +5227,7 @@ contract("TreeFactory", (accounts) => {
       });
     });
 
-    it("regularPlantTree should be rejected (organizationAdmin not accepted planter)", async () => {
+    it("plantTree should be rejected (organizationAdmin not accepted planter)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5256,9 +5262,9 @@ contract("TreeFactory", (accounts) => {
       }).should.be.rejected;
     });
 
-    //---------------------------------------------verifyRegularPlant-----------------------------------------------
+    //---------------------------------------------verifyTree-----------------------------------------------
 
-    it("verifyRegularPlant should be success(Admin Verify)", async () => {
+    it("verifyTree should be success(Admin Verify)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5273,7 +5279,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5324,11 +5330,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.saleType),
-        4,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
       truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
         return ev.treeId == 10001;
@@ -5351,7 +5353,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccessOrganization(
+      await Common.plantTreeSuccessOrganization(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5404,11 +5406,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.saleType),
-        4,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
       truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
         return ev.treeId == 10001;
@@ -5431,7 +5429,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccessOrganization(
+      await Common.plantTreeSuccessOrganization(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5459,7 +5457,7 @@ contract("TreeFactory", (accounts) => {
       });
     });
 
-    it("verifyRegularPlant should be success(tree has owner)", async () => {
+    it("verifyTree should be success(tree has owner)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5474,7 +5472,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5535,14 +5533,10 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.saleType),
-        0,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 0, "saleType not true update");
     });
 
-    it("verifyRegularPlant should be reject", async () => {
+    it("verifyTree should be reject", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5557,7 +5551,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5624,7 +5618,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5719,9 +5713,9 @@ contract("TreeFactory", (accounts) => {
       assert.equal(result2, 10006, "2-lastRegualarTreeId not true");
     });
 
-    // //----------------------------------------requestRegularTree---------------------------------
+    // //----------------------------------------mintTreeById---------------------------------
 
-    it("requestRegularTree should be successfully", async () => {
+    it("mintTreeById should be successfully", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5736,7 +5730,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5768,7 +5762,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(genTreeBefore.saleType),
         4,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
       await treeFactoryInstance.mintTreeById(10001, userAccount5, {
@@ -5790,11 +5784,11 @@ contract("TreeFactory", (accounts) => {
       assert.equal(
         Number(genTreeAfter.saleType),
         0,
-        "provideStatusAfter not true update"
+        "saleTypeAfter not true update"
       );
     });
 
-    it("requestRegularTree should be fail(only RegularSaleContract call)", async () => {
+    it("mintTreeById should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5809,7 +5803,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5831,7 +5825,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
     });
 
-    it("requestRegularTree should be fail(tree must be planted)", async () => {
+    it("mintTreeById should be fail(tree must be planted)", async () => {
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });

@@ -382,7 +382,7 @@ Common.acceptPlanterByOrganization = async (
   );
 };
 
-Common.regularPlantTreeSuccess = async (
+Common.plantTreeSuccess = async (
   arInstance,
   treeFactoryInstance,
   planterInstance,
@@ -407,7 +407,7 @@ Common.regularPlantTreeSuccess = async (
   });
 };
 
-Common.regularPlantTreeSuccessOrganization = async (
+Common.plantTreeSuccessOrganization = async (
   arInstance,
   treeFactoryInstance,
   planterInstance,

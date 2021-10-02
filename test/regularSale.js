@@ -2209,7 +2209,7 @@ contract("regularSale", (accounts) => {
 
       //////////////////-------------------------- plant regualar -----------------
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -2439,7 +2439,7 @@ contract("regularSale", (accounts) => {
 
       //////////////////-------------------------- plant regualar -----------------
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,

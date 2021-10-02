@@ -671,35 +671,35 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      let incrementalPrice2 = await iSaleInstance.incrementalSaleData();
+      let IncrementalSaleData2 = await iSaleInstance.incrementalSaleData();
       let lastSold2 = await iSaleInstance.lastSold();
 
       assert.equal(
-        Number(incrementalPrice2.startTreeId),
+        Number(IncrementalSaleData2.startTreeId),
         135,
         "startTreeId not true"
       );
 
       assert.equal(
-        Number(incrementalPrice2.endTreeId),
+        Number(IncrementalSaleData2.endTreeId),
         285,
         "endTreeId not true"
       );
 
       assert.equal(
-        Number(incrementalPrice2.initialPrice),
+        Number(IncrementalSaleData2.initialPrice),
         web3.utils.toWei("0.01"),
         "initialPrice not true"
       );
 
       assert.equal(
-        Number(incrementalPrice2.increments),
+        Number(IncrementalSaleData2.increments),
         100,
         "increments not true"
       );
 
       assert.equal(
-        Number(incrementalPrice2.priceJump),
+        Number(IncrementalSaleData2.priceJump),
         1000,
         "priceJump not true"
       );
@@ -797,10 +797,10 @@ contract("IncrementalSale", (accounts) => {
 
       truffleAssert.eventEmitted(eventTx1, "IncrementalSaleUpdated");
 
-      let incrementalPrice2 = await iSaleInstance.incrementalSaleData();
+      let IncrementalSaleData2 = await iSaleInstance.incrementalSaleData();
 
       assert.equal(
-        Number(incrementalPrice2.startTreeId),
+        Number(IncrementalSaleData2.startTreeId),
         601,
         "2 startTreeId not true"
       );
@@ -812,7 +812,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(incrementalPrice2.endTreeId),
+        Number(IncrementalSaleData2.endTreeId),
         1301,
         "2 endTreeId not true"
       );
@@ -834,10 +834,10 @@ contract("IncrementalSale", (accounts) => {
 
       truffleAssert.eventEmitted(eventTx2, "IncrementalSaleUpdated");
 
-      let incrementalPrice3 = await iSaleInstance.incrementalSaleData();
+      let IncrementalSaleData3 = await iSaleInstance.incrementalSaleData();
 
       assert.equal(
-        Number(incrementalPrice3.startTreeId),
+        Number(IncrementalSaleData3.startTreeId),
         1001,
         "3 startTreeId not true"
       );
@@ -849,7 +849,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(incrementalPrice3.endTreeId),
+        Number(IncrementalSaleData3.endTreeId),
         1301,
         "3 endTreeId not true"
       );
@@ -885,10 +885,10 @@ contract("IncrementalSale", (accounts) => {
 
       truffleAssert.eventEmitted(eventTx3, "IncrementalSaleUpdated");
 
-      let incrementalPrice4 = await iSaleInstance.incrementalSaleData();
+      let IncrementalSaleData4 = await iSaleInstance.incrementalSaleData();
 
       assert.equal(
-        Number(incrementalPrice4.startTreeId),
+        Number(IncrementalSaleData4.startTreeId),
         1301,
         "3 startTreeId not true"
       );
@@ -900,7 +900,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(incrementalPrice4.endTreeId),
+        Number(IncrementalSaleData4.endTreeId),
         1301,
         "3 endTreeId not true"
       );
@@ -1018,10 +1018,10 @@ contract("IncrementalSale", (accounts) => {
         return true;
       });
 
-      let incrementalPrice1 = await iSaleInstance.incrementalSaleData();
+      let IncrementalSaleData1 = await iSaleInstance.incrementalSaleData();
 
       assert.equal(
-        Number(incrementalPrice1.endTreeId),
+        Number(IncrementalSaleData1.endTreeId),
         301,
         "endTreeId not true"
       );

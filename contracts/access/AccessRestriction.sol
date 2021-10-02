@@ -131,7 +131,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @param _address input address
      */
     function ifScript(address _address) external view {
-        require(isScript(_address), "caller is not buyer rank");
+        require(isScript(_address), "caller is not script");
     }
 
     /**

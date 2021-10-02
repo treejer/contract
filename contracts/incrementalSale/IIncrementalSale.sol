@@ -111,7 +111,7 @@ interface IIncrementalSale {
      * tree price calculate based on treeId and msg.sender pay weth for it
      * and ownership of tree transfered to msg.sender
      * @param _count id of tree to buy
-     * NOTE if buyer, buy another tree before 700 seconds from the
+     * NOTE if funder, buy another tree before 700 seconds from the
      * previous purchase, pays 90% of tree price and gets 10% discount
      * just for this tree. buying another tree give chance to buy
      * the next tree with 10% discount

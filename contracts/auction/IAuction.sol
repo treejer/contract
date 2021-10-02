@@ -85,8 +85,8 @@ interface IAuction {
     /** @dev create an auction for {_treeId} with strating date of {_startDate} and ending date of
      * {_endDate} and initialPrice of {_initialPrice} and bidInterval of {_bidInterval}
      * NOTE its necessary that a fundDestributionModel has been assigned to {_treeId}
-     * NOTE after create an auction for a tree provideStatus set to 1
-     * NOTE for creating an auction for a tree the provideStatus of tree must be 0
+     * NOTE after create an auction for a tree saleType set to 1
+     * NOTE for creating an auction for a tree the saleType of tree must be 0
      */
     function createAuction(
         uint256 _treeId,

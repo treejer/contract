@@ -19,7 +19,7 @@ interface ITreeFactory {
     /** @return Planter contract address */
     function planterContract() external view returns (address);
 
-    /** @return lastRegularPlantedTree */
+    /** @return lastRegularTreeId */
     function lastRegualarTreeId() external view returns (uint256);
 
     /** @return minimum time to send next update request */
@@ -51,7 +51,7 @@ interface ITreeFactory {
             string memory
         );
 
-    /** return UpdateTree data  of {_treeId}
+    /** return TreeUpdate data  of {_treeId}
      * @return updateSpecs
      * @return updateStatus
      */
@@ -160,14 +160,14 @@ interface ITreeFactory {
 
     /**
      * @dev check if a tree is valid to take part in an auction
-     * set {_saleType} to provideStatus when tree is not in use
+     * set {_saleType} to saleType when tree is not in use
      * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
      */
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         returns (uint32);
 
-    /** @dev mint {_treeId} to {_funder} and set mintStatus to {_mintOrigin} and privdeStatus to 0  */
+    /** @dev mint {_treeId} to {_funder} and set mintOrigin to {_mintOrigin} and privdeStatus to 0  */
     function mintAssignedTree(
         uint256 _treeId,
         address _funder,
@@ -183,7 +183,7 @@ interface ITreeFactory {
 
     /**
      * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
-     * and end at {_endTreeId} by setting {_saleType} to provideStatus
+     * and end at {_endTreeId} by setting {_saleType} to saleType
      */
     function manageSaleTypeBatch(
         uint256 _startTreeId,

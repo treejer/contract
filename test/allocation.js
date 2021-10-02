@@ -792,7 +792,7 @@ contract("Allocation", (accounts) => {
 
   //------------------------------------------- findAllocationData ----------------------------------------
 
-  it("findAllocationData should be fail (invalid fund model)", async () => {
+  it("findAllocationData should be fail (invalid allocation data)", async () => {
     await allocationInstance.addAllocationData(
       4000,
       1200,

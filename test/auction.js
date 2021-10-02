@@ -2247,7 +2247,7 @@ contract("Auction", (accounts) => {
     });
 
     // check hold auction
-    it("complex test 2", async () => {
+    it("complex test 2 (without referrer)", async () => {
       const treeId = 0;
       const auctionId = 0;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -2954,7 +2954,7 @@ contract("Auction", (accounts) => {
       await wethInstance.resetAcc(bidderAccount3);
     });
 
-    it("complex test 3 ( complete auction done ) ", async () => {
+    it("complex test 3 (complete auction done with referrer)  ", async () => {
       regularSaleInstance = await deployProxy(
         RegularSale,
         [arInstance.address, web3.utils.toWei("7")],

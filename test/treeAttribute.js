@@ -657,7 +657,7 @@ contract("TreeAttribute", (accounts) => {
       ////-------- Should setBuyerRank rejec because caller must be admin
       await treeAttributeInstance
         .setBuyerRank(userAccount1, 0, 0, 0, 0)
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
 
       ////--------test treejerSpent 2--------------------
 
@@ -967,7 +967,7 @@ contract("TreeAttribute", (accounts) => {
             from: userAccount3,
           }
         )
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK); //only admin can call
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE); //only admin can call
 
       ////-------------------attributes to assign tree should be available
       const treeAttributeGenerateCode = 13000000;

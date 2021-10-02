@@ -28,7 +28,7 @@ const CommonErrorMsg = {
     "not Data Manager or Treejer Contract",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_DATA_MANAGER: "caller is not data manager",
-  CHECK_BUYER_RANK: "caller is not buyer rank",
+  CHECK_SCRIPT_ROLE: "caller is not script",
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",

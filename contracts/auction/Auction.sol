@@ -174,7 +174,7 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin create auction to a tree with provideStatus of '0' and push that auction
+     * @dev admin create auction to a tree with saleType of '0' and push that auction
      * to {auctions[auctionId]} and increament auctionId by 1.
      * NOTE its necessary that a allocation data has been assigned to {_treeId}
      * @param _treeId treeId that auction create for

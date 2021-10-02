@@ -115,7 +115,7 @@ contract("AccessRestriction", (accounts) => {
   it("should add script and check data", async () => {
     await arInstance
       .ifScript(userAccount1)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
 
     const before = await arInstance.isScript(userAccount1);
 

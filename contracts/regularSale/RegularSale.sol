@@ -238,7 +238,7 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev request {_count} trees and the paid amount must be more than
      * {_count * price }
      * @param _count is the number of trees requested by user
-     * @param _referrer is address of refferer
+     * @param _referrer is address of referrer
      */
     function fundTree(uint256 _count, address _referrer) external {
         require(_count > 0 && _count < 101, "invalid count");

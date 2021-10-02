@@ -194,7 +194,7 @@ interface IDaiFund {
         external;
 
     /**
-     * @dev emitted when admin withdraw tree research balance
+     * @dev emitted when admin withdraw research balance
      * {amount} is the amount of withdraw balance to {account} with {reason} massage
      */
     event ResearchBalanceWithdrew(

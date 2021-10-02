@@ -145,7 +145,7 @@ contract DaiFund is Initializable {
 
     /**
      * @dev admin set research address to fund
-     * @param _address tree research address
+     * @param _address research address
      */
     function setResearchAddress(address payable _address)
         external

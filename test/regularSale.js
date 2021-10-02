@@ -2484,7 +2484,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsBefore.research),
         0,
-        "invalid tree research fund"
+        "invalid research fund"
       );
 
       assert.equal(
@@ -2683,7 +2683,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalFundsAfter.research),
         expected.research,
-        "invalid tree research fund"
+        "invalid research fund"
       );
 
       assert.equal(

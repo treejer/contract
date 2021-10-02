@@ -64,8 +64,8 @@ contract("IncrementalSale", (accounts) => {
   let WETHAddress;
   let DAIAddress;
   let uniswapV2Router02NewAddress;
-  let wethFundsInstance;
-  let fModel;
+  let wethFundInstance;
+  let alloctionInstance;
   let planterFundsInstnce;
   let treeAttributeInstance;
   let regularSaleInstance;
@@ -179,13 +179,13 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -276,17 +276,17 @@ contract("IncrementalSale", (accounts) => {
       /////////////////---------------------------------set weth funds address--------------------------------------------------------
 
       await iSaleInstance
-        .setWethFundAddress(wethFundsInstance.address, {
+        .setWethFundAddress(wethFundInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        wethFundsInstance.address,
+        wethFundInstance.address,
         await iSaleInstance.wethFund.call(),
         "weth funds address set incorect"
       );
@@ -316,17 +316,17 @@ contract("IncrementalSale", (accounts) => {
 
       /////////////////---------------------------------set allocation address--------------------------------------------------------
       await iSaleInstance
-        .setAllocationAddress(fModel.address, {
+        .setAllocationAddress(alloctionInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSaleInstance.setAllocationAddress(fModel.address, {
+      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        fModel.address,
+        alloctionInstance.address,
         await iSaleInstance.allocation.call(),
         "financial model address set incorect"
       );
@@ -373,7 +373,7 @@ contract("IncrementalSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -387,7 +387,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSaleInstance.setAllocationAddress(fModel.address, {
+      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
 
@@ -410,9 +410,19 @@ contract("IncrementalSale", (accounts) => {
       );
 
       /////----------------add distributionModel
-      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
     });
 
     /////////////////---------------------------------test createIncrementalSale function--------------------------------------------------------
@@ -451,11 +461,21 @@ contract("IncrementalSale", (accounts) => {
 
       /////-----added incrementalSale should have equivalant fund distribution model
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(110, 10000, 1, {
+      await alloctionInstance.assignAllocationToTree(110, 10000, 1, {
         from: dataManager,
       });
 
@@ -482,7 +502,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(fModel.address, {
+      await auctionInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
 
@@ -494,14 +514,34 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+      await alloctionInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(100, 10000, 1, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 1, {
         from: dataManager,
       });
 
@@ -543,11 +583,21 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -686,7 +736,7 @@ contract("IncrementalSale", (accounts) => {
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -731,23 +781,11 @@ contract("IncrementalSale", (accounts) => {
       const tree1300_1 = await treeFactoryInstance.trees.call(1300);
       const tree1301_1 = await treeFactoryInstance.trees.call(1301);
 
-      assert.equal(
-        Number(tree101_1.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree101_1.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree1300_1.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree1300_1.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree1301_1.saleType),
-        0,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree1301_1.saleType), 0, "sale type is not correct");
 
       await iSaleInstance
         .removeIncrementalSale(500, {
@@ -770,7 +808,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(await iSaleInstance.lastSold()),
         600,
-        "2lastSold not true"
+        "2 lastSold not true"
       );
 
       assert.equal(
@@ -784,29 +822,13 @@ contract("IncrementalSale", (accounts) => {
       const tree600_2 = await treeFactoryInstance.trees.call(600);
       const tree601_2 = await treeFactoryInstance.trees.call(601);
 
-      assert.equal(
-        Number(tree101_2.saleType),
-        0,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree101_2.saleType), 0, "2 sale type is not correct");
 
-      assert.equal(
-        Number(tree300_2.saleType),
-        0,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree300_2.saleType), 0, "2 sale type is not correct");
 
-      assert.equal(
-        Number(tree600_2.saleType),
-        0,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree600_2.saleType), 0, "2 sale type is not correct");
 
-      assert.equal(
-        Number(tree601_2.saleType),
-        2,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree601_2.saleType), 2, "2 sale type is not correct");
 
       const eventTx2 = await iSaleInstance.removeIncrementalSale(400);
 
@@ -823,7 +845,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(await iSaleInstance.lastSold()),
         1000,
-        "3lastSold not true"
+        "3 lastSold not true"
       );
 
       assert.equal(
@@ -837,28 +859,20 @@ contract("IncrementalSale", (accounts) => {
       const tree1000_3 = await treeFactoryInstance.trees.call(1000);
       const tree1001_3 = await treeFactoryInstance.trees.call(1001);
 
-      assert.equal(
-        Number(tree601_3.saleType),
-        0,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree601_3.saleType), 0, "2 sale type is not correct");
 
-      assert.equal(
-        Number(tree800_3.saleType),
-        0,
-        "2provide status is not correct"
-      );
+      assert.equal(Number(tree800_3.saleType), 0, "2 sale type is not correct");
 
       assert.equal(
         Number(tree1000_3.saleType),
         0,
-        "2provide status is not correct"
+        "2 sale type is not correct"
       );
 
       assert.equal(
         Number(tree1001_3.saleType),
         2,
-        "2provide status is not correct"
+        "2 sale type is not correct"
       );
 
       await iSaleInstance
@@ -882,7 +896,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(await iSaleInstance.lastSold()),
         1300,
-        "4lastSold not true"
+        "4 lastSold not true"
       );
 
       assert.equal(
@@ -899,25 +913,25 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(tree1001_4.saleType),
         0,
-        "3provide status is not correct"
+        "3 sale type is not correct"
       );
 
       assert.equal(
         Number(tree1200_4.saleType),
         0,
-        "3provide status is not correct"
+        "3 sale type is not correct"
       );
 
       assert.equal(
         Number(tree1300_4.saleType),
         0,
-        "3provide status is not correct"
+        "3 sale type is not correct"
       );
 
       assert.equal(
         Number(tree1301_4.saleType),
         0,
-        "3provide status is not correct"
+        "3 sale type is not correct"
       );
 
       await iSaleInstance.createIncrementalSale(
@@ -934,7 +948,7 @@ contract("IncrementalSale", (accounts) => {
 
     ///////////// --------------------------------- updateEndTreeId --------------------------------
     it("Should updateEndTreeId succesfully", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -988,29 +1002,13 @@ contract("IncrementalSale", (accounts) => {
       const tree200_1 = await treeFactoryInstance.trees.call(200);
       const tree250_1 = await treeFactoryInstance.trees.call(250);
 
-      assert.equal(
-        Number(tree101_1.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree101_1.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree150_1.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree150_1.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree200_1.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree200_1.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree250_1.saleType),
-        0,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree250_1.saleType), 0, "sale type is not correct");
 
       const eventTx = await iSaleInstance.updateEndTreeId(100, {
         from: dataManager,
@@ -1035,35 +1033,15 @@ contract("IncrementalSale", (accounts) => {
       const tree250_2 = await treeFactoryInstance.trees.call(250);
       const tree300 = await treeFactoryInstance.trees.call(300);
 
-      assert.equal(
-        Number(tree101_2.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree101_2.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree150_2.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree150_2.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree201_2.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree201_2.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree250_2.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree250_2.saleType), 2, "sale type is not correct");
 
-      assert.equal(
-        Number(tree300.saleType),
-        2,
-        "provide status is not correct"
-      );
+      assert.equal(Number(tree300.saleType), 2, "sale type is not correct");
     });
 
     it("Check updateEndTreeId errors", async () => {
@@ -1091,7 +1069,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(fModel.address, {
+      await auctionInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
 
@@ -1099,11 +1077,11 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSaleInstance.setAllocationAddress(fModel.address, {
+      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1237,12 +1215,12 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
-      wethFundsInstance = await deployProxy(WethFund, [arInstance.address], {
+      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
-      fModel = await deployProxy(Allocation, [arInstance.address], {
+      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
         initializer: "initialize",
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
@@ -1269,13 +1247,13 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
-      await iSaleInstance.setWethFundAddress(wethFundsInstance.address, {
+      await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSaleInstance.setAllocationAddress(fModel.address, {
+      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
         from: deployerAccount,
       });
       await iSaleInstance.setRegularSaleAddress(regularSaleInstance.address, {
@@ -1284,26 +1262,26 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setPlanterFundAddress(planterFundsInstnce.address, {
         from: deployerAccount,
       });
-      //-------------wethFundsInstance
-      await wethFundsInstance.setWethTokenAddress(WETHAddress, {
+      //-------------wethFundInstance
+      await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await wethFundsInstance.setPlanterFundContractAddress(
+      await wethFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
-      await wethFundsInstance.setUniswapRouterAddress(
+      await wethFundInstance.setUniswapRouterAddress(
         uniswapV2Router02NewAddress,
         {
           from: deployerAccount,
         }
       );
-      await wethFundsInstance.setWethTokenAddress(WETHAddress, {
+      await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await wethFundsInstance.setDaiAddress(DAIAddress, {
+      await wethFundInstance.setDaiAddress(DAIAddress, {
         from: deployerAccount,
       });
       //-------------treeFactoryInstance
@@ -1323,17 +1301,27 @@ contract("IncrementalSale", (accounts) => {
       );
       await Common.addTreejerContractRole(
         arInstance,
-        wethFundsInstance.address,
+        wethFundInstance.address,
         deployerAccount
       );
       /////----------------add distributionModel
-      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
     });
 
     it("check discount timeout", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1396,10 +1384,10 @@ contract("IncrementalSale", (accounts) => {
 
       await treeTokenInstance.ownerOf(102).should.be.rejected;
 
-      ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==101)
+      ////////-------------Check PlanterFund and wethFund data after fund tree (treeId==101)
 
       const wethFundsBalanceAfter = await wethInstance.balanceOf(
-        wethFundsInstance.address
+        wethFundInstance.address
       );
 
       const planterFundsBalanceAfter = await daiInstance.balanceOf(
@@ -1419,7 +1407,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(planterFundsBalanceAfter),
         Number(expectedSwapTokenAmountTreeid101[1]),
-        "treeToPlanterProjectedEarnings balance not true"
+        "planterFundsBalanceAfter balance not true"
       );
 
       assert.equal(Number(iSaleBalanceAfter), 0, "iSale balance not true");
@@ -1439,7 +1427,7 @@ contract("IncrementalSale", (accounts) => {
       };
 
       //check wethFund totalBalances
-      let totalBalances = await wethFundsInstance.totalBalances();
+      let totalBalances = await wethFundInstance.totalBalances();
 
       assert.equal(
         Number(totalBalances.research),
@@ -1593,7 +1581,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree102.saleType), 0);
 
-      /////-----------------buy 110
+      /////-----------------fund 110
 
       let addressGetToken110 = await treeTokenInstance.ownerOf(110);
 
@@ -1603,7 +1591,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree110.saleType), 0);
 
-      /////-----------------buy 120
+      /////-----------------fund 120
 
       let addressGetToken120 = await treeTokenInstance.ownerOf(120);
 
@@ -1613,7 +1601,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree120.saleType), 0);
 
-      /////-----------------buy 121
+      /////-----------------fund 121
 
       let addressGetToken121 = await treeTokenInstance.ownerOf(121);
 
@@ -1623,7 +1611,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree121.saleType), 0);
 
-      /////-----------------not buy 122
+      /////-----------------not fund 122
 
       await treeTokenInstance.ownerOf(122).should.be.rejected;
 
@@ -1641,10 +1629,10 @@ contract("IncrementalSale", (accounts) => {
         "3-funder balance not true"
       );
 
-      ////////-------------Check PlanterFund and wethFund data after buy tree (treeId==120)
+      ////////-------------Check PlanterFund and wethFund data after fund tree (treeId==120)
 
       const wethFundsBalanceAfter2 = await wethInstance.balanceOf(
-        wethFundsInstance.address
+        wethFundInstance.address
       );
 
       const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
@@ -1671,7 +1659,7 @@ contract("IncrementalSale", (accounts) => {
             expectedSwapTokenAmountForBuy20Tree[1]
           )
         ),
-        "treeToPlanterProjectedEarnings balance not true"
+        "planterFundsBalanceAfter2 not true"
       );
 
       assert.equal(Number(iSaleBalanceAfter2), 0, "iSale balance not true");
@@ -1691,7 +1679,7 @@ contract("IncrementalSale", (accounts) => {
       };
 
       //check wethFund totalBalances
-      let totalBalances2 = await wethFundsInstance.totalBalances();
+      let totalBalances2 = await wethFundInstance.totalBalances();
 
       assert.equal(
         Number(totalBalances2.research),
@@ -1738,17 +1726,17 @@ contract("IncrementalSale", (accounts) => {
 
       let planterFunds2 =
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(121);
-      let referralFunds2 =
+      let ambassadorFunds2 =
         await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(121);
 
       let planterFunds3 =
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(102);
-      let referralFunds3 =
+      let ambassadorFunds3 =
         await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(102);
 
       let planterFunds4 =
         await planterFundsInstnce.treeToPlanterProjectedEarning.call(110);
-      let referralFunds4 =
+      let ambassadorFunds4 =
         await planterFundsInstnce.treeToAmbassadorProjectedEarning.call(110);
 
       assert.equal(
@@ -1790,7 +1778,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(referralFunds2),
+        Number(ambassadorFunds2),
         Number(
           Math.Big(expectedSwapTokenAmountTreeid121).times(1200).div(4200)
         ),
@@ -1806,7 +1794,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(referralFunds3),
+        Number(ambassadorFunds3),
         Number(
           Math.Big(expectedSwapTokenAmountTreeid102).times(1200).div(4200)
         ),
@@ -1822,7 +1810,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       assert.equal(
-        Number(referralFunds4),
+        Number(ambassadorFunds4),
         Number(
           Math.Big(expectedSwapTokenAmountTreeid110).times(1200).div(4200)
         ),
@@ -2028,7 +2016,7 @@ contract("IncrementalSale", (accounts) => {
     ////----------------------------------------------------test updateIncrementalSaleData------------------------------
 
     it("updateIncrementalSaleData should be work successfully", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2227,18 +2215,28 @@ contract("IncrementalSale", (accounts) => {
       );
     });
 
-    ////////////////-----------------------------check buy tree function
+    ////////////////-----------------------------check fund tree function
 
-    it("buyed Tree should be in incremental sell", async () => {
+    it("funded Tree should be in incremental sell", async () => {
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
 
-      await fModel.addAllocationData(4000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2301,7 +2299,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("low price paid for the tree without discount", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
       await iSaleInstance.createIncrementalSale(
@@ -2338,7 +2336,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree work successfully(1 tree => 1 step)", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2394,7 +2392,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_COUNT)", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2450,7 +2448,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_TREE)", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2502,7 +2500,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount usage", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2579,7 +2577,7 @@ contract("IncrementalSale", (accounts) => {
 
     ///-------------------------------------------------------- revealAttributes ---------------------------------------
 
-    it("revealAttributes should be rejec (owner) ", async () => {
+    it("revealAttributes should be reject (owner) ", async () => {
       await iSaleInstance.setTreeAttributesAddress(
         treeAttributeInstance.address,
         {
@@ -2587,11 +2585,21 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2625,7 +2633,7 @@ contract("IncrementalSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        wethFundsInstance.address,
+        wethFundInstance.address,
         deployerAccount
       );
 
@@ -2664,11 +2672,21 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await fModel.addAllocationData(3000, 1200, 1200, 1200, 1200, 2200, 0, 0, {
-        from: dataManager,
-      });
+      await alloctionInstance.addAllocationData(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
 
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2763,7 +2781,7 @@ contract("IncrementalSale", (accounts) => {
 
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
-      await fModel.assignAllocationToTree(100, 10000, 0, {
+      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 

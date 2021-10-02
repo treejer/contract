@@ -131,7 +131,7 @@ contract("PlanterFund", (accounts) => {
     const treeId = 1;
 
     const planterFund = Units.convert("100", "eth", "wei");
-    const referralFund = Units.convert("50", "eth", "wei");
+    const ambassadorFund = Units.convert("50", "eth", "wei");
 
     const planterWithdrawAmount = Units.convert("100", "eth", "wei");
 
@@ -163,7 +163,7 @@ contract("PlanterFund", (accounts) => {
     await planterFundInstance.updateProjectedEarnings(
       treeId,
       planterFund,
-      referralFund,
+      ambassadorFund,
       {
         from: userAccount8,
       }
@@ -342,20 +342,20 @@ contract("PlanterFund", (accounts) => {
       const treeId1 = 1;
       const treeId2 = 2;
       const planterFund1 = 1000;
-      const referralFund1 = 500;
+      const ambassadorFund1 = 500;
       const planterFund2 = 2000;
-      const referralFund2 = 1000;
+      const ambassadorFund2 = 1000;
 
       ////////////// -------------- fail invalid access
       await planterFundInstance
-        .updateProjectedEarnings(treeId1, planterFund1, referralFund1, {
+        .updateProjectedEarnings(treeId1, planterFund1, ambassadorFund1, {
           from: notTreejerContractAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
       const planterFundsBefore =
         await planterFundInstance.treeToPlanterProjectedEarning.call(treeId1);
-      const referralFundsBefore =
+      const ambassadorFundsBefore =
         await planterFundInstance.treeToAmbassadorProjectedEarning.call(
           treeId1
         );
@@ -364,7 +364,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(Number(planterFundsBefore), 0, "planter fund is not ok");
 
-      assert.equal(Number(referralFundsBefore), 0, "referral fund is not ok");
+      assert.equal(
+        Number(ambassadorFundsBefore),
+        0,
+        "ambassador fund is not ok"
+      );
 
       assert.equal(
         Number(totalFundsBefore.planter),
@@ -375,13 +379,13 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         Number(totalFundsBefore.ambassador),
         0,
-        "total referral fund is not ok"
+        "total ambassador fund is not ok"
       );
 
       const eventTx1 = await planterFundInstance.updateProjectedEarnings(
         treeId1,
         planterFund1,
-        referralFund1,
+        ambassadorFund1,
         { from: userAccount1 }
       );
 
@@ -389,13 +393,13 @@ contract("PlanterFund", (accounts) => {
         return (
           Number(ev.treeId) == treeId1 &&
           Number(ev.planterAmount) == Number(planterFund1) &&
-          Number(ev.ambassadorAmount) == Number(referralFund1)
+          Number(ev.ambassadorAmount) == Number(ambassadorFund1)
         );
       });
 
       const planterFundsAfter =
         await planterFundInstance.treeToPlanterProjectedEarning.call(treeId1);
-      const referralFundsAfter =
+      const ambassadorFundsAfter =
         await planterFundInstance.treeToAmbassadorProjectedEarning.call(
           treeId1
         );
@@ -409,9 +413,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(referralFundsAfter),
-        referralFund1,
-        "referral fund is not ok"
+        Number(ambassadorFundsAfter),
+        ambassadorFund1,
+        "ambassador fund is not ok"
       );
 
       assert.equal(
@@ -422,14 +426,14 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(totalFundsAfter.ambassador),
-        referralFund1,
-        "total referral fund is not ok"
+        ambassadorFund1,
+        "total ambassador fund is not ok"
       );
 
       const eventTx2 = await planterFundInstance.updateProjectedEarnings(
         treeId2,
         planterFund2,
-        referralFund2,
+        ambassadorFund2,
         {
           from: userAccount1,
         }
@@ -439,14 +443,14 @@ contract("PlanterFund", (accounts) => {
         return (
           Number(ev.treeId) == treeId2 &&
           Number(ev.planterAmount) == Number(planterFund2) &&
-          Number(ev.ambassadorAmount) == Number(referralFund2)
+          Number(ev.ambassadorAmount) == Number(ambassadorFund2)
         );
       });
 
       const planterFundsAfter2 =
         await planterFundInstance.treeToPlanterProjectedEarning.call(treeId2);
 
-      const referralFundsAfter2 =
+      const ambassadorFundsAfter2 =
         await planterFundInstance.treeToAmbassadorProjectedEarning.call(
           treeId2
         );
@@ -460,9 +464,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(referralFundsAfter2),
-        referralFund2,
-        "referral fund is not ok"
+        Number(ambassadorFundsAfter2),
+        ambassadorFund2,
+        "ambassador fund is not ok"
       );
 
       assert.equal(
@@ -473,8 +477,8 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(totalFundsAfter2.ambassador),
-        Math.add(referralFund1, referralFund2),
-        "total referral fund is not ok"
+        Math.add(ambassadorFund1, ambassadorFund2),
+        "total ambassador fund is not ok"
       );
     });
   });
@@ -512,7 +516,7 @@ contract("PlanterFund", (accounts) => {
     it("check fund planter data to be ok1", async () => {
       const treeId = 1;
       const planterFund = 5000;
-      const referralFund = 1000;
+      const ambassadorFund = 1000;
       const treeStatus1 = 2592;
       const treeStatus2 = 5184;
       const treeStatus3 = 12960;
@@ -541,7 +545,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         { from: userAccount1 }
       );
 
@@ -555,7 +559,7 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(totalFund.ambassador),
-        referralFund,
+        ambassadorFund,
         "total fund is not correct1"
       );
 
@@ -582,7 +586,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid1 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance1 = await planterFundInstance.balances(userAccount2);
-      let referralBalance1 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance1 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(
@@ -595,11 +599,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralFund, treeStatus1), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorFund, treeStatus1), finalStatus)
         ),
         Number(totalFund1.ambassador),
-        "total fund1 referral is not ok"
+        "total fund1 ambassador is not ok"
       );
 
       assert.equal(
@@ -614,9 +618,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralFund, treeStatus1), finalStatus),
-        Number(referralBalance1),
-        "referral balance is not ok1"
+        Math.divide(Math.mul(ambassadorFund, treeStatus1), finalStatus),
+        Number(ambassadorBalance1),
+        "ambassador balance is not ok1"
       );
 
       ///////////////////////////////
@@ -633,7 +637,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid2 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance2 = await planterFundInstance.balances(userAccount2);
-      let referralBalance2 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance2 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(
@@ -645,11 +649,11 @@ contract("PlanterFund", (accounts) => {
       );
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralFund, treeStatus1), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorFund, treeStatus1), finalStatus)
         ),
         Number(totalFund2.ambassador),
-        "total fund2 referral is not ok"
+        "total fund2 ambassador is not ok"
       );
       assert.equal(
         Math.divide(Math.mul(planterFund, treeStatus1), finalStatus),
@@ -664,9 +668,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralFund, treeStatus1), finalStatus),
-        Number(referralBalance2),
-        "referral balance is not ok2"
+        Math.divide(Math.mul(ambassadorFund, treeStatus1), finalStatus),
+        Number(ambassadorBalance2),
+        "ambassador balance is not ok2"
       );
 
       /////////////////////////
@@ -696,7 +700,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid3 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance3 = await planterFundInstance.balances(userAccount2);
-      let referralBalance3 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance3 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(
@@ -709,11 +713,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralFund, treeStatus2), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorFund, treeStatus2), finalStatus)
         ),
         Number(totalFund3.ambassador),
-        "total fund3 referral is not ok"
+        "total fund3 ambassador is not ok"
       );
 
       assert.equal(
@@ -728,9 +732,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralFund, treeStatus2), finalStatus),
-        Number(referralBalance3),
-        "referral balance is not ok3"
+        Math.divide(Math.mul(ambassadorFund, treeStatus2), finalStatus),
+        Number(ambassadorBalance3),
+        "ambassador balance is not ok3"
       );
 
       //////////////////////////////
@@ -760,7 +764,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid4 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance4 = await planterFundInstance.balances(userAccount2);
-      let referralBalance4 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance4 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(
@@ -773,11 +777,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralFund, treeStatus3), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorFund, treeStatus3), finalStatus)
         ),
         Number(totalFund4.ambassador),
-        "total fund4 referral is not ok"
+        "total fund4 ambassador is not ok"
       );
 
       assert.equal(
@@ -792,9 +796,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralFund, treeStatus3), finalStatus),
-        Number(referralBalance4),
-        "referral balance is not ok4"
+        Math.divide(Math.mul(ambassadorFund, treeStatus3), finalStatus),
+        Number(ambassadorBalance4),
+        "ambassador balance is not ok4"
       );
 
       /////////////////
@@ -823,7 +827,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid5 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance5 = await planterFundInstance.balances(userAccount2);
-      let referralBalance5 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance5 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(
@@ -836,11 +840,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralFund, treeStatus4), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorFund, treeStatus4), finalStatus)
         ),
         Number(totalFund5.ambassador),
-        "total fund5 referral is not ok"
+        "total fund5 ambassador is not ok"
       );
 
       assert.equal(
@@ -856,9 +860,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralFund, treeStatus4), finalStatus),
-        Number(referralBalance5),
-        "referral balance is not ok5"
+        Math.divide(Math.mul(ambassadorFund, treeStatus4), finalStatus),
+        Number(ambassadorBalance5),
+        "ambassador balance is not ok5"
       );
       /////////////////
 
@@ -875,7 +879,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid6 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance6 = await planterFundInstance.balances(userAccount2);
-      let referralBalance6 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance6 = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         Math.subtract(planterFund, planterFund),
@@ -884,9 +888,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.subtract(referralFund, referralFund),
+        Math.subtract(ambassadorFund, ambassadorFund),
         Number(totalFund5.ambassador),
-        "total fund6 referral is not ok"
+        "total fund6 ambassador is not ok"
       );
 
       assert.equal(
@@ -901,9 +905,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        referralFund,
-        Number(referralBalance6),
-        "referral balance is not ok6"
+        ambassadorFund,
+        Number(ambassadorBalance6),
+        "ambassador balance is not ok6"
       );
     });
 
@@ -911,7 +915,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = 5000;
-      const referralFund = 1000;
+      const ambassadorFund = 1000;
       const treeStatus1 = 2592;
       const treeStatus2 = 5184;
       const treeStatus3 = 12960;
@@ -956,12 +960,12 @@ contract("PlanterFund", (accounts) => {
 
       const planterTotalFunded = planterFund;
 
-      const referralTotalFunded = referralFund;
+      const ambassadorTotalFunded = ambassadorFund;
 
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         { from: userAccount1 }
       );
 
@@ -986,7 +990,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid1 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance1 = await planterFundInstance.balances(userAccount2);
-      let referralBalance1 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance1 = await planterFundInstance.balances(userAccount3);
       let organizationBalance1 = await planterFundInstance.balances(
         userAccount4
       );
@@ -1002,11 +1006,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralTotalFunded, treeStatus1), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorTotalFunded, treeStatus1), finalStatus)
         ),
         Number(totalFund1.ambassador),
-        "total fund1 referral is not ok"
+        "total fund1 ambassador is not ok"
       );
 
       assert.equal(
@@ -1039,9 +1043,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralTotalFunded, treeStatus1), finalStatus),
-        Number(referralBalance1),
-        "referral balance is not ok1"
+        Math.divide(Math.mul(ambassadorTotalFunded, treeStatus1), finalStatus),
+        Number(ambassadorBalance1),
+        "ambassador balance is not ok1"
       );
 
       ///////////////////////////////
@@ -1055,7 +1059,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid2 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance2 = await planterFundInstance.balances(userAccount2);
-      let referralBalance2 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance2 = await planterFundInstance.balances(userAccount3);
       let organizationBalance2 = await planterFundInstance.balances(
         userAccount4
       );
@@ -1070,11 +1074,11 @@ contract("PlanterFund", (accounts) => {
       );
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralTotalFunded, treeStatus1), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorTotalFunded, treeStatus1), finalStatus)
         ),
         Number(totalFund2.ambassador),
-        "total fund2 referral is not ok"
+        "total fund2 ambassador is not ok"
       );
       assert.equal(
         Math.divide(Math.mul(planterTotalFunded, treeStatus1), finalStatus),
@@ -1095,9 +1099,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralTotalFunded, treeStatus1), finalStatus),
-        Number(referralBalance2),
-        "referral balance is not ok2"
+        Math.divide(Math.mul(ambassadorTotalFunded, treeStatus1), finalStatus),
+        Number(ambassadorBalance2),
+        "ambassador balance is not ok2"
       );
 
       assert.equal(
@@ -1125,7 +1129,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid3 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance3 = await planterFundInstance.balances(userAccount2);
-      let referralBalance3 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance3 = await planterFundInstance.balances(userAccount3);
       let organizationBalance3 = await planterFundInstance.balances(
         userAccount4
       );
@@ -1141,11 +1145,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralTotalFunded, treeStatus2), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorTotalFunded, treeStatus2), finalStatus)
         ),
         Number(totalFund3.ambassador),
-        "total fund3 referral is not ok"
+        "total fund3 ambassador is not ok"
       );
 
       assert.equal(
@@ -1166,9 +1170,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralTotalFunded, treeStatus2), finalStatus),
-        Number(referralBalance3),
-        "referral balance is not ok3"
+        Math.divide(Math.mul(ambassadorTotalFunded, treeStatus2), finalStatus),
+        Number(ambassadorBalance3),
+        "ambassador balance is not ok3"
       );
 
       assert.equal(
@@ -1204,7 +1208,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid4 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance4 = await planterFundInstance.balances(userAccount2);
-      let referralBalance4 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance4 = await planterFundInstance.balances(userAccount3);
       let organizationBalance4 = await planterFundInstance.balances(
         userAccount4
       );
@@ -1220,11 +1224,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralTotalFunded, treeStatus3), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorTotalFunded, treeStatus3), finalStatus)
         ),
         Number(totalFund4.ambassador),
-        "total fund4 referral is not ok"
+        "total fund4 ambassador is not ok"
       );
 
       assert.equal(
@@ -1264,9 +1268,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralTotalFunded, treeStatus3), finalStatus),
-        Number(referralBalance4),
-        "referral balance is not ok4"
+        Math.divide(Math.mul(ambassadorTotalFunded, treeStatus3), finalStatus),
+        Number(ambassadorBalance4),
+        "ambassador balance is not ok4"
       );
 
       assert.equal(
@@ -1316,7 +1320,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid5 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance5 = await planterFundInstance.balances(userAccount2);
-      let referralBalance5 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance5 = await planterFundInstance.balances(userAccount3);
       let organizationBalance5 = await planterFundInstance.balances(
         userAccount4
       );
@@ -1332,11 +1336,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          referralFund,
-          Math.divide(Math.mul(referralTotalFunded, treeStatus4), finalStatus)
+          ambassadorFund,
+          Math.divide(Math.mul(ambassadorTotalFunded, treeStatus4), finalStatus)
         ),
         Number(totalFund5.ambassador),
-        "total fund5 referral is not ok"
+        "total fund5 ambassador is not ok"
       );
 
       assert.equal(
@@ -1413,9 +1417,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.divide(Math.mul(referralTotalFunded, treeStatus4), finalStatus),
-        Number(referralBalance5),
-        "referral balance is not ok5"
+        Math.divide(Math.mul(ambassadorTotalFunded, treeStatus4), finalStatus),
+        Number(ambassadorBalance5),
+        "ambassador balance is not ok5"
       );
       /////////////////
 
@@ -1451,7 +1455,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid6 =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance6 = await planterFundInstance.balances(userAccount2);
-      let referralBalance6 = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance6 = await planterFundInstance.balances(userAccount3);
       let firstOrganizationBalance = await planterFundInstance.balances(
         userAccount4
       );
@@ -1466,9 +1470,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.subtract(referralFund, referralTotalFunded),
+        Math.subtract(ambassadorFund, ambassadorTotalFunded),
         Number(totalFund5.ambassador),
-        "total fund6 referral is not ok"
+        "total fund6 ambassador is not ok"
       );
 
       assert.equal(
@@ -1528,9 +1532,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        referralTotalFunded,
-        Number(referralBalance6),
-        "referral balance is not ok6"
+        ambassadorTotalFunded,
+        Number(ambassadorBalance6),
+        "ambassador balance is not ok6"
       );
 
       assert.equal(
@@ -1588,9 +1592,9 @@ contract("PlanterFund", (accounts) => {
       const treeId2 = 2;
 
       const planterFund = 5000;
-      const referralFund = 1000;
+      const ambassadorFund = 1000;
       const planterFund2 = 10000;
-      const referralFund2 = 2000;
+      const ambassadorFund2 = 2000;
 
       const treeStatus = 65535; //2^16-1
 
@@ -1613,12 +1617,12 @@ contract("PlanterFund", (accounts) => {
 
       const planterTotalFunded = planterFund;
 
-      const referralTotalFunded = referralFund;
+      const ambassadorTotalFunded = ambassadorFund;
 
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount1,
         }
@@ -1627,7 +1631,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId2,
         planterFund2,
-        referralFund2,
+        ambassadorFund2,
         {
           from: userAccount1,
         }
@@ -1642,9 +1646,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.add(referralFund, referralFund2),
+        Math.add(ambassadorFund, ambassadorFund2),
         Number(totalBalances.ambassador),
-        "invalid referral total funds"
+        "invalid ambassador total funds"
       );
 
       let fundP = await planterFundInstance.updatePlanterTotalClaimed(
@@ -1669,7 +1673,7 @@ contract("PlanterFund", (accounts) => {
       let planterPaid =
         await planterFundInstance.treeToPlanterTotalClaimed.call(treeId);
       let planterBalance = await planterFundInstance.balances(userAccount2);
-      let referralBalance = await planterFundInstance.balances(userAccount3);
+      let ambassadorBalance = await planterFundInstance.balances(userAccount3);
 
       assert.equal(
         planterTotalFunded,
@@ -1684,9 +1688,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        referralTotalFunded,
-        Number(referralBalance),
-        "referral balance is not ok1"
+        ambassadorTotalFunded,
+        Number(ambassadorBalance),
+        "ambassador balance is not ok1"
       );
 
       assert.equal(
@@ -1696,9 +1700,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        referralFund2,
+        ambassadorFund2,
         Number(totalFunds2.ambassador),
-        "total funds2 referral is not ok"
+        "total funds2 ambassador is not ok"
       );
     });
 
@@ -1706,7 +1710,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
       const treeId2 = 2;
       const planterFund = 5000;
-      const referralFund = 1000;
+      const ambassadorFund = 1000;
 
       const treeStatus = 65535; //2^16-1
 
@@ -1730,7 +1734,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount1,
         }
@@ -1753,10 +1757,10 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       const planterWithdrawAmount = Units.convert("100", "eth", "wei");
-      const referralWithdrawAmount = Units.convert("30", "eth", "wei");
+      const ambassadorWithdrawAmount = Units.convert("30", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -1790,7 +1794,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -1799,7 +1803,7 @@ contract("PlanterFund", (accounts) => {
         userAccount3
       );
 
-      const referralDaiBlanceBefore = await daiInstance.balanceOf.call(
+      const ambassadorDaiBlanceBefore = await daiInstance.balanceOf.call(
         userAccount4
       );
 
@@ -1832,8 +1836,8 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      let txReferral = await planterFundInstance.withdrawBalance(
-        referralWithdrawAmount,
+      let txAmbassador = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrawAmount,
         {
           from: userAccount4,
         }
@@ -1842,7 +1846,7 @@ contract("PlanterFund", (accounts) => {
       let planterDaiBalanceAfter = await daiInstance.balanceOf.call(
         userAccount3
       );
-      let referralDaiBalanceAfter = await daiInstance.balanceOf.call(
+      let ambassadorDaiBalanceAfter = await daiInstance.balanceOf.call(
         userAccount4
       );
 
@@ -1852,11 +1856,11 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        referralDaiBalanceAfter,
-        Math.add(referralDaiBlanceBefore, referralWithdrawAmount)
+        ambassadorDaiBalanceAfter,
+        Math.add(ambassadorDaiBlanceBefore, ambassadorWithdrawAmount)
       );
 
-      const referralBalanceLeft = await planterFundInstance.balances.call(
+      const ambassadorBalanceLeft = await planterFundInstance.balances.call(
         userAccount4
       );
 
@@ -1865,8 +1869,8 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(referralBalanceLeft),
-        Math.subtract(referralFund, Number(referralDaiBalanceAfter))
+        Number(ambassadorBalanceLeft),
+        Math.subtract(ambassadorFund, Number(ambassadorDaiBalanceAfter))
       );
 
       assert.equal(
@@ -1885,7 +1889,7 @@ contract("PlanterFund", (accounts) => {
       });
 
       const planterFund = Units.convert("5", "eth", "wei");
-      const referralFund = Units.convert("5", "eth", "wei");
+      const ambassadorFund = Units.convert("5", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -1919,7 +1923,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2034,7 +2038,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -2055,7 +2059,7 @@ contract("PlanterFund", (accounts) => {
 
       const totalPlanterFund = planterFund;
 
-      const totalReferralFund = referralFund;
+      const totalAmbassadorFund = ambassadorFund;
 
       await daiInstance.transfer(
         planterFundInstance.address,
@@ -2066,7 +2070,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2097,10 +2101,10 @@ contract("PlanterFund", (accounts) => {
       );
       const accountBalance1 = await web3.eth.getBalance(userAccount3);
 
-      const referralBalance1 = await planterFundInstance.balances.call(
+      const ambassadorBalance1 = await planterFundInstance.balances.call(
         userAccount4
       );
-      const accountReferralBalance1 = await web3.eth.getBalance(userAccount4);
+      const accountAmbassadorBalance1 = await web3.eth.getBalance(userAccount4);
 
       assert.equal(
         Number(planterBalance1),
@@ -2108,12 +2112,12 @@ contract("PlanterFund", (accounts) => {
         "planter balance is not ok 1"
       );
       assert.equal(
-        Number(referralBalance1),
-        totalReferralFund,
-        "referral balance is not ok 1"
+        Number(ambassadorBalance1),
+        totalAmbassadorFund,
+        "ambassador balance is not ok 1"
       );
       const planterWithdrawAmount1 = Units.convert("10", "eth", "wei");
-      const referralWithdrwAmount1 = Units.convert("10", "eth", "wei");
+      const ambassadorWithdrwAmount1 = Units.convert("10", "eth", "wei");
       const tx = await planterFundInstance.withdrawBalance(
         planterWithdrawAmount1,
         { from: userAccount3 }
@@ -2126,14 +2130,14 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      const txReferral = await planterFundInstance.withdrawBalance(
-        referralWithdrwAmount1,
+      const txAmbassador = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrwAmount1,
         { from: userAccount4 }
       );
 
-      truffleAssert.eventEmitted(txReferral, "BalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(txAmbassador, "BalanceWithdrew", (ev) => {
         return (
-          Number(ev.amount) == referralWithdrwAmount1 &&
+          Number(ev.amount) == ambassadorWithdrwAmount1 &&
           ev.account == userAccount4
         );
       });
@@ -2145,7 +2149,7 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         Math.subtract(
           Number(contractBalanceAfterFund),
-          Math.add(planterWithdrawAmount1, referralWithdrwAmount1)
+          Math.add(planterWithdrawAmount1, ambassadorWithdrwAmount1)
         ),
         Number(contractBalanceAfterWithdraw1),
         "contract balance is not ok after withdraw 1"
@@ -2156,10 +2160,10 @@ contract("PlanterFund", (accounts) => {
       );
       const planterDaiBalance2 = await daiInstance.balanceOf.call(userAccount3);
 
-      const referralBalance2 = await planterFundInstance.balances.call(
+      const ambassadorBalance2 = await planterFundInstance.balances.call(
         userAccount4
       );
-      const referralDaiBalance2 = await daiInstance.balanceOf.call(
+      const ambassadorDaiBalance2 = await daiInstance.balanceOf.call(
         userAccount4
       );
 
@@ -2169,9 +2173,9 @@ contract("PlanterFund", (accounts) => {
         "planter blance is not ok 2"
       );
       assert.equal(
-        Math.subtract(totalReferralFund, referralWithdrwAmount1),
-        Number(referralBalance2),
-        "referral blance is not ok 2"
+        Math.subtract(totalAmbassadorFund, ambassadorWithdrwAmount1),
+        Number(ambassadorBalance2),
+        "ambassador blance is not ok 2"
       );
 
       assert.equal(
@@ -2182,15 +2186,15 @@ contract("PlanterFund", (accounts) => {
 
       //////////////////////
       const planterWithdrawAmount2 = Units.convert("20", "eth", "wei");
-      const referralWithdrawAmount2 = Units.convert("40", "eth", "wei");
+      const ambassadorWithdrawAmount2 = Units.convert("40", "eth", "wei");
 
       const tx2 = await planterFundInstance.withdrawBalance(
         planterWithdrawAmount2,
         { from: userAccount3 }
       );
 
-      const txReferral2 = await planterFundInstance.withdrawBalance(
-        referralWithdrawAmount2,
+      const txAmbassador2 = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrawAmount2,
         { from: userAccount4 }
       );
 
@@ -2201,9 +2205,9 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      truffleAssert.eventEmitted(txReferral2, "BalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(txAmbassador2, "BalanceWithdrew", (ev) => {
         return (
-          Number(ev.amount) == referralWithdrawAmount2 &&
+          Number(ev.amount) == ambassadorWithdrawAmount2 &&
           ev.account == userAccount4
         );
       });
@@ -2218,8 +2222,8 @@ contract("PlanterFund", (accounts) => {
           Math.add(
             planterWithdrawAmount1,
             planterWithdrawAmount2,
-            referralWithdrwAmount1,
-            referralWithdrawAmount2
+            ambassadorWithdrwAmount1,
+            ambassadorWithdrawAmount2
           )
         ),
         Number(contractBalanceAfterWithdraw2),
@@ -2229,7 +2233,7 @@ contract("PlanterFund", (accounts) => {
       const planterBalance3 = await planterFundInstance.balances.call(
         userAccount3
       );
-      const referralBalance4 = await planterFundInstance.balances.call(
+      const ambassadorBalance4 = await planterFundInstance.balances.call(
         userAccount4
       );
 
@@ -2242,14 +2246,18 @@ contract("PlanterFund", (accounts) => {
         "planter blance is not ok 3"
       );
 
-      assert.equal(0, Number(referralBalance4), "referral blance is not ok 3");
+      assert.equal(
+        0,
+        Number(ambassadorBalance4),
+        "ambassador blance is not ok 3"
+      );
 
       const totalBalances = await planterFundInstance.totalBalances();
 
       assert.equal(
         0,
         Number(totalBalances.ambassador),
-        "totalReferralFund is not ok 3"
+        "totalAmbassadorFund is not ok 3"
       );
 
       const planterDaiBalance3 = await daiInstance.balanceOf.call(userAccount3);
@@ -2271,7 +2279,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -2311,7 +2319,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2327,7 +2335,7 @@ contract("PlanterFund", (accounts) => {
 
       let planterBalance = await web3.eth.getBalance(userAccount3);
 
-      let referralBalance = await web3.eth.getBalance(userAccount4);
+      let ambassadorBalance = await web3.eth.getBalance(userAccount4);
 
       let organizationBalance = await web3.eth.getBalance(userAccount5);
 
@@ -2341,7 +2349,7 @@ contract("PlanterFund", (accounts) => {
 
       const planterWithdrawAmount = Units.convert("20", "eth", "wei");
       const organizationWithdrawAmount = Units.convert("80", "eth", "wei");
-      const referralWithdrawAmount = Units.convert("10", "eth", "wei");
+      const ambassadorWithdrawAmount = Units.convert("10", "eth", "wei");
 
       let txPlanter = await planterFundInstance.withdrawBalance(
         planterWithdrawAmount,
@@ -2357,8 +2365,8 @@ contract("PlanterFund", (accounts) => {
         }
       );
 
-      let txReferral = await planterFundInstance.withdrawBalance(
-        referralWithdrawAmount,
+      let txAmbassador = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrawAmount,
         {
           from: userAccount4,
         }
@@ -2376,7 +2384,7 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(await daiInstance.balanceOf.call(userAccount4)),
-        referralWithdrawAmount
+        ambassadorWithdrawAmount
       );
     });
 
@@ -2390,7 +2398,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -2430,7 +2438,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2454,7 +2462,7 @@ contract("PlanterFund", (accounts) => {
 
       const planterWithdrawAmount = Units.convert("21", "eth", "wei");
       const organizationWithdrawAmount = Units.convert("81", "eth", "wei");
-      const referralWithdrawAmount = Units.convert("51", "eth", "wei");
+      const ambassadorWithdrawAmount = Units.convert("51", "eth", "wei");
 
       let txPlanter = await planterFundInstance
         .withdrawBalance(planterWithdrawAmount, {
@@ -2467,8 +2475,8 @@ contract("PlanterFund", (accounts) => {
           from: userAccount5,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
-      let txReferral = await planterFundInstance
-        .withdrawBalance(referralWithdrawAmount, {
+      let txAmbassador = await planterFundInstance
+        .withdrawBalance(ambassadorWithdrawAmount, {
           from: userAccount4,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
@@ -2484,7 +2492,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -2523,12 +2531,12 @@ contract("PlanterFund", (accounts) => {
 
       const totalPlanterFund = planterFund;
 
-      const totalReferralFund = referralFund;
+      const totalAmbassadorFund = ambassadorFund;
 
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2546,7 +2554,7 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(contractBalanceAfterFund),
-        Math.add(planterFund, referralFund),
+        Math.add(planterFund, ambassadorFund),
         "contrct balance charged inconrrectly"
       );
 
@@ -2564,7 +2572,7 @@ contract("PlanterFund", (accounts) => {
       );
       const accountBalance1 = await web3.eth.getBalance(userAccount3);
 
-      const referralBalance1 = await planterFundInstance.balances.call(
+      const ambassadorBalance1 = await planterFundInstance.balances.call(
         userAccount4
       );
 
@@ -2588,13 +2596,13 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(referralBalance1),
-        totalReferralFund,
-        "referral balance is not ok 1"
+        Number(ambassadorBalance1),
+        totalAmbassadorFund,
+        "ambassador balance is not ok 1"
       );
 
       const planterWithdrawAmount1 = Units.convert("10", "eth", "wei");
-      const referralWithdrawAmount1 = Units.convert("10", "eth", "wei");
+      const ambassadorWithdrawAmount1 = Units.convert("10", "eth", "wei");
       const organizationWithdrawAmount1 = Units.convert("10", "eth", "wei");
       const tx = await planterFundInstance.withdrawBalance(
         planterWithdrawAmount1,
@@ -2608,14 +2616,14 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      const txReferral = await planterFundInstance.withdrawBalance(
-        referralWithdrawAmount1,
+      const txAmbassador = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrawAmount1,
         { from: userAccount4 }
       );
 
-      truffleAssert.eventEmitted(txReferral, "BalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(txAmbassador, "BalanceWithdrew", (ev) => {
         return (
-          Number(ev.amount) == referralWithdrawAmount1 &&
+          Number(ev.amount) == ambassadorWithdrawAmount1 &&
           ev.account == userAccount4
         );
       });
@@ -2641,7 +2649,7 @@ contract("PlanterFund", (accounts) => {
           Number(contractBalanceAfterFund),
           Math.add(
             planterWithdrawAmount1,
-            referralWithdrawAmount1,
+            ambassadorWithdrawAmount1,
             organizationWithdrawAmount1
           )
         ),
@@ -2654,7 +2662,7 @@ contract("PlanterFund", (accounts) => {
       );
       const accountBalance2 = await daiInstance.balanceOf.call(userAccount3);
 
-      const referralBalance2 = await planterFundInstance.balances.call(
+      const ambassadorBalance2 = await planterFundInstance.balances.call(
         userAccount4
       );
 
@@ -2687,9 +2695,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Math.subtract(totalReferralFund, referralWithdrawAmount1),
-        Number(referralBalance2),
-        "referral blance is not ok 2"
+        Math.subtract(totalAmbassadorFund, ambassadorWithdrawAmount1),
+        Number(ambassadorBalance2),
+        "ambassador blance is not ok 2"
       );
 
       // const txFee = await Common.getTransactionFee(tx);
@@ -2711,7 +2719,7 @@ contract("PlanterFund", (accounts) => {
       //////////////////////
       const planterWithdrawAmount2 = Units.convert("53", "eth", "wei");
       const organizationWithdrawAmount2 = Units.convert("27", "eth", "wei");
-      const referralWithdrawAmount2 = Units.convert("10", "eth", "wei");
+      const ambassadorWithdrawAmount2 = Units.convert("10", "eth", "wei");
       const tx2 = await planterFundInstance.withdrawBalance(
         planterWithdrawAmount2,
         { from: userAccount3 }
@@ -2722,8 +2730,8 @@ contract("PlanterFund", (accounts) => {
         { from: userAccount5 }
       );
 
-      const txReferral2 = await planterFundInstance.withdrawBalance(
-        referralWithdrawAmount2,
+      const txAmbassador2 = await planterFundInstance.withdrawBalance(
+        ambassadorWithdrawAmount2,
         { from: userAccount4 }
       );
 
@@ -2741,9 +2749,9 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      truffleAssert.eventEmitted(txReferral2, "BalanceWithdrew", (ev) => {
+      truffleAssert.eventEmitted(txAmbassador2, "BalanceWithdrew", (ev) => {
         return (
-          Number(ev.amount) == referralWithdrawAmount2 &&
+          Number(ev.amount) == ambassadorWithdrawAmount2 &&
           ev.account == userAccount4
         );
       });
@@ -2760,8 +2768,8 @@ contract("PlanterFund", (accounts) => {
             planterWithdrawAmount2,
             organizationWithdrawAmount1,
             organizationWithdrawAmount2,
-            referralWithdrawAmount1,
-            referralWithdrawAmount2
+            ambassadorWithdrawAmount1,
+            ambassadorWithdrawAmount2
           )
         ),
         Number(contractBalanceAfterWithdraw2),
@@ -2771,7 +2779,7 @@ contract("PlanterFund", (accounts) => {
       const planterBalance3 = await planterFundInstance.balances.call(
         userAccount3
       );
-      const referralBalance4 = await planterFundInstance.balances.call(
+      const ambassadorBalance4 = await planterFundInstance.balances.call(
         userAccount4
       );
       const organizationBalance3 = await planterFundInstance.balances.call(
@@ -2788,11 +2796,11 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(
-          totalReferralFund,
-          Math.add(referralWithdrawAmount2, referralWithdrawAmount1)
+          totalAmbassadorFund,
+          Math.add(ambassadorWithdrawAmount2, ambassadorWithdrawAmount1)
         ),
-        Number(referralBalance4),
-        "referral blance is not ok 3"
+        Number(ambassadorBalance4),
+        "ambassador blance is not ok 3"
       );
 
       const totalBalances = await planterFundInstance.totalBalances();
@@ -2800,7 +2808,7 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         0,
         Number(totalBalances.ambassador),
-        "totalReferralFund is not ok 3"
+        "totalAmbassadorFund is not ok 3"
       );
 
       assert.equal(
@@ -2840,7 +2848,7 @@ contract("PlanterFund", (accounts) => {
 
       const treeId = 1;
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -2860,7 +2868,7 @@ contract("PlanterFund", (accounts) => {
 
       const totalPlanterFund = planterFund;
 
-      const totalReferralFund = referralFund;
+      const totalAmbassadorFund = ambassadorFund;
 
       await daiInstance.transfer(
         planterFundInstance.address,
@@ -2875,7 +2883,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }
@@ -2912,7 +2920,7 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Number(totalBalances.localDevelopment),
-        totalReferralFund,
+        totalAmbassadorFund,
         "localDevelopment balance is not ok 1"
       );
 
@@ -2984,7 +2992,7 @@ contract("PlanterFund", (accounts) => {
       );
       //TODO: we can check here transfer local develop fund and check total funds
       assert.equal(
-        totalReferralFund,
+        totalAmbassadorFund,
         Number(totalFunds2.localDevelopment),
         "localDevelopment blance is not ok 2"
       );
@@ -3064,7 +3072,7 @@ contract("PlanterFund", (accounts) => {
       assert.equal(
         0,
         Number(totalFunds3.ambassador),
-        "totalReferralFund is not ok 3"
+        "totalAmbassadorFund is not ok 3"
       );
 
       assert.equal(
@@ -3074,7 +3082,7 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        totalReferralFund,
+        totalAmbassadorFund,
         Number(totalFunds3.localDevelopment),
         "totallocalDevelop is not ok 3"
       );
@@ -3113,7 +3121,7 @@ contract("PlanterFund", (accounts) => {
       const treeId = 1;
 
       const planterFund = Units.convert("100", "eth", "wei");
-      const referralFund = Units.convert("50", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -3135,7 +3143,7 @@ contract("PlanterFund", (accounts) => {
       await planterFundInstance.updateProjectedEarnings(
         treeId,
         planterFund,
-        referralFund,
+        ambassadorFund,
         {
           from: userAccount8,
         }

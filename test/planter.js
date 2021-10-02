@@ -2225,7 +2225,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       user2PortionAfterJoin["2"],
       userAccount5,
-      "invalid refferal address"
+      "invalid invitor address"
     );
     assert.equal(
       Number(user2PortionAfterJoin["3"]),
@@ -2238,7 +2238,7 @@ contract("Planter", (accounts) => {
 
     assert.equal(user1PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user1PortionAfterJoin["1"], 0x0, "invalid organaizer address");
-    assert.equal(user1PortionAfterJoin["2"], 0x0, "invalid refferal address");
+    assert.equal(user1PortionAfterJoin["2"], 0x0, "invalid invitor address");
     assert.equal(
       Number(user1PortionAfterJoin["3"]),
       10000,
@@ -2250,7 +2250,7 @@ contract("Planter", (accounts) => {
 
     assert.equal(user3PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user3PortionAfterJoin["1"], 0x0, "invalid organaizer address");
-    assert.equal(user3PortionAfterJoin["2"], 0x0, "invalid refferal address");
+    assert.equal(user3PortionAfterJoin["2"], 0x0, "invalid invitor address");
     assert.equal(
       Number(user3PortionAfterJoin["3"]),
       10000,
@@ -2270,7 +2270,7 @@ contract("Planter", (accounts) => {
       userAccount1,
       "invalid organaizer address"
     );
-    assert.equal(user3PortionAferAccept["2"], 0x0, "invalid refferal address");
+    assert.equal(user3PortionAferAccept["2"], 0x0, "invalid invitor address");
     assert.equal(
       Number(user3PortionAferAccept["3"]),
       0,
@@ -2302,7 +2302,7 @@ contract("Planter", (accounts) => {
       userAccount1,
       "invalid organaizer address"
     );
-    assert.equal(user3PortionAfterUpdate["2"], 0x0, "invalid refferal address");
+    assert.equal(user3PortionAfterUpdate["2"], 0x0, "invalid invitor address");
     assert.equal(
       Number(user3PortionAfterUpdate["3"]),
       2000,
@@ -2401,7 +2401,7 @@ contract("Planter", (accounts) => {
     assert.equal(Number(planter4.plantedCount), 2, "planted count must be 2");
   });
 
-  /////////// ---------------------------- planter check ---------------------------------------------------------
+  /////////// ---------------------------- manageTreePermission ---------------------------------------------------------
 
   it("check manageTreePermission return value", async () => {
     //////////// ------------ return true

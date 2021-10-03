@@ -14,6 +14,35 @@ interface ITree is IERC721Upgradeable {
      */
     function isTree() external view returns (bool);
 
+    function treeAttributes(uint256 tokenId)
+        external
+        view
+        returns (
+            uint8 attribute1,
+            uint8 attribute2,
+            uint8 attribute3,
+            uint8 attribute4,
+            uint8 attribute5,
+            uint8 attribute6,
+            uint8 attribute7,
+            uint8 attribute8,
+            uint8 generationType
+        );
+
+    function treeSymbols(uint256 tokenId)
+        external
+        view
+        returns (
+            uint8 treeShape,
+            uint8 trunkColor,
+            uint8 crownColor,
+            uint8 effects,
+            uint8 coefficient,
+            uint8 exists,
+            uint8 hasSymbol,
+            uint8 generationType
+        );
+
     /**
      * @return AccessRestriction contract address
      */
@@ -34,4 +63,10 @@ interface ITree is IERC721Upgradeable {
      * @return true if {_tokenId} exist
      */
     function exists(uint256 _tokenId) external view returns (bool);
+
+    function setTreeAttributes(
+        uint256 _tokenId,
+        uint256 _generatedCode,
+        uint8 _generationType
+    ) external;
 }

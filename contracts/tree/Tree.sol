@@ -13,6 +13,29 @@ contract Tree is ERC721Upgradeable {
     IAccessRestriction public accessRestriction;
     string private baseURI;
 
+    struct Attributes {
+        uint8 attribute1;
+        uint8 attribute2;
+        uint8 attribute3;
+        uint8 attribute4;
+        uint8 attribute5;
+        uint8 attribute6;
+        uint8 attribute7;
+        uint8 attribute8;
+        uint8 generationType;
+    }
+    struct Symbols {
+        uint8 treeShape;
+        uint8 trunkColor;
+        uint8 crownColor;
+        uint8 effects;
+        uint8 coefficient;
+        uint8 generationType;
+    }
+
+    mapping(uint256 => Attributes) public treeAttributes;
+    mapping(uint256 => Symbols) public treeSymbols;
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -77,5 +100,45 @@ contract Tree is ERC721Upgradeable {
     /** @return return baseURI */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
+    }
+
+    function setTreeAttributes(
+        uint256 _tokenId,
+        uint256 _generatedCode,
+        uint8 _generationType
+    ) external onlyTreejerContract {
+        uint8[] memory results = new uint8[](8);
+        uint8 x;
+        for (uint256 i = 0; i < 8; i++) {
+            x = uint8(_generatedCode & 255);
+            results[i] = x;
+            _generatedCode = _generatedCode / 256;
+        }
+        treeAttributes[_tokenId] = Attributes(
+            results[0],
+            results[1],
+            results[2],
+            results[3],
+            results[4],
+            results[5],
+            results[6],
+            results[7],
+            _generationType
+        );
+        if (_generationType > 15) {
+            for (uint256 i = 0; i < 6; i++) {
+                x = uint8(_generatedCode & 255);
+                results[i] = x;
+                _generatedCode = _generatedCode / 256;
+            }
+            treeSymbols[_tokenId] = Symbols(
+                results[0],
+                results[1],
+                results[2],
+                results[3],
+                results[4],
+                results[5]
+            );
+        }
     }
 }

@@ -185,14 +185,18 @@ contract TreeAttribute is Initializable {
             uint8[] memory results = new uint8[](8);
             uint16 shapeInput = uint16(rand & ((2**13) - 1));
 
+            //TODO: create tempRand
+            uint64 tempRand = rand;
             for (uint256 j = 0; j < 8; j++) {
-                results[j] = uint8(rand & 255);
-                rand = rand / uint64(256);
+                results[j] = uint8(tempRand & 255);
+                tempRand = tempRand / 256;
             }
+
             uint8 buyerRank = _setBuyerRank(buyer);
             uint8 treeShape = _calcTreeShape(shapeInput, buyerRank);
             uint8 trunkColor;
             uint8 crownColor;
+
             if (treeShape < 128) {
                 (trunkColor, crownColor) = _calcColors(
                     results[2],
@@ -202,6 +206,7 @@ contract TreeAttribute is Initializable {
             } else {
                 (trunkColor, crownColor) = _setColors(treeShape);
             }
+
             uint8 effects = _calcEffects(results[4], buyerRank);
 
             uint64 symbolCode = treeShape +
@@ -218,12 +223,15 @@ contract TreeAttribute is Initializable {
                 return false;
             }
             uint8 coefficient = _calcCoefficient(results[5], buyerRank);
+
             uint64 values = symbolCode +
                 (2**32) *
                 coefficient +
                 (2**40) *
                 generationType;
+
             uint256 total = rand + values * (2**64);
+
             uniqueSymbol[symbolCode].status = 2;
             uniqueSymbol[symbolCode].generatedCount = 1;
             generatedAttributes[rand] = 1;
@@ -236,6 +244,57 @@ contract TreeAttribute is Initializable {
         }
     }
 
+    function _calcTreeShape(uint16 rand, uint8 buyerRank)
+        private
+        returns (uint8)
+    {
+        //TODO: variables was uint8 before
+        uint16[9] memory rank0 = [128, 256, 320, 384, 432, 480, 496, 511, 512];
+        uint16[9] memory rank1 = [110, 200, 290, 360, 420, 470, 490, 511, 512];
+        uint16[9] memory rank2 = [90, 190, 280, 350, 410, 450, 480, 510, 512];
+        uint16[9] memory rank3 = [64, 176, 272, 340, 400, 460, 496, 508, 512];
+        uint16[9] memory probabilities;
+
+        if (buyerRank == 3) {
+            probabilities = rank3;
+        } else if (buyerRank == 2) {
+            probabilities = rank2;
+        } else if (buyerRank == 1) {
+            probabilities = rank1;
+        } else {
+            probabilities = rank0;
+        }
+
+        uint8 treeShape;
+        //TODO: change this to uint8 from uint16
+        uint8 base16 = uint8(rand & 15);
+
+        uint16 selector = rand / 16;
+
+        uint8 res = 0;
+
+        //TODO: j was uint256 before
+        for (uint8 j = 0; j < 9; j++) {
+            if (selector < probabilities[j]) {
+                res = j;
+                break;
+            }
+        }
+
+        if (res == 8) {
+            if (specialCount < 16) {
+                treeShape = 128 + specialCount;
+                specialCount = specialCount + 1;
+            } else {
+                treeShape = 112 + base16;
+            }
+        } else {
+            treeShape = res * 16 + base16;
+        }
+
+        return treeShape;
+    }
+
     function _calcColors(
         uint8 _a,
         uint8 _b,
@@ -245,30 +304,40 @@ contract TreeAttribute is Initializable {
         uint8[8] memory rank1 = [5, 10, 15, 20, 24, 28, 31, 32];
         uint8[8] memory rank2 = [5, 10, 15, 19, 23, 27, 30, 32];
         uint8[8] memory rank3 = [4, 8, 12, 16, 20, 24, 28, 32];
-        uint8[8] memory probabilities = rank0;
-        if (buyerRank == 1) {
-            probabilities = rank1;
+        uint8[8] memory probabilities;
+
+        if (buyerRank == 3) {
+            probabilities = rank3;
         } else if (buyerRank == 2) {
             probabilities = rank2;
-        } else if (buyerRank == 3) {
-            probabilities = rank3;
+        } else if (buyerRank == 1) {
+            probabilities = rank1;
+        } else {
+            probabilities = rank0;
         }
+
         uint8 a1 = _a & 31;
-        uint8 a2 = _a & 224; //change to  _a / 32
+        uint8 a2 = _a / 32; //change to  _a / 32
         uint8 b1 = _b & 31;
-        uint8 b2 = _b & 224; // change to _b / 32
+        uint8 b2 = _b / 32; // change to _b / 32
         uint8 ar = 0;
         uint8 br = 0;
 
-        //TODO: j was uint256 before
-        for (uint8 j = 0; j < 8; j++) {
-            if (a1 < probabilities[j]) {
-                ar = j;
-            }
-            if (b1 < probabilities[j]) {
-                br = j;
+        //TODO: j was uint256 before |  ar & br not true set
+        for (uint8 i = 0; i < 8; i++) {
+            if (a1 < probabilities[i]) {
+                ar = i;
+                break;
             }
         }
+
+        for (uint8 j = 0; j < 8; j++) {
+            if (b1 < probabilities[j]) {
+                br = j;
+                break;
+            }
+        }
+
         return (ar * 8 + a2, br * 8 + b2);
     }
 
@@ -312,49 +381,7 @@ contract TreeAttribute is Initializable {
         return (trunks[treeShape - 128], crowns[treeShape - 128]);
     }
 
-    function _calcTreeShape(uint16 rand, uint8 buyerRank)
-        private
-        returns (uint8)
-    {
-        //TODO: variables was uint8 before
-        uint16[9] memory rank0 = [128, 256, 320, 384, 432, 480, 496, 511, 512];
-        uint16[9] memory rank1 = [110, 200, 290, 360, 420, 470, 490, 511, 512];
-        uint16[9] memory rank2 = [90, 190, 280, 350, 410, 450, 480, 510, 512];
-        uint16[9] memory rank3 = [64, 176, 272, 340, 400, 460, 496, 508, 512];
-        uint16[9] memory probabilities = rank0;
-        if (buyerRank == 1) {
-            probabilities = rank1;
-        } else if (buyerRank == 2) {
-            probabilities = rank2;
-        } else if (buyerRank == 3) {
-            probabilities = rank3;
-        }
-        uint8 treeShape;
-        //TODO: change this to uint8 from uint16
-        uint8 base16 = uint8(rand & 15);
-        uint16 selector = uint16(rand & 8176);
-        uint8 res = 0;
-
-        //TODO: j was uint256 before
-        for (uint8 j = 0; j < 9; j++) {
-            if (selector < probabilities[j]) {
-                res = j;
-            }
-        }
-        if (res == 8) {
-            if (specialCount < 16) {
-                treeShape = 128 + specialCount;
-                specialCount = specialCount + 1;
-            } else {
-                treeShape = 112 + base16;
-            }
-        } else {
-            treeShape = res * 16 + base16;
-        }
-        return treeShape;
-    }
-
-    function _calcCoefficient(uint16 rand, uint8 buyerRank)
+    function _calcCoefficient(uint8 rand, uint8 buyerRank)
         private
         pure
         returns (uint8)
@@ -362,39 +389,40 @@ contract TreeAttribute is Initializable {
         //TODO: what is this func
         //TODO:change this to uint16 from uint8
 
-        uint16[8] memory rank0 = [190, 225, 235, 244, 250, 253, 255, 256];
-        uint16[8] memory rank1 = [175, 205, 225, 240, 248, 252, 255, 256];
-        uint16[8] memory rank2 = [170, 200, 218, 232, 245, 250, 254, 256];
-        uint16[8] memory rank3 = [128, 192, 210, 227, 240, 249, 253, 256];
-        uint16[8] memory probabilities = rank0;
-        if (buyerRank == 1) {
-            probabilities = rank1;
+        uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
+        uint8[8] memory rank1 = [175, 205, 225, 240, 248, 252, 254, 255];
+        uint8[8] memory rank2 = [170, 200, 218, 232, 245, 250, 253, 255];
+        uint8[8] memory rank3 = [128, 192, 210, 227, 240, 249, 252, 255];
+
+        uint8[8] memory probabilities;
+
+        if (buyerRank == 3) {
+            probabilities = rank3;
         } else if (buyerRank == 2) {
             probabilities = rank2;
-        } else if (buyerRank == 3) {
-            probabilities = rank3;
+        } else if (buyerRank == 1) {
+            probabilities = rank1;
+        } else {
+            probabilities = rank0;
         }
 
-        return 4;
         // //TODO: dont understnd this part
-        // for (uint256 j = 0; j < 8; j++) {
-        //     if (a1 < probabilities[j]) {
-        //         ar = j;
-        //     }
-        //     if (b1 < probabilities[j]) {
-        //         br = j;
-        //     }
-        // }
-        // return (ar * 8 + a2, br * 8 + b2);
+        for (uint8 j = 0; j < 8; j++) {
+            if (rand <= probabilities[j]) {
+                return j;
+            }
+        }
+
+        return 0;
     }
 
-    function _calcEffects(uint16 rand, uint8 buyerRank)
+    function _calcEffects(uint8 rand, uint8 buyerRank)
         private
         pure
         returns (uint8)
     {
         //TODO: change this to uint16 from uint8
-        uint16[16] memory rank0 = [
+        uint8[16] memory rank0 = [
             50,
             100,
             150,
@@ -407,12 +435,12 @@ contract TreeAttribute is Initializable {
             245,
             248,
             251,
+            252,
             253,
             254,
-            255,
-            256
+            255
         ];
-        uint16[16] memory rank1 = [
+        uint8[16] memory rank1 = [
             42,
             84,
             126,
@@ -428,9 +456,9 @@ contract TreeAttribute is Initializable {
             250,
             252,
             254,
-            256
+            255
         ];
-        uint16[16] memory rank2 = [
+        uint8[16] memory rank2 = [
             40,
             80,
             120,
@@ -446,9 +474,9 @@ contract TreeAttribute is Initializable {
             244,
             248,
             252,
-            256
+            255
         ];
-        uint16[16] memory rank3 = [
+        uint8[16] memory rank3 = [
             25,
             50,
             75,
@@ -464,23 +492,30 @@ contract TreeAttribute is Initializable {
             214,
             228,
             242,
-            256
+            255
         ];
-        uint16[16] memory probabilities = rank0;
-        if (buyerRank == 1) {
-            probabilities = rank1;
+
+        uint8[16] memory probabilities;
+
+        if (buyerRank == 3) {
+            probabilities = rank3;
         } else if (buyerRank == 2) {
             probabilities = rank2;
-        } else if (buyerRank == 3) {
-            probabilities = rank3;
+        } else if (buyerRank == 1) {
+            probabilities = rank1;
+        } else {
+            probabilities = rank0;
         }
+
         //TODO: change j to uint8 from uint256
-        for (uint8 j = 0; j < 8; j++) {
+        for (uint8 j = 0; j < 16; j++) {
             //TODO: j must be < 16
-            if (rand < probabilities[j]) {
+            if (rand <= probabilities[j]) {
                 return j;
             }
         }
+
+        return 0;
     }
 
     /**

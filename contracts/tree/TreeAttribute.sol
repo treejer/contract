@@ -373,39 +373,6 @@ contract TreeAttribute is Initializable {
         return (trunks[treeShape - 128], crowns[treeShape - 128]);
     }
 
-    function _calcCoefficient(uint8 rand, uint8 buyerRank)
-        private
-        pure
-        returns (uint8)
-    {
-        //TODO:change this to uint16 from uint8
-
-        uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
-        uint8[8] memory rank1 = [175, 205, 225, 240, 248, 252, 254, 255];
-        uint8[8] memory rank2 = [170, 200, 218, 232, 245, 250, 253, 255];
-        uint8[8] memory rank3 = [128, 192, 210, 227, 240, 249, 252, 255];
-
-        uint8[8] memory probabilities;
-
-        if (buyerRank == 3) {
-            probabilities = rank3;
-        } else if (buyerRank == 2) {
-            probabilities = rank2;
-        } else if (buyerRank == 1) {
-            probabilities = rank1;
-        } else {
-            probabilities = rank0;
-        }
-
-        for (uint8 j = 0; j < 8; j++) {
-            if (rand <= probabilities[j]) {
-                return j;
-            }
-        }
-
-        return 0;
-    }
-
     function _calcEffects(uint8 rand, uint8 buyerRank)
         private
         pure
@@ -500,6 +467,41 @@ contract TreeAttribute is Initializable {
         //TODO: change j to uint8 from uint256
         for (uint8 j = 0; j < 16; j++) {
             //TODO: j must be < 16
+            if (rand <= probabilities[j]) {
+                return j;
+            }
+        }
+
+        return 0;
+    }
+
+    function _calcCoefficient(uint8 rand, uint8 buyerRank)
+        private
+        pure
+        returns (uint8)
+    {
+        //TODO: what is this func
+        //TODO:change this to uint16 from uint8
+
+        uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
+        uint8[8] memory rank1 = [175, 205, 225, 240, 248, 252, 254, 255];
+        uint8[8] memory rank2 = [170, 200, 218, 232, 245, 250, 253, 255];
+        uint8[8] memory rank3 = [128, 192, 210, 227, 240, 249, 252, 255];
+
+        uint8[8] memory probabilities;
+
+        if (buyerRank == 3) {
+            probabilities = rank3;
+        } else if (buyerRank == 2) {
+            probabilities = rank2;
+        } else if (buyerRank == 1) {
+            probabilities = rank1;
+        } else {
+            probabilities = rank0;
+        }
+
+        // //TODO: dont understnd this part
+        for (uint8 j = 0; j < 8; j++) {
             if (rand <= probabilities[j]) {
                 return j;
             }

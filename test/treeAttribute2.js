@@ -8,6 +8,7 @@ const WethFund = artifacts.require("WethFund.sol");
 
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
+const Math = require("./math");
 
 //uniswap
 let Factory;
@@ -50,6 +51,7 @@ contract("TreeAttribute", (accounts) => {
   let planterFundsInstnce;
   let wethInstance;
   let daiInstance;
+  let treeTokenInstance;
   let factoryInstance;
   let uniswapRouterInstance;
   let testUniswapInstance;
@@ -139,6 +141,7 @@ contract("TreeAttribute", (accounts) => {
     await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
   });
 
+  /*
   describe("without financial section", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
@@ -173,176 +176,411 @@ contract("TreeAttribute", (accounts) => {
 
       //////////////////// reserve attribute and check data
 
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode3, {
-        from: dataManager,
-      });
+      const eventTx1 = await treeAttributeInstance.reserveTreeAttributes(
+        generatedCode1,
+        {
+          from: dataManager,
+        }
+      );
 
       const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
         generatedCode1
       );
 
-      console.log("uniqueSymbol1", uniqueSymbol1);
+      assert.equal(
+        Number(uniqueSymbol1.status),
+        1,
+        "reserved proccess is incorrect"
+      );
 
-      // ////------------Should reserveTreeAttributes rejec because generatedCode has been reserved before
-      // await treeAttributeInstance
-      //   .reserveTreeAttributes(generatedCode3, {
-      //     from: dataManager,
-      //   })
-      //   .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
-      // ///////------------------------------------------------------------------------------
+      truffleAssert.eventEmitted(eventTx1, "SymbolReserved", (ev) => {
+        return ev.generatedCode == generatedCode1;
+      });
 
-      // let generatedCode = 2 ** 32 - 1;
+      //////// ------------Should reserveTreeAttributes rejec because generatedCode has been reserved before
+      await treeAttributeInstance
+        .reserveTreeAttributes(generatedCode1, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
 
-      // const eventTx1 = await treeAttributeInstance.reserveTreeAttributes(
-      //   generatedCode,
-      //   {
-      //     from: dataManager,
-      //   }
-      // );
+      // ////// ----------------------- test 2
 
-      // let generatedAttribute = await treeAttributeInstance.generatedAttributes(
-      //   generatedCode
-      // );
+      let generatedCode2 = 0;
 
-      // let reservedAttribute = await treeAttributeInstance.reservedAttributes(
-      //   generatedCode
-      // );
+      await Common.addTreejerContractRole(
+        arInstance,
+        userAccount2,
+        deployerAccount
+      );
 
-      // assert.equal(generatedAttribute, 1, "generatedAttribute not true");
+      const eventTx2 = await treeAttributeInstance.reserveTreeAttributes(
+        generatedCode2,
+        {
+          from: userAccount2,
+        }
+      );
 
-      // assert.equal(reservedAttribute, 1, "reservedAttribute not true");
+      const uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
+        generatedCode2
+      );
 
-      // truffleAssert.eventEmitted(eventTx1, "SymbolReserved", (ev) => {
-      //   return ev.generatedCode == generatedCode;
-      // });
+      assert.equal(
+        Number(uniqueSymbol2.status),
+        1,
+        "reserved proccess is incorrect"
+      );
 
-      // //////test 2
+      assert.equal(
+        Number(uniqueSymbol2.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
-      // let generatedCode2 = 0;
-
-      // await Common.addTreejerContractRole(
-      //   arInstance,
-      //   userAccount2,
-      //   deployerAccount
-      // );
-
-      // const eventTx2 = await treeAttributeInstance.reserveTreeAttributes(
-      //   generatedCode2,
-      //   {
-      //     from: userAccount2,
-      //   }
-      // );
-
-      // let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
-      //   generatedCode2
-      // );
-
-      // let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-      //   generatedCode2
-      // );
-
-      // truffleAssert.eventEmitted(eventTx2, "SymbolReserved", (ev) => {
-      //   return ev.generatedCode == generatedCode2;
-      // });
-
-      // assert.equal(generatedAttribute2, 1, "2 - generatedAttribute not true");
-
-      // assert.equal(reservedAttribute2, 1, "2 - reservedAttribute not true");
+      truffleAssert.eventEmitted(eventTx2, "SymbolReserved", (ev) => {
+        return ev.generatedCode == generatedCode2;
+      });
     });
 
-    // ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
+    ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
 
-    // it("Should freeReserveTreeAttributes work successfully", async () => {
-    //   /////----------------Should freeReserveTreeAttributes rejec because generatedCode hasn't been reserved before
-    //   let generatedCode4 = 12500123;
+    it("Should freeReserveTreeAttributes work successfully", async () => {
+      /////----------------Should freeReserveTreeAttributes rejec because generatedCode hasn't been reserved before
+      let generatedCode1 = 12500123;
 
-    //   await treeAttributeInstance
-    //     .freeReserveTreeAttributes(generatedCode4, {
-    //       from: dataManager,
-    //     })
-    //     .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_NOT_RESERVED);
+      await treeAttributeInstance
+        .freeReserveTreeAttributes(generatedCode1, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_NOT_RESERVED);
 
-    //   /////----------------Should freeReserveTreeAttributes rejec because caller must be admin or communityGifts
+      /////----------------Should freeReserveTreeAttributes rejec because caller must be admin or communityGifts
 
-    //   let generatedCode3 = 12500123;
+      await treeAttributeInstance.reserveTreeAttributes(generatedCode1, {
+        from: dataManager,
+      });
 
-    //   await treeAttributeInstance.reserveTreeAttributes(generatedCode3, {
-    //     from: dataManager,
-    //   });
+      ////////////////// --------------- check data after reserve
 
-    //   await treeAttributeInstance
-    //     .freeReserveTreeAttributes(generatedCode3, { from: userAccount7 })
-    //     .should.be.rejectedWith(
-    //       CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
-    //     );
+      const uniqueSymbol1AfterReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode1);
 
-    //   //////////////
-    //   let generatedCode = 2 ** 32 - 1;
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.status),
+        1,
+        "reserved proccess is incorrect"
+      );
 
-    //   await treeAttributeInstance.reserveTreeAttributes(generatedCode, {
-    //     from: dataManager,
-    //   });
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
-    //   const eventTx1 = await treeAttributeInstance.freeReserveTreeAttributes(
-    //     generatedCode,
-    //     {
-    //       from: dataManager,
-    //     }
-    //   );
+      await treeAttributeInstance
+        .freeReserveTreeAttributes(generatedCode1, { from: userAccount7 })
+        .should.be.rejectedWith(
+          CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
+        );
+      ///////////////// ------------- free reserve
+      const eventTx1 = await treeAttributeInstance.freeReserveTreeAttributes(
+        generatedCode1,
+        {
+          from: dataManager,
+        }
+      );
 
-    //   let generatedAttribute = await treeAttributeInstance.generatedAttributes(
-    //     generatedCode
-    //   );
+      const uniqueSymbol1AfterFreeReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode1);
 
-    //   let reservedAttribute = await treeAttributeInstance.reservedAttributes(
-    //     generatedCode
-    //   );
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
+      );
 
-    //   assert.equal(generatedAttribute, 0, "generatedAttribute not true");
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
-    //   assert.equal(reservedAttribute, 0, "reservedAttribute not true");
+      truffleAssert.eventEmitted(eventTx1, "ReservedSymbolFreed", (ev) => {
+        return ev.generatedCode == generatedCode1;
+      });
 
-    //   truffleAssert.eventEmitted(eventTx1, "ReservedSymbolFreed", (ev) => {
-    //     return ev.generatedCode == generatedCode;
-    //   });
+      //////------------------------test 2
 
-    //   //////test 2
+      let generatedCode2 = 0;
 
-    //   let generatedCode2 = 0;
+      await Common.addTreejerContractRole(
+        arInstance,
+        userAccount2,
+        deployerAccount
+      );
 
-    //   await Common.addTreejerContractRole(
-    //     arInstance,
-    //     userAccount2,
-    //     deployerAccount
-    //   );
+      await treeAttributeInstance.reserveTreeAttributes(generatedCode2, {
+        from: userAccount2,
+      });
 
-    //   await treeAttributeInstance.reserveTreeAttributes(generatedCode2, {
-    //     from: userAccount2,
-    //   });
+      const eventTx2 = await treeAttributeInstance.freeReserveTreeAttributes(
+        generatedCode2,
+        {
+          from: userAccount2,
+        }
+      );
 
-    //   const eventTx2 = await treeAttributeInstance.freeReserveTreeAttributes(
-    //     generatedCode2,
-    //     {
-    //       from: userAccount2,
-    //     }
-    //   );
+      const uniqueSymbol2AfterFreeReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode2);
 
-    //   let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
-    //     generatedCode2
-    //   );
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
+      );
 
-    //   let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-    //     generatedCode2
-    //   );
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
-    //   assert.equal(generatedAttribute2, 0, "2 - generatedAttribute not true");
+      truffleAssert.eventEmitted(eventTx2, "ReservedSymbolFreed", (ev) => {
+        return ev.generatedCode == generatedCode2;
+      });
+    });
+  });
+  */
 
-    //   assert.equal(reservedAttribute2, 0, "2 - reservedAttribute not true");
+  describe("without financial section", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
 
-    //   truffleAssert.eventEmitted(eventTx2, "ReservedSymbolFreed", (ev) => {
-    //     return ev.generatedCode == generatedCode2;
-    //   });
-    // });
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+    it("set attributes by admin", async () => {
+      const treeId1 = 1000;
+      const generatedCode1 = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
+      console.log("genertedCode.toString()", generatedCode1.toString());
+
+      const generatedSymbol1 = 10;
+      const generationType1 = 18;
+
+      //////////////// fail because caller is invalid
+      await treeAttributeInstance
+        .setTreeAttributesByAdmin(
+          treeId1,
+          generatedCode1,
+          generatedSymbol1,
+          generationType1,
+          { from: userAccount7 }
+        )
+        .should.be.rejectedWith(
+          CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
+        );
+
+      /////////////// add successfully and check data
+
+      const eventTx1 = await treeAttributeInstance.setTreeAttributesByAdmin(
+        treeId1,
+        generatedCode1,
+        generatedSymbol1,
+        generationType1,
+        { from: dataManager }
+      );
+
+      const generatedAttributes1 =
+        await treeAttributeInstance.generatedAttributes.call(generatedCode1);
+
+      const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+        generatedSymbol1
+      );
+
+      assert.equal(
+        Number(generatedAttributes1),
+        1,
+        "generatedAttributes is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.status),
+        3,
+        "unique symbol status is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        1,
+        "generated count is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "SymbolSetByAdmin", (ev) => {
+        return Number(ev.treeId) == treeId1;
+      });
+
+      ////// cehck symbol and attribute struct data
+      //TODO: starting line of comment
+
+      ///// -------- check attribute
+
+      // generatedCode1 value = 18446744070000000000
+      //generatedCode binary = 11111111,11111111,11111111,11111111,00100010,11100100,10111100,00000000
+
+      const attribute1Data = await treeTokenInstance.treeAttributes.call(
+        treeId1
+      );
+
+      let expectedAttributeValue = {
+        attribute1: 0,
+        attribute2: 188,
+        attribute3: 228,
+        attribute4: 34,
+        attribute5: 255,
+        attribute6: 255,
+        attribute7: 255,
+        attribute8: 255,
+        generationType: 18,
+      };
+
+      assert.equal(
+        attribute1Data.attribute1,
+        expectedAttributeValue.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute2,
+        expectedAttributeValue.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute3,
+        expectedAttributeValue.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute4,
+        expectedAttributeValue.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute5,
+        expectedAttributeValue.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute6,
+        expectedAttributeValue.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute7,
+        expectedAttributeValue.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute8,
+        expectedAttributeValue.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute1Data.generationType,
+        expectedAttributeValue.generationType,
+        "generation type is invlid"
+      );
+
+      //// ----------- chekc symbol
+
+      // symbol value = 8589934602
+      // symbol binary = 00000000,00000000,00000000,00000010,00000000,00000000,00000000,00001010
+      const expectedSymbolValue = {
+        treeShape: 10,
+        trunkColor: 0,
+        crownColor: 0,
+        effects: 0,
+        coefficient: 2,
+        generationType: 18,
+      };
+
+      const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
+
+      assert.equal(
+        symbol1Data.treeShape,
+        expectedSymbolValue.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.trunkColor,
+        expectedSymbolValue.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.crownColor,
+        expectedSymbolValue.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol1Data.effects,
+        expectedSymbolValue.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol1Data.coefficient,
+        expectedSymbolValue.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol1Data.generationType,
+        expectedSymbolValue.generationType,
+        "generationType is incorrect"
+      );
+
+      // console.log("symbol", symbol1Data);
+      //TODO: ending line of comment
+
+      //////////////////////// ------------- fail to set
+
+      await treeAttributeInstance
+        .setTreeAttributesByAdmin(
+          treeId1,
+          generatedCode1,
+          generatedSymbol1,
+          generationType1,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeAttributeErrorMsg.SYMBOL_IS_TAKEN);
+    });
   });
 });

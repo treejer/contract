@@ -135,6 +135,7 @@ const TreeAttributeErrorMsg = {
   TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
   ATTRIBUTE_TAKEN: "the tree attributes are taken",
   ATTRIBUTE_NOT_RESERVED: "the tree attributes not reserved",
+  SYMBOL_IS_TAKEN: "the tree symbol is taken",
 };
 
 const CommunityGiftErrorMsg = {

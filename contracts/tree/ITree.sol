@@ -68,5 +68,5 @@ interface ITree is IERC721Upgradeable {
         uint8 _generationType
     ) external;
 
-    function checkAttributeExists(uint256 _tokenId) external;
+    function checkAttributeExists(uint256 _tokenId) external returns (bool);
 }

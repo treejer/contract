@@ -5,6 +5,7 @@ import "./../../tree/TreeAttribute.sol";
 
 contract TestTreeAttributes is TreeAttribute {
     function test(uint256 treeId) external {
-        treeAttributes[treeId].exists = 0;
+        //TODO: mahdi
+        // treeAttributes[treeId].exists = 0;
     }
 }

@@ -23,7 +23,7 @@ contract TreeAttribute is Initializable {
     }
 
     //TODO: change this to uint8 from uint256
-    uint8 public specialCount = 0;
+    uint8 public specialCount;
 
     /** NOTE mapping from unique attributes id to number of generations */
     mapping(uint64 => uint32) public generatedAttributes;
@@ -93,6 +93,7 @@ contract TreeAttribute is Initializable {
         );
         require(candidateContract.isAccessRestriction());
         isTreeAttribute = true;
+        specialCount = 0;
         accessRestriction = candidateContract;
     }
 
@@ -212,6 +213,7 @@ contract TreeAttribute is Initializable {
                 crownColor +
                 (2**24) * //2**24
                 effects;
+
             if (uniqueSymbol[symbolCode].status > 0) {
                 uniqueSymbol[symbolCode].generatedCount =
                     uniqueSymbol[symbolCode].generatedCount +

@@ -145,6 +145,7 @@ contract Tree is ERC721Upgradeable {
     function checkAttributeExists(uint256 _tokenId)
         external
         onlyTreejerContract
+        returns (bool)
     {
         return treeAttributes[_tokenId].generationType > 0;
     }

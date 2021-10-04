@@ -38,8 +38,6 @@ interface ITree is IERC721Upgradeable {
             uint8 crownColor,
             uint8 effects,
             uint8 coefficient,
-            uint8 exists,
-            uint8 hasSymbol,
             uint8 generationType
         );
 
@@ -69,4 +67,6 @@ interface ITree is IERC721Upgradeable {
         uint256 _generatedCode,
         uint8 _generationType
     ) external;
+
+    function checkAttributeExists(uint256 _tokenId) external;
 }

@@ -157,11 +157,7 @@ contract TreeAttribute is Initializable {
             uniqueSymbol[generatedSymbol].generatedCount +
             1;
         //
-        uint256 value = generatedSymbol +
-            2 *
-            (2**32) +
-            generationType *
-            (2**40);
+        uint256 value = generatedSymbol + 2 * (2**32);
         uint256 total = generatedCode + value * (2**64);
         treeToken.setTreeAttributes(treeId, total, generationType);
 
@@ -224,11 +220,7 @@ contract TreeAttribute is Initializable {
             }
             uint8 coefficient = _calcCoefficient(results[5], buyerRank);
 
-            uint64 values = symbolCode +
-                (2**32) *
-                coefficient +
-                (2**40) *
-                generationType;
+            uint64 values = symbolCode + (2**32) * coefficient;
 
             uint256 total = rand + values * (2**64);
 
@@ -386,7 +378,6 @@ contract TreeAttribute is Initializable {
         pure
         returns (uint8)
     {
-        //TODO: what is this func
         //TODO:change this to uint16 from uint8
 
         uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
@@ -406,7 +397,6 @@ contract TreeAttribute is Initializable {
             probabilities = rank0;
         }
 
-        // //TODO: dont understnd this part
         for (uint8 j = 0; j < 8; j++) {
             if (rand <= probabilities[j]) {
                 return j;
@@ -531,9 +521,8 @@ contract TreeAttribute is Initializable {
         uint8 generationType
     ) external ifNotPaused onlyTreejerContract returns (bool) {
         //TODO:check treeSymbols instead of treeAttributes
-        (, , , , , uint8 exists, , ) = treeToken.treeSymbols(treeId);
 
-        if (exists == 0) {
+        if (!treeToken.checkAttributeExists(treeId)) {
             bool flag = true;
             uint64 attrRand;
 
@@ -587,9 +576,8 @@ contract TreeAttribute is Initializable {
         returns (bool)
     {
         //TODO:check treeSymbols instead of treeAttributes
-        (, , , , , uint8 exists, , ) = treeToken.treeSymbols(treeId);
 
-        if (exists == 0) {
+        if (!treeToken.checkAttributeExists(treeId)) {
             bool flag = false;
             uint64 attrRand;
 

@@ -126,7 +126,7 @@ contract Tree is ERC721Upgradeable {
             _generationType
         );
         if (_generationType > 15) {
-            for (uint256 i = 0; i < 6; i++) {
+            for (uint256 i = 0; i < 5; i++) {
                 x = uint8(_generatedCode & 255);
                 results[i] = x;
                 _generatedCode = _generatedCode / 256;
@@ -137,8 +137,15 @@ contract Tree is ERC721Upgradeable {
                 results[2],
                 results[3],
                 results[4],
-                results[5]
+                _generationType
             );
         }
+    }
+
+    function checkAttributeExists(uint256 _tokenId)
+        external
+        onlyTreejerContract
+    {
+        return treeAttributes[_tokenId].generationType > 0;
     }
 }

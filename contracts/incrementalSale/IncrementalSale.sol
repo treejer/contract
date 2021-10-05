@@ -450,7 +450,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
             daiAmount,
             totalBalances.planter,
             totalBalances.ambassador,
-            _totalPrice
+            _totalPrice,
+            _funder
         );
 
         if (_referrer != address(0)) {
@@ -466,7 +467,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _daiAmount,
         uint256 _planterAmount,
         uint256 _ambassadorAmount,
-        uint256 _totalPrice
+        uint256 _totalPrice,
+        address _funder
     ) private {
         uint256 planterDaiAmount = (_daiAmount * _planterAmount) /
             (_planterAmount + _ambassadorAmount);
@@ -490,6 +492,23 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 tempLastSold,
                 (planterDaiAmount * treePrice) / _totalPrice,
                 (ambassadorDaiAmount * treePrice) / _totalPrice
+            );
+
+            bytes32 randTree = keccak256(
+                abi.encodePacked(
+                    (planterDaiAmount * treePrice) / _totalPrice,
+                    (ambassadorDaiAmount * treePrice) / _totalPrice,
+                    treePrice,
+                    _daiAmount
+                )
+            );
+
+            treeAttribute.createTreeSymbol(
+                tempLastSold,
+                randTree,
+                _funder,
+                treeAttribute.getFunderRank(_funder),
+                16
             );
 
             tempLastSold += 1;

@@ -427,14 +427,20 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve2
         );
 
+        uint256 planterDaiAmount = (daiAmount * totalBalances.planter) /
+            (totalBalances.planter + totalBalances.ambassador);
+
+        uint256 ambassadorDaiAmount = (daiAmount * totalBalances.ambassador) /
+            (totalBalances.planter + totalBalances.ambassador);
+
         _setPlanterAllocation(
             _tempLastSold,
             _count,
             daiAmount,
-            totalBalances.planter,
-            totalBalances.ambassador,
+            planterDaiAmount,
+            ambassadorDaiAmount,
             _totalPrice,
-            _funder
+            totalBalances.funder
         );
 
         if (_referrer != address(0)) {
@@ -448,23 +454,17 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _tempLastSold,
         uint256 _count,
         uint256 _daiAmount,
-        uint256 _planterAmount,
-        uint256 _ambassadorAmount,
+        uint256 _planterDaiAmount,
+        uint256 _ambassadorDaiAmount,
         uint256 _totalPrice,
         address _funder
     ) private {
-        uint256 planterDaiAmount = (_daiAmount * _planterAmount) /
-            (_planterAmount + _ambassadorAmount);
-
-        uint256 ambassadorDaiAmount = (_daiAmount * _ambassadorAmount) /
-            (_planterAmount + _ambassadorAmount);
-
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        uint256 tempLastSold = _tempLastSold;
+        uint8 funderRank = treeAttribute.getFunderRank(_funder);
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (tempLastSold - incSaleData.startTreeId) /
+            uint256 steps = (_tempLastSold - incSaleData.startTreeId) /
                 incSaleData.increments;
 
             uint256 treePrice = incSaleData.initialPrice +
@@ -472,29 +472,29 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 10000;
 
             planterFundContract.updateProjectedEarnings(
-                tempLastSold,
-                (planterDaiAmount * treePrice) / _totalPrice,
-                (ambassadorDaiAmount * treePrice) / _totalPrice
+                _tempLastSold,
+                (_planterDaiAmount * treePrice) / _totalPrice,
+                (_ambassadorDaiAmount * treePrice) / _totalPrice
             );
 
             bytes32 randTree = keccak256(
                 abi.encodePacked(
-                    (planterDaiAmount * treePrice) / _totalPrice,
-                    (ambassadorDaiAmount * treePrice) / _totalPrice,
+                    (_planterDaiAmount * treePrice) / _totalPrice,
+                    (_ambassadorDaiAmount * treePrice) / _totalPrice,
                     treePrice,
                     _daiAmount
                 )
             );
 
             treeAttribute.createTreeSymbol(
-                tempLastSold,
+                _tempLastSold,
                 randTree,
                 _funder,
-                treeAttribute.getFunderRank(_funder),
+                funderRank,
                 16
             );
 
-            tempLastSold += 1;
+            _tempLastSold += 1;
         }
     }
 }

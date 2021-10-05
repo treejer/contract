@@ -149,8 +149,6 @@ contract("IncrementalSale", (accounts) => {
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
-  /*
-
   describe("deployment and set addresses", () => {
     before(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
@@ -350,7 +348,6 @@ contract("IncrementalSale", (accounts) => {
       );
     });
   });
-  
 
   describe("without financial section", () => {
     beforeEach(async () => {
@@ -1187,8 +1184,6 @@ contract("IncrementalSale", (accounts) => {
     });
   });
 
-  */
-
   describe("with financial section", () => {
     beforeEach(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
@@ -1542,6 +1537,22 @@ contract("IncrementalSale", (accounts) => {
         "Step 0 lastSold not true"
       );
 
+      ////--------------------------- check tree Attributes
+
+      assert.equal(
+        Number((await treeTokenInstance.treeAttributes(101)).generationType),
+        16,
+        "Attributes generationType is not correct"
+      );
+
+      ////--------------------------- check tree Symbols
+
+      assert.equal(
+        Number((await treeTokenInstance.treeSymbols(101)).generationType),
+        16,
+        "Symbols generationType is not correct"
+      );
+
       ////////////////////////////////////////////
 
       let funderBalance2 = await wethInstance.balanceOf(userAccount3);
@@ -1594,6 +1605,36 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.fundTree(5, userAccount6, {
         from: userAccount3,
       });
+
+      ///----------------------check attribute generated for tree
+
+      for (let i = 102; i < 122; i++) {
+        assert.equal(
+          Number((await treeTokenInstance.treeAttributes(i)).generationType),
+          16,
+          "Attributes generationType is not correct"
+        );
+
+        assert.equal(
+          Number((await treeTokenInstance.treeSymbols(i)).generationType),
+          16,
+          "Symbols generationType is not correct"
+        );
+      }
+
+      assert.equal(
+        Number((await treeTokenInstance.treeAttributes(122)).generationType),
+        0,
+        "Attributes generationType is not correct"
+      );
+
+      assert.equal(
+        Number((await treeTokenInstance.treeSymbols(122)).generationType),
+        0,
+        "Symbols generationType is not correct"
+      );
+
+      ///////////////
 
       truffleAssert.eventEmitted(tx, "TreeFunded", (ev) => {
         return (
@@ -1987,9 +2028,13 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(20, userAccount5, {
+      await iSaleInstance.fundTree(15, userAccount5, {
         from: userAccount4,
       });
+      await iSaleInstance.fundTree(5, userAccount5, {
+        from: userAccount4,
+      });
+
       await iSaleInstance.fundTree(14, userAccount5, {
         from: userAccount4,
       });
@@ -2215,10 +2260,16 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(20, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(20, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, {
+        from: userAccount4,
+      });
+      await iSaleInstance.fundTree(15, zeroAddress, {
+        from: userAccount4,
+      });
+      await iSaleInstance.fundTree(5, zeroAddress, {
         from: userAccount4,
       });
       await iSaleInstance.fundTree(9, zeroAddress, {
@@ -2301,6 +2352,34 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.fundTree(15, zeroAddress, { from: userAccount3 });
 
       await iSaleInstance.fundTree(15, userAccount3, { from: userAccount3 });
+
+      ///----------------------check attribute generated for tree
+
+      for (let i = 101; i < 131; i++) {
+        assert.equal(
+          Number((await treeTokenInstance.treeAttributes(i)).generationType),
+          16,
+          "Attributes generationType is not correct"
+        );
+
+        assert.equal(
+          Number((await treeTokenInstance.treeSymbols(i)).generationType),
+          16,
+          "Symbols generationType is not correct"
+        );
+      }
+
+      assert.equal(
+        Number((await treeTokenInstance.treeAttributes(131)).generationType),
+        0,
+        "Attributes generationType is not correct"
+      );
+
+      assert.equal(
+        Number((await treeTokenInstance.treeSymbols(131)).generationType),
+        0,
+        "Symbols generationType is not correct"
+      );
 
       assert.equal(
         Number(

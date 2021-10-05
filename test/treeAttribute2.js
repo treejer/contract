@@ -141,7 +141,6 @@ contract("TreeAttribute", (accounts) => {
     await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
   });
 
-  /*
   describe("without financial section", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
@@ -356,9 +355,7 @@ contract("TreeAttribute", (accounts) => {
       });
     });
   });
-  */
 
-  /*
   describe("without financial section", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
@@ -388,7 +385,7 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
     });
-    
+
     it("set attributes by admin", async () => {
       const treeId1 = 1000;
       const generatedCode1 = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
@@ -567,8 +564,6 @@ contract("TreeAttribute", (accounts) => {
         "generationType is incorrect"
       );
 
-      
-
       //////////////////////// ------------- fail to set
 
       await treeAttributeInstance
@@ -581,7 +576,6 @@ contract("TreeAttribute", (accounts) => {
         )
         .should.be.rejectedWith(TreeAttributeErrorMsg.SYMBOL_IS_TAKEN);
     });
-
 
     it("should _calcRandSymbol work successfully", async () => {
       ///////////// ------------------- check 1
@@ -712,6 +706,16 @@ contract("TreeAttribute", (accounts) => {
         treeId2,
         rand2,
         generationType1
+      );
+
+      let uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+        1054484
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        1,
+        "generated count is incorrect"
       );
 
       //164
@@ -850,18 +854,12 @@ contract("TreeAttribute", (accounts) => {
       let rand3 = web3.utils.toBN("5764607523034234879"); //01001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId3 = 102;
 
-      let x = await treeAttributeInstance._calcRandSymbol(
+      await treeAttributeInstance._calcRandSymbol(
         userAccount2,
         treeId3,
         rand3,
         generationType1
       );
-
-      truffleAssert.eventEmitted(x, "X", (ev) => {
-        console.log("ev.n.toString()", ev.n.toString());
-
-        return true;
-      });
 
       //164
       //169
@@ -1144,17 +1142,25 @@ contract("TreeAttribute", (accounts) => {
       let rand5 = web3.utils.toBN("72057594271803812"); //00001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId5 = 104;
 
-      let result = await treeAttributeInstance._calcRandSymbol.call(
+      await treeAttributeInstance._calcRandSymbol(
         userAccount2,
         treeId5,
         rand5,
         generationType1
       );
 
-      assert.equal(result, false, "must return false");
+      let uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
+        1054484
+      );
+
+      assert.equal(
+        Number(uniqueSymbol2.generatedCount),
+        2,
+        "generatedCount is incorrect"
+      );
     });
 
-    
+    /*
     ////--------------------------test calc treeShape (private function) -------------------------
 
     it("Check calc treeShape", async () => {
@@ -1373,12 +1379,10 @@ contract("TreeAttribute", (accounts) => {
 
       assert.equal(Number(result4), 5, "_calcCoefficient not true");
     });
-    
+    */
   });
 
-  */
-
-  describe("without financial section", () => {
+  describe("createTreeSymbol", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
         TreeAttribute,
@@ -1408,15 +1412,387 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
+    // it("should addTreejerContractRole successfully", async () => {
+    //   const treeId1 = 101;
+    //   const treeId2 = 102;
+    //   const treejerContract = userAccount1;
+
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treejerContract,
+    //     deployerAccount
+    //   );
+
+    //   // planterDai, referralDai, treePrice, _daiAmount;
+    //   const randTree1 = web3.utils.soliditySha3(
+    //     web3.utils.toWei("2"),
+    //     web3.utils.toWei("1"),
+    //     web3.utils.toWei("7"),
+    //     web3.utils.toWei("9")
+    //   );
+    //   const generationType = 18;
+
+    //   await treeAttributeInstance
+    //     .createTreeSymbol(treeId1, randTree1, userAccount2, generationType, {
+    //       from: userAccount7,
+    //     })
+    //     .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+    //   await treeAttributeInstance.createTreeSymbol(
+    //     treeId1,
+    //     randTree1,
+    //     userAccount2,
+    //     generationType,
+    //     {
+    //       from: treejerContract,
+    //     }
+    //   );
+
+    //   let generatedAttributes1 =
+    //     await treeAttributeInstance.generatedAttributes.call(
+    //       web3.utils.toBN("15485305705186275445")
+    //     );
+
+    //   assert.equal(
+    //     generatedAttributes1,
+    //     1,
+    //     "generatedAttributes is not correct"
+    //   );
+
+    //   const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+    //     33824549
+    //   );
+    //   assert.equal(
+    //     Number(uniqueSymbol1.status),
+    //     2,
+    //     "symbol status is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     Number(uniqueSymbol1.generatedCount),
+    //     1,
+    //     "symbol generatedCount is incorrect"
+    //   );
+
+    //   const attribute1Data = await treeTokenInstance.treeAttributes.call(
+    //     treeId1
+    //   );
+
+    //   //11010110,11100110,11011011,01111110,10000011,11110101,00110000,01110101
+
+    //   let expectedAttributeValue1 = {
+    //     attribute1: 117,
+    //     attribute2: 48,
+    //     attribute3: 245,
+    //     attribute4: 131,
+    //     attribute5: 126,
+    //     attribute6: 219,
+    //     attribute7: 230,
+    //     attribute8: 214,
+    //     generationType: 18,
+    //   };
+
+    //   console.log("1", attribute1Data.attribute1.toString());
+    //   console.log("2", attribute1Data.attribute2.toString());
+    //   console.log("3", attribute1Data.attribute3.toString());
+    //   console.log("4", attribute1Data.attribute4.toString());
+    //   console.log("5", attribute1Data.attribute5.toString());
+    //   console.log("6", attribute1Data.attribute6.toString());
+    //   console.log("7", attribute1Data.attribute7.toString());
+    //   console.log("8", attribute1Data.attribute8.toString());
+
+    //   assert.equal(
+    //     attribute1Data.attribute1,
+    //     expectedAttributeValue1.attribute1,
+    //     "attribute1 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute2,
+    //     expectedAttributeValue1.attribute2,
+    //     "attribute2 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute3,
+    //     expectedAttributeValue1.attribute3,
+    //     "attribute3 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute4,
+    //     expectedAttributeValue1.attribute4,
+    //     "attribute4 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute5,
+    //     expectedAttributeValue1.attribute5,
+    //     "attribute5 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute6,
+    //     expectedAttributeValue1.attribute6,
+    //     "attribute6 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute7,
+    //     expectedAttributeValue1.attribute7,
+    //     "attribute7 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute8,
+    //     expectedAttributeValue1.attribute8,
+    //     "attribute8 is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     attribute1Data.generationType,
+    //     expectedAttributeValue1.generationType,
+    //     "generation type is invlid"
+    //   );
+    //   // 0101; // 5
+    //   // 100000111; //263
+
+    //   const expectedSymbolValue1 = {
+    //     treeShape: 37,
+    //     trunkColor: 31,
+    //     crownColor: 4,
+    //     effects: 2,
+    //     coefficient: 1,
+    //     generationType: 18,
+    //   };
+
+    //   const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
+    //   // console.log("1", symbol1Data.treeShape.toString());
+    //   // console.log("2", symbol1Data.trunkColor.toString());
+    //   // console.log("3", symbol1Data.crownColor.toString());
+    //   // console.log("4", symbol1Data.effects.toString());
+    //   // console.log("5", symbol1Data.coefficient.toString());
+    //   // console.log("6", symbol1Data.generationType.toString());
+
+    //   assert.equal(
+    //     symbol1Data.treeShape,
+    //     expectedSymbolValue1.treeShape,
+    //     "treeShape is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol1Data.trunkColor,
+    //     expectedSymbolValue1.trunkColor,
+    //     "trunkColor is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol1Data.crownColor,
+    //     expectedSymbolValue1.crownColor,
+    //     "crownColor is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.effects,
+    //     expectedSymbolValue1.effects,
+    //     "effects is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.coefficient,
+    //     expectedSymbolValue1.coefficient,
+    //     "coefficient is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.generationType,
+    //     expectedSymbolValue1.generationType,
+    //     "generationType is incorrect"
+    //   );
+
+    //   let yy = await treeAttributeInstance.createTreeSymbol(
+    //     treeId2,
+    //     randTree1,
+    //     userAccount2,
+    //     generationType,
+    //     {
+    //       from: treejerContract,
+    //     }
+    //   );
+
+    //   const attribute2Data = await treeTokenInstance.treeAttributes.call(
+    //     treeId2
+    //   );
+    //   console.log("1", attribute2Data.attribute1.toString());
+    //   console.log("2", attribute2Data.attribute2.toString());
+    //   console.log("3", attribute2Data.attribute3.toString());
+    //   console.log("4", attribute2Data.attribute4.toString());
+    //   console.log("5", attribute2Data.attribute5.toString());
+    //   console.log("6", attribute2Data.attribute6.toString());
+    //   console.log("7", attribute2Data.attribute7.toString());
+    //   console.log("8", attribute2Data.attribute8.toString());
+
+    //   // binary 00111110,00000100,11110010,01001000,00000010,11011010,11110101,01010110
+
+    //   let expectedAttributeValue2 = {
+    //     attribute1: 86,
+    //     attribute2: 245,
+    //     attribute3: 218,
+    //     attribute4: 2,
+    //     attribute5: 72,
+    //     attribute6: 242,
+    //     attribute7: 4,
+    //     attribute8: 62,
+    //     generationType: 18,
+    //   };
+
+    //   assert.equal(
+    //     attribute2Data.attribute1,
+    //     expectedAttributeValue2.attribute1,
+    //     "attribute1 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute2,
+    //     expectedAttributeValue2.attribute2,
+    //     "attribute2 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute3,
+    //     expectedAttributeValue2.attribute3,
+    //     "attribute3 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute4,
+    //     expectedAttributeValue2.attribute4,
+    //     "attribute4 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute5,
+    //     expectedAttributeValue2.attribute5,
+    //     "attribute5 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute6,
+    //     expectedAttributeValue2.attribute6,
+    //     "attribute6 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute7,
+    //     expectedAttributeValue2.attribute7,
+    //     "attribute7 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute8,
+    //     expectedAttributeValue2.attribute8,
+    //     "attribute8 is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     attribute2Data.generationType,
+    //     expectedAttributeValue2.generationType,
+    //     "generation type is invlid"
+    //   );
+    //   // 0101; // 5
+    //   // 100000111; //263
+
+    //   const expectedSymbolValue2 = {
+    //     treeShape: 54,
+    //     trunkColor: 46,
+    //     crownColor: 0,
+    //     effects: 1,
+    //     coefficient: 3,
+    //     generationType: 18,
+    //   };
+
+    //   const symbol2Data = await treeTokenInstance.treeSymbols.call(treeId2);
+    //   console.log("1", symbol2Data.treeShape.toString());
+    //   console.log("2", symbol2Data.trunkColor.toString());
+    //   console.log("3", symbol2Data.crownColor.toString());
+    //   console.log("4", symbol2Data.effects.toString());
+    //   console.log("5", symbol2Data.coefficient.toString());
+    //   console.log("6", symbol2Data.generationType.toString());
+
+    //   assert.equal(
+    //     symbol2Data.treeShape,
+    //     expectedSymbolValue2.treeShape,
+    //     "treeShape is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol2Data.trunkColor,
+    //     expectedSymbolValue2.trunkColor,
+    //     "trunkColor is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol2Data.crownColor,
+    //     expectedSymbolValue2.crownColor,
+    //     "crownColor is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.effects,
+    //     expectedSymbolValue2.effects,
+    //     "effects is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.coefficient,
+    //     expectedSymbolValue2.coefficient,
+    //     "coefficient is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.generationType,
+    //     expectedSymbolValue2.generationType,
+    //     "generationType is incorrect"
+    //   );
+
+    //   let generatedAttributes2 =
+    //     await treeAttributeInstance.generatedAttributes.call(
+    //       web3.utils.toBN("4468963121357845846")
+    //     );
+
+    //   assert.equal(
+    //     generatedAttributes2,
+    //     1,
+    //     "generatedAttributes is not correct"
+    //   );
+
+    //   const uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
+    //     16789046
+    //   );
+    //   assert.equal(
+    //     Number(uniqueSymbol2.status),
+    //     2,
+    //     "symbol status is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     Number(uniqueSymbol2.generatedCount),
+    //     1,
+    //     "symbol generatedCount is incorrect"
+    //   );
+
+    //   console.log("attr2", generatedAttributes2.toString());
+
+    //   // const result = await treeAttributeInstance.createTreeSymbol.call(
+    //   //   treeId1,
+    //   //   randTree1,
+    //   //   userAccount2,
+    //   //   generationType,
+    //   //   {
+    //   //     from: treejerContract,
+    //   //   }
+    //   // );
+
+    //   // assert.equal(result, true, "result is incorrect");
+    // });
+
     it("should addTreejerContractRole successfully", async () => {
       const treeId1 = 101;
+      const treeId2 = 102;
+      const treejerContract = userAccount1;
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treejerContract,
+        deployerAccount
+      );
+
+      // planterDai, referralDai, treePrice, _daiAmount;
       const randTree1 = web3.utils.soliditySha3(
-        10000,
-        0,
-        "",
-        0,
-        zeroAddress,
-        ""
+        web3.utils.toWei("2"),
+        web3.utils.toWei("2"),
+        web3.utils.toWei("7"),
+        web3.utils.toWei("5")
       );
       const generationType = 18;
 
@@ -1425,6 +1801,42 @@ contract("TreeAttribute", (accounts) => {
           from: userAccount7,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      const eventTx1 = await treeAttributeInstance.createTreeSymbol(
+        treeId1,
+        randTree1,
+        userAccount2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
+
+      const eventTx2 = await treeAttributeInstance.createTreeSymbol(
+        treeId2,
+        randTree1,
+        userAccount2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx2, "TreeAttributesGenerated");
+
+      const result = await treeAttributeInstance.createTreeSymbol.call(
+        treeId1,
+        randTree1,
+        userAccount2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      assert.equal(result, true, "result is incorrect");
     });
   });
 });

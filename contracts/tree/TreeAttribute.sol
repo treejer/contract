@@ -188,7 +188,7 @@ contract TreeAttribute is Initializable {
                 tempRand = tempRand / 256;
             }
 
-            uint8 buyerRank = _setBuyerRank(buyer);
+            uint8 buyerRank = setBuyerRank(buyer);
             uint8 treeShape = _calcTreeShape(
                 uint16(rand & ((2**13) - 1)),
                 buyerRank
@@ -596,10 +596,13 @@ contract TreeAttribute is Initializable {
 
                 for (uint256 i = 0; i < 4; i++) {
                     attrRand = uint64(rand & type(uint64).max);
+
                     if (generatedAttributes[attrRand] == 0) {
                         treeToken.setTreeAttributes(treeId, attrRand, 1);
                         generatedAttributes[attrRand] = 1;
                         flag = true;
+                        //TODO: add break
+                        break;
                     } else {
                         generatedAttributes[attrRand] =
                             generatedAttributes[attrRand] +
@@ -626,11 +629,11 @@ contract TreeAttribute is Initializable {
     /**
      * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
      * his/her wallet
-     * @param buyer address of buyer
+     * @param _funder address of funder
      */
-    function _setBuyerRank(address buyer) private view returns (uint8) {
+    function getFunderRank(address _funder) public view returns (uint8) {
         uint8 rank = 0;
-        uint256 ownedTrees = treeToken.balanceOf(buyer);
+        uint256 ownedTrees = treeToken.balanceOf(_funder);
         if (ownedTrees > 10000) {
             rank = 3; //points under 61  is rank 1
         } else if (ownedTrees > 2000) {

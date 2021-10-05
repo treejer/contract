@@ -88,26 +88,16 @@ interface ITreeAttribute {
         uint256 treeId,
         bytes32 randTree,
         address buyer,
+        uint8 funderRank,
         uint8 generationType
     ) external returns (bool);
 
     /**
-     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
-     * his/her wallet
-     * @param buyer address of buyer
-     * @param treejerSpent weth amount spent in treejer
-     * @param walletSpent weth amount spent from wallet
-     * @param treesOwned number of trees owned
-     * @param walletSpentCount number of spents transactions from wallet
-     * NOTE emit a {BuyerRankSet} event
+     * @dev the function Tries to Calculate the rank of funder
+     * @param _funder address of funder
+     * NOTE emit a {getFunderRank} event
      */
-    function setBuyerRank(
-        address buyer,
-        uint256 treejerSpent,
-        uint256 walletSpent,
-        uint64 treesOwned,
-        uint64 walletSpentCount
-    ) external;
+    function getFunderRank(address _funder) external view returns (uint8);
 
     function calcRandSymbol(
         address buyer,
@@ -116,8 +106,6 @@ interface ITreeAttribute {
         uint8 generationType
     ) external returns (bool);
 
-    /** @dev emitted when {rank} set for {buyer} */
-    event BuyerRankSet(address buyer, uint8 rank);
     /** @dev emitted when unique tree attribute generated successfully for {treeId} */
     event TreeAttributesGenerated(uint256 treeId);
     /** @dev emitted when unique tree attribute fail to generate for {treeId} */

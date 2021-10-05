@@ -149,6 +149,8 @@ contract("IncrementalSale", (accounts) => {
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
+  /* 
+
   describe("deployment and set addresses", () => {
     before(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
@@ -1184,6 +1186,8 @@ contract("IncrementalSale", (accounts) => {
     });
   });
 
+  */
+
   describe("with financial section", () => {
     beforeEach(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
@@ -1262,6 +1266,14 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setPlanterFundAddress(planterFundsInstnce.address, {
         from: deployerAccount,
       });
+
+      await iSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       //-------------wethFundInstance
       await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
@@ -1288,6 +1300,16 @@ contract("IncrementalSale", (accounts) => {
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });
+
+      //--------------treeAttributeInstance
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       ///////////////////////// -------------------- handle roles here ----------------
       await Common.addTreejerContractRole(
         arInstance,
@@ -1302,6 +1324,11 @@ contract("IncrementalSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         wethFundInstance.address,
+        deployerAccount
+      );
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
       /////----------------add allocation data
@@ -1319,6 +1346,8 @@ contract("IncrementalSale", (accounts) => {
         }
       );
     });
+
+    /*
 
     it("check discount timeout", async () => {
       await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
@@ -2215,6 +2244,8 @@ contract("IncrementalSale", (accounts) => {
       );
     });
 
+    */
+
     ////////////////-----------------------------check fund tree function
 
     it("funded Tree should be in incremental sell", async () => {
@@ -2243,7 +2274,7 @@ contract("IncrementalSale", (accounts) => {
       let eventTx = await iSaleInstance.createIncrementalSale(
         101,
         web3.utils.toWei("0.01"),
-        40,
+        30,
         100,
         1000,
         {
@@ -2266,9 +2297,9 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(20, zeroAddress, { from: userAccount3 });
+      await iSaleInstance.fundTree(15, zeroAddress, { from: userAccount3 });
 
-      await iSaleInstance.fundTree(20, userAccount3, { from: userAccount3 });
+      await iSaleInstance.fundTree(15, userAccount3, { from: userAccount3 });
 
       assert.equal(
         Number(
@@ -2276,7 +2307,7 @@ contract("IncrementalSale", (accounts) => {
             userAccount3
           )
         ),
-        20,
+        15,
         "Referral not true"
       );
 
@@ -2290,7 +2321,7 @@ contract("IncrementalSale", (accounts) => {
 
       let lastSold = await iSaleInstance.lastSold();
 
-      assert.equal(Number(lastSold), 140, "lastSold not true");
+      assert.equal(Number(lastSold), 130, "lastSold not true");
       await iSaleInstance
         .fundTree(1, zeroAddress, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
@@ -2376,7 +2407,11 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(20, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, {
+        from: userAccount3,
+      });
+
+      await iSaleInstance.fundTree(5, zeroAddress, {
         from: userAccount3,
       });
 
@@ -2577,207 +2612,207 @@ contract("IncrementalSale", (accounts) => {
 
     ///-------------------------------------------------------- revealAttributes ---------------------------------------
 
-    it("revealAttributes should be reject (owner) ", async () => {
-      await iSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    // it("revealAttributes should be reject (owner) ", async () => {
+    //   await iSaleInstance.setTreeAttributesAddress(
+    //     treeAttributeInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await alloctionInstance.addAllocationData(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+    //   await alloctionInstance.addAllocationData(
+    //     3000,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     2200,
+    //     0,
+    //     0,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
-        from: dataManager,
-      });
+    //   await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+    //     from: dataManager,
+    //   });
 
-      await iSaleInstance.createIncrementalSale(
-        101,
-        web3.utils.toWei("0.005"),
-        100,
-        100,
-        1000,
-        {
-          from: dataManager,
-        }
-      );
+    //   await iSaleInstance.createIncrementalSale(
+    //     101,
+    //     web3.utils.toWei("0.005"),
+    //     100,
+    //     100,
+    //     1000,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treeFactoryInstance.address,
+    //     deployerAccount
+    //   );
 
-      //mint weth for funder
-      await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+    //   //mint weth for funder
+    //   await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
 
-      await wethInstance.approve(
-        iSaleInstance.address,
-        web3.utils.toWei("0.01"),
-        {
-          from: userAccount3,
-        }
-      );
+    //   await wethInstance.approve(
+    //     iSaleInstance.address,
+    //     web3.utils.toWei("0.01"),
+    //     {
+    //       from: userAccount3,
+    //     }
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        wethFundInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     wethFundInstance.address,
+    //     deployerAccount
+    //   );
 
-      await iSaleInstance.fundTree(1, zeroAddress, {
-        from: userAccount3,
-      });
+    //   await iSaleInstance.fundTree(1, zeroAddress, {
+    //     from: userAccount3,
+    //   });
 
-      await iSaleInstance
-        .revealAttributes(101, 1, {
-          from: userAccount6,
-        })
-        .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+    //   await iSaleInstance
+    //     .revealAttributes(101, 1, {
+    //       from: userAccount6,
+    //     })
+    //     .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     deployerAccount,
+    //     deployerAccount
+    //   );
 
-      await treeTokenInstance.safeMint(userAccount5, 103, {
-        from: deployerAccount,
-      });
+    //   await treeTokenInstance.safeMint(userAccount5, 103, {
+    //     from: deployerAccount,
+    //   });
 
-      await iSaleInstance
-        .revealAttributes(103, 1, {
-          from: userAccount5,
-        })
-        .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
-    });
+    //   await iSaleInstance
+    //     .revealAttributes(103, 1, {
+    //       from: userAccount5,
+    //     })
+    //     .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_WITH_NO_ATTRIBUTES);
+    // });
 
-    it("revealAttributes should be work successfully ", async () => {
-      await iSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    // it("revealAttributes should be work successfully ", async () => {
+    //   await iSaleInstance.setTreeAttributesAddress(
+    //     treeAttributeInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await alloctionInstance.addAllocationData(
-        3000,
-        1200,
-        1200,
-        1200,
-        1200,
-        2200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+    //   await alloctionInstance.addAllocationData(
+    //     3000,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     2200,
+    //     0,
+    //     0,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
-        from: dataManager,
-      });
+    //   await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+    //     from: dataManager,
+    //   });
 
-      await iSaleInstance.createIncrementalSale(
-        101,
-        web3.utils.toWei("0.01"),
-        100,
-        20,
-        1000,
-        {
-          from: dataManager,
-        }
-      );
+    //   await iSaleInstance.createIncrementalSale(
+    //     101,
+    //     web3.utils.toWei("0.01"),
+    //     100,
+    //     20,
+    //     1000,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treeFactoryInstance.address,
+    //     deployerAccount
+    //   );
 
-      //mint weth for funder
-      await wethInstance.setMint(userAccount2, web3.utils.toWei("0.05"));
+    //   //mint weth for funder
+    //   await wethInstance.setMint(userAccount2, web3.utils.toWei("0.05"));
 
-      await wethInstance.approve(
-        iSaleInstance.address,
-        web3.utils.toWei("0.05"),
-        {
-          from: userAccount2,
-        }
-      );
+    //   await wethInstance.approve(
+    //     iSaleInstance.address,
+    //     web3.utils.toWei("0.05"),
+    //     {
+    //       from: userAccount2,
+    //     }
+    //   );
 
-      await iSaleInstance.fundTree(5, zeroAddress, {
-        from: userAccount2,
-      });
+    //   await iSaleInstance.fundTree(5, zeroAddress, {
+    //     from: userAccount2,
+    //   });
 
-      let treeAttributeTemp;
+    //   let treeAttributeTemp;
 
-      for (let i = 101; i < 106; i++) {
-        treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
-        assert.equal(
-          Number(treeAttributeTemp.exists),
-          0,
-          i + " - Exists not true"
-        );
-      }
+    //   for (let i = 101; i < 106; i++) {
+    //     treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
+    //     assert.equal(
+    //       Number(treeAttributeTemp.exists),
+    //       0,
+    //       i + " - Exists not true"
+    //     );
+    //   }
 
-      await iSaleInstance.revealAttributes(101, 5, {
-        from: userAccount2,
-      });
+    //   await iSaleInstance.revealAttributes(101, 5, {
+    //     from: userAccount2,
+    //   });
 
-      for (let i = 101; i < 106; i++) {
-        treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
-        assert.equal(
-          Number(treeAttributeTemp.exists),
-          1,
-          i + " - Exists not true"
-        );
-      }
-      treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
-      assert.equal(
-        Number(treeAttributeTemp.exists),
-        0,
-        "106 - Exists not true"
-      );
+    //   for (let i = 101; i < 106; i++) {
+    //     treeAttributeTemp = await treeAttributeInstance.treeAttributes(i);
+    //     assert.equal(
+    //       Number(treeAttributeTemp.exists),
+    //       1,
+    //       i + " - Exists not true"
+    //     );
+    //   }
+    //   treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
+    //   assert.equal(
+    //     Number(treeAttributeTemp.exists),
+    //     0,
+    //     "106 - Exists not true"
+    //   );
 
-      //mint weth for funder
-      await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
+    //   //mint weth for funder
+    //   await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
 
-      await wethInstance.approve(
-        iSaleInstance.address,
-        web3.utils.toWei("0.01"),
-        {
-          from: userAccount2,
-        }
-      );
+    //   await wethInstance.approve(
+    //     iSaleInstance.address,
+    //     web3.utils.toWei("0.01"),
+    //     {
+    //       from: userAccount2,
+    //     }
+    //   );
 
-      await iSaleInstance.fundTree(1, zeroAddress, {
-        from: userAccount2,
-      });
+    //   await iSaleInstance.fundTree(1, zeroAddress, {
+    //     from: userAccount2,
+    //   });
 
-      await iSaleInstance.revealAttributes(106, 1, {
-        from: userAccount2,
-      });
+    //   await iSaleInstance.revealAttributes(106, 1, {
+    //     from: userAccount2,
+    //   });
 
-      treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
-      assert.equal(
-        Number(treeAttributeTemp.exists),
-        1,
-        "106 - Exists not true"
-      );
-    });
+    //   treeAttributeTemp = await treeAttributeInstance.treeAttributes(106);
+    //   assert.equal(
+    //     Number(treeAttributeTemp.exists),
+    //     1,
+    //     "106 - Exists not true"
+    //   );
+    // });
 
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {

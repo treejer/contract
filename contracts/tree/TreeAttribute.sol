@@ -31,7 +31,6 @@ contract TreeAttribute is Initializable {
     /** NOTE mapping from unique symbol id to number of generations  */
     mapping(uint64 => SymbolStatus) public uniqueSymbol;
 
-    event BuyerRankSet(address buyer, uint8 rank);
     event TreeAttributesGenerated(uint256 treeId);
     event TreeAttributesNotGenerated(uint256 treeId);
     event SymbolReserved(uint64 generatedCode); //TODO: input was uint32 before
@@ -176,6 +175,7 @@ contract TreeAttribute is Initializable {
         address buyer,
         uint256 treeId,
         uint64 rand,
+        uint8 funderRank,
         uint8 generationType
     ) private returns (bool) {
         if (generatedAttributes[rand] == 0) {
@@ -188,10 +188,9 @@ contract TreeAttribute is Initializable {
                 tempRand = tempRand / 256;
             }
 
-            uint8 buyerRank = getFunderRank(buyer);
             uint8 treeShape = _calcTreeShape(
                 uint16(rand & ((2**13) - 1)),
-                buyerRank
+                funderRank
             );
 
             uint8 trunkColor;
@@ -201,13 +200,13 @@ contract TreeAttribute is Initializable {
                 (trunkColor, crownColor) = _calcColors(
                     results[2],
                     results[3],
-                    buyerRank
+                    funderRank
                 );
             } else {
                 (trunkColor, crownColor) = _setColors(treeShape);
             }
 
-            uint8 effects = _calcEffects(results[4], buyerRank);
+            uint8 effects = _calcEffects(results[4], funderRank);
 
             uint64 symbolCode = treeShape +
                 (2**8) * //2**8
@@ -223,7 +222,7 @@ contract TreeAttribute is Initializable {
                     1;
                 return false;
             }
-            uint8 coefficient = _calcCoefficient(results[5], buyerRank);
+            uint8 coefficient = _calcCoefficient(results[5], funderRank);
 
             uint256 total = uint256(rand) +
                 uint256(uint256(symbolCode + (2**32) * coefficient) * (2**64));
@@ -524,6 +523,7 @@ contract TreeAttribute is Initializable {
         uint256 treeId,
         bytes32 randTree,
         address buyer,
+        uint8 funderRank,
         uint8 generationType
     ) external ifNotPaused onlyTreejerContract returns (bool) {
         //TODO:check treeSymbols instead of treeAttributes
@@ -553,6 +553,7 @@ contract TreeAttribute is Initializable {
                         buyer,
                         treeId,
                         attrRand,
+                        funderRank,
                         generationType
                     );
                     if (flag) {
@@ -630,7 +631,7 @@ contract TreeAttribute is Initializable {
      * his/her wallet
      * @param _funder address of funder
      */
-    function getFunderRank(address _funder) public view returns (uint8) {
+    function getFunderRank(address _funder) external view returns (uint8) {
         uint8 rank = 0;
         uint256 ownedTrees = treeToken.balanceOf(_funder);
         if (ownedTrees > 10000) {

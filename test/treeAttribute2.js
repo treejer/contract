@@ -1433,7 +1433,7 @@ contract("TreeAttribute", (accounts) => {
     //   const generationType = 18;
 
     //   await treeAttributeInstance
-    //     .createTreeSymbol(treeId1, randTree1, userAccount2, generationType, {
+    //     .createTreeSymbol(treeId1, randTree1, userAccount2,0, generationType, {
     //       from: userAccount7,
     //     })
     //     .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -1442,6 +1442,7 @@ contract("TreeAttribute", (accounts) => {
     //     treeId1,
     //     randTree1,
     //     userAccount2,
+    //     0
     //     generationType,
     //     {
     //       from: treejerContract,
@@ -1604,6 +1605,7 @@ contract("TreeAttribute", (accounts) => {
     //     treeId2,
     //     randTree1,
     //     userAccount2,
+    //     0,
     //     generationType,
     //     {
     //       from: treejerContract,
@@ -1767,6 +1769,7 @@ contract("TreeAttribute", (accounts) => {
     //   //   treeId1,
     //   //   randTree1,
     //   //   userAccount2,
+    //   //   0,
     //   //   generationType,
     //   //   {
     //   //     from: treejerContract,
@@ -1797,7 +1800,7 @@ contract("TreeAttribute", (accounts) => {
       const generationType = 18;
 
       await treeAttributeInstance
-        .createTreeSymbol(treeId1, randTree1, userAccount2, generationType, {
+        .createTreeSymbol(treeId1, randTree1, userAccount2, 0, generationType, {
           from: userAccount7,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -1806,6 +1809,7 @@ contract("TreeAttribute", (accounts) => {
         treeId1,
         randTree1,
         userAccount2,
+        0,
         generationType,
         {
           from: treejerContract,
@@ -1818,6 +1822,7 @@ contract("TreeAttribute", (accounts) => {
         treeId2,
         randTree1,
         userAccount2,
+        0,
         generationType,
         {
           from: treejerContract,
@@ -1830,6 +1835,7 @@ contract("TreeAttribute", (accounts) => {
         treeId1,
         randTree1,
         userAccount2,
+        0,
         generationType,
         {
           from: treejerContract,

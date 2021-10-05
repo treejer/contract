@@ -188,7 +188,7 @@ contract TreeAttribute is Initializable {
                 tempRand = tempRand / 256;
             }
 
-            uint8 buyerRank = setBuyerRank(buyer);
+            uint8 buyerRank = getFunderRank(buyer);
             uint8 treeShape = _calcTreeShape(
                 uint16(rand & ((2**13) - 1)),
                 buyerRank

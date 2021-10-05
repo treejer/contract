@@ -5,6 +5,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const WethFund = artifacts.require("WethFund.sol");
+const TreeAttribute = artifacts.require("TreeAttribute.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -39,7 +40,7 @@ contract("regularSale", (accounts) => {
   let arInstance;
 
   let treeTokenInstance;
-  let treasuryInstance;
+  let treeAttributeInstance;
 
   let allocationInstance;
   let daiFundInstance;
@@ -371,7 +372,7 @@ contract("regularSale", (accounts) => {
 
     /////////////////------------------------------------- request trees ------------------------------------------
 
-    it("Should request trees rejece", async () => {
+    it("Should request trees rejecet", async () => {
       let funder = userAccount3;
 
       await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
@@ -762,6 +763,15 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
       await regularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
@@ -828,6 +838,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       //-------------daiFundInstance
 
       await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -874,6 +894,12 @@ contract("regularSale", (accounts) => {
         deployerAccount
       );
 
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
       ///////////////////////--------------------- handle referral referralTriggerCount ----------------
 
       await regularSaleInstance.updateReferralTriggerCount(10, {
@@ -894,10 +920,22 @@ contract("regularSale", (accounts) => {
         from: funder,
       });
 
+      ///-------------------- check attributes
+
       let tokentOwner;
+      let attributes;
       for (let i = 10001; i < 10008; i++) {
+        ///////check token owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
+        //////////// check tree attributes
+        attributes = await treeTokenInstance.treeAttributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
       }
 
       await treeTokenInstance.ownerOf(10000).should.be.rejected;
@@ -950,8 +988,18 @@ contract("regularSale", (accounts) => {
       );
 
       for (let i = 13334; i < 13340; i++) {
+        ///check owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
+
+        //////////// check tree attributes
+        attributes = await treeTokenInstance.treeAttributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
       }
 
       await treeTokenInstance.ownerOf(13333).should.be.rejected;
@@ -1037,6 +1085,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       //-------------treeFactoryInstance
 
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -1067,6 +1125,12 @@ contract("regularSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
@@ -1154,9 +1218,20 @@ contract("regularSale", (accounts) => {
       );
 
       let tokentOwner;
+      let attributes;
       for (let i = 10001; i < 10008; i++) {
+        //////////// check tree owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
+
+        //////////// check tree attributes
+        attributes = await treeTokenInstance.treeAttributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
       }
 
       await treeTokenInstance.ownerOf(10000).should.be.rejected;
@@ -1350,6 +1425,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       ///////////////////////// -------------------- handle roles here ----------------
 
       await Common.addTreejerContractRole(
@@ -1367,6 +1452,12 @@ contract("regularSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
@@ -1452,9 +1543,20 @@ contract("regularSale", (accounts) => {
       );
 
       let tokentOwner;
+      let attributes;
       for (let i = 10001; i < 10008; i++) {
+        ///////////// check token owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
+
+        //////////// check tree attributes
+        attributes = await treeTokenInstance.treeAttributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
       }
 
       await treeTokenInstance.ownerOf(10000).should.be.rejected;
@@ -1647,6 +1749,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       ///////////////////////// -------------------- handle roles here ----------------
 
       await Common.addTreejerContractRole(
@@ -1664,6 +1776,12 @@ contract("regularSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
@@ -1758,9 +1876,20 @@ contract("regularSale", (accounts) => {
       );
 
       let tokentOwner;
+      let attributes;
 
+      ////// check tree owner
       tokentOwner = await treeTokenInstance.ownerOf(10001);
       assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
+
+      //////////// check tree attributes
+      attributes = await treeTokenInstance.treeAttributes.call(10001);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10001} is inccorect`
+      );
 
       let lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
 
@@ -1856,6 +1985,15 @@ contract("regularSale", (accounts) => {
 
       tokentOwner = await treeTokenInstance.ownerOf(10002);
       assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
+
+      //////////// check tree attributes
+      attributes = await treeTokenInstance.treeAttributes.call(10002);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10002} is inccorect`
+      );
 
       lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
 
@@ -1954,6 +2092,15 @@ contract("regularSale", (accounts) => {
       tokentOwner = await treeTokenInstance.ownerOf(10003);
       assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
 
+      //////////// check tree attributes
+      attributes = await treeTokenInstance.treeAttributes.call(10003);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10003} is inccorect`
+      );
+
       lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
 
       assert.equal(
@@ -1965,192 +2112,191 @@ contract("regularSale", (accounts) => {
       await daiInstance.resetAcc(funder2);
       await daiInstance.resetAcc(funder3);
     });
-    /*
-    ////--------------------------------gsn test--------------------------
-    it("test gsn [ @skip-on-coverage ]", async () => {
-      ////////////// ------------------- handle allocation data ----------------------
 
-      await allocationInstance.addAllocationData(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+    // ////--------------------------------gsn test--------------------------
+    // it("test gsn [ @skip-on-coverage ]", async () => {
+    //   ////////////// ------------------- handle allocation data ----------------------
 
-      await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
-        from: dataManager,
-      });
+    //   await allocationInstance.addAllocationData(
+    //     4000,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     0,
+    //     0,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      /////////////////////////-------------------- deploy contracts --------------------------
+    //   await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
+    //     from: dataManager,
+    //   });
 
-      let planterInstance = await Planter.new({
-        from: deployerAccount,
-      });
+    //   /////////////////////////-------------------- deploy contracts --------------------------
 
-      await planterInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+    //   let planterInstance = await Planter.new({
+    //     from: deployerAccount,
+    //   });
 
-      ///////////////////// ------------------- handle address here --------------------------
+    //   await planterInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await regularSaleInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        { from: deployerAccount }
-      );
+    //   ///////////////////// ------------------- handle address here --------------------------
 
-      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setTreeFactoryAddress(
+    //     treeFactoryInstance.address,
+    //     { from: deployerAccount }
+    //   );
 
-      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await regularSaleInstance.setAllocationAddress(allocationInstance.address, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      //-------------daiFundInstance
+    //   await regularSaleInstance.setAllocationAddress(allocationInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
+    //   //-------------daiFundInstance
 
-      await daiFundInstance.setPlanterFundContractAddress(
-        planterFundsInstnce.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      //-------------treeFactoryInstance
+    //   await daiFundInstance.setPlanterFundContractAddress(
+    //     planterFundsInstnce.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
+    //   //-------------treeFactoryInstance
 
-      await treeFactoryInstance.setPlanterContractAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+    //   await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      ///////////////////////// -------------------- handle roles here ----------------
+    //   await treeFactoryInstance.setPlanterContractAddress(planterInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        regularSaleInstance.address,
-        deployerAccount
-      );
+    //   ///////////////////////// -------------------- handle roles here ----------------
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     regularSaleInstance.address,
+    //     deployerAccount
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        daiFundInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treeFactoryInstance.address,
+    //     deployerAccount
+    //   );
 
-      ///////------------------------------handle gsn---------------------------------
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     daiFundInstance.address,
+    //     deployerAccount
+    //   );
 
-      let env = await GsnTestEnvironment.startGsn("localhost");
+    //   ///////------------------------------handle gsn---------------------------------
 
-      const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
+    //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-      await regularSaleInstance.setTrustedForwarder(forwarderAddress, {
-        from: deployerAccount,
-      });
+    //   const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
 
-      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    //   await regularSaleInstance.setTrustedForwarder(forwarderAddress, {
+    //     from: deployerAccount,
+    //   });
 
-      await paymaster.setRelayHub(relayHubAddress);
-      await paymaster.setTrustedForwarder(forwarderAddress);
+    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-      web3.eth.sendTransaction({
-        from: accounts[0],
-        to: paymaster.address,
-        value: web3.utils.toWei("1"),
-      });
+    //   await paymaster.setRelayHub(relayHubAddress);
+    //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-      origProvider = web3.currentProvider;
+    //   web3.eth.sendTransaction({
+    //     from: accounts[0],
+    //     to: paymaster.address,
+    //     value: web3.utils.toWei("1"),
+    //   });
 
-      conf = { paymasterAddress: paymaster.address };
+    //   origProvider = web3.currentProvider;
 
-      gsnProvider = await Gsn.RelayProvider.newProvider({
-        provider: origProvider,
-        config: conf,
-      }).init();
+    //   conf = { paymasterAddress: paymaster.address };
 
-      provider = new ethers.providers.Web3Provider(gsnProvider);
+    //   gsnProvider = await Gsn.RelayProvider.newProvider({
+    //     provider: origProvider,
+    //     config: conf,
+    //   }).init();
 
-      let signerFunder = provider.getSigner(3);
+    //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-      let contractFunder = await new ethers.Contract(
-        regularSaleInstance.address,
-        regularSaleInstance.abi,
-        signerFunder
-      );
+    //   let signerFunder = provider.getSigner(3);
 
-      //mint dai for funder
-      await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
+    //   let contractFunder = await new ethers.Contract(
+    //     regularSaleInstance.address,
+    //     regularSaleInstance.abi,
+    //     signerFunder
+    //   );
 
-      await daiInstance.balanceOf(userAccount2);
+    //   //mint dai for funder
+    //   await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
 
-      await daiInstance.approve(
-        regularSaleInstance.address,
-        web3.utils.toWei("7"),
-        {
-          from: userAccount2,
-        }
-      );
+    //   await daiInstance.balanceOf(userAccount2);
 
-      let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+    //   await daiInstance.approve(
+    //     regularSaleInstance.address,
+    //     web3.utils.toWei("7"),
+    //     {
+    //       from: userAccount2,
+    //     }
+    //   );
 
-      await paymaster.addPlanterWhitelistTarget(regularSaleInstance.address, {
-        from: deployerAccount,
-      });
+    //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-      await contractFunder
-        .fundTree(1, zeroAddress, {
-          from: userAccount2,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
+    //   await paymaster.addPlanterWhitelistTarget(regularSaleInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await paymaster.removePlanterWhitelistTarget(
-        regularSaleInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
-      await paymaster.addFunderWhitelistTarget(regularSaleInstance.address, {
-        from: deployerAccount,
-      });
+    //   await contractFunder
+    //     .fundTree(1, zeroAddress, {
+    //       from: userAccount2,
+    //     })
+    //     .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
 
-      await contractFunder.fundTree(1, zeroAddress, {
-        from: userAccount2,
-      });
+    //   await paymaster.removePlanterWhitelistTarget(
+    //     regularSaleInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
+    //   await paymaster.addFunderWhitelistTarget(regularSaleInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+    //   await contractFunder.fundTree(1, zeroAddress, {
+    //     from: userAccount2,
+    //   });
 
-      console.log("balanceAccountBefore", Number(balanceAccountBefore));
-      console.log("balanceAccountAfter", Number(balanceAccountAfter));
+    //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
 
-      assert.equal(
-        balanceAccountAfter,
-        balanceAccountBefore,
-        "Gsn not true work"
-      );
-    });
-    */
+    //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
+
+    //   assert.equal(
+    //     balanceAccountAfter,
+    //     balanceAccountBefore,
+    //     "Gsn not true work"
+    //   );
+    // });
 
     ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
     it("should request tree by id successfully", async () => {
@@ -2219,6 +2365,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       //-------------daiFundInstance
 
       await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2262,6 +2418,12 @@ contract("regularSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
@@ -2319,6 +2481,24 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      ////// check tree owner
+
+      assert.equal(
+        await treeTokenInstance.ownerOf(10001),
+        userAccount1,
+        "funder1 not true " + 10001
+      );
+
+      //////////// check tree attributes
+
+      assert.equal(
+        Number(
+          (await treeTokenInstance.treeAttributes.call(10001)).generationType
+        ),
+        1,
+        `generationType for tree ${10001} is inccorect`
+      );
+
       await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
 
       await daiInstance.approve(
@@ -2332,6 +2512,24 @@ contract("regularSale", (accounts) => {
       await regularSaleInstance.fundTreeById(10002, userAccount7, {
         from: userAccount2,
       });
+
+      ////// check tree owner
+
+      assert.equal(
+        await treeTokenInstance.ownerOf(10002),
+        userAccount2,
+        "funder1 not true " + 10002
+      );
+
+      //////////// check tree attributes
+
+      assert.equal(
+        Number(
+          (await treeTokenInstance.treeAttributes.call(10002)).generationType
+        ),
+        1,
+        `generationType for tree ${10002} is inccorect`
+      );
 
       /////----------------------------check referrer tree balance
       assert.equal(
@@ -2446,6 +2644,16 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      await regularSaleInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
       //-------------daiFundInstance
 
       await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -2489,6 +2697,12 @@ contract("regularSale", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
@@ -2652,6 +2866,24 @@ contract("regularSale", (accounts) => {
         }
       );
 
+      ////// check tree owner
+
+      assert.equal(
+        await treeTokenInstance.ownerOf(treeId),
+        userAccount1,
+        "funder1 not true " + treeId
+      );
+
+      //////////// check tree attributes
+
+      assert.equal(
+        Number(
+          (await treeTokenInstance.treeAttributes.call(treeId)).generationType
+        ),
+        1,
+        `generationType for tree ${treeId} is inccorect`
+      );
+
       /////----------------------------check referrer tree balance
       assert.equal(
         await regularSaleInstance.referrerCount.call(zeroAddress),
@@ -2800,6 +3032,24 @@ contract("regularSale", (accounts) => {
       await regularSaleInstance.fundTreeById(10002, zeroAddress, {
         from: userAccount1,
       });
+
+      ////// check tree owner
+
+      assert.equal(
+        await treeTokenInstance.ownerOf(10002),
+        userAccount1,
+        "funder1 not true " + 10002
+      );
+
+      //////////// check tree attributes
+
+      assert.equal(
+        Number(
+          (await treeTokenInstance.treeAttributes.call(10002)).generationType
+        ),
+        1,
+        `generationType for tree ${10002} is inccorect`
+      );
 
       assert.equal(
         await regularSaleInstance.referrerCount.call(zeroAddress),

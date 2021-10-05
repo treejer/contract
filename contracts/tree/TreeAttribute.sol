@@ -37,7 +37,7 @@ contract TreeAttribute is Initializable {
     event SymbolReserved(uint64 generatedCode); //TODO: input was uint32 before
     event ReservedSymbolFreed(uint64 generatedCode); //TODO: input was uint32 before
     event SymbolSetByAdmin(uint256 treeId);
-
+    event X(uint256 n);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -177,10 +177,9 @@ contract TreeAttribute is Initializable {
         uint256 treeId,
         uint64 rand,
         uint8 generationType
-    ) private returns (bool) {
+    ) public returns (bool) {
         if (generatedAttributes[rand] == 0) {
             uint8[] memory results = new uint8[](8);
-            uint16 shapeInput = uint16(rand & ((2**13) - 1));
 
             //TODO: create tempRand
             uint64 tempRand = rand;
@@ -190,7 +189,11 @@ contract TreeAttribute is Initializable {
             }
 
             uint8 buyerRank = _setBuyerRank(buyer);
-            uint8 treeShape = _calcTreeShape(shapeInput, buyerRank);
+            uint8 treeShape = _calcTreeShape(
+                uint16(rand & ((2**13) - 1)),
+                buyerRank
+            );
+
             uint8 trunkColor;
             uint8 crownColor;
 
@@ -222,9 +225,10 @@ contract TreeAttribute is Initializable {
             }
             uint8 coefficient = _calcCoefficient(results[5], buyerRank);
 
-            uint64 values = symbolCode + (2**32) * coefficient;
+            uint256 total = uint256(rand) +
+                uint256(uint256(symbolCode + (2**32) * coefficient) * (2**64));
 
-            uint256 total = rand + values * (2**64);
+            emit X(total);
 
             uniqueSymbol[symbolCode].status = 2;
             uniqueSymbol[symbolCode].generatedCount = 1;

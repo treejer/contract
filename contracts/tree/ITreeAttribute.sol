@@ -102,6 +102,13 @@ interface ITreeAttribute {
         uint64 walletSpentCount
     ) external;
 
+    function calcRandSymbol(
+        address buyer,
+        uint256 treeId,
+        uint64 rand,
+        uint8 generationType
+    ) external returns (bool);
+
     /** @dev emitted when {rank} set for {buyer} */
     event BuyerRankSet(address buyer, uint8 rank);
     /** @dev emitted when unique tree attribute generated successfully for {treeId} */

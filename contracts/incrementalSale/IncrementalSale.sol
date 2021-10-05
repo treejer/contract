@@ -345,23 +345,6 @@ contract IncrementalSale is Initializable, RelayRecipient {
         emit TreeFunded(_msgSender(), _referrer, tempLastSold - _count, _count);
     }
 
-    //TODO:ADD_COMMENTS
-    function revealAttributes(uint256 _startTreeId, uint256 _count) external {
-        uint256 treeId = _startTreeId;
-        for (uint256 i = 0; i < _count; i++) {
-            treeId = _startTreeId + i;
-
-            (bool isValid, bytes32 randTree) = treeFactory.checkMintOrigin(
-                treeId,
-                _msgSender()
-            );
-
-            require(isValid, "no need to tree attributes");
-
-            treeAttribute.createTreeAttributes(treeId, randTree, _msgSender());
-        }
-    }
-
     /** @dev admin can update incrementalSaleData
      * @param _initialPrice initialPrice of trees
      * @param _increments step to increase tree price

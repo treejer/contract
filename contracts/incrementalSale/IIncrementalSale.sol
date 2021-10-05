@@ -119,9 +119,6 @@ interface IIncrementalSale {
      */
     function fundTree(uint256 _count, address _referrer) external;
 
-    //TODO:ADD_COMMENTS
-    function revealAttributes(uint256 _startTreeId, uint256 _count) external;
-
     /** @dev admin can update incrementalSaleData
      * @param _initialPrice initialPrice of trees
      * @param _increments step to increase tree price

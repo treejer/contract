@@ -3,6 +3,7 @@ const IncrementalSale = artifacts.require("IncrementalSale.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
+const TestTree = artifacts.require("TestTree.sol");
 //treasury section
 const WethFund = artifacts.require("WethFund.sol");
 
@@ -389,7 +390,6 @@ contract("TreeAttribute", (accounts) => {
     it("set attributes by admin", async () => {
       const treeId1 = 1000;
       const generatedCode1 = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
-      console.log("genertedCode.toString()", generatedCode1.toString());
 
       const generatedSymbol1 = 10;
       const generationType1 = 18;
@@ -576,7 +576,7 @@ contract("TreeAttribute", (accounts) => {
         )
         .should.be.rejectedWith(TreeAttributeErrorMsg.SYMBOL_IS_TAKEN);
     });
-
+    /*
     it("should _calcRandSymbol work successfully", async () => {
       ///////////// ------------------- check 1
 
@@ -1160,7 +1160,7 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
-    /*
+    
     ////--------------------------test calc treeShape (private function) -------------------------
 
     it("Check calc treeShape", async () => {
@@ -1837,6 +1837,327 @@ contract("TreeAttribute", (accounts) => {
       );
 
       assert.equal(result, true, "result is incorrect");
+    });
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    /*
+    it("test generated attributes when call createTreeAttributes", async () => {
+      ///---------------test1
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      //1900751594994632129  11010 01100000 11010011 10000001 01001001 11101001 10000101 11000001
+      let expected10001 = {
+        attribute1: 193,
+        attribute2: 133,
+        attribute3: 233,
+        attribute4: 73,
+        attribute5: 129,
+        attribute6: 211,
+        attribute7: 96,
+        attribute8: 26,
+        generationType: 1,
+      };
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      let attribute10001 = await treeTokenInstance.treeAttributes(10001);
+
+      assert.equal(
+        await treeAttributeInstance.generatedAttributes(
+          web3.utils.toBN("1900751594994632129")
+        ),
+        1,
+        "result is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute1),
+        Number(expected10001.attribute1),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute2),
+        Number(expected10001.attribute2),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute3),
+        Number(expected10001.attribute3),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute4),
+        Number(expected10001.attribute4),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute5),
+        Number(expected10001.attribute5),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute6),
+        Number(expected10001.attribute6),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute7),
+        Number(expected10001.attribute7),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.attribute8),
+        Number(expected10001.attribute8),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute10001.generationType),
+        Number(expected10001.generationType),
+        "generationType is not correct"
+      );
+
+      ///---------------test1
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      //733341636019015643  1010 00101101 01011010 01010101 00100001 11101010 11001111 11011011
+      let expected153 = {
+        attribute1: 219,
+        attribute2: 207,
+        attribute3: 234,
+        attribute4: 33,
+        attribute5: 85,
+        attribute6: 90,
+        attribute7: 45,
+        attribute8: 10,
+        generationType: 1,
+      };
+
+      await treeAttributeInstance.createTreeAttributes(115, {
+        from: deployerAccount,
+      });
+
+      let attribute153 = await treeTokenInstance.treeAttributes(115);
+
+      assert.equal(
+        await treeAttributeInstance.generatedAttributes(
+          web3.utils.toBN("733341636019015643")
+        ),
+        1,
+        "result is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute1),
+        Number(expected153.attribute1),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute2),
+        Number(expected153.attribute2),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute3),
+        Number(expected153.attribute3),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute4),
+        Number(expected153.attribute4),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute5),
+        Number(expected153.attribute5),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute6),
+        Number(expected153.attribute6),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute7),
+        Number(expected153.attribute7),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.attribute8),
+        Number(expected153.attribute8),
+        "attributes is not correct"
+      );
+
+      assert.equal(
+        Number(attribute153.generationType),
+        Number(expected153.generationType),
+        "generationType is not correct"
+      );
+    });
+
+    it("test generated attributes when call createTreeAttributes", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
+
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      ///---------------test1
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      //1900751594994632129  11010 01100000 11010011 10000001 01001001 11101001 10000101 11000001
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        await treeAttributeInstance.generatedAttributes(
+          web3.utils.toBN("1900751594994632129")
+        ),
+        1,
+        "result is not correct"
+      );
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        await treeAttributeInstance.generatedAttributes(
+          web3.utils.toBN("1900751594994632129")
+        ),
+        2,
+        "result is not correct"
+      );
+    });
+
+    */
+    it("should createTreeAttributes work successfully", async () => {
+      await treeAttributeInstance
+        .createTreeAttributes(10001, { from: userAccount6 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      let eventTx1 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
+
+      await treeTokenInstance.treeAttributes(10001);
+
+      let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
+    });
+
+    it("should testTree work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
+
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
     });
   });
 });

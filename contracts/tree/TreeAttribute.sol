@@ -177,7 +177,7 @@ contract TreeAttribute is Initializable {
         uint256 treeId,
         uint64 rand,
         uint8 generationType
-    ) public returns (bool) {
+    ) private returns (bool) {
         if (generatedAttributes[rand] == 0) {
             uint8[] memory results = new uint8[](8);
 

@@ -84,6 +84,13 @@ interface ITreeAttribute {
         address buyer
     ) external returns (bool);
 
+    function createTreeSymbol(
+        uint256 treeId,
+        bytes32 randTree,
+        address buyer,
+        uint8 generationType
+    ) external returns (bool);
+
     /**
      * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
      * his/her wallet

@@ -590,6 +590,10 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
       await testInstance.rank1(deployerAccount, {
         from: userAccount6,
       });

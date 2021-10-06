@@ -3,12 +3,14 @@ const IncrementalSale = artifacts.require("IncrementalSale.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
+const TestTree = artifacts.require("TestTree.sol");
+const TestTree2 = artifacts.require("TestTree2.sol");
+
 //treasury section
 const WethFund = artifacts.require("WethFund.sol");
 
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Weth = artifacts.require("Weth.sol");
-
 const Math = require("./math");
 
 //uniswap
@@ -27,8 +29,6 @@ if (process.env.COVERAGE) {
 
 //test
 
-const TestTreeAttributes = artifacts.require("TestTreeAttributes.sol");
-
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -43,8 +43,6 @@ const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-const TestTree = artifacts.require("TestTree.sol");
-
 contract("TreeAttribute", (accounts) => {
   let iSaleInstance;
   let arInstance;
@@ -54,6 +52,7 @@ contract("TreeAttribute", (accounts) => {
   let planterFundsInstnce;
   let wethInstance;
   let daiInstance;
+  let treeTokenInstance;
   let factoryInstance;
   let uniswapRouterInstance;
   let testUniswapInstance;
@@ -70,7 +69,7 @@ contract("TreeAttribute", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const buyerRank = accounts[9];
+  const funderRank = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -140,10 +139,8 @@ contract("TreeAttribute", (accounts) => {
     }
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
+    await Common.addScriptRole(arInstance, funderRank, deployerAccount);
   });
-
-  /*
 
   describe("without financial section", () => {
     beforeEach(async () => {
@@ -158,8 +155,6 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
-    
-
     it("deploys successfully", async () => {
       const address = treeAttributeInstance.address;
       assert.notEqual(address, 0x0);
@@ -168,58 +163,54 @@ contract("TreeAttribute", (accounts) => {
       assert.notEqual(address, undefined);
     });
 
-    ///////////////---------------------------------test reserveTreeAttributes function--------------------------------------------------------
-    it("Should reserveTreeAttributes work successfully", async () => {
-      ////------------Should reserveTreeAttributes rejec because caller must be admin or communityGifts
-      let generatedCode4 = 12500123;
+    ///////////////---------------------------------test reserveSymbol function--------------------------------------------------------
+    it("Should reserveSymbol work successfully", async () => {
+      ////------------Should reserveSymbol rejec because caller must be admin or communityGifts
+      const generatedCode1 = 12500123;
 
       await treeAttributeInstance
-        .reserveTreeAttributes(generatedCode4, { from: userAccount7 })
+        .reserveSymbol(generatedCode1, { from: userAccount7 })
         .should.be.rejectedWith(
           CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
         );
 
-      ////------------Should reserveTreeAttributes rejec because generatedCode has been reserved before
-      let generatedCode3 = 12500123;
+      //////////////////// reserve attribute and check data
 
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode3, {
-        from: dataManager,
-      });
-
-      await treeAttributeInstance
-        .reserveTreeAttributes(generatedCode3, {
-          from: dataManager,
-        })
-        .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
-
-      ///////------------------------------------------------------------------------------
-
-      let generatedCode = 2 ** 32 - 1;
-
-      const eventTx1 = await treeAttributeInstance.reserveTreeAttributes(
-        generatedCode,
+      const eventTx1 = await treeAttributeInstance.reserveSymbol(
+        generatedCode1,
         {
           from: dataManager,
         }
       );
 
-      let generatedAttribute = await treeAttributeInstance.generatedAttributes(
-        generatedCode
+      const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+        generatedCode1
       );
 
-      let reservedAttribute = await treeAttributeInstance.reservedAttributes(
-        generatedCode
+      assert.equal(
+        Number(uniqueSymbol1.status),
+        1,
+        "reserved proccess is incorrect"
       );
 
-      assert.equal(generatedAttribute, 1, "generatedAttribute not true");
-
-      assert.equal(reservedAttribute, 1, "reservedAttribute not true");
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
 
       truffleAssert.eventEmitted(eventTx1, "SymbolReserved", (ev) => {
-        return ev.generatedCode == generatedCode;
+        return ev.generatedCode == generatedCode1;
       });
 
-      //////test 2
+      //////// ------------Should reserveSymbol rejec because generatedCode has been reserved before
+      await treeAttributeInstance
+        .reserveSymbol(generatedCode1, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
+
+      // ////// ----------------------- test 2
 
       let generatedCode2 = 0;
 
@@ -229,87 +220,102 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
 
-      const eventTx2 = await treeAttributeInstance.reserveTreeAttributes(
+      const eventTx2 = await treeAttributeInstance.reserveSymbol(
         generatedCode2,
         {
           from: userAccount2,
         }
       );
 
-      let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
+      const uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
         generatedCode2
       );
 
-      let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-        generatedCode2
+      assert.equal(
+        Number(uniqueSymbol2.status),
+        1,
+        "reserved proccess is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol2.generatedCount),
+        0,
+        "genertedCount is incorrect"
       );
 
       truffleAssert.eventEmitted(eventTx2, "SymbolReserved", (ev) => {
         return ev.generatedCode == generatedCode2;
       });
-
-      assert.equal(generatedAttribute2, 1, "2 - generatedAttribute not true");
-
-      assert.equal(reservedAttribute2, 1, "2 - reservedAttribute not true");
     });
 
-    ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
+    ///////////////---------------------------------test freeReserveSymbol function--------------------------------------------------------
 
-    it("Should freeReserveTreeAttributes work successfully", async () => {
-      /////----------------Should freeReserveTreeAttributes rejec because generatedCode hasn't been reserved before
-      let generatedCode4 = 12500123;
+    it("Should freeReserveSymbol work successfully", async () => {
+      /////----------------Should freeReserveSymbol rejec because generatedCode hasn't been reserved before
+      let generatedCode1 = 12500123;
 
       await treeAttributeInstance
-        .freeReserveTreeAttributes(generatedCode4, {
+        .freeReserveSymbol(generatedCode1, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_NOT_RESERVED);
 
-      /////----------------Should freeReserveTreeAttributes rejec because caller must be admin or communityGifts
+      /////----------------Should freeReserveSymbol rejec because caller must be admin or communityGifts
 
-      let generatedCode3 = 12500123;
-
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode3, {
+      await treeAttributeInstance.reserveSymbol(generatedCode1, {
         from: dataManager,
       });
 
+      ////////////////// --------------- check data after reserve
+
+      const uniqueSymbol1AfterReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode1);
+
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.status),
+        1,
+        "reserved proccess is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
+
       await treeAttributeInstance
-        .freeReserveTreeAttributes(generatedCode3, { from: userAccount7 })
+        .freeReserveSymbol(generatedCode1, { from: userAccount7 })
         .should.be.rejectedWith(
           CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
         );
-
-      //////////////
-      let generatedCode = 2 ** 32 - 1;
-
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode, {
-        from: dataManager,
-      });
-
-      const eventTx1 = await treeAttributeInstance.freeReserveTreeAttributes(
-        generatedCode,
+      ///////////////// ------------- free reserve
+      const eventTx1 = await treeAttributeInstance.freeReserveSymbol(
+        generatedCode1,
         {
           from: dataManager,
         }
       );
 
-      let generatedAttribute = await treeAttributeInstance.generatedAttributes(
-        generatedCode
+      const uniqueSymbol1AfterFreeReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode1);
+
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
       );
 
-      let reservedAttribute = await treeAttributeInstance.reservedAttributes(
-        generatedCode
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
       );
-
-      assert.equal(generatedAttribute, 0, "generatedAttribute not true");
-
-      assert.equal(reservedAttribute, 0, "reservedAttribute not true");
 
       truffleAssert.eventEmitted(eventTx1, "ReservedSymbolFreed", (ev) => {
-        return ev.generatedCode == generatedCode;
+        return ev.generatedCode == generatedCode1;
       });
 
-      //////test 2
+      //////------------------------test 2
 
       let generatedCode2 = 0;
 
@@ -319,769 +325,42 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
 
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode2, {
+      await treeAttributeInstance.reserveSymbol(generatedCode2, {
         from: userAccount2,
       });
 
-      const eventTx2 = await treeAttributeInstance.freeReserveTreeAttributes(
+      const eventTx2 = await treeAttributeInstance.freeReserveSymbol(
         generatedCode2,
         {
           from: userAccount2,
         }
       );
 
-      let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
-        generatedCode2
+      const uniqueSymbol2AfterFreeReserve =
+        await treeAttributeInstance.uniqueSymbol.call(generatedCode2);
+
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
       );
 
-      let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-        generatedCode2
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
       );
-
-      assert.equal(generatedAttribute2, 0, "2 - generatedAttribute not true");
-
-      assert.equal(reservedAttribute2, 0, "2 - reservedAttribute not true");
 
       truffleAssert.eventEmitted(eventTx2, "ReservedSymbolFreed", (ev) => {
         return ev.generatedCode == generatedCode2;
       });
     });
-
-    ///////////////---------------------------------test setTreeAttributesByAdmin function--------------------------------------------------------
-    it("Should setTreeAttributesByAdmin work successFully", async () => {
-      let generatedCode = 3988700315;
-      let treeId = 0;
-      let generatedCodeBase2 = 11101101101111101011110010011011;
-
-      let expectedAttribute = {
-        treeType: 27, //011011
-        groundType: 2, //010
-        trunkColor: 14, //1110
-        crownColor: 5, //0101
-        groundColor: 7, //111
-        specialEffects: 11, //1011
-      };
-
-      const eventTx1 = await treeAttributeInstance.setTreeAttributesByAdmin(
-        treeId,
-        generatedCode,
-        {
-          from: dataManager,
-        }
-      );
-
-      let treeAttribute = await treeAttributeInstance.treeAttributes(treeId);
-
-      let generatedAttribute = await treeAttributeInstance.generatedAttributes(
-        generatedCode
-      );
-
-      let reservedAttribute = await treeAttributeInstance.reservedAttributes(
-        generatedCode
-      );
-
-      assert.equal(
-        Number(generatedAttribute),
-        1,
-        "1 - generatedAttribute not true"
-      );
-
-      assert.equal(
-        Number(reservedAttribute),
-        0,
-        "1 - reservedAttribute not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.treeType),
-        expectedAttribute.treeType,
-        "1 - Tree type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.groundType),
-        expectedAttribute.groundType,
-        "1 - Ground type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.trunkColor),
-        expectedAttribute.trunkColor,
-        "1 - Trunk color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.crownColor),
-        expectedAttribute.crownColor,
-        "1 - Crown color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.groundColor),
-        expectedAttribute.groundColor,
-        "1 - Ground color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute.specialEffects),
-        expectedAttribute.specialEffects,
-        "1 - Special effects not true"
-      );
-      assert.equal(
-        Number(treeAttribute.universalCode),
-        generatedCode,
-        "1 - Generated code not true"
-      );
-
-      assert.equal(Number(treeAttribute.exists), 1, "1 - Exists not true");
-
-      truffleAssert.eventEmitted(eventTx1, "SymbolSetByAdmin", (ev) => {
-        return ev.treeId == treeId;
-      });
-
-      ////-------------------------test2
-
-      let generatedCode2 = 4294967295;
-      let treeId2 = 1;
-      let generatedCode2Base2 = 11111111111111111111111111111111;
-
-      let expectedAttribute2 = {
-        treeType: 63, //111111
-        groundType: 7, //111
-        trunkColor: 15, //1111
-        crownColor: 15, //1111
-        groundColor: 7, //111
-        specialEffects: 15, //1111
-      };
-
-      const eventTx2 = await treeAttributeInstance.setTreeAttributesByAdmin(
-        treeId2,
-        generatedCode2,
-        {
-          from: dataManager,
-        }
-      );
-
-      let treeAttribute2 = await treeAttributeInstance.treeAttributes(treeId2);
-
-      let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
-        generatedCode2
-      );
-
-      let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-        generatedCode2
-      );
-
-      assert.equal(generatedAttribute2, 1, "2 - generatedAttribute not true");
-
-      assert.equal(reservedAttribute2, 0, "2 - reservedAttribute not true");
-
-      assert.equal(
-        Number(treeAttribute2.treeType),
-        expectedAttribute2.treeType,
-        "2 - Tree type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute2.groundType),
-        expectedAttribute2.groundType,
-        "2 - Ground type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute2.trunkColor),
-        expectedAttribute2.trunkColor,
-        "2 - Trunk color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute2.crownColor),
-        expectedAttribute2.crownColor,
-        "2 - Crown color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute2.groundColor),
-        expectedAttribute2.groundColor,
-        "2 - Ground color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute2.specialEffects),
-        expectedAttribute2.specialEffects,
-        "2 - Special effects not true"
-      );
-      assert.equal(
-        Number(treeAttribute2.universalCode),
-        generatedCode2,
-        "2 - Generated code not true"
-      );
-
-      assert.equal(Number(treeAttribute2.exists), 1, "2 - Exists not true");
-
-      ////-------------------------test3
-
-      let generatedCode3 = 0;
-      let treeId3 = 2;
-
-      let generatedCode3Base2 = 00000000000000000000000000000000;
-
-      let expectedAttribute3 = {
-        treeType: 0, //000000
-        groundType: 0, //000
-        trunkColor: 0, //0000
-        crownColor: 0, //0000
-        groundColor: 0, //000
-        specialEffects: 0, //0000
-      };
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(
-        treeId3,
-        generatedCode3,
-        {
-          from: dataManager,
-        }
-      );
-
-      let treeAttribute3 = await treeAttributeInstance.treeAttributes(treeId3);
-
-      let generatedAttribute3 = await treeAttributeInstance.generatedAttributes(
-        generatedCode3
-      );
-
-      let reservedAttribute3 = await treeAttributeInstance.reservedAttributes(
-        generatedCode3
-      );
-
-      assert.equal(generatedAttribute3, 1, "3 - generatedAttribute not true");
-
-      assert.equal(reservedAttribute3, 0, "3 - reservedAttribute not true");
-
-      assert.equal(
-        Number(treeAttribute3.treeType),
-        expectedAttribute3.treeType,
-        "3 - Tree type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute3.groundType),
-        expectedAttribute3.groundType,
-        "3 - Ground type not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute3.trunkColor),
-        expectedAttribute3.trunkColor,
-        "3 - Trunk color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute3.crownColor),
-        expectedAttribute3.crownColor,
-        "3 - Crown color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute3.groundColor),
-        expectedAttribute3.groundColor,
-        "3 - Ground color not true"
-      );
-
-      assert.equal(
-        Number(treeAttribute3.specialEffects),
-        expectedAttribute3.specialEffects,
-        "3 - Special effects not true"
-      );
-      assert.equal(
-        Number(treeAttribute3.universalCode),
-        generatedCode3,
-        "3 - Generated code not true"
-      );
-
-      assert.equal(Number(treeAttribute2.exists), 1, "3 - Exists not true");
-    });
-
-    ////--------------------------- setTreeAttributesByAdmin -------------------
-
-    it("Check setTreeAttributesByAdmin errors", async () => {
-      ////----------------------Should setTreeAttributesByAdmin rejec because caller must be admin or communityGifts
-      let generatedCode5 = 12500123;
-
-      await treeAttributeInstance
-        .setTreeAttributesByAdmin(0, generatedCode5, { from: userAccount7 })
-        .should.be.rejectedWith(
-          CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
-        );
-
-      ////------------------Should setTreeAttributesByAdmin rejec because generatedCode has been generated before and not resreved
-      let generatedCode = 12500123;
-      let generatedCode2 = 12332;
-
-      ///------test reserve before (work successfully)
-
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode, {
-        from: dataManager,
-      });
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(10, generatedCode, {
-        from: dataManager,
-      });
-
-      ///------test generate before (fail)
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(11, generatedCode2, {
-        from: dataManager,
-      });
-
-      await treeAttributeInstance
-        .setTreeAttributesByAdmin(16, generatedCode2, {
-          from: dataManager,
-        })
-        .should.be.rejectedWith(
-          TreeAttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES
-        );
-
-      ////--------------------------------Should setTreeAttributesByAdmin rejec because attributes are set before
-
-      let generatedCode3 = 12500126;
-      let generatedCode4 = 1233212;
-
-      ///------test generate before
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(19, generatedCode3, {
-        from: dataManager,
-      });
-
-      await treeAttributeInstance
-        .setTreeAttributesByAdmin(19, generatedCode4, {
-          from: dataManager,
-        })
-        .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
-    });
-
-    /////----------------------------- Should setBuyerRank work successFully -------------
-
-    it("Should setBuyerRank work successFully", async () => {
-      ////-------- Should setBuyerRank rejec because caller must be admin
-      await treeAttributeInstance
-        .setBuyerRank(userAccount1, 0, 0, 0, 0)
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
-
-      ////--------test treejerSpent 2--------------------
-
-      const eventTx1 = await treeAttributeInstance.setBuyerRank(
-        userAccount2,
-        web3.utils.toWei(".012"), // 30 points(rank must be 0)
-        0,
-        0,
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx1, "BuyerRankSet", (ev) => {
-        return ev.buyer == userAccount2 && Number(ev.rank) == 0;
-      });
-
-      let testRank2 = await treeAttributeInstance.rankOf(userAccount2);
-
-      assert.equal(Number(testRank2), 0, "2-rank is not true");
-
-      ////--------test treejerSpent--------------------
-
-      const eventTx2 = await treeAttributeInstance.setBuyerRank(
-        userAccount2,
-        web3.utils.toWei(".016"), // 31 points(rank must be 1)
-        0,
-        0,
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx2, "BuyerRankSet", (ev) => {
-        return ev.buyer == userAccount2 && Number(ev.rank) == 1;
-      });
-
-      let testRank = await treeAttributeInstance.rankOf(userAccount2);
-
-      assert.equal(Number(testRank), 1, "1-rank is not true");
-
-      ////--------test walletSpent(test2)--------------------
-
-      const eventTx3 = await treeAttributeInstance.setBuyerRank(
-        userAccount3,
-        0,
-        web3.utils.toWei("15"), // 30 points(rank must be 0)
-        0,
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx3, "BuyerRankSet", (ev) => {
-        return ev.buyer == userAccount3 && Number(ev.rank) == 0;
-      });
-
-      let testRank4 = await treeAttributeInstance.rankOf(userAccount3);
-
-      assert.equal(Number(testRank4), 0, "4-rank is not true");
-
-      ////--------test walletSpent--------------------
-
-      await treeAttributeInstance.setBuyerRank(
-        userAccount3,
-        0,
-        web3.utils.toWei("15.5"), // 31 points(rank must be 1)
-        0,
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank3 = await treeAttributeInstance.rankOf(userAccount3);
-
-      assert.equal(Number(testRank3), 1, "3-rank is not true");
-
-      ////--------test treesOwned--------------------
-
-      await treeAttributeInstance.setBuyerRank(
-        userAccount4,
-        0,
-        0,
-        0,
-        30, // 30 points(rank must be 0)
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank5 = await treeAttributeInstance.rankOf(userAccount4);
-
-      assert.equal(Number(testRank5), 0, "5-rank is not true");
-
-      ////--------test treesOwned(test2)--------------------
-
-      await treeAttributeInstance.setBuyerRank(
-        userAccount4,
-        0,
-        0,
-        0,
-        31, // 31 points(rank must be 1)
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank6 = await treeAttributeInstance.rankOf(userAccount4);
-
-      assert.equal(Number(testRank6), 1, "6-rank is not true");
-
-      ////--------test treesOwned--------------------
-
-      await treeAttributeInstance.setBuyerRank(
-        userAccount6,
-        0,
-        0,
-        3, // 30 points(rank must be 0)
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank7 = await treeAttributeInstance.rankOf(userAccount6);
-
-      assert.equal(Number(testRank7), 0, "7-rank is not true");
-
-      ////--------test treesOwned(test2)--------------------
-
-      await treeAttributeInstance.setBuyerRank(
-        userAccount6,
-        0,
-        0,
-        4, // 40 points(rank must be 1)
-        0,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank8 = await treeAttributeInstance.rankOf(userAccount6);
-
-      assert.equal(Number(testRank8), 1, "8-rank is not true");
-
-      ///----------------------------test(range 0---31)---------------------------
-
-      ////--------------------test1
-      await treeAttributeInstance.setBuyerRank(
-        userAccount7,
-        web3.utils.toWei(".004"),
-        web3.utils.toWei("2"),
-        1,
-        6,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank9 = await treeAttributeInstance.rankOf(userAccount7);
-
-      assert.equal(Number(testRank9), 0, "9-rank is not true");
-
-      ////--------------------test2
-      await treeAttributeInstance.setBuyerRank(
-        userAccount7,
-        web3.utils.toWei(".004"),
-        web3.utils.toWei("3"),
-        1,
-        5,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank10 = await treeAttributeInstance.rankOf(userAccount7);
-
-      assert.equal(Number(testRank10), 1, "10-rank is not true");
-
-      ///----------------------------test(range 31---61)---------------------------
-
-      ////--------------------test1
-      await treeAttributeInstance.setBuyerRank(
-        userAccount2,
-        web3.utils.toWei(".012"),
-        web3.utils.toWei("1"),
-        2,
-        8,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank11 = await treeAttributeInstance.rankOf(userAccount2);
-
-      assert.equal(Number(testRank11), 1, "11-rank is not true");
-
-      ////--------------------test2
-      await treeAttributeInstance.setBuyerRank(
-        userAccount2,
-        web3.utils.toWei(".016"),
-        web3.utils.toWei("4"),
-        1,
-        3,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank12 = await treeAttributeInstance.rankOf(userAccount2);
-
-      assert.equal(Number(testRank12), 2, "12-rank is not true");
-
-      ///----------------------------test(range 61---201)---------------------------
-
-      ////--------------------test1
-      await treeAttributeInstance.setBuyerRank(
-        userAccount3,
-        web3.utils.toWei(".02"),
-        web3.utils.toWei("30"),
-        5,
-        40,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank13 = await treeAttributeInstance.rankOf(userAccount3);
-
-      assert.equal(Number(testRank13), 2, "13-rank is not true");
-
-      ////--------------------test2
-      await treeAttributeInstance.setBuyerRank(
-        userAccount3,
-        web3.utils.toWei("0"),
-        web3.utils.toWei("5.5"),
-        11,
-        80,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank14 = await treeAttributeInstance.rankOf(userAccount3);
-
-      assert.equal(Number(testRank14), 3, "14-rank is not true");
-
-      ///----------------------------test(range 201---1001)---------------------------
-
-      ////--------------------test1
-      await treeAttributeInstance.setBuyerRank(
-        userAccount4,
-        web3.utils.toWei(".2"),
-        web3.utils.toWei("50"),
-        25,
-        150,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank15 = await treeAttributeInstance.rankOf(userAccount4);
-
-      assert.equal(Number(testRank15), 3, "15-rank is not true");
-
-      ////--------------------test2
-      await treeAttributeInstance.setBuyerRank(
-        userAccount4,
-        web3.utils.toWei(".24"),
-        web3.utils.toWei("200"),
-        0,
-        1,
-        {
-          from: buyerRank,
-        }
-      );
-
-      let testRank16 = await treeAttributeInstance.rankOf(userAccount4);
-
-      assert.equal(Number(testRank16), 4, "16-rank is not true");
-
-      ////---------test zero
-
-      await treeAttributeInstance.setBuyerRank(userAccount1, 0, 0, 0, 0, {
-        from: buyerRank,
-      });
-
-      let testRank17 = await treeAttributeInstance.rankOf(userAccount1);
-
-      assert.equal(Number(testRank17), 0, "17-rank is not true");
-    });
-
-    it("check some errors", async () => {
-      ////-------------------only admin can call set buyer rank
-      await treeAttributeInstance
-        .setBuyerRank(
-          userAccount3,
-          web3.utils.toWei("100", "finney"),
-          web3.utils.toWei("2"),
-          10,
-          59,
-          {
-            from: userAccount3,
-          }
-        )
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE); //only admin can call
-
-      ////-------------------attributes to assign tree should be available
-      const treeAttributeGenerateCode = 13000000;
-
-      await treeAttributeInstance.reserveTreeAttributes(
-        treeAttributeGenerateCode,
-        {
-          from: dataManager,
-        }
-      );
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(100, 13000001, {
-        from: dataManager,
-      });
-
-      await treeAttributeInstance.setTreeAttributesByAdmin(
-        101,
-        treeAttributeGenerateCode,
-        {
-          from: dataManager,
-        }
-      );
-
-      await treeAttributeInstance
-        .setTreeAttributesByAdmin(102, treeAttributeGenerateCode, {
-          from: dataManager,
-        })
-        .should.be.rejectedWith(
-          TreeAttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES
-        );
-
-      ////----------------------tree has attributes before
-
-      await treeAttributeInstance.reserveTreeAttributes(14000000, {
-        from: dataManager,
-      });
-      await treeAttributeInstance.setTreeAttributesByAdmin(200, 14000001, {
-        from: dataManager,
-      });
-      await treeAttributeInstance.setTreeAttributesByAdmin(201, 14000000, {
-        from: dataManager,
-      });
-      const eventTx = await treeAttributeInstance
-        .setTreeAttributesByAdmin(200, 14000002, {
-          from: dataManager,
-        })
-        .should.be.rejectedWith(TreeAttributeErrorMsg.TREE_HAS_ATTRIBUTES);
-
-      ////-------------------tree has attributes before
-
-      await treeAttributeInstance.reserveTreeAttributes(15000000, {
-        from: dataManager,
-      });
-      await treeAttributeInstance.setTreeAttributesByAdmin(107, 15000001, {
-        from: dataManager,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        userAccount6,
-        deployerAccount
-      );
-
-      let eventTx2 = await treeAttributeInstance.createTreeAttributes(
-        107,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
-
-      let result = await treeAttributeInstance.createTreeAttributes.call(
-        107,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      assert.equal(result, true, "result is not correct");
-    });
-
-
   });
 
-  */
-
-  describe("with financial section", () => {
+  describe("without financial section", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
         TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -1096,20 +375,269 @@ contract("TreeAttribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      iSaleInstance = await deployProxy(IncrementalSale, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+    it("Check setTreeTokenAddress function", async () => {
+      ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeAttributeInstance
+        .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    });
+
+    it("set attributes by admin", async () => {
+      const treeId1 = 1000;
+      const generatedCode1 = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
+
+      const generatedSymbol1 = 10;
+      const generationType1 = 18;
+
+      //////////////// fail because caller is invalid
+      await treeAttributeInstance
+        .setTreeAttributesByAdmin(
+          treeId1,
+          generatedCode1,
+          generatedSymbol1,
+          generationType1,
+          { from: userAccount7 }
+        )
+        .should.be.rejectedWith(
+          CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
+        );
+
+      /////////////// add successfully and check data
+
+      const eventTx1 = await treeAttributeInstance.setTreeAttributesByAdmin(
+        treeId1,
+        generatedCode1,
+        generatedSymbol1,
+        generationType1,
+        { from: dataManager }
+      );
+
+      const generatedAttributes1 =
+        await treeAttributeInstance.generatedAttributes.call(generatedCode1);
+
+      const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+        generatedSymbol1
+      );
+
+      assert.equal(
+        Number(generatedAttributes1),
+        1,
+        "generatedAttributes is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.status),
+        3,
+        "unique symbol status is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        1,
+        "generated count is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "SymbolSetByAdmin", (ev) => {
+        return Number(ev.treeId) == treeId1;
       });
 
-      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      ////// cehck symbol and attribute struct data
+
+      ///// -------- check attribute
+
+      // generatedCode1 value = 18446744070000000000
+      //generatedCode binary = 11111111,11111111,11111111,11111111,00100010,11100100,10111100,00000000
+
+      const attribute1Data = await treeTokenInstance.treeAttributes.call(
+        treeId1
+      );
+
+      let expectedAttributeValue = {
+        attribute1: 0,
+        attribute2: 188,
+        attribute3: 228,
+        attribute4: 34,
+        attribute5: 255,
+        attribute6: 255,
+        attribute7: 255,
+        attribute8: 255,
+        generationType: 18,
+      };
+
+      assert.equal(
+        attribute1Data.attribute1,
+        expectedAttributeValue.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute2,
+        expectedAttributeValue.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute3,
+        expectedAttributeValue.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute4,
+        expectedAttributeValue.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute5,
+        expectedAttributeValue.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute6,
+        expectedAttributeValue.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute7,
+        expectedAttributeValue.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute8,
+        expectedAttributeValue.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute1Data.generationType,
+        expectedAttributeValue.generationType,
+        "generation type is invlid"
+      );
+
+      //// ----------- chekc symbol
+
+      // symbol value = 8589934602
+      // symbol binary = 00000000,00000000,00000000,00000010,00000000,00000000,00000000,00001010
+      const expectedSymbolValue = {
+        treeShape: 10,
+        trunkColor: 0,
+        crownColor: 0,
+        effects: 0,
+        coefficient: 2,
+        generationType: 18,
+      };
+
+      const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
+
+      assert.equal(
+        symbol1Data.treeShape,
+        expectedSymbolValue.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.trunkColor,
+        expectedSymbolValue.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.crownColor,
+        expectedSymbolValue.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol1Data.effects,
+        expectedSymbolValue.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol1Data.coefficient,
+        expectedSymbolValue.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol1Data.generationType,
+        expectedSymbolValue.generationType,
+        "generationType is incorrect"
+      );
+
+      //////////////////////// ------------- fail to set
+
+      await treeAttributeInstance
+        .setTreeAttributesByAdmin(
+          treeId1,
+          generatedCode1,
+          generatedSymbol1,
+          generationType1,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeAttributeErrorMsg.SYMBOL_IS_TAKEN);
+    });
+
+    ////////////////////////////
+
+    it("should getFunderRank work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree2.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank1(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank2(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank3(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+    });
+  });
+
+  describe("createTreeSymbol", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
         [arInstance.address],
         {
           initializer: "initialize",
@@ -1118,317 +646,142 @@ contract("TreeAttribute", (accounts) => {
         }
       );
 
-      /////////////////////////////////////////////////////////////////////////////////
-
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
         from: deployerAccount,
+        unsafeAllowCustomTypes: true,
       });
 
-      await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
-        from: deployerAccount,
-      });
-
-      await iSaleInstance.setWethTokenAddress(wethInstance.address, {
-        from: deployerAccount,
-      });
-
-      ////////////////////////// set weth funds address
-
-      await wethFundInstance.setPlanterFundContractAddress(
-        planterFundsInstnce.address,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await wethFundInstance.setUniswapRouterAddress(
-        uniswapV2Router02NewAddress,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await wethFundInstance.setWethTokenAddress(WETHAddress, {
-        from: deployerAccount,
-      });
-
-      await wethFundInstance.setDaiAddress(DAIAddress, {
-        from: deployerAccount,
-      });
-
-      ///add something
       await treeAttributeInstance.setTreeTokenAddress(
         treeTokenInstance.address,
-        {
-          from: deployerAccount,
-        }
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
       );
     });
 
-    /*
-
-    ////----------------------------------------------createTreeAttributes
-    it("1-Should createTreeAttributes work successfully", async () => {
-      //----------------------------config tree factory-------------------------
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
-      ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
-        from: deployerAccount,
-      });
-
-      let randTree1 = web3.utils.soliditySha3(10000, 0, "", 0, zeroAddress, "");
+    it("should addTreejerContractRole successfully", async () => {
+      const treeId1 = 101;
+      const treeId2 = 102;
+      const treeId3 = 103;
+      const treejerContract = userAccount1;
 
       await Common.addTreejerContractRole(
         arInstance,
-        userAccount6,
+        treejerContract,
         deployerAccount
       );
 
-      await treeAttributeInstance.createTreeAttributes(
-        102,
-        randTree,
-        userAccount2,
-        {
-          from: userAccount6,
-        }
+      // planterDai, referralDai, treePrice, _daiAmount;
+      const randTree1 = web3.utils.soliditySha3(
+        web3.utils.toWei("2"),
+        web3.utils.toWei("2"),
+        web3.utils.toWei("7"),
+        web3.utils.toWei("5")
       );
-
-      ////----------------------------test tree 150 (with rank==1) owner==> userAccounts4----------------------
-      await treeAttributeInstance.setBuyerRank(
-        userAccount4,
-        web3.utils.toWei(".004"),
-        web3.utils.toWei("3"),
-        1,
-        5,
-        {
-          from: buyerRank,
-        }
-      );
-
-      await treeFactoryInstance.mintAssignedTree(150, userAccount4, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        150,
-        randTree,
-        userAccount4,
-        {
-          from: userAccount6,
-        }
-      );
-
-      ////----------------------------test tree 170 (with rank==2) owner==> userAccounts5----------------------
-      await treeAttributeInstance.setBuyerRank(
-        userAccount5,
-        web3.utils.toWei(".016"),
-        web3.utils.toWei("4"),
-        1,
-        3,
-        {
-          from: buyerRank,
-        }
-      );
-      await treeFactoryInstance.mintAssignedTree(170, userAccount5, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        170,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      ////----------------------------test tree 999 (with rank==3) owner==> userAccounts5----------------------
-      await treeAttributeInstance.setBuyerRank(
-        userAccount5,
-        web3.utils.toWei("0"),
-        web3.utils.toWei("5.5"),
-        11,
-        80,
-        {
-          from: buyerRank,
-        }
-      );
-      await treeFactoryInstance.mintAssignedTree(999, userAccount5, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        999,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      //----------------------------test tree 1531 (with rank==4) owner==> userAccounts5----------------------
-      await treeAttributeInstance.setBuyerRank(
-        userAccount5,
-        web3.utils.toWei("0"),
-        web3.utils.toWei("5.5"),
-        11,
-        80,
-        {
-          from: buyerRank,
-        }
-      );
-      await treeFactoryInstance.mintAssignedTree(1531, userAccount5, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        1531,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      //----------------------------test tree 2 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.mintAssignedTree(2, userAccount5, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        2,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-
-      //----------------------------test tree 51 (with rank==2) owner==> userAccounts5----------------------
-      await treeAttributeInstance.setBuyerRank(
-        userAccount5,
-        web3.utils.toWei(".016"),
-        web3.utils.toWei("4"),
-        1,
-        3,
-        {
-          from: buyerRank,
-        }
-      );
-
-      await treeFactoryInstance.mintAssignedTree(51, userAccount5, 1, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.createTreeAttributes(
-        51,
-        randTree,
-        userAccount5,
-        {
-          from: userAccount6,
-        }
-      );
-    });
-
-    it("Should createTreeAttributes reject because treeAttributes exist", async () => {
-      ////----------------------------config tree factory-------------------------
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
-
-      ////---------------------------createTreeAttributes----------------------
-      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
-        from: deployerAccount,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        userAccount6,
-        deployerAccount
-      );
-
-      await treeAttributeInstance.createTreeAttributes(
-        102,
-        randTree,
-        userAccount2,
-        {
-          from: userAccount6,
-        }
-      );
+      const generationType = 18;
 
       await treeAttributeInstance
-        .createTreeAttributes(102, randTree, userAccount3, {
+        .createTreeSymbol(treeId1, randTree1, userAccount2, 0, generationType, {
           from: userAccount7,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      let eventTx = await treeAttributeInstance.createTreeAttributes(
-        102,
-        randTree,
-        userAccount3,
+      const eventTx1 = await treeAttributeInstance.createTreeSymbol(
+        treeId1,
+        randTree1,
+        userAccount2,
+        0,
+        generationType,
         {
-          from: userAccount6,
+          from: treejerContract,
         }
       );
 
-      truffleAssert.eventNotEmitted(eventTx, "TreeAttributesGenerated");
-      truffleAssert.eventNotEmitted(eventTx, "TreeAttributesNotGenerated");
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
 
-      let result = await treeAttributeInstance.createTreeAttributes.call(
-        102,
-        randTree,
-        userAccount3,
+      const eventTx2 = await treeAttributeInstance.createTreeSymbol(
+        treeId2,
+        randTree1,
+        userAccount2,
+        1,
+        generationType,
         {
-          from: userAccount6,
+          from: treejerContract,
         }
       );
 
-      assert.equal(result, true, "result is not correct");
+      truffleAssert.eventEmitted(eventTx2, "TreeAttributesGenerated");
+
+      const eventTx3 = await treeAttributeInstance.createTreeSymbol(
+        treeId3,
+        randTree1,
+        userAccount2,
+        2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx3, "TreeAttributesGenerated");
+
+      const result = await treeAttributeInstance.createTreeSymbol.call(
+        treeId1,
+        randTree1,
+        userAccount2,
+        0,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      assert.equal(result, true, "result is incorrect");
     });
 
-    it("test TestTreeAttributes contract", async () => {
-      //----------------------------config tree factory-------------------------
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
+    it("should createTreeAttributes work successfully", async () => {
+      await treeAttributeInstance
+        .createTreeAttributes(10001, { from: userAccount6 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
       await Common.addTreejerContractRole(
         arInstance,
         deployerAccount,
         deployerAccount
       );
+
       await Common.addTreejerContractRole(
         arInstance,
-        treeFactoryInstance.address,
+        treeAttributeInstance.address,
         deployerAccount
       );
 
-      ////------------------ deploy testTreeAttributes ------------------------------
+      let eventTx1 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
 
-      testInstance = await TestTreeAttributes.new({
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
+
+      await treeTokenInstance.treeAttributes(10001);
+
+      let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
+    });
+
+    it("should testTree work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
         from: deployerAccount,
       });
 
@@ -1436,42 +789,1332 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
         from: deployerAccount,
       });
 
       await Common.addTreejerContractRole(
         arInstance,
-        userAccount6,
+        deployerAccount,
         deployerAccount
       );
 
-      await testInstance.createTreeAttributes(102, randTree, userAccount2, {
-        from: userAccount6,
-      });
-
-      let treeAttribute = await testInstance.treeAttributes(102);
-
-      await testInstance.test(102, {
-        from: userAccount2,
-      });
-
-      await testInstance.createTreeAttributes(102, randTree, userAccount2, {
-        from: userAccount6,
-      });
-
-      let generatedAttribute = await testInstance.generatedAttributes(
-        treeAttribute.universalCode
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
       );
 
-      assert.equal(Number(generatedAttribute), 2);
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
     });
 
-    ssss
+    it("create tree symbol using test tree", async () => {
+      ////------------------ deploy testTree ------------------------------
 
-    */
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
 
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+      ///////////////////////////// ----------------------------
+
+      const randTree = web3.utils.soliditySha3(
+        10000,
+        0,
+        "",
+        0,
+        zeroAddress,
+        ""
+      );
+      const funderRank = 3;
+      const generationType = 17;
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
+    });
+  });
+
+  /** 
+  describe("without financial section", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+
+    
+    it("should _calcRandSymbol work successfully", async () => {
+      ///////////// ------------------- check 1
+
+      const treeId = 100;
+      const rand = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
+      const generationType1 = 18;
+
+      await treeAttributeInstance._calcRandSymbol(
+        treeId,
+        rand,
+        generationType1
+      );
+
+      const attribute1Data = await treeTokenInstance.treeAttributes.call(
+        treeId
+      );
+
+      let expectedAttributeValue = {
+        attribute1: 0,
+        attribute2: 188,
+        attribute3: 228,
+        attribute4: 34,
+        attribute5: 255,
+        attribute6: 255,
+        attribute7: 255,
+        attribute8: 255,
+        generationType: 18,
+      };
+
+      assert.equal(
+        attribute1Data.attribute1,
+        expectedAttributeValue.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute2,
+        expectedAttributeValue.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute3,
+        expectedAttributeValue.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute4,
+        expectedAttributeValue.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute5,
+        expectedAttributeValue.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute6,
+        expectedAttributeValue.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute7,
+        expectedAttributeValue.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute1Data.attribute8,
+        expectedAttributeValue.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute1Data.generationType,
+        expectedAttributeValue.generationType,
+        "generation type is invlid"
+      );
+
+      const expectedSymbolValue = {
+        treeShape: 80,
+        trunkColor: 7,
+        crownColor: 1,
+        effects: 15,
+        coefficient: 7,
+        generationType: 18,
+      };
+
+      const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId);
+
+      assert.equal(
+        symbol1Data.treeShape,
+        expectedSymbolValue.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.trunkColor,
+        expectedSymbolValue.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol1Data.crownColor,
+        expectedSymbolValue.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol1Data.effects,
+        expectedSymbolValue.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol1Data.coefficient,
+        expectedSymbolValue.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol1Data.generationType,
+        expectedSymbolValue.generationType,
+        "generationType is incorrect"
+      );
+
+      let rand2 = 233875876; //00000001,00000000,00000000,00000000,00001101,11110000,10101001,10100100
+      const treeId2 = 101;
+
+      await treeAttributeInstance._calcRandSymbol(
+        treeId2,
+        rand2,
+        generationType1
+      );
+
+      let uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+        1054484
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1.generatedCount),
+        1,
+        "generated count is incorrect"
+      );
+
+      //164
+      //169
+      //240
+      //13
+      //0
+      //0
+      //0
+      //0
+
+      const attribute2Data = await treeTokenInstance.treeAttributes.call(
+        treeId2
+      );
+
+      let expectedAttributeValue2 = {
+        attribute1: 164,
+        attribute2: 169,
+        attribute3: 240,
+        attribute4: 13,
+        attribute5: 0,
+        attribute6: 0,
+        attribute7: 0,
+        attribute8: 0,
+        generationType: 18,
+      };
+
+      // console.log("1", attribute2Data.attribute1.toString());
+      // console.log("2", attribute2Data.attribute2.toString());
+      // console.log("3", attribute2Data.attribute3.toString());
+      // console.log("4", attribute2Data.attribute4.toString());
+      // console.log("5", attribute2Data.attribute5.toString());
+      // console.log("6", attribute2Data.attribute6.toString());
+      // console.log("7", attribute2Data.attribute7.toString());
+      // console.log("8", attribute2Data.attribute8.toString());
+
+      assert.equal(
+        attribute2Data.attribute1,
+        expectedAttributeValue2.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute2,
+        expectedAttributeValue2.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute3,
+        expectedAttributeValue2.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute4,
+        expectedAttributeValue2.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute5,
+        expectedAttributeValue2.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute6,
+        expectedAttributeValue2.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute7,
+        expectedAttributeValue2.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute2Data.attribute8,
+        expectedAttributeValue2.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute2Data.generationType,
+        expectedAttributeValue2.generationType,
+        "generation type is invlid"
+      );
+
+      const expectedSymbolValue2 = {
+        treeShape: 20,
+        trunkColor: 23,
+        crownColor: 16,
+        effects: 0,
+        coefficient: 0,
+        generationType: 18,
+      };
+
+      const symbol2Data = await treeTokenInstance.treeSymbols.call(treeId2);
+
+      // console.log("1", symbol2Data.treeShape.toString());
+      // console.log("2", symbol2Data.trunkColor.toString());
+      // console.log("3", symbol2Data.crownColor.toString());
+      // console.log("4", symbol2Data.effects.toString());
+      // console.log("5", symbol2Data.coefficient.toString());
+      // console.log("6", symbol2Data.generationType.toString());
+      //treeShape 010011010,0100
+      assert.equal(
+        symbol2Data.treeShape,
+        expectedSymbolValue2.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol2Data.trunkColor,
+        expectedSymbolValue2.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol2Data.crownColor,
+        expectedSymbolValue2.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol2Data.effects,
+        expectedSymbolValue2.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol2Data.coefficient,
+        expectedSymbolValue2.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol2Data.generationType,
+        expectedSymbolValue2.generationType,
+        "generationType is incorrect"
+      );
+      //////////////////////////////////////////////////////////////////////////////
+
+      let rand3 = web3.utils.toBN("5764607523034234879"); //01001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
+      const treeId3 = 102;
+
+      await treeAttributeInstance._calcRandSymbol(
+        treeId3,
+        rand3,
+        generationType1
+      );
+
+      //164
+      //169
+      //240
+      //13
+      //0
+      //0
+      //0
+      //0
+
+      const attribute3Data = await treeTokenInstance.treeAttributes.call(
+        treeId3
+      );
+
+      let expectedAttributeValue3 = {
+        attribute1: 255,
+        attribute2: 255,
+        attribute3: 255,
+        attribute4: 255,
+        attribute5: 255,
+        attribute6: 255,
+        attribute7: 255,
+        attribute8: 79,
+        generationType: 18,
+      };
+
+      // console.log("1", attribute3Data.attribute1.toString());
+      // console.log("2", attribute3Data.attribute2.toString());
+      // console.log("3", attribute3Data.attribute3.toString());
+      // console.log("4", attribute3Data.attribute4.toString());
+      // console.log("5", attribute3Data.attribute5.toString());
+      // console.log("6", attribute3Data.attribute6.toString());
+      // console.log("7", attribute3Data.attribute7.toString());
+      // console.log("8", attribute3Data.attribute8.toString());
+
+      assert.equal(
+        attribute3Data.attribute1,
+        expectedAttributeValue3.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute2,
+        expectedAttributeValue3.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute3,
+        expectedAttributeValue3.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute4,
+        expectedAttributeValue3.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute5,
+        expectedAttributeValue3.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute6,
+        expectedAttributeValue3.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute7,
+        expectedAttributeValue3.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute3Data.attribute8,
+        expectedAttributeValue3.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute3Data.generationType,
+        expectedAttributeValue3.generationType,
+        "generation type is invlid"
+      );
+
+      const expectedSymbolValue3 = {
+        treeShape: 128,
+        trunkColor: 6,
+        crownColor: 5,
+        effects: 15,
+        coefficient: 7,
+        generationType: 18,
+      };
+
+      const symbol3Data = await treeTokenInstance.treeSymbols.call(treeId3);
+
+      // console.log("1", symbol3Data.treeShape.toString());
+      // console.log("2", symbol3Data.trunkColor.toString());
+      // console.log("3", symbol3Data.crownColor.toString());
+      // console.log("4", symbol3Data.effects.toString());
+      // console.log("5", symbol3Data.coefficient.toString());
+      // console.log("6", symbol3Data.generationType.toString());
+      //treeShape 010011010,0100
+
+      assert.equal(
+        symbol3Data.treeShape,
+        expectedSymbolValue3.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol3Data.trunkColor,
+        expectedSymbolValue3.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol3Data.crownColor,
+        expectedSymbolValue3.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol3Data.effects,
+        expectedSymbolValue3.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol3Data.coefficient,
+        expectedSymbolValue3.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol3Data.generationType,
+        expectedSymbolValue3.generationType,
+        "generationType is incorrect"
+      );
+
+      //////////////////////////////////////////////////////////////////////////////////////
+      let rand4 = web3.utils.toBN("1152921504556253183"); //00001111,11111111,11111111,11111111,11111100,11111011,11111111,11111111
+      const treeId4 = 103;
+
+      await treeAttributeInstance._calcRandSymbol(
+        treeId4,
+        rand4,
+        generationType1
+      );
+
+      //164
+      //169
+      //240
+      //13
+      //0
+      //0
+      //0
+      //0
+
+      const attribute4Data = await treeTokenInstance.treeAttributes.call(
+        treeId4
+      );
+
+      let expectedAttributeValue4 = {
+        attribute1: 255,
+        attribute2: 255,
+        attribute3: 251,
+        attribute4: 252,
+        attribute5: 255,
+        attribute6: 255,
+        attribute7: 255,
+        attribute8: 15,
+        generationType: 18,
+      };
+
+      // console.log("1", attribute3Data.attribute1.toString());
+      // console.log("2", attribute3Data.attribute2.toString());
+      // console.log("3", attribute3Data.attribute3.toString());
+      // console.log("4", attribute3Data.attribute4.toString());
+      // console.log("5", attribute3Data.attribute5.toString());
+      // console.log("6", attribute3Data.attribute6.toString());
+      // console.log("7", attribute3Data.attribute7.toString());
+      // console.log("8", attribute3Data.attribute8.toString());
+
+      assert.equal(
+        attribute4Data.attribute1,
+        expectedAttributeValue4.attribute1,
+        "attribute1 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute2,
+        expectedAttributeValue4.attribute2,
+        "attribute2 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute3,
+        expectedAttributeValue4.attribute3,
+        "attribute3 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute4,
+        expectedAttributeValue4.attribute4,
+        "attribute4 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute5,
+        expectedAttributeValue4.attribute5,
+        "attribute5 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute6,
+        expectedAttributeValue4.attribute6,
+        "attribute6 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute7,
+        expectedAttributeValue4.attribute7,
+        "attribute7 is incorrect"
+      );
+      assert.equal(
+        attribute4Data.attribute8,
+        expectedAttributeValue4.attribute8,
+        "attribute8 is incorrect"
+      );
+
+      assert.equal(
+        attribute3Data.generationType,
+        expectedAttributeValue3.generationType,
+        "generation type is invlid"
+      );
+
+      const expectedSymbolValue4 = {
+        treeShape: 129,
+        trunkColor: 12,
+        crownColor: 10,
+        effects: 15,
+        coefficient: 7,
+        generationType: 18,
+      };
+
+      const symbol4Data = await treeTokenInstance.treeSymbols.call(treeId4);
+
+      // console.log("1", symbol4Data.treeShape.toString());
+      // console.log("2", symbol4Data.trunkColor.toString());
+      // console.log("3", symbol4Data.crownColor.toString());
+      // console.log("4", symbol3Data.effects.toString());
+      // console.log("5", symbol3Data.coefficient.toString());
+      // console.log("6", symbol3Data.generationType.toString());
+      //treeShape 010011010,0100
+
+      assert.equal(
+        symbol4Data.treeShape,
+        expectedSymbolValue4.treeShape,
+        "treeShape is incorrect"
+      );
+
+      assert.equal(
+        symbol4Data.trunkColor,
+        expectedSymbolValue4.trunkColor,
+        "trunkColor is incorrect"
+      );
+
+      assert.equal(
+        symbol4Data.crownColor,
+        expectedSymbolValue4.crownColor,
+        "crownColor is incorrect"
+      );
+      assert.equal(
+        symbol3Data.effects,
+        expectedSymbolValue3.effects,
+        "effects is incorrect"
+      );
+      assert.equal(
+        symbol3Data.coefficient,
+        expectedSymbolValue3.coefficient,
+        "coefficient is incorrect"
+      );
+      assert.equal(
+        symbol3Data.generationType,
+        expectedSymbolValue3.generationType,
+        "generationType is incorrect"
+      );
+
+      ////////////////// -------------------- should return false
+      let rand5 = web3.utils.toBN("72057594271803812"); //00001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
+      const treeId5 = 104;
+
+      await treeAttributeInstance._calcRandSymbol(
+        treeId5,
+        rand5,
+        generationType1
+      );
+
+      let uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
+        1054484
+      );
+
+      assert.equal(
+        Number(uniqueSymbol2.generatedCount),
+        2,
+        "generatedCount is incorrect"
+      );
+    });
+
+    
+    ////--------------------------test calc treeShape (private function) -------------------------
+
+    it("Check calc treeShape", async () => {
+      ///-------------------------- test special treeShape --------------------------
+      // 111111111 111 == 2 ** 13 -1
+      let result1 = await treeAttributeInstance._calcTreeShape.call(
+        2 ** 13 - 1,
+        0,
+        {
+          from: userAccount3,
+        }
+      );
+
+      assert.equal(Number(result1), 128, "result1 not true");
+
+      for (let i = 1; i < 17; i++) {
+        await treeAttributeInstance._calcTreeShape(2 ** 13 - 1, 0, {
+          from: userAccount3,
+        });
+        assert.equal(Number(await treeAttributeInstance.specialCount()), i);
+      }
+
+      let result6 = await treeAttributeInstance._calcTreeShape.call(
+        2 ** 13 - 15,
+        0,
+        {
+          from: userAccount3,
+        }
+      );
+
+      assert.equal(Number(result6), 113, "result6 not true");
+
+      await treeAttributeInstance._calcTreeShape(2 ** 13 - 3, 0, {
+        from: userAccount3,
+      });
+      assert.equal(Number(await treeAttributeInstance.specialCount()), 16);
+
+      ///-------------------------- test treeShape --------------------------
+
+      ////----test2
+
+      // 1101110 0000 == 1760
+      let result2 = await treeAttributeInstance._calcTreeShape.call(1760, 1, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2), 16, "result2 not true");
+
+      ////----test3
+
+      // 1101101 1111 == 1759
+      let result3 = await treeAttributeInstance._calcTreeShape.call(1759, 1, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3), 15, "result3 not true");
+
+      ////----test4
+
+      // 111000001 1000 == 7192
+      let result4 = await treeAttributeInstance._calcTreeShape.call(7192, 2, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result4), 88, "result4 not true");
+
+      ////----test5
+
+      // 101010100 1010 == 5450
+      let result5 = await treeAttributeInstance._calcTreeShape.call(5450, 3, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result5), 74, "result5 not true");
+    });
+
+    ////--------------------------test calc colors (private function) -------------------------
+
+    it("Check calc colors", async () => {
+      ///-------------------------- test calcColors --------------------------
+
+      ////----test1
+      // a == 111 11111 255
+      // b == 111 11111 255
+      let result1 = await treeAttributeInstance._calcColors.call(255, 255, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1[0]), 63, "result1 trunkColor not true");
+      assert.equal(Number(result1[1]), 63, "result1 crownColor not true");
+
+      ////----test2
+      // a == 000 00000 0
+      // b == 000 00000 0
+      let result2 = await treeAttributeInstance._calcColors.call(0, 0, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2[0]), 0, "result2 trunkColor not true");
+      assert.equal(Number(result2[1]), 0, "result2 crownColor not true");
+
+      ////----test3
+      // a == 101 00000 160
+      // b == 011 00000 96
+      let result3 = await treeAttributeInstance._calcColors.call(160, 96, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3[0]), 5, "result3 trunkColor not true");
+      assert.equal(Number(result3[1]), 3, "result3 crownColor not true");
+
+      ////----test4
+      // a == 101 10100 20
+      // b == 101 10101 21
+      let result4 = await treeAttributeInstance._calcColors.call(180, 181, 3, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result4[0]), 45, "result4 trunkColor not true");
+      assert.equal(Number(result4[1]), 45, "result4 crownColor not true");
+
+      ////----test5
+      // a == 001 00110 38
+      // b == 000 01011 11
+      let result5 = await treeAttributeInstance._calcColors.call(38, 11, 2, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result5[0]), 9, "result5 trunkColor not true");
+      assert.equal(Number(result5[1]), 16, "result5 crownColor not true");
+    });
+
+    ////--------------------------test _setColors (private function) -------------------------
+
+    it("Check _setColors", async () => {
+      ///-------------------------- test _setColors --------------------------
+
+      let result1 = await treeAttributeInstance._setColors.call(128, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1[0]), 6, "result1 trunkColor not true");
+      assert.equal(Number(result1[1]), 5, "result1 trunkColor not true");
+
+      let result2 = await treeAttributeInstance._setColors.call(143, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2[0]), 32, "result2 trunkColor not true");
+      assert.equal(Number(result2[1]), 32, "result2 trunkColor not true");
+
+      let result3 = await treeAttributeInstance._setColors.call(130, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3[0]), 18, "result3 trunkColor not true");
+      assert.equal(Number(result3[1]), 15, "result3 trunkColor not true");
+    });
+
+    ////--------------------------test _calcEffects (private function) -------------------------
+
+    it("Check _calcEffects", async () => {
+      ///-------------------------- test _calcEffects --------------------------
+
+      let result1 = await treeAttributeInstance._calcEffects.call(255, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1), 15, "calcEffects not true");
+
+      let result2 = await treeAttributeInstance._calcEffects.call(50, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2), 0, "calcEffects not true");
+
+      let result3 = await treeAttributeInstance._calcEffects.call(50, 1, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3), 1, "calcEffects not true");
+
+      let result4 = await treeAttributeInstance._calcEffects.call(241, 2, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result4), 12, "calcEffects not true");
+    });
+
+    ////--------------------------test _calcCoefficient (private function) -------------------------
+
+    it("Check _calcCoefficient", async () => {
+      ///-------------------------- test _calcCoefficient --------------------------
+
+      let result1 = await treeAttributeInstance._calcCoefficient.call(190, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1), 0, "_calcCoefficient not true");
+
+      let result2 = await treeAttributeInstance._calcCoefficient.call(190, 1, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2), 1, "_calcCoefficient not true");
+
+      let result3 = await treeAttributeInstance._calcCoefficient.call(254, 2, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3), 7, "_calcCoefficient not true");
+
+      let result4 = await treeAttributeInstance._calcCoefficient.call(241, 3, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result4), 5, "_calcCoefficient not true");
+    });
+  });
+  */
+
+  /*
+  describe("createTreeSymbol", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+    // it("should addTreejerContractRole successfully", async () => {
+    //   const treeId1 = 101;
+    //   const treeId2 = 102;
+    //   const treejerContract = userAccount1;
+
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treejerContract,
+    //     deployerAccount
+    //   );
+
+    //   // planterDai, referralDai, treePrice, _daiAmount;
+    //   const randTree1 = web3.utils.soliditySha3(
+    //     web3.utils.toWei("2"),
+    //     web3.utils.toWei("1"),
+    //     web3.utils.toWei("7"),
+    //     web3.utils.toWei("9")
+    //   );
+    //   const generationType = 18;
+
+    //   await treeAttributeInstance
+    //     .createTreeSymbol(treeId1, randTree1, userAccount2,0, generationType, {
+    //       from: userAccount7,
+    //     })
+    //     .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+    //   await treeAttributeInstance.createTreeSymbol(
+    //     treeId1,
+    //     randTree1,
+    //     userAccount2,
+    //     0
+    //     generationType,
+    //     {
+    //       from: treejerContract,
+    //     }
+    //   );
+
+    //   let generatedAttributes1 =
+    //     await treeAttributeInstance.generatedAttributes.call(
+    //       web3.utils.toBN("15485305705186275445")
+    //     );
+
+    //   assert.equal(
+    //     generatedAttributes1,
+    //     1,
+    //     "generatedAttributes is not correct"
+    //   );
+
+    //   const uniqueSymbol1 = await treeAttributeInstance.uniqueSymbol.call(
+    //     33824549
+    //   );
+    //   assert.equal(
+    //     Number(uniqueSymbol1.status),
+    //     2,
+    //     "symbol status is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     Number(uniqueSymbol1.generatedCount),
+    //     1,
+    //     "symbol generatedCount is incorrect"
+    //   );
+
+    //   const attribute1Data = await treeTokenInstance.treeAttributes.call(
+    //     treeId1
+    //   );
+
+    //   //11010110,11100110,11011011,01111110,10000011,11110101,00110000,01110101
+
+    //   let expectedAttributeValue1 = {
+    //     attribute1: 117,
+    //     attribute2: 48,
+    //     attribute3: 245,
+    //     attribute4: 131,
+    //     attribute5: 126,
+    //     attribute6: 219,
+    //     attribute7: 230,
+    //     attribute8: 214,
+    //     generationType: 18,
+    //   };
+
+    //   console.log("1", attribute1Data.attribute1.toString());
+    //   console.log("2", attribute1Data.attribute2.toString());
+    //   console.log("3", attribute1Data.attribute3.toString());
+    //   console.log("4", attribute1Data.attribute4.toString());
+    //   console.log("5", attribute1Data.attribute5.toString());
+    //   console.log("6", attribute1Data.attribute6.toString());
+    //   console.log("7", attribute1Data.attribute7.toString());
+    //   console.log("8", attribute1Data.attribute8.toString());
+
+    //   assert.equal(
+    //     attribute1Data.attribute1,
+    //     expectedAttributeValue1.attribute1,
+    //     "attribute1 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute2,
+    //     expectedAttributeValue1.attribute2,
+    //     "attribute2 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute3,
+    //     expectedAttributeValue1.attribute3,
+    //     "attribute3 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute4,
+    //     expectedAttributeValue1.attribute4,
+    //     "attribute4 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute5,
+    //     expectedAttributeValue1.attribute5,
+    //     "attribute5 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute6,
+    //     expectedAttributeValue1.attribute6,
+    //     "attribute6 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute7,
+    //     expectedAttributeValue1.attribute7,
+    //     "attribute7 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute1Data.attribute8,
+    //     expectedAttributeValue1.attribute8,
+    //     "attribute8 is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     attribute1Data.generationType,
+    //     expectedAttributeValue1.generationType,
+    //     "generation type is invlid"
+    //   );
+    //   // 0101; // 5
+    //   // 100000111; //263
+
+    //   const expectedSymbolValue1 = {
+    //     treeShape: 37,
+    //     trunkColor: 31,
+    //     crownColor: 4,
+    //     effects: 2,
+    //     coefficient: 1,
+    //     generationType: 18,
+    //   };
+
+    //   const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
+    //   // console.log("1", symbol1Data.treeShape.toString());
+    //   // console.log("2", symbol1Data.trunkColor.toString());
+    //   // console.log("3", symbol1Data.crownColor.toString());
+    //   // console.log("4", symbol1Data.effects.toString());
+    //   // console.log("5", symbol1Data.coefficient.toString());
+    //   // console.log("6", symbol1Data.generationType.toString());
+
+    //   assert.equal(
+    //     symbol1Data.treeShape,
+    //     expectedSymbolValue1.treeShape,
+    //     "treeShape is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol1Data.trunkColor,
+    //     expectedSymbolValue1.trunkColor,
+    //     "trunkColor is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol1Data.crownColor,
+    //     expectedSymbolValue1.crownColor,
+    //     "crownColor is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.effects,
+    //     expectedSymbolValue1.effects,
+    //     "effects is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.coefficient,
+    //     expectedSymbolValue1.coefficient,
+    //     "coefficient is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol1Data.generationType,
+    //     expectedSymbolValue1.generationType,
+    //     "generationType is incorrect"
+    //   );
+
+    //   let yy = await treeAttributeInstance.createTreeSymbol(
+    //     treeId2,
+    //     randTree1,
+    //     userAccount2,
+    //     0,
+    //     generationType,
+    //     {
+    //       from: treejerContract,
+    //     }
+    //   );
+
+    //   const attribute2Data = await treeTokenInstance.treeAttributes.call(
+    //     treeId2
+    //   );
+    //   console.log("1", attribute2Data.attribute1.toString());
+    //   console.log("2", attribute2Data.attribute2.toString());
+    //   console.log("3", attribute2Data.attribute3.toString());
+    //   console.log("4", attribute2Data.attribute4.toString());
+    //   console.log("5", attribute2Data.attribute5.toString());
+    //   console.log("6", attribute2Data.attribute6.toString());
+    //   console.log("7", attribute2Data.attribute7.toString());
+    //   console.log("8", attribute2Data.attribute8.toString());
+
+    //   // binary 00111110,00000100,11110010,01001000,00000010,11011010,11110101,01010110
+
+    //   let expectedAttributeValue2 = {
+    //     attribute1: 86,
+    //     attribute2: 245,
+    //     attribute3: 218,
+    //     attribute4: 2,
+    //     attribute5: 72,
+    //     attribute6: 242,
+    //     attribute7: 4,
+    //     attribute8: 62,
+    //     generationType: 18,
+    //   };
+
+    //   assert.equal(
+    //     attribute2Data.attribute1,
+    //     expectedAttributeValue2.attribute1,
+    //     "attribute1 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute2,
+    //     expectedAttributeValue2.attribute2,
+    //     "attribute2 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute3,
+    //     expectedAttributeValue2.attribute3,
+    //     "attribute3 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute4,
+    //     expectedAttributeValue2.attribute4,
+    //     "attribute4 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute5,
+    //     expectedAttributeValue2.attribute5,
+    //     "attribute5 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute6,
+    //     expectedAttributeValue2.attribute6,
+    //     "attribute6 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute7,
+    //     expectedAttributeValue2.attribute7,
+    //     "attribute7 is incorrect"
+    //   );
+    //   assert.equal(
+    //     attribute2Data.attribute8,
+    //     expectedAttributeValue2.attribute8,
+    //     "attribute8 is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     attribute2Data.generationType,
+    //     expectedAttributeValue2.generationType,
+    //     "generation type is invlid"
+    //   );
+    //   // 0101; // 5
+    //   // 100000111; //263
+
+    //   const expectedSymbolValue2 = {
+    //     treeShape: 54,
+    //     trunkColor: 46,
+    //     crownColor: 0,
+    //     effects: 1,
+    //     coefficient: 3,
+    //     generationType: 18,
+    //   };
+
+    //   const symbol2Data = await treeTokenInstance.treeSymbols.call(treeId2);
+    //   console.log("1", symbol2Data.treeShape.toString());
+    //   console.log("2", symbol2Data.trunkColor.toString());
+    //   console.log("3", symbol2Data.crownColor.toString());
+    //   console.log("4", symbol2Data.effects.toString());
+    //   console.log("5", symbol2Data.coefficient.toString());
+    //   console.log("6", symbol2Data.generationType.toString());
+
+    //   assert.equal(
+    //     symbol2Data.treeShape,
+    //     expectedSymbolValue2.treeShape,
+    //     "treeShape is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol2Data.trunkColor,
+    //     expectedSymbolValue2.trunkColor,
+    //     "trunkColor is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     symbol2Data.crownColor,
+    //     expectedSymbolValue2.crownColor,
+    //     "crownColor is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.effects,
+    //     expectedSymbolValue2.effects,
+    //     "effects is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.coefficient,
+    //     expectedSymbolValue2.coefficient,
+    //     "coefficient is incorrect"
+    //   );
+    //   assert.equal(
+    //     symbol2Data.generationType,
+    //     expectedSymbolValue2.generationType,
+    //     "generationType is incorrect"
+    //   );
+
+    //   let generatedAttributes2 =
+    //     await treeAttributeInstance.generatedAttributes.call(
+    //       web3.utils.toBN("4468963121357845846")
+    //     );
+
+    //   assert.equal(
+    //     generatedAttributes2,
+    //     1,
+    //     "generatedAttributes is not correct"
+    //   );
+
+    //   const uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
+    //     16789046
+    //   );
+    //   assert.equal(
+    //     Number(uniqueSymbol2.status),
+    //     2,
+    //     "symbol status is incorrect"
+    //   );
+
+    //   assert.equal(
+    //     Number(uniqueSymbol2.generatedCount),
+    //     1,
+    //     "symbol generatedCount is incorrect"
+    //   );
+
+    //   console.log("attr2", generatedAttributes2.toString());
+
+    //   // const result = await treeAttributeInstance.createTreeSymbol.call(
+    //   //   treeId1,
+    //   //   randTree1,
+    //   //   userAccount2,
+    //   //   0,
+    //   //   generationType,
+    //   //   {
+    //   //     from: treejerContract,
+    //   //   }
+    //   // );
+
+    //   // assert.equal(result, true, "result is incorrect");
+    // });
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
     it("test generated attributes when call createTreeAttributes", async () => {
       ///---------------test1
       await Common.addTreejerContractRole(
@@ -1719,725 +2362,8 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
-    it("should createTreeAttributes work successfully", async () => {
-      await treeAttributeInstance
-        .createTreeAttributes(10001, { from: userAccount6 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeAttributeInstance.address,
-        deployerAccount
-      );
-
-      let eventTx1 = await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
-      truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
-
-      await treeTokenInstance.treeAttributes(10001);
-
-      let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
-    });
-
-    it("should testTree work successfully", async () => {
-      ////------------------ deploy testTree ------------------------------
-
-      testInstance = await TestTree.new({
-        from: deployerAccount,
-      });
-
-      await testInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
-        from: deployerAccount,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeAttributeInstance.address,
-        deployerAccount
-      );
-
-      await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      await testInstance.test(10001);
-
-      await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-    });
+    
   });
-
-  // it("Should createTreeAttributes work successfully", async () => {
-  ///------------------------------expected for tree with id 102
-  // let rand102 = 22318166; // 10101 010 0100 0110 001 010110
-  // let generatedCode102 = 298070; //10 10010110000111110100
-  // let expectedAttribute102 = {
-  //   treeType: 22, //011100
-  //   groundType: 1, //101
-  //   trunkColor: 6, //0010
-  //   crownColor: 4, //1001
-  //   groundColor: 2, //011
-  //   specialEffects: 21,
-  //   specialEffectsFinal: 0,
-  //   universalCode: 298070, //10 10010110000111110100
-  // };
-  // /////------------------------------expected for tree with id 150
-  // let rand150 = 233875876; //11011111 000 0101 0100 110 100100
-
-  // let x = 10; //11111010 110 0110 0001 000 000010
-  // let generatedCode150 = 14467586; //1000 00001010100110100100
-  // let expectedAttribute150 = {
-  //   treeType: 2, //100100
-  //   groundType: 0, //110
-  //   trunkColor: 1, //0100
-  //   crownColor: 6, //0101
-  //   groundColor: 6, //000
-  //   specialEffects: 250,
-  //   specialEffectsFinal: 13,
-  //   universalCode: 14467586, //1000 00001010100110100100
-  // };
-  // /////------------------------------expected for tree with id 170
-  // let rand170 = 76879606; //1001001 010 1000 1011 011 110110
-  // let generatedCode170 = 1382134; //1 01010001011011110110
-  // let expectedAttribute170 = {
-  //   treeType: 54, //110110
-  //   groundType: 3, //011
-  //   trunkColor: 11, //1011
-  //   crownColor: 8, //1000
-  //   groundColor: 2, //010
-  //   specialEffects: 73,
-  //   specialEffectsFinal: 1,
-  //   universalCode: 1382134, //1 01010001011011110110
-  // };
-  // /////------------------------------expected for tree with id 999
-  // let rand999 = 186983906; //10110010 010 1001 0010 111 100010
-  // //    1111011 110 0001 1001 000 010000;
-  // let generatedCode999 = 3944976; //111 01010010010111100010
-  // let expectedAttribute999 = {
-  //   treeType: 16, //100010
-  //   groundType: 0, //111
-  //   trunkColor: 9, //0010
-  //   crownColor: 1, //1001
-  //   groundColor: 6, //010
-  //   specialEffects: 123, //10110010
-  //   specialEffectsFinal: 3,
-  //   universalCode: 3944976, //111 01010010010111100010
-  // };
-  // /////------------------------------expected for tree with id 1531
-  // let rand1531 = 40214938; //100110 010 1101 0000 110 011010
-  // let generatedCode1531 = 1417626; //1 01011010000110011010
-  // let expectedAttribute1531 = {
-  //   treeType: 26, //011010
-  //   groundType: 6, //110
-  //   trunkColor: 0, //0000
-  //   crownColor: 13, //1101
-  //   groundColor: 2, //010
-  //   specialEffects: 38, //100110
-  //   specialEffectsFinal: 1,
-  //   universalCode: 1417626, //1 01011010000110011010
-  // };
-  // /////------------------------------expected for tree with id 2 (example for auction)
-  // let rand2 = 181058782; //10101100 101 0101 1110 011 011110
-  // let generatedCode2 = 8043742; //111 10101011110011011110
-  // let expectedAttribute2 = {
-  //   treeType: 30, //011110
-  //   groundType: 3, //011
-  //   trunkColor: 14, //1110
-  //   crownColor: 5, //0101
-  //   groundColor: 5, //101
-  //   specialEffects: 172, //100110
-  //   specialEffectsFinal: 7,
-  //   universalCode: 8043742, //111 10101011110011011110
-  // };
-  // /////------------------------------expected for tree with id 51 (example for auction)
-  // let rand51 = 125541807; //1110111 101 1100 1110 110 101111
-  // let generatedCode51 = 6004143; //101 10111001110110101111
-  // let expectedAttribute51 = {
-  //   treeType: 47, //101111
-  //   groundType: 6, //110
-  //   trunkColor: 14, //1110
-  //   crownColor: 12, //1100
-  //   groundColor: 5, //101
-  //   specialEffects: 119, //100110
-  //   specialEffectsFinal: 3,
-  //   universalCode: 6004143, //101 10111001110110101111
-  // };
-  // //----------------------------config tree factory-------------------------
-  // await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-  //   from: deployerAccount,
-  // });
-  // await Common.addTreejerContractRole(
-  //   arInstance,
-  //   deployerAccount,
-  //   deployerAccount
-  // );
-  // await Common.addTreejerContractRole(
-  //   arInstance,
-  //   treeFactoryInstance.address,
-  //   deployerAccount
-  // );
-  // await Common.addTreejerContractRole(
-  //   arInstance,
-  //   userAccount6,
-  //   deployerAccount
-  // );
-  // // ////----------------------------test tree 102 (with rank==0) owner==> userAccounts2----------------------
-  // await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   102,
-  //   randTree,
-  //   userAccount2,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // let treeAttribute102 = await treeAttributeInstance.treeAttributes(102);
-  // let generatedAttribute102 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode102
-  // );
-  // let reservedAttribute102 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode102
-  // );
-
-  // assert.equal(generatedAttribute102, 1, "102 - generatedAttribute not true");
-  // assert.equal(reservedAttribute102, 0, "102 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute102.treeType),
-  //   expectedAttribute102.treeType,
-  //   "102 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.groundType),
-  //   expectedAttribute102.groundType,
-  //   "102 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.trunkColor),
-  //   expectedAttribute102.trunkColor,
-  //   "102 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.crownColor),
-  //   expectedAttribute102.crownColor,
-  //   "102 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.groundColor),
-  //   expectedAttribute102.groundColor,
-  //   "102 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.specialEffects),
-  //   expectedAttribute102.specialEffectsFinal,
-  //   "102 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute102.universalCode),
-  //   expectedAttribute102.universalCode,
-  //   "102 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute102.exists), 1, "102 - Exists not true");
-  // // ////----------------------------test tree 150 (with rank==1) owner==> userAccounts4----------------------
-  // await treeAttributeInstance.setBuyerRank(
-  //   userAccount4,
-  //   web3.utils.toWei(".004"),
-  //   web3.utils.toWei("3"),
-  //   1,
-  //   5,
-  //   {
-  //     from: buyerRank,
-  //   }
-  // );
-  // await treeFactoryInstance.mintAssignedTree(150, userAccount4, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   150,
-  //   randTree,
-  //   userAccount4,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // let treeAttribute150 = await treeAttributeInstance.treeAttributes(150);
-  // let generatedAttribute150 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode150
-  // );
-  // let reservedAttribute150 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode150
-  // );
-
-  // console.log("generatedAttribute102", Number(generatedAttribute150));
-  // console.log("reservedAttribute102", Number(reservedAttribute150));
-  // console.log("treeAttribute102.treeType", Number(treeAttribute150.treeType));
-  // console.log(
-  //   "treeAttribute102.groundType",
-  //   Number(treeAttribute150.groundType)
-  // );
-  // console.log(
-  //   "treeAttribute102.trunkColor",
-  //   Number(treeAttribute150.trunkColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.crownColor",
-  //   Number(treeAttribute150.crownColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.groundColor",
-  //   Number(treeAttribute150.groundColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.specialEffects",
-  //   Number(treeAttribute150.specialEffects)
-  // );
-
-  // console.log("treeAttribute102.exist", Number(treeAttribute150.exists));
-  // console.log("treeeeee", Number(treeAttribute150.universalCode));
-
-  // assert.equal(generatedAttribute150, 1, "150 - generatedAttribute not true");
-  // assert.equal(reservedAttribute150, 0, "150 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute150.treeType),
-  //   expectedAttribute150.treeType,
-  //   "150 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.groundType),
-  //   expectedAttribute150.groundType,
-  //   "150 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.trunkColor),
-  //   expectedAttribute150.trunkColor,
-  //   "150 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.crownColor),
-  //   expectedAttribute150.crownColor,
-  //   "150 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.groundColor),
-  //   expectedAttribute150.groundColor,
-  //   "150 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.specialEffects),
-  //   expectedAttribute150.specialEffectsFinal,
-  //   "150 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute150.universalCode),
-  //   expectedAttribute150.universalCode,
-  //   "150 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute150.exists), 1, "150 - Exists not true");
-  // let testRank150 = await treeAttributeInstance.rankOf(userAccount4);
-  // assert.equal(Number(testRank150), 0, "150-rank is not true");
-  // // ////----------------------------test tree 170 (with rank==2) owner==> userAccounts5----------------------
-  // await treeAttributeInstance.setBuyerRank(
-  //   userAccount5,
-  //   web3.utils.toWei(".016"),
-  //   web3.utils.toWei("4"),
-  //   1,
-  //   3,
-  //   {
-  //     from: buyerRank,
-  //   }
-  // );
-  // await treeFactoryInstance.mintAssignedTree(170, userAccount5, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   170,
-  //   randTree,
-  //   userAccount5,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-  // let treeAttribute170 = await treeAttributeInstance.treeAttributes(170);
-  // let generatedAttribute170 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode170
-  // );
-  // let reservedAttribute170 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode170
-  // );
-  // assert.equal(generatedAttribute170, 1, "170 - generatedAttribute not true");
-  // assert.equal(reservedAttribute170, 0, "170 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute170.treeType),
-  //   expectedAttribute170.treeType,
-  //   "170 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.groundType),
-  //   expectedAttribute170.groundType,
-  //   "170 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.trunkColor),
-  //   expectedAttribute170.trunkColor,
-  //   "170 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.crownColor),
-  //   expectedAttribute170.crownColor,
-  //   "170 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.groundColor),
-  //   expectedAttribute170.groundColor,
-  //   "170 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.specialEffects),
-  //   expectedAttribute170.specialEffectsFinal,
-  //   "170 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute170.universalCode),
-  //   expectedAttribute170.universalCode,
-  //   "170 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute170.exists), 1, "170 - Exists not true");
-  // let testRank170 = await treeAttributeInstance.rankOf(userAccount5);
-  // assert.equal(Number(testRank170), 0, "170-rank is not true");
-  ////----------------------------test tree 999 (with rank==3) owner==> userAccounts5----------------------
-  // await treeAttributeInstance.setBuyerRank(
-  //   userAccount5,
-  //   web3.utils.toWei("0"),
-  //   web3.utils.toWei("5.5"),
-  //   11,
-  //   80,
-  //   {
-  //     from: buyerRank,
-  //   }
-  // );
-  // await treeFactoryInstance.mintAssignedTree(999, userAccount5, 1, {
-  //   from: deployerAccount,
-  // });
-  // const eventTx = await treeAttributeInstance.createTreeAttributes(
-  //   999,
-  //   randTree,
-  //   userAccount5,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // truffleAssert.eventEmitted(eventTx, "Rand", (ev) => {
-  //   console.log("ev.x", ev.rand.toString());
-
-  //   return true;
-  // });
-
-  // let treeAttribute999 = await treeAttributeInstance.treeAttributes(999);
-  // let generatedAttribute999 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode999
-  // );
-  // let reservedAttribute999 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode999
-  // );
-
-  // console.log("generatedAttribute102", Number(generatedAttribute999));
-  // console.log("reservedAttribute102", Number(reservedAttribute999));
-  // console.log("treeAttribute102.treeType", Number(treeAttribute999.treeType));
-  // console.log(
-  //   "treeAttribute102.groundType",
-  //   Number(treeAttribute999.groundType)
-  // );
-  // console.log(
-  //   "treeAttribute102.trunkColor",
-  //   Number(treeAttribute999.trunkColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.crownColor",
-  //   Number(treeAttribute999.crownColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.groundColor",
-  //   Number(treeAttribute999.groundColor)
-  // );
-  // console.log(
-  //   "treeAttribute102.specialEffects",
-  //   Number(treeAttribute999.specialEffects)
-  // );
-
-  // console.log("treeAttribute102.exist", Number(treeAttribute999.exists));
-  // console.log("treeeeee", Number(treeAttribute999.universalCode));
-
-  // assert.equal(generatedAttribute999, 1, "999 - generatedAttribute not true");
-  // assert.equal(reservedAttribute999, 0, "999 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute999.treeType),
-  //   expectedAttribute999.treeType,
-  //   "999 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.groundType),
-  //   expectedAttribute999.groundType,
-  //   "999 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.trunkColor),
-  //   expectedAttribute999.trunkColor,
-  //   "999 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.crownColor),
-  //   expectedAttribute999.crownColor,
-  //   "999 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.groundColor),
-  //   expectedAttribute999.groundColor,
-  //   "999 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.specialEffects),
-  //   expectedAttribute999.specialEffectsFinal,
-  //   "999 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute999.universalCode),
-  //   expectedAttribute999.universalCode,
-  //   "999 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute999.exists), 1, "999 - Exists not true");
-  // let testRank999 = await treeAttributeInstance.rankOf(userAccount5);
-  // assert.equal(Number(testRank999), 0, "999-rank is not true");
-  // //----------------------------test tree 1531 (with rank==4) owner==> userAccounts5----------------------
-  // await treeAttributeInstance.setBuyerRank(
-  //   userAccount5,
-  //   web3.utils.toWei("0"),
-  //   web3.utils.toWei("5.5"),
-  //   11,
-  //   80,
-  //   {
-  //     from: buyerRank,
-  //   }
-  // );
-  // await treeFactoryInstance.mintAssignedTree(1531, userAccount5, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   1531,
-  //   randTree,
-  //   userAccount5,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // let treeAttribute1531 = await treeAttributeInstance.treeAttributes(1531);
-  // let generatedAttribute1531 =
-  //   await treeAttributeInstance.generatedAttributes(generatedCode1531);
-  // let reservedAttribute1531 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode1531
-  // );
-  // assert.equal(
-  //   generatedAttribute1531,
-  //   1,
-  //   "1531 - generatedAttribute not true"
-  // );
-  // assert.equal(reservedAttribute1531, 0, "1531 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute1531.treeType),
-  //   expectedAttribute1531.treeType,
-  //   "1531 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.groundType),
-  //   expectedAttribute1531.groundType,
-  //   "1531 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.trunkColor),
-  //   expectedAttribute1531.trunkColor,
-  //   "1531 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.crownColor),
-  //   expectedAttribute1531.crownColor,
-  //   "1531 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.groundColor),
-  //   expectedAttribute1531.groundColor,
-  //   "1531 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.specialEffects),
-  //   expectedAttribute1531.specialEffectsFinal,
-  //   "1531 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute1531.universalCode),
-  //   expectedAttribute1531.universalCode,
-  //   "1531 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute1531.exists), 1, "1531 - Exists not true");
-  // let testRank1531 = await treeAttributeInstance.rankOf(userAccount5);
-  // assert.equal(Number(testRank1531), 0, "1531-rank is not true");
-  // //----------------------------test tree 2 (with rank==0) owner==> userAccounts2----------------------
-  // await treeFactoryInstance.mintAssignedTree(2, userAccount5, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   2,
-  //   randTree,
-  //   userAccount5,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // let treeAttribute2 = await treeAttributeInstance.treeAttributes(2);
-  // let generatedAttribute2 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode2
-  // );
-  // let reservedAttribute2 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode2
-  // );
-  // assert.equal(generatedAttribute2, 1, "2 - generatedAttribute not true");
-  // assert.equal(reservedAttribute2, 0, "2 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute2.treeType),
-  //   expectedAttribute2.treeType,
-  //   "2 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.groundType),
-  //   expectedAttribute2.groundType,
-  //   "2 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.trunkColor),
-  //   expectedAttribute2.trunkColor,
-  //   "2 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.crownColor),
-  //   expectedAttribute2.crownColor,
-  //   "2 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.groundColor),
-  //   expectedAttribute2.groundColor,
-  //   "2 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.specialEffects),
-  //   expectedAttribute2.specialEffectsFinal,
-  //   "2 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute2.universalCode),
-  //   expectedAttribute2.universalCode,
-  //   "2 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute2.exists), 1, "2 - Exists not true");
-  // let testRank2 = await treeAttributeInstance.rankOf(userAccount5);
-  // assert.equal(Number(testRank2), 0, "2-rank is not true");
-  // //----------------------------test tree 51 (with rank==2) owner==> userAccounts5----------------------
-  // await treeAttributeInstance.setBuyerRank(
-  //   userAccount5,
-  //   web3.utils.toWei(".016"),
-  //   web3.utils.toWei("4"),
-  //   1,
-  //   3,
-  //   {
-  //     from: buyerRank,
-  //   }
-  // );
-  // await treeFactoryInstance.mintAssignedTree(51, userAccount5, 1, {
-  //   from: deployerAccount,
-  // });
-  // await treeAttributeInstance.createTreeAttributes(
-  //   51,
-  //   randTree,
-  //   userAccount5,
-  //   {
-  //     from: userAccount6,
-  //   }
-  // );
-
-  // let treeAttribute51 = await treeAttributeInstance.treeAttributes(51);
-  // let generatedAttribute51 = await treeAttributeInstance.generatedAttributes(
-  //   generatedCode51
-  // );
-  // let reservedAttribute51 = await treeAttributeInstance.reservedAttributes(
-  //   generatedCode51
-  // );
-  // assert.equal(generatedAttribute51, 1, "51 - generatedAttribute not true");
-  // assert.equal(reservedAttribute51, 0, "51 - reservedAttribute not true");
-  // assert.equal(
-  //   Number(treeAttribute51.treeType),
-  //   expectedAttribute51.treeType,
-  //   "51 - Tree type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.groundType),
-  //   expectedAttribute51.groundType,
-  //   "51 - Ground type not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.trunkColor),
-  //   expectedAttribute51.trunkColor,
-  //   "51 - Trunk color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.crownColor),
-  //   expectedAttribute51.crownColor,
-  //   "51 - Crown color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.groundColor),
-  //   expectedAttribute51.groundColor,
-  //   "51 - Ground color not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.specialEffects),
-  //   expectedAttribute51.specialEffectsFinal,
-  //   "51 - Special effects not true"
-  // );
-  // assert.equal(
-  //   Number(treeAttribute51.universalCode),
-  //   expectedAttribute51.universalCode,
-  //   "51 - Generated code not true"
-  // );
-  // assert.equal(Number(treeAttribute51.exists), 1, "51 - Exists not true");
-  // let testRank51 = await treeAttributeInstance.rankOf(userAccount5);
-  // assert.equal(Number(testRank51), 0, "51-rank is not true");
-  // });
+  
+  */
 });

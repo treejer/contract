@@ -44,7 +44,7 @@ contract("WethFund", (accounts) => {
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
   const userAccount8 = accounts[9];
-  const buyerRank = accounts[9];
+  const funderRank = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const withdrawReason = "reason to withdraw";
@@ -128,7 +128,7 @@ contract("WethFund", (accounts) => {
     }
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
+    await Common.addScriptRole(arInstance, funderRank, deployerAccount);
   });
 
   // beforeEach(async () => {
@@ -3028,7 +3028,7 @@ contract("WethFund", (accounts) => {
         expectedSwapTokenAmountTreeId2[0],
         web3.utils.toWei("500", "Ether"),
         {
-          from: buyerRank,
+          from: funderRank,
         }
       );
 
@@ -3128,7 +3128,7 @@ contract("WethFund", (accounts) => {
           expectedSwapTokenAmountTreeId2[0],
           web3.utils.toWei("4000", "Ether"),
           {
-            from: buyerRank,
+            from: funderRank,
           }
         )
         .should.be.rejectedWith(WethFundErrorMsg.LIQUDITY_NOT_ENOUGH);
@@ -3178,7 +3178,7 @@ contract("WethFund", (accounts) => {
 
       await wethFund
         .payDaiDebtToPlanterContract(expectedSwapTokenAmountTreeId2[0], 0, {
-          from: buyerRank,
+          from: funderRank,
         })
         .should.be.rejectedWith(WethFundErrorMsg.TOTALDAI_INVALID);
 
@@ -3200,7 +3200,7 @@ contract("WethFund", (accounts) => {
           expectedSwapTokenAmountTreeId2[0],
           web3.utils.toWei("2000", "Ether"),
           {
-            from: buyerRank,
+            from: funderRank,
           }
         )
         .should.be.rejectedWith(WethFundErrorMsg.TOTALDAI_INVALID);
@@ -3209,7 +3209,7 @@ contract("WethFund", (accounts) => {
         expectedSwapTokenAmountTreeId2[0],
         web3.utils.toWei("1000", "Ether"),
         {
-          from: buyerRank,
+          from: funderRank,
         }
       );
 

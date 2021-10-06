@@ -125,8 +125,8 @@ contract("AccessRestriction", (accounts) => {
 
     const after = await arInstance.isScript(userAccount1);
 
-    assert.equal(before, false, "BuyerRank role is not correct");
-    assert.equal(after, true, "BuyerRank role is not correct");
+    assert.equal(before, false, "FunderRank role is not correct");
+    assert.equal(after, true, "FunderRank role is not correct");
   });
   it("check if data manager or treejer contract", async () => {
     await Common.addDataManager(arInstance, userAccount1, deployerAccount);

@@ -69,7 +69,7 @@ contract("TreeAttribute", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7];
   const userAccount7 = accounts[8];
-  const buyerRank = accounts[9];
+  const funderRank = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -139,7 +139,7 @@ contract("TreeAttribute", (accounts) => {
     }
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
-    await Common.addScriptRole(arInstance, buyerRank, deployerAccount);
+    await Common.addScriptRole(arInstance, funderRank, deployerAccount);
   });
 
   describe("without financial section", () => {

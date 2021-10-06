@@ -387,6 +387,20 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
+    it("Check setTreeTokenAddress function", async () => {
+      ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeAttributeInstance
+        .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    });
+
     it("set attributes by admin", async () => {
       const treeId1 = 1000;
       const generatedCode1 = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;

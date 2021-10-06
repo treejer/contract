@@ -78,11 +78,7 @@ interface ITreeAttribute {
      * @return if unique tree attribute generated successfully
      * NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event
      */
-    function createTreeAttributes(
-        uint256 treeId,
-        bytes32 randTree,
-        address buyer
-    ) external returns (bool);
+    function createTreeAttributes(uint256 treeId) external returns (bool);
 
     function createTreeSymbol(
         uint256 treeId,

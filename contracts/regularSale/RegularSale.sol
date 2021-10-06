@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFund.sol";
+import "../tree/ITreeAttribute.sol";
 import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
@@ -47,6 +48,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
+    ITreeAttribute public treeAttribute;
     IDaiFund public daiFund;
     IAllocation public allocation;
     IERC20Upgradeable public daiToken;
@@ -210,6 +212,17 @@ contract RegularSale is Initializable, RelayRecipient {
         wethFund = candidateContract;
     }
 
+    /**
+     * @dev admin set TreeAttributesAddress
+     * @param _address set to the address of treeAttribute
+     */
+
+    function setTreeAttributesAddress(address _address) external onlyAdmin {
+        ITreeAttribute candidateContract = ITreeAttribute(_address);
+        require(candidateContract.isTreeAttribute());
+        treeAttribute = candidateContract;
+    }
+
     // **** FUNDTREE SECTION ****
 
     /** @dev admin set the price of trees that are sold regular
@@ -269,6 +282,8 @@ contract RegularSale is Initializable, RelayRecipient {
                 tempLastFundedTreeId,
                 _msgSender()
             );
+
+            treeAttribute.createTreeAttributes(tempLastFundedTreeId);
 
             (
                 uint16 planterShare,
@@ -341,6 +356,8 @@ contract RegularSale is Initializable, RelayRecipient {
         emit TreeFundedById(_msgSender(), _referrer, _treeId, price);
 
         treeFactory.mintTreeById(_treeId, _msgSender());
+
+        treeAttribute.createTreeAttributes(_treeId);
 
         (
             uint16 planterShare,

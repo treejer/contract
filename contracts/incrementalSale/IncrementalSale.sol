@@ -43,7 +43,6 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 treasury;
         uint256 reserve1;
         uint256 reserve2;
-        address funder;
     }
 
     /** NOTE {incrementalSaleData} is struct of IncrementalSaleData that store
@@ -379,14 +378,14 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
         uint256 tempLastSold = _tempLastSold;
 
-        totalBalances.funder = _funder;
+        address funder = _funder;
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (tempLastSold - incSaleData.startTreeId) /
-                incSaleData.increments;
-
             uint256 treePrice = incSaleData.initialPrice +
-                (steps * incSaleData.initialPrice * incSaleData.priceJump) /
+                (((tempLastSold - incSaleData.startTreeId) /
+                    incSaleData.increments) *
+                    incSaleData.initialPrice *
+                    incSaleData.priceJump) /
                 10000;
 
             (
@@ -411,7 +410,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1 += (treePrice * reserve1Share) / 10000;
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
-            treeFactory.mintAssignedTree(tempLastSold, totalBalances.funder, 1);
+            treeFactory.mintAssignedTree(tempLastSold, funder, 1);
 
             tempLastSold += 1;
         }
@@ -440,7 +439,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             planterDaiAmount,
             ambassadorDaiAmount,
             _totalPrice,
-            totalBalances.funder
+            funder
         );
 
         if (_referrer != address(0)) {
@@ -464,23 +463,29 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint8 funderRank = treeAttribute.getFunderRank(_funder);
 
         for (uint256 i = 0; i < _count; i++) {
-            uint256 steps = (_tempLastSold - incSaleData.startTreeId) /
-                incSaleData.increments;
-
             uint256 treePrice = incSaleData.initialPrice +
-                (steps * incSaleData.initialPrice * incSaleData.priceJump) /
+                (((_tempLastSold - incSaleData.startTreeId) /
+                    incSaleData.increments) *
+                    incSaleData.initialPrice *
+                    incSaleData.priceJump) /
                 10000;
+
+            uint256 planterDaiAmount = (_planterDaiAmount * treePrice) /
+                _totalPrice;
+
+            uint256 ambassadorDaiAmount = (_ambassadorDaiAmount * treePrice) /
+                _totalPrice;
 
             planterFundContract.updateProjectedEarnings(
                 _tempLastSold,
-                (_planterDaiAmount * treePrice) / _totalPrice,
-                (_ambassadorDaiAmount * treePrice) / _totalPrice
+                planterDaiAmount,
+                ambassadorDaiAmount
             );
 
             bytes32 randTree = keccak256(
                 abi.encodePacked(
-                    (_planterDaiAmount * treePrice) / _totalPrice,
-                    (_ambassadorDaiAmount * treePrice) / _totalPrice,
+                    planterDaiAmount,
+                    ambassadorDaiAmount,
                     treePrice,
                     _daiAmount
                 )

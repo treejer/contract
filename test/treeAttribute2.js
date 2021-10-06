@@ -4,6 +4,8 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
 const TestTree = artifacts.require("TestTree.sol");
+const TestTree2 = artifacts.require("TestTree2.sol");
+
 //treasury section
 const WethFund = artifacts.require("WethFund.sol");
 
@@ -26,8 +28,6 @@ if (process.env.COVERAGE) {
 }
 
 //test
-
-const TestTreeAttributes = artifacts.require("TestTreeAttributes.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();

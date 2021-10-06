@@ -159,6 +159,140 @@ contract TreeAttribute is Initializable {
     }
 
     /**
+     * @dev generate a 256 bits random number as a base for tree attributes and slice it
+     * in 28 bits parts
+     * @param treeId id of tree
+     * @return if unique tree attribute generated successfully
+     */
+    function createTreeSymbol(
+        uint256 treeId,
+        bytes32 randTree,
+        address buyer,
+        uint8 funderRank,
+        uint8 generationType
+    ) external ifNotPaused onlyTreejerContract returns (bool) {
+        //TODO:check treeSymbols instead of treeAttributes
+        //TODO: ==false => !
+        if (!treeToken.checkAttributeExists(treeId)) {
+            //TODO: flag true ==>false
+            bool flag = false;
+            uint64 attrRand;
+
+            for (uint256 j = 0; j < 10000; j++) {
+                uint256 rand = uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            buyer,
+                            randTree,
+                            generationType,
+                            msg.sig,
+                            treeId,
+                            j
+                        )
+                    )
+                );
+
+                for (uint256 i = 0; i < 4; i++) {
+                    attrRand = uint64(rand & type(uint64).max);
+
+                    flag = _calcRandSymbol(
+                        treeId,
+                        attrRand,
+                        funderRank,
+                        generationType
+                    );
+                    if (flag) {
+                        break;
+                    }
+                    rand = rand / (uint256(2)**64);
+                }
+                if (flag) {
+                    break;
+                }
+            }
+            if (flag) {
+                emit TreeAttributesGenerated(treeId);
+            } else {
+                emit TreeAttributesNotGenerated(treeId);
+            }
+
+            return flag;
+        } else {
+            return true;
+        }
+    }
+
+    function createTreeAttributes(uint256 treeId)
+        external
+        ifNotPaused
+        onlyTreejerContract
+        returns (bool)
+    {
+        //TODO:check treeSymbols instead of treeAttributes
+
+        if (!treeToken.checkAttributeExists(treeId)) {
+            bool flag = false;
+            uint64 attrRand;
+
+            for (uint256 j = 0; j < 10000; j++) {
+                uint256 _rand = uint256(
+                    keccak256(abi.encodePacked(msg.sig, treeId, j))
+                );
+
+                for (uint256 i = 0; i < 4; i++) {
+                    attrRand = uint64(_rand & type(uint64).max);
+
+                    if (generatedAttributes[attrRand] == 0) {
+                        treeToken.setTreeAttributes(treeId, attrRand, 1);
+                        generatedAttributes[attrRand] = 1;
+                        flag = true;
+                        //TODO: add break
+                        break;
+                    } else {
+                        generatedAttributes[attrRand] =
+                            generatedAttributes[attrRand] +
+                            1;
+                        _rand = _rand / (uint256(2)**64);
+                    }
+                }
+                if (flag) {
+                    break;
+                }
+            }
+            if (flag) {
+                emit TreeAttributesGenerated(treeId);
+            } else {
+                emit TreeAttributesNotGenerated(treeId);
+            }
+
+            return flag;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
+     * his/her wallet
+     * @param _funder address of funder
+     */
+    function getFunderRank(address _funder) external view returns (uint8) {
+        //TODO: remove rank varible
+
+        uint256 ownedTrees = treeToken.balanceOf(_funder);
+
+        if (ownedTrees > 10000) {
+            return 3;
+        } else if (ownedTrees > 2000) {
+            return 2;
+        } else if (ownedTrees > 500) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
      * @dev calculates the random attributes from random number
      * @param treeId id of tree
      * @param _rand a 28 bits random attribute generator number
@@ -500,139 +634,6 @@ contract TreeAttribute is Initializable {
             if (_rand <= probabilities[j]) {
                 return j;
             }
-        }
-
-        return 0;
-    }
-
-    /**
-     * @dev generate a 256 bits random number as a base for tree attributes and slice it
-     * in 28 bits parts
-     * @param treeId id of tree
-     * @return if unique tree attribute generated successfully
-     */
-    function createTreeSymbol(
-        uint256 treeId,
-        bytes32 randTree,
-        address buyer,
-        uint8 funderRank,
-        uint8 generationType
-    ) external ifNotPaused onlyTreejerContract returns (bool) {
-        //TODO:check treeSymbols instead of treeAttributes
-        //TODO: ==false => !
-        if (!treeToken.checkAttributeExists(treeId)) {
-            bool flag = true;
-            uint64 attrRand;
-
-            for (uint256 j = 0; j < 10000; j++) {
-                uint256 _rand = uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            buyer,
-                            randTree,
-                            generationType,
-                            msg.sig,
-                            treeId,
-                            j
-                        )
-                    )
-                );
-
-                for (uint256 i = 0; i < 4; i++) {
-                    attrRand = uint64(_rand & type(uint64).max);
-
-                    flag = _calcRandSymbol(
-                        treeId,
-                        attrRand,
-                        funderRank,
-                        generationType
-                    );
-                    if (flag) {
-                        break;
-                    }
-                    _rand = _rand / (uint256(2)**64);
-                }
-                if (flag) {
-                    break;
-                }
-            }
-            if (flag) {
-                emit TreeAttributesGenerated(treeId);
-            } else {
-                emit TreeAttributesNotGenerated(treeId);
-            }
-
-            return flag;
-        } else {
-            return true;
-        }
-    }
-
-    function createTreeAttributes(uint256 treeId)
-        external
-        ifNotPaused
-        onlyTreejerContract
-        returns (bool)
-    {
-        //TODO:check treeSymbols instead of treeAttributes
-
-        if (!treeToken.checkAttributeExists(treeId)) {
-            bool flag = false;
-            uint64 attrRand;
-
-            for (uint256 j = 0; j < 10000; j++) {
-                uint256 _rand = uint256(
-                    keccak256(abi.encodePacked(msg.sig, treeId, j))
-                );
-
-                for (uint256 i = 0; i < 4; i++) {
-                    attrRand = uint64(_rand & type(uint64).max);
-
-                    if (generatedAttributes[attrRand] == 0) {
-                        treeToken.setTreeAttributes(treeId, attrRand, 1);
-                        generatedAttributes[attrRand] = 1;
-                        flag = true;
-                        //TODO: add break
-                        break;
-                    } else {
-                        generatedAttributes[attrRand] =
-                            generatedAttributes[attrRand] +
-                            1;
-                        _rand = _rand / (uint256(2)**64);
-                    }
-                }
-                if (flag) {
-                    break;
-                }
-            }
-            if (flag) {
-                emit TreeAttributesGenerated(treeId);
-            } else {
-                emit TreeAttributesNotGenerated(treeId);
-            }
-
-            return flag;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
-     * his/her wallet
-     * @param _funder address of funder
-     */
-    function getFunderRank(address _funder) external view returns (uint8) {
-        //TODO: remove rank varible
-
-        uint256 ownedTrees = treeToken.balanceOf(_funder);
-
-        if (ownedTrees > 10000) {
-            return 3;
-        } else if (ownedTrees > 2000) {
-            return 2;
-        } else if (ownedTrees > 500) {
-            return 1;
         }
 
         return 0;

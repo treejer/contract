@@ -6,6 +6,8 @@ import "./../../tree/Tree.sol";
 contract TestTree2 {
     mapping(address => uint256) public test;
 
+    bool public isTree = true;
+
     function rank1(address _funder) external {
         test[_funder] = 501;
     }

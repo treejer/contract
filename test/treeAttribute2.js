@@ -1782,6 +1782,7 @@ contract("TreeAttribute", (accounts) => {
     it("should addTreejerContractRole successfully", async () => {
       const treeId1 = 101;
       const treeId2 = 102;
+      const treeId3 = 103;
       const treejerContract = userAccount1;
 
       await Common.addTreejerContractRole(
@@ -1822,7 +1823,7 @@ contract("TreeAttribute", (accounts) => {
         treeId2,
         randTree1,
         userAccount2,
-        0,
+        1,
         generationType,
         {
           from: treejerContract,
@@ -1830,6 +1831,19 @@ contract("TreeAttribute", (accounts) => {
       );
 
       truffleAssert.eventEmitted(eventTx2, "TreeAttributesGenerated");
+
+      const eventTx3 = await treeAttributeInstance.createTreeSymbol(
+        treeId3,
+        randTree1,
+        userAccount2,
+        2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx3, "TreeAttributesGenerated");
 
       const result = await treeAttributeInstance.createTreeSymbol.call(
         treeId1,
@@ -2164,6 +2178,70 @@ contract("TreeAttribute", (accounts) => {
       await treeAttributeInstance.createTreeAttributes(10001, {
         from: deployerAccount,
       });
+    });
+
+    it("create tree symbol using test tree", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
+
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+      ///////////////////////////// ----------------------------
+
+      const randTree = web3.utils.soliditySha3(
+        10000,
+        0,
+        "",
+        0,
+        zeroAddress,
+        ""
+      );
+      const funderRank = 3;
+      const generationType = 17;
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
     });
   });
 });

@@ -55,12 +55,6 @@ contract TreeAttribute is Initializable {
         _;
     }
 
-    /** NOTE modifier to check msg.sender has script role */
-    modifier onlyScript() {
-        accessRestriction.ifScript(msg.sender);
-        _;
-    }
-
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();

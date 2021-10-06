@@ -576,7 +576,326 @@ contract("TreeAttribute", (accounts) => {
         )
         .should.be.rejectedWith(TreeAttributeErrorMsg.SYMBOL_IS_TAKEN);
     });
-    /*
+  });
+
+  describe("createTreeSymbol", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+    it("should addTreejerContractRole successfully", async () => {
+      const treeId1 = 101;
+      const treeId2 = 102;
+      const treeId3 = 103;
+      const treejerContract = userAccount1;
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treejerContract,
+        deployerAccount
+      );
+
+      // planterDai, referralDai, treePrice, _daiAmount;
+      const randTree1 = web3.utils.soliditySha3(
+        web3.utils.toWei("2"),
+        web3.utils.toWei("2"),
+        web3.utils.toWei("7"),
+        web3.utils.toWei("5")
+      );
+      const generationType = 18;
+
+      await treeAttributeInstance
+        .createTreeSymbol(treeId1, randTree1, userAccount2, 0, generationType, {
+          from: userAccount7,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      const eventTx1 = await treeAttributeInstance.createTreeSymbol(
+        treeId1,
+        randTree1,
+        userAccount2,
+        0,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
+
+      const eventTx2 = await treeAttributeInstance.createTreeSymbol(
+        treeId2,
+        randTree1,
+        userAccount2,
+        1,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx2, "TreeAttributesGenerated");
+
+      const eventTx3 = await treeAttributeInstance.createTreeSymbol(
+        treeId3,
+        randTree1,
+        userAccount2,
+        2,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx3, "TreeAttributesGenerated");
+
+      const result = await treeAttributeInstance.createTreeSymbol.call(
+        treeId1,
+        randTree1,
+        userAccount2,
+        0,
+        generationType,
+        {
+          from: treejerContract,
+        }
+      );
+
+      assert.equal(result, true, "result is incorrect");
+    });
+
+    it("should createTreeAttributes work successfully", async () => {
+      await treeAttributeInstance
+        .createTreeAttributes(10001, { from: userAccount6 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      let eventTx1 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
+
+      await treeTokenInstance.treeAttributes(10001);
+
+      let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
+      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
+    });
+
+    it("should testTree work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
+
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeAttributes(10001, {
+        from: deployerAccount,
+      });
+    });
+
+    it("create tree symbol using test tree", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree.new({
+        from: deployerAccount,
+      });
+
+      await testInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+      ///////////////////////////// ----------------------------
+
+      const randTree = web3.utils.soliditySha3(
+        10000,
+        0,
+        "",
+        0,
+        zeroAddress,
+        ""
+      );
+      const funderRank = 3;
+      const generationType = 17;
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testInstance.test(10001);
+
+      await treeAttributeInstance.createTreeSymbol(
+        10001,
+        randTree,
+        userAccount2,
+        funderRank,
+        generationType,
+        {
+          from: deployerAccount,
+        }
+      );
+    });
+
+    ////////////////////////////
+
+    it("should getFunderRank work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree2.new({
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank1(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank2(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank3(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+    });
+  });
+
+  /*
+  describe("without financial section", () => {
+    beforeEach(async () => {
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+    });
+
+
+    
     it("should _calcRandSymbol work successfully", async () => {
       ///////////// ------------------- check 1
 
@@ -585,7 +904,6 @@ contract("TreeAttribute", (accounts) => {
       const generationType1 = 18;
 
       await treeAttributeInstance._calcRandSymbol(
-        userAccount2,
         treeId,
         rand,
         generationType1
@@ -702,7 +1020,6 @@ contract("TreeAttribute", (accounts) => {
       const treeId2 = 101;
 
       await treeAttributeInstance._calcRandSymbol(
-        userAccount2,
         treeId2,
         rand2,
         generationType1
@@ -855,7 +1172,6 @@ contract("TreeAttribute", (accounts) => {
       const treeId3 = 102;
 
       await treeAttributeInstance._calcRandSymbol(
-        userAccount2,
         treeId3,
         rand3,
         generationType1
@@ -999,7 +1315,6 @@ contract("TreeAttribute", (accounts) => {
       const treeId4 = 103;
 
       await treeAttributeInstance._calcRandSymbol(
-        userAccount2,
         treeId4,
         rand4,
         generationType1
@@ -1143,7 +1458,6 @@ contract("TreeAttribute", (accounts) => {
       const treeId5 = 104;
 
       await treeAttributeInstance._calcRandSymbol(
-        userAccount2,
         treeId5,
         rand5,
         generationType1
@@ -1379,9 +1693,10 @@ contract("TreeAttribute", (accounts) => {
 
       assert.equal(Number(result4), 5, "_calcCoefficient not true");
     });
-    */
   });
+  */
 
+  /*
   describe("createTreeSymbol", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(
@@ -1779,87 +2094,9 @@ contract("TreeAttribute", (accounts) => {
     //   // assert.equal(result, true, "result is incorrect");
     // });
 
-    it("should addTreejerContractRole successfully", async () => {
-      const treeId1 = 101;
-      const treeId2 = 102;
-      const treeId3 = 103;
-      const treejerContract = userAccount1;
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treejerContract,
-        deployerAccount
-      );
-
-      // planterDai, referralDai, treePrice, _daiAmount;
-      const randTree1 = web3.utils.soliditySha3(
-        web3.utils.toWei("2"),
-        web3.utils.toWei("2"),
-        web3.utils.toWei("7"),
-        web3.utils.toWei("5")
-      );
-      const generationType = 18;
-
-      await treeAttributeInstance
-        .createTreeSymbol(treeId1, randTree1, userAccount2, 0, generationType, {
-          from: userAccount7,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-      const eventTx1 = await treeAttributeInstance.createTreeSymbol(
-        treeId1,
-        randTree1,
-        userAccount2,
-        0,
-        generationType,
-        {
-          from: treejerContract,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
-
-      const eventTx2 = await treeAttributeInstance.createTreeSymbol(
-        treeId2,
-        randTree1,
-        userAccount2,
-        1,
-        generationType,
-        {
-          from: treejerContract,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx2, "TreeAttributesGenerated");
-
-      const eventTx3 = await treeAttributeInstance.createTreeSymbol(
-        treeId3,
-        randTree1,
-        userAccount2,
-        2,
-        generationType,
-        {
-          from: treejerContract,
-        }
-      );
-
-      truffleAssert.eventEmitted(eventTx3, "TreeAttributesGenerated");
-
-      const result = await treeAttributeInstance.createTreeSymbol.call(
-        treeId1,
-        randTree1,
-        userAccount2,
-        0,
-        generationType,
-        {
-          from: treejerContract,
-        }
-      );
-
-      assert.equal(result, true, "result is incorrect");
-    });
     //////////////////////////////////////////////////////////////////////////////////////////////
-    /*
+    
     it("test generated attributes when call createTreeAttributes", async () => {
       ///---------------test1
       await Common.addTreejerContractRole(
@@ -2107,179 +2344,8 @@ contract("TreeAttribute", (accounts) => {
       );
     });
 
-    */
-    it("should createTreeAttributes work successfully", async () => {
-      await treeAttributeInstance
-        .createTreeAttributes(10001, { from: userAccount6 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeAttributeInstance.address,
-        deployerAccount
-      );
-
-      let eventTx1 = await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
-      truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
-
-      await treeTokenInstance.treeAttributes(10001);
-
-      let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesGenerated");
-      truffleAssert.eventNotEmitted(eventTx2, "TreeAttributesNotGenerated");
-    });
-
-    it("should testTree work successfully", async () => {
-      ////------------------ deploy testTree ------------------------------
-
-      testInstance = await TestTree.new({
-        from: deployerAccount,
-      });
-
-      await testInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
-        from: deployerAccount,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeAttributeInstance.address,
-        deployerAccount
-      );
-
-      await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-
-      await testInstance.test(10001);
-
-      await treeAttributeInstance.createTreeAttributes(10001, {
-        from: deployerAccount,
-      });
-    });
-
-    it("create tree symbol using test tree", async () => {
-      ////------------------ deploy testTree ------------------------------
-
-      testInstance = await TestTree.new({
-        from: deployerAccount,
-      });
-
-      await testInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
-        from: deployerAccount,
-      });
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        deployerAccount,
-        deployerAccount
-      );
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeAttributeInstance.address,
-        deployerAccount
-      );
-      ///////////////////////////// ----------------------------
-
-      const randTree = web3.utils.soliditySha3(
-        10000,
-        0,
-        "",
-        0,
-        zeroAddress,
-        ""
-      );
-      const funderRank = 3;
-      const generationType = 17;
-
-      await treeAttributeInstance.createTreeSymbol(
-        10001,
-        randTree,
-        userAccount2,
-        funderRank,
-        generationType,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      await testInstance.test(10001);
-
-      await treeAttributeInstance.createTreeSymbol(
-        10001,
-        randTree,
-        userAccount2,
-        funderRank,
-        generationType,
-        {
-          from: deployerAccount,
-        }
-      );
-    });
-
-    ////////////////////////////
-
-    it("should getFunderRank work successfully", async () => {
-      ////------------------ deploy testTree ------------------------------
-
-      testInstance = await TestTree2.new({
-        from: deployerAccount,
-      });
-
-      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
-        from: deployerAccount,
-      });
-
-      await testInstance.rank1(deployerAccount, {
-        from: userAccount6,
-      });
-
-      await treeAttributeInstance.getFunderRank(deployerAccount, {
-        from: deployerAccount,
-      });
-
-      await testInstance.rank2(deployerAccount, {
-        from: userAccount6,
-      });
-
-      await treeAttributeInstance.getFunderRank(deployerAccount, {
-        from: deployerAccount,
-      });
-
-      await testInstance.rank3(deployerAccount, {
-        from: userAccount6,
-      });
-
-      await treeAttributeInstance.getFunderRank(deployerAccount, {
-        from: deployerAccount,
-      });
-    });
+    
   });
+  
+  */
 });

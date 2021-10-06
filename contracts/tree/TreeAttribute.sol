@@ -222,7 +222,7 @@ contract TreeAttribute is Initializable {
         }
     }
 
-    function createTreeAttributes(uint256 treeId)
+    function createTreeAttributes(uint256 _treeId)
         external
         ifNotPaused
         onlyTreejerContract
@@ -230,39 +230,18 @@ contract TreeAttribute is Initializable {
     {
         //TODO:check treeSymbols instead of treeAttributes
 
-        if (!treeToken.checkAttributeExists(treeId)) {
-            bool flag = false;
-            uint64 attrRand;
+        if (!treeToken.checkAttributeExists(_treeId)) {
+            (bool flag, uint64 generatedAttribute) = _createUniqueAttribute(
+                _treeId
+            );
 
-            for (uint256 j = 0; j < 10000; j++) {
-                uint256 _rand = uint256(
-                    keccak256(abi.encodePacked(msg.sig, treeId, j))
-                );
-
-                for (uint256 i = 0; i < 4; i++) {
-                    attrRand = uint64(_rand & type(uint64).max);
-
-                    if (generatedAttributes[attrRand] == 0) {
-                        treeToken.setTreeAttributes(treeId, attrRand, 1);
-                        generatedAttributes[attrRand] = 1;
-                        flag = true;
-                        //TODO: add break
-                        break;
-                    } else {
-                        generatedAttributes[attrRand] =
-                            generatedAttributes[attrRand] +
-                            1;
-                        _rand = _rand / (uint256(2)**64);
-                    }
-                }
-                if (flag) {
-                    break;
-                }
-            }
             if (flag) {
-                emit TreeAttributesGenerated(treeId);
+                treeToken.setTreeAttributes(_treeId, generatedAttribute, 1);
+                generatedAttributes[generatedAttribute] = 1;
+
+                emit TreeAttributesGenerated(_treeId);
             } else {
-                emit TreeAttributesNotGenerated(treeId);
+                emit TreeAttributesNotGenerated(_treeId);
             }
 
             return flag;
@@ -290,6 +269,33 @@ contract TreeAttribute is Initializable {
         }
 
         return 0;
+    }
+
+    function _createUniqueAttribute(uint256 _treeId)
+        private
+        returns (bool, uint64)
+    {
+        uint64 generatedAttribute;
+
+        for (uint256 j = 0; j < 10000; j++) {
+            uint256 _rand = uint256(
+                keccak256(abi.encodePacked(msg.sig, _treeId, j))
+            );
+
+            for (uint256 i = 0; i < 4; i++) {
+                generatedAttribute = uint64(_rand & type(uint64).max);
+
+                if (generatedAttributes[generatedAttribute] == 0) {
+                    return (true, generatedAttribute);
+                } else {
+                    generatedAttributes[generatedAttribute] =
+                        generatedAttributes[generatedAttribute] +
+                        1;
+                    _rand = _rand / (uint256(2)**64);
+                }
+            }
+        }
+        return (false, 0);
     }
 
     /**

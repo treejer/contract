@@ -881,7 +881,7 @@ contract("TreeAttribute", (accounts) => {
     });
   });
 
-  /*
+  /** 
   describe("without financial section", () => {
     beforeEach(async () => {
       treeAttributeInstance = await deployProxy(

@@ -92,38 +92,38 @@ contract TreeAttribute is Initializable {
 
     /**
      * @dev reserve a unique symbol
-     * @param generatedCode unique symbol to reserve
+     * @param _generatedSymbol unique symbol to reserve
      */
-    function reserveTreeAttributes(uint64 generatedCode)
+    function reserveSymbol(uint64 _generatedSymbol)
         external
         onlyDataManagerOrTreejerContract
     {
         require(
-            uniqueSymbol[generatedCode].status == 0,
+            uniqueSymbol[_generatedSymbol].status == 0,
             "the tree attributes are taken"
         );
-        uniqueSymbol[generatedCode].status = 1;
+        uniqueSymbol[_generatedSymbol].status = 1;
 
-        emit SymbolReserved(generatedCode);
+        emit SymbolReserved(_generatedSymbol);
     }
 
     /**
      * @dev free reservation of a unique symbol
-     * @param generatedCode unique symbol to reserve
+     * @param _generatedSymbol unique symbol to reserve
      */
     //TODO: input was uint32 before
-    function freeReserveTreeAttributes(uint64 generatedCode)
+    function freeReserveSymbol(uint64 _generatedSymbol)
         external
         onlyDataManagerOrTreejerContract
     {
         require(
-            uniqueSymbol[generatedCode].status == 1,
+            uniqueSymbol[_generatedSymbol].status == 1,
             "the tree attributes not reserved"
         );
 
-        uniqueSymbol[generatedCode].status = 0;
+        uniqueSymbol[_generatedSymbol].status = 0;
 
-        emit ReservedSymbolFreed(generatedCode);
+        emit ReservedSymbolFreed(_generatedSymbol);
     }
 
     /**

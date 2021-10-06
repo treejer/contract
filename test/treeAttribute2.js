@@ -163,20 +163,20 @@ contract("TreeAttribute", (accounts) => {
       assert.notEqual(address, undefined);
     });
 
-    ///////////////---------------------------------test reserveTreeAttributes function--------------------------------------------------------
-    it("Should reserveTreeAttributes work successfully", async () => {
-      ////------------Should reserveTreeAttributes rejec because caller must be admin or communityGifts
+    ///////////////---------------------------------test reserveSymbol function--------------------------------------------------------
+    it("Should reserveSymbol work successfully", async () => {
+      ////------------Should reserveSymbol rejec because caller must be admin or communityGifts
       const generatedCode1 = 12500123;
 
       await treeAttributeInstance
-        .reserveTreeAttributes(generatedCode1, { from: userAccount7 })
+        .reserveSymbol(generatedCode1, { from: userAccount7 })
         .should.be.rejectedWith(
           CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
         );
 
       //////////////////// reserve attribute and check data
 
-      const eventTx1 = await treeAttributeInstance.reserveTreeAttributes(
+      const eventTx1 = await treeAttributeInstance.reserveSymbol(
         generatedCode1,
         {
           from: dataManager,
@@ -203,9 +203,9 @@ contract("TreeAttribute", (accounts) => {
         return ev.generatedCode == generatedCode1;
       });
 
-      //////// ------------Should reserveTreeAttributes rejec because generatedCode has been reserved before
+      //////// ------------Should reserveSymbol rejec because generatedCode has been reserved before
       await treeAttributeInstance
-        .reserveTreeAttributes(generatedCode1, {
+        .reserveSymbol(generatedCode1, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_TAKEN);
@@ -220,7 +220,7 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
 
-      const eventTx2 = await treeAttributeInstance.reserveTreeAttributes(
+      const eventTx2 = await treeAttributeInstance.reserveSymbol(
         generatedCode2,
         {
           from: userAccount2,
@@ -248,21 +248,21 @@ contract("TreeAttribute", (accounts) => {
       });
     });
 
-    ///////////////---------------------------------test freeReserveTreeAttributes function--------------------------------------------------------
+    ///////////////---------------------------------test freeReserveSymbol function--------------------------------------------------------
 
-    it("Should freeReserveTreeAttributes work successfully", async () => {
-      /////----------------Should freeReserveTreeAttributes rejec because generatedCode hasn't been reserved before
+    it("Should freeReserveSymbol work successfully", async () => {
+      /////----------------Should freeReserveSymbol rejec because generatedCode hasn't been reserved before
       let generatedCode1 = 12500123;
 
       await treeAttributeInstance
-        .freeReserveTreeAttributes(generatedCode1, {
+        .freeReserveSymbol(generatedCode1, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeAttributeErrorMsg.ATTRIBUTE_NOT_RESERVED);
 
-      /////----------------Should freeReserveTreeAttributes rejec because caller must be admin or communityGifts
+      /////----------------Should freeReserveSymbol rejec because caller must be admin or communityGifts
 
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode1, {
+      await treeAttributeInstance.reserveSymbol(generatedCode1, {
         from: dataManager,
       });
 
@@ -284,12 +284,12 @@ contract("TreeAttribute", (accounts) => {
       );
 
       await treeAttributeInstance
-        .freeReserveTreeAttributes(generatedCode1, { from: userAccount7 })
+        .freeReserveSymbol(generatedCode1, { from: userAccount7 })
         .should.be.rejectedWith(
           CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
         );
       ///////////////// ------------- free reserve
-      const eventTx1 = await treeAttributeInstance.freeReserveTreeAttributes(
+      const eventTx1 = await treeAttributeInstance.freeReserveSymbol(
         generatedCode1,
         {
           from: dataManager,
@@ -325,11 +325,11 @@ contract("TreeAttribute", (accounts) => {
         deployerAccount
       );
 
-      await treeAttributeInstance.reserveTreeAttributes(generatedCode2, {
+      await treeAttributeInstance.reserveSymbol(generatedCode2, {
         from: userAccount2,
       });
 
-      const eventTx2 = await treeAttributeInstance.freeReserveTreeAttributes(
+      const eventTx2 = await treeAttributeInstance.freeReserveSymbol(
         generatedCode2,
         {
           from: userAccount2,

@@ -50,17 +50,17 @@ interface ITreeAttribute {
 
     /**
      * @dev reserve a unique symbol
-     * @param generatedCode unique symbol to reserve
+     * @param _generatedSymbol unique symbol to reserve
      * NOTE emit a {SymbolReserved} event
      */
-    function reserveTreeAttributes(uint32 generatedCode) external;
+    function reserveSymbol(uint64 _generatedSymbol) external;
 
     /**
      * @dev free reservation of a unique symbol
-     * @param generatedCode unique symbol to reserve
+     * @param _generatedSymbol unique symbol to reserve
      * NOTE emit a {ReservedSymbolFreed} event
      */
-    function freeReserveTreeAttributes(uint32 generatedCode) external;
+    function freeReserveSymbol(uint64 _generatedSymbol) external;
 
     /**
      * @dev admin assigns symbol to specified treeId

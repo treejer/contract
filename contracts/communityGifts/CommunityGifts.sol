@@ -237,10 +237,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
             giftCount += 1;
             communityGift.exist = true;
         } else {
-            treeAttribute.freeReserveTreeAttributes(communityGift.symbol);
+            treeAttribute.freeReserveSymbol(communityGift.symbol);
         }
 
-        treeAttribute.reserveTreeAttributes(_symbol);
+        treeAttribute.reserveSymbol(_symbol);
 
         communityGift.symbol = _symbol;
 

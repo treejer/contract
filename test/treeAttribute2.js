@@ -2243,5 +2243,43 @@ contract("TreeAttribute", (accounts) => {
         }
       );
     });
+
+    ////////////////////////////
+
+    it("should getFunderRank work successfully", async () => {
+      ////------------------ deploy testTree ------------------------------
+
+      testInstance = await TestTree2.new({
+        from: deployerAccount,
+      });
+
+      await treeAttributeInstance.setTreeTokenAddress(testInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank1(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank2(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await testInstance.rank3(deployerAccount, {
+        from: userAccount6,
+      });
+
+      await treeAttributeInstance.getFunderRank(deployerAccount, {
+        from: deployerAccount,
+      });
+    });
   });
 });

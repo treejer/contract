@@ -459,12 +459,13 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
-    function resetSaleTypeBatch(uint256 _startTreeId, uint256 _endTreeId)
-        external
-        onlyTreejerContract
-    {
+    function resetSaleTypeBatch(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint256 _saleType
+    ) external onlyTreejerContract {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (trees[i].saleType == 2) {
+            if (trees[i].saleType == _saleType) {
                 trees[i].saleType = 0;
             }
         }

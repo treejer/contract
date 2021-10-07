@@ -211,7 +211,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
         if (incSaleData.increments > 0) {
             treeFactory.resetSaleTypeBatch(
                 incSaleData.startTreeId,
-                incSaleData.endTreeId
+                incSaleData.endTreeId,
+                2
             );
         }
 
@@ -247,7 +248,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
             "IncrementalSale not exist or count must be lt endTree"
         );
 
-        treeFactory.resetSaleTypeBatch(incSaleData.startTreeId, newStartTreeId);
+        treeFactory.resetSaleTypeBatch(
+            incSaleData.startTreeId,
+            newStartTreeId,
+            2
+        );
 
         incSaleData.startTreeId = newStartTreeId;
         lastSold = newStartTreeId - 1;

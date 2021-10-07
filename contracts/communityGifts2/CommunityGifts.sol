@@ -158,6 +158,28 @@ contract CommunityGifts is Initializable, RelayRecipient {
         emit CommuintyGiftSet();
     }
 
+    function freeGiftRange(
+        address _adminWalletAddress,
+        uint256 _startTreeId,
+        uint256 _upTo
+    ) external {
+        bool check = treeFactory.manageSaleTypeBatch(_startTreeId, _upTo, 5);
+        require(check, "trees are not available");
+
+        currentTree = _startTreeId;
+        upTo = _upTo;
+
+        bool success = daiToken.transferFrom(
+            _adminWalletAddress,
+            address(planterFundContract),
+            (_upTo - _startTreeId) * (planterFund + referralFund)
+        );
+
+        require(success, "unsuccessful transfer");
+
+        emit CommuintyGiftSet();
+    }
+
     function reserveSymbol(uint64 _symbol) external onlyDataManager {
         treeAttribute.reserveSymbol(_symbol);
         symbols.push(_symbol);

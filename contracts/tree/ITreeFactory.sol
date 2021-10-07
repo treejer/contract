@@ -178,8 +178,11 @@ interface ITreeFactory {
     function resetSaleType(uint256 _treeId) external;
 
     /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
-    function resetSaleTypeBatch(uint256 _startTreeId, uint256 _endTreeId)
-        external;
+    function resetSaleTypeBatch(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint256 _saleType
+    ) external;
 
     /**
      * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}

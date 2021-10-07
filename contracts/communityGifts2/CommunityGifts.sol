@@ -266,7 +266,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
             "you cant claim tree"
         );
 
-        require(currentTree < upTo, "no tree exists for gift");
+        require(currentTree < upTo, "trees are not available");
         require(claimedCount < symbols.length, "no symbol exists for gift");
 
         bool flag = false;
@@ -286,6 +286,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint256 diffrence;
         uint256 symbolSec;
         uint256 availableCount;
+
         for (uint256 i = 0; i < symbols.length; i++) {
             diffrence = symbols.length - claimedCount;
             symbolSec = diffrence > 0 ? rand % diffrence : 0;
@@ -305,6 +306,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
                             generatedSymbol = symbols[j];
                             flag = true;
                         }
+
                         break;
                     }
                     availableCount += 1;

@@ -541,7 +541,7 @@ contract("CommunityGifts", (accounts) => {
       );
     });
   });
-*/
+
 
   describe("reserveSymbol and freeReservedSymbol", () => {
     beforeEach(async () => {
@@ -571,64 +571,64 @@ contract("CommunityGifts", (accounts) => {
       );
     });
 
-    it("should reserve symbol", async () => {
-      await Common.addTreejerContractRole(
-        arInstance,
-        communityGiftsInstance.address,
-        deployerAccount
-      );
+    // it("should reserve symbol", async () => {
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     communityGiftsInstance.address,
+    //     deployerAccount
+    //   );
 
-      const symbolsArray = [];
-      for (let i = 0; i < 5; i++) {
-        let rand = parseInt(Math.random() * 10e10);
-        while (symbolsArray.includes(rand)) {
-          rand = parseInt(Math.random() * 10e10);
-        }
-        symbolsArray[i] = rand;
-      }
+    //   const symbolsArray = [];
+    //   for (let i = 0; i < 5; i++) {
+    //     let rand = parseInt(Math.random() * 10e10);
+    //     while (symbolsArray.includes(rand)) {
+    //       rand = parseInt(Math.random() * 10e10);
+    //     }
+    //     symbolsArray[i] = rand;
+    //   }
 
-      await communityGiftsInstance
-        .reserveSymbol(symbolsArray[0], { from: userAccount1 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+    //   await communityGiftsInstance
+    //     .reserveSymbol(symbolsArray[0], { from: userAccount1 })
+    //     .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      for (i = 0; i < symbolsArray.length; i++) {
-        await communityGiftsInstance.reserveSymbol(symbolsArray[i], {
-          from: dataManager,
-        });
-      }
+    //   for (i = 0; i < symbolsArray.length; i++) {
+    //     await communityGiftsInstance.reserveSymbol(symbolsArray[i], {
+    //       from: dataManager,
+    //     });
+    //   }
 
-      for (let i = 0; i < symbolsArray.length; i++) {
-        const symbolsResult = await communityGiftsInstance.symbols.call(i);
-        const usedResult = await communityGiftsInstance.used.call(i);
-        assert.equal(
-          Number(symbolsResult),
-          symbolsArray[i],
-          "symbol result is incorrect"
-        );
-        assert.equal(usedResult, false, "used result is incorrect");
-      }
-      const lastSymbolValue = web3.utils.toBN("12345678987654321");
-      await communityGiftsInstance.reserveSymbol(lastSymbolValue, {
-        from: dataManager,
-      });
+    //   for (let i = 0; i < symbolsArray.length; i++) {
+    //     const symbolsResult = await communityGiftsInstance.symbols.call(i);
+    //     const usedResult = await communityGiftsInstance.used.call(i);
+    //     assert.equal(
+    //       Number(symbolsResult),
+    //       symbolsArray[i],
+    //       "symbol result is incorrect"
+    //     );
+    //     assert.equal(usedResult, false, "used result is incorrect");
+    //   }
+    //   const lastSymbolValue = web3.utils.toBN("12345678987654321");
+    //   await communityGiftsInstance.reserveSymbol(lastSymbolValue, {
+    //     from: dataManager,
+    //   });
 
-      const lastSymbolsResult = await communityGiftsInstance.symbols.call(
-        symbolsArray.length
-      );
-      const lastUsedResult = await communityGiftsInstance.used.call(
-        symbolsArray.length
-      );
+    //   const lastSymbolsResult = await communityGiftsInstance.symbols.call(
+    //     symbolsArray.length
+    //   );
+    //   const lastUsedResult = await communityGiftsInstance.used.call(
+    //     symbolsArray.length
+    //   );
 
-      assert.equal(
-        Number(lastSymbolsResult),
-        Number(lastSymbolValue),
-        "last symbol result is incorrect"
-      );
-      assert.equal(lastUsedResult, false, "last used result is incorrect");
-    });
+    //   assert.equal(
+    //     Number(lastSymbolsResult),
+    //     Number(lastSymbolValue),
+    //     "last symbol result is incorrect"
+    //   );
+    //   assert.equal(lastUsedResult, false, "last used result is incorrect");
+    // });
   });
 
-  /*
+  */
 
   describe("update giftees", () => {
     beforeEach(async () => {
@@ -638,12 +638,7 @@ contract("CommunityGifts", (accounts) => {
 
       communityGiftsInstance = await deployProxy(
         CommunityGifts,
-        [
-          arInstance.address,
-          expireDate,
-          initialPlanterFund,
-          initialReferralFund,
-        ],
+        [arInstance.address, initialPlanterFund, initialReferralFund],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -720,6 +715,13 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       });
 
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       //----------------add role to treejer contract role to treeFactoryInstance address
       await Common.addTreejerContractRole(
         arInstance,
@@ -733,7 +735,91 @@ contract("CommunityGifts", (accounts) => {
         communityGiftsInstance.address,
         deployerAccount
       );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
     });
+
+    it("claimGift should be reject", async () => {
+      await communityGiftsInstance
+        .claimGift({
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+      const startDate = parseInt(new Date().getTime() / 1000) + 60 * 60;
+      const expireDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+
+      await communityGiftsInstance.addGiftee(
+        userAccount1,
+        startDate,
+        expireDate,
+        {
+          from: dataManager,
+        }
+      );
+
+      await communityGiftsInstance
+        .claimGift({
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+      await communityGiftsInstance.updateGiftee(userAccount1, 10, 500, {
+        from: dataManager,
+      });
+
+      await communityGiftsInstance
+        .claimGift({
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+      await communityGiftsInstance.updateGiftee(userAccount1, 10, expireDate, {
+        from: dataManager,
+      });
+
+      await communityGiftsInstance
+        .claimGift({
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
+
+      ///------------------------------------------- set mint ----------------------------------------------------------
+      await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
+
+      await daiInstance.approve(
+        communityGiftsInstance.address,
+        web3.utils.toWei("1000"),
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await communityGiftsInstance.setGiftRange(deployerAccount, 10, 13, {
+        from: dataManager,
+      });
+
+      await communityGiftsInstance
+        .claimGift({
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+
+      await communityGiftsInstance.reserveSymbol(1050, {
+        from: dataManager,
+      });
+
+      await communityGiftsInstance.claimGift({
+        from: userAccount1,
+      });
+      // .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+    });
+
+    /*ssss
 
     /////////////////---------------------------------set gift range--------------------------------------------------------
 
@@ -1355,7 +1441,10 @@ contract("CommunityGifts", (accounts) => {
       //   })
       //   .should.be.rejectedWith(CommunityGiftErrorMsg.MAX_GIFT_AMOUNT_REACHED);
     });
+    ssss */
   });
+
+  /*
 
   describe("claim tree and transfer tree", () => {
     beforeEach(async () => {

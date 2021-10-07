@@ -62,6 +62,8 @@ interface ITreeAttribute {
      */
     function freeReserveSymbol(uint64 _generatedSymbol) external;
 
+    function freeReserveSymbolBool(uint64 _generatedSymbol) external;
+
     /**
      * @dev admin assigns symbol to specified treeId
      * @param treeId id of tree

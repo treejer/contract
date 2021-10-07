@@ -127,6 +127,20 @@ contract TreeAttribute is Initializable {
     }
 
     /**
+     * @dev free reservation of a unique symbol
+     * @param _generatedSymbol unique symbol to reserve
+     */
+    function freeReserveSymbolBool(uint64 _generatedSymbol)
+        external
+        onlyDataManagerOrTreejerContract
+    {
+        if (uniqueSymbol[_generatedSymbol].status == 1) {
+            uniqueSymbol[_generatedSymbol].status = 0;
+            emit ReservedSymbolFreed(_generatedSymbol);
+        }
+    }
+
+    /**
      * @dev admin assigns symbol to specified treeId
      * @param treeId id of tree
      * @param generatedCode unique symbol code to assign

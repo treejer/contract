@@ -36,7 +36,7 @@ interface ITreeAttribute {
             uint32
         );
 
-    function uniqueSymbol(uint256 _uniqueSymbol)
+    function uniqueSymbol(uint64 _uniqueSymbol)
         external
         view
         returns (uint128, uint128);

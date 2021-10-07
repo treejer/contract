@@ -152,6 +152,8 @@ const CommunityGiftErrorMsg = {
 
   UPDATE_GIFTEE_INVALID_STATUS: "Status must be one",
   CANT_SET_RANGE: "cant set gift range",
+  CANT_CLAIM: "you cant claim tree",
+  SYMBOL_NOT_EXIST: "no symbol exists for gift",
 };
 
 const WethFundErrorMsg = {

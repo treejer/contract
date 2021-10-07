@@ -43,6 +43,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     uint256 public claimedCount;
     uint256 public currentTree;
     uint256 public upTo;
+    uint256 public count;
 
     ////////////////////////////////////////////////
     event GifteeUpdated(address giftee);
@@ -140,44 +141,37 @@ contract CommunityGifts is Initializable, RelayRecipient {
         address _adminWalletAddress,
         uint256 _startTreeId,
         uint256 _upTo
-    ) external {
+    ) external onlyDataManager {
         bool check = treeFactory.manageSaleTypeBatch(_startTreeId, _upTo, 5);
         require(check, "trees are not available");
 
         currentTree = _startTreeId;
         upTo = _upTo;
 
-        bool success = daiToken.transferFrom(
-            _adminWalletAddress,
-            address(planterFundContract),
-            (_upTo - _startTreeId) * (planterFund + referralFund)
-        );
+        int256 extra = int256(_upTo - _startTreeId) - int256(count);
 
-        require(success, "unsuccessful transfer");
+        if (extra > 0) {
+            bool success = daiToken.transferFrom(
+                _adminWalletAddress,
+                address(planterFundContract),
+                uint256(extra) * (planterFund + referralFund)
+            );
+
+            require(success, "unsuccessful transfer");
+
+            count = 0;
+        } else {
+            count = uint256(-extra);
+        }
 
         emit CommuintyGiftSet();
     }
 
-    function freeGiftRange(
-        address _adminWalletAddress,
-        uint256 _startTreeId,
-        uint256 _upTo
-    ) external {
-        bool check = treeFactory.manageSaleTypeBatch(_startTreeId, _upTo, 5);
-        require(check, "trees are not available");
-
-        currentTree = _startTreeId;
-        upTo = _upTo;
-
-        bool success = daiToken.transferFrom(
-            _adminWalletAddress,
-            address(planterFundContract),
-            (_upTo - _startTreeId) * (planterFund + referralFund)
-        );
-
-        require(success, "unsuccessful transfer");
-
-        emit CommuintyGiftSet();
+    function freeGiftRange() external onlyDataManager {
+        treeFactory.resetSaleTypeBatch(currentTree, upTo, 5);
+        count = upTo - currentTree;
+        upTo = 0;
+        currentTree = 0;
     }
 
     function reserveSymbol(uint64 _symbol) external onlyDataManager {

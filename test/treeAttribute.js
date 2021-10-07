@@ -5,6 +5,7 @@ const TreeAttribute = artifacts.require("TreeAttribute.sol");
 const Tree = artifacts.require("Tree.sol");
 const TestTree = artifacts.require("TestTree.sol");
 const TestTree2 = artifacts.require("TestTree2.sol");
+const TestTreeAttribute = artifacts.require("TestTreeAttribute.sol");
 
 //treasury section
 const WethFund = artifacts.require("WethFund.sol");
@@ -878,6 +879,75 @@ contract("TreeAttribute", (accounts) => {
           from: deployerAccount,
         }
       );
+    });
+  });
+
+  describe("RandAvailibity", () => {
+    ////-------------------------------- randAvailibity ---------------------------------
+
+    it("RandAvailibity work successfully", async () => {
+      ////------------------ deploy testTreeAttribute ------------------------------
+
+      testAttributeInstance = await TestTreeAttribute.new({
+        from: deployerAccount,
+      });
+
+      await testAttributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testAttributeInstance
+        .randAvailibity(10001, 10012, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      let result = await testAttributeInstance.randAvailibity.call(
+        10001,
+        10012,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(Number(result), 10012, "result is not correct");
+
+      await testAttributeInstance.test(10012, {
+        from: deployerAccount,
+      });
+
+      let result2 = await testAttributeInstance.randAvailibity.call(
+        10001,
+        10012,
+        { from: deployerAccount }
+      );
+
+      await testAttributeInstance.randAvailibity(10001, 10012, {
+        from: deployerAccount,
+      });
+
+      assert.notEqual(Number(result2), 10012, "result2 is not correct");
+
+      let generatedAttributesCount =
+        await testAttributeInstance.generatedAttributes.call(10012);
+
+      assert.equal(
+        Number(generatedAttributesCount),
+        2,
+        "result is not correct"
+      );
+
+      let result3 = await testAttributeInstance.randAvailibity.call(1, 1, {
+        from: deployerAccount,
+      });
+
+      assert.equal(Number(result3), 1, "result is not correct");
     });
   });
 

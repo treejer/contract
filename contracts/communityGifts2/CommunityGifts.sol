@@ -165,6 +165,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint256 _startTreeId,
         uint256 _upTo
     ) external onlyDataManager {
+        require(_upTo > _startTreeId, "invalid range");
         require(upTo == currentTree, "cant set gift range");
 
         bool check = treeFactory.manageSaleTypeBatch(_startTreeId, _upTo, 5);

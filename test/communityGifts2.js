@@ -13,6 +13,7 @@ const Units = require("ethereumjs-units");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
+const math = require("./math");
 
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
@@ -922,7 +923,270 @@ contract("CommunityGifts", (accounts) => {
         deployerAccount
       );
     });
-    it("should setGiftRange succussfully", async () => {});
+    it("should setGiftRange  and freeGiftRange succussfully", async () => {
+      //------------------initial data
+
+      const startTree = 11;
+      const endTree = 21;
+
+      const newStartTRee = 31;
+      const newEndTree = 41;
+
+      const transferAmount = web3.utils.toWei("70");
+      const adminWallet = userAccount8;
+
+      //////////////// set price
+
+      await communityGiftsInstance.setPrice(
+        await web3.utils.toWei("5"),
+        await web3.utils.toWei("2"),
+        {
+          from: dataManager,
+        }
+      );
+
+      ///////---------------- handle admin walllet
+
+      await daiInstance.setMint(adminWallet, transferAmount);
+
+      await daiInstance.approve(
+        communityGiftsInstance.address,
+        transferAmount,
+        {
+          from: adminWallet,
+        }
+      );
+
+      const eventTx = await communityGiftsInstance.setGiftRange(
+        adminWallet,
+        startTree,
+        endTree,
+        {
+          from: dataManager,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx, "CommuintyGiftSet");
+      for (let i = 11; i < 21; i++) {
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          5,
+          `saleType is not correct for tree ${i}`
+        );
+      }
+
+      assert.equal(
+        Number(startTree),
+        Number(await communityGiftsInstance.currentTree.call()),
+        "toClaim is not correct"
+      );
+
+      assert.equal(
+        Number(endTree),
+        Number(await communityGiftsInstance.upTo.call()),
+        "upTo is not correct"
+      );
+      //////////////////// ---------------- check planterFund balance
+      assert.equal(
+        Number(await daiInstance.balanceOf(planterFundsInstnce.address)),
+        math.mul(10, web3.utils.toWei("7")),
+        "planter balance is inccorect in range 1 set"
+      );
+
+      await communityGiftsInstance
+        .setGiftRange(adminWallet, newStartTRee, newEndTree, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_SET_RANGE);
+
+      await communityGiftsInstance
+        .freeGiftRange({ from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+      const countBefore = await communityGiftsInstance.count.call();
+      const diffrence =
+        Number(await communityGiftsInstance.upTo.call()) -
+        Number(await communityGiftsInstance.currentTree.call());
+      assert.equal(Number(countBefore), 0, "count is incorrect");
+
+      await communityGiftsInstance.freeGiftRange({ from: dataManager });
+
+      for (let i = 11; i < 21; i++) {
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          0,
+          `saleType is not correct for tree ${i}`
+        );
+      }
+
+      assert.equal(
+        Number(await communityGiftsInstance.upTo.call()),
+        0,
+        "upTo after free reserve is inccorect"
+      );
+      assert.equal(
+        Number(await communityGiftsInstance.currentTree.call()),
+        0,
+        "currentTree after free reserve is inccorect"
+      );
+
+      const countAfter = await communityGiftsInstance.count.call();
+
+      assert.equal(Number(countAfter), diffrence, "count after is incorrect");
+
+      await communityGiftsInstance.setGiftRange(
+        adminWallet,
+        newStartTRee,
+        newEndTree,
+        {
+          from: dataManager,
+        }
+      );
+
+      for (let i = 31; i < 41; i++) {
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          5,
+          `saleType is not correct for tree ${i}`
+        );
+      }
+
+      assert.equal(
+        Number(newStartTRee),
+        Number(await communityGiftsInstance.currentTree.call()),
+        "toClaim is not correct"
+      );
+
+      assert.equal(
+        Number(newEndTree),
+        Number(await communityGiftsInstance.upTo.call()),
+        "upTo is not correct"
+      );
+    });
+
+    it("should range complex (some trees claimed,first set smaller and then set bigger range)", async () => {
+      //------------------initial data
+
+      const startTree = 11;
+      const endTree = 21;
+
+      const newStartTRee = 31;
+      const newEndTree = 41;
+      const startDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+      const expireDate = await Common.timeInitial(TimeEnumes.hours, 5);
+
+      const transferAmount = web3.utils.toWei("70");
+      const adminWallet = userAccount8;
+
+      ////////////// deploy contract
+      treeAttributeInstance = await deployProxy(
+        TreeAttribute,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      ////////////////// handle role
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      ///////////// set address
+      await communityGiftsInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      //////////////// set price
+
+      await communityGiftsInstance.setPrice(
+        await web3.utils.toWei("5"),
+        await web3.utils.toWei("2"),
+        {
+          from: dataManager,
+        }
+      );
+
+      ///////---------------- handle admin walllet
+
+      await daiInstance.setMint(adminWallet, transferAmount);
+
+      await daiInstance.approve(
+        communityGiftsInstance.address,
+        transferAmount,
+        {
+          from: adminWallet,
+        }
+      );
+
+      await communityGiftsInstance.setGiftRange(
+        adminWallet,
+        startTree,
+        endTree,
+        {
+          from: dataManager,
+        }
+      );
+
+      const symbolsArray = [];
+      for (let i = 0; i < 10; i++) {
+        let rand = parseInt(Math.random() * 10e10);
+        while (symbolsArray.includes(rand)) {
+          rand = parseInt(Math.random() * 10e10);
+        }
+        symbolsArray[i] = rand;
+        await communityGiftsInstance.reserveSymbol(rand, {
+          from: dataManager,
+        });
+      }
+      //////////////// --------------- add giftees
+      await communityGiftsInstance.addGiftee(
+        userAccount1,
+        startDate,
+        expireDate,
+        { from: dataManager }
+      );
+      await communityGiftsInstance.addGiftee(
+        userAccount2,
+        startDate,
+        expireDate,
+        {
+          from: dataManager,
+        }
+      );
+      await communityGiftsInstance.addGiftee(
+        userAccount3,
+        startDate,
+        expireDate,
+        {
+          from: dataManager,
+        }
+      );
+      ////////////// claim gift
+
+      await communityGiftsInstance.claimGift({ from: userAccount1 });
+      await communityGiftsInstance.claimGift({ from: userAccount2 });
+      await communityGiftsInstance.claimGift({ from: userAccount3 });
+
+      /////////////////////////// check data
+
+      assert.equal(
+        Number(await communityGiftsInstance.currentTree.call()),
+        14,
+        "current tree is incorrect"
+      );
+    });
 
     it("fail to set gift range", async () => {
       //------------------initial data
@@ -936,21 +1200,24 @@ contract("CommunityGifts", (accounts) => {
       const addminWalletWithInsufficientTransferAmount = userAccount6;
       const insufficientApprovalAmount = web3.utils.toWei("629");
       const adminWallet = userAccount8;
-      const expireDate = await Common.timeInitial(TimeEnumes.minutes, 1440);
       const treeIdInAuction = 16;
-      const startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
-      const endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+      //////////////// set price
+
+      await communityGiftsInstance.setPrice(planterShare, referralShare, {
+        from: dataManager,
+      });
 
       ///////////////// ---------------------- fail because caller is not data manager
       await communityGiftsInstance
-        .setGiftsRange(adminWallet, startTree, endTree, {
+        .setGiftRange(adminWallet, startTree, endTree, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       ///////////----------------- fail because of invalid range
       await communityGiftsInstance
-        .setGiftsRange(adminWallet, endTree, startTree, {
+        .setGiftRange(adminWallet, endTree, startTree, {
           from: dataManager,
         })
         .should.be.rejectedWith(CommunityGiftErrorMsg.INVALID_RANGE);
@@ -968,13 +1235,11 @@ contract("CommunityGifts", (accounts) => {
       );
 
       await communityGiftsInstance
-        .setGiftsRange(
+        .setGiftRange(
+          adminWallet,
           startTree,
           endTree,
-          planterShare,
-          referralShare,
-          Number(expireDate),
-          adminWallet,
+
           {
             from: dataManager,
           }
@@ -996,13 +1261,11 @@ contract("CommunityGifts", (accounts) => {
       );
 
       await communityGiftsInstance
-        .setGiftsRange(
+        .setGiftRange(
+          addminWalletWithInsufficientTransferAmount,
           startTree,
           endTree,
-          planterShare,
-          referralShare,
-          Number(expireDate),
-          addminWalletWithInsufficientTransferAmount,
+
           {
             from: dataManager,
           }
@@ -1011,20 +1274,12 @@ contract("CommunityGifts", (accounts) => {
 
       //////////////----------------- fail because of invalid admin account
       await communityGiftsInstance
-        .setGiftsRange(
-          startTree,
-          endTree,
-          planterShare,
-          referralShare,
-          Number(expireDate),
-          zeroAddress,
-          {
-            from: dataManager,
-          }
-        )
+        .setGiftRange(zeroAddress, startTree, endTree, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(erc20ErrorMsg.ZERO_ADDRESS);
 
-      //----------------- fail setGiftsRange because a tree is not free
+      //----------------- fail setGiftRange because a tree is not free
 
       await treeFactoryInstance.listTree(treeIdInAuction, "some ipfs hash", {
         from: dataManager,
@@ -1044,17 +1299,9 @@ contract("CommunityGifts", (accounts) => {
       );
 
       await communityGiftsInstance
-        .setGiftsRange(
-          startTree,
-          endTree,
-          planterShare,
-          referralShare,
-          Number(expireDate),
-          adminWallet,
-          {
-            from: dataManager,
-          }
-        )
+        .setGiftRange(adminWallet, startTree, endTree, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
     });
   });

@@ -2860,3 +2860,79 @@ contract("CommunityGifts", (accounts) => {
     });
   });
 });
+
+// it("claimGift should be reject", async () => {
+//   await communityGiftsInstance
+//     .claimGift({
+//       from: userAccount1,
+//     })
+//     .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+//   const startDate = parseInt(new Date().getTime() / 1000) + 60 * 60;
+//   const expireDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+
+//   await communityGiftsInstance.addGiftee(
+//     userAccount1,
+//     startDate,
+//     expireDate,
+//     {
+//       from: dataManager,
+//     }
+//   );
+
+//   await communityGiftsInstance
+//     .claimGift({
+//       from: userAccount1,
+//     })
+//     .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+//   await communityGiftsInstance.updateGiftee(userAccount1, 10, 500, {
+//     from: dataManager,
+//   });
+
+//   await communityGiftsInstance
+//     .claimGift({
+//       from: userAccount1,
+//     })
+//     .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+
+//   await communityGiftsInstance.updateGiftee(userAccount1, 10, expireDate, {
+//     from: dataManager,
+//   });
+
+//   await communityGiftsInstance
+//     .claimGift({
+//       from: userAccount1,
+//     })
+//     .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
+
+//   ///------------------------------------------- set mint ----------------------------------------------------------
+//   await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
+
+//   await daiInstance.approve(
+//     communityGiftsInstance.address,
+//     web3.utils.toWei("1000"),
+//     {
+//       from: deployerAccount,
+//     }
+//   );
+
+//   await communityGiftsInstance.setGiftRange(deployerAccount, 10, 13, {
+//     from: dataManager,
+//   });
+
+//   await communityGiftsInstance
+//     .claimGift({
+//       from: userAccount1,
+//     })
+//     .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+
+//   await communityGiftsInstance.reserveSymbol(1050, {
+//     from: dataManager,
+//   });
+
+//   await communityGiftsInstance.claimGift({
+//     from: userAccount1,
+//   });
+//   // .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+// });

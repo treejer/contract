@@ -293,6 +293,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
                 treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
 
                 delete giftees[_msgSender()];
+
+                emit TreeClaimed(currentTree);
             }
         }
     }

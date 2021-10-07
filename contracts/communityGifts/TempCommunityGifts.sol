@@ -12,7 +12,7 @@ import "../gsn/RelayRecipient.sol";
 
 /** @title CommunityGifts */
 
-contract CommunityGifts is Initializable, RelayRecipient {
+contract TempCommunityGifts is Initializable, RelayRecipient {
     /** NOTE {isCommunityGifts} set inside the initialize to {true} */
     bool public isCommunityGifts;
 

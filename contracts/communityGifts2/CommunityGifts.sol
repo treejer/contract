@@ -35,7 +35,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint64 status;
     }
 
-    mapping(address => GifteeData) giftees;
+    mapping(address => GifteeData) public giftees;
 
     uint64[] public symbols;
     bool[] public used;
@@ -75,6 +75,28 @@ contract CommunityGifts is Initializable, RelayRecipient {
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
         _;
+    }
+
+    /**
+     * @dev initialize accessRestriction contract and set true for isCommunityGifts
+     * set expire date and planterFund and referralFund initial value
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @param _planterFund initial planter fund
+     * @param _referralFund initial referral fund
+     */
+    function initialize(
+        address _accessRestrictionAddress,
+        uint256 _planterFund,
+        uint256 _referralFund
+    ) external initializer {
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
+        require(candidateContract.isAccessRestriction());
+        isCommunityGifts = true;
+        accessRestriction = candidateContract;
+        planterFund = _planterFund;
+        referralFund = _referralFund;
     }
 
     /**

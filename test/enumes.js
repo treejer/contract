@@ -149,6 +149,7 @@ const CommunityGiftErrorMsg = {
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
   INVALID_RANGE: "invalid range",
+  UPDATE_GIFTEE_INVALID_STATUS: "Status must be one",
 };
 
 const WethFundErrorMsg = {

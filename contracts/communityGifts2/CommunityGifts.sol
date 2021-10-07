@@ -195,7 +195,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
     function freeGiftRange() external onlyDataManager {
         treeFactory.resetSaleTypeBatch(currentTree, upTo, 5);
-        count = upTo - currentTree;
+        count += upTo - currentTree;
         upTo = 0;
         currentTree = 0;
     }

@@ -75,6 +75,67 @@ contract CommunityGifts is Initializable, RelayRecipient {
         _;
     }
 
+    /**
+     * @dev admin set the trustedForwarder adress
+     * @param _address is the address of trusted forwarder
+     */
+
+    function setTrustedForwarder(address _address)
+        external
+        onlyAdmin
+        validAddress(_address)
+    {
+        trustedForwarder = _address;
+    }
+
+    /**
+     * @dev admin set DaiToken address
+     * @param _daiTokenAddress set to the address of DaiToken
+     */
+    function setDaiTokenAddress(address _daiTokenAddress)
+        external
+        onlyAdmin
+        validAddress(_daiTokenAddress)
+    {
+        IERC20Upgradeable candidateContract = IERC20Upgradeable(
+            _daiTokenAddress
+        );
+        daiToken = candidateContract;
+    }
+
+    /**
+     * @dev admin set TreeAttributesAddress
+     * @param _address set to the address of treeAttribute
+     */
+
+    function setTreeAttributesAddress(address _address) external onlyAdmin {
+        ITreeAttribute candidateContract = ITreeAttribute(_address);
+        require(candidateContract.isTreeAttribute());
+        treeAttribute = candidateContract;
+    }
+
+    /**
+     * @dev admin set TreeFactoryAddress
+     * @param _address set to the address of treeFactory
+     */
+
+    function setTreeFactoryAddress(address _address) external onlyAdmin {
+        ITreeFactory candidateContract = ITreeFactory(_address);
+        require(candidateContract.isTreeFactory());
+        treeFactory = candidateContract;
+    }
+
+    /**
+     * @dev admin set PlanterFundAddress
+     * @param _address set to the address of PlanterFund
+     */
+
+    function setPlanterFundAddress(address _address) external onlyAdmin {
+        IPlanterFund candidateContract = IPlanterFund(_address);
+        require(candidateContract.isPlanterFund());
+        planterFundContract = candidateContract;
+    }
+
     function setGiftRange(
         address _adminWalletAddress,
         uint256 _startTreeId,
@@ -153,5 +214,86 @@ contract CommunityGifts is Initializable, RelayRecipient {
         referralFund = _referralFund;
 
         emit CommunityGiftPlanterFund(_planterFund, _referralFund);
+    }
+
+    function claimGift() external {
+        GifteeData storage giftee = giftees[_msgSender()];
+        require(
+            giftee.expireDate > block.timestamp &&
+                giftee.startDate < block.timestamp &&
+                giftee.status == 1,
+            "you cant claim tree"
+        );
+
+        if (currentTree < upTo) {
+            if (claimedCount < symbols.length) {
+                bool flag = false;
+
+                uint256 rand = uint256(
+                    keccak256(
+                        abi.encode(
+                            giftee.expireDate,
+                            giftee.startDate,
+                            msg.data,
+                            currentTree
+                        )
+                    )
+                );
+
+                uint256 availableCount = 0;
+                uint64 generatedSymbol;
+
+                for (uint256 i = 0; i < symbols.length; i++) {
+                    uint256 symbolSec = rand % (symbols.length - claimedCount);
+
+                    for (uint256 j = 0; j < symbols.length; j++) {
+                        if (!used[j]) {
+                            availableCount += 1;
+                            if (availableCount == symbolSec) {
+                                claimedCount += 1;
+                                used[j] = true;
+
+                                (, uint128 status) = treeAttribute.uniqueSymbol(
+                                    symbols[j]
+                                );
+
+                                if (status == 1) {
+                                    generatedSymbol = symbols[j];
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (flag) {
+                        break;
+                    }
+                }
+
+                uint64 generatedAttribute = treeAttribute.randAvailibity(
+                    currentTree,
+                    uint64(rand & type(uint64).max)
+                );
+
+                treeAttribute.setTreeAttributesByAdmin(
+                    currentTree,
+                    generatedAttribute,
+                    generatedSymbol,
+                    18
+                );
+
+                planterFundContract.updateProjectedEarnings(
+                    currentTree,
+                    planterFund,
+                    referralFund
+                );
+
+                currentTree += 1;
+
+                treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
+
+                delete giftees[_msgSender()];
+            }
+        }
     }
 }

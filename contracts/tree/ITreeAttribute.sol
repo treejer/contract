@@ -36,11 +36,20 @@ interface ITreeAttribute {
             uint32
         );
 
+    function uniqueSymbol(uint256 _uniqueSymbol)
+        external
+        view
+        returns (uint128, uint128);
+
     /** @return number of generations of a unique symbol */
     function generatedAttributes(uint32 attributeId)
         external
         view
         returns (uint32);
+
+    function randAvailibity(uint256 _treeId, uint64 _rand)
+        external
+        returns (uint64);
 
     /** @return reserved status of a unique symbol */
     function reservedAttributes(uint32 attributeId)
@@ -70,8 +79,12 @@ interface ITreeAttribute {
      * @param generatedCode unique symbol code to assign
      * NOTE emit a {SymbolSetByAdmin} event
      */
-    function setTreeAttributesByAdmin(uint256 treeId, uint32 generatedCode)
-        external;
+    function setTreeAttributesByAdmin(
+        uint256 treeId,
+        uint64 generatedCode,
+        uint64 generatedSymbol,
+        uint8 generationType
+    ) external;
 
     /**
      * @dev generate a 256 bits random number as a base for tree attributes and slice it

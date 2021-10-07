@@ -264,6 +264,26 @@ contract TreeAttribute is Initializable {
         }
     }
 
+    function randAvailibity(uint256 _treeId, uint64 _rand)
+        external
+        onlyTreejerContract
+        returns (uint64)
+    {
+        if (generatedAttributes[_rand] == 0) {
+            return _rand;
+        } else {
+            generatedAttributes[_rand] = generatedAttributes[_rand] + 1;
+
+            (bool flag, uint64 generatedAttribute) = _createUniqueAttribute(
+                _treeId
+            );
+
+            require(flag, "unique attribute not fund");
+
+            return generatedAttribute;
+        }
+    }
+
     /**
      * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
      * his/her wallet

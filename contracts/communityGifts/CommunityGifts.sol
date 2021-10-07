@@ -96,18 +96,15 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint256 _planterFund,
         uint256 _referralFund
     ) external initializer {
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
-
-        require(candidateContract.isAccessRestriction());
-
-        isCommunityGifts = true;
-        accessRestriction = candidateContract;
-
-        expireDate = _expireDate;
-        planterFund = _planterFund;
-        referralFund = _referralFund;
+        // IAccessRestriction candidateContract = IAccessRestriction(
+        //     _accessRestrictionAddress
+        // );
+        // require(candidateContract.isAccessRestriction());
+        // isCommunityGifts = true;
+        // accessRestriction = candidateContract;
+        // expireDate = _expireDate;
+        // planterFund = _planterFund;
+        // referralFund = _referralFund;
     }
 
     /**
@@ -120,7 +117,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
         onlyAdmin
         validAddress(_address)
     {
-        trustedForwarder = _address;
+        // trustedForwarder = _address;
     }
 
     /**
@@ -132,10 +129,10 @@ contract CommunityGifts is Initializable, RelayRecipient {
         onlyAdmin
         validAddress(_daiTokenAddress)
     {
-        IERC20Upgradeable candidateContract = IERC20Upgradeable(
-            _daiTokenAddress
-        );
-        daiToken = candidateContract;
+        // IERC20Upgradeable candidateContract = IERC20Upgradeable(
+        //     _daiTokenAddress
+        // );
+        // daiToken = candidateContract;
     }
 
     /**
@@ -144,9 +141,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
      */
 
     function setTreeAttributesAddress(address _address) external onlyAdmin {
-        ITreeAttribute candidateContract = ITreeAttribute(_address);
-        require(candidateContract.isTreeAttribute());
-        treeAttribute = candidateContract;
+        // ITreeAttribute candidateContract = ITreeAttribute(_address);
+        // require(candidateContract.isTreeAttribute());
+        // treeAttribute = candidateContract;
     }
 
     /**
@@ -155,9 +152,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
      */
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
-        ITreeFactory candidateContract = ITreeFactory(_address);
-        require(candidateContract.isTreeFactory());
-        treeFactory = candidateContract;
+        // ITreeFactory candidateContract = ITreeFactory(_address);
+        // require(candidateContract.isTreeFactory());
+        // treeFactory = candidateContract;
     }
 
     /**
@@ -166,9 +163,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
      */
 
     function setPlanterFundAddress(address _address) external onlyAdmin {
-        IPlanterFund candidateContract = IPlanterFund(_address);
-        require(candidateContract.isPlanterFund());
-        planterFundContract = candidateContract;
+        // IPlanterFund candidateContract = IPlanterFund(_address);
+        // require(candidateContract.isPlanterFund());
+        // planterFundContract = candidateContract;
     }
 
     /** @dev admin set the gift range from {_startTreeId} to {_endTreeId}
@@ -192,32 +189,26 @@ contract CommunityGifts is Initializable, RelayRecipient {
         uint64 _expireDate,
         address _adminWalletAddress
     ) external onlyDataManager {
-        require(_endTreeId > _startTreeId, "invalid range");
-
-        bool check = treeFactory.manageSaleTypeBatch(
-            _startTreeId,
-            _endTreeId,
-            5
-        );
-
-        require(check, "trees are not available");
-
-        planterFund = _planterFund;
-        referralFund = _referralFund;
-        expireDate = _expireDate;
-        maxGiftCount = _endTreeId - _startTreeId;
-        toClaim = _startTreeId;
-        upTo = _endTreeId;
-
-        bool success = daiToken.transferFrom(
-            _adminWalletAddress,
-            address(planterFundContract),
-            maxGiftCount * (planterFund + referralFund)
-        );
-
-        require(success, "unsuccessful transfer");
-
-        emit CommuintyGiftSet();
+        // require(_endTreeId > _startTreeId, "invalid range");
+        // bool check = treeFactory.manageSaleTypeBatch(
+        //     _startTreeId,
+        //     _endTreeId,
+        //     5
+        // );
+        // require(check, "trees are not available");
+        // planterFund = _planterFund;
+        // referralFund = _referralFund;
+        // expireDate = _expireDate;
+        // maxGiftCount = _endTreeId - _startTreeId;
+        // toClaim = _startTreeId;
+        // upTo = _endTreeId;
+        // bool success = daiToken.transferFrom(
+        //     _adminWalletAddress,
+        //     address(planterFundContract),
+        //     maxGiftCount * (planterFund + referralFund)
+        // );
+        // require(success, "unsuccessful transfer");
+        // emit CommuintyGiftSet();
     }
 
     /** @dev admin assign an unique symbol to a giftee
@@ -228,23 +219,18 @@ contract CommunityGifts is Initializable, RelayRecipient {
         external
         onlyDataManager
     {
-        CommunityGift storage communityGift = communityGifts[_giftee];
-
-        require(!communityGift.claimed, "Claimed before");
-
-        if (!communityGift.exist) {
-            require(giftCount < maxGiftCount, "max giftCount reached");
-            giftCount += 1;
-            communityGift.exist = true;
-        } else {
-            treeAttribute.freeReserveSymbol(communityGift.symbol);
-        }
-
-        treeAttribute.reserveSymbol(_symbol);
-
-        communityGift.symbol = _symbol;
-
-        emit GifteeUpdated(_giftee);
+        // CommunityGift storage communityGift = communityGifts[_giftee];
+        // require(!communityGift.claimed, "Claimed before");
+        // if (!communityGift.exist) {
+        //     require(giftCount < maxGiftCount, "max giftCount reached");
+        //     giftCount += 1;
+        //     communityGift.exist = true;
+        // } else {
+        //     treeAttribute.freeReserveSymbol(communityGift.symbol);
+        // }
+        // treeAttribute.reserveSymbol(_symbol);
+        // communityGift.symbol = _symbol;
+        // emit GifteeUpdated(_giftee);
     }
 
     /** @dev giftee can claim assigned tree before communityGift expireDate
@@ -253,28 +239,21 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * NOTE planterFund and referralFund of tree updated in planterFund contract
      */
     function claimTree() external {
-        CommunityGift storage communityGift = communityGifts[_msgSender()];
-
-        require(block.timestamp <= expireDate, "CommunityGift ended");
-        require(communityGifts[_msgSender()].exist, "User not exist");
-        require(!communityGifts[_msgSender()].claimed, "Claimed before");
-
-        uint256 treeId = toClaim;
-        toClaim += 1;
-
-        communityGift.claimed = true;
-
-        treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
-
-        planterFundContract.updateProjectedEarnings(
-            treeId,
-            planterFund,
-            referralFund
-        );
-
-        treeFactory.mintAssignedTree(treeId, _msgSender(), 3);
-
-        emit TreeClaimed(treeId);
+        // CommunityGift storage communityGift = communityGifts[_msgSender()];
+        // require(block.timestamp <= expireDate, "CommunityGift ended");
+        // require(communityGifts[_msgSender()].exist, "User not exist");
+        // require(!communityGifts[_msgSender()].claimed, "Claimed before");
+        // uint256 treeId = toClaim;
+        // toClaim += 1;
+        // communityGift.claimed = true;
+        // treeAttribute.setTreeAttributesByAdmin(treeId, communityGift.symbol);
+        // planterFundContract.updateProjectedEarnings(
+        //     treeId,
+        //     planterFund,
+        //     referralFund
+        // );
+        // treeFactory.mintAssignedTree(treeId, _msgSender(), 3);
+        // emit TreeClaimed(treeId);
     }
 
     /** @dev admin can set the maximum time that giftees can claim their gift before
@@ -282,10 +261,9 @@ contract CommunityGifts is Initializable, RelayRecipient {
      * @param _expireDate is the maximum time to claim tree
      */
     function setExpireDate(uint256 _expireDate) external onlyDataManager {
-        require(block.timestamp < expireDate, "can not update expire date");
-        expireDate = _expireDate;
-
-        emit CommuintyGiftSet();
+        // require(block.timestamp < expireDate, "can not update expire date");
+        // expireDate = _expireDate;
+        // emit CommuintyGiftSet();
     }
 
     /** @dev if giftee did not claim gift, admin can transfer reserved symbol to
@@ -301,28 +279,21 @@ contract CommunityGifts is Initializable, RelayRecipient {
         ifNotPaused
         onlyDataManager
     {
-        require(
-            block.timestamp > expireDate,
-            "CommunityGift Time not yet ended"
-        );
-
-        require(toClaim < upTo, "tree is not for community gift");
-
-        uint256 treeId = toClaim;
-
-        toClaim += 1;
-
-        treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
-
-        planterFundContract.updateProjectedEarnings(
-            treeId,
-            planterFund,
-            referralFund
-        );
-
-        treeFactory.mintAssignedTree(treeId, _giftee, 3);
-
-        emit TreeTransfered(treeId);
+        // require(
+        //     block.timestamp > expireDate,
+        //     "CommunityGift Time not yet ended"
+        // );
+        // require(toClaim < upTo, "tree is not for community gift");
+        // uint256 treeId = toClaim;
+        // toClaim += 1;
+        // treeAttribute.setTreeAttributesByAdmin(treeId, _symbol);
+        // planterFundContract.updateProjectedEarnings(
+        //     treeId,
+        //     planterFund,
+        //     referralFund
+        // );
+        // treeFactory.mintAssignedTree(treeId, _giftee, 3);
+        // emit TreeTransfered(treeId);
     }
 
     /** @dev admin can set planter and referral funds amount
@@ -334,9 +305,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
         external
         onlyDataManager
     {
-        planterFund = _planterFund;
-        referralFund = _referralFund;
-
-        emit CommunityGiftPlanterFund(_planterFund, _referralFund);
+        // planterFund = _planterFund;
+        // referralFund = _referralFund;
+        // emit CommunityGiftPlanterFund(_planterFund, _referralFund);
     }
 }

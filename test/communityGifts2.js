@@ -6,6 +6,7 @@ const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Tree = artifacts.require("Tree.sol");
 const Dai = artifacts.require("Dai.sol");
+const TestCommunityGifts = artifacts.require("TestCommunityGifts.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const Units = require("ethereumjs-units");
@@ -541,7 +542,7 @@ contract("CommunityGifts", (accounts) => {
       );
     });
   });
-*/
+
 
   describe("reserveSymbol and freeReservedSymbol", () => {
     beforeEach(async () => {
@@ -606,6 +607,15 @@ contract("CommunityGifts", (accounts) => {
           "symbol result is incorrect"
         );
         assert.equal(usedResult, false, "used result is incorrect");
+        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
+          symbolsArray[i]
+        );
+
+        assert.equal(
+          Number(uniqueSymbol.status),
+          1,
+          "uniqueSymbol status is incorrect"
+        );
       }
       const lastSymbolValue = web3.utils.toBN("12345678987654321");
       await communityGiftsInstance.reserveSymbol(lastSymbolValue, {
@@ -625,6 +635,427 @@ contract("CommunityGifts", (accounts) => {
         "last symbol result is incorrect"
       );
       assert.equal(lastUsedResult, false, "last used result is incorrect");
+    });
+
+    it("removeReservedSymbol should work successfully", async () => {
+      await Common.addTreejerContractRole(
+        arInstance,
+        communityGiftsInstance.address,
+        deployerAccount
+      );
+
+      const symbolsArray = [];
+      for (let i = 0; i < 5; i++) {
+        let rand = parseInt(Math.random() * 10e10);
+        while (symbolsArray.includes(rand)) {
+          rand = parseInt(Math.random() * 10e10);
+        }
+        symbolsArray[i] = rand;
+      }
+
+      for (i = 0; i < symbolsArray.length; i++) {
+        await communityGiftsInstance.reserveSymbol(symbolsArray[i], {
+          from: dataManager,
+        });
+      }
+
+      for (let i = 0; i < symbolsArray.length; i++) {
+        const symbolsResult = await communityGiftsInstance.symbols.call(i);
+        const usedResult = await communityGiftsInstance.used.call(i);
+        assert.equal(
+          Number(symbolsResult),
+          symbolsArray[i],
+          "symbol result is incorrect"
+        );
+        assert.equal(usedResult, false, "used result is incorrect");
+        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
+          symbolsArray[i]
+        );
+
+        assert.equal(
+          Number(uniqueSymbol.status),
+          1,
+          "uniqueSymbol status is incorrect"
+        );
+      }
+
+      await communityGiftsInstance
+        .removeReservedSymbol({ from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      await communityGiftsInstance.removeReservedSymbol({ from: dataManager });
+
+      for (let i = 0; i < symbolsArray.length; i++) {
+        await communityGiftsInstance.symbols.call(i).should.be.rejected;
+        await communityGiftsInstance.used.call(i).should.be.rejected;
+        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
+          symbolsArray[i]
+        );
+        assert.equal(
+          Number(uniqueSymbol.status),
+          0,
+          "uniqueSymbol status is incorrect"
+        );
+      }
+    });
+
+    it("removeReservedSymbol should work successfully (some symbols are used and some symbols are setted by admin)", async () => {
+      /////////////  -------------- deploy contracts
+
+      let testCommunityGiftsInstance = await TestCommunityGifts.new({
+        from: deployerAccount,
+      });
+
+      await testCommunityGiftsInstance.initialize(
+        arInstance.address,
+        initialPlanterFund,
+        initialReferralFund,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      /////////////////// ------------ handle roles
+      await Common.addTreejerContractRole(
+        arInstance,
+        testCommunityGiftsInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeAttributeInstance.address,
+        deployerAccount
+      );
+
+      //////////////// ----------------- set addresses
+      await testCommunityGiftsInstance.setTreeAttributesAddress(
+        treeAttributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await treeAttributeInstance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        { from: deployerAccount }
+      );
+
+      //////////// ------------------- reserve symbols
+      const symbolsArray = [];
+      for (let i = 0; i < 5; i++) {
+        let rand = parseInt(Math.random() * 10e10);
+        while (symbolsArray.includes(rand)) {
+          rand = parseInt(Math.random() * 10e10);
+        }
+        symbolsArray[i] = rand;
+      }
+
+      for (i = 0; i < symbolsArray.length; i++) {
+        await testCommunityGiftsInstance.reserveSymbol(symbolsArray[i], {
+          from: dataManager,
+        });
+      }
+
+      for (let i = 0; i < symbolsArray.length; i++) {
+        const symbolsResult = await testCommunityGiftsInstance.symbols.call(i);
+        const usedResult = await testCommunityGiftsInstance.used.call(i);
+        assert.equal(
+          Number(symbolsResult),
+          symbolsArray[i],
+          "symbol result is incorrect"
+        );
+        assert.equal(usedResult, false, "used result is incorrect");
+        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
+          symbolsArray[i]
+        );
+
+        assert.equal(
+          Number(uniqueSymbol.status),
+          1,
+          "uniqueSymbol status is incorrect"
+        );
+      }
+
+      ///////////////// --------------- change some data to test
+      await testCommunityGiftsInstance.updateClaimedCount(3);
+      await testCommunityGiftsInstance.updateUsed(1);
+
+      await treeAttributeInstance.setTreeAttributesByAdmin(
+        101,
+        123456789,
+        symbolsArray[3],
+        18,
+        { from: dataManager }
+      );
+
+      assert.equal(
+        Number(await testCommunityGiftsInstance.claimedCount.call()),
+        3,
+        "claimed count is incorrect before free"
+      );
+
+      await testCommunityGiftsInstance.removeReservedSymbol({
+        from: dataManager,
+      });
+
+      assert.equal(
+        Number(await testCommunityGiftsInstance.claimedCount.call()),
+        0,
+        "claimed count is incorrect after free"
+      );
+
+      for (let i = 0; i < symbolsArray.length; i++) {
+        await testCommunityGiftsInstance.symbols.call(i).should.be.rejected;
+        await testCommunityGiftsInstance.used.call(i).should.be.rejected;
+        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
+          symbolsArray[i]
+        );
+
+        ////////// ---------- used is true and dont update status
+        if (i == 1) {
+          assert.equal(
+            Number(uniqueSymbol.status),
+            1,
+            "uniqueSymbol status is incorrect"
+          );
+          ////////// ---------- this symbol is setted by admin and status is 3 and dont update status
+        } else if (i == 3) {
+          assert.equal(
+            Number(uniqueSymbol.status),
+            3,
+            "uniqueSymbol status is incorrect"
+          );
+        } else {
+          assert.equal(
+            Number(uniqueSymbol.status),
+            0,
+            "uniqueSymbol status is incorrect"
+          );
+        }
+      }
+    });
+  });
+  */
+
+  describe("update giftees", () => {
+    beforeEach(async () => {
+      //------------------ deploy contracts
+
+      communityGiftsInstance = await deployProxy(
+        CommunityGifts,
+        [arInstance.address, initialPlanterFund, initialReferralFund],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      planterFundsInstnce = await deployProxy(
+        PlanterFund,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeFactoryInstance = await deployProxy(
+        TreeFactory,
+        [arInstance.address],
+        {
+          initializer: "initialize",
+          from: deployerAccount,
+          unsafeAllowCustomTypes: true,
+        }
+      );
+
+      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
+
+      //----------------- set cntract addresses
+
+      await communityGiftsInstance.setTreeFactoryAddress(
+        treeFactoryInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await communityGiftsInstance.setPlanterFundAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      //----------------add role to treejer contract role to treeFactoryInstance address
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+
+      //----------------add role to treejer contract role to communityGiftsInstance address
+      await Common.addTreejerContractRole(
+        arInstance,
+        communityGiftsInstance.address,
+        deployerAccount
+      );
+    });
+    it("should setGiftRange succussfully", async () => {});
+
+    it("fail to set gift range", async () => {
+      //------------------initial data
+
+      const startTree = 11;
+      const endTree = 101;
+      const planterShare = web3.utils.toWei("5");
+      const referralShare = web3.utils.toWei("2");
+      const transferAmount = web3.utils.toWei("630");
+      const insufficientTransferAmount = web3.utils.toWei("629.9");
+      const addminWalletWithInsufficientTransferAmount = userAccount6;
+      const insufficientApprovalAmount = web3.utils.toWei("629");
+      const adminWallet = userAccount8;
+      const expireDate = await Common.timeInitial(TimeEnumes.minutes, 1440);
+      const treeIdInAuction = 16;
+      const startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
+      const endTime = await Common.timeInitial(TimeEnumes.hours, 1);
+
+      ///////////////// ---------------------- fail because caller is not data manager
+      await communityGiftsInstance
+        .setGiftsRange(adminWallet, startTree, endTree, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      ///////////----------------- fail because of invalid range
+      await communityGiftsInstance
+        .setGiftsRange(adminWallet, endTree, startTree, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(CommunityGiftErrorMsg.INVALID_RANGE);
+
+      /////////////// fail because of insufficient approval amount
+
+      await daiInstance.setMint(adminWallet, transferAmount);
+
+      await daiInstance.approve(
+        communityGiftsInstance.address,
+        insufficientApprovalAmount,
+        {
+          from: adminWallet,
+        }
+      );
+
+      await communityGiftsInstance
+        .setGiftsRange(
+          startTree,
+          endTree,
+          planterShare,
+          referralShare,
+          Number(expireDate),
+          adminWallet,
+          {
+            from: dataManager,
+          }
+        )
+        .should.be.rejectedWith(erc20ErrorMsg.APPROVAL_ISSUE);
+
+      //////////// fail because of insufficient admin account balance
+      await daiInstance.setMint(
+        addminWalletWithInsufficientTransferAmount,
+        insufficientTransferAmount
+      );
+
+      await daiInstance.approve(
+        communityGiftsInstance.address,
+        transferAmount,
+        {
+          from: addminWalletWithInsufficientTransferAmount,
+        }
+      );
+
+      await communityGiftsInstance
+        .setGiftsRange(
+          startTree,
+          endTree,
+          planterShare,
+          referralShare,
+          Number(expireDate),
+          addminWalletWithInsufficientTransferAmount,
+          {
+            from: dataManager,
+          }
+        )
+        .should.be.rejectedWith(erc20ErrorMsg.INSUFFICIENT_BALANCE);
+
+      //////////////----------------- fail because of invalid admin account
+      await communityGiftsInstance
+        .setGiftsRange(
+          startTree,
+          endTree,
+          planterShare,
+          referralShare,
+          Number(expireDate),
+          zeroAddress,
+          {
+            from: dataManager,
+          }
+        )
+        .should.be.rejectedWith(erc20ErrorMsg.ZERO_ADDRESS);
+
+      //----------------- fail setGiftsRange because a tree is not free
+
+      await treeFactoryInstance.listTree(treeIdInAuction, "some ipfs hash", {
+        from: dataManager,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        userAccount7,
+        deployerAccount
+      );
+
+      await treeFactoryInstance.manageSaleTypeBatch(
+        treeIdInAuction,
+        treeIdInAuction + 1,
+        5,
+        { from: userAccount7 }
+      );
+
+      await communityGiftsInstance
+        .setGiftsRange(
+          startTree,
+          endTree,
+          planterShare,
+          referralShare,
+          Number(expireDate),
+          adminWallet,
+          {
+            from: dataManager,
+          }
+        )
+        .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
     });
   });
 

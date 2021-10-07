@@ -51,6 +51,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     event TreeTransfered(uint256 treeId);
     event CommunityGiftPlanterFund(uint256 planterFund, uint256 referralFund);
     event CommuintyGiftSet();
+    event TreeNotClaimed(address giftee);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -241,77 +242,83 @@ contract CommunityGifts is Initializable, RelayRecipient {
             "you cant claim tree"
         );
 
-        if (currentTree < upTo) {
-            if (claimedCount < symbols.length) {
-                bool flag = false;
+        require(currentTree < upTo, "no tree exists for gift");
+        require(claimedCount < symbols.length, "no symbol exists for gift");
 
-                uint256 rand = uint256(
-                    keccak256(
-                        abi.encode(
-                            giftee.expireDate,
-                            giftee.startDate,
-                            msg.data,
-                            currentTree
-                        )
-                    )
-                );
+        bool flag = false;
 
-                uint256 availableCount = 0;
-                uint64 generatedSymbol;
+        uint256 rand = uint256(
+            keccak256(
+                abi.encode(
+                    giftee.expireDate,
+                    giftee.startDate,
+                    msg.data,
+                    currentTree
+                )
+            )
+        );
 
-                for (uint256 i = 0; i < symbols.length; i++) {
-                    uint256 symbolSec = rand % (symbols.length - claimedCount);
+        uint64 generatedSymbol;
+        uint256 diffrence;
+        uint256 symbolSec;
+        uint256 availableCount;
+        for (uint256 i = 0; i < symbols.length; i++) {
+            diffrence = symbols.length - claimedCount;
+            symbolSec = diffrence > 0 ? rand % diffrence : 0;
+            availableCount = 0;
 
-                    for (uint256 j = 0; j < symbols.length; j++) {
-                        if (!used[j]) {
-                            availableCount += 1;
-                            if (availableCount == symbolSec) {
-                                claimedCount += 1;
-                                used[j] = true;
+            for (uint256 j = 0; j < symbols.length; j++) {
+                if (!used[j]) {
+                    if (availableCount == symbolSec) {
+                        claimedCount += 1;
+                        used[j] = true;
 
-                                (, uint128 status) = treeAttribute.uniqueSymbol(
-                                    symbols[j]
-                                );
+                        (, uint128 status) = treeAttribute.uniqueSymbol(
+                            symbols[j]
+                        );
 
-                                if (status == 1) {
-                                    generatedSymbol = symbols[j];
-                                    flag = true;
-                                    break;
-                                }
-                            }
+                        if (status == 1) {
+                            generatedSymbol = symbols[j];
+                            flag = true;
                         }
-                    }
-                    if (flag) {
                         break;
                     }
+                    availableCount += 1;
                 }
-
-                uint64 generatedAttribute = treeAttribute.randAvailibity(
-                    currentTree,
-                    uint64(rand & type(uint64).max)
-                );
-
-                treeAttribute.setTreeAttributesByAdmin(
-                    currentTree,
-                    generatedAttribute,
-                    generatedSymbol,
-                    18
-                );
-
-                planterFundContract.updateProjectedEarnings(
-                    currentTree,
-                    planterFund,
-                    referralFund
-                );
-
-                currentTree += 1;
-
-                treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
-
-                delete giftees[_msgSender()];
-
-                emit TreeClaimed(currentTree);
             }
+            if (flag) {
+                break;
+            }
+        }
+
+        if (flag) {
+            uint64 generatedAttribute = treeAttribute.randAvailibity(
+                currentTree,
+                uint64(rand & type(uint64).max)
+            );
+
+            treeAttribute.setTreeAttributesByAdmin(
+                currentTree,
+                generatedAttribute,
+                generatedSymbol,
+                18
+            );
+
+            planterFundContract.updateProjectedEarnings(
+                currentTree,
+                planterFund,
+                referralFund
+            );
+
+            currentTree += 1;
+
+            treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
+
+            delete giftees[_msgSender()];
+
+            emit TreeClaimed(currentTree);
+        } else {
+            emit TreeNotClaimed(_msgSender());
         }
     }
 }

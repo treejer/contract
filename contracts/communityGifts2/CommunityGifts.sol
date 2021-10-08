@@ -260,6 +260,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
 
     function claimGift() external {
         GifteeData storage giftee = giftees[_msgSender()];
+
         require(
             giftee.expireDate > block.timestamp &&
                 giftee.startDate < block.timestamp &&
@@ -337,13 +338,13 @@ contract CommunityGifts is Initializable, RelayRecipient {
                 referralFund
             );
 
-            currentTree += 1;
-
             treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
 
-            delete giftees[_msgSender()];
-
             emit TreeClaimed(currentTree);
+
+            currentTree += 1;
+
+            delete giftees[_msgSender()];
         } else {
             emit TreeNotClaimed(_msgSender());
         }

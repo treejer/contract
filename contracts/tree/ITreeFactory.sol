@@ -28,7 +28,6 @@ interface ITreeFactory {
     /** return Tree data of {_treeId}
      * @return planter
      * @return species
-     * @return mintOrigin
      * @return countryCode
      * @return saleType
      * @return treeStatus
@@ -42,8 +41,7 @@ interface ITreeFactory {
         returns (
             address,
             uint256,
-            uint16,
-            uint16,
+            uint32,
             uint32,
             uint64,
             uint64,
@@ -167,12 +165,8 @@ interface ITreeFactory {
         external
         returns (uint32);
 
-    /** @dev mint {_treeId} to {_funder} and set mintOrigin to {_mintOrigin} and privdeStatus to 0  */
-    function mintAssignedTree(
-        uint256 _treeId,
-        address _funder,
-        uint16 _mintOrigin
-    ) external;
+    /** @dev mint {_treeId} to {_funder} and privdeStatus to 0  */
+    function mintAssignedTree(uint256 _treeId, address _funder) external;
 
     /** @dev exit a {_treeId} from auction */
     function resetSaleType(uint256 _treeId) external;
@@ -193,11 +187,6 @@ interface ITreeFactory {
         uint256 _endTreeId,
         uint32 _saleType
     ) external returns (bool);
-
-    function checkMintOrigin(uint256 _treeId, address _funder)
-        external
-        view
-        returns (bool, bytes32);
 
     /**
      * @dev This function is called by planter who have planted a new tree

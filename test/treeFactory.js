@@ -2061,7 +2061,7 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.mintAssignedTree(102, userAccount2, 1, {
+      await treeFactoryInstance.mintAssignedTree(102, userAccount2, {
         from: deployerAccount,
       });
 
@@ -3528,7 +3528,7 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////// verify 2 and set token owner ////////////////////////
 
-      await treeFactoryInstance.mintAssignedTree(treeId, userAccount8, 2, {
+      await treeFactoryInstance.mintAssignedTree(treeId, userAccount8, {
         from: userAccount5,
       });
 
@@ -4756,7 +4756,7 @@ contract("TreeFactory", (accounts) => {
 
       //////// ----------- fail invalid access
       await treeFactoryInstance
-        .mintAssignedTree(1, userAccount4, 2, {
+        .mintAssignedTree(1, userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -4777,7 +4777,7 @@ contract("TreeFactory", (accounts) => {
         from: userAccount5,
       });
 
-      await treeFactoryInstance.mintAssignedTree(1, userAccount4, 2, {
+      await treeFactoryInstance.mintAssignedTree(1, userAccount4, {
         from: userAccount5,
       });
 
@@ -4793,7 +4793,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(addressGetToken, userAccount4, "token not true mint");
 
-      await treeFactoryInstance.mintAssignedTree(1, userAccount6, 2, {
+      await treeFactoryInstance.mintAssignedTree(1, userAccount6, {
         from: userAccount5,
       }).should.be.rejected;
     });

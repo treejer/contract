@@ -5,15 +5,6 @@ pragma solidity ^0.8.6;
 /** @title ICommunityGifts */
 
 interface ICommunityGifts {
-    /** @return true in case of CommnunityGift contract have been initialized */
-    function isCommunityGifts() external view returns (bool);
-
-    /** @return planter fund amount */
-    function planterFund() external view returns (uint256);
-
-    /** @return referral fund amount */
-    function referralFund() external view returns (uint256);
-
     /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
 
@@ -29,34 +20,38 @@ interface ICommunityGifts {
     /** @return DaiToken contract address */
     function daiToken() external view returns (address);
 
-    /** @dev return communityGifts data based on giftee address
-     * @return symbol that is unique
-     * @return claimed that is true when a gift claimed
-     * @return exist that is true when a communityGift is exist
-     */
-    function communityGifts(address _address)
+    function giftees(address _address)
         external
         view
         returns (
-            uint32 symbol,
-            bool claimed,
-            bool exist
+            uint64 expireDate,
+            uint64 startDate,
+            uint64 status
         );
 
-    /** @return maximum time to claim a tree */
-    function expireDate() external view returns (uint256);
+    function symbols(uint256 _index) external returns (uint64 symbol);
 
-    /** @return total number of tree that gifted */
-    function giftCount() external view returns (uint256);
+    function used(uint256 _index) external returns (bool used);
 
-    /** @return maximum amount of gift trees*/
-    function maxGiftCount() external view returns (uint256);
+    /** @return true in case of CommnunityGift contract have been initialized */
+    function isCommunityGifts() external view returns (bool);
+
+    function claimedCount() external view returns (uint256);
 
     /** @return id of tree to claim */
-    function toClaim() external view returns (uint256);
+    function currentTree() external view returns (uint256);
 
     /** @return maximum id of trees can be claimed up to it */
     function upTo() external view returns (uint256);
+
+    /** @return maximum id of trees can be claimed up to it */
+    function count() external view returns (uint256);
+
+    /** @return planter fund amount */
+    function planterFund() external view returns (uint256);
+
+    /** @return referral fund amount */
+    function referralFund() external view returns (uint256);
 
     /** @dev admin set {_address} to trust forwarder*/
     function setTrustedForwarder(address _address) external;
@@ -73,60 +68,29 @@ interface ICommunityGifts {
     /** @dev admin set {_address} to PlanterFund contract address */
     function setPlanterFundAddress(address _address) external;
 
-    /** @dev admin set the gift range from {_startTreeId} to {_endTreeId}
-     * with planter fund amount {_planterFund} and referral fund amount {_referralFund}
-     * NOTE community gift ends at {_expireDate} and giftees can claim gifts until {_expireDate}
-     * NOTE when a community gift set {_adminWalletAddress} transfer total value of trees
-     * calculated based on planter and referral funds and number of gifted trees to
-     * planterFund contract
-     * @param _startTreeId stating tree id for gifts range
-     * @param _endTreeId ending tree id for gifts range
-     * @param _planterFund planter fund amount
-     * @param _referralFund referral fund amount
-     * @param _expireDate expire date of community gift
-     * @param _adminWalletAddress address of the admin wallet
-     * NOTE emit a {CommuintyGiftSet} event
-     */
-    function setGiftsRange(
+    function setGiftRange(
+        address _adminWalletAddress,
         uint256 _startTreeId,
-        uint256 _endTreeId,
-        uint256 _planterFund,
-        uint256 _referralFund,
-        uint64 _expireDate,
-        address _adminWalletAddress
+        uint256 _upTo
     ) external;
 
-    /** @dev admin assign an unique symbol to a giftee
-     * @param _giftee address of giftee
-     * @param _symbol unique symbol assigned to a giftee
-     * NOTE emit a {GifteeUpdated} event
-     */
-    function updateGiftees(address _giftee, uint32 _symbol) external;
+    function freeGiftRange() external;
 
-    /** @dev giftee can claim assigned tree before communityGift expireDate
-     * and ownership of tree transfered to giftee that is giftee
-     * NOTE giftees that claim their gift soon get low tree id
-     * NOTE planterFund and referralFund of tree updated in planterFund contract
-     * NOTE emit a {TreeClaimed} event
-     */
-    function claimTree() external;
+    function reserveSymbol(uint64 _symbol) external;
 
-    /** @dev admin can set the maximum time that giftees can claim their gift before
-     * expire date of community gift reach
-     * @param _expireDate is the maximum time to claim tree
-     * NOTE emit a {CommuintyGiftSet} event
-     */
-    function setExpireDate(uint256 _expireDate) external;
+    function removeReservedSymbol() external;
 
-    /** @dev if giftee did not claim gift, admin can transfer reserved symbol to
-     * a giftee
-     * @param _giftee is the address of giftee to transfer gift
-     * @param _symbol is the reserved symbol is transfering to giftee
-     * NOTE ownership of tree transfer to {_giftee}
-     * NOTE planterFund and referralFund of tree updated in planterFund contract
-     * NOTE emit a {TreeTransfered} event
-     */
-    function transferTree(address _giftee, uint32 _symbol) external;
+    function addGiftee(
+        address _funder,
+        uint64 _startDate,
+        uint64 _expireDate
+    ) external;
+
+    function updateGiftee(
+        address _funder,
+        uint64 _startDate,
+        uint64 _expireDate
+    ) external;
 
     /** @dev admin can set planter and referral funds amount
      * @param _planterFund is the planter fund amount
@@ -134,6 +98,8 @@ interface ICommunityGifts {
      * NOTE emit a {CommunityGiftPlanterFund} event
      */
     function setPrice(uint256 _planterFund, uint256 _referralFund) external;
+
+    function claimGift() external;
 
     /** @dev emitted when giftee update
      * @param giftee is address of new giftee
@@ -145,11 +111,6 @@ interface ICommunityGifts {
      */
     event TreeClaimed(uint256 treeId);
 
-    /** @dev  emitted when atree transfer to a giftee by admin
-     * @param treeId is id of transfered tree
-     */
-    event TreeTransfered(uint256 treeId);
-
     /** @dev emitted when planter and referral funds set by setPrice
      * @param planterFund planter fund amount
      * @param referralFund referral fund amount
@@ -158,4 +119,6 @@ interface ICommunityGifts {
 
     /** @dev emitted when a community gift range set */
     event CommuintyGiftSet();
+
+    event TreeNotClaimed(address giftee);
 }

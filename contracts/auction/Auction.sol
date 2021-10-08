@@ -330,8 +330,7 @@ contract Auction is Initializable, RelayRecipient {
 
             treeFactory.mintAssignedTree(
                 auctionData.treeId,
-                auctionData.bidder,
-                2
+                auctionData.bidder
             );
 
             address referrerOfWinner = referrals[auctionData.bidder][

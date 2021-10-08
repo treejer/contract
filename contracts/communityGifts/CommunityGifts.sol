@@ -13,16 +13,6 @@ import "../gsn/RelayRecipient.sol";
 /** @title CommunityGifts */
 
 contract CommunityGifts is Initializable, RelayRecipient {
-    /** NOTE {isCommunityGifts} set inside the initialize to {true} */
-    bool public isCommunityGifts;
-
-    /**NOTE {planterFund} is share of plater when a tree claimed or transfered to someone*/
-    uint256 public planterFund;
-
-    /**NOTE {referralFund} is share of referral when a tree claimed or transfered to someone*/
-
-    uint256 public referralFund;
-
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IPlanterFund public planterFundContract;
@@ -40,15 +30,22 @@ contract CommunityGifts is Initializable, RelayRecipient {
     uint64[] public symbols;
     bool[] public used;
 
+    /** NOTE {isCommunityGifts} set inside the initialize to {true} */
+    bool public isCommunityGifts;
+
     uint256 public claimedCount;
     uint256 public currentTree;
     uint256 public upTo;
     uint256 public count;
 
+    /**NOTE {planterFund} is share of plater when a tree claimed or transfered to someone*/
+    uint256 public planterFund;
+    /**NOTE {referralFund} is share of referral when a tree claimed or transfered to someone*/
+    uint256 public referralFund;
+
     ////////////////////////////////////////////////
     event GifteeUpdated(address giftee);
     event TreeClaimed(uint256 treeId);
-    event TreeTransfered(uint256 treeId);
     event CommunityGiftPlanterFund(uint256 planterFund, uint256 referralFund);
     event CommuintyGiftSet();
     event TreeNotClaimed(address giftee);
@@ -338,7 +335,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
                 referralFund
             );
 
-            treeFactory.mintAssignedTree(currentTree, _msgSender(), 3);
+            treeFactory.mintAssignedTree(currentTree, _msgSender());
 
             emit TreeClaimed(currentTree);
 

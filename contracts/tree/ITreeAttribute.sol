@@ -9,53 +9,22 @@ interface ITreeAttribute {
     /** @return AccessRestriction contract address */
     function accessRestriction() external view returns (address);
 
-    /** @return rank of buyer address */
-    function rankOf(address _buyer) external view returns (uint8);
+    /** @return treeToken contract address */
+    function treeToken() external view returns (address);
 
-    /** return Attributes data of {_treeId}
-     * @return treeType
-     * @return groundType
-     * @return trunkColor
-     * @return crownColor
-     * @return groundColor
-     * @return specialEffects
-     * @return universalCode
-     * @return exists
-     */
-    function treeAttributes(uint256 _treeId)
-        external
-        view
-        returns (
-            uint32,
-            uint32,
-            uint32,
-            uint32,
-            uint32,
-            uint32,
-            uint32,
-            uint32
-        );
+    function specialCount() external view returns (uint256);
 
-    function uniqueSymbol(uint64 _uniqueSymbol)
-        external
-        view
-        returns (uint128, uint128);
-
-    /** @return number of generations of a unique symbol */
-    function generatedAttributes(uint32 attributeId)
+    function generatedAttributes(uint64 _attribute)
         external
         view
         returns (uint32);
 
-    function randAvailibity(uint256 _treeId, uint64 _rand)
-        external
-        returns (uint64);
-
-    /** @return reserved status of a unique symbol */
-    function reservedAttributes(uint32 attributeId)
+    function uniqueSymbol(uint64 _uniqueSymbol)
         external
         view
-        returns (uint8);
+        returns (uint128 generatedCount, uint128 status);
+
+    function setTreeTokenAddress(address _address) external;
 
     /**
      * @dev reserve a unique symbol
@@ -86,15 +55,6 @@ interface ITreeAttribute {
         uint8 generationType
     ) external;
 
-    /**
-     * @dev generate a 256 bits random number as a base for tree attributes and slice it
-     * in 28 bits parts
-     * @param treeId id of tree
-     * @return if unique tree attribute generated successfully
-     * NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event
-     */
-    function createTreeAttributes(uint256 treeId) external returns (bool);
-
     function createTreeSymbol(
         uint256 treeId,
         bytes32 randTree,
@@ -104,18 +64,24 @@ interface ITreeAttribute {
     ) external returns (bool);
 
     /**
+     * @dev generate a 256 bits random number as a base for tree attributes and slice it
+     * in 28 bits parts
+     * @param treeId id of tree
+     * @return if unique tree attribute generated successfully
+     * NOTE emit a {TreeAttributesGenerated} or {TreeAttributesNotGenerated} event
+     */
+    function createTreeAttributes(uint256 treeId) external returns (bool);
+
+    function randAvailibity(uint256 _treeId, uint64 _rand)
+        external
+        returns (uint64);
+
+    /**
      * @dev the function Tries to Calculate the rank of funder
      * @param _funder address of funder
      * NOTE emit a {getFunderRank} event
      */
     function getFunderRank(address _funder) external view returns (uint8);
-
-    function calcRandSymbol(
-        address buyer,
-        uint256 treeId,
-        uint64 rand,
-        uint8 generationType
-    ) external returns (bool);
 
     /** @dev emitted when unique tree attribute generated successfully for {treeId} */
     event TreeAttributesGenerated(uint256 treeId);

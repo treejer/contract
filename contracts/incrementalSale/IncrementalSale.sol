@@ -415,7 +415,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1 += (treePrice * reserve1Share) / 10000;
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
-            treeFactory.mintAssignedTree(tempLastSold, funder, 1);
+            treeFactory.mintAssignedTree(tempLastSold, funder);
 
             tempLastSold += 1;
         }

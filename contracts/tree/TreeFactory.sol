@@ -34,8 +34,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     struct TreeData {
         address planter;
         uint256 species;
-        uint16 mintOrigin;
-        uint16 countryCode;
+        uint32 countryCode;
         uint32 saleType;
         uint64 treeStatus;
         uint64 plantDate;
@@ -442,14 +441,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         return currentSaleType;
     }
 
-    /** @dev mint {_treeId} to {_funder} and set mintOrigin to {_mintOrigin} and privdeStatus to 0  */
-    function mintAssignedTree(
-        uint256 _treeId,
-        address _funder,
-        uint16 _mintOrigin
-    ) external onlyTreejerContract {
+    /** @dev mint {_treeId} to {_funder}  and privdeStatus to 0  */
+    function mintAssignedTree(uint256 _treeId, address _funder)
+        external
+        onlyTreejerContract
+    {
         trees[_treeId].saleType = 0;
-        trees[_treeId].mintOrigin = _mintOrigin;
         treeToken.safeMint(_funder, _treeId);
     }
 
@@ -489,40 +486,6 @@ contract TreeFactory is Initializable, RelayRecipient {
             trees[j].saleType = _saleType;
         }
         return true;
-    }
-
-    /**
-     *
-     */
-    function checkMintOrigin(uint256 _treeId, address _funder)
-        external
-        view
-        returns (bool, bytes32)
-    {
-        uint16 mintOrigin = trees[_treeId].mintOrigin;
-
-        bool flag = ((mintOrigin == 1 || mintOrigin == 2) &&
-            treeToken.ownerOf(_treeId) == _funder);
-
-        if (flag) {
-            TreeData storage treeData = trees[_treeId];
-
-            return (
-                true,
-                keccak256(
-                    abi.encodePacked(
-                        lastRegualarTreeId,
-                        treeData.birthDate,
-                        treeData.treeSpecs,
-                        treeData.treeStatus,
-                        treeData.planter,
-                        treeUpdates[_treeId].updateSpecs
-                    )
-                )
-            );
-        }
-
-        return (false, 0);
     }
 
     /**

@@ -313,7 +313,7 @@ Common.successFundTree = async (
     from: auctionAddress,
   });
 
-  await treeFactoryInstance.mintAssignedTree(treeId, tokenOwner, 2, {
+  await treeFactoryInstance.mintAssignedTree(treeId, tokenOwner, {
     from: auctionAddress,
   });
 

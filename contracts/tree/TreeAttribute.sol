@@ -62,18 +62,6 @@ contract TreeAttribute is Initializable {
     }
 
     /**
-     * @dev admin set TreeToken contract address
-     * @param _address set to the address of TreeToken contract
-     */
-    function setTreeTokenAddress(address _address) external onlyAdmin {
-        ITree candidateContract = ITree(_address);
-
-        require(candidateContract.isTree());
-
-        treeToken = candidateContract;
-    }
-
-    /**
      * @dev initialize accessRestriction contract and set true for isTreeAttribute
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
@@ -88,6 +76,18 @@ contract TreeAttribute is Initializable {
         isTreeAttribute = true;
         specialCount = 0;
         accessRestriction = candidateContract;
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _address set to the address of TreeToken contract
+     */
+    function setTreeTokenAddress(address _address) external onlyAdmin {
+        ITree candidateContract = ITree(_address);
+
+        require(candidateContract.isTree());
+
+        treeToken = candidateContract;
     }
 
     /**

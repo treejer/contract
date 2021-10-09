@@ -14,8 +14,8 @@ interface ICommunityGifts {
     /** @return PlanterFund contract address */
     function planterFundContract() external view returns (address);
 
-    /** @return TreeAttribute contract address */
-    function treeAttribute() external view returns (address);
+    /** @return Attribute contract address */
+    function attribute() external view returns (address);
 
     /** @return DaiToken contract address */
     function daiToken() external view returns (address);
@@ -59,8 +59,8 @@ interface ICommunityGifts {
     /** @dev admin set {_daiTokenAddress} to DaiToken contract address */
     function setDaiTokenAddress(address _daiTokenAddress) external;
 
-    /** @dev admin set {_address} to TreeAttribute contract address */
-    function setTreeAttributesAddress(address _address) external;
+    /** @dev admin set {_address} to Attribute contract address */
+    function setAttributesAddress(address _address) external;
 
     /** @dev admin set {_address} to TreeFactory contract address */
     function setTreeFactoryAddress(address _address) external;

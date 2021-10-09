@@ -129,13 +129,11 @@ const IncrementalSaleErrorMsg = {
     "IncrementalSale not exist or count must be lt endTree",
 };
 
-const TreeAttributeErrorMsg = {
-  DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
-  TREE_HAS_ATTRIBUTES: "tree attributes are set before",
-  TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
-  ATTRIBUTE_TAKEN: "the tree attributes are taken",
-  ATTRIBUTE_NOT_RESERVED: "the tree attributes not reserved",
-  SYMBOL_IS_TAKEN: "the tree symbol is taken",
+const AttributeErrorMsg = {
+  DUPLICATE_TREE_ATTRIBUTES: "the attributes are taken",
+  ATTRIBUTE_TAKEN: "the attributes are taken",
+  ATTRIBUTE_NOT_RESERVED: "the attributes not reserved",
+  SYMBOL_IS_TAKEN: "the symbol is taken",
 };
 
 const CommunityGiftErrorMsg = {
@@ -170,7 +168,7 @@ module.exports = {
   PlanterErrorMsg,
   RegularSaleErrors,
   IncrementalSaleErrorMsg,
-  TreeAttributeErrorMsg,
+  AttributeErrorMsg,
   DaiFundErrorMsg,
   AllocationErrorMsg,
   CommunityGiftErrorMsg,

@@ -22,8 +22,8 @@ interface IIncrementalSale {
     /** @return Allocation contract address */
     function allocation() external view returns (address);
 
-    /** @return TreeAttribute contract address */
-    function treeAttribute() external view returns (address);
+    /** @return Attribute contract address */
+    function attribute() external view returns (address);
 
     /** @return PlanterFund contract address */
     function planterFundContract() external view returns (address);
@@ -74,8 +74,8 @@ interface IIncrementalSale {
     /** @dev set {_address} to Allocation contract address */
     function setAllocationAddress(address _address) external;
 
-    /** @dev set {_address} to TreeAttributes contract address */
-    function setTreeAttributesAddress(address _address) external;
+    /** @dev set {_address} to Attributes contract address */
+    function setAttributesAddress(address _address) external;
 
     /**
      * @dev admin set a range from {startTreeId} to {startTreeId + treeCount}

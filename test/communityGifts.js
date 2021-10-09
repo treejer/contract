@@ -1,6 +1,6 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const CommunityGifts = artifacts.require("CommunityGifts.sol");
-const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const Attribute = artifacts.require("Attribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
@@ -25,7 +25,7 @@ const {
   CommonErrorMsg,
   TimeEnumes,
   CommunityGiftErrorMsg,
-  TreeAttributeErrorMsg,
+
   erc20ErrorMsg,
   GsnErrorMsg,
 } = require("./enumes");
@@ -33,7 +33,7 @@ const {
 contract("CommunityGifts", (accounts) => {
   let communityGiftsInstance;
   let arInstance;
-  let treeAttributeInstance;
+  let attributeInstance;
   let treeFactoryInstance;
 
   let treeTokenInstance;
@@ -190,15 +190,11 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       planterFundsInstnce = await deployProxy(
         PlanterFund,
@@ -284,23 +280,23 @@ contract("CommunityGifts", (accounts) => {
         "address set incorect"
       );
 
-      /////////////////---------------------------------set tree attribute address--------------------------------------------------------
+      /////////////////---------------------------------set attribute address--------------------------------------------------------
       await communityGiftsInstance
-        .setTreeAttributesAddress(treeAttributeInstance.address, {
+        .setAttributesAddress(attributeInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await communityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         {
           from: deployerAccount,
         }
       );
 
       assert.equal(
-        treeAttributeInstance.address,
-        await communityGiftsInstance.treeAttribute.call(),
+        attributeInstance.address,
+        await communityGiftsInstance.attribute.call(),
         "address set incorect"
       );
 
@@ -555,18 +551,14 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
-      await communityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await communityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
     });
@@ -606,9 +598,10 @@ contract("CommunityGifts", (accounts) => {
           "symbol result is incorrect"
         );
         assert.equal(usedResult, false, "used result is incorrect");
-        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-          symbolsArray[i]
-        );
+        const uniqueSymbol =
+          await attributeInstance.uniquenessFactorToSymbolStatus.call(
+            symbolsArray[i]
+          );
 
         assert.equal(
           Number(uniqueSymbol.status),
@@ -667,9 +660,10 @@ contract("CommunityGifts", (accounts) => {
           "symbol result is incorrect"
         );
         assert.equal(usedResult, false, "used result is incorrect");
-        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-          symbolsArray[i]
-        );
+        const uniqueSymbol =
+          await attributeInstance.uniquenessFactorToSymbolStatus.call(
+            symbolsArray[i]
+          );
 
         assert.equal(
           Number(uniqueSymbol.status),
@@ -687,9 +681,10 @@ contract("CommunityGifts", (accounts) => {
       for (let i = 0; i < symbolsArray.length; i++) {
         await communityGiftsInstance.symbols.call(i).should.be.rejected;
         await communityGiftsInstance.used.call(i).should.be.rejected;
-        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-          symbolsArray[i]
-        );
+        const uniqueSymbol =
+          await attributeInstance.uniquenessFactorToSymbolStatus.call(
+            symbolsArray[i]
+          );
         assert.equal(
           Number(uniqueSymbol.status),
           0,
@@ -729,20 +724,19 @@ contract("CommunityGifts", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
       //////////////// ----------------- set addresses
-      await testCommunityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await testCommunityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //////////// ------------------- reserve symbols
       const symbolsArray = [];
@@ -769,9 +763,10 @@ contract("CommunityGifts", (accounts) => {
           "symbol result is incorrect"
         );
         assert.equal(usedResult, false, "used result is incorrect");
-        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-          symbolsArray[i]
-        );
+        const uniqueSymbol =
+          await attributeInstance.uniquenessFactorToSymbolStatus.call(
+            symbolsArray[i]
+          );
 
         assert.equal(
           Number(uniqueSymbol.status),
@@ -784,7 +779,7 @@ contract("CommunityGifts", (accounts) => {
       await testCommunityGiftsInstance.updateClaimedCount(3);
       await testCommunityGiftsInstance.updateUsed(1);
 
-      await treeAttributeInstance.setTreeAttributesByAdmin(
+      await attributeInstance.setAttribute(
         101,
         123456789,
         symbolsArray[3],
@@ -811,9 +806,10 @@ contract("CommunityGifts", (accounts) => {
       for (let i = 0; i < symbolsArray.length; i++) {
         await testCommunityGiftsInstance.symbols.call(i).should.be.rejected;
         await testCommunityGiftsInstance.used.call(i).should.be.rejected;
-        const uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-          symbolsArray[i]
-        );
+        const uniqueSymbol =
+          await attributeInstance.uniquenessFactorToSymbolStatus.call(
+            symbolsArray[i]
+          );
 
         ////////// ---------- used is true and dont update status
         if (i == 1) {
@@ -1080,35 +1076,30 @@ contract("CommunityGifts", (accounts) => {
       const adminWallet = userAccount8;
 
       ////////////// deploy contract
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       ////////////////// handle role
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
       ///////////// set address
-      await communityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await communityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //////////////// set price
 
@@ -1408,15 +1399,11 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       planterFundsInstnce = await deployProxy(
         PlanterFund,
@@ -1457,8 +1444,8 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      await communityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await communityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         {
           from: deployerAccount,
         }
@@ -1479,12 +1466,9 @@ contract("CommunityGifts", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //----------------add role to treejer contract role to treeFactoryInstance address
       await Common.addTreejerContractRole(
@@ -1500,10 +1484,10 @@ contract("CommunityGifts", (accounts) => {
         deployerAccount
       );
 
-      //----------------add role to treejer contract role to treeAttributeInstance address
+      //----------------add role to treejer contract role to attributeInstance address
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
     });
@@ -1624,7 +1608,8 @@ contract("CommunityGifts", (accounts) => {
       assert.equal(usedResult, true, "used result is incorrect");
 
       //check uniqueSymbol
-      let uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(1050);
+      let uniqueSymbol =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(1050);
       assert.equal(Number(uniqueSymbol.status), 3, "status is not correct");
       assert.equal(
         Number(uniqueSymbol.generatedCount),
@@ -1750,21 +1735,13 @@ contract("CommunityGifts", (accounts) => {
         from: dataManager,
       });
 
-      await treeAttributeInstance.setTreeAttributesByAdmin(
-        20,
-        100012,
-        1055,
-        20,
-        { from: dataManager }
-      );
+      await attributeInstance.setAttribute(20, 100012, 1055, 20, {
+        from: dataManager,
+      });
 
-      await treeAttributeInstance.setTreeAttributesByAdmin(
-        22,
-        2321321,
-        1058,
-        20,
-        { from: dataManager }
-      );
+      await attributeInstance.setAttribute(22, 2321321, 1058, 20, {
+        from: dataManager,
+      });
 
       let eventTx2 = await communityGiftsInstance.claimGift({
         from: userAccount2,
@@ -1861,9 +1838,10 @@ contract("CommunityGifts", (accounts) => {
       assert.equal(usedResult, true, "used result is incorrect");
 
       //check uniqueSymbol
-      let uniqueSymbol = await treeAttributeInstance.uniqueSymbol.call(
-        await communityGiftsInstance.symbols.call(treeIdGeneratedForUser1)
-      );
+      let uniqueSymbol =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser1)
+        );
       assert.equal(Number(uniqueSymbol.status), 3, "status is not correct");
       assert.equal(
         Number(uniqueSymbol.generatedCount),
@@ -1930,9 +1908,10 @@ contract("CommunityGifts", (accounts) => {
       assert.equal(usedResult2, true, "used result is incorrect");
 
       //check uniqueSymbol
-      let uniqueSymbol2 = await treeAttributeInstance.uniqueSymbol.call(
-        await communityGiftsInstance.symbols.call(treeIdGeneratedForUser2)
-      );
+      let uniqueSymbol2 =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser2)
+        );
       assert.equal(Number(uniqueSymbol2.status), 3, "status is not correct");
       assert.equal(
         Number(uniqueSymbol2.generatedCount),
@@ -1995,10 +1974,11 @@ contract("CommunityGifts", (accounts) => {
       );
       assert.equal(usedResult3, true, "used result is incorrect");
 
-      //check uniqueSymbol
-      let uniqueSymbol3 = await treeAttributeInstance.uniqueSymbol.call(
-        await communityGiftsInstance.symbols.call(treeIdGeneratedForUser3)
-      );
+      //check uniquenessFactorToSymbolStatus
+      let uniqueSymbol3 =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser3)
+        );
       assert.equal(Number(uniqueSymbol3.status), 3, "status is not correct");
       assert.equal(
         Number(uniqueSymbol3.generatedCount),
@@ -2115,13 +2095,13 @@ contract("CommunityGifts", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
       //////////////// ----------------- set addresses
-      await testCommunityGiftsInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await testCommunityGiftsInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
@@ -2208,13 +2188,9 @@ contract("CommunityGifts", (accounts) => {
       const usedResult2 = await testCommunityGiftsInstance.used.call(4);
       assert.equal(usedResult2, true, "used result is incorrect");
 
-      await treeAttributeInstance.setTreeAttributesByAdmin(
-        22,
-        2321321,
-        1050,
-        20,
-        { from: dataManager }
-      );
+      await attributeInstance.setAttribute(22, 2321321, 1050, 20, {
+        from: dataManager,
+      });
 
       let tx = await testCommunityGiftsInstance.testClaimGiftFor(20, {
         from: userAccount1,

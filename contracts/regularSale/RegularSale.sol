@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFund.sol";
-import "../tree/ITreeAttribute.sol";
+import "../tree/IAttribute.sol";
 import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
@@ -48,7 +48,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
-    ITreeAttribute public treeAttribute;
+    IAttribute public attribute;
     IDaiFund public daiFund;
     IAllocation public allocation;
     IERC20Upgradeable public daiToken;
@@ -213,14 +213,14 @@ contract RegularSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeAttributesAddress
-     * @param _address set to the address of treeAttribute
+     * @dev admin set AttributesAddress
+     * @param _address set to the address of attribute
      */
 
-    function setTreeAttributesAddress(address _address) external onlyAdmin {
-        ITreeAttribute candidateContract = ITreeAttribute(_address);
-        require(candidateContract.isTreeAttribute());
-        treeAttribute = candidateContract;
+    function setAttributesAddress(address _address) external onlyAdmin {
+        IAttribute candidateContract = IAttribute(_address);
+        require(candidateContract.isAttribute());
+        attribute = candidateContract;
     }
 
     // **** FUNDTREE SECTION ****
@@ -283,7 +283,7 @@ contract RegularSale is Initializable, RelayRecipient {
                 _msgSender()
             );
 
-            treeAttribute.createTreeAttributes(tempLastFundedTreeId);
+            attribute.createAttribute(tempLastFundedTreeId);
 
             (
                 uint16 planterShare,
@@ -357,7 +357,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
         treeFactory.mintTreeById(_treeId, _msgSender());
 
-        treeAttribute.createTreeAttributes(_treeId);
+        attribute.createAttribute(_treeId);
 
         (
             uint16 planterShare,

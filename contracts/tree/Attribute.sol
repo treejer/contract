@@ -7,11 +7,11 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITree.sol";
 
-/** @title TreeAttribute Contract */
-contract TreeAttribute is Initializable {
+/** @title Attribute Contract */
+contract Attribute is Initializable {
     using SafeCastUpgradeable for uint256;
 
-    bool public isTreeAttribute;
+    bool public isAttribute;
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
 
@@ -22,20 +22,18 @@ contract TreeAttribute is Initializable {
         uint128 status; // 0 free, 1 reserved , 2 set, 3 setByAdmin
     }
 
-    //TODO: change this to uint8 from uint256
-    uint8 public specialCount;
+    uint8 public specialTreeCount;
 
     /** NOTE mapping from unique attributes id to number of generations */
-    mapping(uint64 => uint32) public generatedAttributes;
+    mapping(uint64 => uint32) public uniquenessFactorToGeneratedAttributesCount;
 
     /** NOTE mapping from unique symbol id to number of generations  */
-    mapping(uint64 => SymbolStatus) public uniqueSymbol;
+    mapping(uint64 => SymbolStatus) public uniquenessFactorToSymbolStatus;
 
-    event TreeAttributesGenerated(uint256 treeId);
-    event TreeAttributesNotGenerated(uint256 treeId);
-    event SymbolReserved(uint64 generatedCode); //TODO: input was uint32 before
-    event ReservedSymbolFreed(uint64 generatedCode); //TODO: input was uint32 before
-    event SymbolSetByAdmin(uint256 treeId);
+    event AttributeGenerated(uint256 treeId);
+    event AttributeGenerationFailed(uint256 treeId);
+    event SymbolReserved(uint64 uniquenessFactor);
+    event ReservedSymbolReleased(uint64 uniquenessFactor);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -62,7 +60,7 @@ contract TreeAttribute is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTreeAttribute
+     * @dev initialize accessRestriction contract and set true for isAttribute
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
@@ -73,8 +71,8 @@ contract TreeAttribute is Initializable {
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());
-        isTreeAttribute = true;
-        specialCount = 0;
+        isAttribute = true;
+        specialTreeCount = 0;
         accessRestriction = candidateContract;
     }
 
@@ -92,142 +90,147 @@ contract TreeAttribute is Initializable {
 
     /**
      * @dev reserve a unique symbol
-     * @param _generatedSymbol unique symbol to reserve
+     * @param _uniquenessFactor unique symbol to reserve
      */
-    function reserveSymbol(uint64 _generatedSymbol)
+    function reserveSymbol(uint64 _uniquenessFactor)
         external
         onlyDataManagerOrTreejerContract
     {
         require(
-            uniqueSymbol[_generatedSymbol].status == 0,
-            "the tree attributes are taken"
+            uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 0,
+            "the attributes are taken"
         );
-        uniqueSymbol[_generatedSymbol].status = 1;
+        uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 1;
 
-        emit SymbolReserved(_generatedSymbol);
+        emit SymbolReserved(_uniquenessFactor);
     }
 
     /**
      * @dev free reservation of a unique symbol
-     * @param _generatedSymbol unique symbol to reserve
+     * @param _uniquenessFactor unique symbol to reserve
      */
-    //TODO: input was uint32 before
-    function freeReserveSymbol(uint64 _generatedSymbol)
+
+    function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
         onlyDataManagerOrTreejerContract
     {
         require(
-            uniqueSymbol[_generatedSymbol].status == 1,
-            "the tree attributes not reserved"
+            uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1,
+            "the attributes not reserved"
         );
 
-        uniqueSymbol[_generatedSymbol].status = 0;
+        uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 0;
 
-        emit ReservedSymbolFreed(_generatedSymbol);
+        emit ReservedSymbolReleased(_uniquenessFactor);
     }
 
     /**
      * @dev free reservation of a unique symbol
-     * @param _generatedSymbol unique symbol to reserve
+     * @param _uniquenessFactor unique symbol to reserve
      */
-    function freeReserveSymbolBool(uint64 _generatedSymbol)
+    function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
         onlyDataManagerOrTreejerContract
     {
-        if (uniqueSymbol[_generatedSymbol].status == 1) {
-            uniqueSymbol[_generatedSymbol].status = 0;
-            emit ReservedSymbolFreed(_generatedSymbol);
+        if (uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1) {
+            uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 0;
+            emit ReservedSymbolReleased(_uniquenessFactor);
         }
     }
 
     /**
      * @dev admin assigns symbol to specified treeId
-     * @param treeId id of tree
-     * @param generatedCode unique symbol code to assign
+     * @param _treeId id of tree
+     * @param _attributeUniquenessFactor unique symbol code to assign
      */
-    function setTreeAttributesByAdmin(
-        uint256 treeId,
-        uint64 generatedCode,
-        uint64 generatedSymbol,
-        uint8 generationType
+    function setAttribute(
+        uint256 _treeId,
+        uint64 _attributeUniquenessFactor,
+        uint64 _symbolUniquenessFactor,
+        uint8 _generationType
     ) external onlyDataManagerOrTreejerContract {
         require(
-            uniqueSymbol[generatedSymbol].status < 2,
-            "the tree symbol is taken"
+            uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
+            "the symbol is taken"
         );
         require(
-            generatedAttributes[generatedCode] == 0,
-            "the tree attributes are taken"
+            uniquenessFactorToGeneratedAttributesCount[
+                _attributeUniquenessFactor
+            ] == 0,
+            "the attributes are taken"
         );
-        generatedAttributes[generatedCode] = 1;
-        uniqueSymbol[generatedSymbol].status = 3;
-        uniqueSymbol[generatedSymbol].generatedCount =
-            uniqueSymbol[generatedSymbol].generatedCount +
+        uniquenessFactorToGeneratedAttributesCount[
+            _attributeUniquenessFactor
+        ] = 1;
+        uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status = 3;
+        uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].generatedCount =
+            uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
+                .generatedCount +
             1;
         //
-        uint256 value = generatedSymbol + 2 * (2**32);
-        uint256 total = generatedCode + value * (2**64);
-        treeToken.setAttributes(treeId, total, generationType);
+        // uint256 value = _symbolUniquenessFactor + 2 * (2**32) ; //TODO: MIX_WITH_BELOW
+        uint256 uniquenessFactor = _attributeUniquenessFactor +
+            uint256(_symbolUniquenessFactor + 2 * (2**32)) *
+            (2**64);
+        treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
-        emit SymbolSetByAdmin(treeId);
+        emit AttributeGenerated(_treeId);
     }
 
     /**
-     * @dev generate a 256 bits random number as a base for tree attributes and slice it
+     * @dev generate a 256 bits random number as a base for attributes and slice it
      * in 28 bits parts
-     * @param treeId id of tree
-     * @return if unique tree attribute generated successfully
+     * @param _treeId id of tree
+     * @return if unique attribute generated successfully
      */
-    function createTreeSymbol(
-        uint256 treeId,
-        bytes32 randTree,
-        address buyer,
-        uint8 funderRank,
-        uint8 generationType
+    function createSymbol(
+        uint256 _treeId,
+        bytes32 _randomValue,
+        address _funder,
+        uint8 _funderRank,
+        uint8 _generationType
     ) external ifNotPaused onlyTreejerContract returns (bool) {
-        //TODO:check symbols instead of attributes
-        //TODO: ==false => !
-        if (!treeToken.attributeExists(treeId)) {
+        if (!treeToken.attributeExists(_treeId)) {
             //TODO: flag true ==>false
             bool flag = false;
-            uint64 attrRand;
+            uint64 tempRandomValue;
 
             for (uint256 j = 0; j < 10000; j++) {
-                uint256 rand = uint256(
+                uint256 randomValue = uint256(
                     keccak256(
                         abi.encodePacked(
-                            buyer,
-                            randTree,
-                            generationType,
+                            _funder,
+                            _randomValue,
+                            _generationType,
                             msg.sig,
-                            treeId,
+                            _treeId,
                             j
                         )
                     )
                 );
 
                 for (uint256 i = 0; i < 4; i++) {
-                    attrRand = uint64(rand & type(uint64).max);
+                    tempRandomValue = uint64(randomValue & type(uint64).max);
 
-                    flag = _calcRandSymbol(
-                        treeId,
-                        attrRand,
-                        funderRank,
-                        generationType
+                    flag = _generateUniquenessFactor(
+                        _treeId,
+                        tempRandomValue,
+                        _funderRank,
+                        _generationType
                     );
                     if (flag) {
                         break;
                     }
-                    rand = rand / (uint256(2)**64);
+                    randomValue = randomValue / (uint256(2)**64);
                 }
                 if (flag) {
                     break;
                 }
             }
             if (flag) {
-                emit TreeAttributesGenerated(treeId);
+                emit AttributeGenerated(_treeId);
             } else {
-                emit TreeAttributesNotGenerated(treeId);
+                emit AttributeGenerationFailed(_treeId);
             }
 
             return flag;
@@ -236,26 +239,27 @@ contract TreeAttribute is Initializable {
         }
     }
 
-    function createTreeAttributes(uint256 _treeId)
+    function createAttribute(uint256 _treeId)
         external
         ifNotPaused
         onlyTreejerContract
         returns (bool)
     {
-        //TODO:check symbols instead of attributes
-
         if (!treeToken.attributeExists(_treeId)) {
-            (bool flag, uint64 generatedAttribute) = _createUniqueAttribute(
-                _treeId
-            );
+            (
+                bool flag,
+                uint64 generatedAttribute //TODO:NAMING
+            ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
                 treeToken.setAttributes(_treeId, generatedAttribute, 1);
-                generatedAttributes[generatedAttribute] = 1;
+                uniquenessFactorToGeneratedAttributesCount[
+                    generatedAttribute
+                ] = 1;
 
-                emit TreeAttributesGenerated(_treeId);
+                emit AttributeGenerated(_treeId);
             } else {
-                emit TreeAttributesNotGenerated(_treeId);
+                emit AttributeGenerationFailed(_treeId);
             }
 
             return flag;
@@ -264,19 +268,23 @@ contract TreeAttribute is Initializable {
         }
     }
 
-    function randAvailibity(uint256 _treeId, uint64 _rand)
-        external
-        onlyTreejerContract
-        returns (uint64)
-    {
-        if (generatedAttributes[_rand] == 0) {
-            return _rand;
+    function manageAttributeUniquenessFactor(
+        uint256 _treeId,
+        uint64 _uniquenessFactor
+    ) external onlyTreejerContract returns (uint64) {
+        if (
+            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] == 0
+        ) {
+            return _uniquenessFactor;
         } else {
-            generatedAttributes[_rand] = generatedAttributes[_rand] + 1;
+            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] =
+                uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] +
+                1;
 
-            (bool flag, uint64 generatedAttribute) = _createUniqueAttribute(
-                _treeId
-            );
+            (
+                bool flag,
+                uint64 generatedAttribute //TODO:NAMING
+            ) = _generateAttributeUniquenessFactor(_treeId);
 
             require(flag, "unique attribute not fund");
 
@@ -290,42 +298,48 @@ contract TreeAttribute is Initializable {
      * @param _funder address of funder
      */
     function getFunderRank(address _funder) external view returns (uint8) {
-        //TODO: remove rank varible
-
         uint256 ownedTrees = treeToken.balanceOf(_funder);
 
         if (ownedTrees > 10000) {
             return 3;
-        } else if (ownedTrees > 2000) {
+        } else if (ownedTrees > 1000) {
             return 2;
-        } else if (ownedTrees > 500) {
+        } else if (ownedTrees > 100) {
             return 1;
         }
 
         return 0;
     }
 
-    function _createUniqueAttribute(uint256 _treeId)
+    function _generateAttributeUniquenessFactor(uint256 _treeId)
         private
         returns (bool, uint64)
     {
-        uint64 generatedAttribute;
+        uint64 generatedAttribute; //TODO:NAMING
 
         for (uint256 j = 0; j < 10000; j++) {
-            uint256 _rand = uint256(
+            uint256 randomValue = uint256(
                 keccak256(abi.encodePacked(msg.sig, _treeId, j))
             );
 
             for (uint256 i = 0; i < 4; i++) {
-                generatedAttribute = uint64(_rand & type(uint64).max);
+                generatedAttribute = uint64(randomValue & type(uint64).max);
 
-                if (generatedAttributes[generatedAttribute] == 0) {
+                if (
+                    uniquenessFactorToGeneratedAttributesCount[
+                        generatedAttribute
+                    ] == 0
+                ) {
                     return (true, generatedAttribute);
                 } else {
-                    generatedAttributes[generatedAttribute] =
-                        generatedAttributes[generatedAttribute] +
+                    uniquenessFactorToGeneratedAttributesCount[
+                        generatedAttribute
+                    ] =
+                        uniquenessFactorToGeneratedAttributesCount[
+                            generatedAttribute
+                        ] +
                         1;
-                    _rand = _rand / (uint256(2)**64);
+                    randomValue = randomValue / (uint256(2)**64);
                 }
             }
         }
@@ -334,29 +348,28 @@ contract TreeAttribute is Initializable {
 
     /**
      * @dev calculates the random attributes from random number
-     * @param treeId id of tree
-     * @param _rand a 28 bits random attribute generator number
+     * @param _treeId id of tree
+     * @param _randomValue a 28 bits random attribute generator number
      * @return if generated random attribute is unique
      */
-    function _calcRandSymbol(
-        uint256 treeId,
-        uint64 _rand,
-        uint8 funderRank,
-        uint8 generationType
+    function _generateUniquenessFactor(
+        uint256 _treeId,
+        uint64 _randomValue,
+        uint8 _funderRank,
+        uint8 _generationType
     ) private returns (bool) {
-        if (generatedAttributes[_rand] == 0) {
-            uint8[] memory results = new uint8[](8);
+        if (uniquenessFactorToGeneratedAttributesCount[_randomValue] == 0) {
+            uint8[] memory results = new uint8[](8); //TODO:NAMING
 
-            //TODO: create tempRand
-            uint64 tempRand = _rand;
+            uint64 tempRandomValue = _randomValue;
             for (uint256 j = 0; j < 8; j++) {
-                results[j] = uint8(tempRand & 255);
-                tempRand = tempRand / 256;
+                results[j] = uint8(tempRandomValue & 255);
+                tempRandomValue = tempRandomValue / 256;
             }
 
-            uint8 shape = _calcTreeShape(
-                uint16(_rand & ((2**13) - 1)),
-                funderRank
+            uint8 shape = _calcShape(
+                uint16(_randomValue & ((2**13) - 1)),
+                _funderRank
             );
 
             uint8 trunkColor;
@@ -366,15 +379,15 @@ contract TreeAttribute is Initializable {
                 (trunkColor, crownColor) = _calcColors(
                     results[2],
                     results[3],
-                    funderRank
+                    _funderRank
                 );
             } else {
-                (trunkColor, crownColor) = _setColors(shape);
+                (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
-            uint8 effect = _calcEffects(results[4], funderRank);
+            uint8 effect = _calcEffects(results[4], _funderRank);
 
-            uint64 symbolCode = shape +
+            uint64 symbolUniquenessFactor = shape +
                 (2**8) * //2**8
                 trunkColor +
                 (2**16) * //2**16
@@ -382,39 +395,49 @@ contract TreeAttribute is Initializable {
                 (2**24) * //2**24
                 effect;
 
-            if (uniqueSymbol[symbolCode].status > 0) {
-                uniqueSymbol[symbolCode].generatedCount =
-                    uniqueSymbol[symbolCode].generatedCount +
+            if (
+                uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
+                0
+            ) {
+                uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
+                    .generatedCount =
+                    uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
+                        .generatedCount +
                     1;
                 return false;
             }
-            uint8 coefficient = _calcCoefficient(results[5], funderRank);
+            uint8 coefficient = _calcCoefficient(results[5], _funderRank);
 
-            uint256 total = uint256(_rand) +
-                uint256(uint256(symbolCode + (2**32) * coefficient) * (2**64));
+            uint256 uniquenessFactor = uint256(_randomValue) +
+                uint256(
+                    uint256(symbolUniquenessFactor + (2**32) * coefficient) *
+                        (2**64)
+                );
 
-            uniqueSymbol[symbolCode].status = 2;
-            uniqueSymbol[symbolCode].generatedCount = 1;
-            generatedAttributes[_rand] = 1;
-            treeToken.setAttributes(treeId, total, generationType);
-            //TODO: there waas no return here we add return true
+            uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status = 2;
+            uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
+                .generatedCount = 1;
+            uniquenessFactorToGeneratedAttributesCount[_randomValue] = 1;
+            treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
+
             return true;
         } else {
-            generatedAttributes[_rand] = generatedAttributes[_rand] + 1;
+            uniquenessFactorToGeneratedAttributesCount[_randomValue] =
+                uniquenessFactorToGeneratedAttributesCount[_randomValue] +
+                1;
             return false;
         }
     }
 
-    function _calcTreeShape(uint16 _rand, uint8 _funderRank)
+    function _calcShape(uint16 _randomValue, uint8 _funderRank)
         private
         returns (uint8)
     {
-        //TODO: variables was uint8 before
         uint16[9] memory rank0 = [128, 256, 320, 384, 432, 480, 496, 511, 512];
         uint16[9] memory rank1 = [110, 200, 290, 360, 420, 470, 490, 511, 512];
         uint16[9] memory rank2 = [90, 190, 280, 350, 410, 450, 480, 510, 512];
         uint16[9] memory rank3 = [64, 176, 272, 340, 400, 460, 496, 508, 512];
-        uint16[9] memory probabilities;
+        uint16[9] memory probabilities; //TODO:NAMING
 
         if (_funderRank == 3) {
             probabilities = rank3;
@@ -427,14 +450,13 @@ contract TreeAttribute is Initializable {
         }
 
         uint8 shape;
-        //TODO: change this to uint8 from uint16
-        uint8 base16 = uint8(_rand & 15);
 
-        uint16 selector = _rand / 16;
+        uint8 base16 = uint8(_randomValue & 15); //TODO:NAMING
 
-        uint8 res = 0;
+        uint16 selector = _randomValue / 16; //TODO:NAMING
 
-        //TODO: j was uint256 before
+        uint8 res = 0; //TODO:NAMING
+
         for (uint8 j = 0; j < 9; j++) {
             if (selector < probabilities[j]) {
                 res = j;
@@ -443,9 +465,9 @@ contract TreeAttribute is Initializable {
         }
 
         if (res == 8) {
-            if (specialCount < 16) {
-                shape = 128 + specialCount;
-                specialCount = specialCount + 1;
+            if (specialTreeCount < 16) {
+                shape = 128 + specialTreeCount;
+                specialTreeCount = specialTreeCount + 1;
             } else {
                 shape = 112 + base16;
             }
@@ -457,8 +479,8 @@ contract TreeAttribute is Initializable {
     }
 
     function _calcColors(
-        uint8 _a,
-        uint8 _b,
+        uint8 _a, //TODO:NAMING
+        uint8 _b, //TODO:NAMING
         uint8 _funderRank
     ) private pure returns (uint8, uint8) {
         uint8[8] memory rank0 = [6, 12, 18, 22, 26, 29, 31, 32];
@@ -477,14 +499,13 @@ contract TreeAttribute is Initializable {
             probabilities = rank0;
         }
 
-        uint8 a1 = _a & 31;
-        uint8 a2 = _a / 32; //change to  _a / 32
-        uint8 b1 = _b & 31;
-        uint8 b2 = _b / 32; // change to _b / 32
-        uint8 ar = 0;
-        uint8 br = 0;
+        uint8 a1 = _a & 31; //TODO:NAMING
+        uint8 a2 = _a / 32; //change to  _a / 32 //TODO:NAMING
+        uint8 b1 = _b & 31; //TODO:NAMING
+        uint8 b2 = _b / 32; // change to _b / 32//TODO:NAMING
+        uint8 ar = 0; //TODO:NAMING
+        uint8 br = 0; //TODO:NAMING
 
-        //TODO: j was uint256 before |  ar & br not true set
         for (uint8 i = 0; i < 8; i++) {
             if (a1 < probabilities[i]) {
                 ar = i;
@@ -502,7 +523,11 @@ contract TreeAttribute is Initializable {
         return (ar * 8 + a2, br * 8 + b2);
     }
 
-    function _setColors(uint8 _treeShape) private pure returns (uint8, uint8) {
+    function _setSpecialTreeColors(uint8 _shape)
+        private
+        pure
+        returns (uint8, uint8)
+    {
         uint8[16] memory trunks = [
             6,
             12,
@@ -539,15 +564,14 @@ contract TreeAttribute is Initializable {
             31,
             32
         ];
-        return (trunks[_treeShape - 128], crowns[_treeShape - 128]);
+        return (trunks[_shape - 128], crowns[_shape - 128]);
     }
 
-    function _calcEffects(uint8 _rand, uint8 _funderRank)
+    function _calcEffects(uint8 _randomValue, uint8 _funderRank)
         private
         pure
         returns (uint8)
     {
-        //TODO: change this to uint16 from uint8
         uint8[16] memory rank0 = [
             50,
             100,
@@ -633,10 +657,8 @@ contract TreeAttribute is Initializable {
             probabilities = rank0;
         }
 
-        //TODO: change j to uint8 from uint256
         for (uint8 j = 0; j < 16; j++) {
-            //TODO: j must be < 16
-            if (_rand <= probabilities[j]) {
+            if (_randomValue <= probabilities[j]) {
                 return j;
             }
         }
@@ -644,14 +666,11 @@ contract TreeAttribute is Initializable {
         return 0;
     }
 
-    function _calcCoefficient(uint8 _rand, uint8 _funderRank)
+    function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
         private
         pure
         returns (uint8)
     {
-        //TODO: what is this func
-        //TODO:change this to uint16 from uint8
-
         uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
         uint8[8] memory rank1 = [175, 205, 225, 240, 248, 252, 254, 255];
         uint8[8] memory rank2 = [170, 200, 218, 232, 245, 250, 253, 255];
@@ -669,9 +688,8 @@ contract TreeAttribute is Initializable {
             probabilities = rank0;
         }
 
-        // //TODO: dont understnd this part
         for (uint8 j = 0; j < 8; j++) {
-            if (_rand <= probabilities[j]) {
+            if (_randomValue <= probabilities[j]) {
                 return j;
             }
         }

@@ -31,9 +31,8 @@ contract TestCommunityGifts is CommunityGifts {
                         claimedCount += 1;
                         used[j] = true;
 
-                        (, uint128 status) = treeAttribute.uniqueSymbol(
-                            symbols[j]
-                        );
+                        (, uint128 status) = attribute
+                            .uniquenessFactorToSymbolStatus(symbols[j]);
 
                         if (status == 1) {
                             generatedSymbol = symbols[j];

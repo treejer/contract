@@ -5,7 +5,7 @@ const IncrementalSale = artifacts.require("IncrementalSale.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Auction = artifacts.require("Auction.sol");
-const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const Attribute = artifacts.require("Attribute.sol");
 const RegularSale = artifacts.require("RegularSale.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -49,7 +49,6 @@ const {
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   GsnErrorMsg,
-  TreeAttributeErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -67,7 +66,7 @@ contract("IncrementalSale", (accounts) => {
   let wethFundInstance;
   let alloctionInstance;
   let planterFundsInstnce;
-  let treeAttributeInstance;
+  let attributeInstance;
   let regularSaleInstance;
 
   const dataManager = accounts[0];
@@ -159,15 +158,11 @@ contract("IncrementalSale", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       treeFactoryInstance = await deployProxy(
         TreeFactory,
@@ -235,24 +230,21 @@ contract("IncrementalSale", (accounts) => {
         "address set incorect"
       );
 
-      ///////////////---------------------------------set TreeAttributes address--------------------------------------------------------
+      ///////////////---------------------------------set Attributes address--------------------------------------------------------
 
       await iSaleInstance
-        .setTreeAttributesAddress(treeAttributeInstance.address, {
+        .setAttributesAddress(attributeInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await iSaleInstance.setAttributesAddress(attributeInstance.address, {
+        from: deployerAccount,
+      });
 
       assert.equal(
-        treeAttributeInstance.address,
-        await iSaleInstance.treeAttribute(),
+        attributeInstance.address,
+        await iSaleInstance.attribute(),
         "address set incorect"
       );
 
@@ -1192,15 +1184,11 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
         unsafeAllowCustomTypes: true,
       });
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
       treeFactoryInstance = await deployProxy(
         TreeFactory,
         [arInstance.address],
@@ -1263,12 +1251,9 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await iSaleInstance.setAttributesAddress(attributeInstance.address, {
+        from: deployerAccount,
+      });
 
       //-------------wethFundInstance
       await wethFundInstance.setWethTokenAddress(WETHAddress, {
@@ -1297,14 +1282,11 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      //--------------treeAttributeInstance
+      //--------------attributeInstance
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       ///////////////////////// -------------------- handle roles here ----------------
       await Common.addTreejerContractRole(
@@ -1324,7 +1306,7 @@ contract("IncrementalSale", (accounts) => {
       );
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
       /////----------------add allocation data
@@ -1537,7 +1519,7 @@ contract("IncrementalSale", (accounts) => {
         "Step 0 lastSold not true"
       );
 
-      ////--------------------------- check tree Attributes
+      ////--------------------------- check  attributes
 
       assert.equal(
         Number((await treeTokenInstance.attributes(101)).generationType),

@@ -293,7 +293,7 @@ contract("Gsn", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
-  it("test TestTreeAttributes", async () => {
+  it("test TestAttributes", async () => {
     //deploy TestWhitelistPaymaster
 
     testInstance = await deployProxy(TestWhitelistPaymaster, [], {

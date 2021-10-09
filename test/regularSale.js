@@ -5,7 +5,7 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 const Tree = artifacts.require("Tree.sol");
 const Planter = artifacts.require("Planter.sol");
 const WethFund = artifacts.require("WethFund.sol");
-const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const Attribute = artifacts.require("Attribute.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -40,7 +40,7 @@ contract("regularSale", (accounts) => {
   let arInstance;
 
   let treeTokenInstance;
-  let treeAttributeInstance;
+  let attributeInstance;
 
   let allocationInstance;
   let daiFundInstance;
@@ -763,15 +763,11 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      treeAttributeInstance = await deployProxy(
-        TreeAttribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
       await regularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
@@ -838,15 +834,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //-------------daiFundInstance
 
@@ -896,7 +891,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -928,7 +923,7 @@ contract("regularSale", (accounts) => {
         ///////check token owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
-        //////////// check tree attributes
+        //////////// check attributes
         attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
@@ -992,7 +987,7 @@ contract("regularSale", (accounts) => {
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
-        //////////// check tree attributes
+        //////////// check attributes
         attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
@@ -1085,15 +1080,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //-------------treeFactoryInstance
 
@@ -1130,7 +1124,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -1224,7 +1218,7 @@ contract("regularSale", (accounts) => {
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
-        //////////// check tree attributes
+        //////////// check attributes
         attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
@@ -1425,15 +1419,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1457,7 +1450,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -1549,7 +1542,7 @@ contract("regularSale", (accounts) => {
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
-        //////////// check tree attributes
+        //////////// check attributes
         attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
@@ -1749,15 +1742,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       ///////////////////////// -------------------- handle roles here ----------------
 
@@ -1781,7 +1773,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -1882,7 +1874,7 @@ contract("regularSale", (accounts) => {
       tokentOwner = await treeTokenInstance.ownerOf(10001);
       assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
 
-      //////////// check tree attributes
+      //////////// check attributes
       attributes = await treeTokenInstance.attributes.call(10001);
 
       assert.equal(
@@ -1986,7 +1978,7 @@ contract("regularSale", (accounts) => {
       tokentOwner = await treeTokenInstance.ownerOf(10002);
       assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
 
-      //////////// check tree attributes
+      //////////// check attributes
       attributes = await treeTokenInstance.attributes.call(10002);
 
       assert.equal(
@@ -2092,7 +2084,7 @@ contract("regularSale", (accounts) => {
       tokentOwner = await treeTokenInstance.ownerOf(10003);
       assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
 
-      //////////// check tree attributes
+      //////////// check attributes
       attributes = await treeTokenInstance.attributes.call(10003);
 
       assert.equal(
@@ -2365,15 +2357,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //-------------daiFundInstance
 
@@ -2423,7 +2414,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -2489,12 +2480,10 @@ contract("regularSale", (accounts) => {
         "funder1 not true " + 10001
       );
 
-      //////////// check tree attributes
+      //////////// check attributes
 
       assert.equal(
-        Number(
-          (await treeTokenInstance.attributes.call(10001)).generationType
-        ),
+        Number((await treeTokenInstance.attributes.call(10001)).generationType),
         1,
         `generationType for tree ${10001} is inccorect`
       );
@@ -2521,12 +2510,10 @@ contract("regularSale", (accounts) => {
         "funder1 not true " + 10002
       );
 
-      //////////// check tree attributes
+      //////////// check attributes
 
       assert.equal(
-        Number(
-          (await treeTokenInstance.attributes.call(10002)).generationType
-        ),
+        Number((await treeTokenInstance.attributes.call(10002)).generationType),
         1,
         `generationType for tree ${10002} is inccorect`
       );
@@ -2644,15 +2631,14 @@ contract("regularSale", (accounts) => {
         }
       );
 
-      await regularSaleInstance.setTreeAttributesAddress(
-        treeAttributeInstance.address,
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await treeAttributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       //-------------daiFundInstance
 
@@ -2702,7 +2688,7 @@ contract("regularSale", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAttributeInstance.address,
+        attributeInstance.address,
         deployerAccount
       );
 
@@ -2874,7 +2860,7 @@ contract("regularSale", (accounts) => {
         "funder1 not true " + treeId
       );
 
-      //////////// check tree attributes
+      //////////// check attributes
 
       assert.equal(
         Number(
@@ -3041,12 +3027,10 @@ contract("regularSale", (accounts) => {
         "funder1 not true " + 10002
       );
 
-      //////////// check tree attributes
+      //////////// check attributes
 
       assert.equal(
-        Number(
-          (await treeTokenInstance.attributes.call(10002)).generationType
-        ),
+        Number((await treeTokenInstance.attributes.call(10002)).generationType),
         1,
         `generationType for tree ${10002} is inccorect`
       );

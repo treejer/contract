@@ -8,7 +8,7 @@ import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFund.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
-import "../tree/ITreeAttribute.sol";
+import "../tree/IAttribute.sol";
 import "../regularSale/IRegularSale.sol";
 import "../gsn/RelayRecipient.sol";
 
@@ -21,7 +21,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     ITreeFactory public treeFactory;
     IWethFund public wethFund;
     IAllocation public allocation;
-    ITreeAttribute public treeAttribute;
+    IAttribute public attribute;
     IPlanterFund public planterFundContract;
     IRegularSale public regularSale;
     IERC20Upgradeable public wethToken;
@@ -171,14 +171,14 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeAttributesAddress
-     * @param _address set to the address of treeAttribute
+     * @dev admin set AttributesAddress
+     * @param _address set to the address of attribute
      */
 
-    function setTreeAttributesAddress(address _address) external onlyAdmin {
-        ITreeAttribute candidateContract = ITreeAttribute(_address);
-        require(candidateContract.isTreeAttribute());
-        treeAttribute = candidateContract;
+    function setAttributesAddress(address _address) external onlyAdmin {
+        IAttribute candidateContract = IAttribute(_address);
+        require(candidateContract.isAttribute());
+        attribute = candidateContract;
     }
 
     /**
@@ -465,7 +465,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     ) private {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        uint8 funderRank = treeAttribute.getFunderRank(_funder);
+        uint8 funderRank = attribute.getFunderRank(_funder);
 
         for (uint256 i = 0; i < _count; i++) {
             uint256 treePrice = incSaleData.initialPrice +
@@ -496,7 +496,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
                 )
             );
 
-            treeAttribute.createTreeSymbol(
+            attribute.createSymbol(
                 _tempLastSold,
                 randTree,
                 _funder,

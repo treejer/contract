@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
-import "../tree/ITreeAttribute.sol";
+import "../tree/IAttribute.sol";
 import "../treasury/IPlanterFund.sol";
 import "../gsn/RelayRecipient.sol";
 
@@ -16,7 +16,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IPlanterFund public planterFundContract;
-    ITreeAttribute public treeAttribute;
+    IAttribute public attribute;
     IERC20Upgradeable public daiToken;
 
     struct GifteeData {
@@ -125,14 +125,14 @@ contract CommunityGifts is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeAttributesAddress
-     * @param _address set to the address of treeAttribute
+     * @dev admin set AttributesAddress
+     * @param _address set to the address of attribute
      */
 
-    function setTreeAttributesAddress(address _address) external onlyAdmin {
-        ITreeAttribute candidateContract = ITreeAttribute(_address);
-        require(candidateContract.isTreeAttribute());
-        treeAttribute = candidateContract;
+    function setAttributesAddress(address _address) external onlyAdmin {
+        IAttribute candidateContract = IAttribute(_address);
+        require(candidateContract.isAttribute());
+        attribute = candidateContract;
     }
 
     /**
@@ -198,7 +198,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     }
 
     function reserveSymbol(uint64 _symbol) external onlyDataManager {
-        treeAttribute.reserveSymbol(_symbol);
+        attribute.reserveSymbol(_symbol);
         symbols.push(_symbol);
         used.push(false);
     }
@@ -206,7 +206,7 @@ contract CommunityGifts is Initializable, RelayRecipient {
     function removeReservedSymbol() external onlyDataManager {
         for (uint256 i = 0; i < symbols.length; i++) {
             if (!used[i]) {
-                treeAttribute.freeReserveSymbolBool(symbols[i]);
+                attribute.releaseReservedSymbol(symbols[i]);
             }
         }
 
@@ -297,9 +297,8 @@ contract CommunityGifts is Initializable, RelayRecipient {
                         claimedCount += 1;
                         used[j] = true;
 
-                        (, uint128 status) = treeAttribute.uniqueSymbol(
-                            symbols[j]
-                        );
+                        (, uint128 status) = attribute
+                            .uniquenessFactorToSymbolStatus(symbols[j]);
 
                         if (status == 1) {
                             generatedSymbol = symbols[j];
@@ -317,12 +316,13 @@ contract CommunityGifts is Initializable, RelayRecipient {
         }
 
         if (flag) {
-            uint64 generatedAttribute = treeAttribute.randAvailibity(
-                currentTree,
-                uint64(rand & type(uint64).max)
-            );
+            uint64 generatedAttribute = attribute
+                .manageAttributeUniquenessFactor(
+                    currentTree,
+                    uint64(rand & type(uint64).max)
+                );
 
-            treeAttribute.setTreeAttributesByAdmin(
+            attribute.setAttribute(
                 currentTree,
                 generatedAttribute,
                 generatedSymbol,

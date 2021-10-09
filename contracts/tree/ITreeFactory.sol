@@ -179,7 +179,7 @@ interface ITreeFactory {
     ) external;
 
     /**
-     * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
+     * @dev set incremental and honoraryTree sell for trees starting from {_startTreeId}
      * and end at {_endTreeId} by setting {_saleType} to saleType
      */
     function manageSaleTypeBatch(

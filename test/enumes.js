@@ -136,19 +136,16 @@ const AttributeErrorMsg = {
   SYMBOL_IS_TAKEN: "the symbol is taken",
 };
 
-const CommunityGiftErrorMsg = {
+const HonoraryTreeErrorMsg = {
   CLAIMED_BEFORE: "Claimed before",
   MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
   TREES_ARE_NOT_AVAILABLE: "trees are not available",
-  EXPIREDATE_REACHED: "CommunityGift ended",
   USER_NOT_EXIST: "User not exist",
-  EXPIREDATE_NOT_REACHED: "CommunityGift Time not yet ended",
   SYMBOL_NOT_RESERVED: "Symbol not reserved",
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
   INVALID_RANGE: "invalid range",
-
-  UPDATE_GIFTEE_INVALID_STATUS: "Status must be one",
+  UPDATE_RECIPIENT_INVALID_STATUS: "Status must be one",
   CANT_SET_RANGE: "cant set gift range",
   CANT_CLAIM: "you cant claim tree",
   SYMBOL_NOT_EXIST: "no symbol exists for gift",
@@ -171,7 +168,7 @@ module.exports = {
   AttributeErrorMsg,
   DaiFundErrorMsg,
   AllocationErrorMsg,
-  CommunityGiftErrorMsg,
+  HonoraryTreeErrorMsg,
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,

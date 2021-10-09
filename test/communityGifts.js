@@ -1,12 +1,12 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
-const CommunityGifts = artifacts.require("CommunityGifts.sol");
+const HonoraryTree = artifacts.require("HonoraryTree.sol");
 const Attribute = artifacts.require("Attribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Tree = artifacts.require("Tree.sol");
 const Dai = artifacts.require("Dai.sol");
-const TestCommunityGifts = artifacts.require("TestCommunityGifts.sol");
+const TestHonoraryTree = artifacts.require("TestHonoraryTree.sol");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const Units = require("ethereumjs-units");
@@ -24,14 +24,14 @@ const ethers = require("ethers");
 const {
   CommonErrorMsg,
   TimeEnumes,
-  CommunityGiftErrorMsg,
+  HonoraryTreeErrorMsg,
 
   erc20ErrorMsg,
   GsnErrorMsg,
 } = require("./enumes");
 
-contract("CommunityGifts", (accounts) => {
-  let communityGiftsInstance;
+contract("HonoraryTree", (accounts) => {
+  let honoraryTreeInstance;
   let arInstance;
   let attributeInstance;
   let treeFactoryInstance;
@@ -52,8 +52,8 @@ contract("CommunityGifts", (accounts) => {
   const userAccount8 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-  const initialPlanterFund = web3.utils.toWei("0.5");
-  const initialReferralFund = web3.utils.toWei("0.1");
+  const initialReferralTreePaymentToPlanter = web3.utils.toWei("0.5");
+  const initialReferralTreePaymentToAmbassador = web3.utils.toWei("0.1");
 
   before(async () => {
     arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
@@ -67,122 +67,15 @@ contract("CommunityGifts", (accounts) => {
 
   afterEach(async () => {});
 
-  ////////////////--------------------------------------------gsn------------------------------------------------
-  // it("test gsn [ @skip-on-coverage ]", async () => {
-  //   let env = await GsnTestEnvironment.startGsn("localhost");
-
-  //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
-  //     env.contractsDeployment;
-
-  //   await communityGiftsInstance.setTrustedForwarder(forwarderAddress, {
-  //     from: deployerAccount,
-  //   });
-
-  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-  //   await paymaster.setRelayHub(relayHubAddress);
-  //   await paymaster.setTrustedForwarder(forwarderAddress);
-
-  //   web3.eth.sendTransaction({
-  //     from: accounts[0],
-  //     to: paymaster.address,
-  //     value: web3.utils.toWei("1"),
-  //   });
-
-  //   origProvider = web3.currentProvider;
-
-  //   conf = { paymasterAddress: paymaster.address };
-
-  //   gsnProvider = await Gsn.RelayProvider.newProvider({
-  //     provider: origProvider,
-  //     config: conf,
-  //   }).init();
-
-  //   provider = new ethers.providers.Web3Provider(gsnProvider);
-
-  //   let signerGiftee = provider.getSigner(3);
-
-  //   let contractCommunityGift = await new ethers.Contract(
-  //     communityGiftsInstance.address,
-  //     communityGiftsInstance.abi,
-  //     signerGiftee
-  //   );
-
-  //   const giftee = userAccount2;
-  //   const symbol = 1234554321;
-
-  //   //////////--------------add giftee by admin
-
-  //   const startTree = 11;
-  //   const endTree = 13;
-  //   const planterShare = web3.utils.toWei("5");
-  //   const referralShare = web3.utils.toWei("2");
-  //   const transferAmount = web3.utils.toWei("14");
-  //   const adminWallet = userAccount8;
-  //   const expireDate = await Common.timeInitial(TimeEnumes.days, 30);
-
-  //   ///////---------------- handle admin walllet
-
-  //   await daiInstance.setMint(adminWallet, transferAmount);
-
-  //   await daiInstance.approve(communityGiftsInstance.address, transferAmount, {
-  //     from: adminWallet,
-  //   });
-
-  //   //////////--------------add giftee by admin
-
-  //   await communityGiftsInstance.setGiftsRange(
-  //     startTree,
-  //     endTree,
-  //     planterShare,
-  //     referralShare,
-  //     Number(expireDate),
-  //     adminWallet,
-  //     {
-  //       from: dataManager,
-  //     }
-  //   );
-
-  //   await communityGiftsInstance.updateGiftees(giftee, symbol, {
-  //     from: dataManager,
-  //   });
-
-  //   await communityGiftsInstance.setPrice(
-  //     web3.utils.toWei("4.9"), //planter share
-  //     web3.utils.toWei("2.1"), //referral share
-  //     { from: dataManager }
-  //   );
-
-  //   let balanceAccountBefore = await web3.eth.getBalance(giftee);
-
-  //   await contractCommunityGift
-  //     .claimTree({
-  //       from: giftee,
-  //     })
-  //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
-
-  //   await paymaster.addFunderWhitelistTarget(communityGiftsInstance.address, {
-  //     from: deployerAccount,
-  //   });
-
-  //   await contractCommunityGift.claimTree({
-  //     from: giftee,
-  //   });
-
-  //   let balanceAccountAfter = await web3.eth.getBalance(giftee);
-
-  //   assert.equal(
-  //     balanceAccountAfter,
-  //     balanceAccountBefore,
-  //     "gsn not true work"
-  //   );
-  // });
-
   describe("deployment and set addresses", () => {
     beforeEach(async () => {
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [arInstance.address, initialPlanterFund, initialReferralFund],
+      honoraryTreeInstance = await deployProxy(
+        HonoraryTree,
+        [
+          arInstance.address,
+          initialReferralTreePaymentToPlanter,
+          initialReferralTreePaymentToAmbassador,
+        ],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -226,7 +119,7 @@ contract("CommunityGifts", (accounts) => {
     });
     it("deploys successfully and set addresses", async () => {
       //////////////////------------------------------------ deploy successfully ----------------------------------------//
-      const address = communityGiftsInstance.address;
+      const address = honoraryTreeInstance.address;
       assert.notEqual(address, 0x0);
       assert.notEqual(address, "");
       assert.notEqual(address, null);
@@ -234,60 +127,60 @@ contract("CommunityGifts", (accounts) => {
 
       ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setTrustedForwarder(userAccount2, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setTrustedForwarder(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await communityGiftsInstance.setTrustedForwarder(userAccount2, {
+      await honoraryTreeInstance.setTrustedForwarder(userAccount2, {
         from: deployerAccount,
       });
 
       assert.equal(
         userAccount2,
-        await communityGiftsInstance.trustedForwarder(),
+        await honoraryTreeInstance.trustedForwarder(),
         "address set incorrect"
       );
 
       /////////////////---------------------------------set dai token address--------------------------------------------------------
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setDaiTokenAddress(daiInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setDaiTokenAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
+      await honoraryTreeInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
         daiInstance.address,
-        await communityGiftsInstance.daiToken.call(),
+        await honoraryTreeInstance.daiToken.call(),
         "address set incorect"
       );
 
       /////////////////---------------------------------set attribute address--------------------------------------------------------
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setAttributesAddress(attributeInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance.setAttributesAddress(
+      await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         {
           from: deployerAccount,
@@ -296,19 +189,19 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         attributeInstance.address,
-        await communityGiftsInstance.attribute.call(),
+        await honoraryTreeInstance.attribute.call(),
         "address set incorect"
       );
 
       /////////////////---------------------------------set tree factory address--------------------------------------------------------
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setTreeFactoryAddress(treeFactoryInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance.setTreeFactoryAddress(
+      await honoraryTreeInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         {
           from: deployerAccount,
@@ -317,18 +210,18 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         treeFactoryInstance.address,
-        await communityGiftsInstance.treeFactory.call(),
+        await honoraryTreeInstance.treeFactory.call(),
         "address set incorect"
       );
       /////////////////---------------------------------set planter fund address--------------------------------------------------------
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .setPlanterFundAddress(planterFundsInstnce.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await communityGiftsInstance.setPlanterFundAddress(
+      await honoraryTreeInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -337,17 +230,21 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         planterFundsInstnce.address,
-        await communityGiftsInstance.planterFundContract.call(),
+        await honoraryTreeInstance.planterFundContract.call(),
         "address set incorect"
       );
     });
   });
 
-  describe("set price and add giftee update giftee", () => {
+  describe("set price and add recipient update recipient", () => {
     beforeEach(async () => {
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [arInstance.address, initialPlanterFund, initialReferralFund],
+      honoraryTreeInstance = await deployProxy(
+        HonoraryTree,
+        [
+          arInstance.address,
+          initialReferralTreePaymentToPlanter,
+          initialReferralTreePaymentToAmbassador,
+        ],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -359,180 +256,211 @@ contract("CommunityGifts", (accounts) => {
     /////////////////-------------------------------------- set price ------------------------------------------------
 
     it("should set price successfully and check data to be ok and fail in invalid situation", async () => {
-      const planterFund = Units.convert("0.5", "eth", "wei");
-      const referralFund = Units.convert("0.1", "eth", "wei");
+      const referralTreePaymentToPlanter = Units.convert("0.5", "eth", "wei");
+      const referralTreePaymentToAmbassador = Units.convert(
+        "0.1",
+        "eth",
+        "wei"
+      );
 
       ////////// --------------- fail because caller is not data manager
-      await communityGiftsInstance
-        .setPrice(100, 200, { from: userAccount1 })
+      await honoraryTreeInstance
+        .updateReferralTreePayments(100, 200, { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      const eventTx = await communityGiftsInstance.setPrice(
-        planterFund,
-        referralFund,
+      const eventTx = await honoraryTreeInstance.updateReferralTreePayments(
+        referralTreePaymentToPlanter,
+        referralTreePaymentToAmbassador,
         {
           from: dataManager,
         }
       );
 
-      const settedPlanterFund = await communityGiftsInstance.planterFund.call();
-      const settedReferralFund =
-        await communityGiftsInstance.referralFund.call();
+      const settedReferralTreePaymentToPlanter =
+        await honoraryTreeInstance.referralTreePaymentToPlanter.call();
+      const settedReferralTreePaymentToAmbassador =
+        await honoraryTreeInstance.referralTreePaymentToAmbassador.call();
 
       assert.equal(
-        Number(settedPlanterFund),
-        Number(planterFund),
-        "planter fund is not correct"
+        Number(settedReferralTreePaymentToPlanter),
+        Number(referralTreePaymentToPlanter),
+        "ReferralTreePaymentToPlanter is not correct"
       );
 
       assert.equal(
-        Number(settedReferralFund),
-        Number(referralFund),
-        "referral fund is not correct"
+        Number(settedReferralTreePaymentToAmbassador),
+        Number(referralTreePaymentToAmbassador),
+        "ReferralTreePaymentToAmbassador is not correct"
       );
 
-      truffleAssert.eventEmitted(eventTx, "CommunityGiftPlanterFund", (ev) => {
-        return (
-          Number(ev.planterFund) == Number(planterFund) &&
-          Number(ev.referralFund) == Number(referralFund)
-        );
-      });
+      truffleAssert.eventEmitted(
+        eventTx,
+        "ReferralTreePaymentsUpdated",
+        (ev) => {
+          return (
+            Number(ev.referralTreePaymentToPlanter) ==
+              Number(referralTreePaymentToPlanter) &&
+            Number(ev.referralTreePaymentToAmbassador) ==
+              Number(referralTreePaymentToAmbassador)
+          );
+        }
+      );
     });
 
-    /////////////////---------------------------------addGiftee--------------------------------------------------------
-    it("should add giftee", async () => {
+    /////////////////---------------------------------addRecipient--------------------------------------------------------
+    it("should add recipient", async () => {
       const startDate = parseInt(new Date().getTime() / 1000) + 60 * 60;
-      const expireDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
 
       const newStartDate = parseInt(new Date().getTime() / 1000) + 5 * 60 * 60;
-      const newExpireDate = parseInt(new Date().getTime() / 1000) + 9 * 60 * 60;
+      const newExpiryDate = parseInt(new Date().getTime() / 1000) + 9 * 60 * 60;
 
-      await communityGiftsInstance
-        .addGiftee(userAccount1, startDate, expireDate, { from: userAccount2 })
+      await honoraryTreeInstance
+        .addRecipient(userAccount1, startDate, expiryDate, {
+          from: userAccount2,
+        })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      await communityGiftsInstance.addGiftee(
+      const addTx1 = await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      const oldGiftee = await communityGiftsInstance.giftees.call(userAccount1);
+      truffleAssert.eventEmitted(addTx1, "RecipientAdded", (ev) => {
+        return ev.recipient == userAccount1;
+      });
 
-      assert.equal(Number(oldGiftee.status), 1, "status is incorrect");
+      const oldRecipient = await honoraryTreeInstance.recipients.call(
+        userAccount1
+      );
+
+      assert.equal(Number(oldRecipient.status), 1, "status is incorrect");
 
       assert.equal(
-        Number(oldGiftee.expireDate),
-        expireDate,
-        "expire date is incorrect"
+        Number(oldRecipient.expiryDate),
+        expiryDate,
+        "expiry date is incorrect"
       );
 
       assert.equal(
-        Number(oldGiftee.startDate),
+        Number(oldRecipient.startDate),
         startDate,
         "start date is incorrect"
       );
 
-      await communityGiftsInstance.addGiftee(
+      const addTx2 = await honoraryTreeInstance.addRecipient(
         userAccount1,
         newStartDate,
-        newExpireDate,
+        newExpiryDate,
         {
           from: dataManager,
         }
       );
 
-      const newGiftee = await communityGiftsInstance.giftees.call(userAccount1);
+      truffleAssert.eventEmitted(addTx2, "RecipientAdded", (ev) => {
+        return ev.recipient == userAccount1;
+      });
+      const newRecipient = await honoraryTreeInstance.recipients.call(
+        userAccount1
+      );
 
-      assert.equal(Number(newGiftee.status), 1, "status is incorrect");
+      assert.equal(Number(newRecipient.status), 1, "status is incorrect");
 
       assert.equal(
-        Number(newGiftee.expireDate),
-        newExpireDate,
-        "expire date is incorrect"
+        Number(newRecipient.expiryDate),
+        newExpiryDate,
+        "expiry date is incorrect"
       );
 
       assert.equal(
-        Number(newGiftee.startDate),
+        Number(newRecipient.startDate),
         newStartDate,
         "start date is incorrect"
       );
     });
-    /////////////////---------------------------------editGiftee--------------------------------------------------------
-    it("should edit giftee", async () => {
+    /////////////////---------------------------------editRecipient--------------------------------------------------------
+    it("should edit recipient", async () => {
       const startDate1 = parseInt(new Date().getTime() / 1000) + 60 * 60;
-      const expireDate1 = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+      const expiryDate1 = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
 
       const startDate2 =
         parseInt(new Date().getTime() / 1000) + 1 * 24 * 60 * 60;
-      const expireDate2 =
+      const expiryDate2 =
         parseInt(new Date().getTime() / 1000) + 2 * 24 * 60 * 60;
 
-      await communityGiftsInstance
-        .updateGiftee(userAccount1, startDate1, expireDate1, {
+      await honoraryTreeInstance
+        .updateRecipient(userAccount1, startDate1, expiryDate1, {
           from: userAccount8,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      await communityGiftsInstance
-        .updateGiftee(userAccount1, startDate1, expireDate1, {
+      await honoraryTreeInstance
+        .updateRecipient(userAccount1, startDate1, expiryDate1, {
           from: dataManager,
         })
         .should.be.rejectedWith(
-          CommunityGiftErrorMsg.UPDATE_GIFTEE_INVALID_STATUS
+          HonoraryTreeErrorMsg.UPDATE_RECIPIENT_INVALID_STATUS
         );
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate1,
-        expireDate1,
+        expiryDate1,
         { from: dataManager }
       );
 
-      const gifteeAfterAdd = await communityGiftsInstance.giftees.call(
+      const recipientAfterAdd = await honoraryTreeInstance.recipients.call(
         userAccount1
       );
 
-      assert.equal(Number(gifteeAfterAdd.status), 1, "status is incorrect");
+      assert.equal(Number(recipientAfterAdd.status), 1, "status is incorrect");
 
       assert.equal(
-        Number(gifteeAfterAdd.expireDate),
-        expireDate1,
-        "expire date is incorrect"
+        Number(recipientAfterAdd.expiryDate),
+        expiryDate1,
+        "expiry date is incorrect"
       );
 
       assert.equal(
-        Number(gifteeAfterAdd.startDate),
+        Number(recipientAfterAdd.startDate),
         startDate1,
         "start date is incorrect"
       );
 
-      await communityGiftsInstance.updateGiftee(
+      const updateTx = await honoraryTreeInstance.updateRecipient(
         userAccount1,
         startDate2,
-        expireDate2,
+        expiryDate2,
         {
           from: dataManager,
         }
       );
+      truffleAssert.eventEmitted(updateTx, "RecipientUpdated", (ev) => {
+        return ev.recipient == userAccount1;
+      });
 
-      const gifteeAfterUpdate = await communityGiftsInstance.giftees.call(
+      const recipientAfterUpdate = await honoraryTreeInstance.recipients.call(
         userAccount1
       );
 
-      assert.equal(Number(gifteeAfterUpdate.status), 1, "status is incorrect");
-
       assert.equal(
-        Number(gifteeAfterUpdate.expireDate),
-        expireDate2,
-        "expire date is incorrect"
+        Number(recipientAfterUpdate.status),
+        1,
+        "status is incorrect"
       );
 
       assert.equal(
-        Number(gifteeAfterUpdate.startDate),
+        Number(recipientAfterUpdate.expiryDate),
+        expiryDate2,
+        "expiry date is incorrect"
+      );
+
+      assert.equal(
+        Number(recipientAfterUpdate.startDate),
         startDate2,
         "start date is incorrect"
       );
@@ -541,9 +469,13 @@ contract("CommunityGifts", (accounts) => {
 
   describe("reserveSymbol and freeReservedSymbol", () => {
     beforeEach(async () => {
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [arInstance.address, initialPlanterFund, initialReferralFund],
+      honoraryTreeInstance = await deployProxy(
+        HonoraryTree,
+        [
+          arInstance.address,
+          initialReferralTreePaymentToPlanter,
+          initialReferralTreePaymentToAmbassador,
+        ],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -557,7 +489,7 @@ contract("CommunityGifts", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      await communityGiftsInstance.setAttributesAddress(
+      await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         { from: deployerAccount }
       );
@@ -566,7 +498,7 @@ contract("CommunityGifts", (accounts) => {
     it("should reserve symbol", async () => {
       await Common.addTreejerContractRole(
         arInstance,
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         deployerAccount
       );
 
@@ -579,19 +511,19 @@ contract("CommunityGifts", (accounts) => {
         symbolsArray[i] = rand;
       }
 
-      await communityGiftsInstance
+      await honoraryTreeInstance
         .reserveSymbol(symbolsArray[0], { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       for (i = 0; i < symbolsArray.length; i++) {
-        await communityGiftsInstance.reserveSymbol(symbolsArray[i], {
+        await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {
           from: dataManager,
         });
       }
 
       for (let i = 0; i < symbolsArray.length; i++) {
-        const symbolsResult = await communityGiftsInstance.symbols.call(i);
-        const usedResult = await communityGiftsInstance.used.call(i);
+        const symbolsResult = await honoraryTreeInstance.symbols.call(i);
+        const usedResult = await honoraryTreeInstance.used.call(i);
         assert.equal(
           Number(symbolsResult),
           symbolsArray[i],
@@ -610,14 +542,14 @@ contract("CommunityGifts", (accounts) => {
         );
       }
       const lastSymbolValue = web3.utils.toBN("12345678987654321");
-      await communityGiftsInstance.reserveSymbol(lastSymbolValue, {
+      await honoraryTreeInstance.reserveSymbol(lastSymbolValue, {
         from: dataManager,
       });
 
-      const lastSymbolsResult = await communityGiftsInstance.symbols.call(
+      const lastSymbolsResult = await honoraryTreeInstance.symbols.call(
         symbolsArray.length
       );
-      const lastUsedResult = await communityGiftsInstance.used.call(
+      const lastUsedResult = await honoraryTreeInstance.used.call(
         symbolsArray.length
       );
 
@@ -629,10 +561,10 @@ contract("CommunityGifts", (accounts) => {
       assert.equal(lastUsedResult, false, "last used result is incorrect");
     });
 
-    it("removeReservedSymbol should work successfully", async () => {
+    it("releaseReservedSymbol should work successfully", async () => {
       await Common.addTreejerContractRole(
         arInstance,
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         deployerAccount
       );
 
@@ -646,14 +578,14 @@ contract("CommunityGifts", (accounts) => {
       }
 
       for (i = 0; i < symbolsArray.length; i++) {
-        await communityGiftsInstance.reserveSymbol(symbolsArray[i], {
+        await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {
           from: dataManager,
         });
       }
 
       for (let i = 0; i < symbolsArray.length; i++) {
-        const symbolsResult = await communityGiftsInstance.symbols.call(i);
-        const usedResult = await communityGiftsInstance.used.call(i);
+        const symbolsResult = await honoraryTreeInstance.symbols.call(i);
+        const usedResult = await honoraryTreeInstance.used.call(i);
         assert.equal(
           Number(symbolsResult),
           symbolsArray[i],
@@ -672,15 +604,15 @@ contract("CommunityGifts", (accounts) => {
         );
       }
 
-      await communityGiftsInstance
-        .removeReservedSymbol({ from: userAccount1 })
+      await honoraryTreeInstance
+        .releaseReservedSymbol({ from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      await communityGiftsInstance.removeReservedSymbol({ from: dataManager });
+      await honoraryTreeInstance.releaseReservedSymbol({ from: dataManager });
 
       for (let i = 0; i < symbolsArray.length; i++) {
-        await communityGiftsInstance.symbols.call(i).should.be.rejected;
-        await communityGiftsInstance.used.call(i).should.be.rejected;
+        await honoraryTreeInstance.symbols.call(i).should.be.rejected;
+        await honoraryTreeInstance.used.call(i).should.be.rejected;
         const uniqueSymbol =
           await attributeInstance.uniquenessFactorToSymbolStatus.call(
             symbolsArray[i]
@@ -693,17 +625,17 @@ contract("CommunityGifts", (accounts) => {
       }
     });
 
-    it("removeReservedSymbol should work successfully (some symbols are used and some symbols are setted by admin)", async () => {
+    it("releaseReservedSymbol should work successfully (some symbols are used and some symbols are setted by admin)", async () => {
       /////////////  -------------- deploy contracts
 
-      let testCommunityGiftsInstance = await TestCommunityGifts.new({
+      let testHonoraryTreeInstance = await TestHonoraryTree.new({
         from: deployerAccount,
       });
 
-      await testCommunityGiftsInstance.initialize(
+      await testHonoraryTreeInstance.initialize(
         arInstance.address,
-        initialPlanterFund,
-        initialReferralFund,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
         {
           from: deployerAccount,
         }
@@ -718,7 +650,7 @@ contract("CommunityGifts", (accounts) => {
       /////////////////// ------------ handle roles
       await Common.addTreejerContractRole(
         arInstance,
-        testCommunityGiftsInstance.address,
+        testHonoraryTreeInstance.address,
         deployerAccount
       );
 
@@ -729,7 +661,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       //////////////// ----------------- set addresses
-      await testCommunityGiftsInstance.setAttributesAddress(
+      await testHonoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         { from: deployerAccount }
       );
@@ -749,14 +681,14 @@ contract("CommunityGifts", (accounts) => {
       }
 
       for (i = 0; i < symbolsArray.length; i++) {
-        await testCommunityGiftsInstance.reserveSymbol(symbolsArray[i], {
+        await testHonoraryTreeInstance.reserveSymbol(symbolsArray[i], {
           from: dataManager,
         });
       }
 
       for (let i = 0; i < symbolsArray.length; i++) {
-        const symbolsResult = await testCommunityGiftsInstance.symbols.call(i);
-        const usedResult = await testCommunityGiftsInstance.used.call(i);
+        const symbolsResult = await testHonoraryTreeInstance.symbols.call(i);
+        const usedResult = await testHonoraryTreeInstance.used.call(i);
         assert.equal(
           Number(symbolsResult),
           symbolsArray[i],
@@ -776,8 +708,8 @@ contract("CommunityGifts", (accounts) => {
       }
 
       ///////////////// --------------- change some data to test
-      await testCommunityGiftsInstance.updateClaimedCount(3);
-      await testCommunityGiftsInstance.updateUsed(1);
+      await testHonoraryTreeInstance.updateClaimedCount(3);
+      await testHonoraryTreeInstance.updateUsed(1);
 
       await attributeInstance.setAttribute(
         101,
@@ -788,24 +720,24 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number(await testCommunityGiftsInstance.claimedCount.call()),
+        Number(await testHonoraryTreeInstance.claimedCount.call()),
         3,
         "claimed count is incorrect before free"
       );
 
-      await testCommunityGiftsInstance.removeReservedSymbol({
+      await testHonoraryTreeInstance.releaseReservedSymbol({
         from: dataManager,
       });
 
       assert.equal(
-        Number(await testCommunityGiftsInstance.claimedCount.call()),
+        Number(await testHonoraryTreeInstance.claimedCount.call()),
         0,
         "claimed count is incorrect after free"
       );
 
       for (let i = 0; i < symbolsArray.length; i++) {
-        await testCommunityGiftsInstance.symbols.call(i).should.be.rejected;
-        await testCommunityGiftsInstance.used.call(i).should.be.rejected;
+        await testHonoraryTreeInstance.symbols.call(i).should.be.rejected;
+        await testHonoraryTreeInstance.used.call(i).should.be.rejected;
         const uniqueSymbol =
           await attributeInstance.uniquenessFactorToSymbolStatus.call(
             symbolsArray[i]
@@ -836,13 +768,17 @@ contract("CommunityGifts", (accounts) => {
     });
   });
 
-  describe("update giftees", () => {
+  describe("update recipients", () => {
     beforeEach(async () => {
       //------------------ deploy contracts
 
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [arInstance.address, initialPlanterFund, initialReferralFund],
+      honoraryTreeInstance = await deployProxy(
+        HonoraryTree,
+        [
+          arInstance.address,
+          initialReferralTreePaymentToPlanter,
+          initialReferralTreePaymentToAmbassador,
+        ],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -880,21 +816,21 @@ contract("CommunityGifts", (accounts) => {
 
       //----------------- set cntract addresses
 
-      await communityGiftsInstance.setTreeFactoryAddress(
+      await honoraryTreeInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setPlanterFundAddress(
+      await honoraryTreeInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
+      await honoraryTreeInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
@@ -909,15 +845,15 @@ contract("CommunityGifts", (accounts) => {
         deployerAccount
       );
 
-      //----------------add role to treejer contract role to communityGiftsInstance address
+      //----------------add role to treejer contract role to honoraryTreeInstance address
       await Common.addTreejerContractRole(
         arInstance,
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         deployerAccount
       );
     });
 
-    it("should setGiftRange  and freeGiftRange succussfully", async () => {
+    it("should setTreeRange  and releaseTreeRange succussfully", async () => {
       //------------------initial data
 
       const startTree = 11;
@@ -931,7 +867,7 @@ contract("CommunityGifts", (accounts) => {
 
       //////////////// set price
 
-      await communityGiftsInstance.setPrice(
+      await honoraryTreeInstance.updateReferralTreePayments(
         await web3.utils.toWei("5"),
         await web3.utils.toWei("2"),
         {
@@ -943,15 +879,11 @@ contract("CommunityGifts", (accounts) => {
 
       await daiInstance.setMint(adminWallet, transferAmount);
 
-      await daiInstance.approve(
-        communityGiftsInstance.address,
-        transferAmount,
-        {
-          from: adminWallet,
-        }
-      );
+      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+        from: adminWallet,
+      });
 
-      const eventTx = await communityGiftsInstance.setGiftRange(
+      const eventTx = await honoraryTreeInstance.setTreeRange(
         adminWallet,
         startTree,
         endTree,
@@ -960,7 +892,7 @@ contract("CommunityGifts", (accounts) => {
         }
       );
 
-      truffleAssert.eventEmitted(eventTx, "CommuintyGiftSet");
+      truffleAssert.eventEmitted(eventTx, "TreeRangeSet");
       for (let i = 11; i < 21; i++) {
         assert.equal(
           Number((await treeFactoryInstance.trees.call(i)).saleType),
@@ -971,38 +903,42 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         Number(startTree),
-        Number(await communityGiftsInstance.currentTree.call()),
+        Number(await honoraryTreeInstance.currentTreeId.call()),
         "toClaim is not correct"
       );
 
       assert.equal(
         Number(endTree),
-        Number(await communityGiftsInstance.upTo.call()),
+        Number(await honoraryTreeInstance.upTo.call()),
         "upTo is not correct"
       );
-      //////////////////// ---------------- check planterFund balance
+      //////////////////// ---------------- check PlanterFund balance
       assert.equal(
         Number(await daiInstance.balanceOf(planterFundsInstnce.address)),
         math.mul(10, web3.utils.toWei("7")),
         "planter balance is inccorect in range 1 set"
       );
 
-      await communityGiftsInstance
-        .setGiftRange(adminWallet, newStartTree, newEndTree, {
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, newStartTree, newEndTree, {
           from: dataManager,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_SET_RANGE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_SET_RANGE);
 
-      await communityGiftsInstance
-        .freeGiftRange({ from: userAccount1 })
+      await honoraryTreeInstance
+        .releaseTreeRange({ from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
-      const countBefore = await communityGiftsInstance.count.call();
+      const countBefore = await honoraryTreeInstance.prePaidTreeCount.call();
       const diffrence =
-        Number(await communityGiftsInstance.upTo.call()) -
-        Number(await communityGiftsInstance.currentTree.call());
-      assert.equal(Number(countBefore), 0, "count is incorrect");
+        Number(await honoraryTreeInstance.upTo.call()) -
+        Number(await honoraryTreeInstance.currentTreeId.call());
+      assert.equal(Number(countBefore), 0, "prePaidTreeCount is incorrect");
 
-      await communityGiftsInstance.freeGiftRange({ from: dataManager });
+      const releaseTx = await honoraryTreeInstance.releaseTreeRange({
+        from: dataManager,
+      });
+
+      truffleAssert.eventEmitted(releaseTx, "TreeRangeReleased");
 
       for (let i = 11; i < 21; i++) {
         assert.equal(
@@ -1013,21 +949,25 @@ contract("CommunityGifts", (accounts) => {
       }
 
       assert.equal(
-        Number(await communityGiftsInstance.upTo.call()),
+        Number(await honoraryTreeInstance.upTo.call()),
         0,
         "upTo after free reserve is inccorect"
       );
       assert.equal(
-        Number(await communityGiftsInstance.currentTree.call()),
+        Number(await honoraryTreeInstance.currentTreeId.call()),
         0,
-        "currentTree after free reserve is inccorect"
+        "currentTreeId after free reserve is inccorect"
       );
 
-      const countAfter = await communityGiftsInstance.count.call();
+      const countAfter = await honoraryTreeInstance.prePaidTreeCount.call();
 
-      assert.equal(Number(countAfter), diffrence, "count after is incorrect");
+      assert.equal(
+        Number(countAfter),
+        diffrence,
+        "prePaidTreeCount after is incorrect"
+      );
 
-      await communityGiftsInstance.setGiftRange(
+      await honoraryTreeInstance.setTreeRange(
         adminWallet,
         newStartTree,
         newEndTree,
@@ -1046,13 +986,13 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         Number(newStartTree),
-        Number(await communityGiftsInstance.currentTree.call()),
+        Number(await honoraryTreeInstance.currentTreeId.call()),
         "toClaim is not correct"
       );
 
       assert.equal(
         Number(newEndTree),
-        Number(await communityGiftsInstance.upTo.call()),
+        Number(await honoraryTreeInstance.upTo.call()),
         "upTo is not correct"
       );
     });
@@ -1070,7 +1010,7 @@ contract("CommunityGifts", (accounts) => {
       const newEndTree2 = 51;
 
       const startDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-      const expireDate = await Common.timeInitial(TimeEnumes.hours, 5);
+      const expiryDate = await Common.timeInitial(TimeEnumes.hours, 5);
 
       const transferAmount = web3.utils.toWei("70");
       const adminWallet = userAccount8;
@@ -1090,7 +1030,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       ///////////// set address
-      await communityGiftsInstance.setAttributesAddress(
+      await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         {
           from: deployerAccount,
@@ -1103,7 +1043,7 @@ contract("CommunityGifts", (accounts) => {
 
       //////////////// set price
 
-      await communityGiftsInstance.setPrice(
+      await honoraryTreeInstance.updateReferralTreePayments(
         await web3.utils.toWei("5"),
         await web3.utils.toWei("2"),
         {
@@ -1115,22 +1055,13 @@ contract("CommunityGifts", (accounts) => {
 
       await daiInstance.setMint(adminWallet, transferAmount);
 
-      await daiInstance.approve(
-        communityGiftsInstance.address,
-        transferAmount,
-        {
-          from: adminWallet,
-        }
-      );
+      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+        from: adminWallet,
+      });
 
-      await communityGiftsInstance.setGiftRange(
-        adminWallet,
-        startTree,
-        endTree,
-        {
-          from: dataManager,
-        }
-      );
+      await honoraryTreeInstance.setTreeRange(adminWallet, startTree, endTree, {
+        from: dataManager,
+      });
 
       const symbolsArray = [];
       for (let i = 0; i < 10; i++) {
@@ -1139,61 +1070,61 @@ contract("CommunityGifts", (accounts) => {
           rand = parseInt(Math.random() * 10e10);
         }
         symbolsArray[i] = rand;
-        await communityGiftsInstance.reserveSymbol(rand, {
+        await honoraryTreeInstance.reserveSymbol(rand, {
           from: dataManager,
         });
       }
-      //////////////// --------------- add giftees
-      await communityGiftsInstance.addGiftee(
+      //////////////// --------------- add recipients
+      await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         { from: dataManager }
       );
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount2,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount3,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
       ////////////// claim gift
 
-      await communityGiftsInstance.claimGift({ from: userAccount1 });
-      await communityGiftsInstance.claimGift({ from: userAccount2 });
-      await communityGiftsInstance.claimGift({ from: userAccount3 });
+      await honoraryTreeInstance.claim({ from: userAccount1 });
+      await honoraryTreeInstance.claim({ from: userAccount2 });
+      await honoraryTreeInstance.claim({ from: userAccount3 });
 
       /////////////////////////// check data
 
       assert.equal(
-        Number(await communityGiftsInstance.currentTree.call()),
+        Number(await honoraryTreeInstance.currentTreeId.call()),
         14,
         "current tree is incorrect"
       );
-      await communityGiftsInstance
-        .setGiftRange(adminWallet, newStartTree1, newEndTree1, {
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, newStartTree1, newEndTree1, {
           from: dataManager,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_SET_RANGE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_SET_RANGE);
 
-      await communityGiftsInstance.freeGiftRange({ from: dataManager });
+      await honoraryTreeInstance.releaseTreeRange({ from: dataManager });
 
       assert.equal(
-        Number(await communityGiftsInstance.count.call()),
+        Number(await honoraryTreeInstance.prePaidTreeCount.call()),
         7,
-        "count after free1 is incorrect"
+        "prePaidTreeCount after free1 is incorrect"
       );
 
-      await communityGiftsInstance.setGiftRange(
+      await honoraryTreeInstance.setTreeRange(
         adminWallet,
         newStartTree1,
         newEndTree1,
@@ -1209,41 +1140,41 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number(await communityGiftsInstance.count.call()),
+        Number(await honoraryTreeInstance.prePaidTreeCount.call()),
         5,
-        "count after set range2 is incorrect"
+        "prePaidTreeCount after set range2 is incorrect"
       );
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount4,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance.claimGift({ from: userAccount4 });
+      await honoraryTreeInstance.claim({ from: userAccount4 });
 
-      await communityGiftsInstance.freeGiftRange({ from: dataManager });
+      await honoraryTreeInstance.releaseTreeRange({ from: dataManager });
 
       assert.equal(
-        Number(await communityGiftsInstance.count.call()),
+        Number(await honoraryTreeInstance.prePaidTreeCount.call()),
         6,
-        "count after free1 is incorrect"
+        "prePaidTreeCount after free1 is incorrect"
       );
 
       await daiInstance.setMint(adminWallet, web3.utils.toWei("28"));
 
       await daiInstance.approve(
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         web3.utils.toWei("28"),
         {
           from: adminWallet,
         }
       );
 
-      await communityGiftsInstance.setGiftRange(
+      await honoraryTreeInstance.setTreeRange(
         adminWallet,
         newStartTree2,
         newEndTree2,
@@ -1259,9 +1190,9 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number(await communityGiftsInstance.count.call()),
+        Number(await honoraryTreeInstance.prePaidTreeCount.call()),
         0,
-        "count after free1 is incorrect"
+        "prePaidTreeCount after free1 is incorrect"
       );
     });
 
@@ -1281,38 +1212,42 @@ contract("CommunityGifts", (accounts) => {
 
       //////////////// set price
 
-      await communityGiftsInstance.setPrice(planterShare, referralShare, {
-        from: dataManager,
-      });
+      await honoraryTreeInstance.updateReferralTreePayments(
+        planterShare,
+        referralShare,
+        {
+          from: dataManager,
+        }
+      );
 
       ///////////////// ---------------------- fail because caller is not data manager
-      await communityGiftsInstance
-        .setGiftRange(adminWallet, startTree, endTree, {
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, startTree, endTree, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       ///////////----------------- fail because of invalid range
-      await communityGiftsInstance
-        .setGiftRange(adminWallet, endTree, startTree, {
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, endTree, startTree, {
           from: dataManager,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.INVALID_RANGE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.INVALID_RANGE);
 
       /////////////// fail because of insufficient approval amount
 
       await daiInstance.setMint(adminWallet, transferAmount);
 
       await daiInstance.approve(
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         insufficientApprovalAmount,
         {
           from: adminWallet,
         }
       );
 
-      await communityGiftsInstance
-        .setGiftRange(
+      await honoraryTreeInstance
+        .setTreeRange(
           adminWallet,
           startTree,
           endTree,
@@ -1329,16 +1264,12 @@ contract("CommunityGifts", (accounts) => {
         insufficientTransferAmount
       );
 
-      await daiInstance.approve(
-        communityGiftsInstance.address,
-        transferAmount,
-        {
-          from: addminWalletWithInsufficientTransferAmount,
-        }
-      );
+      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+        from: addminWalletWithInsufficientTransferAmount,
+      });
 
-      await communityGiftsInstance
-        .setGiftRange(
+      await honoraryTreeInstance
+        .setTreeRange(
           addminWalletWithInsufficientTransferAmount,
           startTree,
           endTree,
@@ -1350,13 +1281,13 @@ contract("CommunityGifts", (accounts) => {
         .should.be.rejectedWith(erc20ErrorMsg.INSUFFICIENT_BALANCE);
 
       //////////////----------------- fail because of invalid admin account
-      await communityGiftsInstance
-        .setGiftRange(zeroAddress, startTree, endTree, {
+      await honoraryTreeInstance
+        .setTreeRange(zeroAddress, startTree, endTree, {
           from: dataManager,
         })
         .should.be.rejectedWith(erc20ErrorMsg.ZERO_ADDRESS);
 
-      //----------------- fail setGiftRange because a tree is not free
+      //----------------- fail setTreeRange because a tree is not free
 
       await treeFactoryInstance.listTree(treeIdInAuction, "some ipfs hash", {
         from: dataManager,
@@ -1375,23 +1306,27 @@ contract("CommunityGifts", (accounts) => {
         { from: userAccount7 }
       );
 
-      await communityGiftsInstance
-        .setGiftRange(adminWallet, startTree, endTree, {
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, startTree, endTree, {
           from: dataManager,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.TREES_ARE_NOT_AVAILABLE);
     });
   });
 
-  describe("claimGift", () => {
+  describe("claim", () => {
     beforeEach(async () => {
-      const expireDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
+      const expiryDate = await Common.timeInitial(TimeEnumes.days, 30); //one month after now
 
       //------------------ deploy contracts
 
-      communityGiftsInstance = await deployProxy(
-        CommunityGifts,
-        [arInstance.address, initialPlanterFund, initialReferralFund],
+      honoraryTreeInstance = await deployProxy(
+        HonoraryTree,
+        [
+          arInstance.address,
+          initialReferralTreePaymentToPlanter,
+          initialReferralTreePaymentToAmbassador,
+        ],
         {
           initializer: "initialize",
           from: deployerAccount,
@@ -1437,28 +1372,28 @@ contract("CommunityGifts", (accounts) => {
 
       //----------------- set cntract addresses
 
-      await communityGiftsInstance.setTreeFactoryAddress(
+      await honoraryTreeInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setAttributesAddress(
+      await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setPlanterFundAddress(
+      await honoraryTreeInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
+      await honoraryTreeInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
@@ -1477,10 +1412,10 @@ contract("CommunityGifts", (accounts) => {
         deployerAccount
       );
 
-      //----------------add role to treejer contract role to communityGiftsInstance address
+      //----------------add role to treejer contract role to honoraryTreeInstance address
       await Common.addTreejerContractRole(
         arInstance,
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         deployerAccount
       );
 
@@ -1492,89 +1427,89 @@ contract("CommunityGifts", (accounts) => {
       );
     });
 
-    it("claimGift should be reject", async () => {
-      await communityGiftsInstance
-        .claimGift({
+    it("claim should be reject", async () => {
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
       const startDate = parseInt(new Date().getTime() / 1000) + 60 * 60;
-      const expireDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      await communityGiftsInstance.updateGiftee(userAccount1, 10, 500, {
+      await honoraryTreeInstance.updateRecipient(userAccount1, 10, 500, {
         from: dataManager,
       });
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      await communityGiftsInstance.updateGiftee(userAccount1, 10, expireDate, {
+      await honoraryTreeInstance.updateRecipient(userAccount1, 10, expiryDate, {
         from: dataManager,
       });
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.TREES_ARE_NOT_AVAILABLE);
 
       ///------------------------------------------- set mint ----------------------------------------------------------
       await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
 
       await daiInstance.approve(
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         web3.utils.toWei("1000"),
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setGiftRange(deployerAccount, 10, 13, {
+      await honoraryTreeInstance.setTreeRange(deployerAccount, 10, 13, {
         from: dataManager,
       });
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.SYMBOL_NOT_EXIST);
 
-      await communityGiftsInstance.reserveSymbol(1050, {
+      await honoraryTreeInstance.reserveSymbol(1050, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.claimGift({
+      await honoraryTreeInstance.claim({
         from: userAccount1,
       });
     });
 
-    it("claimGift should be work successfully", async () => {
+    it("claim should be work successfully", async () => {
       const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expireDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
@@ -1584,27 +1519,27 @@ contract("CommunityGifts", (accounts) => {
       await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
 
       await daiInstance.approve(
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         web3.utils.toWei("1000"),
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setGiftRange(deployerAccount, 10, 11, {
+      await honoraryTreeInstance.setTreeRange(deployerAccount, 10, 11, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.reserveSymbol(1050, {
+      await honoraryTreeInstance.reserveSymbol(1050, {
         from: dataManager,
       });
 
-      let eventTx1 = await communityGiftsInstance.claimGift({
+      let eventTx1 = await honoraryTreeInstance.claim({
         from: userAccount1,
       });
 
       //check used
-      const usedResult = await communityGiftsInstance.used.call(0);
+      const usedResult = await honoraryTreeInstance.used.call(0);
       assert.equal(usedResult, true, "used result is incorrect");
 
       //check uniqueSymbol
@@ -1623,26 +1558,32 @@ contract("CommunityGifts", (accounts) => {
         "Symbols generationType is not correct"
       );
 
-      //check GifteeData
-      let gifteeData = await communityGiftsInstance.giftees.call(userAccount1);
-      assert.equal(Number(gifteeData.status), 0, "status is not correct");
-      assert.equal(
-        Number(gifteeData.expireDate),
-        0,
-        "expireDate is not correct"
+      //check RecipientData
+      let recipientData = await honoraryTreeInstance.recipients.call(
+        userAccount1
       );
-      assert.equal(Number(gifteeData.startDate), 0, "startDate is not correct");
+      assert.equal(Number(recipientData.status), 0, "status is not correct");
+      assert.equal(
+        Number(recipientData.expiryDate),
+        0,
+        "expiryDate is not correct"
+      );
+      assert.equal(
+        Number(recipientData.startDate),
+        0,
+        "startDate is not correct"
+      );
 
       //check claimedCount
       assert.equal(
-        Number(await communityGiftsInstance.claimedCount()),
+        Number(await honoraryTreeInstance.claimedCount()),
         1,
         "status is not correct"
       );
 
-      //check currentTree
+      //check currentTreeId
       assert.equal(
-        Number(await communityGiftsInstance.currentTree()),
+        Number(await honoraryTreeInstance.currentTreeId()),
         11,
         "status is not correct"
       );
@@ -1664,27 +1605,27 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         Number(pFundAfter),
-        Number(initialPlanterFund),
-        "planter fund is not ok"
+        Number(initialReferralTreePaymentToPlanter),
+        "ReferralTreePaymentToPlanter is not ok"
       );
 
       assert.equal(
         Number(rFundAfter),
-        Number(initialReferralFund),
-        "referral fund is not ok"
+        Number(initialReferralTreePaymentToAmbassador),
+        "ReferralTreePaymentToAmbassador is not ok"
       );
 
       const pfTotalFundAfter = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
         Number(pfTotalFundAfter.planter),
-        Number(initialPlanterFund),
+        Number(initialReferralTreePaymentToPlanter),
         "planter total fund is not ok"
       );
 
       assert.equal(
         Number(pfTotalFundAfter.ambassador),
-        Number(initialReferralFund),
+        Number(initialReferralTreePaymentToAmbassador),
         "ambassador total fund is not ok"
       );
 
@@ -1696,42 +1637,42 @@ contract("CommunityGifts", (accounts) => {
 
       //////////-------------- check event emitted
 
-      truffleAssert.eventEmitted(eventTx1, "TreeClaimed", (ev) => {
+      truffleAssert.eventEmitted(eventTx1, "Claimed", (ev) => {
         return Number(ev.treeId) == 10;
       });
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount1,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.CANT_CLAIM);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      //////---------------------------------test2 (check TreeNotClaimed emit)
+      //////---------------------------------test2 (check ClaimFailed emit)
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount2,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount2,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.TREES_ARE_NOT_AVAILABLE);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.TREES_ARE_NOT_AVAILABLE);
 
-      await communityGiftsInstance.setGiftRange(deployerAccount, 11, 13, {
+      await honoraryTreeInstance.setTreeRange(deployerAccount, 11, 13, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.reserveSymbol(1055, {
+      await honoraryTreeInstance.reserveSymbol(1055, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.reserveSymbol(1058, {
+      await honoraryTreeInstance.reserveSymbol(1058, {
         from: dataManager,
       });
 
@@ -1743,50 +1684,50 @@ contract("CommunityGifts", (accounts) => {
         from: dataManager,
       });
 
-      let eventTx2 = await communityGiftsInstance.claimGift({
+      let eventTx2 = await honoraryTreeInstance.claim({
         from: userAccount2,
       });
 
-      truffleAssert.eventEmitted(eventTx2, "TreeNotClaimed", (ev) => {
-        return ev.giftee == userAccount2;
+      truffleAssert.eventEmitted(eventTx2, "ClaimFailed", (ev) => {
+        return ev.recipient == userAccount2;
       });
     });
 
-    it("2-claimGift should be work successfully", async () => {
+    it("2-claim should be work successfully", async () => {
       const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expireDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount2,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount3,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
       );
 
-      await communityGiftsInstance.addGiftee(
+      await honoraryTreeInstance.addRecipient(
         userAccount4,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
@@ -1796,43 +1737,43 @@ contract("CommunityGifts", (accounts) => {
       await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
 
       await daiInstance.approve(
-        communityGiftsInstance.address,
+        honoraryTreeInstance.address,
         web3.utils.toWei("1000"),
         {
           from: deployerAccount,
         }
       );
 
-      await communityGiftsInstance.setGiftRange(deployerAccount, 10, 15, {
+      await honoraryTreeInstance.setTreeRange(deployerAccount, 10, 15, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.reserveSymbol(1050, {
+      await honoraryTreeInstance.reserveSymbol(1050, {
         from: dataManager,
       });
 
-      await communityGiftsInstance.reserveSymbol(1051, {
+      await honoraryTreeInstance.reserveSymbol(1051, {
         from: dataManager,
       });
-      await communityGiftsInstance.reserveSymbol(1052, {
+      await honoraryTreeInstance.reserveSymbol(1052, {
         from: dataManager,
       });
 
-      let eventTx1 = await communityGiftsInstance.claimGift({
+      let eventTx1 = await honoraryTreeInstance.claim({
         from: userAccount1,
       });
 
       let treeIdGeneratedForUser1;
 
       for (let i = 0; i < 3; i++) {
-        if (await communityGiftsInstance.used.call(i)) {
+        if (await honoraryTreeInstance.used.call(i)) {
           treeIdGeneratedForUser1 = i;
           break;
         }
       }
 
       //check used
-      const usedResult = await communityGiftsInstance.used.call(
+      const usedResult = await honoraryTreeInstance.used.call(
         treeIdGeneratedForUser1
       );
       assert.equal(usedResult, true, "used result is incorrect");
@@ -1840,7 +1781,7 @@ contract("CommunityGifts", (accounts) => {
       //check uniqueSymbol
       let uniqueSymbol =
         await attributeInstance.uniquenessFactorToSymbolStatus.call(
-          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser1)
+          await honoraryTreeInstance.symbols.call(treeIdGeneratedForUser1)
         );
       assert.equal(Number(uniqueSymbol.status), 3, "status is not correct");
       assert.equal(
@@ -1855,13 +1796,15 @@ contract("CommunityGifts", (accounts) => {
         "Symbols generationType is not correct"
       );
 
-      //check GifteeData
-      let gifteeData = await communityGiftsInstance.giftees.call(userAccount1);
-      assert.equal(Number(gifteeData.status), 0, "status is not correct");
+      //check RecipientData
+      let recipientData = await honoraryTreeInstance.recipients.call(
+        userAccount1
+      );
+      assert.equal(Number(recipientData.status), 0, "status is not correct");
 
       //check claimedCount
       assert.equal(
-        Number(await communityGiftsInstance.claimedCount()),
+        Number(await honoraryTreeInstance.claimedCount()),
         1,
         "status is not correct"
       );
@@ -1875,7 +1818,7 @@ contract("CommunityGifts", (accounts) => {
 
       //////////-------------- check event emitted
 
-      truffleAssert.eventEmitted(eventTx1, "TreeClaimed", (ev) => {
+      truffleAssert.eventEmitted(eventTx1, "Claimed", (ev) => {
         return Number(ev.treeId) == 10;
       });
 
@@ -1885,7 +1828,7 @@ contract("CommunityGifts", (accounts) => {
 
       ////---------------------------------- claim user2
 
-      let eventTx2 = await communityGiftsInstance.claimGift({
+      let eventTx2 = await honoraryTreeInstance.claim({
         from: userAccount2,
       });
 
@@ -1893,7 +1836,7 @@ contract("CommunityGifts", (accounts) => {
 
       for (let i = 0; i < 3; i++) {
         if (
-          (await communityGiftsInstance.used.call(i)) &&
+          (await honoraryTreeInstance.used.call(i)) &&
           i != treeIdGeneratedForUser2
         ) {
           treeIdGeneratedForUser2 = i;
@@ -1902,7 +1845,7 @@ contract("CommunityGifts", (accounts) => {
       }
 
       //check used
-      const usedResult2 = await communityGiftsInstance.used.call(
+      const usedResult2 = await honoraryTreeInstance.used.call(
         treeIdGeneratedForUser2
       );
       assert.equal(usedResult2, true, "used result is incorrect");
@@ -1910,7 +1853,7 @@ contract("CommunityGifts", (accounts) => {
       //check uniqueSymbol
       let uniqueSymbol2 =
         await attributeInstance.uniquenessFactorToSymbolStatus.call(
-          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser2)
+          await honoraryTreeInstance.symbols.call(treeIdGeneratedForUser2)
         );
       assert.equal(Number(uniqueSymbol2.status), 3, "status is not correct");
       assert.equal(
@@ -1925,13 +1868,15 @@ contract("CommunityGifts", (accounts) => {
         "Symbols generationType is not correct"
       );
 
-      //check GifteeData
-      let gifteeData2 = await communityGiftsInstance.giftees.call(userAccount2);
-      assert.equal(Number(gifteeData2.status), 0, "status is not correct");
+      //check RecipientData
+      let recipientData2 = await honoraryTreeInstance.recipients.call(
+        userAccount2
+      );
+      assert.equal(Number(recipientData2.status), 0, "status is not correct");
 
       //check claimedCount
       assert.equal(
-        Number(await communityGiftsInstance.claimedCount()),
+        Number(await honoraryTreeInstance.claimedCount()),
         2,
         "status is not correct"
       );
@@ -1945,13 +1890,13 @@ contract("CommunityGifts", (accounts) => {
 
       //////////-------------- check event emitted
 
-      truffleAssert.eventEmitted(eventTx2, "TreeClaimed", (ev) => {
+      truffleAssert.eventEmitted(eventTx2, "Claimed", (ev) => {
         return Number(ev.treeId) == 11;
       });
 
       ////---------------------------------- claim user2
 
-      let eventTx3 = await communityGiftsInstance.claimGift({
+      let eventTx3 = await honoraryTreeInstance.claim({
         from: userAccount3,
       });
 
@@ -1959,7 +1904,7 @@ contract("CommunityGifts", (accounts) => {
 
       for (let i = 0; i < 3; i++) {
         if (
-          (await communityGiftsInstance.used.call(i)) &&
+          (await honoraryTreeInstance.used.call(i)) &&
           i != treeIdGeneratedForUser1 &&
           i != treeIdGeneratedForUser2
         ) {
@@ -1969,7 +1914,7 @@ contract("CommunityGifts", (accounts) => {
       }
 
       //check used
-      const usedResult3 = await communityGiftsInstance.used.call(
+      const usedResult3 = await honoraryTreeInstance.used.call(
         treeIdGeneratedForUser3
       );
       assert.equal(usedResult3, true, "used result is incorrect");
@@ -1977,7 +1922,7 @@ contract("CommunityGifts", (accounts) => {
       //check uniquenessFactorToSymbolStatus
       let uniqueSymbol3 =
         await attributeInstance.uniquenessFactorToSymbolStatus.call(
-          await communityGiftsInstance.symbols.call(treeIdGeneratedForUser3)
+          await honoraryTreeInstance.symbols.call(treeIdGeneratedForUser3)
         );
       assert.equal(Number(uniqueSymbol3.status), 3, "status is not correct");
       assert.equal(
@@ -1992,13 +1937,15 @@ contract("CommunityGifts", (accounts) => {
         "Symbols generationType is not correct"
       );
 
-      //check GifteeData
-      let gifteeData3 = await communityGiftsInstance.giftees.call(userAccount3);
-      assert.equal(Number(gifteeData3.status), 0, "status is not correct");
+      //check RecipientData
+      let recipientData3 = await honoraryTreeInstance.recipients.call(
+        userAccount3
+      );
+      assert.equal(Number(recipientData3.status), 0, "status is not correct");
 
       //check claimedCount
       assert.equal(
-        Number(await communityGiftsInstance.claimedCount()),
+        Number(await honoraryTreeInstance.claimedCount()),
         3,
         "status is not correct"
       );
@@ -2012,7 +1959,7 @@ contract("CommunityGifts", (accounts) => {
 
       //////////-------------- check event emitted
 
-      truffleAssert.eventEmitted(eventTx3, "TreeClaimed", (ev) => {
+      truffleAssert.eventEmitted(eventTx3, "Claimed", (ev) => {
         return Number(ev.treeId) == 12;
       });
 
@@ -2026,27 +1973,27 @@ contract("CommunityGifts", (accounts) => {
 
       assert.equal(
         Number(pFundAfter),
-        Number(initialPlanterFund),
-        "planter fund is not ok"
+        Number(initialReferralTreePaymentToPlanter),
+        "ReferralTreePaymentToPlanter is not ok"
       );
 
       assert.equal(
         Number(rFundAfter),
-        Number(initialReferralFund),
-        "referral fund is not ok"
+        Number(initialReferralTreePaymentToAmbassador),
+        "ReferralTreePaymentToAmbassador is not ok"
       );
 
       const pfTotalFundAfter = await planterFundsInstnce.totalBalances.call();
 
       assert.equal(
         Number(pfTotalFundAfter.planter),
-        Number(initialPlanterFund) * 3,
+        Number(initialReferralTreePaymentToPlanter) * 3,
         "planter total fund is not ok"
       );
 
       assert.equal(
         Number(pfTotalFundAfter.ambassador),
-        Number(initialReferralFund) * 3,
+        Number(initialReferralTreePaymentToAmbassador) * 3,
         "ambassador total fund is not ok"
       );
 
@@ -2057,24 +2004,24 @@ contract("CommunityGifts", (accounts) => {
       );
 
       ////------------------gift 4
-      await communityGiftsInstance
-        .claimGift({
+      await honoraryTreeInstance
+        .claim({
           from: userAccount4,
         })
-        .should.be.rejectedWith(CommunityGiftErrorMsg.SYMBOL_NOT_EXIST);
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.SYMBOL_NOT_EXIST);
     });
 
-    it("claimGift in TestCommunityGifts", async () => {
+    it("claim in TestHonoraryTree", async () => {
       /////////////  -------------- deploy contracts
 
-      let testCommunityGiftsInstance = await TestCommunityGifts.new({
+      let testHonoraryTreeInstance = await TestHonoraryTree.new({
         from: deployerAccount,
       });
 
-      await testCommunityGiftsInstance.initialize(
+      await testHonoraryTreeInstance.initialize(
         arInstance.address,
-        initialPlanterFund,
-        initialReferralFund,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
         {
           from: deployerAccount,
         }
@@ -2089,7 +2036,7 @@ contract("CommunityGifts", (accounts) => {
       /////////////////// ------------ handle roles
       await Common.addTreejerContractRole(
         arInstance,
-        testCommunityGiftsInstance.address,
+        testHonoraryTreeInstance.address,
         deployerAccount
       );
 
@@ -2100,21 +2047,21 @@ contract("CommunityGifts", (accounts) => {
       );
 
       //////////////// ----------------- set addresses
-      await testCommunityGiftsInstance.setAttributesAddress(
+      await testHonoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         { from: deployerAccount }
       );
 
-      await testCommunityGiftsInstance.setTreeFactoryAddress(
+      await testHonoraryTreeInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         { from: deployerAccount }
       );
 
-      await testCommunityGiftsInstance.setDaiTokenAddress(daiInstance.address, {
+      await testHonoraryTreeInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
-      await testCommunityGiftsInstance.setPlanterFundAddress(
+      await testHonoraryTreeInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
           from: deployerAccount,
@@ -2124,12 +2071,12 @@ contract("CommunityGifts", (accounts) => {
       ///////////////////------------------------------------------------------------------------
 
       const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expireDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
 
-      await testCommunityGiftsInstance.addGiftee(
+      await testHonoraryTreeInstance.addRecipient(
         userAccount1,
         startDate,
-        expireDate,
+        expiryDate,
         {
           from: dataManager,
         }
@@ -2139,66 +2086,184 @@ contract("CommunityGifts", (accounts) => {
       await daiInstance.setMint(deployerAccount, web3.utils.toWei("1000"));
 
       await daiInstance.approve(
-        testCommunityGiftsInstance.address,
+        testHonoraryTreeInstance.address,
         web3.utils.toWei("1000"),
         {
           from: deployerAccount,
         }
       );
 
-      await testCommunityGiftsInstance.setGiftRange(deployerAccount, 10, 15, {
+      await testHonoraryTreeInstance.setTreeRange(deployerAccount, 10, 15, {
         from: dataManager,
       });
 
-      await testCommunityGiftsInstance.reserveSymbol(1050, {
+      await testHonoraryTreeInstance.reserveSymbol(1050, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1051, {
+      await testHonoraryTreeInstance.reserveSymbol(1051, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1052, {
+      await testHonoraryTreeInstance.reserveSymbol(1052, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1053, {
+      await testHonoraryTreeInstance.reserveSymbol(1053, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1054, {
+      await testHonoraryTreeInstance.reserveSymbol(1054, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1055, {
+      await testHonoraryTreeInstance.reserveSymbol(1055, {
         from: dataManager,
       });
-      await testCommunityGiftsInstance.reserveSymbol(1056, {
+      await testHonoraryTreeInstance.reserveSymbol(1056, {
         from: dataManager,
       });
 
-      await testCommunityGiftsInstance.testClaimGiftFor(17, {
+      await testHonoraryTreeInstance.testClaimGiftFor(17, {
         from: userAccount1,
       });
 
       //check used
-      const usedResult = await testCommunityGiftsInstance.used.call(3);
+      const usedResult = await testHonoraryTreeInstance.used.call(3);
       assert.equal(usedResult, true, "used result is incorrect");
 
-      await testCommunityGiftsInstance.testClaimGiftFor(15, {
+      await testHonoraryTreeInstance.testClaimGiftFor(15, {
         from: userAccount1,
       });
 
       //check used
-      const usedResult2 = await testCommunityGiftsInstance.used.call(4);
+      const usedResult2 = await testHonoraryTreeInstance.used.call(4);
       assert.equal(usedResult2, true, "used result is incorrect");
 
       await attributeInstance.setAttribute(22, 2321321, 1050, 20, {
         from: dataManager,
       });
 
-      let tx = await testCommunityGiftsInstance.testClaimGiftFor(20, {
+      let tx = await testHonoraryTreeInstance.testClaimGiftFor(20, {
         from: userAccount1,
       });
 
       // check used
-      const usedResult3 = await testCommunityGiftsInstance.used.call(1);
+      const usedResult3 = await testHonoraryTreeInstance.used.call(1);
       assert.equal(usedResult3, true, "used result is incorrect");
+    });
+
+    //////////////--------------------------------------------gsn------------------------------------------------
+    it("test gsn [ @skip-on-coverage ]", async () => {
+      let env = await GsnTestEnvironment.startGsn("localhost");
+
+      const { forwarderAddress, relayHubAddress, paymasterAddress } =
+        env.contractsDeployment;
+
+      await honoraryTreeInstance.setTrustedForwarder(forwarderAddress, {
+        from: deployerAccount,
+      });
+
+      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+
+      await paymaster.setRelayHub(relayHubAddress);
+      await paymaster.setTrustedForwarder(forwarderAddress);
+
+      web3.eth.sendTransaction({
+        from: accounts[0],
+        to: paymaster.address,
+        value: web3.utils.toWei("1"),
+      });
+
+      origProvider = web3.currentProvider;
+
+      conf = { paymasterAddress: paymaster.address };
+
+      gsnProvider = await Gsn.RelayProvider.newProvider({
+        provider: origProvider,
+        config: conf,
+      }).init();
+
+      provider = new ethers.providers.Web3Provider(gsnProvider);
+
+      let signerRecipient = provider.getSigner(3);
+
+      let contractHonoraryTree = await new ethers.Contract(
+        honoraryTreeInstance.address,
+        honoraryTreeInstance.abi,
+        signerRecipient
+      );
+
+      const recipient = userAccount2;
+      const symbol = 1234554321;
+
+      //////////--------------add recipient by admin
+
+      const startTree = 11;
+      const endTree = 13;
+
+      const transferAmount = web3.utils.toWei("14");
+      const adminWallet = userAccount8;
+
+      ///////---------------- handle admin walllet
+
+      await daiInstance.setMint(adminWallet, transferAmount);
+
+      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+        from: adminWallet,
+      });
+
+      ////////////////////////////////////////////////////////////////////////////////////////
+
+      const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
+      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+
+      await honoraryTreeInstance.addRecipient(
+        recipient,
+        startDate,
+        expiryDate,
+        {
+          from: dataManager,
+        }
+      );
+
+      ///------------------------------------------- set mint ----------------------------------------------------------
+
+      await honoraryTreeInstance.setTreeRange(adminWallet, startTree, endTree, {
+        from: dataManager,
+      });
+
+      await honoraryTreeInstance.reserveSymbol(1050, {
+        from: dataManager,
+      });
+
+      await honoraryTreeInstance.updateReferralTreePayments(
+        web3.utils.toWei("4.9"), //planter share
+        web3.utils.toWei("2.1"), //ambassedor share
+        { from: dataManager }
+      );
+
+      //////////////////////////////////////////////////////////////////////////////////////////
+
+      let balanceAccountBefore = await web3.eth.getBalance(recipient);
+
+      await contractHonoraryTree
+        .claim({
+          from: recipient,
+        })
+        .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+
+      await paymaster.addFunderWhitelistTarget(honoraryTreeInstance.address, {
+        from: deployerAccount,
+      });
+
+      await contractHonoraryTree.claim({
+        from: recipient,
+      });
+
+      let balanceAccountAfter = await web3.eth.getBalance(recipient);
+
+      assert.equal(
+        balanceAccountAfter,
+        balanceAccountBefore,
+        "gsn not true work"
+      );
     });
   });
 });
+/////////

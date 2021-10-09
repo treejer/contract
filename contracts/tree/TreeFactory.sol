@@ -469,7 +469,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
+     * @dev set incremental and HonoraryTree sell for trees starting from {_startTreeId}
      * and end at {_endTreeId} by setting {_saleType} to saleType
      */
     function manageSaleTypeBatch(

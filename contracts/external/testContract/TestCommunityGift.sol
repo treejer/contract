@@ -1,9 +1,9 @@
 // // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
-import "./../../communityGifts/CommunityGifts.sol";
+import "./../../honoraryTree/HonoraryTree.sol";
 
-contract TestCommunityGifts is CommunityGifts {
+contract TestHonoraryTree is HonoraryTree {
     function updateUsed(uint256 _index) external {
         used[_index] = true;
     }

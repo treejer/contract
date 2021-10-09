@@ -162,7 +162,7 @@ contract("Attribute", (accounts) => {
 
     ///////////////---------------------------------test reserveSymbol function--------------------------------------------------------
     it("Should reserveSymbol work successfully", async () => {
-      ////------------Should reserveSymbol rejec because caller must be admin or communityGifts
+      ////------------Should reserveSymbol rejec because caller must be admin or HonoraryTree
       const generatedCode1 = 12500123;
 
       await attributeInstance
@@ -253,7 +253,7 @@ contract("Attribute", (accounts) => {
         })
         .should.be.rejectedWith(AttributeErrorMsg.ATTRIBUTE_NOT_RESERVED);
 
-      /////----------------Should releaseReservedSymbolByAdmin rejec because caller must be admin or communityGifts
+      /////----------------Should releaseReservedSymbolByAdmin rejec because caller must be admin or HonoraryTree
 
       await attributeInstance.reserveSymbol(generatedCode1, {
         from: dataManager,

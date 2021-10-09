@@ -255,13 +255,13 @@ contract Attribute is Initializable {
         if (!treeToken.attributeExists(_treeId)) {
             (
                 bool flag,
-                uint64 generatedAttribute //TODO:NAMING
+                uint64 uniquenessFactor //TODO:NAMING uniquenessFactor
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
-                treeToken.setAttributes(_treeId, generatedAttribute, 1);
+                treeToken.setAttributes(_treeId, uniquenessFactor, 1);
                 uniquenessFactorToGeneratedAttributesCount[
-                    generatedAttribute
+                    uniquenessFactor
                 ] = 1;
 
                 emit AttributeGenerated(_treeId);
@@ -290,12 +290,12 @@ contract Attribute is Initializable {
 
             (
                 bool flag,
-                uint64 generatedAttribute //TODO:NAMING
+                uint64 uniquenessFactor //TODO:NAMING uniquenessFactor
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             require(flag, "unique attribute not fund");
 
-            return generatedAttribute;
+            return uniquenessFactor;
         }
     }
 
@@ -322,7 +322,7 @@ contract Attribute is Initializable {
         private
         returns (bool, uint64)
     {
-        uint64 generatedAttribute; //TODO:NAMING
+        uint64 uniquenessFactor; //TODO:NAMING uniquenessFactor
 
         for (uint256 j = 0; j < 10000; j++) {
             uint256 randomValue = uint256(
@@ -330,20 +330,20 @@ contract Attribute is Initializable {
             );
 
             for (uint256 i = 0; i < 4; i++) {
-                generatedAttribute = uint64(randomValue & type(uint64).max);
+                uniquenessFactor = uint64(randomValue & type(uint64).max);
 
                 if (
                     uniquenessFactorToGeneratedAttributesCount[
-                        generatedAttribute
+                        uniquenessFactor
                     ] == 0
                 ) {
-                    return (true, generatedAttribute);
+                    return (true, uniquenessFactor);
                 } else {
                     uniquenessFactorToGeneratedAttributesCount[
-                        generatedAttribute
+                        uniquenessFactor
                     ] =
                         uniquenessFactorToGeneratedAttributesCount[
-                            generatedAttribute
+                            uniquenessFactor
                         ] +
                         1;
                     randomValue = randomValue / (uint256(2)**64);
@@ -366,11 +366,11 @@ contract Attribute is Initializable {
         uint8 _generationType
     ) private returns (bool) {
         if (uniquenessFactorToGeneratedAttributesCount[_randomValue] == 0) {
-            uint8[] memory results = new uint8[](8); //TODO:NAMING
+            uint8[] memory attributes = new uint8[](8); //TODO:NAMING attributes
 
             uint64 tempRandomValue = _randomValue;
             for (uint256 j = 0; j < 8; j++) {
-                results[j] = uint8(tempRandomValue & 255);
+                attributes[j] = uint8(tempRandomValue & 255);
                 tempRandomValue = tempRandomValue / 256;
             }
 
@@ -384,15 +384,15 @@ contract Attribute is Initializable {
 
             if (shape < 128) {
                 (trunkColor, crownColor) = _calcColors(
-                    results[2],
-                    results[3],
+                    attributes[2],
+                    attributes[3],
                     _funderRank
                 );
             } else {
                 (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
-            uint8 effect = _calcEffects(results[4], _funderRank);
+            uint8 effect = _calcEffects(attributes[4], _funderRank);
 
             uint64 symbolUniquenessFactor = shape +
                 (2**8) * //2**8
@@ -413,7 +413,7 @@ contract Attribute is Initializable {
                     1;
                 return false;
             }
-            uint8 coefficient = _calcCoefficient(results[5], _funderRank);
+            uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
 
             uint256 uniquenessFactor = uint256(_randomValue) +
                 uint256(
@@ -440,94 +440,137 @@ contract Attribute is Initializable {
         private
         returns (uint8)
     {
-        uint16[9] memory rank0 = [128, 256, 320, 384, 432, 480, 496, 511, 512];
-        uint16[9] memory rank1 = [110, 200, 290, 360, 420, 470, 490, 511, 512];
-        uint16[9] memory rank2 = [90, 190, 280, 350, 410, 450, 480, 510, 512];
-        uint16[9] memory rank3 = [64, 176, 272, 340, 400, 460, 496, 508, 512];
-        uint16[9] memory probabilities; //TODO:NAMING
+        uint16[9] memory probRank0 = [
+            128,
+            256,
+            320,
+            384,
+            432,
+            480,
+            496,
+            511,
+            512
+        ]; //TODO:NAMING probRank0
+        uint16[9] memory probRank1 = [
+            110,
+            200,
+            290,
+            360,
+            420,
+            470,
+            490,
+            511,
+            512
+        ]; //TODO:NAMING probRank1
+        uint16[9] memory probRank2 = [
+            90,
+            190,
+            280,
+            350,
+            410,
+            450,
+            480,
+            510,
+            512
+        ]; //TODO:NAMING probRank2
+        uint16[9] memory probRank3 = [
+            64,
+            176,
+            272,
+            340,
+            400,
+            460,
+            496,
+            508,
+            512
+        ]; //TODO:NAMING probRank3
+        uint16[9] memory selectedRankProb; //TODO:NAMING selectedRankProb
 
         if (_funderRank == 3) {
-            probabilities = rank3;
+            selectedRankProb = probRank3;
         } else if (_funderRank == 2) {
-            probabilities = rank2;
+            selectedRankProb = probRank2;
         } else if (_funderRank == 1) {
-            probabilities = rank1;
+            selectedRankProb = probRank1;
         } else {
-            probabilities = rank0;
+            selectedRankProb = probRank0;
         }
 
         uint8 shape;
 
-        uint8 base16 = uint8(_randomValue & 15); //TODO:NAMING
+        uint8 randomValueFirstFourBit = uint8(_randomValue & 15); //TODO:NAMING _randomValueFirstFourBit
 
-        uint16 selector = _randomValue / 16; //TODO:NAMING
+        uint16 probability = _randomValue / 16; //TODO:NAMING probability
 
-        uint8 res = 0; //TODO:NAMING
+        uint8 result = 0; //TODO:NAMING result
 
         for (uint8 j = 0; j < 9; j++) {
-            if (selector < probabilities[j]) {
-                res = j;
+            if (probability < selectedRankProb[j]) {
+                result = j;
                 break;
             }
         }
 
-        if (res == 8) {
+        if (result == 8) {
             if (specialTreeCount < 16) {
                 shape = 128 + specialTreeCount;
                 specialTreeCount = specialTreeCount + 1;
             } else {
-                shape = 112 + base16;
+                shape = 112 + randomValueFirstFourBit;
             }
         } else {
-            shape = res * 16 + base16;
+            shape = result * 16 + randomValueFirstFourBit;
         }
 
         return shape;
     }
 
     function _calcColors(
-        uint8 _a, //TODO:NAMING
-        uint8 _b, //TODO:NAMING
+        uint8 _randomValue1, //TODO:NAMING _randomValue1
+        uint8 _randomValue2, //TODO:NAMING _randomValue2
         uint8 _funderRank
     ) private pure returns (uint8, uint8) {
-        uint8[8] memory rank0 = [6, 12, 18, 22, 26, 29, 31, 32];
-        uint8[8] memory rank1 = [5, 10, 15, 20, 24, 28, 31, 32];
-        uint8[8] memory rank2 = [5, 10, 15, 19, 23, 27, 30, 32];
-        uint8[8] memory rank3 = [4, 8, 12, 16, 20, 24, 28, 32];
-        uint8[8] memory probabilities;
+        uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
+        uint8[8] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
+        uint8[8] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
+        uint8[8] memory probRank3 = [4, 8, 12, 16, 20, 24, 28, 32];
+        uint8[8] memory selectedRankProb;
 
         if (_funderRank == 3) {
-            probabilities = rank3;
+            selectedRankProb = probRank3;
         } else if (_funderRank == 2) {
-            probabilities = rank2;
+            selectedRankProb = probRank2;
         } else if (_funderRank == 1) {
-            probabilities = rank1;
+            selectedRankProb = probRank1;
         } else {
-            probabilities = rank0;
+            selectedRankProb = probRank0;
         }
 
-        uint8 a1 = _a & 31; //TODO:NAMING
-        uint8 a2 = _a / 32; //change to  _a / 32 //TODO:NAMING
-        uint8 b1 = _b & 31; //TODO:NAMING
-        uint8 b2 = _b / 32; // change to _b / 32//TODO:NAMING
-        uint8 ar = 0; //TODO:NAMING
-        uint8 br = 0; //TODO:NAMING
+        uint8 probability1 = _randomValue1 & 31; //TODO:NAMING probability1
+        uint8 randomValue1Last3Bit = _randomValue1 / 32; //change to  _a / 32 //TODO:NAMING _randomValue1Last3Bit
+        uint8 probability2 = _randomValue2 & 31; //TODO:NAMING probability2
+        uint8 randomValue2Last3Bit = _randomValue2 / 32; // change to _b / 32//TODO:NAMING _randomValue2Last3Bit
+        uint8 result1 = 0; //TODO:NAMING result1
+        uint8 result2 = 0; //TODO:NAMING result2
 
         for (uint8 i = 0; i < 8; i++) {
-            if (a1 < probabilities[i]) {
-                ar = i;
+            if (probability1 < selectedRankProb[i]) {
+                result1 = i;
                 break;
             }
         }
 
         for (uint8 j = 0; j < 8; j++) {
-            if (b1 < probabilities[j]) {
-                br = j;
+            if (probability2 < selectedRankProb[j]) {
+                result2 = j;
                 break;
             }
         }
 
-        return (ar * 8 + a2, br * 8 + b2);
+        return (
+            result1 * 8 + randomValue1Last3Bit,
+            result2 * 8 + randomValue2Last3Bit
+        );
     }
 
     function _setSpecialTreeColors(uint8 _shape)
@@ -579,7 +622,7 @@ contract Attribute is Initializable {
         pure
         returns (uint8)
     {
-        uint8[16] memory rank0 = [
+        uint8[16] memory probRank0 = [
             50,
             100,
             150,
@@ -597,7 +640,7 @@ contract Attribute is Initializable {
             254,
             255
         ];
-        uint8[16] memory rank1 = [
+        uint8[16] memory probRank1 = [
             42,
             84,
             126,
@@ -615,7 +658,7 @@ contract Attribute is Initializable {
             254,
             255
         ];
-        uint8[16] memory rank2 = [
+        uint8[16] memory probRank2 = [
             40,
             80,
             120,
@@ -633,7 +676,7 @@ contract Attribute is Initializable {
             252,
             255
         ];
-        uint8[16] memory rank3 = [
+        uint8[16] memory probRank3 = [
             25,
             50,
             75,
@@ -652,20 +695,20 @@ contract Attribute is Initializable {
             255
         ];
 
-        uint8[16] memory probabilities;
+        uint8[16] memory selectedRankProb;
 
         if (_funderRank == 3) {
-            probabilities = rank3;
+            selectedRankProb = probRank3;
         } else if (_funderRank == 2) {
-            probabilities = rank2;
+            selectedRankProb = probRank2;
         } else if (_funderRank == 1) {
-            probabilities = rank1;
+            selectedRankProb = probRank1;
         } else {
-            probabilities = rank0;
+            selectedRankProb = probRank0;
         }
 
         for (uint8 j = 0; j < 16; j++) {
-            if (_randomValue <= probabilities[j]) {
+            if (_randomValue <= selectedRankProb[j]) {
                 return j;
             }
         }
@@ -678,25 +721,25 @@ contract Attribute is Initializable {
         pure
         returns (uint8)
     {
-        uint8[8] memory rank0 = [190, 225, 235, 244, 250, 253, 254, 255];
-        uint8[8] memory rank1 = [175, 205, 225, 240, 248, 252, 254, 255];
-        uint8[8] memory rank2 = [170, 200, 218, 232, 245, 250, 253, 255];
-        uint8[8] memory rank3 = [128, 192, 210, 227, 240, 249, 252, 255];
+        uint8[8] memory probRank0 = [190, 225, 235, 244, 250, 253, 254, 255];
+        uint8[8] memory probRank1 = [175, 205, 225, 240, 248, 252, 254, 255];
+        uint8[8] memory probRank2 = [170, 200, 218, 232, 245, 250, 253, 255];
+        uint8[8] memory probRank3 = [128, 192, 210, 227, 240, 249, 252, 255];
 
-        uint8[8] memory probabilities;
+        uint8[8] memory selectedRankProb;
 
         if (_funderRank == 3) {
-            probabilities = rank3;
+            selectedRankProb = probRank3;
         } else if (_funderRank == 2) {
-            probabilities = rank2;
+            selectedRankProb = probRank2;
         } else if (_funderRank == 1) {
-            probabilities = rank1;
+            selectedRankProb = probRank1;
         } else {
-            probabilities = rank0;
+            selectedRankProb = probRank0;
         }
 
         for (uint8 j = 0; j < 8; j++) {
-            if (_randomValue <= probabilities[j]) {
+            if (_randomValue <= selectedRankProb[j]) {
                 return j;
             }
         }

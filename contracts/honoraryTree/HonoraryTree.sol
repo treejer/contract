@@ -303,19 +303,21 @@ contract HonoraryTree is Initializable, RelayRecipient {
             )
         );
 
-        uint64 generatedSymbol; //TODO:NAMING
-        uint256 diffrence; //TODO:NAMING
-        uint256 symbolSec; //TODO:NAMING
-        uint256 availableCount; //TODO:NAMING
+        uint64 selectedSymbol; //TODO:NAMING selectedSymbol
+        uint256 remainedSymbolCount; //TODO:NAMING remainedSymbolCount
+        uint256 selectedFreeSymbolIndex; //TODO:NAMING selectedFreeSymbolIndex
+        uint256 index; //TODO:NAMING index
 
         for (uint256 i = 0; i < symbols.length; i++) {
-            diffrence = symbols.length - claimedCount;
-            symbolSec = diffrence > 0 ? randomValue % diffrence : 0;
-            availableCount = 0;
+            remainedSymbolCount = symbols.length - claimedCount;
+            selectedFreeSymbolIndex = remainedSymbolCount > 0
+                ? randomValue % remainedSymbolCount
+                : 0;
+            index = 0;
 
             for (uint256 j = 0; j < symbols.length; j++) {
                 if (!used[j]) {
-                    if (availableCount == symbolSec) {
+                    if (index == selectedFreeSymbolIndex) {
                         claimedCount += 1;
                         used[j] = true;
 
@@ -323,13 +325,13 @@ contract HonoraryTree is Initializable, RelayRecipient {
                             .uniquenessFactorToSymbolStatus(symbols[j]);
 
                         if (status == 1) {
-                            generatedSymbol = symbols[j];
+                            selectedSymbol = symbols[j];
                             flag = true;
                         }
 
                         break;
                     }
-                    availableCount += 1;
+                    index += 1;
                 }
             }
             if (flag) {
@@ -338,7 +340,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         }
 
         if (flag) {
-            uint64 generatedAttribute = attribute //TODO:NAMING
+            uint64 generatedAttribute = attribute //TODO:NAMING uniquenessFactor
                 .manageAttributeUniquenessFactor(
                     currentTreeId,
                     uint64(randomValue & type(uint64).max)
@@ -347,7 +349,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
             attribute.setAttribute(
                 currentTreeId,
                 generatedAttribute,
-                generatedSymbol,
+                selectedSymbol,
                 18
             );
 

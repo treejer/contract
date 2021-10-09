@@ -13,7 +13,7 @@ contract Tree is ERC721Upgradeable {
     IAccessRestriction public accessRestriction;
     string private baseURI;
 
-    struct Attributes {
+    struct Attribute {
         uint8 attribute1;
         uint8 attribute2;
         uint8 attribute3;
@@ -24,17 +24,17 @@ contract Tree is ERC721Upgradeable {
         uint8 attribute8;
         uint8 generationType;
     }
-    struct Symbols {
-        uint8 treeShape;
+    struct Symbol {
+        uint8 shape;
         uint8 trunkColor;
         uint8 crownColor;
-        uint8 effects;
+        uint8 effect;
         uint8 coefficient;
         uint8 generationType;
     }
 
-    mapping(uint256 => Attributes) public treeAttributes;
-    mapping(uint256 => Symbols) public treeSymbols;
+    mapping(uint256 => Attribute) public attributes;
+    mapping(uint256 => Symbol) public symbols;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -102,19 +102,19 @@ contract Tree is ERC721Upgradeable {
         return baseURI;
     }
 
-    function setTreeAttributes(
+    function setAttributes(
         uint256 _tokenId,
-        uint256 _generatedCode,
+        uint256 _uniquenessFactor,
         uint8 _generationType
     ) external onlyTreejerContract {
         uint8[] memory results = new uint8[](8);
         uint8 x;
         for (uint256 i = 0; i < 8; i++) {
-            x = uint8(_generatedCode & 255);
+            x = uint8(_uniquenessFactor & 255);
             results[i] = x;
-            _generatedCode = _generatedCode / 256;
+            _uniquenessFactor = _uniquenessFactor / 256;
         }
-        treeAttributes[_tokenId] = Attributes(
+        attributes[_tokenId] = Attribute(
             results[0],
             results[1],
             results[2],
@@ -127,11 +127,11 @@ contract Tree is ERC721Upgradeable {
         );
         if (_generationType > 15) {
             for (uint256 i = 0; i < 5; i++) {
-                x = uint8(_generatedCode & 255);
+                x = uint8(_uniquenessFactor & 255);
                 results[i] = x;
-                _generatedCode = _generatedCode / 256;
+                _uniquenessFactor = _uniquenessFactor / 256;
             }
-            treeSymbols[_tokenId] = Symbols(
+            symbols[_tokenId] = Symbol(
                 results[0],
                 results[1],
                 results[2],
@@ -142,12 +142,12 @@ contract Tree is ERC721Upgradeable {
         }
     }
 
-    function checkAttributeExists(uint256 _tokenId)
+    function attributeExists(uint256 _tokenId)
         external
         view
         onlyTreejerContract
         returns (bool)
     {
-        return treeAttributes[_tokenId].generationType > 0;
+        return attributes[_tokenId].generationType > 0;
     }
 }

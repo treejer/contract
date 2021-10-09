@@ -167,7 +167,7 @@ contract TreeAttribute is Initializable {
         //
         uint256 value = generatedSymbol + 2 * (2**32);
         uint256 total = generatedCode + value * (2**64);
-        treeToken.setTreeAttributes(treeId, total, generationType);
+        treeToken.setAttributes(treeId, total, generationType);
 
         emit SymbolSetByAdmin(treeId);
     }
@@ -185,9 +185,9 @@ contract TreeAttribute is Initializable {
         uint8 funderRank,
         uint8 generationType
     ) external ifNotPaused onlyTreejerContract returns (bool) {
-        //TODO:check treeSymbols instead of treeAttributes
+        //TODO:check symbols instead of attributes
         //TODO: ==false => !
-        if (!treeToken.checkAttributeExists(treeId)) {
+        if (!treeToken.attributeExists(treeId)) {
             //TODO: flag true ==>false
             bool flag = false;
             uint64 attrRand;
@@ -242,15 +242,15 @@ contract TreeAttribute is Initializable {
         onlyTreejerContract
         returns (bool)
     {
-        //TODO:check treeSymbols instead of treeAttributes
+        //TODO:check symbols instead of attributes
 
-        if (!treeToken.checkAttributeExists(_treeId)) {
+        if (!treeToken.attributeExists(_treeId)) {
             (bool flag, uint64 generatedAttribute) = _createUniqueAttribute(
                 _treeId
             );
 
             if (flag) {
-                treeToken.setTreeAttributes(_treeId, generatedAttribute, 1);
+                treeToken.setAttributes(_treeId, generatedAttribute, 1);
                 generatedAttributes[generatedAttribute] = 1;
 
                 emit TreeAttributesGenerated(_treeId);
@@ -354,7 +354,7 @@ contract TreeAttribute is Initializable {
                 tempRand = tempRand / 256;
             }
 
-            uint8 treeShape = _calcTreeShape(
+            uint8 shape = _calcTreeShape(
                 uint16(_rand & ((2**13) - 1)),
                 funderRank
             );
@@ -362,25 +362,25 @@ contract TreeAttribute is Initializable {
             uint8 trunkColor;
             uint8 crownColor;
 
-            if (treeShape < 128) {
+            if (shape < 128) {
                 (trunkColor, crownColor) = _calcColors(
                     results[2],
                     results[3],
                     funderRank
                 );
             } else {
-                (trunkColor, crownColor) = _setColors(treeShape);
+                (trunkColor, crownColor) = _setColors(shape);
             }
 
-            uint8 effects = _calcEffects(results[4], funderRank);
+            uint8 effect = _calcEffects(results[4], funderRank);
 
-            uint64 symbolCode = treeShape +
+            uint64 symbolCode = shape +
                 (2**8) * //2**8
                 trunkColor +
                 (2**16) * //2**16
                 crownColor +
                 (2**24) * //2**24
-                effects;
+                effect;
 
             if (uniqueSymbol[symbolCode].status > 0) {
                 uniqueSymbol[symbolCode].generatedCount =
@@ -396,7 +396,7 @@ contract TreeAttribute is Initializable {
             uniqueSymbol[symbolCode].status = 2;
             uniqueSymbol[symbolCode].generatedCount = 1;
             generatedAttributes[_rand] = 1;
-            treeToken.setTreeAttributes(treeId, total, generationType);
+            treeToken.setAttributes(treeId, total, generationType);
             //TODO: there waas no return here we add return true
             return true;
         } else {
@@ -426,7 +426,7 @@ contract TreeAttribute is Initializable {
             probabilities = rank0;
         }
 
-        uint8 treeShape;
+        uint8 shape;
         //TODO: change this to uint8 from uint16
         uint8 base16 = uint8(_rand & 15);
 
@@ -444,16 +444,16 @@ contract TreeAttribute is Initializable {
 
         if (res == 8) {
             if (specialCount < 16) {
-                treeShape = 128 + specialCount;
+                shape = 128 + specialCount;
                 specialCount = specialCount + 1;
             } else {
-                treeShape = 112 + base16;
+                shape = 112 + base16;
             }
         } else {
-            treeShape = res * 16 + base16;
+            shape = res * 16 + base16;
         }
 
-        return treeShape;
+        return shape;
     }
 
     function _calcColors(

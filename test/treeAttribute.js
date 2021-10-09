@@ -468,9 +468,7 @@ contract("TreeAttribute", (accounts) => {
       // generatedCode1 value = 18446744070000000000
       //generatedCode binary = 11111111,11111111,11111111,11111111,00100010,11100100,10111100,00000000
 
-      const attribute1Data = await treeTokenInstance.treeAttributes.call(
-        treeId1
-      );
+      const attribute1Data = await treeTokenInstance.attributes.call(treeId1);
 
       let expectedAttributeValue = {
         attribute1: 0,
@@ -536,20 +534,20 @@ contract("TreeAttribute", (accounts) => {
       // symbol value = 8589934602
       // symbol binary = 00000000,00000000,00000000,00000010,00000000,00000000,00000000,00001010
       const expectedSymbolValue = {
-        treeShape: 10,
+        shape: 10,
         trunkColor: 0,
         crownColor: 0,
-        effects: 0,
+        effect: 0,
         coefficient: 2,
         generationType: 18,
       };
 
-      const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
+      const symbol1Data = await treeTokenInstance.symbols.call(treeId1);
 
       assert.equal(
-        symbol1Data.treeShape,
-        expectedSymbolValue.treeShape,
-        "treeShape is incorrect"
+        symbol1Data.shape,
+        expectedSymbolValue.shape,
+        "shape is incorrect"
       );
 
       assert.equal(
@@ -564,9 +562,9 @@ contract("TreeAttribute", (accounts) => {
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol1Data.effects,
-        expectedSymbolValue.effects,
-        "effects is incorrect"
+        symbol1Data.effect,
+        expectedSymbolValue.effect,
+        "effect is incorrect"
       );
       assert.equal(
         symbol1Data.coefficient,
@@ -769,7 +767,7 @@ contract("TreeAttribute", (accounts) => {
       truffleAssert.eventEmitted(eventTx1, "TreeAttributesGenerated");
       truffleAssert.eventNotEmitted(eventTx1, "TreeAttributesNotGenerated");
 
-      await treeTokenInstance.treeAttributes(10001);
+      await treeTokenInstance.attributes(10001);
 
       let eventTx2 = await treeAttributeInstance.createTreeAttributes(10001, {
         from: deployerAccount,
@@ -997,7 +995,7 @@ contract("TreeAttribute", (accounts) => {
         generationType1
       );
 
-      const attribute1Data = await treeTokenInstance.treeAttributes.call(
+      const attribute1Data = await treeTokenInstance.attributes.call(
         treeId
       );
 
@@ -1061,20 +1059,20 @@ contract("TreeAttribute", (accounts) => {
       );
 
       const expectedSymbolValue = {
-        treeShape: 80,
+        shape: 80,
         trunkColor: 7,
         crownColor: 1,
-        effects: 15,
+        effect: 15,
         coefficient: 7,
         generationType: 18,
       };
 
-      const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId);
+      const symbol1Data = await treeTokenInstance.symbols.call(treeId);
 
       assert.equal(
-        symbol1Data.treeShape,
-        expectedSymbolValue.treeShape,
-        "treeShape is incorrect"
+        symbol1Data.shape,
+        expectedSymbolValue.shape,
+        "shape is incorrect"
       );
 
       assert.equal(
@@ -1089,9 +1087,9 @@ contract("TreeAttribute", (accounts) => {
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol1Data.effects,
-        expectedSymbolValue.effects,
-        "effects is incorrect"
+        symbol1Data.effect,
+        expectedSymbolValue.effect,
+        "effect is incorrect"
       );
       assert.equal(
         symbol1Data.coefficient,
@@ -1132,7 +1130,7 @@ contract("TreeAttribute", (accounts) => {
       //0
       //0
 
-      const attribute2Data = await treeTokenInstance.treeAttributes.call(
+      const attribute2Data = await treeTokenInstance.attributes.call(
         treeId2
       );
 
@@ -1205,27 +1203,27 @@ contract("TreeAttribute", (accounts) => {
       );
 
       const expectedSymbolValue2 = {
-        treeShape: 20,
+        shape: 20,
         trunkColor: 23,
         crownColor: 16,
-        effects: 0,
+        effect: 0,
         coefficient: 0,
         generationType: 18,
       };
 
-      const symbol2Data = await treeTokenInstance.treeSymbols.call(treeId2);
+      const symbol2Data = await treeTokenInstance.symbols.call(treeId2);
 
-      // console.log("1", symbol2Data.treeShape.toString());
+      // console.log("1", symbol2Data.shape.toString());
       // console.log("2", symbol2Data.trunkColor.toString());
       // console.log("3", symbol2Data.crownColor.toString());
-      // console.log("4", symbol2Data.effects.toString());
+      // console.log("4", symbol2Data.effect.toString());
       // console.log("5", symbol2Data.coefficient.toString());
       // console.log("6", symbol2Data.generationType.toString());
-      //treeShape 010011010,0100
+      //shape 010011010,0100
       assert.equal(
-        symbol2Data.treeShape,
-        expectedSymbolValue2.treeShape,
-        "treeShape is incorrect"
+        symbol2Data.shape,
+        expectedSymbolValue2.shape,
+        "shape is incorrect"
       );
 
       assert.equal(
@@ -1240,9 +1238,9 @@ contract("TreeAttribute", (accounts) => {
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol2Data.effects,
-        expectedSymbolValue2.effects,
-        "effects is incorrect"
+        symbol2Data.effect,
+        expectedSymbolValue2.effect,
+        "effect is incorrect"
       );
       assert.equal(
         symbol2Data.coefficient,
@@ -1274,7 +1272,7 @@ contract("TreeAttribute", (accounts) => {
       //0
       //0
 
-      const attribute3Data = await treeTokenInstance.treeAttributes.call(
+      const attribute3Data = await treeTokenInstance.attributes.call(
         treeId3
       );
 
@@ -1347,28 +1345,28 @@ contract("TreeAttribute", (accounts) => {
       );
 
       const expectedSymbolValue3 = {
-        treeShape: 128,
+        shape: 128,
         trunkColor: 6,
         crownColor: 5,
-        effects: 15,
+        effect: 15,
         coefficient: 7,
         generationType: 18,
       };
 
-      const symbol3Data = await treeTokenInstance.treeSymbols.call(treeId3);
+      const symbol3Data = await treeTokenInstance.symbols.call(treeId3);
 
-      // console.log("1", symbol3Data.treeShape.toString());
+      // console.log("1", symbol3Data.shape.toString());
       // console.log("2", symbol3Data.trunkColor.toString());
       // console.log("3", symbol3Data.crownColor.toString());
-      // console.log("4", symbol3Data.effects.toString());
+      // console.log("4", symbol3Data.effect.toString());
       // console.log("5", symbol3Data.coefficient.toString());
       // console.log("6", symbol3Data.generationType.toString());
-      //treeShape 010011010,0100
+      //shape 010011010,0100
 
       assert.equal(
-        symbol3Data.treeShape,
-        expectedSymbolValue3.treeShape,
-        "treeShape is incorrect"
+        symbol3Data.shape,
+        expectedSymbolValue3.shape,
+        "shape is incorrect"
       );
 
       assert.equal(
@@ -1383,9 +1381,9 @@ contract("TreeAttribute", (accounts) => {
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol3Data.effects,
-        expectedSymbolValue3.effects,
-        "effects is incorrect"
+        symbol3Data.effect,
+        expectedSymbolValue3.effect,
+        "effect is incorrect"
       );
       assert.equal(
         symbol3Data.coefficient,
@@ -1417,7 +1415,7 @@ contract("TreeAttribute", (accounts) => {
       //0
       //0
 
-      const attribute4Data = await treeTokenInstance.treeAttributes.call(
+      const attribute4Data = await treeTokenInstance.attributes.call(
         treeId4
       );
 
@@ -1490,28 +1488,28 @@ contract("TreeAttribute", (accounts) => {
       );
 
       const expectedSymbolValue4 = {
-        treeShape: 129,
+        shape: 129,
         trunkColor: 12,
         crownColor: 10,
-        effects: 15,
+        effect: 15,
         coefficient: 7,
         generationType: 18,
       };
 
-      const symbol4Data = await treeTokenInstance.treeSymbols.call(treeId4);
+      const symbol4Data = await treeTokenInstance.symbols.call(treeId4);
 
-      // console.log("1", symbol4Data.treeShape.toString());
+      // console.log("1", symbol4Data.shape.toString());
       // console.log("2", symbol4Data.trunkColor.toString());
       // console.log("3", symbol4Data.crownColor.toString());
-      // console.log("4", symbol3Data.effects.toString());
+      // console.log("4", symbol3Data.effect.toString());
       // console.log("5", symbol3Data.coefficient.toString());
       // console.log("6", symbol3Data.generationType.toString());
-      //treeShape 010011010,0100
+      //shape 010011010,0100
 
       assert.equal(
-        symbol4Data.treeShape,
-        expectedSymbolValue4.treeShape,
-        "treeShape is incorrect"
+        symbol4Data.shape,
+        expectedSymbolValue4.shape,
+        "shape is incorrect"
       );
 
       assert.equal(
@@ -1526,9 +1524,9 @@ contract("TreeAttribute", (accounts) => {
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol3Data.effects,
-        expectedSymbolValue3.effects,
-        "effects is incorrect"
+        symbol3Data.effect,
+        expectedSymbolValue3.effect,
+        "effect is incorrect"
       );
       assert.equal(
         symbol3Data.coefficient,
@@ -1563,10 +1561,10 @@ contract("TreeAttribute", (accounts) => {
     });
 
     
-    ////--------------------------test calc treeShape (private function) -------------------------
+    ////--------------------------test calc shape (private function) -------------------------
 
-    it("Check calc treeShape", async () => {
-      ///-------------------------- test special treeShape --------------------------
+    it("Check calc shape", async () => {
+      ///-------------------------- test special shape --------------------------
       // 111111111 111 == 2 ** 13 -1
       let result1 = await treeAttributeInstance._calcTreeShape.call(
         2 ** 13 - 1,
@@ -1600,7 +1598,7 @@ contract("TreeAttribute", (accounts) => {
       });
       assert.equal(Number(await treeAttributeInstance.specialCount()), 16);
 
-      ///-------------------------- test treeShape --------------------------
+      ///-------------------------- test shape --------------------------
 
       ////----test2
 
@@ -1878,7 +1876,7 @@ contract("TreeAttribute", (accounts) => {
     //     "symbol generatedCount is incorrect"
     //   );
 
-    //   const attribute1Data = await treeTokenInstance.treeAttributes.call(
+    //   const attribute1Data = await treeTokenInstance.attributes.call(
     //     treeId1
     //   );
 
@@ -1955,26 +1953,26 @@ contract("TreeAttribute", (accounts) => {
     //   // 100000111; //263
 
     //   const expectedSymbolValue1 = {
-    //     treeShape: 37,
+    //     shape: 37,
     //     trunkColor: 31,
     //     crownColor: 4,
-    //     effects: 2,
+    //     effect: 2,
     //     coefficient: 1,
     //     generationType: 18,
     //   };
 
-    //   const symbol1Data = await treeTokenInstance.treeSymbols.call(treeId1);
-    //   // console.log("1", symbol1Data.treeShape.toString());
+    //   const symbol1Data = await treeTokenInstance.symbols.call(treeId1);
+    //   // console.log("1", symbol1Data.shape.toString());
     //   // console.log("2", symbol1Data.trunkColor.toString());
     //   // console.log("3", symbol1Data.crownColor.toString());
-    //   // console.log("4", symbol1Data.effects.toString());
+    //   // console.log("4", symbol1Data.effect.toString());
     //   // console.log("5", symbol1Data.coefficient.toString());
     //   // console.log("6", symbol1Data.generationType.toString());
 
     //   assert.equal(
-    //     symbol1Data.treeShape,
-    //     expectedSymbolValue1.treeShape,
-    //     "treeShape is incorrect"
+    //     symbol1Data.shape,
+    //     expectedSymbolValue1.shape,
+    //     "shape is incorrect"
     //   );
 
     //   assert.equal(
@@ -1989,9 +1987,9 @@ contract("TreeAttribute", (accounts) => {
     //     "crownColor is incorrect"
     //   );
     //   assert.equal(
-    //     symbol1Data.effects,
-    //     expectedSymbolValue1.effects,
-    //     "effects is incorrect"
+    //     symbol1Data.effect,
+    //     expectedSymbolValue1.effect,
+    //     "effect is incorrect"
     //   );
     //   assert.equal(
     //     symbol1Data.coefficient,
@@ -2015,7 +2013,7 @@ contract("TreeAttribute", (accounts) => {
     //     }
     //   );
 
-    //   const attribute2Data = await treeTokenInstance.treeAttributes.call(
+    //   const attribute2Data = await treeTokenInstance.attributes.call(
     //     treeId2
     //   );
     //   console.log("1", attribute2Data.attribute1.toString());
@@ -2091,26 +2089,26 @@ contract("TreeAttribute", (accounts) => {
     //   // 100000111; //263
 
     //   const expectedSymbolValue2 = {
-    //     treeShape: 54,
+    //     shape: 54,
     //     trunkColor: 46,
     //     crownColor: 0,
-    //     effects: 1,
+    //     effect: 1,
     //     coefficient: 3,
     //     generationType: 18,
     //   };
 
-    //   const symbol2Data = await treeTokenInstance.treeSymbols.call(treeId2);
-    //   console.log("1", symbol2Data.treeShape.toString());
+    //   const symbol2Data = await treeTokenInstance.symbols.call(treeId2);
+    //   console.log("1", symbol2Data.shape.toString());
     //   console.log("2", symbol2Data.trunkColor.toString());
     //   console.log("3", symbol2Data.crownColor.toString());
-    //   console.log("4", symbol2Data.effects.toString());
+    //   console.log("4", symbol2Data.effect.toString());
     //   console.log("5", symbol2Data.coefficient.toString());
     //   console.log("6", symbol2Data.generationType.toString());
 
     //   assert.equal(
-    //     symbol2Data.treeShape,
-    //     expectedSymbolValue2.treeShape,
-    //     "treeShape is incorrect"
+    //     symbol2Data.shape,
+    //     expectedSymbolValue2.shape,
+    //     "shape is incorrect"
     //   );
 
     //   assert.equal(
@@ -2125,9 +2123,9 @@ contract("TreeAttribute", (accounts) => {
     //     "crownColor is incorrect"
     //   );
     //   assert.equal(
-    //     symbol2Data.effects,
-    //     expectedSymbolValue2.effects,
-    //     "effects is incorrect"
+    //     symbol2Data.effect,
+    //     expectedSymbolValue2.effect,
+    //     "effect is incorrect"
     //   );
     //   assert.equal(
     //     symbol2Data.coefficient,
@@ -2216,7 +2214,7 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      let attribute10001 = await treeTokenInstance.treeAttributes(10001);
+      let attribute10001 = await treeTokenInstance.attributes(10001);
 
       assert.equal(
         await treeAttributeInstance.generatedAttributes(
@@ -2310,7 +2308,7 @@ contract("TreeAttribute", (accounts) => {
         from: deployerAccount,
       });
 
-      let attribute153 = await treeTokenInstance.treeAttributes(115);
+      let attribute153 = await treeTokenInstance.attributes(115);
 
       assert.equal(
         await treeAttributeInstance.generatedAttributes(

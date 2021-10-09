@@ -1633,7 +1633,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(10)).generationType),
+        Number((await treeTokenInstance.symbols(10)).generationType),
         18,
         "Symbols generationType is not correct"
       );
@@ -1872,7 +1872,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(10)).generationType),
+        Number((await treeTokenInstance.symbols(10)).generationType),
         18,
         "Symbols generationType is not correct"
       );
@@ -1941,7 +1941,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(11)).generationType),
+        Number((await treeTokenInstance.symbols(11)).generationType),
         18,
         "Symbols generationType is not correct"
       );
@@ -2007,7 +2007,7 @@ contract("CommunityGifts", (accounts) => {
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(11)).generationType),
+        Number((await treeTokenInstance.symbols(11)).generationType),
         18,
         "Symbols generationType is not correct"
       );

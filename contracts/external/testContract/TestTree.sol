@@ -5,6 +5,6 @@ import "./../../tree/Tree.sol";
 
 contract TestTree is Tree {
     function test(uint256 _treeId) external {
-        treeAttributes[_treeId].generationType = 0;
+        attributes[_treeId].generationType = 0;
     }
 }

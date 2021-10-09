@@ -929,7 +929,7 @@ contract("regularSale", (accounts) => {
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, funder, "funder not true " + i);
         //////////// check tree attributes
-        attributes = await treeTokenInstance.treeAttributes.call(i);
+        attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
           Number(attributes.generationType),
@@ -993,7 +993,7 @@ contract("regularSale", (accounts) => {
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
         //////////// check tree attributes
-        attributes = await treeTokenInstance.treeAttributes.call(i);
+        attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
           Number(attributes.generationType),
@@ -1225,7 +1225,7 @@ contract("regularSale", (accounts) => {
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
         //////////// check tree attributes
-        attributes = await treeTokenInstance.treeAttributes.call(i);
+        attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
           Number(attributes.generationType),
@@ -1550,7 +1550,7 @@ contract("regularSale", (accounts) => {
         assert.equal(tokentOwner, funder, "funder not true " + i);
 
         //////////// check tree attributes
-        attributes = await treeTokenInstance.treeAttributes.call(i);
+        attributes = await treeTokenInstance.attributes.call(i);
 
         assert.equal(
           Number(attributes.generationType),
@@ -1883,7 +1883,7 @@ contract("regularSale", (accounts) => {
       assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
 
       //////////// check tree attributes
-      attributes = await treeTokenInstance.treeAttributes.call(10001);
+      attributes = await treeTokenInstance.attributes.call(10001);
 
       assert.equal(
         Number(attributes.generationType),
@@ -1987,7 +1987,7 @@ contract("regularSale", (accounts) => {
       assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
 
       //////////// check tree attributes
-      attributes = await treeTokenInstance.treeAttributes.call(10002);
+      attributes = await treeTokenInstance.attributes.call(10002);
 
       assert.equal(
         Number(attributes.generationType),
@@ -2093,7 +2093,7 @@ contract("regularSale", (accounts) => {
       assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
 
       //////////// check tree attributes
-      attributes = await treeTokenInstance.treeAttributes.call(10003);
+      attributes = await treeTokenInstance.attributes.call(10003);
 
       assert.equal(
         Number(attributes.generationType),
@@ -2493,7 +2493,7 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(
-          (await treeTokenInstance.treeAttributes.call(10001)).generationType
+          (await treeTokenInstance.attributes.call(10001)).generationType
         ),
         1,
         `generationType for tree ${10001} is inccorect`
@@ -2525,7 +2525,7 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(
-          (await treeTokenInstance.treeAttributes.call(10002)).generationType
+          (await treeTokenInstance.attributes.call(10002)).generationType
         ),
         1,
         `generationType for tree ${10002} is inccorect`
@@ -2878,7 +2878,7 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(
-          (await treeTokenInstance.treeAttributes.call(treeId)).generationType
+          (await treeTokenInstance.attributes.call(treeId)).generationType
         ),
         1,
         `generationType for tree ${treeId} is inccorect`
@@ -3045,7 +3045,7 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(
-          (await treeTokenInstance.treeAttributes.call(10002)).generationType
+          (await treeTokenInstance.attributes.call(10002)).generationType
         ),
         1,
         `generationType for tree ${10002} is inccorect`

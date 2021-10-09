@@ -1540,7 +1540,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------------- check tree Attributes
 
       assert.equal(
-        Number((await treeTokenInstance.treeAttributes(101)).generationType),
+        Number((await treeTokenInstance.attributes(101)).generationType),
         16,
         "Attributes generationType is not correct"
       );
@@ -1548,7 +1548,7 @@ contract("IncrementalSale", (accounts) => {
       ////--------------------------- check tree Symbols
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(101)).generationType),
+        Number((await treeTokenInstance.symbols(101)).generationType),
         16,
         "Symbols generationType is not correct"
       );
@@ -1610,26 +1610,26 @@ contract("IncrementalSale", (accounts) => {
 
       for (let i = 102; i < 122; i++) {
         assert.equal(
-          Number((await treeTokenInstance.treeAttributes(i)).generationType),
+          Number((await treeTokenInstance.attributes(i)).generationType),
           16,
           "Attributes generationType is not correct"
         );
 
         assert.equal(
-          Number((await treeTokenInstance.treeSymbols(i)).generationType),
+          Number((await treeTokenInstance.symbols(i)).generationType),
           16,
           "Symbols generationType is not correct"
         );
       }
 
       assert.equal(
-        Number((await treeTokenInstance.treeAttributes(122)).generationType),
+        Number((await treeTokenInstance.attributes(122)).generationType),
         0,
         "Attributes generationType is not correct"
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(122)).generationType),
+        Number((await treeTokenInstance.symbols(122)).generationType),
         0,
         "Symbols generationType is not correct"
       );
@@ -2357,26 +2357,26 @@ contract("IncrementalSale", (accounts) => {
 
       for (let i = 101; i < 131; i++) {
         assert.equal(
-          Number((await treeTokenInstance.treeAttributes(i)).generationType),
+          Number((await treeTokenInstance.attributes(i)).generationType),
           16,
           "Attributes generationType is not correct"
         );
 
         assert.equal(
-          Number((await treeTokenInstance.treeSymbols(i)).generationType),
+          Number((await treeTokenInstance.symbols(i)).generationType),
           16,
           "Symbols generationType is not correct"
         );
       }
 
       assert.equal(
-        Number((await treeTokenInstance.treeAttributes(131)).generationType),
+        Number((await treeTokenInstance.attributes(131)).generationType),
         0,
         "Attributes generationType is not correct"
       );
 
       assert.equal(
-        Number((await treeTokenInstance.treeSymbols(131)).generationType),
+        Number((await treeTokenInstance.symbols(131)).generationType),
         0,
         "Symbols generationType is not correct"
       );

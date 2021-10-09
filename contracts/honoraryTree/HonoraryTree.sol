@@ -87,7 +87,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * set expire date and referralTreePaymentToPlanter and referralTreePaymentToAmbassador initial value
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      * @param _referralTreePaymentToPlanter initial planter fund
-     * @param _referralTreePaymentToAmbassador initial referral fund
+     * @param _referralTreePaymentToAmbassador initial ambassador fund
      */
     function initialize(
         address _accessRestrictionAddress,
@@ -183,13 +183,14 @@ contract HonoraryTree is Initializable, RelayRecipient {
         currentTreeId = _startTreeId;
         upTo = _upTo;
 
-        int256 extra = int256(_upTo - _startTreeId) - int256(prePaidTreeCount);
+        int256 extraPrePaid = int256(_upTo - _startTreeId) -
+            int256(prePaidTreeCount);
 
-        if (extra > 0) {
+        if (extraPrePaid > 0) {
             bool success = daiToken.transferFrom(
                 _sponsor,
                 address(planterFundContract),
-                uint256(extra) *
+                uint256(extraPrePaid) *
                     (referralTreePaymentToPlanter +
                         referralTreePaymentToAmbassador)
             );
@@ -198,7 +199,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
 
             prePaidTreeCount = 0;
         } else {
-            prePaidTreeCount = uint256(-extra);
+            prePaidTreeCount = uint256(-extraPrePaid);
         }
 
         emit TreeRangeSet();

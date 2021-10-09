@@ -280,9 +280,7 @@ contract("Attribute", (accounts) => {
 
       await attributeInstance
         .releaseReservedSymbolByAdmin(generatedCode1, { from: userAccount7 })
-        .should.be.rejectedWith(
-          CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
       ///////////////// ------------- free reserve
       const eventTx1 = await attributeInstance.releaseReservedSymbolByAdmin(
         generatedCode1,
@@ -329,7 +327,7 @@ contract("Attribute", (accounts) => {
       const eventTx2 = await attributeInstance.releaseReservedSymbolByAdmin(
         generatedCode2,
         {
-          from: userAccount2,
+          from: dataManager,
         }
       );
 

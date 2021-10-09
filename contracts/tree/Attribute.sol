@@ -47,6 +47,12 @@ contract Attribute is Initializable {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has data manager role */
+    modifier onlyDataManager() {
+        accessRestriction.ifDataManager(msg.sender);
+        _;
+    }
+
     /** NOTE modifier to check msg.sender has data manager or treejer contract role */
     modifier onlyDataManagerOrTreejerContract() {
         accessRestriction.ifDataManagerOrTreejerContract(msg.sender);
@@ -112,7 +118,7 @@ contract Attribute is Initializable {
 
     function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
-        onlyDataManagerOrTreejerContract
+        onlyDataManager
     {
         require(
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1,
@@ -128,9 +134,10 @@ contract Attribute is Initializable {
      * @dev free reservation of a unique symbol
      * @param _uniquenessFactor unique symbol to reserve
      */
+    //TODO: add test for this function
     function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
-        onlyDataManagerOrTreejerContract
+        onlyTreejerContract
     {
         if (uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1) {
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 0;

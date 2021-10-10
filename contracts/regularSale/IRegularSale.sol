@@ -150,17 +150,19 @@ interface IRegularSale {
     /** @dev emited when {count} trees requsted by {funder} with amount of {amount} */
     event TreeFunded(
         address funder,
+        address recipient,
         address referrer,
         uint256 count,
         uint256 amount
     );
 
     /** @dev emitted when each Regular Tree minted by {funder} */
-    event RegularMint(address funder, uint256 treeId, uint256 price);
+    event RegularMint(address recipient, uint256 treeId, uint256 price);
 
     /** @dev emitted when tree with id {treeId} requsted by {funder} with amount of {amount} */
     event TreeFundedById(
         address funder,
+        address recipient,
         address referrer,
         uint256 treeId,
         uint256 amount

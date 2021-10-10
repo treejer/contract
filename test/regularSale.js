@@ -1171,7 +1171,7 @@ contract("regularSale", (accounts) => {
       for (let i = 10001; i <= 10007; i++) {
         truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
           return (
-            ev.owner == funder &&
+            ev.recipient == funder &&
             ev.treeId == i &&
             Number(ev.price) == Number(web3.utils.toWei("7"))
           );
@@ -1182,7 +1182,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 7 &&
           ev.funder == funder &&
-          ev.owner == funder &&
+          ev.recipient == funder &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 7)
         );
       });
@@ -1504,7 +1504,7 @@ contract("regularSale", (accounts) => {
       for (let i = 10001; i <= 10007; i++) {
         truffleAssert.eventEmitted(requestTx, "RegularMint", (ev) => {
           return (
-            ev.owner == recipient &&
+            ev.recipient == recipient &&
             ev.treeId == i &&
             Number(ev.price) == Number(web3.utils.toWei("7"))
           );
@@ -1515,7 +1515,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 7 &&
           ev.funder == funder &&
-          ev.owner == recipient &&
+          ev.recipient == recipient &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 7)
         );
       });
@@ -1845,7 +1845,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 7 &&
           ev.funder == funder &&
-          ev.owner == funder &&
+          ev.recipient == funder &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("8"), 7)
         );
       });
@@ -2177,7 +2177,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 7 &&
           ev.funder == funder &&
-          ev.owner == recipient &&
+          ev.recipient == recipient &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("8"), 7)
         );
       });
@@ -2507,7 +2507,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder1 &&
-          ev.owner == funder1 &&
+          ev.recipient == funder1 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -2621,7 +2621,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder2 &&
-          ev.owner == funder2 &&
+          ev.recipient == funder2 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -2731,7 +2731,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder3 &&
-          ev.owner == funder3 &&
+          ev.recipient == funder3 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -2971,7 +2971,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder1 &&
-          ev.owner == recipient &&
+          ev.recipient == recipient &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -3087,7 +3087,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder2 &&
-          ev.owner == recipient2 &&
+          ev.recipient == recipient2 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -3199,7 +3199,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.count) == 1 &&
           ev.funder == funder3 &&
-          ev.owner == recipient3 &&
+          ev.recipient == recipient3 &&
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
@@ -3973,7 +3973,7 @@ contract("regularSale", (accounts) => {
         return (
           Number(ev.treeId) == 10001 &&
           ev.funder == userAccount1 &&
-          ev.owner == recipient2 &&
+          ev.recipient == recipient2 &&
           Number(ev.amount) == Number(web3.utils.toWei("7"))
         );
       });

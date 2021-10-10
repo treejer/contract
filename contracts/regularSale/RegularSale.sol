@@ -58,15 +58,15 @@ contract RegularSale is Initializable, RelayRecipient {
     event PriceUpdated(uint256 price);
     event TreeFunded(
         address funder,
-        address owner,
+        address recipient,
         address referrer,
         uint256 count,
         uint256 amount
     );
-    event RegularMint(address owner, uint256 treeId, uint256 price);
+    event RegularMint(address recipient, uint256 treeId, uint256 price);
     event TreeFundedById(
         address funder,
-        address owner,
+        address recipient,
         address referrer,
         uint256 treeId,
         uint256 amount
@@ -323,7 +323,7 @@ contract RegularSale is Initializable, RelayRecipient {
                 (price * ambassadorShare) / 10000
             );
 
-            //TODO : NAMING
+            //TODO : NAMING TreeMinted
             emit RegularMint(recipient, tempLastFundedTreeId, price);
         }
 

@@ -352,6 +352,114 @@ contract("Attribute", (accounts) => {
         return ev.uniquenessFactor == generatedCode2;
       });
     });
+
+    ///////////////---------------------------------test releaseReservedSymbol function--------------------------------------------------------
+
+    it("Should releaseReservedSymbol work successfully", async () => {
+      let generatedCode1 = 12500123;
+
+      /////----------------Should releaseReservedSymbol rejec because caller must be admin or HonoraryTree
+
+      await attributeInstance.reserveSymbol(generatedCode1, {
+        from: dataManager,
+      });
+
+      ////////////////// --------------- check data after reserve
+
+      const uniqueSymbol1AfterReserve =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          generatedCode1
+        );
+
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.status),
+        1,
+        "reserved proccess is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1AfterReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
+
+      await attributeInstance
+        .releaseReservedSymbol(generatedCode1, {
+          from: userAccount7,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+      ///////////////// ------------- free reserve
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        userAccount2,
+        deployerAccount
+      );
+
+      const eventTx1 = await attributeInstance.releaseReservedSymbol(
+        generatedCode1,
+        {
+          from: userAccount2,
+        }
+      );
+
+      const uniqueSymbol1AfterFreeReserve =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          generatedCode1
+        );
+
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol1AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "ReservedSymbolReleased", (ev) => {
+        return ev.uniquenessFactor == generatedCode1;
+      });
+
+      //////------------------------test 2
+
+      let generatedCode2 = 0;
+
+      await attributeInstance.reserveSymbol(generatedCode2, {
+        from: userAccount2,
+      });
+
+      const eventTx2 = await attributeInstance.releaseReservedSymbol(
+        generatedCode2,
+        {
+          from: userAccount2,
+        }
+      );
+
+      const uniqueSymbol2AfterFreeReserve =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(
+          generatedCode2
+        );
+
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.status),
+        0,
+        "free reserved proccess is incorrect"
+      );
+
+      assert.equal(
+        Number(uniqueSymbol2AfterFreeReserve.generatedCount),
+        0,
+        "genertedCount is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx2, "ReservedSymbolReleased", (ev) => {
+        return ev.uniquenessFactor == generatedCode2;
+      });
+    });
   });
 
   describe("without financial section", () => {

@@ -2105,6 +2105,450 @@ contract("regularSale", (accounts) => {
       await daiInstance.resetAcc(funder3);
     });
 
+    it("3.should request trees successfully (_recipient)", async () => {
+      let funder1 = userAccount3;
+      let funder2 = userAccount3;
+      let funder3 = userAccount3;
+
+      ////////////// ------------------- handle allocation data ----------------------
+
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+
+      await allocationInstance.assignAllocationToTree(10001, 10003, 0, {
+        from: dataManager,
+      });
+
+      /////////////////////////-------------------- deploy contracts --------------------------
+
+      let planterInstance = await deployProxy(Planter, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
+
+      ///////////////////// ------------------- handle addresses here --------------------------
+
+      await regularSaleInstance.setTreeFactoryAddress(
+        treeFactoryInstance.address,
+        { from: deployerAccount }
+      );
+
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      //-------------daiFundInstance
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.setPlanterFundContractAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      //-------------treeFactoryInstance
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      ///////////////////////// -------------------- handle roles here ----------------
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        regularSaleInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        attributeInstance.address,
+        deployerAccount
+      );
+
+      ///////////////////////--------------------- handle referral referralTriggerCount ----------------
+
+      await regularSaleInstance.updateReferralTriggerCount(2, {
+        from: dataManager,
+      });
+
+      ///////////////////////--------------------- fundTree --------------------------
+
+      //mint dai for funder
+      await daiInstance.setMint(funder1, web3.utils.toWei("7"));
+
+      let funder1BalanceBefore = await daiInstance.balanceOf(funder1);
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: funder1,
+        }
+      );
+
+      assert.equal(
+        Number(funder1BalanceBefore),
+        web3.utils.toWei("7"),
+        "1-funder balance not true"
+      );
+
+      let requestTx1 = await regularSaleInstance.fundTree(1, userAccount1, {
+        from: funder1,
+      });
+
+      /////----------------------------check referrer tree balance
+      assert.equal(
+        await regularSaleInstance.referrerCount.call(userAccount1),
+        1
+      );
+
+      assert.equal(
+        await regularSaleInstance.referrerClaimableTreesDai.call(userAccount1),
+        0
+      );
+
+      /////////////////////////
+
+      truffleAssert.eventEmitted(requestTx1, "TreeFunded", (ev) => {
+        return (
+          Number(ev.count) == 1 &&
+          ev.funder == funder1 &&
+          Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+        );
+      });
+
+      let funder1BalanceAfter = await daiInstance.balanceOf(funder1);
+
+      assert.equal(
+        Number(funder1BalanceAfter),
+        web3.utils.toWei("0"),
+        "2-funder balance not true"
+      );
+
+      const daiFundBalanceAfter1 = await daiInstance.balanceOf(
+        daiFundInstance.address
+      );
+
+      const planterFundsBalanceAfter1 = await daiInstance.balanceOf(
+        planterFundsInstnce.address
+      );
+
+      const regularSaleBalanceAfter1 = await daiInstance.balanceOf(
+        regularSaleInstance.address
+      );
+
+      assert.equal(
+        Number(daiFundBalanceAfter1),
+        Number(web3.utils.toWei("3.36")),
+        "daiFund balance not true"
+      );
+
+      assert.equal(
+        Number(planterFundsBalanceAfter1),
+        Number(web3.utils.toWei("3.64")),
+        "treeToPlanterProjectedEarnings balance not true"
+      );
+
+      assert.equal(
+        Number(regularSaleBalanceAfter1),
+        0,
+        "regularSale balance not true"
+      );
+
+      let tokentOwner;
+      let attributes;
+
+      ////// check tree owner
+      tokentOwner = await treeTokenInstance.ownerOf(10001);
+      assert.equal(tokentOwner, funder1, "funder1 not true " + 10001);
+
+      //////////// check attributes
+      attributes = await treeTokenInstance.attributes.call(10001);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10001} is inccorect`
+      );
+
+      let lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
+
+      assert.equal(
+        Number(lastFundedTreeId),
+        10001,
+        "lastFundedTreeId not true"
+      );
+
+      ///------------- funder2 -----------------
+
+      //mint dai for funder
+      await daiInstance.setMint(funder2, web3.utils.toWei("7"));
+
+      let funder2BalanceBefore = await daiInstance.balanceOf(funder2);
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: funder2,
+        }
+      );
+
+      assert.equal(
+        Number(funder2BalanceBefore),
+        web3.utils.toWei("7"),
+        "3-funder balance not true"
+      );
+
+      let requestTx2 = await regularSaleInstance.fundTree(1, zeroAddress, {
+        from: funder2,
+      });
+
+      /////----------------------------check referrer tree balance
+      assert.equal(
+        await regularSaleInstance.referrerCount.call(zeroAddress),
+        0
+      );
+
+      assert.equal(
+        await regularSaleInstance.referrerClaimableTreesDai.call(zeroAddress),
+        0
+      );
+
+      /////////////////////////
+
+      truffleAssert.eventEmitted(requestTx2, "TreeFunded", (ev) => {
+        return (
+          Number(ev.count) == 1 &&
+          ev.funder == funder2 &&
+          Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+        );
+      });
+
+      let funder2BalanceAfter = await daiInstance.balanceOf(funder2);
+
+      assert.equal(
+        Number(funder2BalanceAfter),
+        web3.utils.toWei("0"),
+        "4-funder balance not true"
+      );
+
+      const daiFundBalanceAfter2 = await daiInstance.balanceOf(
+        daiFundInstance.address
+      );
+
+      const planterFundsBalanceAfter2 = await daiInstance.balanceOf(
+        planterFundsInstnce.address
+      );
+
+      const regularSaleBalanceAfter2 = await daiInstance.balanceOf(
+        regularSaleInstance.address
+      );
+
+      assert.equal(
+        Number(daiFundBalanceAfter2),
+        Number(web3.utils.toWei("6.72")),
+        "2-daiFund balance not true"
+      );
+
+      assert.equal(
+        Number(planterFundsBalanceAfter2),
+        Number(web3.utils.toWei("7.28")),
+        "2-treeToPlanterProjectedEarnings balance not true"
+      );
+
+      assert.equal(
+        Number(regularSaleBalanceAfter2),
+        0,
+        "2-regularSale balance not true"
+      );
+
+      tokentOwner = await treeTokenInstance.ownerOf(10002);
+      assert.equal(tokentOwner, funder2, "funder2 not true " + 10002);
+
+      //////////// check attributes
+      attributes = await treeTokenInstance.attributes.call(10002);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10002} is inccorect`
+      );
+
+      lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
+
+      assert.equal(
+        Number(lastFundedTreeId),
+        10002,
+        "2.lastFundedTreeId not true"
+      );
+
+      ///------------- funder3 -----------------
+
+      //mint dai for funder
+      await daiInstance.setMint(funder3, web3.utils.toWei("7"));
+
+      let funder3BalanceBefore = await daiInstance.balanceOf(funder3);
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: funder3,
+        }
+      );
+
+      assert.equal(
+        Number(funder3BalanceBefore),
+        web3.utils.toWei("7"),
+        "3-funder balance not true"
+      );
+
+      let requestTx = await regularSaleInstance.fundTree(1, userAccount1, {
+        from: funder3,
+      });
+
+      /////----------------------------check referrer tree balance
+      assert.equal(
+        await regularSaleInstance.referrerCount.call(userAccount1),
+        0
+      );
+
+      assert.equal(
+        await regularSaleInstance.referrerClaimableTreesDai.call(userAccount1),
+        1
+      );
+
+      /////////////////////////
+
+      truffleAssert.eventEmitted(requestTx, "TreeFunded", (ev) => {
+        return (
+          Number(ev.count) == 1 &&
+          ev.funder == funder3 &&
+          Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
+        );
+      });
+
+      const txFee = await Common.getTransactionFee(requestTx);
+
+      let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
+
+      assert.equal(
+        Number(funder3BalanceAfter),
+        web3.utils.toWei("0"),
+        "3-funder balance not true"
+      );
+
+      const daiFundBalanceAfter3 = await daiInstance.balanceOf(
+        daiFundInstance.address
+      );
+
+      const planterFundsBalanceAfter3 = await daiInstance.balanceOf(
+        planterFundsInstnce.address
+      );
+
+      const regularSaleBalanceAfter3 = await daiInstance.balanceOf(
+        regularSaleInstance.address
+      );
+
+      assert.equal(
+        Number(daiFundBalanceAfter3),
+        Number(web3.utils.toWei("10.08")),
+        "daiFund balance not true"
+      );
+
+      assert.equal(
+        Number(planterFundsBalanceAfter3),
+        Number(web3.utils.toWei("10.92")),
+        "treeToPlanterProjectedEarnings balance not true"
+      );
+
+      assert.equal(
+        Number(regularSaleBalanceAfter3),
+        0,
+        "regularSale balance not true"
+      );
+
+      tokentOwner = await treeTokenInstance.ownerOf(10003);
+      assert.equal(tokentOwner, funder3, "funder3 not true " + 10003);
+
+      //////////// check attributes
+      attributes = await treeTokenInstance.attributes.call(10003);
+
+      assert.equal(
+        Number(attributes.generationType),
+        1,
+        `generationType for tree ${10003} is inccorect`
+      );
+
+      lastFundedTreeId = await regularSaleInstance.lastFundedTreeId();
+
+      assert.equal(
+        Number(lastFundedTreeId),
+        10003,
+        "3.lastFundedTreeId not true"
+      );
+      await daiInstance.resetAcc(funder1);
+      await daiInstance.resetAcc(funder2);
+      await daiInstance.resetAcc(funder3);
+    });
+
     // ////--------------------------------gsn test--------------------------
     // it("test gsn [ @skip-on-coverage ]", async () => {
     //   ////////////// ------------------- handle allocation data ----------------------

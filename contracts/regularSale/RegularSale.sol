@@ -58,13 +58,15 @@ contract RegularSale is Initializable, RelayRecipient {
     event PriceUpdated(uint256 price);
     event TreeFunded(
         address funder,
+        address owner,
         address referrer,
         uint256 count,
         uint256 amount
     );
-    event RegularMint(address funder, uint256 treeId, uint256 price);
+    event RegularMint(address owner, uint256 treeId, uint256 price);
     event TreeFundedById(
         address funder,
+        address owner,
         address referrer,
         uint256 treeId,
         uint256 amount
@@ -253,7 +255,11 @@ contract RegularSale is Initializable, RelayRecipient {
      * @param _count is the number of trees requested by user
      * @param _referrer is address of referrer
      */
-    function fundTree(uint256 _count, address _referrer) external {
+    function fundTree(
+        uint256 _count,
+        address _referrer,
+        address _recipient
+    ) external {
         require(_count > 0 && _count < 101, "invalid count");
 
         uint256 totalPrice = price * _count;
@@ -271,7 +277,11 @@ contract RegularSale is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        emit TreeFunded(_msgSender(), _referrer, _count, totalPrice);
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
+
+        emit TreeFunded(_msgSender(), recipient, _referrer, _count, totalPrice);
 
         uint256 tempLastFundedTreeId = lastFundedTreeId;
 
@@ -280,7 +290,7 @@ contract RegularSale is Initializable, RelayRecipient {
         for (uint256 i = 0; i < _count; i++) {
             tempLastFundedTreeId = treeFactory.mintTree(
                 tempLastFundedTreeId,
-                _msgSender()
+                recipient
             );
 
             attribute.createAttribute(tempLastFundedTreeId);
@@ -313,7 +323,8 @@ contract RegularSale is Initializable, RelayRecipient {
                 (price * ambassadorShare) / 10000
             );
 
-            emit RegularMint(_msgSender(), tempLastFundedTreeId, price);
+            //TODO : NAMING
+            emit RegularMint(recipient, tempLastFundedTreeId, price);
         }
 
         daiFund.fundTreeBatch(
@@ -340,7 +351,11 @@ contract RegularSale is Initializable, RelayRecipient {
      * @param _treeId is the id of tree requested by user
      * @param _referrer is address of referrer
      */
-    function fundTreeById(uint256 _treeId, address _referrer) external {
+    function fundTreeById(
+        uint256 _treeId,
+        address _referrer,
+        address _recipient
+    ) external {
         require(_treeId > lastFundedTreeId, "invalid tree");
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
@@ -353,9 +368,13 @@ contract RegularSale is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        emit TreeFundedById(_msgSender(), _referrer, _treeId, price);
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
 
-        treeFactory.mintTreeById(_treeId, _msgSender());
+        emit TreeFundedById(_msgSender(), recipient, _referrer, _treeId, price);
+
+        treeFactory.mintTreeById(_treeId, recipient);
 
         attribute.createAttribute(_treeId);
 

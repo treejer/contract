@@ -372,11 +372,11 @@ contract RegularSale is Initializable, RelayRecipient {
             ? _msgSender()
             : _recipient;
 
-        emit TreeFundedById(_msgSender(), recipient, _referrer, _treeId, price);
+        uint256 treeId = _treeId;
 
-        treeFactory.mintTreeById(_treeId, recipient);
+        treeFactory.mintTreeById(treeId, recipient);
 
-        attribute.createAttribute(_treeId);
+        attribute.createAttribute(treeId);
 
         (
             uint16 planterShare,
@@ -387,10 +387,10 @@ contract RegularSale is Initializable, RelayRecipient {
             uint16 treasuryShare,
             uint16 reserve1Share,
             uint16 reserve2Share
-        ) = allocation.findAllocationData(_treeId);
+        ) = allocation.findAllocationData(treeId);
 
         daiFund.fundTree(
-            _treeId,
+            treeId,
             price,
             planterShare,
             ambassadorShare,
@@ -405,6 +405,8 @@ contract RegularSale is Initializable, RelayRecipient {
         if (_referrer != address(0)) {
             _calculateReferrerCount(_referrer, 1);
         }
+
+        emit TreeFundedById(_msgSender(), recipient, _referrer, treeId, price);
     }
 
     // **** REFERRAL SECTION ****

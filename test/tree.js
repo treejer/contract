@@ -14,12 +14,6 @@ const {
   erc721ErrorMsg,
 } = require("./enumes");
 
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
-
 contract("Tree", (accounts) => {
   let treeInstance;
 

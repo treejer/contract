@@ -34,7 +34,7 @@ contract Attribute is Initializable {
     event AttributeGenerationFailed(uint256 treeId);
     event SymbolReserved(uint64 uniquenessFactor);
     event ReservedSymbolReleased(uint64 uniquenessFactor);
-
+    event X(uint256 n);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -184,8 +184,11 @@ contract Attribute is Initializable {
         // treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            ((_symbolUniquenessFactor + (2 << 32)) << 64);
-
+            ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64);
+        emit X(
+            _attributeUniquenessFactor +
+                ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64)
+        );
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
         emit AttributeGenerated(_treeId);
@@ -410,9 +413,9 @@ contract Attribute is Initializable {
             //TODO: check (2**24) * effect
 
             uint64 symbolUniquenessFactor = shape +
-                (trunkColor << 8) +
-                (crownColor << 16) +
-                (effect << 24);
+                (uint64(trunkColor) << 8) +
+                (uint64(crownColor) << 16) +
+                (uint64(effect) << 24);
 
             if (
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
@@ -430,7 +433,8 @@ contract Attribute is Initializable {
             //TODO: check (2**32) * coefficient
             //TODO: check uint256(uint256(symbolUniquenessFactor + (coefficient << 32)) *(2**64));
             uint256 uniquenessFactor = uint256(_randomValue) +
-                ((symbolUniquenessFactor + (coefficient << 32)) << 64);
+                ((uint256(symbolUniquenessFactor) +
+                    (uint256(coefficient) << 32)) << 64);
 
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status = 2;
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
@@ -448,7 +452,7 @@ contract Attribute is Initializable {
     }
 
     function _calcShape(uint16 _randomValue, uint8 _funderRank)
-        private
+        public
         returns (uint8)
     {
         uint16[9] memory probRank0 = [
@@ -541,7 +545,7 @@ contract Attribute is Initializable {
         uint8 _randomValue1, //TODO:NAMING _randomValue1
         uint8 _randomValue2, //TODO:NAMING _randomValue2
         uint8 _funderRank
-    ) private pure returns (uint8, uint8) {
+    ) public pure returns (uint8, uint8) {
         uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
         uint8[8] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
         uint8[8] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
@@ -588,7 +592,7 @@ contract Attribute is Initializable {
     }
 
     function _setSpecialTreeColors(uint8 _shape)
-        private
+        public
         pure
         returns (uint8, uint8)
     {
@@ -632,7 +636,7 @@ contract Attribute is Initializable {
     }
 
     function _calcEffects(uint8 _randomValue, uint8 _funderRank)
-        private
+        public
         pure
         returns (uint8)
     {
@@ -731,7 +735,7 @@ contract Attribute is Initializable {
     }
 
     function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
-        private
+        public
         pure
         returns (uint8)
     {

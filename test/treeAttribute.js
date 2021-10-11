@@ -38,12 +38,6 @@ const Common = require("./common");
 
 const { CommonErrorMsg, AttributeErrorMsg } = require("./enumes");
 
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
-
 contract("Attribute", (accounts) => {
   let iSaleInstance;
   let arInstance;
@@ -560,6 +554,12 @@ contract("Attribute", (accounts) => {
         return Number(ev.treeId) == treeId1;
       });
 
+      truffleAssert.eventEmitted(eventTx1, "X", (ev) => {
+        console.log("ev.n.toString()", ev.n.toString());
+
+        return true;
+      });
+
       ////// cehck symbol and attribute struct data
 
       ///// -------- check attribute
@@ -644,34 +644,34 @@ contract("Attribute", (accounts) => {
       const symbol1Data = await treeTokenInstance.symbols.call(treeId1);
 
       assert.equal(
-        symbol1Data.shape,
+        Number(symbol1Data.shape),
         expectedSymbolValue.shape,
         "shape is incorrect"
       );
 
       assert.equal(
-        symbol1Data.trunkColor,
+        Number(symbol1Data.trunkColor),
         expectedSymbolValue.trunkColor,
         "trunkColor is incorrect"
       );
 
       assert.equal(
-        symbol1Data.crownColor,
+        Number(symbol1Data.crownColor),
         expectedSymbolValue.crownColor,
         "crownColor is incorrect"
       );
       assert.equal(
-        symbol1Data.effect,
+        Number(symbol1Data.effect),
         expectedSymbolValue.effect,
         "effect is incorrect"
       );
       assert.equal(
-        symbol1Data.coefficient,
+        Number(symbol1Data.coefficient),
         expectedSymbolValue.coefficient,
         "coefficient is incorrect"
       );
       assert.equal(
-        symbol1Data.generationType,
+        Number(symbol1Data.generationType),
         expectedSymbolValue.generationType,
         "generationType is incorrect"
       );
@@ -1052,18 +1052,13 @@ contract("Attribute", (accounts) => {
     });
   });
 
-  /** 
   describe("without financial section", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(
-        Attribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
+        initializer: "initialize",
+        from: deployerAccount,
+        unsafeAllowCustomTypes: true,
+      });
 
       treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
         initializer: "initialize",
@@ -1071,10 +1066,9 @@ contract("Attribute", (accounts) => {
         unsafeAllowCustomTypes: true,
       });
 
-      await attributeInstance.setTreeTokenAddress(
-        treeTokenInstance.address,
-        { from: deployerAccount }
-      );
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.addTreejerContractRole(
         arInstance,
@@ -1082,9 +1076,7 @@ contract("Attribute", (accounts) => {
         deployerAccount
       );
     });
-
-
-    
+    /*
     it("should _calcRandSymbol work successfully", async () => {
       ///////////// ------------------- check 1
 
@@ -1092,15 +1084,9 @@ contract("Attribute", (accounts) => {
       const rand = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
       const generationType1 = 18;
 
-      await attributeInstance._calcRandSymbol(
-        treeId,
-        rand,
-        generationType1
-      );
+      await attributeInstance._calcRandSymbol(treeId, rand, generationType1);
 
-      const attribute1Data = await treeTokenInstance.attributes.call(
-        treeId
-      );
+      const attribute1Data = await treeTokenInstance.attributes.call(treeId);
 
       let expectedAttributeValue = {
         attribute1: 0,
@@ -1208,15 +1194,10 @@ contract("Attribute", (accounts) => {
       let rand2 = 233875876; //00000001,00000000,00000000,00000000,00001101,11110000,10101001,10100100
       const treeId2 = 101;
 
-      await attributeInstance._calcRandSymbol(
-        treeId2,
-        rand2,
-        generationType1
-      );
+      await attributeInstance._calcRandSymbol(treeId2, rand2, generationType1);
 
-      let uniqueSymbol1 = await attributeInstance.uniquenessFactorToSymbolStatus.call(
-        1054484
-      );
+      let uniqueSymbol1 =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(1054484);
 
       assert.equal(
         Number(uniqueSymbol1.generatedCount),
@@ -1233,9 +1214,7 @@ contract("Attribute", (accounts) => {
       //0
       //0
 
-      const attribute2Data = await treeTokenInstance.attributes.call(
-        treeId2
-      );
+      const attribute2Data = await treeTokenInstance.attributes.call(treeId2);
 
       let expectedAttributeValue2 = {
         attribute1: 164,
@@ -1360,11 +1339,7 @@ contract("Attribute", (accounts) => {
       let rand3 = web3.utils.toBN("5764607523034234879"); //01001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId3 = 102;
 
-      await attributeInstance._calcRandSymbol(
-        treeId3,
-        rand3,
-        generationType1
-      );
+      await attributeInstance._calcRandSymbol(treeId3, rand3, generationType1);
 
       //164
       //169
@@ -1375,9 +1350,7 @@ contract("Attribute", (accounts) => {
       //0
       //0
 
-      const attribute3Data = await treeTokenInstance.attributes.call(
-        treeId3
-      );
+      const attribute3Data = await treeTokenInstance.attributes.call(treeId3);
 
       let expectedAttributeValue3 = {
         attribute1: 255,
@@ -1503,11 +1476,7 @@ contract("Attribute", (accounts) => {
       let rand4 = web3.utils.toBN("1152921504556253183"); //00001111,11111111,11111111,11111111,11111100,11111011,11111111,11111111
       const treeId4 = 103;
 
-      await attributeInstance._calcRandSymbol(
-        treeId4,
-        rand4,
-        generationType1
-      );
+      await attributeInstance._calcRandSymbol(treeId4, rand4, generationType1);
 
       //164
       //169
@@ -1518,9 +1487,7 @@ contract("Attribute", (accounts) => {
       //0
       //0
 
-      const attribute4Data = await treeTokenInstance.attributes.call(
-        treeId4
-      );
+      const attribute4Data = await treeTokenInstance.attributes.call(treeId4);
 
       let expectedAttributeValue4 = {
         attribute1: 255,
@@ -1646,15 +1613,10 @@ contract("Attribute", (accounts) => {
       let rand5 = web3.utils.toBN("72057594271803812"); //00001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId5 = 104;
 
-      await attributeInstance._calcRandSymbol(
-        treeId5,
-        rand5,
-        generationType1
-      );
+      await attributeInstance._calcRandSymbol(treeId5, rand5, generationType1);
 
-      let uniqueSymbol2 = await attributeInstance.uniquenessFactorToSymbolStatus.call(
-        1054484
-      );
+      let uniqueSymbol2 =
+        await attributeInstance.uniquenessFactorToSymbolStatus.call(1054484);
 
       assert.equal(
         Number(uniqueSymbol2.generatedCount),
@@ -1662,41 +1624,33 @@ contract("Attribute", (accounts) => {
         "generatedCount is incorrect"
       );
     });
+    */
 
-    
     ////--------------------------test calc shape (private function) -------------------------
 
     it("Check calc shape", async () => {
       ///-------------------------- test special shape --------------------------
       // 111111111 111 == 2 ** 13 -1
-      let result1 = await attributeInstance._calcTreeShape.call(
-        2 ** 13 - 1,
-        0,
-        {
-          from: userAccount3,
-        }
-      );
+      let result1 = await attributeInstance._calcShape.call(2 ** 13 - 1, 0, {
+        from: userAccount3,
+      });
 
       assert.equal(Number(result1), 128, "result1 not true");
 
       for (let i = 1; i < 17; i++) {
-        await attributeInstance._calcTreeShape(2 ** 13 - 1, 0, {
+        await attributeInstance._calcShape(2 ** 13 - 1, 0, {
           from: userAccount3,
         });
         assert.equal(Number(await attributeInstance.specialTreeCount()), i);
       }
 
-      let result6 = await attributeInstance._calcTreeShape.call(
-        2 ** 13 - 15,
-        0,
-        {
-          from: userAccount3,
-        }
-      );
+      let result6 = await attributeInstance._calcShape.call(2 ** 13 - 15, 0, {
+        from: userAccount3,
+      });
 
       assert.equal(Number(result6), 113, "result6 not true");
 
-      await attributeInstance._calcTreeShape(2 ** 13 - 3, 0, {
+      await attributeInstance._calcShape(2 ** 13 - 3, 0, {
         from: userAccount3,
       });
       assert.equal(Number(await attributeInstance.specialTreeCount()), 16);
@@ -1706,7 +1660,7 @@ contract("Attribute", (accounts) => {
       ////----test2
 
       // 1101110 0000 == 1760
-      let result2 = await attributeInstance._calcTreeShape.call(1760, 1, {
+      let result2 = await attributeInstance._calcShape.call(1760, 1, {
         from: userAccount3,
       });
 
@@ -1715,7 +1669,7 @@ contract("Attribute", (accounts) => {
       ////----test3
 
       // 1101101 1111 == 1759
-      let result3 = await attributeInstance._calcTreeShape.call(1759, 1, {
+      let result3 = await attributeInstance._calcShape.call(1759, 1, {
         from: userAccount3,
       });
 
@@ -1724,7 +1678,7 @@ contract("Attribute", (accounts) => {
       ////----test4
 
       // 111000001 1000 == 7192
-      let result4 = await attributeInstance._calcTreeShape.call(7192, 2, {
+      let result4 = await attributeInstance._calcShape.call(7192, 2, {
         from: userAccount3,
       });
 
@@ -1733,7 +1687,7 @@ contract("Attribute", (accounts) => {
       ////----test5
 
       // 101010100 1010 == 5450
-      let result5 = await attributeInstance._calcTreeShape.call(5450, 3, {
+      let result5 = await attributeInstance._calcShape.call(5450, 3, {
         from: userAccount3,
       });
 
@@ -1796,26 +1750,26 @@ contract("Attribute", (accounts) => {
       assert.equal(Number(result5[1]), 16, "result5 crownColor not true");
     });
 
-    ////--------------------------test _setColors (private function) -------------------------
+    ////--------------------------test _setSpecialTreeColors (private function) -------------------------
 
-    it("Check _setColors", async () => {
-      ///-------------------------- test _setColors --------------------------
+    it("Check _setSpecialTreeColors", async () => {
+      ///-------------------------- test _setSpecialTreeColors --------------------------
 
-      let result1 = await attributeInstance._setColors.call(128, {
+      let result1 = await attributeInstance._setSpecialTreeColors.call(128, {
         from: userAccount3,
       });
 
       assert.equal(Number(result1[0]), 6, "result1 trunkColor not true");
       assert.equal(Number(result1[1]), 5, "result1 trunkColor not true");
 
-      let result2 = await attributeInstance._setColors.call(143, {
+      let result2 = await attributeInstance._setSpecialTreeColors.call(143, {
         from: userAccount3,
       });
 
       assert.equal(Number(result2[0]), 32, "result2 trunkColor not true");
       assert.equal(Number(result2[1]), 32, "result2 trunkColor not true");
 
-      let result3 = await attributeInstance._setColors.call(130, {
+      let result3 = await attributeInstance._setSpecialTreeColors.call(130, {
         from: userAccount3,
       });
 
@@ -1883,7 +1837,6 @@ contract("Attribute", (accounts) => {
       assert.equal(Number(result4), 5, "_calcCoefficient not true");
     });
   });
-  */
 
   /*
   describe("createSymbol", () => {

@@ -24,12 +24,6 @@ if (process.env.COVERAGE) {
   TestUniswap = artifacts.require("TestUniswap.sol");
 }
 
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
-
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -43,9 +37,8 @@ const {
   AuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
-  GsnErrorMsg,
 } = require("./enumes");
-const { zeroPad } = require("ethers/lib/utils");
+
 const { util } = require("chai");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";

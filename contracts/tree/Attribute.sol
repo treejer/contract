@@ -176,9 +176,16 @@ contract Attribute is Initializable {
             1;
         //
         // uint256 value = _symbolUniquenessFactor + 2 * (2**32) ; //TODO: MIX_WITH_BELOW
+
+        //TODO: check
+        // uint256 uniquenessFactor = _attributeUniquenessFactor +
+        //     uint256(_symbolUniquenessFactor + 2 * (2**32)) *
+        //     (2**64);
+        // treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
+
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            uint256(_symbolUniquenessFactor + 2 * (2**32)) *
-            (2**64);
+            ((_symbolUniquenessFactor + (2 << 32)) << 64);
+
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
         emit AttributeGenerated(_treeId);
@@ -228,7 +235,8 @@ contract Attribute is Initializable {
                     if (flag) {
                         break;
                     }
-                    randomValue = randomValue / (uint256(2)**64);
+                    //TODO: check randomValue = randomValue / (uint256(2)**64);
+                    randomValue >>= 64;
                 }
                 if (flag) {
                     break;
@@ -346,7 +354,9 @@ contract Attribute is Initializable {
                             uniquenessFactor
                         ] +
                         1;
-                    randomValue = randomValue / (uint256(2)**64);
+
+                    //TODO: check randomValue = randomValue / (uint256(2)**64);
+                    randomValue >>= 8;
                 }
             }
         }
@@ -371,7 +381,8 @@ contract Attribute is Initializable {
             uint64 tempRandomValue = _randomValue;
             for (uint256 j = 0; j < 8; j++) {
                 attributes[j] = uint8(tempRandomValue & 255);
-                tempRandomValue = tempRandomValue / 256;
+                //TODO: check tempRandomValue = tempRandomValue / 256;
+                tempRandomValue >>= 8;
             }
 
             uint8 shape = _calcShape(
@@ -394,13 +405,14 @@ contract Attribute is Initializable {
 
             uint8 effect = _calcEffects(attributes[4], _funderRank);
 
+            //TODO: check (2**8) * trunkColor
+            //TODO: check (2**16) * crownColor
+            //TODO: check (2**24) * effect
+
             uint64 symbolUniquenessFactor = shape +
-                (2**8) * //2**8
-                trunkColor +
-                (2**16) * //2**16
-                crownColor +
-                (2**24) * //2**24
-                effect;
+                (trunkColor << 8) +
+                (crownColor << 16) +
+                (effect << 24);
 
             if (
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
@@ -415,11 +427,10 @@ contract Attribute is Initializable {
             }
             uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
 
+            //TODO: check (2**32) * coefficient
+            //TODO: check uint256(uint256(symbolUniquenessFactor + (coefficient << 32)) *(2**64));
             uint256 uniquenessFactor = uint256(_randomValue) +
-                uint256(
-                    uint256(symbolUniquenessFactor + (2**32) * coefficient) *
-                        (2**64)
-                );
+                ((symbolUniquenessFactor + (coefficient << 32)) << 64);
 
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status = 2;
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
@@ -500,7 +511,8 @@ contract Attribute is Initializable {
 
         uint8 randomValueFirstFourBit = uint8(_randomValue & 15); //TODO:NAMING _randomValueFirstFourBit
 
-        uint16 probability = _randomValue / 16; //TODO:NAMING probability
+        //TODO: check _randomValue / 16
+        uint16 probability = _randomValue >> 4; //TODO:NAMING probability
 
         uint8 result = 0; //TODO:NAMING result
 
@@ -547,9 +559,11 @@ contract Attribute is Initializable {
         }
 
         uint8 probability1 = _randomValue1 & 31; //TODO:NAMING probability1
-        uint8 randomValue1Last3Bit = _randomValue1 / 32; //change to  _a / 32 //TODO:NAMING _randomValue1Last3Bit
+        //TODO: check _randomValue1 / 32
+        uint8 randomValue1Last3Bit = _randomValue1 >> 5; //change to  _a / 32 //TODO:NAMING _randomValue1Last3Bit
         uint8 probability2 = _randomValue2 & 31; //TODO:NAMING probability2
-        uint8 randomValue2Last3Bit = _randomValue2 / 32; // change to _b / 32//TODO:NAMING _randomValue2Last3Bit
+        //TODO: check _randomValue2 / 32
+        uint8 randomValue2Last3Bit = _randomValue2 >> 5; // change to _b / 32//TODO:NAMING _randomValue2Last3Bit
         uint8 result1 = 0; //TODO:NAMING result1
         uint8 result2 = 0; //TODO:NAMING result2
 

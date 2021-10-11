@@ -107,36 +107,37 @@ contract Tree is ERC721Upgradeable {
         uint256 _uniquenessFactor,
         uint8 _generationType
     ) external onlyTreejerContract {
-        uint8[] memory results = new uint8[](8);
-        uint8 x;
+        uint8[] memory attribute = new uint8[](8);
+
         for (uint256 i = 0; i < 8; i++) {
-            x = uint8(_uniquenessFactor & 255);
-            results[i] = x;
-            _uniquenessFactor = _uniquenessFactor / 256;
+            attribute[i] = uint8(_uniquenessFactor & 255);
+            //TODO: check _uniquenessFactor = _uniquenessFactor / 256
+            _uniquenessFactor >>= 8;
         }
         attributes[_tokenId] = Attribute(
-            results[0],
-            results[1],
-            results[2],
-            results[3],
-            results[4],
-            results[5],
-            results[6],
-            results[7],
+            attribute[0],
+            attribute[1],
+            attribute[2],
+            attribute[3],
+            attribute[4],
+            attribute[5],
+            attribute[6],
+            attribute[7],
             _generationType
         );
         if (_generationType > 15) {
             for (uint256 i = 0; i < 5; i++) {
-                x = uint8(_uniquenessFactor & 255);
-                results[i] = x;
-                _uniquenessFactor = _uniquenessFactor / 256;
+                attribute[i] = uint8(_uniquenessFactor & 255);
+
+                //TODO: check _uniquenessFactor = _uniquenessFactor / 256
+                _uniquenessFactor >>= 8;
             }
             symbols[_tokenId] = Symbol(
-                results[0],
-                results[1],
-                results[2],
-                results[3],
-                results[4],
+                attribute[0],
+                attribute[1],
+                attribute[2],
+                attribute[3],
+                attribute[4],
                 _generationType
             );
         }

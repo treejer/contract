@@ -34,7 +34,6 @@ contract Attribute is Initializable {
     event AttributeGenerationFailed(uint256 treeId);
     event SymbolReserved(uint64 uniquenessFactor);
     event ReservedSymbolReleased(uint64 uniquenessFactor);
-    event X(uint256 n);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -134,7 +133,6 @@ contract Attribute is Initializable {
      * @dev free reservation of a unique symbol
      * @param _uniquenessFactor unique symbol to reserve
      */
-    //TODO: add test for this function
     function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
         onlyTreejerContract
@@ -170,25 +168,12 @@ contract Attribute is Initializable {
             _attributeUniquenessFactor
         ] = 1;
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status = 3;
-        uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].generatedCount =
-            uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
-                .generatedCount +
-            1;
-        //
-        // uint256 value = _symbolUniquenessFactor + 2 * (2**32) ; //TODO: MIX_WITH_BELOW
-
-        //TODO: check
-        // uint256 uniquenessFactor = _attributeUniquenessFactor +
-        //     uint256(_symbolUniquenessFactor + 2 * (2**32)) *
-        //     (2**64);
-        // treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
+        uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
+            .generatedCount += 1;
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
             ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64);
-        emit X(
-            _attributeUniquenessFactor +
-                ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64)
-        );
+
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
         emit AttributeGenerated(_treeId);
@@ -208,7 +193,6 @@ contract Attribute is Initializable {
         uint8 _generationType
     ) external ifNotPaused onlyTreejerContract returns (bool) {
         if (!treeToken.attributeExists(_treeId)) {
-            //TODO: flag true ==>false
             bool flag = false;
             uint64 tempRandomValue;
 
@@ -238,7 +222,7 @@ contract Attribute is Initializable {
                     if (flag) {
                         break;
                     }
-                    //TODO: check randomValue = randomValue / (uint256(2)**64);
+
                     randomValue >>= 64;
                 }
                 if (flag) {
@@ -266,7 +250,7 @@ contract Attribute is Initializable {
         if (!treeToken.attributeExists(_treeId)) {
             (
                 bool flag,
-                uint64 uniquenessFactor //TODO:NAMING uniquenessFactor
+                uint64 uniquenessFactor
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
@@ -295,13 +279,11 @@ contract Attribute is Initializable {
         ) {
             return _uniquenessFactor;
         } else {
-            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] =
-                uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] +
-                1;
+            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] += 1;
 
             (
                 bool flag,
-                uint64 uniquenessFactor //TODO:NAMING uniquenessFactor
+                uint64 uniquenessFactor
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             require(flag, "unique attribute not fund");
@@ -333,7 +315,7 @@ contract Attribute is Initializable {
         private
         returns (bool, uint64)
     {
-        uint64 uniquenessFactor; //TODO:NAMING uniquenessFactor
+        uint64 uniquenessFactor;
 
         for (uint256 j = 0; j < 10000; j++) {
             uint256 randomValue = uint256(
@@ -352,13 +334,8 @@ contract Attribute is Initializable {
                 } else {
                     uniquenessFactorToGeneratedAttributesCount[
                         uniquenessFactor
-                    ] =
-                        uniquenessFactorToGeneratedAttributesCount[
-                            uniquenessFactor
-                        ] +
-                        1;
+                    ] += 1;
 
-                    //TODO: check randomValue = randomValue / (uint256(2)**64);
                     randomValue >>= 64;
                 }
             }
@@ -379,19 +356,16 @@ contract Attribute is Initializable {
         uint8 _generationType
     ) private returns (bool) {
         if (uniquenessFactorToGeneratedAttributesCount[_randomValue] == 0) {
-            uint8[] memory attributes = new uint8[](8); //TODO:NAMING attributes
+            uint8[] memory attributes = new uint8[](8);
 
             uint64 tempRandomValue = _randomValue;
             for (uint256 j = 0; j < 8; j++) {
                 attributes[j] = uint8(tempRandomValue & 255);
-                //TODO: check tempRandomValue = tempRandomValue / 256;
+
                 tempRandomValue >>= 8;
             }
 
-            uint8 shape = _calcShape(
-                uint16(_randomValue & ((2**13) - 1)),
-                _funderRank
-            );
+            uint8 shape = _calcShape(uint16(_randomValue & 8191), _funderRank); //8191 = 2^13-1
 
             uint8 trunkColor;
             uint8 crownColor;
@@ -407,10 +381,6 @@ contract Attribute is Initializable {
             }
 
             uint8 effect = _calcEffects(attributes[4], _funderRank);
-
-            //TODO: check (2**8) * trunkColor
-            //TODO: check (2**16) * crownColor
-            //TODO: check (2**24) * effect
 
             uint64 symbolUniquenessFactor = shape +
                 (uint64(trunkColor) << 8) +
@@ -430,11 +400,8 @@ contract Attribute is Initializable {
             }
             uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
 
-            //TODO: check (2**32) * coefficient
-            //TODO: check uint256(uint256(symbolUniquenessFactor + (coefficient << 32)) *(2**64));
-            uint256 uniquenessFactor = uint256(_randomValue) +
-                ((uint256(symbolUniquenessFactor) +
-                    (uint256(coefficient) << 32)) << 64);
+            uint256 uniquenessFactor = _randomValue +
+                ((symbolUniquenessFactor + (uint256(coefficient) << 32)) << 64);
 
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status = 2;
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
@@ -444,9 +411,7 @@ contract Attribute is Initializable {
 
             return true;
         } else {
-            uniquenessFactorToGeneratedAttributesCount[_randomValue] =
-                uniquenessFactorToGeneratedAttributesCount[_randomValue] +
-                1;
+            uniquenessFactorToGeneratedAttributesCount[_randomValue] += 1;
             return false;
         }
     }
@@ -465,7 +430,7 @@ contract Attribute is Initializable {
             496,
             511,
             512
-        ]; //TODO:NAMING probRank0
+        ];
         uint16[9] memory probRank1 = [
             110,
             200,
@@ -476,7 +441,7 @@ contract Attribute is Initializable {
             490,
             511,
             512
-        ]; //TODO:NAMING probRank1
+        ];
         uint16[9] memory probRank2 = [
             90,
             190,
@@ -487,7 +452,7 @@ contract Attribute is Initializable {
             480,
             510,
             512
-        ]; //TODO:NAMING probRank2
+        ];
         uint16[9] memory probRank3 = [
             64,
             176,
@@ -498,8 +463,8 @@ contract Attribute is Initializable {
             496,
             508,
             512
-        ]; //TODO:NAMING probRank3
-        uint16[9] memory selectedRankProb; //TODO:NAMING selectedRankProb
+        ];
+        uint16[9] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -513,12 +478,11 @@ contract Attribute is Initializable {
 
         uint8 shape;
 
-        uint8 randomValueFirstFourBit = uint8(_randomValue & 15); //TODO:NAMING _randomValueFirstFourBit
+        uint8 randomValueFirstFourBit = uint8(_randomValue & 15);
 
-        //TODO: check _randomValue / 16
-        uint16 probability = _randomValue >> 4; //TODO:NAMING probability
+        uint16 probability = _randomValue >> 4;
 
-        uint8 result = 0; //TODO:NAMING result
+        uint8 result = 0;
 
         for (uint8 j = 0; j < 9; j++) {
             if (probability < selectedRankProb[j]) {
@@ -530,7 +494,7 @@ contract Attribute is Initializable {
         if (result == 8) {
             if (specialTreeCount < 16) {
                 shape = 128 + specialTreeCount;
-                specialTreeCount = specialTreeCount + 1;
+                specialTreeCount += 1;
             } else {
                 shape = 112 + randomValueFirstFourBit;
             }
@@ -542,8 +506,8 @@ contract Attribute is Initializable {
     }
 
     function _calcColors(
-        uint8 _randomValue1, //TODO:NAMING _randomValue1
-        uint8 _randomValue2, //TODO:NAMING _randomValue2
+        uint8 _randomValue1,
+        uint8 _randomValue2,
         uint8 _funderRank
     ) public pure returns (uint8, uint8) {
         uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
@@ -562,14 +526,14 @@ contract Attribute is Initializable {
             selectedRankProb = probRank0;
         }
 
-        uint8 probability1 = _randomValue1 & 31; //TODO:NAMING probability1
-        //TODO: check _randomValue1 / 32
-        uint8 randomValue1Last3Bit = _randomValue1 >> 5; //change to  _a / 32 //TODO:NAMING _randomValue1Last3Bit
-        uint8 probability2 = _randomValue2 & 31; //TODO:NAMING probability2
-        //TODO: check _randomValue2 / 32
-        uint8 randomValue2Last3Bit = _randomValue2 >> 5; // change to _b / 32//TODO:NAMING _randomValue2Last3Bit
-        uint8 result1 = 0; //TODO:NAMING result1
-        uint8 result2 = 0; //TODO:NAMING result2
+        uint8 probability1 = _randomValue1 & 31;
+
+        uint8 randomValue1Last3Bit = _randomValue1 >> 5;
+        uint8 probability2 = _randomValue2 & 31;
+
+        uint8 randomValue2Last3Bit = _randomValue2 >> 5;
+        uint8 result1 = 0;
+        uint8 result2 = 0;
 
         for (uint8 i = 0; i < 8; i++) {
             if (probability1 < selectedRankProb[i]) {

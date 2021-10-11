@@ -1051,7 +1051,7 @@ contract("Attribute", (accounts) => {
       assert.equal(Number(result3), 1, "result is not correct");
     });
   });
-
+  /*
   describe("without financial section", () => {
     beforeEach(async () => {
       attributeInstance = await deployProxy(Attribute, [arInstance.address], {
@@ -1076,23 +1076,29 @@ contract("Attribute", (accounts) => {
         deployerAccount
       );
     });
-    /*
-    it("should _calcRandSymbol work successfully", async () => {
+  
+
+    it("should _generateUniquenessFactor work successfully", async () => {
       ///////////// ------------------- check 1
 
       const treeId = 100;
-      const rand = await web3.utils.toBN(18446744070000000000); // 2 ** 64 - 2 ** 25;
+      const rand = await web3.utils.toBN("18446744073709551615"); // 2 ** 64 - 2 ** 25;
       const generationType1 = 18;
 
-      await attributeInstance._calcRandSymbol(treeId, rand, generationType1);
+      await attributeInstance._generateUniquenessFactor(
+        treeId,
+        rand,
+        0,
+        generationType1
+      );
 
       const attribute1Data = await treeTokenInstance.attributes.call(treeId);
 
       let expectedAttributeValue = {
-        attribute1: 0,
-        attribute2: 188,
-        attribute3: 228,
-        attribute4: 34,
+        attribute1: 255,
+        attribute2: 255,
+        attribute3: 255,
+        attribute4: 255,
         attribute5: 255,
         attribute6: 255,
         attribute7: 255,
@@ -1148,9 +1154,9 @@ contract("Attribute", (accounts) => {
       );
 
       const expectedSymbolValue = {
-        shape: 80,
-        trunkColor: 7,
-        crownColor: 1,
+        shape: 128,
+        trunkColor: 6,
+        crownColor: 5,
         effect: 15,
         coefficient: 7,
         generationType: 18,
@@ -1191,10 +1197,16 @@ contract("Attribute", (accounts) => {
         "generationType is incorrect"
       );
 
+ 
       let rand2 = 233875876; //00000001,00000000,00000000,00000000,00001101,11110000,10101001,10100100
       const treeId2 = 101;
 
-      await attributeInstance._calcRandSymbol(treeId2, rand2, generationType1);
+      await attributeInstance._generateUniquenessFactor(
+        treeId2,
+        rand2,
+        0,
+        generationType1
+      );
 
       let uniqueSymbol1 =
         await attributeInstance.uniquenessFactorToSymbolStatus.call(1054484);
@@ -1339,7 +1351,12 @@ contract("Attribute", (accounts) => {
       let rand3 = web3.utils.toBN("5764607523034234879"); //01001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId3 = 102;
 
-      await attributeInstance._calcRandSymbol(treeId3, rand3, generationType1);
+      await attributeInstance._generateUniquenessFactor(
+        treeId3,
+        rand3,
+        0,
+        generationType1
+      );
 
       //164
       //169
@@ -1476,7 +1493,12 @@ contract("Attribute", (accounts) => {
       let rand4 = web3.utils.toBN("1152921504556253183"); //00001111,11111111,11111111,11111111,11111100,11111011,11111111,11111111
       const treeId4 = 103;
 
-      await attributeInstance._calcRandSymbol(treeId4, rand4, generationType1);
+      await attributeInstance._generateUniquenessFactor(
+        treeId4,
+        rand4,
+        0,
+        generationType1
+      );
 
       //164
       //169
@@ -1613,7 +1635,12 @@ contract("Attribute", (accounts) => {
       let rand5 = web3.utils.toBN("72057594271803812"); //00001111,11111111,11111111,11111111,11111111,11111111,11111111,11111111
       const treeId5 = 104;
 
-      await attributeInstance._calcRandSymbol(treeId5, rand5, generationType1);
+      await attributeInstance._generateUniquenessFactor(
+        treeId5,
+        rand5,
+        0,
+        generationType1
+      );
 
       let uniqueSymbol2 =
         await attributeInstance.uniquenessFactorToSymbolStatus.call(1054484);
@@ -1623,8 +1650,8 @@ contract("Attribute", (accounts) => {
         2,
         "generatedCount is incorrect"
       );
+    
     });
-    */
 
     ////--------------------------test calc shape (private function) -------------------------
 
@@ -2486,8 +2513,6 @@ contract("Attribute", (accounts) => {
       );
     });
 
-    
   });
-  
   */
 });

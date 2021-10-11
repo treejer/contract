@@ -303,10 +303,10 @@ contract HonoraryTree is Initializable, RelayRecipient {
             )
         );
 
-        uint64 selectedSymbol; //TODO:NAMING selectedSymbol
-        uint256 remainedSymbolCount; //TODO:NAMING remainedSymbolCount
-        uint256 selectedFreeSymbolIndex; //TODO:NAMING selectedFreeSymbolIndex
-        uint256 index; //TODO:NAMING index
+        uint64 selectedSymbol;
+        uint256 remainedSymbolCount;
+        uint256 selectedFreeSymbolIndex;
+        uint256 index;
 
         for (uint256 i = 0; i < symbols.length; i++) {
             remainedSymbolCount = symbols.length - claimedCount;
@@ -340,15 +340,14 @@ contract HonoraryTree is Initializable, RelayRecipient {
         }
 
         if (flag) {
-            uint64 generatedAttribute = attribute //TODO:NAMING uniquenessFactor
-                .manageAttributeUniquenessFactor(
-                    currentTreeId,
-                    uint64(randomValue & type(uint64).max)
-                );
+            uint64 uniquenessFactor = attribute.manageAttributeUniquenessFactor(
+                currentTreeId,
+                uint64(randomValue & type(uint64).max)
+            );
 
             attribute.setAttribute(
                 currentTreeId,
-                generatedAttribute,
+                uniquenessFactor,
                 selectedSymbol,
                 18
             );

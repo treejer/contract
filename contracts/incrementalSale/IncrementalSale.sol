@@ -52,6 +52,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
     event TreeFunded(
         address funder,
+        address recipient,
         address referrer,
         uint256 startTreeId,
         uint256 count
@@ -285,7 +286,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     //TODO:ADD_COMMENTS
-    function fundTree(uint256 _count, address _referrer) external ifNotPaused {
+    function fundTree(
+        uint256 _count,
+        address _referrer,
+        address _recipient
+    ) external ifNotPaused {
         require(_count < 101 && _count > 0, "Count must be lt 100");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
@@ -300,18 +305,19 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 y = (tempLastSold - incSaleData.startTreeId) /
             incSaleData.increments;
 
-        uint256 z = (y + 1) *
-            incSaleData.increments +
-            incSaleData.startTreeId -
-            tempLastSold;
-
         uint256 tempLastSoldPrice = incSaleData.initialPrice +
             (y * incSaleData.initialPrice * incSaleData.priceJump) /
             10000;
 
         uint256 totalPrice = _count * tempLastSoldPrice;
-
-        int256 extra = int256(_count) - int256(z);
+        //TODO: CHANGE,omit variable z
+        int256 extra = int256(_count) -
+            int256(
+                (y + 1) *
+                    incSaleData.increments +
+                    incSaleData.startTreeId -
+                    tempLastSold
+            );
 
         while (extra > 0) {
             totalPrice +=
@@ -336,17 +342,28 @@ contract IncrementalSale is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
+
         tempLastSold = _setAllocation(
             tempLastSold,
             _count,
             _msgSender(),
+            recipient,
             _referrer,
             totalPrice
         );
 
         lastSold = tempLastSold - 1;
 
-        emit TreeFunded(_msgSender(), _referrer, tempLastSold - _count, _count);
+        emit TreeFunded(
+            _msgSender(),
+            recipient,
+            _referrer,
+            tempLastSold - _count,
+            _count
+        );
     }
 
     /** @dev admin can update incrementalSaleData
@@ -374,6 +391,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _tempLastSold,
         uint256 _count,
         address _funder,
+        address _recipient,
         address _referrer,
         uint256 _totalPrice
     ) private returns (uint256) {
@@ -384,6 +402,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 tempLastSold = _tempLastSold;
 
         address funder = _funder;
+        address recipient = _recipient;
 
         for (uint256 i = 0; i < _count; i++) {
             uint256 treePrice = incSaleData.initialPrice +
@@ -415,7 +434,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1 += (treePrice * reserve1Share) / 10000;
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
-            treeFactory.mintAssignedTree(tempLastSold, funder);
+            treeFactory.mintAssignedTree(tempLastSold, recipient);
 
             tempLastSold += 1;
         }
@@ -430,19 +449,15 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1,
             totalBalances.reserve2
         );
-
-        uint256 planterDaiAmount = (daiAmount * totalBalances.planter) /
-            (totalBalances.planter + totalBalances.ambassador);
-
-        uint256 ambassadorDaiAmount = (daiAmount * totalBalances.ambassador) /
-            (totalBalances.planter + totalBalances.ambassador);
-
+        //TODO: CHANGE, omit variable planterDaiAmount and ambassadorDaiAmount
         _setPlanterAllocation(
             _tempLastSold,
             _count,
             daiAmount,
-            planterDaiAmount,
-            ambassadorDaiAmount,
+            (daiAmount * totalBalances.planter) /
+                (totalBalances.planter + totalBalances.ambassador), //planterDaiAmount
+            (daiAmount * totalBalances.ambassador) /
+                (totalBalances.planter + totalBalances.ambassador), //ambassadorDaiAmount
             _totalPrice,
             funder
         );

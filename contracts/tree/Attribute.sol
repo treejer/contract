@@ -356,7 +356,7 @@ contract Attribute is Initializable {
                         1;
 
                     //TODO: check randomValue = randomValue / (uint256(2)**64);
-                    randomValue >>= 8;
+                    randomValue >>= 64;
                 }
             }
         }

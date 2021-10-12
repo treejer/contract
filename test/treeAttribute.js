@@ -554,12 +554,6 @@ contract("Attribute", (accounts) => {
         return Number(ev.treeId) == treeId1;
       });
 
-      truffleAssert.eventEmitted(eventTx1, "X", (ev) => {
-        console.log("ev.n.toString()", ev.n.toString());
-
-        return true;
-      });
-
       ////// cehck symbol and attribute struct data
 
       ///// -------- check attribute

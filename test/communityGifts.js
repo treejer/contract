@@ -502,7 +502,7 @@ contract("HonoraryTree", (accounts) => {
         deployerAccount
       );
 
-      const symbolsArray = [];
+      let symbolsArray = [];
       for (let i = 0; i < 5; i++) {
         let rand = parseInt(Math.random() * 10e10);
         while (symbolsArray.includes(rand)) {
@@ -568,7 +568,7 @@ contract("HonoraryTree", (accounts) => {
         deployerAccount
       );
 
-      const symbolsArray = [];
+      let symbolsArray = [];
       for (let i = 0; i < 5; i++) {
         let rand = parseInt(Math.random() * 10e10);
         while (symbolsArray.includes(rand)) {
@@ -671,7 +671,7 @@ contract("HonoraryTree", (accounts) => {
       });
 
       //////////// ------------------- reserve symbols
-      const symbolsArray = [];
+      let symbolsArray = [];
       for (let i = 0; i < 5; i++) {
         let rand = parseInt(Math.random() * 10e10);
         while (symbolsArray.includes(rand)) {
@@ -1063,7 +1063,7 @@ contract("HonoraryTree", (accounts) => {
         from: dataManager,
       });
 
-      const symbolsArray = [];
+      let symbolsArray = [];
       for (let i = 0; i < 10; i++) {
         let rand = parseInt(Math.random() * 10e10);
         while (symbolsArray.includes(rand)) {

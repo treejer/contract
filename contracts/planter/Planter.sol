@@ -28,16 +28,16 @@ contract Planter is Initializable, RelayRecipient {
         uint64 latitude;
     }
 
-    /** NOTE mapping of planterAddress to PlanterData */
+    /** NOTE mapping of planter address to PlanterData */
     mapping(address => PlanterData) public planters;
 
-    /** NOTE mapping of planterAddress to address of invitedBy */
+    /** NOTE mapping of planter address to address of invitedBy */
     mapping(address => address) public invitedBy;
 
-    /** NOTE mapping of planterAddress to organizationAddress that planter is member of it */
+    /** NOTE mapping of planter address to organization address that planter is member of it */
     mapping(address => address) public memberOf;
 
-    /** NOTE mapping of organizationAddress to mapping of planterAddress to portionValue */
+    /** NOTE mapping of organization address to mapping of planter address to portionValue */
     mapping(address => mapping(address => uint256))
         public organizationMemberShare;
 
@@ -88,8 +88,8 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isPlanter
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isPlanter
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -118,14 +118,14 @@ contract Planter is Initializable, RelayRecipient {
     /**
      * @dev based on {_planterType} a planter can join as individual planter or
      * member of an organization
-     * @param _planterType 1 for individual and 3 for member of organization
+     * NOTE member of organization planter status set to pendding and wait to be
+     * accepted by organization.
+     * @param _planterType type of planter: 1 for individual and 3 for member of organization
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
-     * @param _invitedBy address of referral
+     * @param _invitedBy address of referrer
      * @param _organization address of organization to be member of
-     * NOTE if join as a member of an organization, when that organization
-     * accept planter, planter status set to active
      */
     function join(
         uint8 _planterType,
@@ -182,7 +182,19 @@ contract Planter is Initializable, RelayRecipient {
         emit PlanterJoined(_msgSender());
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev admin add a individual planter or
+     * member of an organization planter based on {_planterType}
+     * NOTE member of organization planter status set to active and no need for
+     * accepting by organization
+     * @param _planter address of planter
+     * @param _planterType type of planter: 1 for individual and 3 for member of organization
+     * @param _longitude longitude value
+     * @param _latitude latitude value
+     * @param _countryCode country code
+     * @param _invitedBy address of referrer
+     * @param _organization address of organization to be member of
+     */
     function joinByAdmin(
         address _planter,
         uint8 _planterType,
@@ -241,8 +253,8 @@ contract Planter is Initializable, RelayRecipient {
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
-     * @param _supplyCap plant supplyCap of organization planter
-     * @param _invitedBy address of referral
+     * @param _supplyCap planting supplyCap of organization planter
+     * @param _invitedBy address of referrer
      */
     function joinOrganization(
         address _organization,
@@ -280,21 +292,20 @@ contract Planter is Initializable, RelayRecipient {
         emit OrganizationJoined(_organization);
     }
 
-    //TODO:remove this function??
-
     /**
-     * @dev planter with planterType 1 , 3 can update their planterType using this
-     * function.
-     * planterType 3 (member of organization) can change to
+     * @dev planter with planterType 1 , 3 can update their planterType
+     * NOTE planterType 3 (member of organization) can change to
      * planterType 1 (individual planter) with input value {_planterType}
      * of 1 and zeroAddress as {_organization}
      * or choose other organization to be member of with
      * input value {_planterType} of 3 and {_organization}.
-     * planterType 1 can only change to planterType 3 with input value
+     * NOTE planterType 1 can only change to planterType 3 with input value
      * {_planter} of 3 and {_organization}
-     * if planter planterType 3 choose another oraganization
-     * or planterType 1 chage to planterType 3, they must be accepted by the
+     * if planter planterType 3 choose another oraganization or planter with
+     * planterType 1 change it's planterType to 3,they must be accepted by the
      * organization to be an active planter
+     * @param _planterType type of planter
+     * @param _organization address of organization
      */
     function updatePlanterType(uint8 _planterType, address _organization)
         external
@@ -343,7 +354,8 @@ contract Planter is Initializable, RelayRecipient {
         emit PlanterUpdated(_msgSender());
     }
 
-    /** @dev organization can accept planter to be it's member or reject
+    /**
+     * @dev organization can accept planter to be it's member or reject
      * @param _planter address of planter
      * @param _acceptance accept or reject
      */
@@ -373,7 +385,8 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev admin update supplyCap of planter {_planter}
+    /**
+     * @dev admin update supplyCap of planter
      * @param _planter address of planter to update supplyCap
      * @param _supplyCap supplyCap that set to planter supplyCap
      */
@@ -391,7 +404,8 @@ contract Planter is Initializable, RelayRecipient {
         emit PlanterUpdated(_planter);
     }
 
-    /** @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
+    /**
+     * @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
      * @param _planter address of planter who want to plant tree
      * @param _assignedPlanterAddress address of planter that tree assigned to
      * @return if a planter can plant a tree or not
@@ -424,10 +438,10 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    /** @dev oragnization can update planterPayment rules of it's members
+    /**
+     * @dev oragnization can update the share of its members
      * @param _planter address of planter
-     * @param _organizationMemberShareAmount payment portion value
-     * NOTE only organization (planterType = 2) can call this function
+     * @param _organizationMemberShareAmount member share value
      */
     function updateOrganizationMemberShare(
         address _planter,
@@ -447,11 +461,13 @@ contract Planter is Initializable, RelayRecipient {
         emit OrganizationMemberShareUpdated(_planter);
     }
 
-    /** @dev return planter paymentPortion for an accepted organizationPlanter
-     * @param _planter address of planter to get payment portion
-     * @return {true} as first param in valid planter case and seccond param is
-     * address of organization that {_planter} is member of it.
-     * and third param is address of referral and the last one is portion value
+    /**
+     * @dev return organization member data
+     * @param _planter address of organization member planter to get data
+     * @return true in case of valid planter
+     * @return address of organization that {_planter} is member of it.
+     * @return address of referrer
+     * @return share of {_plnater}
      */
     function getOrganizationMemberData(address _planter)
         external
@@ -484,10 +500,10 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev when tree plant of {_planter} rejected, plantedCount of {_planter}
-     * must reduce 1 time and if planter status is full supplyCap {2} update it to active {1}
+    /**
+     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
+     * must reduce by 1 and if planter status is full, set it to active.
      * @param _planter address of planter
-     * NOTE only treeFactory contract can call this function
      */
     function reducePlantedCount(address _planter)
         external
@@ -503,12 +519,12 @@ contract Planter is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev check that planter {_planter} can plant regular tree
+    /**
+     * @dev check that planter {_planter} can plant regular tree
+     * NOTE if plantedCount reach to supplyCap status of planter
+     * set to full (value of full is '2')
      * @param _planter address of planter
-     * NOTE treeFactory contract can call this function
-     * NOTE change status to full supplyCap if plantedCount be equal with
-     * planter supplyCap after increase plantedCount by 1
-     * @return true in case of planter status is active {1}
+     * @return true in case of planter status is active (value of active is '1')
      */
     function manageTreePermission(address _planter)
         external
@@ -529,7 +545,8 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    /** @dev check that {_verifier} can verify plant or update requests of {_planter}
+    /**
+     * @dev check that {_verifier} can verify plant or tree update requests of {_planter}
      * @param _planter address of planter
      * @param _verifier address of verifier
      * @return true in case of {_verifier} can verify {_planter} and false otherwise
@@ -557,7 +574,8 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    /** @dev check allowance to assign tree to planter {_planter}
+    /**
+     * @dev check allowance to assign tree to planter
      * @param _planter address of assignee planter
      * @return true in case of active planter or orgnization planter and false otherwise
      */

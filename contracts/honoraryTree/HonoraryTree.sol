@@ -24,10 +24,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
         uint64 startDate;
         uint64 status;
     }
-
+    /** NOTE mapping of recipient address to Recipient struct */
     mapping(address => Recipient) public recipients;
-
+    /** NOTE array of symbols */
     uint64[] public symbols;
+    /** array of bool to show a symbol is used or not*/
     bool[] public used;
 
     /** NOTE {isHonoraryTree} set inside the initialize to {true} */
@@ -38,12 +39,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
     uint256 public upTo;
     uint256 public prePaidTreeCount;
 
-    /**NOTE {referralTreePaymentToPlanter} is share of plater when a tree claimed or transfered to someone*/
+    /**NOTE {referralTreePaymentToPlanter} is share of plater when a tree claimed for someone*/
     uint256 public referralTreePaymentToPlanter;
-    /**NOTE {referralTreePaymentToAmbassador} is share of referral when a tree claimed or transfered to someone*/
+    /**NOTE {referralTreePaymentToAmbassador} is share of ambassador when a tree claimed for someone*/
     uint256 public referralTreePaymentToAmbassador;
 
-    ////////////////////////////////////////////////
     event TreeRangeSet();
     event TreeRangeReleased();
 
@@ -84,7 +84,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
 
     /**
      * @dev initialize accessRestriction contract and set true for isHonoraryTree
-     * set expire date and referralTreePaymentToPlanter and referralTreePaymentToAmbassador initial value
+     * set referralTreePaymentToPlanter and referralTreePaymentToAmbassador initial value
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
      * @param _referralTreePaymentToPlanter initial planter fund
      * @param _referralTreePaymentToAmbassador initial ambassador fund
@@ -118,8 +118,8 @@ contract HonoraryTree is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set DaiToken address
-     * @param _daiTokenAddress set to the address of DaiToken
+     * @dev admin set DaiToken contract address
+     * @param _daiTokenAddress set to the address of DaiToken contract
      */
     function setDaiTokenAddress(address _daiTokenAddress)
         external
@@ -133,8 +133,8 @@ contract HonoraryTree is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set AttributesAddress
-     * @param _address set to the address of attribute
+     * @dev admin set Attribute contract address
+     * @param _address set to the address of Attribute contract
      */
 
     function setAttributesAddress(address _address) external onlyAdmin {
@@ -144,8 +144,8 @@ contract HonoraryTree is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeFactoryAddress
-     * @param _address set to the address of treeFactory
+     * @dev admin set TreeFactory contract address
+     * @param _address set to the address of TreeFactory contract
      */
 
     function setTreeFactoryAddress(address _address) external onlyAdmin {
@@ -155,8 +155,8 @@ contract HonoraryTree is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set PlanterFundAddress
-     * @param _address set to the address of PlanterFund
+     * @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
      */
 
     function setPlanterFundAddress(address _address) external onlyAdmin {
@@ -164,6 +164,15 @@ contract HonoraryTree is Initializable, RelayRecipient {
         require(candidateContract.isPlanterFund());
         planterFundContract = candidateContract;
     }
+
+    /**
+     * @dev admin set a range of trees with saleType of '0' for honorary trees
+     * NOTE saleType of tree set to '5'
+     * NOTE the prepaid amount is deducted from the total amount t pay
+     * @param _sponsor address of account pay for value of honorary trees
+     * @param _startTreeId start tree id of honorary tree to claim
+     * @param _upTo end tree id of honorary tree to claim
+     */
 
     function setTreeRange(
         address _sponsor,
@@ -205,6 +214,12 @@ contract HonoraryTree is Initializable, RelayRecipient {
         emit TreeRangeSet();
     }
 
+    /**
+     * @dev admin release tree range
+     * NOTE saleType of trees set to '0'
+     * NOTE calculate prePaidCount value to deducte from number of tree count
+     * when new tree range set
+     */
     function releaseTreeRange() external onlyDataManager {
         treeFactory.resetSaleTypeBatch(currentTreeId, upTo, 5);
         prePaidTreeCount += upTo - currentTreeId;
@@ -213,12 +228,19 @@ contract HonoraryTree is Initializable, RelayRecipient {
         emit TreeRangeReleased();
     }
 
+    /**
+     * @dev admin reserve a symbol
+     * @param _uniquenessFactor unique symbol to reserve
+     */
     function reserveSymbol(uint64 _uniquenessFactor) external onlyDataManager {
         attribute.reserveSymbol(_uniquenessFactor);
         symbols.push(_uniquenessFactor);
         used.push(false);
     }
 
+    /**
+     * @dev admin release all reserved and not used symbols
+     */
     function releaseReservedSymbol() external onlyDataManager {
         for (uint256 i = 0; i < symbols.length; i++) {
             if (!used[i]) {
@@ -231,6 +253,12 @@ contract HonoraryTree is Initializable, RelayRecipient {
         claimedCount = 0;
     }
 
+    /**
+     * @dev admin add recipient
+     * @param _recipient address of recipient
+     * @param _startDate start date for {_recipient} to claim tree
+     * @param _expiryDate expiry date for {_recipient} to claim tree
+     */
     function addRecipient(
         address _recipient,
         uint64 _startDate,
@@ -245,6 +273,12 @@ contract HonoraryTree is Initializable, RelayRecipient {
         emit RecipientAdded(_recipient);
     }
 
+    /**
+     * @dev admin update {_recipient} data
+     * @param _recipient address of recipient to update date
+     * @param _startDate new start date for {_recipient} to claim tree
+     * @param _expiryDate new expiry date for {_recipient} to claim tree
+     */
     function updateRecipient(
         address _recipient,
         uint64 _startDate,
@@ -259,11 +293,10 @@ contract HonoraryTree is Initializable, RelayRecipient {
         emit RecipientUpdated(_recipient);
     }
 
-    /** @dev admin can set planter and referral funds amount
-     * @param _referralTreePaymentToPlanter is the planter fund amount
-     * @param _referralTreePaymentToAmbassador is the referral fund amount
+    /** @dev admin can set referral tree payments
+     * @param _referralTreePaymentToPlanter is referral tree payment to planter amount
+     * @param _referralTreePaymentToAmbassador is referral tree payment to ambassador amount
      */
-
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
@@ -277,6 +310,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         );
     }
 
+    //TODO: COMMENT
     function claim() external {
         Recipient storage recipientData = recipients[_msgSender()];
 

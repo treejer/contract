@@ -9,6 +9,8 @@ const IncrementalSale = artifacts.require("IncrementalSale.sol");
 const HonoraryTree = artifacts.require("HonoraryTree.sol");
 const WethFund = artifacts.require("WethFund.sol");
 const DaiFund = artifacts.require("DaiFund.sol");
+const Attribute = artifacts.require("Attribute.sol");
+const PlanterFund = artifacts.require("PlanterFund.sol");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
@@ -22,6 +24,8 @@ module.exports = async function (deployer, network, accounts) {
   const honoraryTreeAddress = HonoraryTree.address;
   const daiFundAddress = DaiFund.address;
   const wethFundAddress = WethFund.address;
+  const attributeAddress = Attribute.address;
+  const planterFundAddress = PlanterFund.address;
 
   console.log("Call AccessRestriction Methods...");
   await AccessRestriction.deployed().then(async (instance) => {
@@ -34,5 +38,7 @@ module.exports = async function (deployer, network, accounts) {
     await instance.grantRole(TREEJER_CONTRACT_ROLE, honoraryTreeAddress);
     await instance.grantRole(TREEJER_CONTRACT_ROLE, daiFundAddress);
     await instance.grantRole(TREEJER_CONTRACT_ROLE, wethFundAddress);
+    await instance.grantRole(TREEJER_CONTRACT_ROLE, attributeAddress);
+    await instance.grantRole(TREEJER_CONTRACT_ROLE, planterFundAddress);
   });
 };

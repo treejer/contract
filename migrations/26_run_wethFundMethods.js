@@ -39,10 +39,10 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Call WethFund Methods...");
 
   await WethFund.deployed().then(async (instance) => {
-    await instance.setDaiAddress(daiAddress);
-    await instance.setWethTokenAddress(wethAddress);
-    await instance.setUniswapRouterAddress(UniswapV2RouterAddress);
-    await instance.setPlanterFundContractAddress(planterFundAddress);
+    // await instance.setDaiAddress(daiAddress);
+    // await instance.setWethTokenAddress(wethAddress);
+    // await instance.setUniswapRouterAddress(UniswapV2RouterAddress);
+    // await instance.setPlanterFundContractAddress(planterFundAddress);
 
     await instance.setResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
     await instance.setLocalDevelopmentAddress(

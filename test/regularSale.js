@@ -4624,7 +4624,7 @@ contract("regularSale", (accounts) => {
 
       await testRegularSaleInstance.updateRegularReferrerGift(
         userAccount1,
-        15,
+        25,
         {
           from: userAccount8,
         }
@@ -4638,7 +4638,7 @@ contract("regularSale", (accounts) => {
 
       await testRegularSaleInstance.updateReferrerClaimableTreesWeth(
         userAccount1,
-        10,
+        25,
         {
           from: userAccount8,
         }
@@ -4651,7 +4651,7 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(user1GiftCountBeforeClaim),
-        15,
+        25,
         "user 1 gift before claim is not correct"
       );
 
@@ -4661,7 +4661,7 @@ contract("regularSale", (accounts) => {
             userAccount1
           )
         ),
-        10,
+        25,
         "user 1 gift before claim is not correct"
       );
 
@@ -4696,29 +4696,29 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 10),
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25),
         "user 1 gift after claim is not correct"
       );
 
       assert.equal(
         await daiInstance.balanceOf(planterFundsInstnce.address),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 15),
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25),
         "planterFund balance not true"
       );
 
       let tokentOwner;
 
-      for (let i = 10001; i < 10026; i++) {
+      for (let i = 10001; i < 10051; i++) {
         tokentOwner = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner, userAccount1, "funder not true " + i);
       }
 
       let lastTreeSold = await testRegularSaleInstance.lastFundedTreeId.call();
 
-      assert.equal(lastTreeSold, 10025, "last sold is not correct");
+      assert.equal(lastTreeSold, 10050, "last sold is not correct");
       let planterFund;
       let referralFund;
-      for (let i = 10001; i < 10026; i++) {
+      for (let i = 10001; i < 10051; i++) {
         planterFund =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund =
@@ -4740,17 +4740,17 @@ contract("regularSale", (accounts) => {
       let totalBalances = await planterFundsInstnce.totalBalances.call();
       assert.equal(
         Number(totalBalances.planter),
-        Math.mul(25, Number(planterShare))
+        Math.mul(50, Number(planterShare))
       );
 
       assert.equal(
         Number(totalBalances.ambassador),
-        Math.mul(25, Number(referralShare))
+        Math.mul(50, Number(referralShare))
       );
 
       /////////////// claim 10 tree with user2 (two tree is in use)
-      await treeFactoryInstance.listTree(10028, "", { from: dataManager });
-      await treeFactoryInstance.listTree(10030, "", { from: dataManager });
+      await treeFactoryInstance.listTree(10053, "", { from: dataManager });
+      await treeFactoryInstance.listTree(10055, "", { from: dataManager });
 
       await testRegularSaleInstance.updateRegularReferrerGift(
         userAccount2,
@@ -4786,14 +4786,14 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         Number(await daiInstance.balanceOf(planterFundsInstnce.address)),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25),
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 35),
         "planterFund balance not true"
       );
 
       let tokentOwner2;
 
-      for (let i = 10026; i < 10038; i++) {
-        if ([10028, 10030].includes(i)) {
+      for (let i = 10051; i < 10063; i++) {
+        if ([10053, 10055].includes(i)) {
           await treeTokenInstance.ownerOf(i).should.be.rejected;
         } else {
           tokentOwner2 = await treeTokenInstance.ownerOf(i);
@@ -4803,11 +4803,11 @@ contract("regularSale", (accounts) => {
 
       let lastTreeSold2 = await testRegularSaleInstance.lastFundedTreeId.call();
 
-      assert.equal(lastTreeSold2, 10037, "last sold is not correct");
+      assert.equal(lastTreeSold2, 10062, "last sold is not correct");
       let planterFund2;
       let referralFund2;
-      for (let i = 10026; i < 10037; i++) {
-        if ([10028, 10030].includes(i)) {
+      for (let i = 10051; i < 10063; i++) {
+        if ([10053, 10055].includes(i)) {
           planterFund2 =
             await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
           referralFund2 =
@@ -4843,12 +4843,12 @@ contract("regularSale", (accounts) => {
       let totalBalances2 = await planterFundsInstnce.totalBalances.call();
       assert.equal(
         Number(totalBalances2.planter),
-        Math.mul(35, Number(planterShare))
+        Math.mul(60, Number(planterShare))
       );
 
       assert.equal(
         Number(totalBalances2.ambassador),
-        Math.mul(35, Number(referralShare))
+        Math.mul(60, Number(referralShare))
       );
 
       // /////////////// -------------- claim 10 tree with new shares
@@ -4884,7 +4884,7 @@ contract("regularSale", (accounts) => {
 
       await testRegularSaleInstance.updateReferrerClaimableTreesWeth(
         userAccount3,
-        25,
+        50,
         {
           from: userAccount8,
         }
@@ -4907,7 +4907,7 @@ contract("regularSale", (accounts) => {
             userAccount3
           )
         ),
-        25,
+        50,
         "user 3 gift before claim is not correct"
       );
 
@@ -4926,31 +4926,31 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         await daiInstance.balanceOf(planterFundsInstnce.address),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25) +
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 35) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 10),
         "planterFund balance not true"
       );
 
       assert.equal(
         Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 10) +
-          Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 15),
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25) +
+          Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 40),
         "user 1 gift after claim is not correct"
       );
 
       let tokentOwner3;
 
-      for (let i = 10038; i < 10063; i++) {
+      for (let i = 10063; i < 10113; i++) {
         tokentOwner3 = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner3, userAccount3, "funder not true " + i);
       }
 
       let lastTreeSold3 = await testRegularSaleInstance.lastFundedTreeId.call();
 
-      assert.equal(lastTreeSold3, 10062, "last sold is not correct");
+      assert.equal(lastTreeSold3, 10112, "last sold is not correct");
       let planterFund3;
       let referralFund3;
-      for (let i = 10038; i < 10063; i++) {
+      for (let i = 10063; i < 10113; i++) {
         planterFund3 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund3 =
@@ -4973,16 +4973,16 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalBalances3.planter),
         Math.add(
-          Math.mul(35, Number(planterShare)),
-          Math.mul(25, Number(planterShare2))
+          Math.mul(60, Number(planterShare)),
+          Math.mul(50, Number(planterShare2))
         )
       );
 
       assert.equal(
         Number(totalBalances3.ambassador),
         Math.add(
-          Math.mul(35, Number(referralShare)),
-          Math.mul(25, Number(referralShare2))
+          Math.mul(60, Number(referralShare)),
+          Math.mul(50, Number(referralShare2))
         )
       );
 
@@ -5012,31 +5012,31 @@ contract("regularSale", (accounts) => {
 
       assert.equal(
         await daiInstance.balanceOf(planterFundsInstnce.address),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25) +
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 35) +
           Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 10),
         "planterFund balance not true"
       );
 
       assert.equal(
         Number(await wethFundInstance.totalDaiDebtToPlanterContract()),
-        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 10) +
-          Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 25),
+        Math.mul(Math.add(Number(planterShare), Number(referralShare)), 25) +
+          Math.mul(Math.add(Number(planterShare2), Number(referralShare2)), 50),
         "user 1 gift after claim is not correct"
       );
 
       let tokentOwner4;
 
-      for (let i = 10063; i < 10073; i++) {
+      for (let i = 10113; i < 10123; i++) {
         tokentOwner4 = await treeTokenInstance.ownerOf(i);
         assert.equal(tokentOwner4, userAccount3, "funder not true " + i);
       }
 
       let lastTreeSold4 = await testRegularSaleInstance.lastFundedTreeId.call();
 
-      assert.equal(lastTreeSold4, 10072, "last sold is not correct");
+      assert.equal(lastTreeSold4, 10122, "last sold is not correct");
       let planterFund4;
       let referralFund4;
-      for (let i = 10063; i < 10073; i++) {
+      for (let i = 10113; i < 10123; i++) {
         planterFund4 =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
         referralFund4 =
@@ -5059,16 +5059,16 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalBalances4.planter),
         Math.add(
-          Math.mul(35, Number(planterShare)),
-          Math.mul(35, Number(planterShare2))
+          Math.mul(60, Number(planterShare)),
+          Math.mul(60, Number(planterShare2))
         )
       );
 
       assert.equal(
         Number(totalBalances4.ambassador),
         Math.add(
-          Math.mul(35, Number(referralShare)),
-          Math.mul(35, Number(referralShare2))
+          Math.mul(60, Number(referralShare)),
+          Math.mul(60, Number(referralShare2))
         )
       );
     });
@@ -5245,8 +5245,6 @@ contract("regularSale", (accounts) => {
         90,
         "user 3 gift before claim is not correct"
       );
-
-      await testRegularSaleInstance.claimReferralReward({ from: userAccount3 });
 
       await testRegularSaleInstance.claimReferralReward({ from: userAccount3 });
 

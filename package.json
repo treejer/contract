@@ -36,7 +36,7 @@
   },
   "scripts": {
     "test": "bash ./scripts/run_tests.sh",
-    "ganache": "node_modules/.bin/ganache-cli --networkId 1337 --chainId 1337",
+    "ganache": "node_modules/.bin/ganache-cli --networkId 1337 --chainId 1337 -l 20000000",
     "gsn": "node_modules/.bin/gsn start",
     "coverage": "node_modules/.bin/truffle run coverage --network development --solcoverjs .solcover.js"
   },

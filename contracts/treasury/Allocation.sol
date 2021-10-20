@@ -17,7 +17,7 @@ contract Allocation is Initializable {
 
     /** NOTE {isAllocation} set inside the initialize to {true} */
     bool public isAllocation;
-    //TODO: COMMENT
+    /** NOTE maximum index assigned */
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;

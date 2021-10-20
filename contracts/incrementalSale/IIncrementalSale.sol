@@ -113,17 +113,6 @@ interface IIncrementalSale {
      */
     function updateEndTreeId(uint256 _treeCount) external;
 
-    //TODO:CHECK_COMMENT
-    /**
-     * tree price calculate based on treeId and msg.sender pay weth for it
-     * and ownership of tree transfered to msg.sender
-     * @param _count id of tree to buy
-     * NOTE if funder, buy another tree before 700 seconds from the
-     * previous purchase, pays 90% of tree price and gets 10% discount
-     * just for this tree. buying another tree give chance to buy
-     * the next tree with 10% discount
-     */
-
     /**
      * @dev fund {_count} tree
      * NOTE if {_recipient} address exist tree minted to the {_recipient}

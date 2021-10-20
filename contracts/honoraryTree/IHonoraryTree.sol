@@ -159,7 +159,12 @@ interface IHonoraryTree {
         uint256 _referralTreePaymentToAmbassador
     ) external;
 
-    //TODO: COMMENT
+    /**
+     * @dev recipient claim a tree and tree minted to recipient.
+     * projected earnings updated and random attributes set for that tree
+     * NOTE emit a {Claimed} or {ClaimFailed} event
+     */
+
     function claim() external;
 
     /** @dev emitted when a tree range set for honorary trees */

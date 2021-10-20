@@ -417,7 +417,7 @@ contract Attribute is Initializable {
     }
 
     function _calcShape(uint16 _randomValue, uint8 _funderRank)
-        public
+        private
         returns (uint8)
     {
         uint16[9] memory probRank0 = [
@@ -509,7 +509,7 @@ contract Attribute is Initializable {
         uint8 _randomValue1,
         uint8 _randomValue2,
         uint8 _funderRank
-    ) public pure returns (uint8, uint8) {
+    ) private pure returns (uint8, uint8) {
         uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
         uint8[8] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
         uint8[8] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
@@ -556,7 +556,7 @@ contract Attribute is Initializable {
     }
 
     function _setSpecialTreeColors(uint8 _shape)
-        public
+        private
         pure
         returns (uint8, uint8)
     {
@@ -600,7 +600,7 @@ contract Attribute is Initializable {
     }
 
     function _calcEffects(uint8 _randomValue, uint8 _funderRank)
-        public
+        private
         pure
         returns (uint8)
     {
@@ -699,7 +699,7 @@ contract Attribute is Initializable {
     }
 
     function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
-        public
+        private
         pure
         returns (uint8)
     {

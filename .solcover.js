@@ -2,6 +2,7 @@ module.exports = {
   providerOptions: {
     networkId: 1337,
     chainId: 1337,
+    gas: 20000000,
   },
   skipFiles: ["external"],
   measureStatementCoverage: true,

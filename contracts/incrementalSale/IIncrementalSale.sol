@@ -7,7 +7,9 @@ interface IIncrementalSale {
      */
     function isIncrementalSale() external view returns (bool);
 
-    //TODO: ADD_COMMENT
+    /**
+     * @return last tree id sold in incremetal sale
+     */
     function lastSold() external view returns (uint256);
 
     /** @return AccessRestriction contract address */
@@ -78,14 +80,14 @@ interface IIncrementalSale {
     function setAttributesAddress(address _address) external;
 
     /**
-     * @dev admin set a range from {startTreeId} to {startTreeId + treeCount}
-     * for incremental sales for tree
+     * @dev admin set a tree range from {startTreeId} to {startTreeId + treeCount}
+     * for incremental sales
+     * NOTE emit an {IncrementalSaleUpdated} event
      * @param _startTreeId starting treeId
      * @param _initialPrice initialPrice of trees
-     * @param _treeCount number of tree in incremental sale
-     * @param _increments step to increase tree price
-     * @param _priceJump increment price rate
-     * emit an {IncrementalSaleUpdated} event
+     * @param _treeCount number of tree in incremental sell
+     * @param _increments number of trees after which the price increases
+     * @param _priceJump price jump
      */
     function createIncrementalSale(
         uint256 _startTreeId,
@@ -95,35 +97,47 @@ interface IIncrementalSale {
         uint64 _priceJump
     ) external;
 
-    //TODO:ADD_COMMENT
+    /**
+     * @dev remove some trees from incremental sale and reset saleType of that trees
+     * NOTE {_count} trees removed from first of the incremetalSale tree range
+     * NOTE emit an {IncrementalSaleUpdated} event
+     * @param _count is number of trees to remove
+     */
     function removeIncrementalSale(uint256 _count) external;
 
     /**
-     * @dev admin add {treeCount} tree at the end of incremental sale tree range
-     * @param treeCount number of trees added at the end of the incremental sale
+     * @dev admin update endTreeId of incrementalSale tree range
+     * NOTE  emit an {IncrementalSaleUpdated} event
+     * @param _treeCount number of trees added at the end of the incrementalSale
      * tree range
-     * emit an {IncrementalSaleUpdated} event
      */
-    function updateEndTreeId(uint256 treeCount) external;
+    function updateEndTreeId(uint256 _treeCount) external;
 
-    //TODO:CHECK_COMMENT
     /**
-     * tree price calculate based on treeId and msg.sender pay weth for it
-     * and ownership of tree transfered to msg.sender
-     * @param _count id of tree to buy
-     * NOTE if funder, buy another tree before 700 seconds from the
-     * previous purchase, pays 90% of tree price and gets 10% discount
-     * just for this tree. buying another tree give chance to buy
-     * the next tree with 10% discount
+     * @dev fund {_count} tree
+     * NOTE if {_recipient} address exist tree minted to the {_recipient}
+     * and mint to the function caller otherwise
+     * NOTE function caller pay for the price of trees
+     * NOTE total price calculated based on the incrementalSaleData
+     * NOTE based on the allocation data for tree totalBalances and PlanterFund
+     * contract balance updated
+     * NOTE generate unique symbols for trees
      * NOTE emit an {TreeFunded} event
+     * @param _count number of trees to fund
+     * @param _referrer address of referrer
+     * @param _recipient address of recipient
      */
-    function fundTree(uint256 _count, address _referrer) external;
+    function fundTree(
+        uint256 _count,
+        address _referrer,
+        address _recipient
+    ) external;
 
-    /** @dev admin can update incrementalSaleData
-     * @param _initialPrice initialPrice of trees
-     * @param _increments step to increase tree price
-     * @param _priceJump increment price rate
+    /** @dev admin update incrementalSaleData
      * NOTE emit a {IncrementalSaleDataUpdated} event
+     * @param _initialPrice initialPrice of trees
+     * @param _increments number of trees after which the price increases
+     * @param _priceJump price jump
      */
     function updateIncrementalSaleData(
         uint256 _initialPrice,
@@ -132,9 +146,9 @@ interface IIncrementalSale {
     ) external;
 
     /**
-     * @dev emitted when {count} tree starting from id {strtTreeId} purchased by {funder}
-     * with referral {referrer}
+     * @dev emitted when trees funded
      * @param funder address of funder
+     * @param recipient address of recipient
      * @param referrer address of referrer
      * @param startTreeId starting tree id
      * @param count count of funded trees
@@ -142,16 +156,17 @@ interface IIncrementalSale {
 
     event TreeFunded(
         address funder,
+        address recipient,
         address referrer,
         uint256 startTreeId,
         uint256 count
     );
 
     /**
-     * @dev emitted when incremental tree sale added or updated
+     * @dev emitted when incremental sale created or removed or incremetal sale end tree id updated
      */
     event IncrementalSaleUpdated();
 
-    /** @dev emiited when incremental rates updated */
+    /** @dev emitted when incremental sale data updated */
     event IncrementalSaleDataUpdated();
 }

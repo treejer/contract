@@ -15,6 +15,7 @@ import "../gsn/RelayRecipient.sol";
 contract IncrementalSale is Initializable, RelayRecipient {
     /** NOTE {isIncrementalSale} set inside the initialize to {true} */
     bool public isIncrementalSale;
+    /** NOTE last tree id sold in incremetal sale */
     uint256 public lastSold;
 
     IAccessRestriction public accessRestriction;
@@ -45,8 +46,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 reserve2;
     }
 
-    /** NOTE {incrementalSaleData} is struct of IncrementalSaleData that store
-     * startTreeId, endTreeId, initialPrice, increments, priceJump values
+    /** NOTE {incrementalSaleData} store startTreeId, endTreeId, initialPrice,
+     *  increments, priceJump values
      */
     IncrementalSaleData public incrementalSaleData;
 
@@ -72,7 +73,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
+    /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -85,8 +86,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isIncrementalSale
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isIncrementalSale
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -113,8 +114,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set PlanterFundAddress
-     * @param _address set to the address of PlanterFund
+     * @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
      */
 
     function setPlanterFundAddress(address _address) external onlyAdmin {
@@ -123,6 +124,10 @@ contract IncrementalSale is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
+    /**
+     * @dev admin set RegularSale contract address
+     * @param _address set to the address of RegularSale contract
+     */
     function setRegularSaleAddress(address _address) external onlyAdmin {
         IRegularSale candidateContract = IRegularSale(_address);
         require(candidateContract.isRegularSale());
@@ -130,7 +135,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /** @dev admin set TreeFactory contract address
-     * @param _address TreeFactory contract address
+     * @param _address set to the address of TreeFactory contract
      */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
@@ -138,8 +143,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set wethFund contract address
-     * @param _address wethFund contract address
+    /** @dev admin set WethFund contract address
+     * @param _address set to the address of WethFund contract
      */
     function setWethFundAddress(address _address) external onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
@@ -150,7 +155,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /** @dev admin set wethToken contract address
-     * @param _address wethToken contract address
+     * @param _address set to the address of WethToken contract
      */
     function setWethTokenAddress(address _address)
         external
@@ -162,8 +167,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set Allocation address
-     * @param _address set to the address of Allocation
+     * @dev admin set Allocation contract address
+     * @param _address set to the address of Allocation contract
      */
     function setAllocationAddress(address _address) external onlyAdmin {
         IAllocation candidateContract = IAllocation(_address);
@@ -172,8 +177,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set AttributesAddress
-     * @param _address set to the address of attribute
+     * @dev admin set Attribute contract address
+     * @param _address set to the address of Attribute contract
      */
 
     function setAttributesAddress(address _address) external onlyAdmin {
@@ -183,15 +188,14 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set a range from {startTreeId} to {startTreeId + treeCount}
-     * for incremental selles for tree
+     * @dev admin set a tree range from {startTreeId} to {startTreeId + treeCount}
+     * for incremental sales
      * @param _startTreeId starting treeId
      * @param _initialPrice initialPrice of trees
      * @param _treeCount number of tree in incremental sell
-     * @param _increments step to increase tree price
-     * @param _priceJump increment price rate
+     * @param _increments number of trees after which the price increases
+     * @param _priceJump price jump
      */
-
     function createIncrementalSale(
         uint256 _startTreeId,
         uint256 _initialPrice,
@@ -237,7 +241,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
         emit IncrementalSaleUpdated();
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev remove some trees from incremental sale and reset saleType of that trees
+     * NOTE {_count} trees removed from first of the incremetalSale tree range
+     * @param _count is number of trees to remove
+     */
     function removeIncrementalSale(uint256 _count) external onlyDataManager {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
@@ -262,8 +270,8 @@ contract IncrementalSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin add {treeCount} tree at the end of incremental sell tree range
-     * @param _treeCount number of trees added at the end of the incremental sale
+     * @dev admin update endTreeId of incrementalSale tree range
+     * @param _treeCount number of trees added at the end of the incrementalSale
      * tree range
      */
     function updateEndTreeId(uint256 _treeCount) external onlyDataManager {
@@ -285,7 +293,19 @@ contract IncrementalSale is Initializable, RelayRecipient {
         emit IncrementalSaleUpdated();
     }
 
-    //TODO:ADD_COMMENTS
+    /**
+     * @dev fund {_count} tree
+     * NOTE if {_recipient} address exist tree minted to the {_recipient}
+     * and mint to the function caller otherwise
+     * NOTE function caller pay for the price of trees
+     * NOTE total price calculated based on the incrementalSaleData
+     * NOTE based on the allocation data for tree totalBalances and PlanterFund
+     * contract balance updated
+     * NOTE generate unique symbols for trees
+     * @param _count number of trees to fund
+     * @param _referrer address of referrer
+     * @param _recipient address of recipient
+     */
     function fundTree(
         uint256 _count,
         address _referrer,
@@ -310,7 +330,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             10000;
 
         uint256 totalPrice = _count * tempLastSoldPrice;
-        //TODO: CHANGE,omit variable z
+
         int256 extra = int256(_count) -
             int256(
                 (y + 1) *
@@ -366,10 +386,10 @@ contract IncrementalSale is Initializable, RelayRecipient {
         );
     }
 
-    /** @dev admin can update incrementalSaleData
+    /** @dev admin update incrementalSaleData
      * @param _initialPrice initialPrice of trees
-     * @param _increments step to increase tree price
-     * @param _priceJump increment price rate
+     * @param _increments number of trees after which the price increases
+     * @param _priceJump price jump
      */
     function updateIncrementalSaleData(
         uint256 _initialPrice,
@@ -387,6 +407,18 @@ contract IncrementalSale is Initializable, RelayRecipient {
         emit IncrementalSaleDataUpdated();
     }
 
+    /**
+     * @dev calculate amount of each part in totalBalances based on the tree allocation
+     * data and total price of trees and update them in totalBlances.
+     * NOTE trees minted to the recipient
+     * @param _tempLastSold last tree id sold in incremetal sale
+     * @param _count number of trees to fund
+     * @param _funder address of funder
+     * @param _recipient address of recipient
+     * @param _referrer address of referrer
+     * @param _totalPrice total price of trees
+     * @return new last sold tree id
+     */
     function _setAllocation(
         uint256 _tempLastSold,
         uint256 _count,
@@ -449,7 +481,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
             totalBalances.reserve1,
             totalBalances.reserve2
         );
-        //TODO: CHANGE, omit variable planterDaiAmount and ambassadorDaiAmount
+
         _setPlanterAllocation(
             _tempLastSold,
             _count,
@@ -469,6 +501,16 @@ contract IncrementalSale is Initializable, RelayRecipient {
         return tempLastSold;
     }
 
+    /**
+     * @dev update projected earning in PlanterFund and create symbol for tree
+     * @param _tempLastSold last tree id sold in incremetal sale
+     * @param _count number of trees to fund
+     * @param _daiAmount total dai amount
+     * @param _planterDaiAmount total planter dai share
+     * @param _ambassadorDaiAmount total ambassador dai share
+     * @param _totalPrice total price
+     * @param _funder address of funder
+     */
     function _setPlanterAllocation(
         uint256 _tempLastSold,
         uint256 _count,

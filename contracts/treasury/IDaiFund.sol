@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 /** @title DaiFund interfce */
 interface IDaiFund {
     /**
-     * @return true in case of DaiFund contract have been initialized
+     * @return true in case of DaiFund contract has been initialized
      */
     function isDaiFund() external view returns (bool);
 
@@ -112,14 +112,20 @@ interface IDaiFund {
     function setReserve2Address(address payable _address) external;
 
     /**
-     * @dev fund a tree by RegularSale contract and based on allocation data
-     * of tree, shares divide beetwen (planter, ambassador, research,
-     * localDevelopment, insurance, treasury, otherFund1 and otherFund2)
-     * and added to the totalBalances of each part,
-     * @param _treeId id of a tree to fund
-     * NOTE planterShare and ambassadorShare share transfer to PlanterFund contract
-     * and add to totalFund section there
+     * @dev update totalBalances based on share amounts.
+     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
+     * contract and update projected earnings
      * NOTE emit a {TreeFunded} event
+     * @param _treeId id of a tree to fund
+     * @param _amount total amount
+     * @param _planterShare planter share
+     * @param _ambassadorShare ambassador share
+     * @param _researchShare research share
+     * @param _localDevelopmentShare localDevelopment share
+     * @param _insuranceShare insurance share
+     * @param _treasuryShare treasury share
+     * @param _reserve1Share reserve1 share
+     * @param _reserve2Share reserve2 share
      */
     function fundTree(
         uint256 _treeId,
@@ -134,7 +140,19 @@ interface IDaiFund {
         uint16 _reserve2Share
     ) external;
 
-    //TODO : ADD_COMMENT
+    /**
+     * @dev update totalBalances based on input amounts.
+     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
+     * NOTE emit a {TreeFundedBatch} event
+     * @param _totalPlanterAmount total planter amount
+     * @param _totalAmbassadorAmount total ambassador amount
+     * @param _totalResearch total research amount
+     * @param _totalLocalDevelopment total localDevelopment amount
+     * @param _totalInsurance total insurance amount
+     * @param _totalTreasury total treasury amount
+     * @param _totalReserve1 total reserve1 amount
+     * @param _totalReserve2 total reserve2 amount
+     */
     function fundTreeBatch(
         uint256 _totalPlanterAmount,
         uint256 _totalAmbassadorAmount,
@@ -146,19 +164,29 @@ interface IDaiFund {
         uint256 _totalReserve2
     ) external;
 
-    //TODO:ADD_COMMENTS
+    /**
+     * @dev transfer dai from treasury in totalBalances to PlanterFund contract when
+     * referrer want to claim reward
+     * @param _amount amount to transfer
+     */
     function transferReferrerDai(uint256 _amount) external;
 
     /**
-     * @dev trnasfer {_amount} from research in {totalBalances} to researchAddress
+     * @dev admin withdraw from research totalBalance
+     * NOTE amount transfer to researchAddress
      * NOTE emit a {ResearchBalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external;
 
     /**
-     * @dev trnasfer {_amount} from localDevelopment in {totalBalances} to localDevelopmentAddress
+     * @dev admin withdraw from localDevelopment totalBalances
+     * NOTE amount transfer to localDevelopmentAddress
      * NOTE emit a {LocalDevelopmentBalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
@@ -166,36 +194,50 @@ interface IDaiFund {
     ) external;
 
     /**
-     * @dev trnasfer {_amount} from insurance in {totalBalances} to insuranceAddress
+     * @dev admin withdraw from insurance totalBalances
+     * NOTE amount transfer to insuranceAddress
      * NOTE emit a {InsuranceBalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external;
 
     /**
-     * @dev trnasfer {_amount} from treasury in {totalBalances} to treasuryAddress
+     * @dev admin withdraw from treasury totalBalances
+     * NOTE amount transfer to treasuryAddress
      * NOTE emit a {TreasuryBalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external;
 
     /**
-     * @dev trnasfer {_amount} from reserve1 in {totalBalances} to reserve1Address
+     * @dev admin withdraw from reserve1 totalBalances
+     * NOTE amount transfer to reserve1Address
      * NOTE emit a {Reserve1BalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external;
 
     /**
-     * @dev trnasfer {_amount} from reserve2 in {totalBalances} to reserve2Address
+     * @dev admin withdraw from reserve2 totalBalances
+     * NOTE amount transfer to reserve2Address
      * NOTE emit a {Reserve2BalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external;
 
     /**
      * @dev emitted when admin withdraw research balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event ResearchBalanceWithdrew(
         uint256 amount,
@@ -203,8 +245,10 @@ interface IDaiFund {
         string reason
     );
     /**
-     * @dev emitted when admin withdraw local development balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @dev emitted when admin withdraw localDevelopment balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event LocalDevelopmentBalanceWithdrew(
         uint256 amount,
@@ -213,7 +257,9 @@ interface IDaiFund {
     );
     /**
      * @dev emitted when admin withdraw insurance balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event InsuranceBalanceWithdrew(
         uint256 amount,
@@ -221,8 +267,10 @@ interface IDaiFund {
         string reason
     );
     /**
-     * @dev emitted when admin withdraw treejer develop balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @dev emitted when admin withdraw treasury balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event TreasuryBalanceWithdrew(
         uint256 amount,
@@ -230,8 +278,10 @@ interface IDaiFund {
         string reason
     );
     /**
-     * @dev emitted when admin withdraw reserve balance1 balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @dev emitted when admin withdraw reserve1 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event Reserve1BalanceWithdrew(
         uint256 amount,
@@ -240,8 +290,10 @@ interface IDaiFund {
     );
 
     /**
-     * @dev emitted when admin withdraw reserve balance2 balance
-     * {amount} is the amount of withdraw balance to {account} with {reason} massage
+     * @dev emitted when admin withdraw reserve2 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
     event Reserve2BalanceWithdrew(
         uint256 amount,
@@ -250,12 +302,15 @@ interface IDaiFund {
     );
 
     /**
-     * @dev emitted when a tree funded with total amount of {amount} and with
-     * planter share of {planterShare}
-     * {treeId} is id of tree that is funded
+     * @dev emitted when a tree funded
+     * @param treeId id of tree that is funded
+     * @param amount total amount
+     * @param planterPart sum of planter amount and ambassador amount
      */
     event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev emitted when trees are fund in batches
+     */
     event TreeFundedBatch();
 }

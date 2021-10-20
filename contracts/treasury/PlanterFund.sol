@@ -15,6 +15,8 @@ import "../gsn/RelayRecipient.sol";
 contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE {isPlanterFund} set inside the initialize to {true} */
     bool public isPlanterFund;
+
+    /** NOTE minimum withdrawable amount */
     uint256 public minWithdrawable;
 
     IAccessRestriction public accessRestriction;
@@ -27,7 +29,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 localDevelopment;
     }
 
-    /** NOTE {totalBalances} is struct of TotalBalances that keep total share of
+    /** NOTE totalBalances keep total share of
      * planter, ambassador, localDevelopment
      */
     TotalBalances public totalBalances;
@@ -38,7 +40,7 @@ contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE mapping of treeId to ambassadorProjectedEarning*/
     mapping(uint256 => uint256) public treeToAmbassadorProjectedEarning;
 
-    /** NOTE  mpping of treeId to treeToPlanterTotalClaimed balance*/
+    /** NOTE mpping of treeId to treeToPlanterTotalClaimed balance*/
     mapping(uint256 => uint256) public treeToPlanterTotalClaimed;
 
     /** NOTE mapping of planter address to planter balance*/
@@ -71,7 +73,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
+    /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -90,8 +92,8 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isPlanterFund
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isPlanterFund
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -143,8 +145,8 @@ contract PlanterFund is Initializable, RelayRecipient {
         daiToken = candidateContract;
     }
 
-    /** @dev admin can set the minimum amount to withdraw
-     * @param _amount is min withdrawable amount
+    /** @dev admin set the minimum amount to withdraw
+     * @param _amount is minimum withdrawable amount
      */
     function updateWithdrawableAmount(uint256 _amount)
         external
@@ -156,9 +158,10 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev set treeToPlanterProjectedEarning and treeToAmbassadorProjectedEarning
-     * of a tree with id {_treeId} and add {_planterAmount} to plante part of
-     * totalBalances and add {_ambassadorAmount} to _ambassador part of totalBalances
+     * @dev set projected earnings
+     * @param _treeId id of tree to set projected earning for
+     * @param _planterAmount planter amount
+     * @param _ambassadorAmount ambassador amount
      */
     function updateProjectedEarnings(
         uint256 _treeId,
@@ -179,12 +182,12 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev based on the {_treeStatus} planter charged in every tree update verifying
-     * @param _treeId id of a tree to fund
+     * @dev based on the {_treeStatus} planter total claimable amount updated in every tree
+     * update verifying
+     * @param _treeId id of a tree that planter's total claimable amount updated for
      * @param _planter  address of planter to fund
      * @param _treeStatus status of tree
      */
-
     function updatePlanterTotalClaimed(
         uint256 _treeId,
         address _planter,
@@ -264,8 +267,7 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev planter withdraw {_amount} from planter's balances in case of
-     * valid {_amount} and daiToken transfer to planters address (to msgSender())
+     * @dev planter withdraw {_amount} from balances
      * @param _amount amount to withdraw
      */
     function withdrawBalance(uint256 _amount) external ifNotPaused {

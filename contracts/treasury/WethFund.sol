@@ -20,13 +20,12 @@ contract WethFund is Initializable {
     IERC20Upgradeable public wethToken;
     IUniswapV2Router02New public uniswapRouter;
 
-    /** NOTE daiToken address */
+    /** NOTE Dai contract address */
     address public daiAddress;
 
-    //TODO:ADD_COMMENT
     uint256 public totalDaiDebtToPlanterContract;
 
-    /** NOTE {totalBalances} is struct of TotalBalances that keep total share of
+    /** NOTE {totalBalances} keep total share of
      * research, localDevelopment,insurance,treasury,reserve1
      * and reserve2
      */
@@ -100,7 +99,7 @@ contract WethFund is Initializable {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
+    /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -119,8 +118,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isWethFund
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isWethFund
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -137,8 +136,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin set DaiToken address
-     * @param _daiAddress set to the address of DaiToken
+     * @dev admin set Dai contract address
+     * @param _daiAddress set to the address of Dai contract
      */
     function setDaiAddress(address _daiAddress)
         external
@@ -206,7 +205,7 @@ contract WethFund is Initializable {
 
     /**
      * @dev admin set localDevelopment address to fund
-     * @param _address local development address
+     * @param _address localDevelopment address
      */
     function setLocalDevelopmentAddress(address payable _address)
         external
@@ -230,7 +229,7 @@ contract WethFund is Initializable {
 
     /**
      * @dev admin set treasury address to fund
-     * @param _address treejer develop address
+     * @param _address treasury address
      */
     function setTreasuryAddress(address payable _address)
         external
@@ -265,13 +264,19 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev fund a tree by IncrementalSale or Auction contract and based on allocation
-     * data of tree, shares divide beetwen (planter, ambassador, research,
-     * localDevelopment, insurance, treasury, reserve1 and reserve2)
-     * and added to the totalBalances of each part,
+     * @dev update totalBalances based on share amounts.
+     * NOTE sum of planter and ambassador amount first swap to dai and
+     * then transfer to the PlanterFund contract and update projected earnings
      * @param _treeId id of a tree to fund
-     * NOTE planter and ambassador share first swap to daiToken and then
-     * transfer to PlanterFund contract and add to totalBalances section there
+     * @param _amount total amount
+     * @param _planterShare planter share
+     * @param _ambassadorShare ambassador share
+     * @param _researchShare research share
+     * @param _localDevelopmentShare localDevelopment share
+     * @param _insuranceShare insurance share
+     * @param _treasuryShare treasury share
+     * @param _reserve1Share reserve1 share
+     * @param _reserve2Share reserve2 share
      */
     function fundTree(
         uint256 _treeId,
@@ -302,6 +307,19 @@ contract WethFund is Initializable {
         _swapPlanterShare(_treeId, _amount, _planterShare, _ambassadorShare);
     }
 
+    /**
+     * @dev update totalBalances based on input amounts.
+     * NOTE sum of planter and ambassador amount first swap to dai and then
+     * transfer to the PlanterFund
+     * @param _totalPlanterAmount total planter amount
+     * @param _totalAmbassadorAmount total ambassador amount
+     * @param _totalResearch total research amount
+     * @param _totalLocalDevelopment total localDevelopment amount
+     * @param _totalInsurance total insurance amount
+     * @param _totalTreasury total treasury amount
+     * @param _totalReserve1 total reserve1 amount
+     * @param _totalReserve2 total reserve2 amount
+     */
     function fundTreeBatch(
         uint256 _totalPlanterAmount,
         uint256 _totalAmbassadorAmount,
@@ -335,7 +353,11 @@ contract WethFund is Initializable {
         return daiAmount;
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev admin pay daiDebtToPlanterContract.
+     * @param _wethMaxUse maximum amount of weth can use
+     * @param _daiAmountToSwap amount of dai that must swap
+     */
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
         uint256 _daiAmountToSwap
@@ -376,7 +398,10 @@ contract WethFund is Initializable {
         totalBalances.treasury -= amounts[0];
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev update totalDaiDebtToPlanterContract amount
+     * @param _amount is amount add to totalDaiDebtToPlanterContract
+     */
     function updateDaiDebtToPlanterContract(uint256 _amount)
         external
         onlyTreejerContract
@@ -385,8 +410,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from research totalBalances in case of
-     * valid {_amount}  and wethToken transfer to {researchAddress}
+     * @dev admin withdraw from research totalBalance
+     * NOTE amount transfer to researchAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -411,8 +436,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelopment totalBalances in case of
-     * valid {_amount} and wethToken transfer to {localDevelopmentAddress}
+     * @dev admin withdraw from localDevelopment totalBalances
+     * NOTE amount transfer to localDevelopmentAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -439,8 +464,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from insurance totalBalances in case of
-     * valid {_amount} and wethToken transfer to {insuranceAddress}
+     * @dev admin withdraw from insurance totalBalances
+     * NOTE amount transfer to insuranceAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -465,8 +490,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treasury totalBalances in case of
-     * valid {_amount} and wethToken transfer to {treasuryAddress}
+     * @dev admin withdraw from treasury totalBalances
+     * NOTE amount transfer to treasuryAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -491,8 +516,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve1 totalBalances in case of
-     * valid {_amount} and wethToken transfer to {reserve1Address}
+     * @dev admin withdraw from reserve1 totalBalances
+     * NOTE amount transfer to reserve1Address
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -517,8 +542,8 @@ contract WethFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve2 totalBalances in case of
-     * valid {_amount} and wethToken transfer to {reserve2Address}
+     * @dev admin withdraw from reserve2 totalBalances
+     * NOTE amount transfer to reserve2Address
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -542,9 +567,10 @@ contract WethFund is Initializable {
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
 
-    /** @dev private function to swap {_amount} wethToken to daiToken
-     * @param _treeId id of tree that funded
-     * @param _amount amount to swap
+    /** @dev calculate planter and ambassador dai amount and transfer it to
+     * PlanterFund contract and update projected earnings
+     * @param _treeId id of tree to updateProjectedEarnings for
+     * @param _amount total amount
      * @param _planterShare planter share
      * @param _ambassadorShare ambassador share
      */
@@ -579,7 +605,11 @@ contract WethFund is Initializable {
         emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev swap weth token to dai token
+     * @param _amount is amount of weth token to swap
+     * @return amount of dai
+     */
     function _swapExactTokensForTokens(uint256 _amount)
         private
         returns (uint256 amount)

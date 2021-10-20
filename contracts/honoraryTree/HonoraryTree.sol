@@ -310,7 +310,10 @@ contract HonoraryTree is Initializable, RelayRecipient {
         );
     }
 
-    //TODO: COMMENT
+    /**
+     * @dev recipient claim a tree and tree minted to recipient.
+     * projected earnings updated and random attributes set for that tree
+     */
     function claim() external {
         Recipient storage recipientData = recipients[_msgSender()];
 

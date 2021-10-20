@@ -21,18 +21,18 @@ contract RegularSale is Initializable, RelayRecipient {
     /** NOTE {isRegularSale} set inside the initialize to {true} */
     bool public isRegularSale;
 
-    /** NOTE regular planter fund amount */
+    /** NOTE referralTreePaymentToPlanter amount */
     uint256 public referralTreePaymentToPlanter;
 
-    /** NOTE regular referral fund amount */
+    /** NOTE referralTreePaymentToAmbassador amount */
     uint256 public referralTreePaymentToAmbassador;
-
-    //TODO: ADD_COMMENT
+    /** NOTE referralTriggerCount   */
     uint256 public referralTriggerCount;
-
+    /** NOTE mapping of referrer address to claimableTreesWeth */
     mapping(address => uint256) public referrerClaimableTreesWeth;
+    /** NOTE mapping of referrer address to claimableTreesDai */
     mapping(address => uint256) public referrerClaimableTreesDai;
-
+    /** NOTE mapping of referrer address to referrerCount */
     mapping(address => uint256) public referrerCount;
 
     struct TotalBalances {
@@ -109,9 +109,9 @@ contract RegularSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isRegularSale
-     * set {_price} to tree price and set 10000 to lastFundedTreeId
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isRegularSale
+     * set {_price} to tree price and 10000 to lastFundedTreeId and 20 to referralTriggerCount
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      * @param _price initial tree price
      */
     function initialize(address _accessRestrictionAddress, uint256 _price)
@@ -148,8 +148,8 @@ contract RegularSale is Initializable, RelayRecipient {
         trustedForwarder = _address;
     }
 
-    /** @dev admin set treeFactory contract address
-     * @param _address treeFactory contract address
+    /** @dev admin set TreeFactory contract address
+     * @param _address set to the address of TreeFactory contract
      */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
@@ -159,8 +159,8 @@ contract RegularSale is Initializable, RelayRecipient {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set daiFund contract address
-     * @param _address daiFund contract address
+    /** @dev admin set DaiFund contract address
+     * @param _address set to the address of DaiFund contract
      */
     function setDaiFundAddress(address _address) external onlyAdmin {
         IDaiFund candidateContract = IDaiFund(_address);
@@ -170,8 +170,8 @@ contract RegularSale is Initializable, RelayRecipient {
         daiFund = candidateContract;
     }
 
-    /** @dev admin set daiToken contract address
-     * @param _address daiToken contract address
+    /** @dev admin set DaiToken contract address
+     * @param _address set to the address of DaiToken contract
      */
     function setDaiTokenAddress(address _address)
         external
@@ -184,7 +184,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     /**
      * @dev admin set Allocation contract address
-     * @param _address set to the address of Allocation
+     * @param _address set to the address of Allocation contract
      */
     function setAllocationAddress(address _address) external onlyAdmin {
         IAllocation candidateContract = IAllocation(_address);
@@ -192,8 +192,8 @@ contract RegularSale is Initializable, RelayRecipient {
         allocation = candidateContract;
     }
 
-    /** @dev admin set planterFund contract address
-     * @param _address planterFund contract address
+    /** @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
      */
     function setPlanterFundAddress(address _address) external onlyAdmin {
         IPlanterFund candidateContract = IPlanterFund(_address);
@@ -203,8 +203,8 @@ contract RegularSale is Initializable, RelayRecipient {
         planterFundContract = candidateContract;
     }
 
-    /** @dev admin set wethFund contract address
-     * @param _address wethFund contract address
+    /** @dev admin set WethFund contract address
+     * @param _address set to the address of WethFund contract
      */
     function setWethFundAddress(address _address) external onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
@@ -215,8 +215,8 @@ contract RegularSale is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set AttributesAddress
-     * @param _address set to the address of attribute
+     * @dev admin set Attributes contract address
+     * @param _address set to the address of Attribute contract
      */
 
     function setAttributesAddress(address _address) external onlyAdmin {
@@ -227,7 +227,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     // **** FUNDTREE SECTION ****
 
-    /** @dev admin set the price of trees that are sold regular
+    /** @dev admin set the price of trees
      * @param _price price of tree
      */
     function updatePrice(uint256 _price) external onlyDataManager {
@@ -235,7 +235,10 @@ contract RegularSale is Initializable, RelayRecipient {
         emit PriceUpdated(_price);
     }
 
-    /** @dev data manager can update lastFundedTreeId */
+    /**
+     * @dev admin update lastFundedTreeId
+     * @param _lastFundedTreeId id of last funded tree
+     */
     function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
         onlyDataManager
@@ -250,10 +253,18 @@ contract RegularSale is Initializable, RelayRecipient {
         emit LastFundedTreeIdUpdated(_lastFundedTreeId);
     }
 
-    /** @dev request {_count} trees and the paid amount must be more than
-     * {_count * price }
-     * @param _count is the number of trees requested by user
-     * @param _referrer is address of referrer
+    /**
+     * @dev fund {_count} tree
+     * NOTE if {_recipient} address exist trees minted to the {_recipient}
+     * and mint to the function caller otherwise
+     * NOTE function caller pay for the price of trees
+     * NOTE based on the allocation data for tree totalBalances and PlanterFund
+     * contract balance and projected earnings updated
+     * NOTE generate unique symbols for trees
+     * NOTE if referrer address exists {_count} added to the referrerCount
+     * @param _count number of trees to fund
+     * @param _referrer address of referrer
+     * @param _recipient address of recipient
      */
     function fundTree(
         uint256 _count,
@@ -323,7 +334,6 @@ contract RegularSale is Initializable, RelayRecipient {
                 (price * ambassadorShare) / 10000
             );
 
-            //TODO : NAMING TreeMinted
             emit RegularMint(recipient, tempLastFundedTreeId, price);
         }
 
@@ -345,11 +355,18 @@ contract RegularSale is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev request  tree with id {_treeId} and the paid amount must be more than
-     * {price} and the {_treeId} must be more than {lastFundedTreeId} to
-     * make sure that has not been sold before
-     * @param _treeId is the id of tree requested by user
-     * @param _referrer is address of referrer
+    /**
+     * @dev fund {_count} tree
+     * NOTE if {_recipient} address exist tree minted to the {_recipient}
+     * and mint to the function caller otherwise
+     * NOTE function caller pay for the price of trees
+     * NOTE based on the allocation data for tree totalBalances and PlanterFund
+     * contract balance and projected earnings updated
+     * NOTE generate unique symbols for trees
+     * NOTE if referrer address exists {_count} added to the referrerCount
+     * @param _treeId id of tree to fund
+     * @param _referrer address of referrer
+     * @param _recipient address of recipient
      */
     function fundTreeById(
         uint256 _treeId,
@@ -411,7 +428,11 @@ contract RegularSale is Initializable, RelayRecipient {
 
     // **** REFERRAL SECTION ****
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev admin update referral tree payments
+     * @param _referralTreePaymentToPlanter is referral tree payment to planter amount
+     * @param _referralTreePaymentToAmbassador is referral tree payment to ambassador amount
+     */
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
@@ -425,7 +446,10 @@ contract RegularSale is Initializable, RelayRecipient {
         );
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev admin update referral trigger count
+     * @param _count number set to referralTriggerCount
+     */
     function updateReferralTriggerCount(uint256 _count)
         external
         onlyDataManager
@@ -434,7 +458,11 @@ contract RegularSale is Initializable, RelayRecipient {
         emit ReferralTriggerCountUpdated(_count);
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev update referrer claimable trees
+     * @param _referrer address of referrer
+     * @param _count amount added to referrerClaimableTreesWeth
+     */
     function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external
         onlyTreejerContract
@@ -442,6 +470,12 @@ contract RegularSale is Initializable, RelayRecipient {
         referrerClaimableTreesWeth[_referrer] += _count;
     }
 
+    /**
+     * @dev update referrerCount and calculate referrerClaimableTreesDai based on
+     * referrerCount and referralTriggerCount
+     * @param _referrer address of referrer
+     * @param _count added number to referrerCount of referrer
+     */
     function _calculateReferrerCount(address _referrer, uint256 _count)
         private
     {
@@ -456,7 +490,10 @@ contract RegularSale is Initializable, RelayRecipient {
         referrerCount[_referrer] = tempReferrerCount;
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev referrer claim rewards and trees mint to the referral
+     * NOTE referrer can claim up to 45 trees in each request
+     */
     function claimReferralReward() external {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
@@ -515,7 +552,11 @@ contract RegularSale is Initializable, RelayRecipient {
         _mintReferralReward(claimableTreesCount, _msgSender());
     }
 
-    //TODO: ADD_COMMENT
+    /**
+     * @dev mint trees to the referral and update projected earnings
+     * @param _count number of trees to mint
+     * @param _referrer address of referrer
+     */
     function _mintReferralReward(uint256 _count, address _referrer) private {
         uint256 tempLastFundedTreeId = lastFundedTreeId;
 

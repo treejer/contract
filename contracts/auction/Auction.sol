@@ -45,6 +45,7 @@ contract Auction is Initializable, RelayRecipient {
     /**NOTE mapping of bidder to mapping of auctionId to referral */
     mapping(address => mapping(uint256 => address)) public referrals;
 
+    event AuctionCreated(uint256 auctionId);
     event HighestBidIncreased(
         uint256 auctionId,
         uint256 treeId,
@@ -52,6 +53,8 @@ contract Auction is Initializable, RelayRecipient {
         uint256 amount,
         address referrer
     );
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+
     event AuctionSettled(
         uint256 auctionId,
         uint256 treeId,
@@ -59,9 +62,7 @@ contract Auction is Initializable, RelayRecipient {
         uint256 amount,
         address referrer
     );
-    event AuctionCreated(uint256 auctionId);
     event AuctionEnded(uint256 auctionId, uint256 treeId);
-    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -117,8 +118,8 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set TreeFactoryAddress
-     * @param _address set to the address of treeFactory
+     * @dev admin set TreeFactory contract address
+     * @param _address set to the address of TreeFactory contract
      */
     function setTreeFactoryAddress(address _address) external onlyAdmin {
         ITreeFactory candidateContract = ITreeFactory(_address);
@@ -127,8 +128,8 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set Allocation
-     * @param _address set to the address of Allocation
+     * @dev admin set Allocation contract address
+     * @param _address set to the address of Allocation contract
      */
 
     function setAllocationAddress(address _address) external onlyAdmin {
@@ -138,8 +139,8 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set WethFund
-     * @param _address set to the address of wethFund
+     * @dev admin set WethFund contract address
+     * @param _address set to the address of WethFund contract
      */
 
     function setWethFundAddress(address _address) external onlyAdmin {
@@ -149,8 +150,8 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set RegularSale
-     * @param _address set to the address of regularSale
+     * @dev admin set RegularSale contract address
+     * @param _address set to the address of RegularSale contract
      */
 
     function setRegularSaleAddress(address _address) external onlyAdmin {
@@ -160,8 +161,8 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin set WethToken
-     * @param _address set to the address of wethToken
+     * @dev admin set WethToken contract address
+     * @param _address set to the address of WethToken contract
      */
 
     function setWethTokenAddress(address _address)
@@ -174,14 +175,14 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin create auction to a tree with saleType of '0' and push that auction
-     * to {auctions[auctionId]} and increament auctionId by 1.
+     * @dev admin put a tree with saleType of '0' in auction.
+     * NOTE set saleType to '1' to that tree
      * NOTE its necessary that a allocation data has been assigned to {_treeId}
      * @param _treeId treeId that auction create for
      * @param _startDate strat time of auction
      * @param _endDate end time of auction
      * @param _intialPrice initial price of auction
-     * @param _bidInterval bid interval for auction . if it set to 10 for example and the last bid is 100.new bidder can bid for 110
+     * @param _bidInterval bid interval for auction.if it set to 10 for example and the last bid is 100.new bidder can bid at least for 110
      */
     function createAuction(
         uint256 _treeId,
@@ -210,9 +211,10 @@ contract Auction is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev bid to {auctions[_auctionId]} by user in a time beetwen start time and end time
-     * its require to send at least {higestBid + bidInterval } {_amount}.
-     * if new bid done old bidder refund automatically.
+     * @dev user bid for {_auctionId} in a time beetwen start time and end time
+     * NOTE its require to send at least {higestBid + bidInterval } {_amount}.
+     * NOTE if new bid done old bidder refund automatically.
+     * NOTE if user bid 10 minutes left to auction end, auction's end time increase 10 minute
      * @param _auctionId auctionId that user bid for it.
      */
 
@@ -281,10 +283,12 @@ contract Auction is Initializable, RelayRecipient {
         }
     }
 
-    /** @dev everyone can call this method  including the winner of auction after
-     * auction end time and if auction have bidder transfer owner of tree to bidder
-     * and tree funded.
-     * @param _auctionId id of auction that want to finish.
+    /** @dev end auction and mint tree to winner if auction has bidder
+     * and tree funded based on allocation data for that tree
+     * NOTE if winner has referrer, claimable trees of that referrer increase by 1
+     * NOTE if auction does not have bidder, saleType of tree in auction reset
+     * and admin can put that tree in another auction
+     * @param _auctionId id of auction to end.
      */
     function endAuction(uint256 _auctionId) external ifNotPaused {
         AuctionData storage auctionData = auctions[_auctionId];
@@ -359,9 +363,9 @@ contract Auction is Initializable, RelayRecipient {
         delete auctions[_auctionId];
     }
 
-    /** @dev if latest bid is less than 10 minutes to the end of auctionEndTime:
-     * we will increase auctionEndTime 600 seconds
-     * @param _auctionId id of auction that increase end time of it.
+    /** @dev if user bids less than 10 minutes left to the end of auction,
+     * aution end time increase 10 minutes
+     * @param _auctionId id of auction to increase end time.
      */
     function _increaseAuctionEndTime(uint256 _auctionId) private {
         if (auctions[_auctionId].endDate - block.timestamp <= 600) {

@@ -55,7 +55,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         address planter;
         string treeSpecs;
     }
-    /** NOTE mapping of treeId to Tree Struct */
+    /** NOTE mapping of treeId to TreeData Struct */
     mapping(uint256 => TreeData) public trees;
     /** NOTE mapping of treeId to TreeUpdate struct */
     mapping(uint256 => TreeUpdate) public treeUpdates;
@@ -119,8 +119,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTreeFactory
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isTreeFactory
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      * NOTE set lastRegualarTreeId to 10000
      */
     function initialize(address _accessRestrictionAddress)
@@ -187,7 +187,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken = candidateContract;
     }
 
-    /** @dev admin can set the minimum time to send next update request
+    /** @dev admin set the minimum time to send next update request
      * @param _day time to next update request
      */
     function setUpdateInterval(uint256 _day) external onlyDataManager {
@@ -197,8 +197,8 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin add tree
-     * @param _treeId id of tree to add
+     * @dev admin list tree
+     * @param _treeId id of tree to list
      * @param _treeSpecs tree specs
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs)
@@ -217,9 +217,9 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     /**
      * @dev admin assign an existing tree to planter
+     * NOTE tree must be not planted
      * @param _treeId id of tree to assign
      * @param _planter assignee planter
-     * NOTE tree must be not planted
      */
     function assignTree(uint256 _treeId, address _planter)
         external
@@ -240,7 +240,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev planter with permission to plant, can plan their trees
+     * @dev planter with permission to plant, can plant its assigned tree
      * @param _treeId id of tree to plant
      * @param _treeSpecs tree specs
      * @param _birthDate birth date of tree
@@ -281,7 +281,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev admin or allowed verifier can verify a plant or reject.
+     * @dev admin or allowed verifier can verify or reject plant for assigned tree.
      * @param _treeId id of tree to verifiy
      * @param _isVerified true for verify and false for reject
      */
@@ -322,7 +322,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev planter of  tree send update request for tree
+     * @dev planter of tree send update request for tree
      * @param _treeId id of tree to update
      * @param _treeSpecs tree specs
      */
@@ -356,12 +356,12 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     /**
      * @dev admin or allowed verifier can verifiy or reject update request for tree.
-     * @param _treeId id of tree to verify update request
-     * @param _isVerified true for verify and false for reject
      * NOTE based on the current time of verifing and plant date, age of tree
      * calculated and set as the treeStatus
      * NOTE if a token exist for that tree (minted before) planter of tree funded
      * based on calculated tree status
+     * @param _treeId id of tree to verify update request
+     * @param _isVerified true for verify and false for reject
      */
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
@@ -418,9 +418,11 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev check if a tree is valid to take part in an auction
-     * set {_saleType} to saleType when tree is not in use
-     * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
+     * @dev check if a tree is free to take part in sale and set {_saleType}
+     * to saleType of tree when tree is not in use
+     * @param _treeId id of tree to check
+     * @param _saleType saleType for tree
+     * @return 0 if a tree ready for a sale and 1 if a tree is in use or minted before
      */
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
@@ -441,7 +443,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         return currentSaleType;
     }
 
-    /** @dev mint {_treeId} to {_funder}  and privdeStatus to 0  */
+    /**
+     * @dev mint a tree to funder and set saleType to 0
+     * @param _treeId id of tree to mint
+     * @param _funder address of funder to mint tree for
+     */
     function mintAssignedTree(uint256 _treeId, address _funder)
         external
         onlyTreejerContract
@@ -450,12 +456,21 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken.safeMint(_funder, _treeId);
     }
 
-    /** @dev exit a {_treeId} from auction */
+    /**
+     * @dev reset saleType value of tree
+     * @param _treeId id of tree to reset saleType value
+     */
     function resetSaleType(uint256 _treeId) external onlyTreejerContract {
         trees[_treeId].saleType = 0;
     }
 
-    /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
+    /**
+     * @dev reset saleType of trees in range of {_startTreeId} and {_endTreeId}
+     * with saleType value of {_saleType}
+     * @param _startTreeId starting tree id to reset saleType
+     * @param _endTreeId ending tree id to reset saleType
+     * @param _saleType saleType value of trees
+     */
     function resetSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -469,8 +484,11 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev set incremental and HonoraryTree sell for trees starting from {_startTreeId}
-     * and end at {_endTreeId} by setting {_saleType} to saleType
+     * @dev set {_saleType} to saleType of trees in range {_startTreeId} and {_endTreeId}
+     * @param _startTreeId starting tree id to set saleType value
+     * @param _endTreeId _ending tree id to set saleType value
+     * @param _saleType saleType value
+     * @return true if all trees saleType value successfully set and false otherwise
      */
     function manageSaleTypeBatch(
         uint256 _startTreeId,
@@ -489,13 +507,10 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev This function is called by planter who have planted a new tree
-     * The planter enters the information of the new tree
-     * Information is stored in The {tempTrees} mapping
-     * And finally the tree is waiting for approval
-     * @param _treeSpecs //TODO: what is _treeSpecs ??
+     * @dev planter plant a tree
+     * @param _treeSpecs tree specs
      * @param _birthDate birthDate of the tree
-     * @param _countryCode Code of the country where the tree was planted
+     * @param _countryCode country code of tree
      */
     function plantTree(
         string calldata _treeSpecs,
@@ -519,11 +534,9 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev In this function, the admin approves or rejects the pending trees
-     * After calling this function, if the tree is approved the tree information will be transferred to the {trees}
-     *
-     * @param _tempTreeId _tempTreeId
-     * @param _isVerified Tree approved or not
+     * @dev admin or allowed verifier can verify or rejects the pending trees
+     * @param _tempTreeId tempTreeId to verify
+     * @param _isVerified true for verify and false for reject
      */
     function verifyTree(uint256 _tempTreeId, bool _isVerified) external {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
@@ -574,11 +587,10 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
-     * This function is called only by the regularSale contract
-     * @param _lastFundedTreeId The last tree sold in the regular
+     * @dev mint a tree to funder of tree
+     * @param _lastFundedTreeId The last tree funded in the regular sale
      * @param _funder funder of a new tree sold in Regular
-     * @return The last tree sold after update
+     * @return the last tree funded after update
      */
     function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
@@ -610,10 +622,9 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev Request to buy a tree with a specific Id already planted and this function transfer ownership to funder
-     * This function is called only by the regularSale contract
-     * @param _treeId Tree with special Id (The Id must be larger than the last tree sold)
-     * @param _funder funder of a new tree sold in Regular
+     * @dev mint an already planted tree with id to funder
+     * @param _treeId tree id to mint
+     * @param _funder address of funder
      */
     function mintTreeById(uint256 _treeId, address _funder)
         external
@@ -631,7 +642,11 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken.safeMint(_funder, _treeId);
     }
 
-    /** @dev script role update {_treeSpecs} of {_treeId} */
+    /**
+     * @dev script role update treeSpecs
+     * @param _treeId id of tree to update treeSpecs
+     * @param _treeSpecs new tree specs
+     */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
         onlyScript

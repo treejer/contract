@@ -4,7 +4,7 @@ pragma solidity >=0.7.6;
 /** @title Auction interface */
 interface IAuction {
     /**
-     * @return true in case of Auction contract have been initialized
+     * @return true if Auction contract has been initialized
      */
     function isAuction() external view returns (bool);
 
@@ -39,13 +39,14 @@ interface IAuction {
     function regularSale() external view returns (address);
 
     /**
-     *@dev return data of an auction with auction id
-     *@return  treeId
-     *@return bidder
-     *@return startDate of auction
-     *@return endDate of auction
-     *@return highestBid
-     *@return bidInterval
+     * @dev return data of an auction with {_auctionId}
+     * @param _auctionId id of auction to get data
+     * @return treeId
+     * @return bidder
+     * @return startDate of auction
+     * @return endDate of auction
+     * @return highestBid
+     * @return bidInterval
      */
     function auctions(uint256 _auctionId)
         external
@@ -59,6 +60,12 @@ interface IAuction {
             uint256
         );
 
+    /**
+     * @dev return referrer address of {_bidder} in auction with id {_auctionId}
+     * @param _bidder id of bidder
+     * @param _auctionId id of auction
+     * @return address of referrer
+     */
     function referrals(address _bidder, uint256 _auctionId)
         external
         view
@@ -82,11 +89,16 @@ interface IAuction {
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _address) external;
 
-    /** @dev create an auction for {_treeId} with strating date of {_startDate} and ending date of
-     * {_endDate} and initialPrice of {_initialPrice} and bidInterval of {_bidInterval}
+    /**
+     * @dev admin put a tree with saleType of '0' in auction.
+     * NOTE set saleType to '1' to that tree
      * NOTE its necessary that a allocation data has been assigned to {_treeId}
-     * NOTE after create an auction for a tree saleType set to 1
-     * NOTE for creating an auction for a tree the saleType of tree must be 0
+     * NOTE emit an {AuctionCreated} event
+     * @param _treeId treeId that auction create for
+     * @param _startDate strat time of auction
+     * @param _endDate end time of auction
+     * @param _intialPrice initial price of auction
+     * @param _bidInterval bid interval for auction.if it set to 10 for example and the last bid is 100.new bidder can bid at least for 110
      */
     function createAuction(
         uint256 _treeId,
@@ -96,12 +108,14 @@ interface IAuction {
         uint256 _bidInterval
     ) external;
 
-    /** @dev bid to auctions {_auctionId}  by user in a time beetwen start time and end time of auction
-     * and return the old bidder's amount to account
-     * NOTE its require that {_amount} be at least {higestBid + bidInterval }.
-     * NOTE check if less than 10 minutes left to end of auction add 10 minutes to the end date of auction
-     * NOTE when new bid done previous bidder refunded automatically
-     * emit a {HighestBidIncreased} event
+    /**
+     * @dev user bid for {_auctionId} in a time beetwen start time and end time
+     * NOTE its require to send at least {higestBid + bidInterval } {_amount}.
+     * NOTE if new bid done old bidder refund automatically.
+     * NOTE if user bid 10 minutes left to auction end, auction's end time increase 10 minute
+     * NOTE emit a {HighestBidIncreased} event
+     * NOTE emit an {AuctionEndTimeIncreased} if user bids less than 10 minutes left to auction end
+     * @param _auctionId auctionId that user bid for it.
      */
     function bid(
         uint256 _auctionId,
@@ -109,17 +123,30 @@ interface IAuction {
         address _referrer
     ) external;
 
-    /** @dev everyone can call this method after
-     * auction end time and if auction have bidder , transfer owner of tree to bidder
-     * and tree funded.
-     * NOTE auction status set to end here
-     * emit a {AuctionEnded} event
+    /** @dev end auction and mint tree to winner if auction has bidder
+     * and tree funded based on allocation data for that tree
+     * NOTE if winner has referrer, claimable trees of that referrer increase by 1
+     * NOTE if auction does not have bidder, saleType of tree in auction reset
+     * and admin can put that tree in another auction
+     * NOTE emit an {AuctionSettled} event if auction has bidder
+     * NOTE emit an {AuctionEnded} event if auction does not have bidder
+     * @param _auctionId id of auction to end.
      */
     function endAuction(uint256 _auctionId) external;
 
     /**
-     * @dev emitted when highestBid for auctions {auctionid} and tree {treeID} increase by {bidder}
-     * with value of {amount} and {referrer} address
+     * @dev emitted when admin create an auction
+     * @param auctionId  is id of auction
+     */
+    event AuctionCreated(uint256 auctionId);
+
+    /**
+     * @dev emitted when new bid done for auction
+     * @param auctionId id of auction that bid done for
+     * @param treeId id of tree in auction
+     * @param bidder address of bidder
+     * @param amount bid amount
+     * @param referrer referrer address of bidder
      */
     event HighestBidIncreased(
         uint256 auctionId,
@@ -128,10 +155,21 @@ interface IAuction {
         uint256 amount,
         address referrer
     );
+
     /**
-     * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
-     * {winner} is the final bidder of auction and {amount} is the auction's highestBid
-     * and {referrer} is the address of referrer
+     * @dev emmited when user bids less than 10 minutes left to the end of auction
+     * @param auctionId id of auction to increase end time
+     * @param newAuctionEndTime new value of auction end time
+     */
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+
+    /**
+     * @dev emitted when auction ended and there is winner
+     * @param auctionId id of auction that end
+     * @param treeId id of tree in auction
+     * @param winner address of winner
+     * @param amount highest bid amount
+     * @param referrer referrer address of winner
      */
 
     event AuctionSettled(
@@ -143,22 +181,9 @@ interface IAuction {
     );
 
     /**
-     * @dev emitted when an auction created
-     * {auctionId} is the number of auction
-     */
-    event AuctionCreated(uint256 auctionId);
-
-    /**
-     * @dev emitted when auctions {auctionId} for tree {treeId} finisehd.
-     * and there is no bidder
-     *
+     * @dev emitted when auction end and there is no bidder.
+     * @param auctionId id of auction that end
+     * @param treeId id of tree in auction
      */
     event AuctionEnded(uint256 auctionId, uint256 treeId);
-
-    /**
-     * @dev emmited when a bid take apart less than 10 minutes to end of auction
-     * by {bidder}
-     * {newAuctionEndTime} is old auction end time plus 10 minutes
-     */
-    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 }

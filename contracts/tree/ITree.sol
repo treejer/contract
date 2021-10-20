@@ -14,7 +14,20 @@ interface ITree is IERC721Upgradeable {
      */
     function isTree() external view returns (bool);
 
-    function attributes(uint256 tokenId)
+    /**
+     * @dev return attribute data
+     * @param _tokenId id of token to get data
+     * @return attribute1
+     * @return attribute2
+     * @return attribute3
+     * @return attribute4
+     * @return attribute5
+     * @return attribute6
+     * @return attribute7
+     * @return attribute8
+     * @return generationType
+     */
+    function attributes(uint256 _tokenId)
         external
         view
         returns (
@@ -29,7 +42,17 @@ interface ITree is IERC721Upgradeable {
             uint8 generationType
         );
 
-    function symbols(uint256 tokenId)
+    /**
+     * @dev return symbol data
+     * @param _tokenId id of token to get data
+     * @return shape
+     * @return trunkColor
+     * @return crownColor
+     * @return effect
+     * @return coefficient
+     * @return generationType
+     */
+    function symbols(uint256 _tokenId)
         external
         view
         returns (
@@ -46,27 +69,38 @@ interface ITree is IERC721Upgradeable {
      */
     function accessRestriction() external view returns (address);
 
-    /** @dev amin set {baseURI_} to baseURI */
+    /** @dev admin set {baseURI_} to baseURI */
     function setBaseURI(string calldata baseURI_) external;
 
     /**
      * @dev mint {_tokenId} to {_to}
-     * NOTE must call by TreeFactory
      */
     function safeMint(address _to, uint256 _tokenId) external;
 
     /**
-     * @dev check existance of {_tokenId}
+     * @dev check that _tokenId exist or not
      * @param _tokenId id of token to check existance
      * @return true if {_tokenId} exist
      */
     function exists(uint256 _tokenId) external view returns (bool);
 
+    /**
+     * @dev set attribute and symbol for a tokenId based on {_uniquenessFactor}
+     * NOTE symbol set when {_generationType} is more than 15 (for HonoraryTree and IncremetalSale)
+     * @param _tokenId id of token
+     * @param _uniquenessFactor uniqueness factor
+     * @param _generationType type of generation
+     */
     function setAttributes(
         uint256 _tokenId,
-        uint256 _generatedCode,
+        uint256 _uniquenessFactor,
         uint8 _generationType
     ) external;
 
+    /**
+     * @dev check attribute existance for a tokenId
+     * @param _tokenId id of token
+     * @return true if attributes exist for {_tokenId}
+     */
     function attributeExists(uint256 _tokenId) external returns (bool);
 }

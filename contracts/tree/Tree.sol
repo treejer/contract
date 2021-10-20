@@ -32,8 +32,9 @@ contract Tree is ERC721Upgradeable {
         uint8 coefficient;
         uint8 generationType;
     }
-
+    /** NOTE mapping of tokenId to attributes */
     mapping(uint256 => Attribute) public attributes;
+    /** NOTE mapping of tokenId to symbols */
     mapping(uint256 => Symbol) public symbols;
 
     /** NOTE modifier to check msg.sender has admin role */
@@ -48,8 +49,8 @@ contract Tree is ERC721Upgradeable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTree
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isTree
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      * @param baseURI_ initial baseURI
      */
     function initialize(
@@ -79,7 +80,6 @@ contract Tree is ERC721Upgradeable {
 
     /**
      * @dev mint {_tokenId} to {_to}
-     * NOTE must call by TreeFactory
      */
     function safeMint(address _to, uint256 _tokenId)
         external
@@ -102,6 +102,13 @@ contract Tree is ERC721Upgradeable {
         return baseURI;
     }
 
+    /**
+     * @dev set attribute and symbol for a tokenId based on {_uniquenessFactor}
+     * NOTE symbol set when {_generationType} is more than 15 (for HonoraryTree and IncremetalSale)
+     * @param _tokenId id of token
+     * @param _uniquenessFactor uniqueness factor
+     * @param _generationType type of generation
+     */
     function setAttributes(
         uint256 _tokenId,
         uint256 _uniquenessFactor,
@@ -111,7 +118,6 @@ contract Tree is ERC721Upgradeable {
 
         for (uint256 i = 0; i < 8; i++) {
             attribute[i] = uint8(_uniquenessFactor & 255);
-            //TODO: check _uniquenessFactor = _uniquenessFactor / 256
             _uniquenessFactor >>= 8;
         }
         attributes[_tokenId] = Attribute(
@@ -129,7 +135,6 @@ contract Tree is ERC721Upgradeable {
             for (uint256 i = 0; i < 5; i++) {
                 attribute[i] = uint8(_uniquenessFactor & 255);
 
-                //TODO: check _uniquenessFactor = _uniquenessFactor / 256
                 _uniquenessFactor >>= 8;
             }
             symbols[_tokenId] = Symbol(
@@ -143,6 +148,11 @@ contract Tree is ERC721Upgradeable {
         }
     }
 
+    /**
+     * @dev check attribute existance for a tokenId
+     * @param _tokenId id of token
+     * @return true if attributes exist for {_tokenId}
+     */
     function attributeExists(uint256 _tokenId)
         external
         view

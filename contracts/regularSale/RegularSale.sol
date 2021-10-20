@@ -500,8 +500,8 @@ contract RegularSale is Initializable, RelayRecipient {
 
         require(claimableTreesCount > 0, "invalid gift owner");
 
-        if (claimableTreesCount > 45) {
-            claimableTreesCount = 45;
+        if (claimableTreesCount > 25) {
+            claimableTreesCount = 25;
         }
 
         int256 difference = int256(referrerClaimableTreesDai[_msgSender()]) -
@@ -565,6 +565,8 @@ contract RegularSale is Initializable, RelayRecipient {
                 tempLastFundedTreeId,
                 _referrer
             );
+
+            attribute.createAttribute(tempLastFundedTreeId);
 
             planterFundContract.updateProjectedEarnings(
                 tempLastFundedTreeId,

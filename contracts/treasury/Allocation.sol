@@ -17,7 +17,7 @@ contract Allocation is Initializable {
 
     /** NOTE {isAllocation} set inside the initialize to {true} */
     bool public isAllocation;
-
+    //TODO: COMMENT
     uint256 public maxAssignedIndex;
 
     IAccessRestriction public accessRestriction;
@@ -38,7 +38,7 @@ contract Allocation is Initializable {
         uint256 startingTreeId;
         uint256 allocationDataId;
     }
-
+    /**array of strating tree with specific allocation  */
     AllocationToTree[] public allocationToTrees;
 
     /** NOTE mapping of allocationDataId to AllocationData*/
@@ -216,7 +216,7 @@ contract Allocation is Initializable {
     /**
      * @dev check if there is allocation data for {_treeId} or not
      * @param _treeId id of a tree to check if there is a allocation data
-     * @return true in case of allocation data existance for {_treeId} and false otherwise
+     * @return true if allocation data exists for {_treeId} and false otherwise
      */
 
     function exists(uint256 _treeId) external view returns (bool) {
@@ -228,7 +228,7 @@ contract Allocation is Initializable {
     }
 
     /**
-     * @dev return allocation data of {_treeId}
+     * @dev return allocation data
      * @param _treeId id of tree to find allocation data
      * @return planterShare
      * @return ambassadorShare

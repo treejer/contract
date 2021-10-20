@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 /** @title PlanterFund interfce */
 interface IPlanterFund {
     /**
-     * @return true in case of PlanterFund contract have been initialized
+     * @return true in case of PlanterFund contract has been initialized
      */
     function isPlanterFund() external view returns (bool);
 
@@ -80,16 +80,19 @@ interface IPlanterFund {
     /** @dev set {_address} to DaiToken contract address */
     function setDaiTokenAddress(address _address) external;
 
-    /** @dev admin can set the minimum amount to withdraw
-     * @param _amount is min withdrawable amount
+    /**
+     * @dev admin set the minimum amount to withdraw
+     * NOTE emit a {MinWithdrawableAmountUpdated} event
+     * @param _amount is minimum withdrawable amount
      */
     function updateWithdrawableAmount(uint256 _amount) external;
 
     /**
-     * @dev set treeToPlanterProjectedEarning and treeToAmbassadorProjectedEarning
-     * of a tree with id {_treeId} and add {_planterAmount} to plante part of
-     * totalBalances and add {_ambassadorAmount} to _ambassador part of totalBalances
+     * @dev set projected earnings
      * NOTE emit a {ProjectedEarningUpdated} event
+     * @param _treeId id of tree to set projected earning for
+     * @param _planterAmount planter amount
+     * @param _ambassadorAmount ambassador amount
      */
     function updateProjectedEarnings(
         uint256 _treeId,
@@ -98,11 +101,12 @@ interface IPlanterFund {
     ) external;
 
     /**
-     * @dev based on the {_treeStatus} planter charged in every tree update verifying
-     * @param _treeId id of a tree to fund
-     * @param _planter address of planter to fund
-     * @param _treeStatus status of tree
+     * @dev based on the {_treeStatus} planter total claimable amount updated in every tree
+     * update verifying
      * NOTE emit a {PlanterTotalClaimedUpdated} event
+     * @param _treeId id of a tree that planter's total claimable amount updated for
+     * @param _planter  address of planter to fund
+     * @param _treeStatus status of tree
      */
     function updatePlanterTotalClaimed(
         uint256 _treeId,
@@ -111,16 +115,18 @@ interface IPlanterFund {
     ) external;
 
     /**
-     * @dev planter withdraw {_amount} from planter's balances in case of
-     * valid {_amount} and daiToken transfer to planters address (to msgSender())
-     * @param _amount amount to withdraw
+     * @dev planter withdraw {_amount} from balances
      * NOTE emit a {BalanceWithdrew} event
+     * @param _amount amount to withdraw
      */
     function withdrawBalance(uint256 _amount) external;
 
     /**
-     * @dev emitted when a {planter} funded {amount} for tree
-     * with id {treeId} and with address of {ambassador}
+     * @dev emitted when planter total claimable amount updated
+     * @param treeId id of tree that planter total claimable amount updated for
+     * @param planter address of planter
+     * @param amount amount added to planter total claimable amount
+     * @param ambassador address of ambassador
      */
     event PlanterTotalClaimedUpdated(
         uint256 treeId,
@@ -130,14 +136,17 @@ interface IPlanterFund {
     );
 
     /**
-     * @dev emitted when a planter by address {account} withdraw {amount}
-     * from balance
+     * @dev emitted when a planter withdraw
+     * @param amount amount of withdraw
+     * @param account address of planter
      */
     event BalanceWithdrew(uint256 amount, address account);
 
     /**
-     * @dev emitted when ProjectedEarning set for tree with id {treeId} with 
-     planter amount {planterAmount} and ambassador amount {ambassadorAmount}
+     * @dev emitted when ProjectedEarning set for tree
+     * @param treeId id of tree ProjectedEarning set for
+     * @param planterAmount planter amount
+     * @param ambassadorAmount ambassador amount
      */
     event ProjectedEarningUpdated(
         uint256 treeId,
@@ -145,6 +154,6 @@ interface IPlanterFund {
         uint256 ambassadorAmount
     );
 
-    //TODO:ADD_COMMENT
+    /** @dev emitted when minimum withdrable amount set */
     event MinWithdrawableAmountUpdated();
 }

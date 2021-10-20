@@ -17,9 +17,8 @@ contract DaiFund is Initializable {
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public daiToken;
 
-    /** NOTE {totalBalances} is struct of TotalFund that keep total share of
-     * research, localDevelopment,insurance,treejerDeveop,reserve1
-     * and reserve2
+    /** NOTE {totalBalances} keep total share of research, localDevelopment,
+     * insurance,treejerDeveop,reserve1 and reserve2
      */
     TotalBalances public totalBalances;
 
@@ -98,8 +97,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isDaiFund
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isDaiFund
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -116,8 +115,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin set DaiToken address
-     * @param _daiTokenAddress set to the address of DaiToken
+     * @dev admin set DaiToken contract address
+     * @param _daiTokenAddress set to the address of DaiToken contract
      */
     function setDaiTokenAddress(address _daiTokenAddress)
         external
@@ -131,8 +130,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin set PlanterFund address
-     * @param _address set to the address of PlanterFund
+     * @dev admin set PlanterFund contract address
+     * @param _address set to the address of PlanterFund contract
      */
     function setPlanterFundContractAddress(address _address)
         external
@@ -157,7 +156,7 @@ contract DaiFund is Initializable {
 
     /**
      * @dev admin set localDevelopment address to fund
-     * @param _address local development address
+     * @param _address localDevelopment address
      */
     function setLocalDevelopmentAddress(address payable _address)
         external
@@ -169,7 +168,7 @@ contract DaiFund is Initializable {
 
     /**
      * @dev admin set insurance address to fund
-     * @param _address insurance fund address
+     * @param _address insurance address
      */
     function setInsuranceAddress(address payable _address)
         external
@@ -181,7 +180,7 @@ contract DaiFund is Initializable {
 
     /**
      * @dev admin set treasury address to fund
-     * @param _address treejer develop address
+     * @param _address treasury address
      */
     function setTreasuryAddress(address payable _address)
         external
@@ -216,13 +215,19 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev fund a tree by RegularSale contract and based on allocation data
-     * of tree, shares divide beetwen (planter, ambassador, research,
-     * localDevelopment, insurance, treasury, reserve1 and reserve2)
-     * and added to the totalBalances of each part,
+     * @dev update totalBalances based on share amounts.
+     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
+     * contract and update projected earnings
      * @param _treeId id of a tree to fund
-     * NOTE planter and ambassador share transfer to PlanterFund contract
-     * and add to totalFund section there
+     * @param _amount total amount
+     * @param _planterShare planter share
+     * @param _ambassadorShare ambassador share
+     * @param _researchShare research share
+     * @param _localDevelopmentShare localDevelopment share
+     * @param _insuranceShare insurance share
+     * @param _treasuryShare treasury share
+     * @param _reserve1Share reserve1 share
+     * @param _reserve2Share reserve2 share
      */
     function fundTree(
         uint256 _treeId,
@@ -269,7 +274,18 @@ contract DaiFund is Initializable {
         emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
 
-    //TODO : ADD_COMMENT
+    /**
+     * @dev update totalBalances based on input amounts.
+     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
+     * @param _totalPlanterAmount total planter amount
+     * @param _totalAmbassadorAmount total ambassador amount
+     * @param _totalResearch total research amount
+     * @param _totalLocalDevelopment total localDevelopment amount
+     * @param _totalInsurance total insurance amount
+     * @param _totalTreasury total treasury amount
+     * @param _totalReserve1 total reserve1 amount
+     * @param _totalReserve2 total reserve2 amount
+     */
     function fundTreeBatch(
         uint256 _totalPlanterAmount,
         uint256 _totalAmbassadorAmount,
@@ -302,7 +318,11 @@ contract DaiFund is Initializable {
         emit TreeFundedBatch();
     }
 
-    //TODO:ADD_COMMENTS
+    /**
+     * @dev transfer dai from treasury in totalBalances to PlanterFund contract when
+     * referrer want to claim reward
+     * @param _amount amount to transfer
+     */
     function transferReferrerDai(uint256 _amount) external onlyTreejerContract {
         require(totalBalances.treasury >= _amount, "Liquidity not enough");
 
@@ -314,8 +334,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from research totalBalances in case of
-     * valid {_amount}  and daiToken transfer to {researchAddress}
+     * @dev admin withdraw from research totalBalance
+     * NOTE amount transfer to researchAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -340,8 +360,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from localDevelopment totalBalances in case of
-     * valid {_amount} and daiToken transfer to {localDevelopmentAddress}
+     * @dev admin withdraw from localDevelopment totalBalances
+     * NOTE amount transfer to localDevelopmentAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -368,8 +388,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from insurance totalBalances in case of
-     * valid {_amount} and daiToken transfer to {insuranceAddress}
+     * @dev admin withdraw from insurance totalBalances
+     * NOTE amount transfer to insuranceAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -394,8 +414,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from treasury totalBalances in case of
-     * valid {_amount} and daiToken transfer to {treasuryAddress}
+     * @dev admin withdraw from treasury totalBalances
+     * NOTE amount transfer to treasuryAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -420,8 +440,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve1 totalBalances in case of
-     * valid {_amount} and daiToken transfer to {reserve1Address}
+     * @dev admin withdraw from reserve1 totalBalances
+     * NOTE amount transfer to reserve1Address
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
@@ -446,8 +466,8 @@ contract DaiFund is Initializable {
     }
 
     /**
-     * @dev admin withdraw {_amount} from reserve2 totalBalances in case of
-     * valid {_amount} and daiToken transfer to {reserve2Address}
+     * @dev admin withdraw from reserve2 totalBalances
+     * NOTE amount transfer to reserve2Address
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */

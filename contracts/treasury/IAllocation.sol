@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 /** @title Allocation interfce */
 interface IAllocation {
     /**
-     * @return true in case of Allocation contract have been initialized
+     * @return true in case of Allocation contract has been initialized
      */
     function isAllocation() external view returns (bool);
 
@@ -19,17 +19,19 @@ interface IAllocation {
      */
     function accessRestriction() external view returns (address);
 
-    /** return allocationToTrees data for index {_index} of allocationToTrees
-     * array for example from startingId of allocationToTrees[0] to startingId of
+    /** return allocationToTrees data (strating tree with specific allocation)
+     * for example from startingId of allocationToTrees[0] to startingId of
      * allocationToTrees[1] belong to allocationDataId of allocationToTrees[0]
-     * @return startingTreeId is starting tree with model allocationDataId
-     * @return allocationDataId for index {_index} of allocationToTrees array
+     * @param _index index of array to get data
+     * @return startingTreeId is starting tree with allocationDataId
+     * @return allocationDataId for index
      */
     function allocationToTrees(uint256 _index)
         external
         returns (uint256 startingTreeId, uint256 allocationDataId);
 
-    /** return allocations data based on _allocationDataId
+    /** return allocations data
+     * @param _allocationDataId id of allocation to get data
      * @return planterShare
      * @return ambassadorShare
      * @return researchShare
@@ -56,17 +58,17 @@ interface IAllocation {
         );
 
     /**
-     * @dev admin add allocation data that sum of the
+     * @dev admin add a model for allocation data that sum of the
      * inputs must be 10000
+     * NOTE emit a {AllocationDataAdded} event
      * @param _planterShare planter share
      * @param _ambassadorShare ambassador share
-     * @param _researchShare research share
+     * @param _researchShare  research share
      * @param _localDevelopmentShare local development share
      * @param _insuranceShare insurance share
-     * @param _treasuryShare treasury share
+     * @param _treasuryShare _treasuryshare
      * @param _reserve1Share reserve1 share
      * @param _reserve2Share reserve2 share
-     * NOTE emit a {AllocationDataAdded} event
      */
     function addAllocationData(
         uint16 _planterShare,
@@ -80,12 +82,12 @@ interface IAllocation {
     ) external;
 
     /**
-     * @dev admin assgign a funding allocation data to trees starting from
+     * @dev admin assign a allocation data to trees starting from
      * {_startTreeId} and end at {_endTreeId}
-     * @param _startTreeId strating tree id to assign allocation to
-     * @param _endTreeId ending tree id to assign allocation to
-     * @param _allocationDataId allocation data id to assign
      * NOTE emit a {AllocationToTreeAssigned} event
+     * @param _startTreeId strating tree id to assign alloction to
+     * @param _endTreeId ending tree id to assign alloction to
+     * @param _allocationDataId allocation data id to assign
      */
     function assignAllocationToTree(
         uint256 _startTreeId,
@@ -96,12 +98,12 @@ interface IAllocation {
     /**
      * @dev check if there is allocation data for {_treeId} or not
      * @param _treeId id of a tree to check if there is a allocation data
-     * @return true in case of allocation data existance for {_treeId} and false otherwise
+     * @return true if allocation data exists for {_treeId} and false otherwise
      */
     function exists(uint256 _treeId) external view returns (bool);
 
     /**
-     * @dev return allocation data of {_treeId}
+     * @dev return allocation data
      * @param _treeId id of tree to find allocation data
      * @return planterShare
      * @return ambassadorShare
@@ -126,13 +128,15 @@ interface IAllocation {
         );
 
     /**
-     * @dev emitted when a AllocationData added with {allocationDataId}
+     * @dev emitted when a AllocationData added
+     * @param allocationDataId id of allocationData
      */
 
     event AllocationDataAdded(uint256 allocationDataId);
 
     /**
      * @dev emitted when AllocationData assigned to a range of tree
+     * @param allocationToTreesLength length of allocationToTrees
      */
 
     event AllocationToTreeAssigned(uint256 allocationToTreesLength);

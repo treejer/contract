@@ -70,12 +70,6 @@ contract HonoraryTree is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
-    modifier ifNotPaused() {
-        accessRestriction.ifNotPaused();
-        _;
-    }
-
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");

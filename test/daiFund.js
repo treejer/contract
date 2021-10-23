@@ -1,20 +1,21 @@
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const DaiFund = artifacts.require("DaiFund.sol");
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
+const DaiFund = contract.fromArtifact("DaiFund");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Allocation = contract.fromArtifact("Allocation");
+const PlanterFund = contract.fromArtifact("PlanterFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Math = require("./math");
 
-var Dai = artifacts.require("Dai.sol");
+var Dai = contract.fromArtifact("Dai");
 
 const { CommonErrorMsg, DaiFundErrorMsg } = require("./enumes");
 
 const Common = require("./common");
 
-contract("DaiFund", (accounts) => {
+describe("DaiFund", () => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -37,10 +38,12 @@ contract("DaiFund", (accounts) => {
   const withdrawReason = "reason to withdraw";
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
@@ -56,26 +59,26 @@ contract("DaiFund", (accounts) => {
       deployerAccount
     );
   });
-
+  /*
   describe("deployment and set addresses", () => {
     before(async () => {
       /////////////---------------------- deploy contracts ------------------- //////////////
 
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
     });
@@ -295,27 +298,29 @@ contract("DaiFund", (accounts) => {
     beforeEach(async () => {
       /////////////---------------------- deploy contracts ------------------- //////////////
 
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      await daiFundInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
@@ -3165,4 +3170,5 @@ contract("DaiFund", (accounts) => {
       );
     });
   });
+  */
 });

@@ -1,12 +1,12 @@
-const AccessRestriction = artifacts.require("AccessRestriction");
-const HonoraryTree = artifacts.require("HonoraryTree.sol");
-const Attribute = artifacts.require("Attribute.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
-const Tree = artifacts.require("Tree.sol");
-const Dai = artifacts.require("Dai.sol");
-const TestHonoraryTree = artifacts.require("TestHonoraryTree.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const HonoraryTree = contract.fromArtifact("HonoraryTree");
+const Attribute = contract.fromArtifact("Attribute");
+const TreeFactory = contract.fromArtifact("TreeFactory");
+const PlanterFund = contract.fromArtifact("PlanterFund");
+const Tree = contract.fromArtifact("Tree");
+const Dai = contract.fromArtifact("Dai");
+const TestHonoraryTree = contract.fromArtifact("TestHonoraryTree");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const Units = require("ethereumjs-units");
@@ -16,7 +16,7 @@ const Common = require("./common");
 const math = require("./math");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
@@ -30,7 +30,7 @@ const {
   GsnErrorMsg,
 } = require("./enumes");
 
-contract("HonoraryTree", (accounts) => {
+describe("HonoraryTree", () => {
   let honoraryTreeInstance;
   let arInstance;
   let attributeInstance;
@@ -56,10 +56,12 @@ contract("HonoraryTree", (accounts) => {
   const initialReferralTreePaymentToAmbassador = web3.utils.toWei("0.1");
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
@@ -69,50 +71,50 @@ contract("HonoraryTree", (accounts) => {
 
   describe("deployment and set addresses", () => {
     beforeEach(async () => {
-      honoraryTreeInstance = await deployProxy(
-        HonoraryTree,
-        [
-          arInstance.address,
-          initialReferralTreePaymentToPlanter,
-          initialReferralTreePaymentToAmbassador,
-        ],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      honoraryTreeInstance = await HonoraryTree.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
+      await honoraryTreeInstance.initialize(
+        arInstance.address,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
@@ -238,17 +240,17 @@ contract("HonoraryTree", (accounts) => {
 
   describe("set price and add recipient update recipient", () => {
     beforeEach(async () => {
-      honoraryTreeInstance = await deployProxy(
-        HonoraryTree,
-        [
-          arInstance.address,
-          initialReferralTreePaymentToPlanter,
-          initialReferralTreePaymentToAmbassador,
-        ],
+      honoraryTreeInstance = await HonoraryTree.new({
+        from: deployerAccount,
+      });
+
+      await honoraryTreeInstance.initialize(
+        arInstance.address,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
     });
@@ -469,24 +471,26 @@ contract("HonoraryTree", (accounts) => {
 
   describe("reserveSymbol and freeReservedSymbol", () => {
     beforeEach(async () => {
-      honoraryTreeInstance = await deployProxy(
-        HonoraryTree,
-        [
-          arInstance.address,
-          initialReferralTreePaymentToPlanter,
-          initialReferralTreePaymentToAmbassador,
-        ],
+      honoraryTreeInstance = await HonoraryTree.new({
+        from: deployerAccount,
+      });
+
+      await honoraryTreeInstance.initialize(
+        arInstance.address,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await honoraryTreeInstance.setAttributesAddress(
@@ -641,10 +645,12 @@ contract("HonoraryTree", (accounts) => {
         }
       );
 
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      treeTokenInstance = await Tree.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       /////////////////// ------------ handle roles
@@ -772,44 +778,42 @@ contract("HonoraryTree", (accounts) => {
     beforeEach(async () => {
       //------------------ deploy contracts
 
-      honoraryTreeInstance = await deployProxy(
-        HonoraryTree,
-        [
-          arInstance.address,
-          initialReferralTreePaymentToPlanter,
-          initialReferralTreePaymentToAmbassador,
-        ],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      honoraryTreeInstance = await HonoraryTree.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await honoraryTreeInstance.initialize(
+        arInstance.address,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
+        {
+          from: deployerAccount,
+        }
+      );
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
@@ -1016,10 +1020,12 @@ contract("HonoraryTree", (accounts) => {
       const adminWallet = userAccount8;
 
       ////////////// deploy contract
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       ////////////////// handle role
@@ -1320,50 +1326,50 @@ contract("HonoraryTree", (accounts) => {
 
       //------------------ deploy contracts
 
-      honoraryTreeInstance = await deployProxy(
-        HonoraryTree,
-        [
-          arInstance.address,
-          initialReferralTreePaymentToPlanter,
-          initialReferralTreePaymentToAmbassador,
-        ],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      honoraryTreeInstance = await HonoraryTree.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
+      await honoraryTreeInstance.initialize(
+        arInstance.address,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       daiInstance = await Dai.new("DAI", "dai", {
@@ -1434,8 +1440,8 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      const startDate = parseInt(new Date().getTime() / 1000) + 60 * 60;
-      const expiryDate = parseInt(new Date().getTime() / 1000) + 2 * 60 * 60;
+      const startDate = await Common.timeInitial(TimeEnumes.hours, 1);
+      const expiryDate = await Common.timeInitial(TimeEnumes.hours, 2);
 
       await honoraryTreeInstance.addRecipient(
         userAccount1,
@@ -1503,8 +1509,9 @@ contract("HonoraryTree", (accounts) => {
     });
 
     it("claim should be work successfully", async () => {
-      const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+      const startDate =
+        Number(await Common.timeInitial(TimeEnumes.seconds, 0)) - 100000;
+      const expiryDate = await Common.timeInitial(TimeEnumes.hours, 10);
 
       await honoraryTreeInstance.addRecipient(
         userAccount1,
@@ -1694,8 +1701,9 @@ contract("HonoraryTree", (accounts) => {
     });
 
     it("2-claim should be work successfully", async () => {
-      const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+      const startDate =
+        Number(await Common.timeInitial(TimeEnumes.seconds, 0)) - 100000;
+      const expiryDate = await Common.timeInitial(TimeEnumes.hours, 10);
 
       await honoraryTreeInstance.addRecipient(
         userAccount1,
@@ -2027,10 +2035,12 @@ contract("HonoraryTree", (accounts) => {
         }
       );
 
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      treeTokenInstance = await Tree.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       /////////////////// ------------ handle roles

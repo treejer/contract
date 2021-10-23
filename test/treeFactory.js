@@ -1,16 +1,18 @@
-const AccessRestriction = artifacts.require("AccessRestriction");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Tree = artifacts.require("Tree.sol");
-const Auction = artifacts.require("Auction.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const Planter = artifacts.require("Planter.sol");
-const Dai = artifacts.require("Dai.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
-const DaiFund = artifacts.require("DaiFund.sol");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const TreeFactory = contract.fromArtifact("TreeFactory");
+const Tree = contract.fromArtifact("Tree");
+const Auction = contract.fromArtifact("Auction");
+
+const Planter = contract.fromArtifact("Planter");
+const Dai = contract.fromArtifact("Dai");
+const Allocation = contract.fromArtifact("Allocation");
+const PlanterFund = contract.fromArtifact("PlanterFund");
+const DaiFund = contract.fromArtifact("DaiFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
@@ -25,12 +27,12 @@ const {
 const Math = require("./math");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-contract("TreeFactory", (accounts) => {
+describe("TreeFactory", () => {
   let treeFactoryInstance;
   let treeTokenInstance;
 
@@ -61,44 +63,46 @@ contract("TreeFactory", (accounts) => {
 
   describe("deploy and set addresses", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      planterFundInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
+      await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.setPlanterContractAddress(
@@ -183,23 +187,23 @@ contract("TreeFactory", (accounts) => {
 
   describe("just treeFactory methods", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
     });
 
     ////////////////////------------------------------------ test set treeUpdateInterval  ----------------------------------------//
@@ -302,34 +306,38 @@ contract("TreeFactory", (accounts) => {
 
   describe("add tree,assign and plant tree,verify plant", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
+      await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.setPlanterContractAddress(
@@ -2103,44 +2111,46 @@ contract("TreeFactory", (accounts) => {
 
   describe("deploy and set addresses", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      planterFundInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
+      await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.setPlanterContractAddress(
@@ -2443,10 +2453,12 @@ contract("TreeFactory", (accounts) => {
 
       //////////// -------------- deploy dauFunds
 
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
@@ -2454,10 +2466,12 @@ contract("TreeFactory", (accounts) => {
 
       ////////////// ---------- deploy allocation
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -2647,20 +2661,25 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -2895,20 +2914,25 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -3118,20 +3142,25 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -3334,10 +3363,12 @@ contract("TreeFactory", (accounts) => {
       );
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await allocationInstance.addAllocationData(
@@ -3369,12 +3400,13 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
@@ -4370,20 +4402,24 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -4471,19 +4507,25 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFund, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       await Common.successFundTree(
@@ -5589,10 +5631,12 @@ contract("TreeFactory", (accounts) => {
     it("Check lastRegualarTreeId count", async () => {
       //// deploy tree auction
 
-      auctionInstance = await deployProxy(Auction, [arInstance.address], {
-        initializer: "initialize",
+      auctionInstance = await Auction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await auctionInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -5634,12 +5678,13 @@ contract("TreeFactory", (accounts) => {
       });
 
       ////////////// ---------- deploy allocation
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
       await auctionInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });

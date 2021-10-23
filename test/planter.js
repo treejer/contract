@@ -1,22 +1,24 @@
-const AccessRestriction = artifacts.require("AccessRestriction");
-const Planter = artifacts.require("Planter.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Planter = contract.fromArtifact("Planter");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
 const { CommonErrorMsg, GsnErrorMsg, PlanterErrorMsg } = require("./enumes");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
 
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-contract("Planter", (accounts) => {
+describe("Planter", () => {
   let planterInstance;
 
   let arInstance;
@@ -39,18 +41,22 @@ contract("Planter", (accounts) => {
   // });
 
   beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
+    planterInstance = await Planter.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await planterInstance.initialize(arInstance.address, {
+      from: deployerAccount,
     });
   });
 

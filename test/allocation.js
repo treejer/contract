@@ -1,14 +1,14 @@
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const Allocation = artifacts.require("Allocation.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Allocation = contract.fromArtifact("Allocation");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { CommonErrorMsg, AllocationErrorMsg } = require("./enumes");
 
-contract("Allocation", (accounts) => {
+describe("Allocation", () => {
   let arInstance;
   let allocationInstance;
 
@@ -24,20 +24,24 @@ contract("Allocation", (accounts) => {
   const treasuryAddress = accounts[9];
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
   });
 
   beforeEach(async () => {
-    allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-      initializer: "initialize",
+    allocationInstance = await Allocation.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await allocationInstance.initialize(arInstance.address, {
+      from: deployerAccount,
     });
   });
 

@@ -49,6 +49,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
 
     event RecipientUpdated(address recipient);
     event RecipientAdded(address recipient);
+    event X(uint256);
 
     event ReferralTreePaymentsUpdated(
         uint256 referralTreePaymentToPlanter,
@@ -310,13 +311,17 @@ contract HonoraryTree is Initializable, RelayRecipient {
      */
     function claim() external {
         Recipient storage recipientData = recipients[_msgSender()];
-
+        emit X(block.timestamp);
         require(
-            recipientData.expiryDate > block.timestamp &&
-                recipientData.startDate < block.timestamp &&
-                recipientData.status == 1,
-            "you cant claim tree"
+            recipientData.expiryDate > block.timestamp,
+            "you cant claim tree1"
         );
+        require(
+            recipientData.startDate < block.timestamp,
+            "you cant claim tree2"
+        );
+
+        require(recipientData.status == 1, "you cant claim tree3");
 
         require(currentTreeId < upTo, "trees are not available");
         require(claimedCount < symbols.length, "no symbol exists for gift");

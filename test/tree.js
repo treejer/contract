@@ -1,9 +1,10 @@
-const AccessRestriction = artifacts.require("AccessRestriction");
-const Tree = artifacts.require("Tree.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Tree = contract.fromArtifact("Tree");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
@@ -14,7 +15,7 @@ const {
   erc721ErrorMsg,
 } = require("./enumes");
 
-contract("Tree", (accounts) => {
+describe("Tree", () => {
   let treeInstance;
 
   let arInstance;
@@ -33,18 +34,22 @@ contract("Tree", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
   });
 
   beforeEach(async () => {
-    treeInstance = await deployProxy(Tree, [arInstance.address, "base uri"], {
-      initializer: "initialize",
+    treeInstance = await Tree.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await treeInstance.initialize(arInstance.address, "", {
+      from: deployerAccount,
     });
   });
 

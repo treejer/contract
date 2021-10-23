@@ -1,44 +1,46 @@
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const IncrementalSale = artifacts.require("IncrementalSale.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Attribute = artifacts.require("Attribute.sol");
-const Tree = artifacts.require("Tree.sol");
-const TestTree = artifacts.require("TestTree.sol");
-const TestTree2 = artifacts.require("TestTree2.sol");
-const TestAttribute = artifacts.require("TestAttribute.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const IncrementalSale = contract.fromArtifact("IncrementalSale");
+const TreeFactory = contract.fromArtifact("TreeFactory");
+const Attribute = contract.fromArtifact("Attribute");
+const Tree = contract.fromArtifact("Tree");
+const TestTree = contract.fromArtifact("TestTree");
+const TestTree2 = contract.fromArtifact("TestTree2");
+const TestAttribute = contract.fromArtifact("TestAttribute");
 
 //treasury section
-const WethFund = artifacts.require("WethFund.sol");
+const WethFund = contract.fromArtifact("WethFund");
 
-const PlanterFund = artifacts.require("PlanterFund.sol");
-const Weth = artifacts.require("Weth.sol");
+const PlanterFund = contract.fromArtifact("PlanterFund");
+const Weth = contract.fromArtifact("Weth");
 const Math = require("./math");
 
 //uniswap
 let Factory;
-var Dai = artifacts.require("Dai.sol");
+var Dai = contract.fromArtifact("Dai");
 let UniswapV2Router02New;
 let TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
+  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
 } else {
-  Factory = artifacts.require("Factory.sol");
-  UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-  TestUniswap = artifacts.require("TestUniswap.sol");
+  Factory = contract.fromArtifact("Factory");
+  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
+  TestUniswap = contract.fromArtifact("TestUniswap");
 }
 
 //test
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
 const { CommonErrorMsg, AttributeErrorMsg } = require("./enumes");
 
-contract("Attribute", (accounts) => {
+describe("Attribute", () => {
   let iSaleInstance;
   let arInstance;
 
@@ -71,10 +73,12 @@ contract("Attribute", (accounts) => {
   const randTree = web3.utils.soliditySha3(10000, 0, "", 0, zeroAddress, "");
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     ////--------------------------uniswap deploy
@@ -139,10 +143,12 @@ contract("Attribute", (accounts) => {
 
   describe("without financial section", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
     });
 
@@ -458,16 +464,20 @@ contract("Attribute", (accounts) => {
 
   describe("without financial section", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      await attributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -728,16 +738,20 @@ contract("Attribute", (accounts) => {
 
   describe("createSymbol", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      await attributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -1048,16 +1062,20 @@ contract("Attribute", (accounts) => {
   /*
   describe("without financial section", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      await attributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
@@ -1862,20 +1880,20 @@ contract("Attribute", (accounts) => {
   /*
   describe("createSymbol", () => {
     beforeEach(async () => {
-      attributeInstance = await deployProxy(
-        Attribute,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      attributeInstance = await Attribute.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       await attributeInstance.setTreeTokenAddress(

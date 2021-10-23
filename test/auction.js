@@ -1,32 +1,33 @@
 require("dotenv").config();
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const Auction = artifacts.require("Auction.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Auction = contract.fromArtifact("Auction");
+const TreeFactory = contract.fromArtifact("TreeFactory");
 
-const Tree = artifacts.require("Tree.sol");
-const Planter = artifacts.require("Planter.sol");
-const WethFund = artifacts.require("WethFund.sol");
-const RegularSale = artifacts.require("RegularSale.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
-var Dai = artifacts.require("Dai.sol");
-var Weth = artifacts.require("Weth.sol");
+const Tree = contract.fromArtifact("Tree");
+const Planter = contract.fromArtifact("Planter");
+const WethFund = contract.fromArtifact("WethFund");
+const RegularSale = contract.fromArtifact("RegularSale");
+const Allocation = contract.fromArtifact("Allocation");
+const PlanterFund = contract.fromArtifact("PlanterFund");
+var Dai = contract.fromArtifact("Dai");
+var Weth = contract.fromArtifact("Weth");
 let Factory;
 let UniswapV2Router02New;
 let TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
+  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
 } else {
-  Factory = artifacts.require("Factory.sol");
-  UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-  TestUniswap = artifacts.require("TestUniswap.sol");
+  Factory = contract.fromArtifact("Factory");
+  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
+  TestUniswap = contract.fromArtifact("TestUniswap");
 }
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
@@ -39,11 +40,9 @@ const {
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
-const { util } = require("chai");
-
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-contract("Auction", (accounts) => {
+describe("Auction", () => {
   let auctionInstance;
   let arInstance;
   let treeFactoryInstance;
@@ -77,10 +76,12 @@ contract("Auction", (accounts) => {
   const ipfsHash = "some ipfs hash here";
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     if (!process.env.COVERAGE) {
@@ -145,42 +146,47 @@ contract("Auction", (accounts) => {
 
   describe("deployment and set addresses", () => {
     before(async () => {
-      auctionInstance = await deployProxy(Auction, [arInstance.address], {
-        initializer: "initialize",
+      auctionInstance = await Auction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+      await auctionInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      wethFundInstance = await WethFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, web3.utils.toWei("7")],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      await wethFundInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
       //////////////////////////////////
@@ -300,32 +306,36 @@ contract("Auction", (accounts) => {
 
   describe("add auction and bid", () => {
     beforeEach(async () => {
-      auctionInstance = await deployProxy(Auction, [arInstance.address], {
-        initializer: "initialize",
+      auctionInstance = await Auction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      await auctionInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
       });
 
       //////////////////////////////-------------------- handle address
@@ -1102,55 +1112,61 @@ contract("Auction", (accounts) => {
 
   describe("test with end auction", () => {
     beforeEach(async () => {
-      auctionInstance = await deployProxy(Auction, [arInstance.address], {
-        initializer: "initialize",
+      auctionInstance = await Auction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      await auctionInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      allocationInstance = await Allocation.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      await allocationInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
+      wethFundInstance = await WethFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      await wethFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       //////////////////////////////-------------------- handle address
       await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
@@ -1216,13 +1232,15 @@ contract("Auction", (accounts) => {
     });
 
     it("should end auction and fail in invalid situations", async () => {
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, web3.utils.toWei("7")],
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
@@ -1626,14 +1644,15 @@ contract("Auction", (accounts) => {
       await auctionInstance.endAuction(0, { from: userAccount3 });
 
       /////////// --------------- check referral for zero address
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
 
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, web3.utils.toWei("7")],
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 
@@ -1805,16 +1824,17 @@ contract("Auction", (accounts) => {
     // ---------------------------------------complex test (auction and treeFactory and treasury)-------------------------------------
 
     it("complex test 1 with referral", async () => {
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, web3.utils.toWei("7")],
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
-
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -2945,13 +2965,15 @@ contract("Auction", (accounts) => {
     });
 
     it("complex test 3 (complete auction done with referrer)  ", async () => {
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, web3.utils.toWei("7")],
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
 

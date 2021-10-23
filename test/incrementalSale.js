@@ -1,15 +1,16 @@
 require("dotenv").config();
 
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const IncrementalSale = artifacts.require("IncrementalSale.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Tree = artifacts.require("Tree.sol");
-const Auction = artifacts.require("Auction.sol");
-const Attribute = artifacts.require("Attribute.sol");
-const RegularSale = artifacts.require("RegularSale.sol");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const IncrementalSale = contract.fromArtifact("IncrementalSale");
+const TreeFactory = contract.fromArtifact("TreeFactory");
+const Tree = contract.fromArtifact("Tree");
+const Auction = contract.fromArtifact("Auction");
+const Attribute = contract.fromArtifact("Attribute");
+const RegularSale = contract.fromArtifact("RegularSale");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
@@ -17,11 +18,11 @@ const Math = require("./math");
 const Units = require("ethereumjs-units");
 
 //treasury section
-const WethFund = artifacts.require("WethFund.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
-const Weth = artifacts.require("Weth.sol");
-var Dai = artifacts.require("Dai.sol");
+const WethFund = contract.fromArtifact("WethFund");
+const Allocation = contract.fromArtifact("Allocation");
+const PlanterFund = contract.fromArtifact("PlanterFund");
+const Weth = contract.fromArtifact("Weth");
+var Dai = contract.fromArtifact("Dai");
 //uniswap
 var Factory;
 var Dai;
@@ -29,31 +30,30 @@ var UniswapV2Router02New;
 var TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
+  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
 } else {
-  Factory = artifacts.require("Factory.sol");
-  UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-  TestUniswap = artifacts.require("TestUniswap.sol");
+  Factory = contract.fromArtifact("Factory");
+  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
+  TestUniswap = contract.fromArtifact("TestUniswap");
 }
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 const {
   TimeEnumes,
   CommonErrorMsg,
   IncrementalSaleErrorMsg,
-  TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   GsnErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-contract("IncrementalSale", (accounts) => {
+describe("IncrementalSale", () => {
   let iSaleInstance;
   let arInstance;
   let TreeFactoryInstance;
@@ -64,7 +64,7 @@ contract("IncrementalSale", (accounts) => {
   let DAIAddress;
   let uniswapV2Router02NewAddress;
   let wethFundInstance;
-  let alloctionInstance;
+  let allocationInstance;
   let planterFundsInstnce;
   let attributeInstance;
   let regularSaleInstance;
@@ -83,10 +83,12 @@ contract("IncrementalSale", (accounts) => {
   const ipfsHash = "some ipfs hash here";
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     ////--------------------------uniswap deploy
@@ -152,47 +154,55 @@ contract("IncrementalSale", (accounts) => {
     before(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
 
-      iSaleInstance = await deployProxy(IncrementalSale, [arInstance.address], {
-        initializer: "initialize",
+      iSaleInstance = await IncrementalSale.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+      await iSaleInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      wethFundInstance = await WethFund.new({
+        from: deployerAccount,
+      });
+
+      await wethFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, treePrice],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
     });
@@ -308,17 +318,17 @@ contract("IncrementalSale", (accounts) => {
 
       /////////////////---------------------------------set allocation address--------------------------------------------------------
       await iSaleInstance
-        .setAllocationAddress(alloctionInstance.address, {
+        .setAllocationAddress(allocationInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
+      await iSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
       assert.equal(
-        alloctionInstance.address,
+        allocationInstance.address,
         await iSaleInstance.allocation.call(),
         "allocation address set incorect"
       );
@@ -343,32 +353,36 @@ contract("IncrementalSale", (accounts) => {
 
   describe("without financial section", () => {
     beforeEach(async () => {
-      iSaleInstance = await deployProxy(IncrementalSale, [arInstance.address], {
-        initializer: "initialize",
+      iSaleInstance = await IncrementalSale.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
+      await iSaleInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       /////-------------------------handle address here-----------------
@@ -379,7 +393,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
+      await iSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
@@ -402,7 +416,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       /////----------------add allocation data
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -453,7 +467,7 @@ contract("IncrementalSale", (accounts) => {
 
       /////-----added incrementalSale should have equivalant allocation data
 
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -467,7 +481,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await alloctionInstance.assignAllocationToTree(110, 10000, 1, {
+      await allocationInstance.assignAllocationToTree(110, 10000, 1, {
         from: dataManager,
       });
 
@@ -494,7 +508,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(alloctionInstance.address, {
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
@@ -506,7 +520,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -519,7 +533,7 @@ contract("IncrementalSale", (accounts) => {
           from: dataManager,
         }
       );
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -533,7 +547,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 1, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 1, {
         from: dataManager,
       });
 
@@ -575,7 +589,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -589,7 +603,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -723,12 +737,12 @@ contract("IncrementalSale", (accounts) => {
 
     it("Should removeIncrementalSale succesfully", async () => {
       await iSaleInstance
-        .removeIncrementalSale(400)
+        .removeIncrementalSale(400, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -785,7 +799,9 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      const eventTx1 = await iSaleInstance.removeIncrementalSale(500);
+      const eventTx1 = await iSaleInstance.removeIncrementalSale(500, {
+        from: dataManager,
+      });
 
       truffleAssert.eventEmitted(eventTx1, "IncrementalSaleUpdated");
 
@@ -822,7 +838,9 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree601_2.saleType), 2, "2 sale type is not correct");
 
-      const eventTx2 = await iSaleInstance.removeIncrementalSale(400);
+      const eventTx2 = await iSaleInstance.removeIncrementalSale(400, {
+        from: dataManager,
+      });
 
       truffleAssert.eventEmitted(eventTx2, "IncrementalSaleUpdated");
 
@@ -868,12 +886,14 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .removeIncrementalSale(400)
+        .removeIncrementalSale(400, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      const eventTx3 = await iSaleInstance.removeIncrementalSale(300);
+      const eventTx3 = await iSaleInstance.removeIncrementalSale(300, {
+        from: dataManager,
+      });
 
       truffleAssert.eventEmitted(eventTx3, "IncrementalSaleUpdated");
 
@@ -940,7 +960,7 @@ contract("IncrementalSale", (accounts) => {
 
     ///////////// --------------------------------- updateEndTreeId --------------------------------
     it("Should updateEndTreeId succesfully", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1061,7 +1081,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await auctionInstance.setAllocationAddress(alloctionInstance.address, {
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
@@ -1069,11 +1089,11 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
+      await iSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -1175,62 +1195,78 @@ contract("IncrementalSale", (accounts) => {
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
     });
   });
-
   describe("with financial section", () => {
     beforeEach(async () => {
       const treePrice = Units.convert("7", "eth", "wei");
-      iSaleInstance = await deployProxy(IncrementalSale, [arInstance.address], {
-        initializer: "initialize",
+
+      iSaleInstance = await IncrementalSale.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
-      attributeInstance = await deployProxy(Attribute, [arInstance.address], {
-        initializer: "initialize",
+
+      await iSaleInstance.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      wethFundInstance = await WethFund.new({
+        from: deployerAccount,
+      });
+
+      await wethFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-      wethFundInstance = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-      alloctionInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-      regularSaleInstance = await deployProxy(
-        RegularSale,
-        [arInstance.address, treePrice],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+
       /////-------------------------handle address here-----------------
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
@@ -1241,7 +1277,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
-      await iSaleInstance.setAllocationAddress(alloctionInstance.address, {
+      await iSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
       await iSaleInstance.setRegularSaleAddress(regularSaleInstance.address, {
@@ -1310,7 +1346,7 @@ contract("IncrementalSale", (accounts) => {
         deployerAccount
       );
       /////----------------add allocation data
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -1326,7 +1362,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount timeout", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2078,7 +2114,7 @@ contract("IncrementalSale", (accounts) => {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     it("fundTree with recipient", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2224,7 +2260,7 @@ contract("IncrementalSale", (accounts) => {
     ////----------------------------------------------------test updateIncrementalSaleData------------------------------
 
     it("updateIncrementalSaleData should be work successfully", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2438,7 +2474,7 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
-      await alloctionInstance.addAllocationData(
+      await allocationInstance.addAllocationData(
         4000,
         1200,
         1200,
@@ -2452,7 +2488,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2547,7 +2583,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("low price paid for the tree without discount", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
       await iSaleInstance.createIncrementalSale(
@@ -2584,7 +2620,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree work successfully(1 tree => 1 step)", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2644,7 +2680,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_COUNT)", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2700,7 +2736,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("fundTree should be reject (INVALID_TREE)", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2752,7 +2788,7 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount usage", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 
@@ -2826,10 +2862,11 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount3);
       await wethInstance.resetAcc(userAccount4);
     });
+
     /*
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
-      await alloctionInstance.assignAllocationToTree(100, 10000, 0, {
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
 

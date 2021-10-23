@@ -1,26 +1,27 @@
-require("dotenv").config();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const WethFund = artifacts.require("WethFund");
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const Allocation = artifacts.require("Allocation.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
+require("dotenv").config();
+
+const WethFund = contract.fromArtifact("WethFund");
+const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const Allocation = contract.fromArtifact("Allocation");
+const PlanterFund = contract.fromArtifact("PlanterFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 
-var Dai = artifacts.require("Dai.sol");
-var Weth = artifacts.require("Weth.sol");
+var Dai = contract.fromArtifact("Dai");
+var Weth = contract.fromArtifact("Weth");
 let UniswapV2Router02New;
 let TestUniswap;
 let Factory;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
+  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
 } else {
-  Factory = artifacts.require("Factory.sol");
-  UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-  TestUniswap = artifacts.require("TestUniswap.sol");
+  Factory = contract.fromArtifact("Factory");
+  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
+  TestUniswap = contract.fromArtifact("TestUniswap");
 }
 
 const Math = require("./math");
@@ -33,7 +34,7 @@ const {
 
 const Common = require("./common");
 
-contract("WethFund", (accounts) => {
+describe("WethFund", () => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -66,10 +67,12 @@ contract("WethFund", (accounts) => {
   let DAIAddress;
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     if (!process.env.COVERAGE) {
@@ -132,23 +135,29 @@ contract("WethFund", (accounts) => {
   });
 
   // beforeEach(async () => {
-  //   wethFund = await deployProxy(WethFund, [arInstance.address], {
-  //     initializer: "initialize",
-  //     from: deployerAccount,
-  //     unsafeAllowCustomTypes: true,
-  //   });
+  // wethFund = await WethFund.new({
+  //   from: deployerAccount,
+  // });
 
-  //   allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-  //     initializer: "initialize",
-  //     from: deployerAccount,
-  //     unsafeAllowCustomTypes: true,
-  //   });
+  // await wethFund.initialize(arInstance.address, {
+  //   from: deployerAccount,
+  // });
 
-  //   planterFundsInstnce = await deployProxy(PlanterFund, [arInstance.address], {
-  //     initializer: "initialize",
-  //     from: deployerAccount,
-  //     unsafeAllowCustomTypes: true,
-  //   });
+  // allocationInstance = await Allocation.new({
+  //   from: deployerAccount,
+  // });
+
+  // await allocationInstance.initialize(arInstance.address, {
+  //   from: deployerAccount,
+  // });
+
+  // planterFundsInstnce = await PlanterFund.new({
+  //   from: deployerAccount,
+  // });
+
+  // await planterFundsInstnce.initialize(arInstance.address, {
+  //   from: deployerAccount,
+  // });
 
   //   await wethFund.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
   //     from: deployerAccount,
@@ -164,27 +173,29 @@ contract("WethFund", (accounts) => {
 
   describe("deployment and set addresses", () => {
     beforeEach(async () => {
-      wethFund = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      wethFund = await WethFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      await wethFund.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
     });
 
     it("should set addresses", async () => {
@@ -277,10 +288,12 @@ contract("WethFund", (accounts) => {
 
   describe("set fund addresses", () => {
     beforeEach(async () => {
-      wethFund = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      wethFund = await WethFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await wethFund.initialize(arInstance.address, {
+        from: deployerAccount,
       });
     });
 
@@ -434,27 +447,29 @@ contract("WethFund", (accounts) => {
 
   describe("fund and withdraw", () => {
     beforeEach(async () => {
-      wethFund = await deployProxy(WethFund, [arInstance.address], {
-        initializer: "initialize",
+      wethFund = await WethFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      allocationInstance = await deployProxy(Allocation, [arInstance.address], {
-        initializer: "initialize",
+      await wethFund.initialize(arInstance.address, {
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
-      planterFundsInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await wethFund.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
         from: deployerAccount,

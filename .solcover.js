@@ -5,8 +5,8 @@ module.exports = {
     gas: 20000000,
   },
   skipFiles: ["external"],
-  measureStatementCoverage: true,
-  measureFunctionCoverage: true,
+  measureStatementCoverage: false,
+  measureFunctionCoverage: false,
   istanbulReporter: ["html"],
   mocha: {
     timeout: 1111111111111111111111111110000,

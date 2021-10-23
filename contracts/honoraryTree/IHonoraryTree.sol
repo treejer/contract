@@ -47,9 +47,9 @@ interface IHonoraryTree {
     /**
      * @dev return if symbol in {_index} is used or not
      * @param _index is index of array
-     * @return used , if symbol in {_index} is used or not
+     * @return isUsed , if symbol in {_index} is used or not
      */
-    function used(uint256 _index) external returns (bool used);
+    function used(uint256 _index) external returns (bool isUsed);
 
     /** @return true in case of HonoraryTree contract have been initialized */
     function isHonoraryTree() external view returns (bool);

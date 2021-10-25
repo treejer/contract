@@ -63,87 +63,80 @@ contract("Planter", (accounts) => {
   afterEach(async () => {});
 
   ////////////////--------------------------------------------gsn------------------------------------------------
-  // it("test gsn [ @skip-on-coverage ]", async () => {
-  //   let env = await GsnTestEnvironment.startGsn("localhost");
+  it("test gsn [ @skip-on-coverage ]", async () => {
+    let env = await GsnTestEnvironment.startGsn("localhost");
 
-  //   const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
+    const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
 
-  //   await planterInstance.setTrustedForwarder(forwarderAddress, {
-  //     from: deployerAccount,
-  //   });
+    await planterInstance.setTrustedForwarder(forwarderAddress, {
+      from: deployerAccount,
+    });
 
-  //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-  //   await paymaster.setRelayHub(relayHubAddress);
-  //   await paymaster.setTrustedForwarder(forwarderAddress);
+    await paymaster.setRelayHub(relayHubAddress);
+    await paymaster.setTrustedForwarder(forwarderAddress);
 
-  //   web3.eth.sendTransaction({
-  //     from: accounts[0],
-  //     to: paymaster.address,
-  //     value: web3.utils.toWei("1"),
-  //   });
+    web3.eth.sendTransaction({
+      from: accounts[0],
+      to: paymaster.address,
+      value: web3.utils.toWei("1"),
+    });
 
-  //   origProvider = web3.currentProvider;
+    origProvider = web3.currentProvider;
 
-  //   conf = { paymasterAddress: paymaster.address };
+    conf = { paymasterAddress: paymaster.address };
 
-  //   gsnProvider = await Gsn.RelayProvider.newProvider({
-  //     provider: origProvider,
-  //     config: conf,
-  //   }).init();
+    gsnProvider = await Gsn.RelayProvider.newProvider({
+      provider: origProvider,
+      config: conf,
+    }).init();
 
-  //   provider = new ethers.providers.Web3Provider(gsnProvider);
+    provider = new ethers.providers.Web3Provider(gsnProvider);
 
-  //   let signerPlanter = provider.getSigner(3);
+    let signerPlanter = provider.getSigner(3);
 
-  //   let contractPlanter = await new ethers.Contract(
-  //     planterInstance.address,
-  //     planterInstance.abi,
-  //     signerPlanter
-  //   );
+    let contractPlanter = await new ethers.Contract(
+      planterInstance.address,
+      planterInstance.abi,
+      signerPlanter
+    );
 
-  //   let longitude = 1;
-  //   let latitude = 2;
-  //   const countryCode = 10;
+    let longitude = 1;
+    let latitude = 2;
+    const countryCode = 10;
 
-  //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+    let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-  //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
-  //   let tx = await contractPlanter
-  //     .join(
-  //       1,
-  //       longitude,
-  //       latitude,
-  //       countryCode,
-  //       zeroAddress,
-  //       zeroAddress
-  //     )
-  //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+    let tx = await contractPlanter
+      .join(1, longitude, latitude, countryCode, zeroAddress, zeroAddress)
+      .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-  //   await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
-  //     from: deployerAccount,
-  //   });
+    await paymaster.addPlanterWhitelistTarget(planterInstance.address, {
+      from: deployerAccount,
+    });
 
-  //   await contractPlanter.join(
-  //     1,
-  //     longitude,
-  //     latitude,
-  //     countryCode,
-  //     zeroAddress,
-  //     zeroAddress
-  //   );
+    await contractPlanter.join(
+      1,
+      longitude,
+      latitude,
+      countryCode,
+      zeroAddress,
+      zeroAddress
+    );
 
-  //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+    let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
 
-  //   assert.equal(
-  //     balanceAccountAfter,
-  //     balanceAccountBefore,
-  //     "gsn not true work"
-  //   );
+    assert.equal(
+      balanceAccountAfter,
+      balanceAccountBefore,
+      "gsn not true work"
+    );
 
-  //   await GsnTestEnvironment.stopGsn();
-  // });
+    await GsnTestEnvironment.stopGsn();
+  });
 
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
 

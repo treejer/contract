@@ -17,12 +17,19 @@ const Math = require("./math");
 
 const Units = require("ethereumjs-units");
 
+//gsn
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Gsn = require("@opengsn/provider");
+const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+const ethers = require("ethers");
+
 //treasury section
 const WethFund = artifacts.require("WethFund");
 const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
 const Weth = artifacts.require("Weth");
 var Dai = artifacts.require("Dai");
+
 //uniswap
 var Factory;
 var Dai;
@@ -2863,7 +2870,6 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount4);
     });
 
-    /*
     ////////////////-------------------------------------------- gsn ------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
@@ -2967,6 +2973,5 @@ contract("IncrementalSale", (accounts) => {
         "Gsn not true work"
       );
     });
-    */
   });
 });

@@ -37,10 +37,10 @@
     "truffle-assertions": "^0.9.2"
   },
   "scripts": {
-    "test": "mocha --exit --recursive --timeout 0",
+    "test": "bash scripts/run_tests.sh",
     "ganache": "node_modules/.bin/ganache-cli --networkId 1337 --chainId 1337 -l 20000000",
     "gsn": "node_modules/.bin/gsn start",
-    "coverage": "scripts/coverage"
+    "coverage": "bash scripts/coverage.sh"
   },
   "keywords": [
     "Treejer",

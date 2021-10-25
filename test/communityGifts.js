@@ -2157,7 +2157,7 @@ contract("HonoraryTree", (accounts) => {
       const usedResult3 = await testHonoraryTreeInstance.used.call(1);
       assert.equal(usedResult3, true, "used result is incorrect");
     });
-    /*
+
     //////////////--------------------------------------------gsn------------------------------------------------
     it("test gsn [ @skip-on-coverage ]", async () => {
       let env = await GsnTestEnvironment.startGsn("localhost");
@@ -2274,7 +2274,6 @@ contract("HonoraryTree", (accounts) => {
         "gsn not true work"
       );
     });
-    */
   });
 });
 /////////

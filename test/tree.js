@@ -1,7 +1,7 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Tree = contract.fromArtifact("Tree");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Tree = artifacts.require("Tree");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -15,7 +15,7 @@ const {
   erc721ErrorMsg,
 } = require("./enumes");
 
-describe("Tree", () => {
+contract("Tree", (accounts) => {
   let treeInstance;
 
   let arInstance;

@@ -1,28 +1,28 @@
 require("dotenv").config();
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Auction = contract.fromArtifact("Auction");
-const TreeFactory = contract.fromArtifact("TreeFactory");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Auction = artifacts.require("Auction");
+const TreeFactory = artifacts.require("TreeFactory");
 
-const Tree = contract.fromArtifact("Tree");
-const Planter = contract.fromArtifact("Planter");
-const WethFund = contract.fromArtifact("WethFund");
-const RegularSale = contract.fromArtifact("RegularSale");
-const Allocation = contract.fromArtifact("Allocation");
-const PlanterFund = contract.fromArtifact("PlanterFund");
-var Dai = contract.fromArtifact("Dai");
-var Weth = contract.fromArtifact("Weth");
+const Tree = artifacts.require("Tree");
+const Planter = artifacts.require("Planter");
+const WethFund = artifacts.require("WethFund");
+const RegularSale = artifacts.require("RegularSale");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
+var Dai = artifacts.require("Dai");
+var Weth = artifacts.require("Weth");
 let Factory;
 let UniswapV2Router02New;
 let TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
+  UniswapV2Router02New = artifacts.require("UniSwapMini");
 } else {
-  Factory = contract.fromArtifact("Factory");
-  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
-  TestUniswap = contract.fromArtifact("TestUniswap");
+  Factory = artifacts.require("Factory");
+  UniswapV2Router02New = artifacts.require("UniswapV2Router02New");
+  TestUniswap = artifacts.require("TestUniswap");
 }
 
 const assert = require("chai").assert;
@@ -42,7 +42,7 @@ const {
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-describe("Auction", () => {
+contract("Auction", (accounts) => {
   let auctionInstance;
   let arInstance;
   let treeFactoryInstance;

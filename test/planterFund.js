@@ -1,18 +1,18 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Planter = contract.fromArtifact("Planter");
-const PlanterFund = contract.fromArtifact("PlanterFund");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Planter = artifacts.require("Planter");
+const PlanterFund = artifacts.require("PlanterFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Units = require("ethereumjs-units");
 const zeroAddress = "0x0000000000000000000000000000000000000000";
-var Dai = contract.fromArtifact("Dai");
+var Dai = artifacts.require("Dai");
 
 //gsn
-const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
@@ -28,7 +28,7 @@ const {
   GsnErrorMsg,
 } = require("./enumes");
 
-describe("PlanterFund", () => {
+contract("PlanterFund", (accounts) => {
   let planterInstance;
   let planterFundInstance;
 
@@ -2702,10 +2702,6 @@ describe("PlanterFund", () => {
         "ambassador blance is not ok 2"
       );
 
-      // const txFee = await Common.getTransactionFee(tx);
-
-      // const txOrganizationFee = await Common.getTransactionFee(txOrganization);
-
       assert.equal(
         Number(accountBalance2),
         planterWithdrawAmount1,
@@ -2999,8 +2995,6 @@ describe("PlanterFund", () => {
         "localDevelopment blance is not ok 2"
       );
 
-      const txFee = await Common.getTransactionFee(tx);
-
       assert.equal(
         Number(accountOrganizationPlanterBalance2),
         planterWithdrawAmount1,
@@ -3092,8 +3086,6 @@ describe("PlanterFund", () => {
       const accountOrganizationPlanterBalance3 =
         await daiInstance.balanceOf.call(userAccount3);
       // const accountlocalDevelopBalance3 = await web3.eth.getBalance(userAccount6);
-
-      const txFee2 = await Common.getTransactionFee(tx2);
 
       assert.equal(
         Number(accountOrganizationPlanterBalance3),

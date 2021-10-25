@@ -1,14 +1,14 @@
 require("dotenv").config();
 
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const IncrementalSale = contract.fromArtifact("IncrementalSale");
-const TreeFactory = contract.fromArtifact("TreeFactory");
-const Tree = contract.fromArtifact("Tree");
-const Auction = contract.fromArtifact("Auction");
-const Attribute = contract.fromArtifact("Attribute");
-const RegularSale = contract.fromArtifact("RegularSale");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const IncrementalSale = artifacts.require("IncrementalSale");
+const TreeFactory = artifacts.require("TreeFactory");
+const Tree = artifacts.require("Tree");
+const Auction = artifacts.require("Auction");
+const Attribute = artifacts.require("Attribute");
+const RegularSale = artifacts.require("RegularSale");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
@@ -18,11 +18,11 @@ const Math = require("./math");
 const Units = require("ethereumjs-units");
 
 //treasury section
-const WethFund = contract.fromArtifact("WethFund");
-const Allocation = contract.fromArtifact("Allocation");
-const PlanterFund = contract.fromArtifact("PlanterFund");
-const Weth = contract.fromArtifact("Weth");
-var Dai = contract.fromArtifact("Dai");
+const WethFund = artifacts.require("WethFund");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
+const Weth = artifacts.require("Weth");
+var Dai = artifacts.require("Dai");
 //uniswap
 var Factory;
 var Dai;
@@ -30,15 +30,15 @@ var UniswapV2Router02New;
 var TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
+  UniswapV2Router02New = artifacts.require("UniSwapMini");
 } else {
-  Factory = contract.fromArtifact("Factory");
-  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
-  TestUniswap = contract.fromArtifact("TestUniswap");
+  Factory = artifacts.require("Factory");
+  UniswapV2Router02New = artifacts.require("UniswapV2Router02New");
+  TestUniswap = artifacts.require("TestUniswap");
 }
 
 //gsn
-// const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 // const Gsn = require("@opengsn/provider");
 // const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 // const ethers = require("ethers");
@@ -53,7 +53,7 @@ const {
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-describe("IncrementalSale", () => {
+contract("IncrementalSale", (accounts) => {
   let iSaleInstance;
   let arInstance;
   let TreeFactoryInstance;

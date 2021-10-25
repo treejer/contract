@@ -1,7 +1,7 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Planter = contract.fromArtifact("Planter");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Planter = artifacts.require("Planter");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -12,13 +12,13 @@ const Common = require("./common");
 const { CommonErrorMsg, GsnErrorMsg, PlanterErrorMsg } = require("./enumes");
 
 //gsn
-const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
-describe("Planter", () => {
+contract("Planter", (accounts) => {
   let planterInstance;
 
   let arInstance;

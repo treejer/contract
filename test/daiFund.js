@@ -1,21 +1,21 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const DaiFund = contract.fromArtifact("DaiFund");
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Allocation = contract.fromArtifact("Allocation");
-const PlanterFund = contract.fromArtifact("PlanterFund");
+const DaiFund = artifacts.require("DaiFund");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Math = require("./math");
 
-var Dai = contract.fromArtifact("Dai");
+var Dai = artifacts.require("Dai");
 
 const { CommonErrorMsg, DaiFundErrorMsg } = require("./enumes");
 
 const Common = require("./common");
 
-describe("DaiFund", () => {
+contract("DaiFund", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -59,7 +59,7 @@ describe("DaiFund", () => {
       deployerAccount
     );
   });
-  /*
+
   describe("deployment and set addresses", () => {
     before(async () => {
       /////////////---------------------- deploy contracts ------------------- //////////////
@@ -3170,5 +3170,4 @@ describe("DaiFund", () => {
       );
     });
   });
-  */
 });

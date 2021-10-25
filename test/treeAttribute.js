@@ -1,33 +1,33 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const IncrementalSale = contract.fromArtifact("IncrementalSale");
-const TreeFactory = contract.fromArtifact("TreeFactory");
-const Attribute = contract.fromArtifact("Attribute");
-const Tree = contract.fromArtifact("Tree");
-const TestTree = contract.fromArtifact("TestTree");
-const TestTree2 = contract.fromArtifact("TestTree2");
-const TestAttribute = contract.fromArtifact("TestAttribute");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const IncrementalSale = artifacts.require("IncrementalSale");
+const TreeFactory = artifacts.require("TreeFactory");
+const Attribute = artifacts.require("Attribute");
+const Tree = artifacts.require("Tree");
+const TestTree = artifacts.require("TestTree");
+const TestTree2 = artifacts.require("TestTree2");
+const TestAttribute = artifacts.require("TestAttribute");
 
 //treasury section
-const WethFund = contract.fromArtifact("WethFund");
+const WethFund = artifacts.require("WethFund");
 
-const PlanterFund = contract.fromArtifact("PlanterFund");
-const Weth = contract.fromArtifact("Weth");
+const PlanterFund = artifacts.require("PlanterFund");
+const Weth = artifacts.require("Weth");
 const Math = require("./math");
 
 //uniswap
 let Factory;
-var Dai = contract.fromArtifact("Dai");
+var Dai = artifacts.require("Dai");
 let UniswapV2Router02New;
 let TestUniswap;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
+  UniswapV2Router02New = artifacts.require("UniSwapMini");
 } else {
-  Factory = contract.fromArtifact("Factory");
-  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
-  TestUniswap = contract.fromArtifact("TestUniswap");
+  Factory = artifacts.require("Factory");
+  UniswapV2Router02New = artifacts.require("UniswapV2Router02New");
+  TestUniswap = artifacts.require("TestUniswap");
 }
 
 //test
@@ -40,7 +40,7 @@ const Common = require("./common");
 
 const { CommonErrorMsg, AttributeErrorMsg } = require("./enumes");
 
-describe("Attribute", () => {
+contract("Attribute", (accounts) => {
   let iSaleInstance;
   let arInstance;
 

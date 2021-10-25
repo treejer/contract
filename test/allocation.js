@@ -1,6 +1,6 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Allocation = contract.fromArtifact("Allocation");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Allocation = artifacts.require("Allocation");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -8,7 +8,7 @@ const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { CommonErrorMsg, AllocationErrorMsg } = require("./enumes");
 
-describe("Allocation", () => {
+contract("Allocation", (accounts) => {
   let arInstance;
   let allocationInstance;
 

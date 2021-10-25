@@ -1,27 +1,27 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
 require("dotenv").config();
 
-const WethFund = contract.fromArtifact("WethFund");
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const Allocation = contract.fromArtifact("Allocation");
-const PlanterFund = contract.fromArtifact("PlanterFund");
+const WethFund = artifacts.require("WethFund");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 
-var Dai = contract.fromArtifact("Dai");
-var Weth = contract.fromArtifact("Weth");
+var Dai = artifacts.require("Dai");
+var Weth = artifacts.require("Weth");
 let UniswapV2Router02New;
 let TestUniswap;
 let Factory;
 
 if (process.env.COVERAGE) {
-  UniswapV2Router02New = contract.fromArtifact("UniSwapMini");
+  UniswapV2Router02New = artifacts.require("UniSwapMini");
 } else {
-  Factory = contract.fromArtifact("Factory");
-  UniswapV2Router02New = contract.fromArtifact("UniswapV2Router02New");
-  TestUniswap = contract.fromArtifact("TestUniswap");
+  Factory = artifacts.require("Factory");
+  UniswapV2Router02New = artifacts.require("UniswapV2Router02New");
+  TestUniswap = artifacts.require("TestUniswap");
 }
 
 const Math = require("./math");
@@ -34,7 +34,7 @@ const {
 
 const Common = require("./common");
 
-describe("WethFund", () => {
+contract("WethFund", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];

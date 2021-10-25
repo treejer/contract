@@ -1,14 +1,14 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const RegularSale = contract.fromArtifact("RegularSale");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const RegularSale = artifacts.require("RegularSale");
 
-const TestRegularSale = contract.fromArtifact("TestRegularSale");
-const TreeFactory = contract.fromArtifact("TreeFactory");
-const Tree = contract.fromArtifact("Tree");
-const Planter = contract.fromArtifact("Planter");
-const WethFund = contract.fromArtifact("WethFund");
-const Attribute = contract.fromArtifact("Attribute");
+const TestRegularSale = artifacts.require("TestRegularSale");
+const TreeFactory = artifacts.require("TreeFactory");
+const Tree = artifacts.require("Tree");
+const Planter = artifacts.require("Planter");
+const WethFund = artifacts.require("WethFund");
+const Attribute = artifacts.require("Attribute");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -19,13 +19,13 @@ const Units = require("ethereumjs-units");
 const Math = require("./math");
 
 //treasury section
-const DaiFund = contract.fromArtifact("DaiFund");
-const Allocation = contract.fromArtifact("Allocation");
-const PlanterFund = contract.fromArtifact("PlanterFund");
-const Dai = contract.fromArtifact("Dai");
+const DaiFund = artifacts.require("DaiFund");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
+const Dai = artifacts.require("Dai");
 
 //gsn
-const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
@@ -37,7 +37,7 @@ const {
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
-describe("regularSale", () => {
+contract("regularSale", (accounts) => {
   let regularSaleInstance;
   let treeFactoryInstance;
   let arInstance;
@@ -2762,8 +2762,6 @@ describe("regularSale", () => {
         );
       });
 
-      const txFee = await Common.getTransactionFee(requestTx);
-
       let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
 
       assert.equal(
@@ -3230,8 +3228,6 @@ describe("regularSale", () => {
           Number(ev.amount) == Math.mul(web3.utils.toWei("7"), 1)
         );
       });
-
-      const txFee = await Common.getTransactionFee(requestTx);
 
       let funder3BalanceAfter = await daiInstance.balanceOf(funder3);
 

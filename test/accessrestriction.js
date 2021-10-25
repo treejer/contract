@@ -1,5 +1,5 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+const AccessRestriction = artifacts.require("AccessRestriction");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
@@ -7,7 +7,7 @@ const Common = require("./common");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const { CommonErrorMsg } = require("./enumes");
 
-describe("AccessRestriction", () => {
+contract("AccessRestriction", (accounts) => {
   let arInstance;
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];

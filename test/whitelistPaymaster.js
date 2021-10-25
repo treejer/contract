@@ -1,15 +1,15 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
+const AccessRestriction = artifacts.require("AccessRestriction");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const Common = require("./common");
 
-const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 
 const { CommonErrorMsg, GsnErrorMsg } = require("./enumes");
 
-describe("WhitelistPaymaster", () => {
+contract("WhitelistPaymaster", (accounts) => {
   let paymasterInstance;
   let arInstance;
 

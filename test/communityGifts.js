@@ -1,12 +1,12 @@
-const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
-const AccessRestriction = contract.fromArtifact("AccessRestriction");
-const HonoraryTree = contract.fromArtifact("HonoraryTree");
-const Attribute = contract.fromArtifact("Attribute");
-const TreeFactory = contract.fromArtifact("TreeFactory");
-const PlanterFund = contract.fromArtifact("PlanterFund");
-const Tree = contract.fromArtifact("Tree");
-const Dai = contract.fromArtifact("Dai");
-const TestHonoraryTree = contract.fromArtifact("TestHonoraryTree");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const HonoraryTree = artifacts.require("HonoraryTree");
+const Attribute = artifacts.require("Attribute");
+const TreeFactory = artifacts.require("TreeFactory");
+const PlanterFund = artifacts.require("PlanterFund");
+const Tree = artifacts.require("Tree");
+const Dai = artifacts.require("Dai");
+const TestHonoraryTree = artifacts.require("TestHonoraryTree");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const Units = require("ethereumjs-units");
@@ -16,7 +16,7 @@ const Common = require("./common");
 const math = require("./math");
 
 //gsn
-const WhitelistPaymaster = contract.fromArtifact("WhitelistPaymaster");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
@@ -30,7 +30,7 @@ const {
   GsnErrorMsg,
 } = require("./enumes");
 
-describe("HonoraryTree", () => {
+contract("HonoraryTree", (accounts) => {
   let honoraryTreeInstance;
   let arInstance;
   let attributeInstance;

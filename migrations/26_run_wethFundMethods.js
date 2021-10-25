@@ -3,7 +3,7 @@ require("dotenv").config();
 // local uniswap
 var Dai = artifacts.require("Dai.sol");
 var Weth = artifacts.require("Weth.sol");
-var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+var UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
 
 //deployed contracts
 const WethFund = artifacts.require("WethFund.sol");
@@ -39,10 +39,10 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Call WethFund Methods...");
 
   await WethFund.deployed().then(async (instance) => {
-    // await instance.setDaiAddress(daiAddress);
-    // await instance.setWethTokenAddress(wethAddress);
-    // await instance.setUniswapRouterAddress(UniswapV2RouterAddress);
-    // await instance.setPlanterFundContractAddress(planterFundAddress);
+    await instance.setDaiAddress(daiAddress);
+    await instance.setWethTokenAddress(wethAddress);
+    await instance.setUniswapRouterAddress(UniswapV2RouterAddress);
+    await instance.setPlanterFundContractAddress(planterFundAddress);
 
     await instance.setResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
     await instance.setLocalDevelopmentAddress(

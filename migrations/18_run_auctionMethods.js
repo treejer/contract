@@ -9,7 +9,6 @@ const RegularSale = artifacts.require("RegularSale.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
-  console.log("network", network);
 
   const treeFactoryAddress = TreeFactory.address;
   const allocationAddress = Allocation.address;

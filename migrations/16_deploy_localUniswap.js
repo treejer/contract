@@ -1,10 +1,9 @@
 // local uniswap
-var Factory = artifacts.require("Factory.sol");
-var Dai = artifacts.require("Dai.sol");
+
 var Weth = artifacts.require("Weth.sol");
+var Dai = artifacts.require("Dai.sol");
 var Wmatic = artifacts.require("Wmatic.sol");
-var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-var TestUniswap = artifacts.require("TestUniswap.sol");
+var UniswapV2Router02New = artifacts.require("UniSwapMini.sol");
 
 //deployed contracts
 
@@ -26,9 +25,10 @@ const TreeFactory = artifacts.require("TreeFactory.sol");
 //gsn
 
 module.exports = async function (deployer, network, accounts) {
-  const isLocal = network === "development" || network === "mumbai";
+  const isLocal = network === "development";
+  const isMumbai = network === "mumbai";
 
-  if (isLocal) {
+  if (isMumbai) {
     let factoryAddress;
     let wethAddress;
     let uniswapV2Router02NewAddress;
@@ -110,6 +110,60 @@ module.exports = async function (deployer, network, accounts) {
     console.log("wmaticAddress=", wmaticAddress);
     console.log("testUniswapAddress=", testUniswapAddress);
     console.log("factoryAddress=", factoryAddress);
+    console.log("uniswapV2Router02NewAddress=", uniswapV2Router02NewAddress);
+  } else if (isLocal) {
+    let wethAddress;
+    let uniswapV2Router02NewAddress;
+    let daiAddress;
+    let wmaticAddress;
+
+    await deployer
+      .deploy(Weth, "WETH", "weth", {
+        from: accounts[0],
+      })
+      .then((err) => {
+        wethAddress = Weth.address;
+      });
+
+    await deployer
+      .deploy(Dai, "DAI", "dai", {
+        from: accounts[0],
+      })
+      .then((err) => {
+        daiAddress = Dai.address;
+      });
+
+    await deployer
+      .deploy(Wmatic, "WMATIC", "wmatic", {
+        from: accounts[0],
+      })
+      .then((err) => {
+        wmaticAddress = Wmatic.address;
+      });
+
+    await deployer
+      .deploy(UniswapV2Router02New, daiAddress, wethAddress, {
+        from: accounts[0],
+      })
+      .then((err) => {
+        uniswapV2Router02NewAddress = UniswapV2Router02New.address;
+      });
+
+    let wethInstance = await Weth.deployed();
+    let daiInstance = await Dai.deployed();
+
+    await wethInstance.setMint(
+      uniswapV2Router02NewAddress,
+      web3.utils.toWei("125000", "Ether")
+    );
+    await daiInstance.setMint(
+      uniswapV2Router02NewAddress,
+      web3.utils.toWei("250000000", "Ether")
+    );
+
+    console.log("daiAddress=", daiAddress);
+    console.log("wethAddress=", wethAddress);
+    console.log("wmaticAddress=", wmaticAddress);
     console.log("uniswapV2Router02NewAddress=", uniswapV2Router02NewAddress);
   }
 

@@ -2159,121 +2159,121 @@ contract("HonoraryTree", (accounts) => {
     });
 
     //////////////--------------------------------------------gsn------------------------------------------------
-    it("test gsn [ @skip-on-coverage ]", async () => {
-      let env = await GsnTestEnvironment.startGsn("localhost");
+    // it("test gsn [ @skip-on-coverage ]", async () => {
+    //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-      const { forwarderAddress, relayHubAddress, paymasterAddress } =
-        env.contractsDeployment;
+    //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+    //     env.contractsDeployment;
 
-      await honoraryTreeInstance.setTrustedForwarder(forwarderAddress, {
-        from: deployerAccount,
-      });
+    //   await honoraryTreeInstance.setTrustedForwarder(forwarderAddress, {
+    //     from: deployerAccount,
+    //   });
 
-      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-      await paymaster.setRelayHub(relayHubAddress);
-      await paymaster.setTrustedForwarder(forwarderAddress);
+    //   await paymaster.setRelayHub(relayHubAddress);
+    //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-      web3.eth.sendTransaction({
-        from: accounts[0],
-        to: paymaster.address,
-        value: web3.utils.toWei("1"),
-      });
+    //   web3.eth.sendTransaction({
+    //     from: accounts[0],
+    //     to: paymaster.address,
+    //     value: web3.utils.toWei("1"),
+    //   });
 
-      origProvider = web3.currentProvider;
+    //   origProvider = web3.currentProvider;
 
-      conf = { paymasterAddress: paymaster.address };
+    //   conf = { paymasterAddress: paymaster.address };
 
-      gsnProvider = await Gsn.RelayProvider.newProvider({
-        provider: origProvider,
-        config: conf,
-      }).init();
+    //   gsnProvider = await Gsn.RelayProvider.newProvider({
+    //     provider: origProvider,
+    //     config: conf,
+    //   }).init();
 
-      provider = new ethers.providers.Web3Provider(gsnProvider);
+    //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-      let signerRecipient = provider.getSigner(3);
+    //   let signerRecipient = provider.getSigner(3);
 
-      let contractHonoraryTree = await new ethers.Contract(
-        honoraryTreeInstance.address,
-        honoraryTreeInstance.abi,
-        signerRecipient
-      );
+    //   let contractHonoraryTree = await new ethers.Contract(
+    //     honoraryTreeInstance.address,
+    //     honoraryTreeInstance.abi,
+    //     signerRecipient
+    //   );
 
-      const recipient = userAccount2;
-      const symbol = 1234554321;
+    //   const recipient = userAccount2;
+    //   const symbol = 1234554321;
 
-      //////////--------------add recipient by admin
+    //   //////////--------------add recipient by admin
 
-      const startTree = 11;
-      const endTree = 13;
+    //   const startTree = 11;
+    //   const endTree = 13;
 
-      const transferAmount = web3.utils.toWei("14");
-      const adminWallet = userAccount8;
+    //   const transferAmount = web3.utils.toWei("14");
+    //   const adminWallet = userAccount8;
 
-      ///////---------------- handle admin walllet
+    //   ///////---------------- handle admin walllet
 
-      await daiInstance.setMint(adminWallet, transferAmount);
+    //   await daiInstance.setMint(adminWallet, transferAmount);
 
-      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
-        from: adminWallet,
-      });
+    //   await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+    //     from: adminWallet,
+    //   });
 
-      ////////////////////////////////////////////////////////////////////////////////////////
+    //   ////////////////////////////////////////////////////////////////////////////////////////
 
-      const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
-      const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
+    //   const startDate = parseInt(new Date().getTime() / 1000) - 60 * 60;
+    //   const expiryDate = parseInt(new Date().getTime() / 1000) + 10 * 60 * 60;
 
-      await honoraryTreeInstance.addRecipient(
-        recipient,
-        startDate,
-        expiryDate,
-        {
-          from: dataManager,
-        }
-      );
+    //   await honoraryTreeInstance.addRecipient(
+    //     recipient,
+    //     startDate,
+    //     expiryDate,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      ///------------------------------------------- set mint ----------------------------------------------------------
+    //   ///------------------------------------------- set mint ----------------------------------------------------------
 
-      await honoraryTreeInstance.setTreeRange(adminWallet, startTree, endTree, {
-        from: dataManager,
-      });
+    //   await honoraryTreeInstance.setTreeRange(adminWallet, startTree, endTree, {
+    //     from: dataManager,
+    //   });
 
-      await honoraryTreeInstance.reserveSymbol(1050, {
-        from: dataManager,
-      });
+    //   await honoraryTreeInstance.reserveSymbol(1050, {
+    //     from: dataManager,
+    //   });
 
-      await honoraryTreeInstance.updateReferralTreePayments(
-        web3.utils.toWei("4.9"), //planter share
-        web3.utils.toWei("2.1"), //ambassedor share
-        { from: dataManager }
-      );
+    //   await honoraryTreeInstance.updateReferralTreePayments(
+    //     web3.utils.toWei("4.9"), //planter share
+    //     web3.utils.toWei("2.1"), //ambassedor share
+    //     { from: dataManager }
+    //   );
 
-      //////////////////////////////////////////////////////////////////////////////////////////
+    //   //////////////////////////////////////////////////////////////////////////////////////////
 
-      let balanceAccountBefore = await web3.eth.getBalance(recipient);
+    //   let balanceAccountBefore = await web3.eth.getBalance(recipient);
 
-      await contractHonoraryTree
-        .claim({
-          from: recipient,
-        })
-        .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+    //   await contractHonoraryTree
+    //     .claim({
+    //       from: recipient,
+    //     })
+    //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-      await paymaster.addFunderWhitelistTarget(honoraryTreeInstance.address, {
-        from: deployerAccount,
-      });
+    //   await paymaster.addFunderWhitelistTarget(honoraryTreeInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await contractHonoraryTree.claim({
-        from: recipient,
-      });
+    //   await contractHonoraryTree.claim({
+    //     from: recipient,
+    //   });
 
-      let balanceAccountAfter = await web3.eth.getBalance(recipient);
+    //   let balanceAccountAfter = await web3.eth.getBalance(recipient);
 
-      assert.equal(
-        balanceAccountAfter,
-        balanceAccountBefore,
-        "gsn not true work"
-      );
-    });
+    //   assert.equal(
+    //     balanceAccountAfter,
+    //     balanceAccountBefore,
+    //     "gsn not true work"
+    //   );
+    // });
   });
 });
 /////////

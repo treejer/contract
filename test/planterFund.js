@@ -3061,132 +3061,132 @@ contract("PlanterFund", (accounts) => {
     });
 
     //////---------------------------------------------- test gsn --------------------------------
-    it("test gsn [ @skip-on-coverage ]", async () => {
-      let env = await GsnTestEnvironment.startGsn("localhost");
+    // it("test gsn [ @skip-on-coverage ]", async () => {
+    //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-      // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
-      // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
-      // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
-      const { forwarderAddress, relayHubAddress, paymasterAddress } =
-        env.contractsDeployment;
+    //   // const forwarderAddress = "0xDA69A8986295576aaF2F82ab1cf4342F1Fd6fb6a";
+    //   // const relayHubAddress = "0xe692c56fF6d87b1028C967C5Ab703FBd1839bBb2";
+    //   // const paymasterAddress = "0x5337173441B06673d317519cb2503c8395015b15";
+    //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+    //     env.contractsDeployment;
 
-      await planterFundInstance.setTrustedForwarder(forwarderAddress, {
-        from: deployerAccount,
-      });
+    //   await planterFundInstance.setTrustedForwarder(forwarderAddress, {
+    //     from: deployerAccount,
+    //   });
 
-      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-      await paymaster.setRelayHub(relayHubAddress);
-      await paymaster.setTrustedForwarder(forwarderAddress);
+    //   await paymaster.setRelayHub(relayHubAddress);
+    //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-      web3.eth.sendTransaction({
-        from: accounts[0],
-        to: paymaster.address,
-        value: web3.utils.toWei("1"),
-      });
+    //   web3.eth.sendTransaction({
+    //     from: accounts[0],
+    //     to: paymaster.address,
+    //     value: web3.utils.toWei("1"),
+    //   });
 
-      origProvider = web3.currentProvider;
+    //   origProvider = web3.currentProvider;
 
-      conf = { paymasterAddress: paymaster.address };
+    //   conf = { paymasterAddress: paymaster.address };
 
-      gsnProvider = await Gsn.RelayProvider.newProvider({
-        provider: origProvider,
-        config: conf,
-      }).init();
+    //   gsnProvider = await Gsn.RelayProvider.newProvider({
+    //     provider: origProvider,
+    //     config: conf,
+    //   }).init();
 
-      provider = new ethers.providers.Web3Provider(gsnProvider);
+    //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-      let signerPlanterFund = provider.getSigner(4);
+    //   let signerPlanterFund = provider.getSigner(4);
 
-      let contractPlanterFund = await new ethers.Contract(
-        planterFundInstance.address,
-        planterFundInstance.abi,
-        signerPlanterFund
-      );
+    //   let contractPlanterFund = await new ethers.Contract(
+    //     planterFundInstance.address,
+    //     planterFundInstance.abi,
+    //     signerPlanterFund
+    //   );
 
-      //////////---------------------------------------------------------------------------------
+    //   //////////---------------------------------------------------------------------------------
 
-      const planterAddress = userAccount3;
+    //   const planterAddress = userAccount3;
 
-      await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+    //   await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
-      const treeId = 1;
+    //   const treeId = 1;
 
-      const planterFund = Units.convert("100", "eth", "wei");
-      const ambassadorFund = Units.convert("50", "eth", "wei");
+    //   const planterFund = Units.convert("100", "eth", "wei");
+    //   const ambassadorFund = Units.convert("50", "eth", "wei");
 
-      const planterWithdrawAmount = Units.convert("100", "eth", "wei");
+    //   const planterWithdrawAmount = Units.convert("100", "eth", "wei");
 
-      await planterFundInstance.setPlanterContractAddress(
-        planterInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await planterFundInstance.setPlanterContractAddress(
+    //     planterInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await Common.successJoin(
-        arInstance,
-        deployerAccount,
-        planterInstance,
-        treeId,
-        planterAddress,
-        userAccount4,
-        zeroAddress
-      );
+    //   await Common.successJoin(
+    //     arInstance,
+    //     deployerAccount,
+    //     planterInstance,
+    //     treeId,
+    //     planterAddress,
+    //     userAccount4,
+    //     zeroAddress
+    //   );
 
-      await daiInstance.transfer(
-        planterFundInstance.address,
-        Units.convert("150", "eth", "wei"),
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await daiInstance.transfer(
+    //     planterFundInstance.address,
+    //     Units.convert("150", "eth", "wei"),
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await planterFundInstance.updateProjectedEarnings(
-        treeId,
-        planterFund,
-        ambassadorFund,
-        {
-          from: userAccount8,
-        }
-      );
+    //   await planterFundInstance.updateProjectedEarnings(
+    //     treeId,
+    //     planterFund,
+    //     ambassadorFund,
+    //     {
+    //       from: userAccount8,
+    //     }
+    //   );
 
-      await planterFundInstance.updatePlanterTotalClaimed(
-        treeId,
-        planterAddress,
-        25920,
-        {
-          from: userAccount6,
-        }
-      );
+    //   await planterFundInstance.updatePlanterTotalClaimed(
+    //     treeId,
+    //     planterAddress,
+    //     25920,
+    //     {
+    //       from: userAccount6,
+    //     }
+    //   );
 
-      await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
+    //   await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      let balanceAccountBefore = await web3.eth.getBalance(planterAddress);
+    //   let balanceAccountBefore = await web3.eth.getBalance(planterAddress);
 
-      await contractPlanterFund
-        .withdrawBalance(planterWithdrawAmount, {
-          from: planterAddress,
-        })
-        .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+    //   await contractPlanterFund
+    //     .withdrawBalance(planterWithdrawAmount, {
+    //       from: planterAddress,
+    //     })
+    //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-      await paymaster.addPlanterWhitelistTarget(planterFundInstance.address, {
-        from: deployerAccount,
-      });
+    //   await paymaster.addPlanterWhitelistTarget(planterFundInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await contractPlanterFund.withdrawBalance(planterWithdrawAmount, {
-        from: planterAddress,
-      });
+    //   await contractPlanterFund.withdrawBalance(planterWithdrawAmount, {
+    //     from: planterAddress,
+    //   });
 
-      let balanceAccountAfter = await web3.eth.getBalance(planterAddress);
+    //   let balanceAccountAfter = await web3.eth.getBalance(planterAddress);
 
-      assert.equal(
-        balanceAccountAfter,
-        balanceAccountBefore,
-        "gsn not true work"
-      );
-    });
+    //   assert.equal(
+    //     balanceAccountAfter,
+    //     balanceAccountBefore,
+    //     "gsn not true work"
+    //   );
+    // });
   });
 });

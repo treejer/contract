@@ -2871,107 +2871,107 @@ contract("IncrementalSale", (accounts) => {
     });
 
     ////////////////-------------------------------------------- gsn ------------------------------------------------
-    it("test gsn [ @skip-on-coverage ]", async () => {
-      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
-        from: dataManager,
-      });
+    // it("test gsn [ @skip-on-coverage ]", async () => {
+    //   await allocationInstance.assignAllocationToTree(100, 10000, 0, {
+    //     from: dataManager,
+    //   });
 
-      await iSaleInstance.createIncrementalSale(
-        101,
-        web3.utils.toWei("0.01"),
-        100,
-        20,
-        1000,
-        {
-          from: dataManager,
-        }
-      );
+    //   await iSaleInstance.createIncrementalSale(
+    //     101,
+    //     web3.utils.toWei("0.01"),
+    //     100,
+    //     20,
+    //     1000,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treeFactoryInstance.address,
+    //     deployerAccount
+    //   );
 
-      ///////------------------------------handle gsn---------------------------------
+    //   ///////------------------------------handle gsn---------------------------------
 
-      let env = await GsnTestEnvironment.startGsn("localhost");
+    //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-      const { forwarderAddress, relayHubAddress, paymasterAddress } =
-        env.contractsDeployment;
+    //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
+    //     env.contractsDeployment;
 
-      await iSaleInstance.setTrustedForwarder(forwarderAddress, {
-        from: deployerAccount,
-      });
+    //   await iSaleInstance.setTrustedForwarder(forwarderAddress, {
+    //     from: deployerAccount,
+    //   });
 
-      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-      await paymaster.setRelayHub(relayHubAddress);
-      await paymaster.setTrustedForwarder(forwarderAddress);
+    //   await paymaster.setRelayHub(relayHubAddress);
+    //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-      web3.eth.sendTransaction({
-        from: accounts[0],
-        to: paymaster.address,
-        value: web3.utils.toWei("1"),
-      });
+    //   web3.eth.sendTransaction({
+    //     from: accounts[0],
+    //     to: paymaster.address,
+    //     value: web3.utils.toWei("1"),
+    //   });
 
-      origProvider = web3.currentProvider;
+    //   origProvider = web3.currentProvider;
 
-      conf = { paymasterAddress: paymaster.address };
+    //   conf = { paymasterAddress: paymaster.address };
 
-      gsnProvider = await Gsn.RelayProvider.newProvider({
-        provider: origProvider,
-        config: conf,
-      }).init();
+    //   gsnProvider = await Gsn.RelayProvider.newProvider({
+    //     provider: origProvider,
+    //     config: conf,
+    //   }).init();
 
-      provider = new ethers.providers.Web3Provider(gsnProvider);
+    //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-      let signerFunder = provider.getSigner(3);
+    //   let signerFunder = provider.getSigner(3);
 
-      let contractFunder = await new ethers.Contract(
-        iSaleInstance.address,
-        iSaleInstance.abi,
-        signerFunder
-      );
+    //   let contractFunder = await new ethers.Contract(
+    //     iSaleInstance.address,
+    //     iSaleInstance.abi,
+    //     signerFunder
+    //   );
 
-      //mint weth for funder
-      await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
+    //   //mint weth for funder
+    //   await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
 
-      await wethInstance.approve(
-        iSaleInstance.address,
-        web3.utils.toWei("0.01"),
-        {
-          from: userAccount2,
-        }
-      );
+    //   await wethInstance.approve(
+    //     iSaleInstance.address,
+    //     web3.utils.toWei("0.01"),
+    //     {
+    //       from: userAccount2,
+    //     }
+    //   );
 
-      let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+    //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-      await contractFunder
-        .fundTree(1, zeroAddress, zeroAddress)
-        .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
+    //   await contractFunder
+    //     .fundTree(1, zeroAddress, zeroAddress)
+    //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
-      await paymaster.addFunderWhitelistTarget(iSaleInstance.address, {
-        from: deployerAccount,
-      });
+    //   await paymaster.addFunderWhitelistTarget(iSaleInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await contractFunder.fundTree(1, zeroAddress, zeroAddress);
+    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress);
 
-      //////////--------------check tree owner
-      let addressGetToken = await treeTokenInstance.ownerOf(101);
+    //   //////////--------------check tree owner
+    //   let addressGetToken = await treeTokenInstance.ownerOf(101);
 
-      assert.equal(addressGetToken, userAccount2, "1.mint not true");
+    //   assert.equal(addressGetToken, userAccount2, "1.mint not true");
 
-      let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+    //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
 
-      console.log("balanceAccountBefore", Number(balanceAccountBefore));
-      console.log("balanceAccountAfter", Number(balanceAccountAfter));
+    //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
 
-      assert.equal(
-        balanceAccountAfter,
-        balanceAccountBefore,
-        "Gsn not true work"
-      );
-    });
+    //   assert.equal(
+    //     balanceAccountAfter,
+    //     balanceAccountBefore,
+    //     "Gsn not true work"
+    //   );
+    // });
   });
 });

@@ -3292,210 +3292,210 @@ contract("regularSale", (accounts) => {
     });
 
     // ////--------------------------------gsn test--------------------------
-    it("test gsn [ @skip-on-coverage ]", async () => {
-      ////////////// ------------------- handle allocation data ----------------------
+    // it("test gsn [ @skip-on-coverage ]", async () => {
+    //   ////////////// ------------------- handle allocation data ----------------------
 
-      await allocationInstance.addAllocationData(
-        4000,
-        1200,
-        1200,
-        1200,
-        1200,
-        1200,
-        0,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+    //   await allocationInstance.addAllocationData(
+    //     4000,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     1200,
+    //     0,
+    //     0,
+    //     {
+    //       from: dataManager,
+    //     }
+    //   );
 
-      await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
-        from: dataManager,
-      });
+    //   await allocationInstance.assignAllocationToTree(10001, 10007, 0, {
+    //     from: dataManager,
+    //   });
 
-      /////////////////////////-------------------- deploy contracts --------------------------
+    //   /////////////////////////-------------------- deploy contracts --------------------------
 
-      let planterInstance = await Planter.new({
-        from: deployerAccount,
-      });
+    //   let planterInstance = await Planter.new({
+    //     from: deployerAccount,
+    //   });
 
-      await planterInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+    //   await planterInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      ///////////////////// ------------------- handle address here --------------------------
+    //   ///////////////////// ------------------- handle address here --------------------------
 
-      await regularSaleInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        { from: deployerAccount }
-      );
+    //   await regularSaleInstance.setTreeFactoryAddress(
+    //     treeFactoryInstance.address,
+    //     { from: deployerAccount }
+    //   );
 
-      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await regularSaleInstance.setAllocationAddress(
-        allocationInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await regularSaleInstance.setAllocationAddress(
+    //     allocationInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      //-------------daiFundInstance
+    //   //-------------daiFundInstance
 
-      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
+    //   await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await daiFundInstance.setPlanterFundContractAddress(
-        planterFundsInstnce.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await daiFundInstance.setPlanterFundContractAddress(
+    //     planterFundsInstnce.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      //-------------treeFactoryInstance
+    //   //-------------treeFactoryInstance
 
-      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
+    //   await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await treeFactoryInstance.setPlanterContractAddress(
-        planterInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+    //   await treeFactoryInstance.setPlanterContractAddress(
+    //     planterInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
 
-      await regularSaleInstance.setAttributesAddress(
-        attributeInstance.address,
-        { from: deployerAccount }
-      );
+    //   await regularSaleInstance.setAttributesAddress(
+    //     attributeInstance.address,
+    //     { from: deployerAccount }
+    //   );
 
-      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount,
-      });
+    //   await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      ///////////////////////// -------------------- handle roles here ----------------
+    //   ///////////////////////// -------------------- handle roles here ----------------
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        regularSaleInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     regularSaleInstance.address,
+    //     deployerAccount
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        treeFactoryInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     treeFactoryInstance.address,
+    //     deployerAccount
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        daiFundInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     daiFundInstance.address,
+    //     deployerAccount
+    //   );
 
-      await Common.addTreejerContractRole(
-        arInstance,
-        attributeInstance.address,
-        deployerAccount
-      );
+    //   await Common.addTreejerContractRole(
+    //     arInstance,
+    //     attributeInstance.address,
+    //     deployerAccount
+    //   );
 
-      ///////------------------------------handle gsn---------------------------------
+    //   ///////------------------------------handle gsn---------------------------------
 
-      let env = await GsnTestEnvironment.startGsn("localhost");
+    //   let env = await GsnTestEnvironment.startGsn("localhost");
 
-      const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
+    //   const { forwarderAddress, relayHubAddress } = env.contractsDeployment;
 
-      await regularSaleInstance.setTrustedForwarder(forwarderAddress, {
-        from: deployerAccount,
-      });
+    //   await regularSaleInstance.setTrustedForwarder(forwarderAddress, {
+    //     from: deployerAccount,
+    //   });
 
-      let paymaster = await WhitelistPaymaster.new(arInstance.address);
+    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
 
-      await paymaster.setRelayHub(relayHubAddress);
-      await paymaster.setTrustedForwarder(forwarderAddress);
+    //   await paymaster.setRelayHub(relayHubAddress);
+    //   await paymaster.setTrustedForwarder(forwarderAddress);
 
-      web3.eth.sendTransaction({
-        from: accounts[0],
-        to: paymaster.address,
-        value: web3.utils.toWei("1"),
-      });
+    //   web3.eth.sendTransaction({
+    //     from: accounts[0],
+    //     to: paymaster.address,
+    //     value: web3.utils.toWei("1"),
+    //   });
 
-      origProvider = web3.currentProvider;
+    //   origProvider = web3.currentProvider;
 
-      conf = { paymasterAddress: paymaster.address };
+    //   conf = { paymasterAddress: paymaster.address };
 
-      gsnProvider = await Gsn.RelayProvider.newProvider({
-        provider: origProvider,
-        config: conf,
-      }).init();
+    //   gsnProvider = await Gsn.RelayProvider.newProvider({
+    //     provider: origProvider,
+    //     config: conf,
+    //   }).init();
 
-      provider = new ethers.providers.Web3Provider(gsnProvider);
+    //   provider = new ethers.providers.Web3Provider(gsnProvider);
 
-      let signerFunder = provider.getSigner(3);
+    //   let signerFunder = provider.getSigner(3);
 
-      let contractFunder = await new ethers.Contract(
-        regularSaleInstance.address,
-        regularSaleInstance.abi,
-        signerFunder
-      );
+    //   let contractFunder = await new ethers.Contract(
+    //     regularSaleInstance.address,
+    //     regularSaleInstance.abi,
+    //     signerFunder
+    //   );
 
-      //mint dai for funder
-      await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
+    //   //mint dai for funder
+    //   await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
 
-      await daiInstance.balanceOf(userAccount2);
+    //   await daiInstance.balanceOf(userAccount2);
 
-      await daiInstance.approve(
-        regularSaleInstance.address,
-        web3.utils.toWei("7"),
-        {
-          from: userAccount2,
-        }
-      );
+    //   await daiInstance.approve(
+    //     regularSaleInstance.address,
+    //     web3.utils.toWei("7"),
+    //     {
+    //       from: userAccount2,
+    //     }
+    //   );
 
-      let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
+    //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
-      await paymaster.addPlanterWhitelistTarget(regularSaleInstance.address, {
-        from: deployerAccount,
-      });
+    //   await paymaster.addPlanterWhitelistTarget(regularSaleInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await contractFunder
-        .fundTree(1, zeroAddress, zeroAddress, {
-          from: userAccount2,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
+    //   await contractFunder
+    //     .fundTree(1, zeroAddress, zeroAddress, {
+    //       from: userAccount2,
+    //     })
+    //     .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
 
-      await paymaster.removePlanterWhitelistTarget(
-        regularSaleInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
-      await paymaster.addFunderWhitelistTarget(regularSaleInstance.address, {
-        from: deployerAccount,
-      });
+    //   await paymaster.removePlanterWhitelistTarget(
+    //     regularSaleInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
+    //   await paymaster.addFunderWhitelistTarget(regularSaleInstance.address, {
+    //     from: deployerAccount,
+    //   });
 
-      await contractFunder.fundTree(1, zeroAddress, zeroAddress, {
-        from: userAccount2,
-      });
+    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress, {
+    //     from: userAccount2,
+    //   });
 
-      let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
+    //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
 
-      console.log("balanceAccountBefore", Number(balanceAccountBefore));
-      console.log("balanceAccountAfter", Number(balanceAccountAfter));
+    //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
+    //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
 
-      assert.equal(
-        balanceAccountAfter,
-        balanceAccountBefore,
-        "Gsn not true work"
-      );
-    });
+    //   assert.equal(
+    //     balanceAccountAfter,
+    //     balanceAccountBefore,
+    //     "Gsn not true work"
+    //   );
+    // });
 
     ////////////////////// ------------------------------------------- request tree by id ---------------------------------------------------
     it("should request tree by id successfully", async () => {

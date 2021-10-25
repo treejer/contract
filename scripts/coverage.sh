@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# npm install -g istanbul-combine
+
 run_coverage() {
     path=$(pwd)
     

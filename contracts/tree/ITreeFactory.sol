@@ -95,9 +95,9 @@ interface ITreeFactory {
 
     /** @dev admin set the minimum time to send next update request
      * NOTE emit an {TreeUpdateIntervalChanged} event
-     * @param _day time to next update request
+     * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _day) external;
+    function setUpdateInterval(uint256 _seconds) external;
 
     /**
      * @dev admin list tree
@@ -313,8 +313,9 @@ interface ITreeFactory {
     /**
      * @dev emitted when planting for regular tree verified
      * @param treeId id of tree that verified
+     * @param tempTreeId id of tempTree
      */
-    event TreeVerified(uint256 treeId);
+    event TreeVerified(uint256 treeId, uint256 tempTreeId);
 
     /**
      * @dev emitted when planting for regular tree rejected

@@ -72,6 +72,7 @@ const TreeFactoryErrorMsg = {
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
   TREE_MUST_BE_PLANTED: "tree must be planted",
   REGULAR_TREE_NOT_EXIST: "regularTree not exist",
+  TREE_HAS_PENDING_UPDATE: "tree has pending update",
 };
 const TreasuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",

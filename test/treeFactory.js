@@ -212,10 +212,10 @@ contract("TreeFactory", (accounts) => {
       let dayBefore = await treeFactoryInstance.treeUpdateInterval();
 
       await treeFactoryInstance
-        .setUpdateInterval(10, { from: userAccount1 })
+        .setUpdateInterval(10 * 24 * 60 * 60, { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      let tx = await treeFactoryInstance.setUpdateInterval(10, {
+      let tx = await treeFactoryInstance.setUpdateInterval(10 * 24 * 60 * 60, {
         from: dataManager,
       });
 
@@ -266,15 +266,21 @@ contract("TreeFactory", (accounts) => {
       const treeId = 0;
       const newIpfs = "new ipfs hash";
 
-      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
-
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
       const treeData1 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(treeData1.treeSpecs, ipfsHash, "ipfs hash is not correct");
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, newIpfs, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
 
       const eventTx = await treeFactoryInstance.updateTreeSpecs(
         treeId,
@@ -295,12 +301,6 @@ contract("TreeFactory", (accounts) => {
         newIpfs,
         "new ipfs hash is not correct"
       );
-
-      await treeFactoryInstance
-        .updateTreeSpecs(treeId, newIpfs, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
     });
   });
 
@@ -2195,6 +2195,14 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
 
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, "new ipfs", {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_HAS_PENDING_UPDATE);
+
       let result = await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(
@@ -2255,7 +2263,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
       const treeUpdateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(
-        3,
+        3 * 24 * 60 * 60,
         {
           from: dataManager,
         }
@@ -2275,7 +2283,7 @@ contract("TreeFactory", (accounts) => {
       });
 
       const treeUpdateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(
-        4,
+        4 * 24 * 60 * 60,
         {
           from: dataManager,
         }
@@ -2305,8 +2313,6 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
     });
-
-    it("should fail to update tree", async () => {});
 
     it("Should update tree not work because update time not reach", async () => {
       const treeId = 1;
@@ -2745,6 +2751,12 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
+      await treeFactoryInstance.updateTreeSpecs(treeId, "new ipfs", {
+        from: dataManager,
+      });
+
       await treeFactoryInstance
         .updateTree(treeId, ipfsHash, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
@@ -2762,6 +2774,12 @@ contract("TreeFactory", (accounts) => {
       await treeFactoryInstance.updateTree(treeId, ipfsHash, {
         from: userAccount2,
       });
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, "new ipfs", {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_HAS_PENDING_UPDATE);
     });
 
     ////////////////////-----------------------------------------------------------verifyUpdate test--------------------------------------------
@@ -5375,7 +5393,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
       truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
-        return ev.treeId == 10001;
+        return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
     });
 
@@ -5451,7 +5469,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
       truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
-        return ev.treeId == 10001;
+        return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
     });
 

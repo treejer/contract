@@ -71,7 +71,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     event TreeUpdatedVerified(uint256 treeId);
     event TreeUpdateRejected(uint256 treeId);
     event TreePlanted(uint256 treeId);
-    event TreeVerified(uint256 treeId);
+    event TreeVerified(uint256 treeId, uint256 tempTreeId);
     event TreeRejected(uint256 treeId);
     event TreeUpdateIntervalChanged();
     event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
@@ -109,6 +109,15 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** NOTE modifier for check treeId to be valid tree */
     modifier validTree(uint256 _treeId) {
         require(trees[_treeId].treeStatus > 0, "invalid tree");
+        _;
+    }
+
+    /** NOTE modifier for check tree has not pending update */
+    modifier notHavePendingUpdate(uint256 _treeId) {
+        require(
+            treeUpdates[_treeId].updateStatus != 1,
+            "tree has pending update"
+        );
         _;
     }
 
@@ -188,10 +197,10 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /** @dev admin set the minimum time to send next update request
-     * @param _day time to next update request
+     * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _day) external onlyDataManager {
-        treeUpdateInterval = _day * 86400;
+    function setUpdateInterval(uint256 _seconds) external onlyDataManager {
+        treeUpdateInterval = _seconds;
 
         emit TreeUpdateIntervalChanged();
     }
@@ -578,7 +587,7 @@ contract TreeFactory is Initializable, RelayRecipient {
             if (!treeToken.exists(lastRegualarTreeId)) {
                 treeData.saleType = 4;
             }
-            emit TreeVerified(lastRegualarTreeId);
+            emit TreeVerified(lastRegualarTreeId, _tempTreeId);
         } else {
             emit TreeRejected(_tempTreeId);
         }
@@ -650,6 +659,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
         onlyScript
+        notHavePendingUpdate(_treeId)
     {
         trees[_treeId].treeSpecs = _treeSpecs;
 

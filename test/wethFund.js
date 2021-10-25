@@ -10,19 +10,9 @@ const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 
-var Dai = artifacts.require("Dai");
-var Weth = artifacts.require("Weth");
-let UniswapV2Router02New;
-let TestUniswap;
-let Factory;
+var Token = artifacts.require("Weth");
 
-if (process.env.COVERAGE) {
-  UniswapV2Router02New = artifacts.require("UniSwapMini");
-} else {
-  Factory = artifacts.require("Factory");
-  UniswapV2Router02New = artifacts.require("UniswapV2Router02New");
-  TestUniswap = artifacts.require("TestUniswap");
-}
+let UniswapV2Router02New = artifacts.require("UniSwapMini");
 
 const Math = require("./math");
 
@@ -75,60 +65,26 @@ contract("WethFund", (accounts) => {
       from: deployerAccount,
     });
 
-    if (!process.env.COVERAGE) {
-      factoryInstance = await Factory.new(accounts[2], {
-        from: deployerAccount,
-      });
-      const factoryAddress = factoryInstance.address;
-      wethInstance = await Weth.new("WETH", "weth", { from: accounts[0] });
-      WETHAddress = wethInstance.address;
-      daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-      DAIAddress = daiInstance.address;
-      uniswapRouterInstance = await UniswapV2Router02New.new(
-        factoryAddress,
-        WETHAddress,
-        { from: deployerAccount }
-      );
-      uniswapV2Router02NewAddress = uniswapRouterInstance.address;
-      testUniswapInstance = await TestUniswap.new(
-        uniswapV2Router02NewAddress,
-        DAIAddress,
-        WETHAddress,
-        { from: deployerAccount }
-      );
-      /////---------------------------addLiquidity-------------------------
-      const testUniswapAddress = testUniswapInstance.address;
-      await wethInstance.setMint(
-        testUniswapAddress,
-        web3.utils.toWei("125000", "Ether")
-      );
-      await daiInstance.setMint(
-        testUniswapAddress,
-        web3.utils.toWei("250000000", "Ether")
-      );
-      await testUniswapInstance.addLiquidity();
-    } else {
-      wethInstance = await Weth.new("WETH", "weth", {
-        from: accounts[0],
-      });
-      WETHAddress = wethInstance.address;
-      daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
-      DAIAddress = daiInstance.address;
-      uniswapRouterInstance = await UniswapV2Router02New.new(
-        DAIAddress,
-        WETHAddress,
-        { from: deployerAccount }
-      );
-      uniswapV2Router02NewAddress = uniswapRouterInstance.address;
-      await wethInstance.setMint(
-        uniswapV2Router02NewAddress,
-        web3.utils.toWei("125000", "Ether")
-      );
-      await daiInstance.setMint(
-        uniswapV2Router02NewAddress,
-        web3.utils.toWei("250000000", "Ether")
-      );
-    }
+    wethInstance = await Token.new("WETH", "weth", {
+      from: accounts[0],
+    });
+    WETHAddress = wethInstance.address;
+    daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+    DAIAddress = daiInstance.address;
+    uniswapRouterInstance = await UniswapV2Router02New.new(
+      DAIAddress,
+      WETHAddress,
+      { from: deployerAccount }
+    );
+    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    await wethInstance.setMint(
+      uniswapV2Router02NewAddress,
+      web3.utils.toWei("125000", "Ether")
+    );
+    await daiInstance.setMint(
+      uniswapV2Router02NewAddress,
+      web3.utils.toWei("250000000", "Ether")
+    );
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
     await Common.addScriptRole(arInstance, funderRank, deployerAccount);

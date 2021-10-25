@@ -31,3 +31,6 @@ dist
 .coverage_contracts
 
 slither.json
+
+final-coverage-json
+final-coverage

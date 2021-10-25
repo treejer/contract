@@ -20,7 +20,7 @@ run_coverage() {
         
         npx truffle run coverage --file $entry
 
-        mv "$path"/coverage.json final-coverage/"$testFileName".json
+        mv "$path"/coverage.json final-coverage-json/"$testFileName".json
         
         rm -r coverage
     fi

@@ -75,12 +75,13 @@ run_test() {
 
     isERROR="FALSE"
 
-    mkdir backup-migrations -p $path
-    
-    mv "$path"/migrations/* "$path"/backup-migrations
-
     npx truffle compile --all
     
+    #backup-migrations config
+    mkdir backup-migrations -p $path
+    mv "$path"/migrations/* "$path"/backup-migrations
+
+
     for entry in "$path"/test/*;
 
     do
@@ -111,8 +112,8 @@ run_test() {
     printf "\n\n /************** TEST SUCCESSFUL **********************/ \n\n"
     fi
 
+    #backup-migrations config
     mv "$path"/backup-migrations/* "$path"/migrations
-
     rm -r backup-migrations
 }
 

@@ -85,8 +85,8 @@ run_test() {
 
     do
 
-    testFileName=${entry#*"test/"}
-    testFileName=${testFileName%"."*}
+    testFileNameWithJS=${entry#*"test/"}
+    testFileName=${testFileNameWithJS%"."*}
 
     
 
@@ -95,7 +95,7 @@ run_test() {
 
     printf "\n\n /************** START "$testFileName" **********************/ \n\n"     
 
-    npx truffle test $entry -b  || { isERROR="TRUE"; break; } 
+    npx truffle test ./test/$testFileNameWithJS -b  || { isERROR="TRUE"; break; } 
 
     printf "\n\n /************** FINISH "$testFileName" **********************/ \n\n" 
 

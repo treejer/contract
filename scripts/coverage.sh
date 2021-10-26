@@ -16,7 +16,7 @@ run_coverage() {
 
     if [[ $testFileName != "common" && $testFileName != "config" && $testFileName != "enumes" && $testFileName != "math" ]]; then
         
-        echo "$testFileName"
+        printf "\n\n /************** "$testFileName" **********************/ \n\n"  
         
         npx truffle run coverage --file $entry
 

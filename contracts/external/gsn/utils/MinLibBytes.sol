@@ -1,17 +1,18 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 // minimal bytes manipulation required by GSN
 // a minimal subset from 0x/LibBytes
 /* solhint-disable no-inline-assembly */
 pragma solidity >=0.7.6;
 
 library MinLibBytes {
-
     //truncate the given parameter (in-place) if its length is above the given maximum length
     // do nothing otherwise.
     //NOTE: solidity warns unless the method is marked "pure", but it DOES modify its parameter.
     function truncateInPlace(bytes memory data, uint256 maxlen) internal pure {
         if (data.length > maxlen) {
-            assembly { mstore(data, maxlen) }
+            assembly {
+                mstore(data, maxlen)
+            }
         }
     }
 
@@ -19,15 +20,12 @@ library MinLibBytes {
     /// @param b Byte array containing an address.
     /// @param index Index in byte array of address.
     /// @return result address from byte array.
-    function readAddress(
-        bytes memory b,
-        uint256 index
-    )
+    function readAddress(bytes memory b, uint256 index)
         internal
         pure
         returns (address result)
     {
-        require (b.length >= index + 20, "readAddress: data too short");
+        require(b.length >= index + 20, "readAddress: data too short");
 
         // Add offset to index:
         // 1. Arrays are prefixed by 32-byte length parameter (add 32 to index)
@@ -39,24 +37,24 @@ library MinLibBytes {
             // 1. Add index to address of bytes array
             // 2. Load 32-byte word from memory
             // 3. Apply 20-byte mask to obtain address
-            result := and(mload(add(b, index)), 0xffffffffffffffffffffffffffffffffffffffff)
+            result := and(
+                mload(add(b, index)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
         }
         return result;
     }
 
-    function readBytes32(
-        bytes memory b,
-        uint256 index
-    )
+    function readBytes32(bytes memory b, uint256 index)
         internal
         pure
         returns (bytes32 result)
     {
-        require(b.length >= index + 32, "readBytes32: data too short" );
+        require(b.length >= index + 32, "readBytes32: data too short");
 
         // Read the bytes32 from array memory
         assembly {
-            result := mload(add(b, add(index,32)))
+            result := mload(add(b, add(index, 32)))
         }
         return result;
     }
@@ -65,10 +63,7 @@ library MinLibBytes {
     /// @param b Byte array containing a uint256 value.
     /// @param index Index in byte array of uint256 value.
     /// @return result uint256 value from byte array.
-    function readUint256(
-        bytes memory b,
-        uint256 index
-    )
+    function readUint256(bytes memory b, uint256 index)
         internal
         pure
         returns (uint256 result)
@@ -77,10 +72,7 @@ library MinLibBytes {
         return result;
     }
 
-    function readBytes4(
-        bytes memory b,
-        uint256 index
-    )
+    function readBytes4(bytes memory b, uint256 index)
         internal
         pure
         returns (bytes4 result)
@@ -89,10 +81,13 @@ library MinLibBytes {
 
         // Read the bytes4 from array memory
         assembly {
-            result := mload(add(b, add(index,32)))
+            result := mload(add(b, add(index, 32)))
             // Solidity does not require us to clean the trailing bytes.
             // We do it anyway
-            result := and(result, 0xFFFFFFFF00000000000000000000000000000000000000000000000000000000)
+            result := and(
+                result,
+                0xFFFFFFFF00000000000000000000000000000000000000000000000000000000
+            )
         }
         return result;
     }

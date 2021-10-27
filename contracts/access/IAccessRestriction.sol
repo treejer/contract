@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 /** @title AccessRestriction interface*/
 
 interface IAccessRestriction {
-    /** @return true if AccessRestriction contract have been initialized  */
+    /** @return true if AccessRestriction contract has been initialized  */
     function isAccessRestriction() external view returns (bool);
 
     /** @return if account {account} has role {role} or not */
@@ -42,31 +42,24 @@ interface IAccessRestriction {
     function ifPlanter(address _address) external view;
 
     /**
-     * @dev check if given address has Planter role
+     * @dev check if given address has planter role
      * @param _address input address
-     * @return if given address has Planter role
+     * @return if given address has planter role
      */
     function isPlanter(address _address) external view returns (bool);
 
     /**
-     * @dev check if given address is Admin
+     * @dev check if given address is admin
      * @param _address input address
      */
     function ifAdmin(address _address) external view;
 
     /**
-     * @dev check if given address has Admin role
+     * @dev check if given address has admin role
      * @param _address input address
-     * @return if given address has Admin role
+     * @return if given address has admin role
      */
     function isAdmin(address _address) external view returns (bool);
-
-    /**
-     * @dev check if given address has data manager role
-     * @param _address input address
-     * @return if given address has data manager role
-     */
-    function isDataManager(address _address) external view returns (bool);
 
     /**
      * @dev check if given address is Treejer contract
@@ -88,10 +81,11 @@ interface IAccessRestriction {
     function ifDataManager(address _address) external view;
 
     /**
-     * @dev check if given address is DataManager or Treejer contract
+     * @dev check if given address has data manager role
      * @param _address input address
+     * @return if given address has data manager role
      */
-    function ifDataManagerOrTreejerContract(address _address) external view;
+    function isDataManager(address _address) external view returns (bool);
 
     /**
      * @dev check if given address is script
@@ -99,8 +93,18 @@ interface IAccessRestriction {
      */
     function ifScript(address _address) external view;
 
-    /** @return if functionality is paused*/
-    function paused() external view returns (bool);
+    /**
+     * @dev check if given address has script role
+     * @param _address input address
+     * @return if given address has script role
+     */
+    function isScript(address _address) external view returns (bool);
+
+    /**
+     * @dev check if given address is DataManager or Treejer contract
+     * @param _address input address
+     */
+    function ifDataManagerOrTreejerContract(address _address) external view;
 
     /** @dev check if functionality is not puased */
     function ifNotPaused() external view;
@@ -108,11 +112,14 @@ interface IAccessRestriction {
     /** @dev check if functionality is puased */
     function ifPaused() external view;
 
+    /** @dev pause functionality */
+    function pause() external;
+
     /** @dev unpause functionality */
     function unpause() external;
 
-    /** @dev pause functionality */
-    function pause() external;
+    /** @return if functionality is paused*/
+    function paused() external view returns (bool);
 
     /** @dev emitted when role granted to account */
     event RoleGranted(

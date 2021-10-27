@@ -1,7 +1,7 @@
 const Units = require("ethereumjs-units");
 const { time } = require("@openzeppelin/test-helpers");
 var Common = {};
-
+// const { web3 } = require("@openzeppelin/test-environment");
 const assert = require("chai").assert;
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const DEFAULT_ADMIN_ROLE =
@@ -41,7 +41,7 @@ Common.addDataManager = async (instance, account, adminAccount) => {
   await instance.grantRole(DATA_MANAGER_ROLE, account, { from: adminAccount });
 };
 
-Common.addBuyerRank = async (instance, account, adminAccount) => {
+Common.addScriptRole = async (instance, account, adminAccount) => {
   await instance.grantRole(SCRIPT_ROLE, account, { from: adminAccount });
 };
 
@@ -108,15 +108,15 @@ Common.successPlant = async (
     );
   });
 
-  await treeFactoryInstance.addTree(treeId, ipfsHash, {
+  await treeFactoryInstance.listTree(treeId, ipfsHash, {
     from: dataManager,
   });
 
-  await treeFactoryInstance.assignTreeToPlanter(treeId, planterAddress, {
+  await treeFactoryInstance.assignTree(treeId, planterAddress, {
     from: dataManager,
   });
 
-  await treeFactoryInstance.plantTree(
+  await treeFactoryInstance.plantAssignedTree(
     treeId,
     ipfsHash,
     birthDate,
@@ -125,7 +125,7 @@ Common.successPlant = async (
       from: planterAddress,
     }
   );
-  await treeFactoryInstance.verifyPlant(treeId, true, {
+  await treeFactoryInstance.verifyAssignedTree(treeId, true, {
     from: dataManager,
   });
 };
@@ -133,19 +133,19 @@ Common.joinSimplePlanter = async (
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress
 ) => {
   const longitude = 1;
   const latitude = 2;
   const countryCode = 10;
 
-  const tx = await planterInstance.planterJoin(
+  const tx = await planterInstance.join(
     planterType,
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
@@ -155,20 +155,20 @@ Common.joinSimplePlanter = async (
 Common.joinOrganizationPlanter = async (
   instance,
   organizationAddress,
-  refferedBy,
+  invitedBy,
   adminAccount
 ) => {
   let longitude = 1;
   let latitude = 2;
   const countryCode = 10;
   const capcity = 1000;
-  const tx = await instance.organizationJoin(
+  const tx = await instance.joinOrganization(
     organizationAddress,
     longitude,
     latitude,
     countryCode,
     capcity,
-    refferedBy,
+    invitedBy,
     { from: adminAccount }
   );
   return tx;
@@ -177,7 +177,7 @@ Common.joinSimplePlanterFromTreeFactory = async (
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress,
   treeFactoryInstance,
   adminAccount
@@ -186,12 +186,12 @@ Common.joinSimplePlanterFromTreeFactory = async (
   let latitude = 2;
   const countryCode = 10;
 
-  await planterInstance.planterJoin(
+  await planterInstance.join(
     planterType,
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
@@ -204,48 +204,48 @@ Common.getTransactionFee = async (tx) => {
   return Math.mul(gasPrice, gasUsed);
 };
 
-Common.successPlanterJoin = async (
+Common.successJoin = async (
   arInstance,
   adminAccount,
   planterInstance,
   planterType,
   planterAddress,
-  refferedBy,
+  invitedBy,
   organizationAddress
 ) => {
   await Common.addPlanter(arInstance, planterAddress, adminAccount);
 
-  if (refferedBy != zeroAddress) {
-    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  if (invitedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, invitedBy, adminAccount);
   }
 
   let longitude = 1;
   let latitude = 2;
   const countryCode = 10;
 
-  await planterInstance.planterJoin(
+  await planterInstance.join(
     planterType,
     longitude,
     latitude,
     countryCode,
-    refferedBy,
+    invitedBy,
     organizationAddress,
     { from: planterAddress }
   );
 };
 
-Common.successOrganizationPlanterJoin = async (
+Common.successJoinOrganization = async (
   arInstance,
   instance,
   organizationAddress,
-  refferedBy,
+  invitedBy,
   adminAccount,
   dataManager
 ) => {
   await Common.addPlanter(arInstance, organizationAddress, adminAccount);
 
-  if (refferedBy != zeroAddress) {
-    await Common.addPlanter(arInstance, refferedBy, adminAccount);
+  if (invitedBy != zeroAddress) {
+    await Common.addPlanter(arInstance, invitedBy, adminAccount);
   }
 
   let longitude = 1;
@@ -253,13 +253,13 @@ Common.successOrganizationPlanterJoin = async (
   const countryCode = 10;
   const capcity = 1000;
 
-  await instance.organizationJoin(
+  await instance.joinOrganization(
     organizationAddress,
     longitude,
     latitude,
     countryCode,
     capcity,
-    refferedBy,
+    invitedBy,
     { from: dataManager }
   );
 };
@@ -269,7 +269,7 @@ Common.successFundTree = async (
   deployerAccount,
   treeFactoryAddress,
   auctionAddress,
-  financialModelInstance,
+  allocationInstance,
   daiFundInstance,
   daiInstance,
   planterFundInstnce,
@@ -286,20 +286,20 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await financialModelInstance.addFundDistributionModel(
+  await allocationInstance.addAllocationData(
     fundsPercent.planterFund,
     fundsPercent.referralFund,
-    fundsPercent.treeResearch,
-    fundsPercent.localDevelop,
-    fundsPercent.rescueFund,
-    fundsPercent.treejerDevelop,
-    fundsPercent.reserveFund1,
-    fundsPercent.reserveFund2,
+    fundsPercent.research,
+    fundsPercent.localDevelopment,
+    fundsPercent.insurance,
+    fundsPercent.treasury,
+    fundsPercent.reserve1,
+    fundsPercent.reserve2,
     {
       from: dataManager,
     }
   );
-  await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+  await allocationInstance.assignAllocationToTree(0, 10, 0, {
     from: dataManager,
   });
 
@@ -309,11 +309,11 @@ Common.successFundTree = async (
     deployerAccount
   );
 
-  await treeFactoryInstance.availability(treeId, 1, {
+  await treeFactoryInstance.manageSaleType(treeId, 1, {
     from: auctionAddress,
   });
 
-  await treeFactoryInstance.updateOwner(treeId, tokenOwner, 2, {
+  await treeFactoryInstance.mintAssignedTree(treeId, tokenOwner, {
     from: auctionAddress,
   });
 
@@ -351,12 +351,12 @@ Common.successFundTree = async (
     fundAmount,
     fundsPercent.planterFund,
     fundsPercent.referralFund,
-    fundsPercent.treeResearch,
-    fundsPercent.localDevelop,
-    fundsPercent.rescueFund,
-    fundsPercent.treejerDevelop,
-    fundsPercent.reserveFund1,
-    fundsPercent.reserveFund2,
+    fundsPercent.research,
+    fundsPercent.localDevelopment,
+    fundsPercent.insurance,
+    fundsPercent.treasury,
+    fundsPercent.reserve1,
+    fundsPercent.reserve2,
     {
       from: auctionAddress,
     }
@@ -369,11 +369,11 @@ Common.acceptPlanterByOrganization = async (
   planterAddress,
   planterProtion
 ) => {
-  await planterInstance.acceptPlanterFromOrganization(planterAddress, true, {
+  await planterInstance.acceptPlanterByOrganization(planterAddress, true, {
     from: organizationAddress,
   });
 
-  await planterInstance.updateOrganizationPlanterPayment(
+  await planterInstance.updateOrganizationMemberShare(
     planterAddress,
     planterProtion,
     {
@@ -382,7 +382,7 @@ Common.acceptPlanterByOrganization = async (
   );
 };
 
-Common.regularPlantTreeSuccess = async (
+Common.plantTreeSuccess = async (
   arInstance,
   treeFactoryInstance,
   planterInstance,
@@ -402,12 +402,12 @@ Common.regularPlantTreeSuccess = async (
     zeroAddress
   );
 
-  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };
 
-Common.regularPlantTreeSuccessOrganization = async (
+Common.plantTreeSuccessOrganization = async (
   arInstance,
   treeFactoryInstance,
   planterInstance,
@@ -434,11 +434,11 @@ Common.regularPlantTreeSuccessOrganization = async (
     zeroAddress,
     organizationAdmin
   );
-  await planterInstance.acceptPlanterFromOrganization(planter, true, {
+  await planterInstance.acceptPlanterByOrganization(planter, true, {
     from: organizationAdmin,
   });
 
-  await treeFactoryInstance.regularPlantTree(ipfsHash, birthDate, countryCode, {
+  await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
 };

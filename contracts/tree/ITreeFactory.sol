@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
 interface ITreeFactory {
-    /** @return true in case of TreeFactory contract have been initialized */
+    /** @return true in case of TreeFactory contract has been initialized */
     function isTreeFactory() external view returns (bool);
 
     /** @return AccessRestriction contract address */
@@ -17,33 +17,32 @@ interface ITreeFactory {
     function planterFund() external view returns (address);
 
     /** @return Planter contract address */
-    function planter() external view returns (address);
+    function planterContract() external view returns (address);
 
-    /** @return lastRegularPlantedTree */
-    function lastRegularPlantedTree() external view returns (uint256);
+    /** @return lastRegularTreeId */
+    function lastRegualarTreeId() external view returns (uint256);
 
     /** @return minimum time to send next update request */
-    function updateInterval() external view returns (uint256);
+    function treeUpdateInterval() external view returns (uint256);
 
-    /** return TreeStruct data  of {_treeId}
-     * @return planterId
-     * @return treeType
-     * @return mintStatus
+    /** return Tree data
+     * @param _treeId  id of tree to get data
+     * @return planter
+     * @return species
      * @return countryCode
-     * @return provideStatus
+     * @return saleType
      * @return treeStatus
      * @return plantDate
      * @return birthDate
      * @return treeSpecs
      */
-    function treeData(uint256 _treeId)
+    function trees(uint256 _treeId)
         external
         view
         returns (
             address,
             uint256,
-            uint16,
-            uint16,
+            uint32,
             uint32,
             uint64,
             uint64,
@@ -51,24 +50,26 @@ interface ITreeFactory {
             string memory
         );
 
-    /** return UpdateTree data  of {_treeId}
+    /** return TreeUpdate data
+     8 @param _treeId id of tree to get data
      * @return updateSpecs
      * @return updateStatus
      */
-    function updateTrees(uint256 _treeId)
+    function treeUpdates(uint256 _treeId)
         external
         view
         returns (string memory, uint64);
 
-    /** return RegularTree data  of {_treeId}
+    /** return TempTree data
+     * @param _tempTreeId id of tempTree to get data
      * @return birthDate
      * @return plantDate
      * @return countryCode
      * @return otherData
-     * @return planterAddress
+     * @return planter
      * @return treeSpecs
      */
-    function regularTrees(uint256 _regularTreeId)
+    function tempTrees(uint256 _tempTreeId)
         external
         view
         returns (
@@ -87,44 +88,43 @@ interface ITreeFactory {
     function setPlanterFundAddress(address _address) external;
 
     /** @dev set {_address} to Planter contract address */
-    function setPlanterAddress(address _address) external;
+    function setPlanterContractAddress(address _address) external;
 
     /** @dev set {_address} to TreeToken contract address */
     function setTreeTokenAddress(address _address) external;
 
-    /** @dev admin can set the minimum time to send next update request
-     * @param _day time to next update request
-     * NOTE emit an {UpdateIntervalSet} event
+    /** @dev admin set the minimum time to send next update request
+     * NOTE emit an {TreeUpdateIntervalChanged} event
+     * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _day) external;
+    function setUpdateInterval(uint256 _seconds) external;
 
     /**
-     * @dev admin add tree
-     * @param _treeId id of tree to add
-     * @param _treeDescription tree description
-     * NOTE emited a {TreeAdded} event
+     * @dev admin list tree
+     * NOTE emited a {TreeListed} event
+     * @param _treeId id of tree to list
+     * @param _treeSpecs tree specs
      */
-    function addTree(uint256 _treeId, string calldata _treeDescription)
-        external;
+    function listTree(uint256 _treeId, string calldata _treeSpecs) external;
 
     /**
      * @dev admin assign an existing tree to planter
-     * @param _treeId id of tree to assign
-     * @param _planterId assignee planter
      * NOTE tree must be not planted
      * NOTE emited a {TreeAssigned} event
+     * @param _treeId id of tree to assign
+     * @param _planter assignee planter
      */
-    function assignTreeToPlanter(uint256 _treeId, address _planterId) external;
+    function assignTree(uint256 _treeId, address _planter) external;
 
     /**
-     * @dev planter with permission to plant, can plan their tree
+     * @dev planter with permission to plant, can plant its assigned tree
+     * NOTE emited an {AssignedTreePlanted} event
      * @param _treeId id of tree to plant
      * @param _treeSpecs tree specs
      * @param _birthDate birth date of tree
      * @param _countryCode country code of tree
-     * NOTE emited a {TreePlanted} event
      */
-    function plantTree(
+    function plantAssignedTree(
         uint256 _treeId,
         string calldata _treeSpecs,
         uint64 _birthDate,
@@ -132,158 +132,203 @@ interface ITreeFactory {
     ) external;
 
     /**
-     * @dev admin or allowed verifier can verify a plant or reject.
+     * @dev admin or allowed verifier can verify or reject plant for assigned tree.
+     * NOTE emited an {AssignedTreeVerified} or {AssignedTreeRejected} event
      * @param _treeId id of tree to verifiy
      * @param _isVerified true for verify and false for reject
-     * NOTE emited a {PlantVerified} or {PlantRejected} event
      */
-    function verifyPlant(uint256 _treeId, bool _isVerified) external;
+    function verifyAssignedTree(uint256 _treeId, bool _isVerified) external;
 
     /**
-     * @dev planter of  tree send update request for tree
+     * @dev planter of tree send update request for tree
+     * NOTE emited a {TreeUpdated} event
      * @param _treeId id of tree to update
      * @param _treeSpecs tree specs
-     * NOTE emited a {TreeUpdated} event
      */
     function updateTree(uint256 _treeId, string memory _treeSpecs) external;
 
     /**
      * @dev admin or allowed verifier can verifiy or reject update request for tree.
-     * @param _treeId id of tree to verify update request
-     * @param _isVerified true for verify and false for reject
      * NOTE based on the current time of verifing and plant date, age of tree
      * calculated and set as the treeStatus
      * NOTE if a token exist for that tree (minted before) planter of tree funded
      * based on calculated tree status
-     * NOTE emited a {UpdateVerified} or {UpdateRejected} event
+     * NOTE emited a {TreeUpdatedVerified} or {TreeUpdateRejected} event
+     * @param _treeId id of tree to verify update request
+     * @param _isVerified true for verify and false for reject
      */
     function verifyUpdate(uint256 _treeId, bool _isVerified) external;
 
     /**
-     * @dev check if a tree is valid to take part in an auction
-     * set {_provideType} to provideStatus when tree is not in use
-     * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
+     * @dev check if a tree is free to take part in sale and set {_saleType}
+     * to saleType of tree when tree is not in use
+     * @param _treeId id of tree to check
+     * @param _saleType saleType for tree
+     * @return 0 if a tree ready for a sale and 1 if a tree is in use or minted before
      */
-    function availability(uint256 _treeId, uint32 _provideType)
+    function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         returns (uint32);
 
-    /** @dev mint {_treeId} to {_ownerId} and set mintStatus to {_mintStatus} and privdeStatus to 0  */
-    function updateOwner(
-        uint256 _treeId,
-        address _ownerId,
-        uint16 _mintStatus
-    ) external;
-
-    /** @dev exit a {_treeId} from auction */
-    function updateAvailability(uint256 _treeId) external;
-
-    /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
-    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId) external;
+    /**
+     * @dev mint a tree to funder and set saleType to 0
+     * @param _treeId id of tree to mint
+     * @param _funder address of funder to mint tree for
+     */
+    function mintAssignedTree(uint256 _treeId, address _funder) external;
 
     /**
-     * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
-     * and end at {_endTreeId} by setting {_provideStatus} to provideStatus
+     * @dev reset saleType value of tree
+     * @param _treeId id of tree to reset saleType value
      */
-    function manageProvideStatus(
+    function resetSaleType(uint256 _treeId) external;
+
+    /**
+     * @dev reset saleType of trees in range of {_startTreeId} and {_endTreeId}
+     * with saleType value of {_saleType}
+     * @param _startTreeId starting tree id to reset saleType
+     * @param _endTreeId ending tree id to reset saleType
+     * @param _saleType saleType value of trees
+     */
+    function resetSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
-        uint32 _provideStatus
-    ) external returns (bool);
-
-    function checkMintStatus(uint256 _treeId, address _buyer)
-        external
-        view
-        returns (bool, bytes32);
+        uint256 _saleType
+    ) external;
 
     /**
-     * @dev This function is called by planter who have planted a new tree
-     * The planter enters the information of the new tree
-     * Information is stored in The {regularTrees} mapping
-     * And finally the tree is waiting for approval
-     * @param _treeSpecs //TODO: what is _treeSpecs ??
-     * @param _birthDate birthDate of the tree
-     * @param _countryCode Code of the country where the tree was planted
-     * NOTE emited a {RegularTreePlanted} event
+     * @dev set {_saleType} to saleType of trees in range {_startTreeId} and {_endTreeId}
+     * @param _startTreeId starting tree id to set saleType value
+     * @param _endTreeId _ending tree id to set saleType value
+     * @param _saleType saleType value
+     * @return true if all trees saleType value successfully set and false otherwise
      */
-    function regularPlantTree(
+    function manageSaleTypeBatch(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint32 _saleType
+    ) external returns (bool);
+
+    /**
+     * @dev planter plant a tree
+     * NOTE emited a {TreePlanted} event
+     * @param _treeSpecs tree specs
+     * @param _birthDate birthDate of the tree
+     * @param _countryCode country code of tree
+     */
+    function plantTree(
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external;
 
     /**
-     * @dev In this function, the admin approves or rejects the pending trees
-     * After calling this function, if the tree is approved the tree information will be transferred to the {treeData}
-     * @param _regularTreeId _regularTreeId
-     * @param _isVerified Tree approved or not
-     * NOTE emited a {RegularPlantVerified} or {RegularPlantRejected} event
+     * @dev admin or allowed verifier can verify or rejects the pending trees
+     * NOTE emited a {TreeVerified} or {TreeRejected} event
+     * @param _tempTreeId tempTreeId to verify
+     * @param _isVerified true for verify and false for reject
      */
-    function verifyRegularPlant(uint256 _regularTreeId, bool _isVerified)
-        external;
+    function verifyTree(uint256 _tempTreeId, bool _isVerified) external;
 
     /**
-     * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
-     * This function is called only by the regularSell contract
-     * @param _lastSold The last tree sold in the regular
-     * @param _owner Owner of a new tree sold in Regular
-     * @return The last tree sold after update
+     * @dev mint a tree to funder of tree
+     * @param _lastFundedTreeId The last tree funded in the regular sale
+     * @param _funder funder of a new tree sold in Regular
+     * @return the last tree funded after update
      */
-    function mintRegularTrees(uint256 _lastSold, address _owner)
+    function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
         returns (uint256);
 
     /**
-     * @dev Request to buy a tree with a specific Id already planted and this function transfer ownership to funder
-     * This function is called only by the regularSell contract
-     * @param _treeId Tree with special Id (The Id must be larger than the last tree sold)
-     * @param _owner Owner of a new tree sold in Regular
+     * @dev mint an already planted tree with id to funder
+     * @param _treeId tree id to mint
+     * @param _funder address of funder
      */
-    function requestRegularTree(uint256 _treeId, address _owner) external;
+    function mintTreeById(uint256 _treeId, address _funder) external;
 
     /**
-     * @dev script role update {_treeSpecs} of {_treeId}
-     * NOTE emit a {TreeSpecsUpdate} event
+     * @dev script role update treeSpecs
+     * NOTE emit a {TreeSpecsUpdated} event
+     * @param _treeId id of tree to update treeSpecs
+     * @param _treeSpecs new tree specs
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
 
-    /** @dev emitted when tree with id {treeId} added */
-    event TreeAdded(uint256 treeId);
+    /**
+     * @dev emitted when a tree list
+     * @param treeId id of tree to list
+     */
+    event TreeListed(uint256 treeId);
 
-    /** @dev emitted when tree with id {treeId} assigned to planter */
+    /**
+     * @dev emitted when a tree assigned to planter
+     * @param treeId id of tree to assign
+     */
     event TreeAssigned(uint256 treeId);
 
-    /** @dev emitted when tree with id {treeId} planted */
-    event TreePlanted(uint256 treeId);
+    /**
+     * @dev emitted when  assigned tree planted
+     * @param treeId id of tree that planted
+     */
+    event AssignedTreePlanted(uint256 treeId);
 
-    /** @dev emitted when planting of tree with id {treeId} verified */
-    event PlantVerified(uint256 treeId);
+    /**
+     * @dev emitted when planting of assigned tree verified
+     * @param treeId id of tree that verified
+     */
+    event AssignedTreeVerified(uint256 treeId);
 
-    /** @dev emitted when planting of tree with id {treeId} rejected */
-    event PlantRejected(uint256 treeId);
+    /**
+     * @dev emitted when planting of assigned tree rejected
+     * @param treeId id of tree that rejected
+     */
+    event AssignedTreeRejected(uint256 treeId);
 
-    /** @dev emitted when planter send update request to tree with id {treeId} */
+    /**
+     * @dev emitted when planter send update request to tree
+     * @param treeId id of tree that update request sent for
+     */
     event TreeUpdated(uint256 treeId);
 
-    /** @dev emitted when update request for tree with id {treeId} veirified */
-    event UpdateVerified(uint256 treeId);
+    /**
+     * @dev emitted when update request for tree verified
+     * @param treeId id of tree that update request verified
+     */
+    event TreeUpdatedVerified(uint256 treeId);
 
-    /** @dev emitted when update request for tree with id {treeId} rejected */
-    event UpdateRejected(uint256 treeId);
+    /**
+     * @dev emitted when update request for tree rejected
+     * @param treeId id of tree that update request rejected
+     */
+    event TreeUpdateRejected(uint256 treeId);
 
-    /** @dev emitted when regular tree with id {treeId} planted */
-    event RegularTreePlanted(uint256 treeId);
+    /**
+     * @dev emitted when regular tree planted
+     * @param treeId id of regular tree id that planted
+     */
+    event TreePlanted(uint256 treeId);
 
-    /** @dev emitted when planting for regular tree with id {treeId} veirified */
-    event RegularPlantVerified(uint256 treeId);
+    /**
+     * @dev emitted when planting for regular tree verified
+     * @param treeId id of tree that verified
+     * @param tempTreeId id of tempTree
+     */
+    event TreeVerified(uint256 treeId, uint256 tempTreeId);
 
-    /** @dev emitted when planting for regular tree with id {treeId} rejected */
-    event RegularPlantRejected(uint256 treeId);
+    /**
+     * @dev emitted when planting for regular tree rejected
+     * @param treeId id of tree that rejected
+     */
+    event TreeRejected(uint256 treeId);
 
-    /** @dev emitted when new updateInterval set */
-    event UpdateIntervalSet();
+    /** @dev emitted when new treeUpdateInterval set */
+    event TreeUpdateIntervalChanged();
 
-    /** @dev emitted when treeSpecs of {treeId} updated */
-    event TreeSpecsUpdate(uint256 treeId);
+    /**
+     * @dev emitted when treeSpecs of tree updated
+     * @param treeId id of tree to update treeSpecs
+     */
+    event TreeSpecsUpdated(uint256 treeId);
 }

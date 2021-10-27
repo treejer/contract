@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 
@@ -22,30 +22,31 @@ contract Planter is Initializable, RelayRecipient {
         uint8 status;
         uint16 countryCode;
         uint32 score;
-        uint32 capacity;
+        uint32 supplyCap;
         uint32 plantedCount;
         uint64 longitude;
         uint64 latitude;
     }
 
-    /** NOTE mapping of planterAddress to PlanterData */
+    /** NOTE mapping of planter address to PlanterData */
     mapping(address => PlanterData) public planters;
 
-    /** NOTE mapping of planterAddress to address of refferedBy */
-    mapping(address => address) public refferedBy;
+    /** NOTE mapping of planter address to address of invitedBy */
+    mapping(address => address) public invitedBy;
 
-    /** NOTE mapping of planterAddress to organizationAddress that planter is member of it */
+    /** NOTE mapping of planter address to organization address that planter is member of it */
     mapping(address => address) public memberOf;
 
-    /** NOTE mapping of organizationAddress to mapping of planterAddress to portionValue */
-    mapping(address => mapping(address => uint256)) public organizationRules;
+    /** NOTE mapping of organization address to mapping of planter address to portionValue */
+    mapping(address => mapping(address => uint256))
+        public organizationMemberShare;
 
-    event PlanterJoin(address planterId);
-    event OrganizationJoin(address organizationId);
-    event PlanterUpdated(address planterId);
-    event AcceptedByOrganization(address planterId);
-    event RejectedByOrganization(address planterId);
-    event PortionUpdated(address planterId);
+    event PlanterJoined(address planter);
+    event OrganizationJoined(address organization);
+    event PlanterUpdated(address planter);
+    event AcceptedByOrganization(address planter);
+    event RejectedByOrganization(address planter);
+    event OrganizationMemberShareUpdated(address planter);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -59,12 +60,9 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check _planterAddress is exist*/
-    modifier existPlanter(address _planterAddress) {
-        require(
-            planters[_planterAddress].planterType > 0,
-            "planter does not exist"
-        );
+    /** NOTE modifier for check _planter is exist*/
+    modifier existPlanter(address _planter) {
+        require(planters[_planter].planterType > 0, "planter does not exist");
         _;
     }
 
@@ -90,8 +88,8 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isPlanter
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isPlanter
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -120,22 +118,22 @@ contract Planter is Initializable, RelayRecipient {
     /**
      * @dev based on {_planterType} a planter can join as individual planter or
      * member of an organization
-     * @param _planterType 1 for individual and 3 for member of organization
+     * NOTE member of organization planter status set to pendding and wait to be
+     * accepted by organization.
+     * @param _planterType type of planter: 1 for individual and 3 for member of organization
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
-     * @param _refferedBy address of referral
-     * @param _organizationAddress address of organization to be member of
-     * NOTE if join as a member of an organization, when that organization
-     * accept planter, planter status set to active
+     * @param _invitedBy address of referrer
+     * @param _organization address of organization to be member of
      */
-    function planterJoin(
+    function join(
         uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        address _refferedBy,
-        address _organizationAddress
+        address _invitedBy,
+        address _organization
     ) external {
         require(
             accessRestriction.isPlanter(_msgSender()) &&
@@ -150,53 +148,65 @@ contract Planter is Initializable, RelayRecipient {
 
         if (_planterType == 3) {
             require(
-                planters[_organizationAddress].planterType == 2,
+                planters[_organization].planterType == 2,
                 "organization address not valid"
             );
         }
 
-        if (_refferedBy != address(0)) {
+        if (_invitedBy != address(0)) {
             require(
-                _refferedBy != _msgSender() &&
-                    accessRestriction.isPlanter(_refferedBy),
-                "refferedBy not true"
+                _invitedBy != _msgSender() &&
+                    accessRestriction.isPlanter(_invitedBy),
+                "invitedBy not true"
             );
 
-            refferedBy[_msgSender()] = _refferedBy;
+            invitedBy[_msgSender()] = _invitedBy;
         }
 
         uint8 status = 1;
 
         if (_planterType == 3) {
-            memberOf[_msgSender()] = _organizationAddress;
+            memberOf[_msgSender()] = _organization;
             status = 0;
         }
 
-        PlanterData storage planter = planters[_msgSender()];
+        PlanterData storage planterData = planters[_msgSender()];
 
-        planter.planterType = _planterType;
-        planter.status = status;
-        planter.countryCode = _countryCode;
-        planter.capacity = 100;
-        planter.longitude = _longitude;
-        planter.latitude = _latitude;
+        planterData.planterType = _planterType;
+        planterData.status = status;
+        planterData.countryCode = _countryCode;
+        planterData.supplyCap = 100;
+        planterData.longitude = _longitude;
+        planterData.latitude = _latitude;
 
-        emit PlanterJoin(_msgSender());
+        emit PlanterJoined(_msgSender());
     }
 
-    //TODO: ADD_COMMENT
-    function planterJoinByAdmin(
-        address _planterAddress,
+    /**
+     * @dev admin add a individual planter or
+     * member of an organization planter based on {_planterType}
+     * NOTE member of organization planter status set to active and no need for
+     * accepting by organization
+     * @param _planter address of planter
+     * @param _planterType type of planter: 1 for individual and 3 for member of organization
+     * @param _longitude longitude value
+     * @param _latitude latitude value
+     * @param _countryCode country code
+     * @param _invitedBy address of referrer
+     * @param _organization address of organization to be member of
+     */
+    function joinByAdmin(
+        address _planter,
         uint8 _planterType,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        address _refferedBy,
-        address _organizationAddress
+        address _invitedBy,
+        address _organization
     ) external onlyDataManager {
         require(
-            accessRestriction.isPlanter(_planterAddress) &&
-                planters[_planterAddress].planterType == 0,
+            accessRestriction.isPlanter(_planter) &&
+                planters[_planter].planterType == 0,
             "User exist or not planter"
         );
 
@@ -207,98 +217,97 @@ contract Planter is Initializable, RelayRecipient {
 
         if (_planterType == 3) {
             require(
-                planters[_organizationAddress].planterType == 2,
+                planters[_organization].planterType == 2,
                 "organization address not valid"
             );
 
-            memberOf[_planterAddress] = _organizationAddress;
+            memberOf[_planter] = _organization;
         }
 
-        if (_refferedBy != address(0)) {
+        if (_invitedBy != address(0)) {
             require(
-                _refferedBy != _planterAddress &&
-                    accessRestriction.isPlanter(_refferedBy),
-                "refferedBy not true"
+                _invitedBy != _planter &&
+                    accessRestriction.isPlanter(_invitedBy),
+                "invitedBy not true"
             );
 
-            refferedBy[_planterAddress] = _refferedBy;
+            invitedBy[_planter] = _invitedBy;
         }
 
-        PlanterData storage planter = planters[_planterAddress];
+        PlanterData storage planterData = planters[_planter];
 
-        planter.planterType = _planterType;
-        planter.status = 1;
-        planter.countryCode = _countryCode;
-        planter.capacity = 100;
-        planter.longitude = _longitude;
-        planter.latitude = _latitude;
+        planterData.planterType = _planterType;
+        planterData.status = 1;
+        planterData.countryCode = _countryCode;
+        planterData.supplyCap = 100;
+        planterData.longitude = _longitude;
+        planterData.latitude = _latitude;
 
-        emit PlanterJoin(_planterAddress);
+        emit PlanterJoined(_planter);
     }
 
     /**
      * @dev admin add a plater as organization (planterType 2) so planterType 3
      * can be member of these planters.
-     * @param _organizationAddress address of organization planter
+     * @param _organization address of organization planter
      * @param _longitude longitude value
      * @param _latitude latitude value
      * @param _countryCode country code
-     * @param _capacity plant capacity of organization planter
-     * @param _refferedBy address of referral
+     * @param _supplyCap planting supplyCap of organization planter
+     * @param _invitedBy address of referrer
      */
-    function organizationJoin(
-        address _organizationAddress,
+    function joinOrganization(
+        address _organization,
         uint64 _longitude,
         uint64 _latitude,
         uint16 _countryCode,
-        uint32 _capacity,
-        address _refferedBy
+        uint32 _supplyCap,
+        address _invitedBy
     ) external onlyDataManager {
         require(
-            planters[_organizationAddress].planterType == 0 &&
-                accessRestriction.isPlanter(_organizationAddress),
+            planters[_organization].planterType == 0 &&
+                accessRestriction.isPlanter(_organization),
             "User exist or not planter"
         );
 
-        if (_refferedBy != address(0)) {
+        if (_invitedBy != address(0)) {
             require(
-                _refferedBy != _msgSender() &&
-                    accessRestriction.isPlanter(_refferedBy),
-                "refferedBy not true"
+                _invitedBy != _msgSender() &&
+                    accessRestriction.isPlanter(_invitedBy),
+                "invitedBy not true"
             );
 
-            refferedBy[_organizationAddress] = _refferedBy;
+            invitedBy[_organization] = _invitedBy;
         }
 
-        PlanterData storage planter = planters[_organizationAddress];
+        PlanterData storage planterData = planters[_organization];
 
-        planter.planterType = 2;
-        planter.status = 1;
-        planter.countryCode = _countryCode;
-        planter.capacity = _capacity;
-        planter.longitude = _longitude;
-        planter.latitude = _latitude;
+        planterData.planterType = 2;
+        planterData.status = 1;
+        planterData.countryCode = _countryCode;
+        planterData.supplyCap = _supplyCap;
+        planterData.longitude = _longitude;
+        planterData.latitude = _latitude;
 
-        emit OrganizationJoin(_organizationAddress);
+        emit OrganizationJoined(_organization);
     }
 
-    //TODO:remove this function??
-
     /**
-     * @dev planter with type 1 , 3 can update their planterType using this
-     * function.
-     * planterType 3 (member of organization) can change to
+     * @dev planter with planterType 1 , 3 can update their planterType
+     * NOTE planterType 3 (member of organization) can change to
      * planterType 1 (individual planter) with input value {_planterType}
-     * of 1 and zeroAddress as {_organizationAddress}
+     * of 1 and zeroAddress as {_organization}
      * or choose other organization to be member of with
-     * input value {_planterType} of 3 and {_organizationAddress}.
-     * planterType 1 can only change to planterType 3 with input value
-     * {_planterAddress} of 3 and {_organizationAddress}
-     * if planter type 3 choose another oraganization
-     * or planterType 1 chage to planterType 3, they must be accepted by the
+     * input value {_planterType} of 3 and {_organization}.
+     * NOTE planterType 1 can only change to planterType 3 with input value
+     * {_planter} of 3 and {_organization}
+     * if planter planterType 3 choose another oraganization or planter with
+     * planterType 1 change it's planterType to 3,they must be accepted by the
      * organization to be an active planter
+     * @param _planterType type of planter
+     * @param _organization address of organization
      */
-    function updatePlanterType(uint8 _planterType, address _organizationAddress)
+    function updatePlanterType(uint8 _planterType, address _organization)
         external
         existPlanter(_msgSender())
     {
@@ -307,112 +316,119 @@ contract Planter is Initializable, RelayRecipient {
             "planterType not allowed values"
         );
 
-        PlanterData storage planter = planters[_msgSender()];
+        PlanterData storage planterData = planters[_msgSender()];
 
         require(
-            planter.status == 0 || planter.status == 1,
+            planterData.status == 0 || planterData.status == 1,
             "invalid planter status"
         );
 
-        require(planter.planterType != 2, "Caller is organizationPlanter");
+        require(planterData.planterType != 2, "Caller is organizationPlanter");
 
         if (_planterType == 3) {
             require(
-                planters[_organizationAddress].planterType == 2,
+                planters[_organization].planterType == 2,
                 "organization address not valid"
             );
 
-            memberOf[_msgSender()] = _organizationAddress;
+            memberOf[_msgSender()] = _organization;
 
-            planter.status = 0;
+            planterData.status = 0;
         } else {
-            require(planter.planterType == 3, "invalid planterType in change");
+            require(
+                planterData.planterType == 3,
+                "invalid planterType in change"
+            );
 
-            if (planter.planterType == 3) {
+            if (planterData.planterType == 3) {
                 memberOf[_msgSender()] = address(0);
             }
 
-            if (planter.status == 0) {
-                planter.status = 1;
+            if (planterData.status == 0) {
+                planterData.status = 1;
             }
         }
 
-        planter.planterType = _planterType;
+        planterData.planterType = _planterType;
 
         emit PlanterUpdated(_msgSender());
     }
 
-    /** @dev organization can accept planter to be it's member or reject
-     * @param _planterAddress address of planter
+    /**
+     * @dev organization can accept planter to be it's member or reject
+     * @param _planter address of planter
      * @param _acceptance accept or reject
      */
-    function acceptPlanterFromOrganization(
-        address _planterAddress,
-        bool _acceptance
-    ) external onlyOrganization existPlanter(_planterAddress) {
+    function acceptPlanterByOrganization(address _planter, bool _acceptance)
+        external
+        onlyOrganization
+        existPlanter(_planter)
+    {
         require(
-            memberOf[_planterAddress] == _msgSender() &&
-                planters[_planterAddress].status == 0,
+            memberOf[_planter] == _msgSender() &&
+                planters[_planter].status == 0,
             "Planter not request or not pending"
         );
 
-        PlanterData storage planter = planters[_planterAddress];
+        PlanterData storage planterData = planters[_planter];
 
         if (_acceptance) {
-            planter.status = 1;
+            planterData.status = 1;
 
-            emit AcceptedByOrganization(_planterAddress);
+            emit AcceptedByOrganization(_planter);
         } else {
-            planter.status = 1;
-            planter.planterType = 1;
-            memberOf[_planterAddress] = address(0);
+            planterData.status = 1;
+            planterData.planterType = 1;
+            memberOf[_planter] = address(0);
 
-            emit RejectedByOrganization(_planterAddress);
+            emit RejectedByOrganization(_planter);
         }
     }
 
-    /** @dev admin update capacity of planter {_planterAddress}
-     * @param _planterAddress address of planter to update capacity
-     * @param _capacity capacity that set to planter capacity
+    /**
+     * @dev admin update supplyCap of planter
+     * @param _planter address of planter to update supplyCap
+     * @param _supplyCap supplyCap that set to planter supplyCap
      */
-    function updateCapacity(address _planterAddress, uint32 _capacity)
+    function updateSupplyCap(address _planter, uint32 _supplyCap)
         external
         onlyDataManager
-        existPlanter(_planterAddress)
+        existPlanter(_planter)
     {
-        PlanterData storage tempPlanter = planters[_planterAddress];
-        require(_capacity > tempPlanter.plantedCount, "invalid capacity");
-        tempPlanter.capacity = _capacity;
-        if (tempPlanter.status == 2) {
-            tempPlanter.status = 1;
+        PlanterData storage planterData = planters[_planter];
+        require(_supplyCap > planterData.plantedCount, "invalid supplyCap");
+        planterData.supplyCap = _supplyCap;
+        if (planterData.status == 2) {
+            planterData.status = 1;
         }
-        emit PlanterUpdated(_planterAddress);
+        emit PlanterUpdated(_planter);
     }
 
-    /** @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
-     * @param _planterAddress address of planter who want to plant tree
+    /**
+     * @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
+     * @param _planter address of planter who want to plant tree
      * @param _assignedPlanterAddress address of planter that tree assigned to
      * @return if a planter can plant a tree or not
      */
-    function plantingPermission(
-        address _planterAddress,
+    function manageAssignedTreePermission(
+        address _planter,
         address _assignedPlanterAddress
     ) external onlyTreejerContract returns (bool) {
-        PlanterData storage tempPlanter = planters[_planterAddress];
-        if (tempPlanter.planterType > 0) {
+        PlanterData storage planterData = planters[_planter];
+        if (planterData.planterType > 0) {
             if (
-                _planterAddress == _assignedPlanterAddress ||
-                (tempPlanter.planterType == 3 &&
-                    memberOf[_planterAddress] == _assignedPlanterAddress)
+                _planter == _assignedPlanterAddress ||
+                (planterData.planterType == 3 &&
+                    memberOf[_planter] == _assignedPlanterAddress)
             ) {
                 if (
-                    tempPlanter.status == 1 &&
-                    tempPlanter.plantedCount < tempPlanter.capacity
+                    planterData.status == 1 &&
+                    planterData.plantedCount < planterData.supplyCap
                 ) {
-                    tempPlanter.plantedCount += 1;
+                    planterData.plantedCount += 1;
 
-                    if (tempPlanter.plantedCount >= tempPlanter.capacity) {
-                        tempPlanter.status = 2;
+                    if (planterData.plantedCount >= planterData.supplyCap) {
+                        planterData.status = 2;
                     }
                     return true;
                 }
@@ -422,39 +438,38 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    /** @dev oragnization can update planterPayment rules of it's members
-     * @param _planterAddress address of planter
-     * @param _planterAutomaticPaymentPortion payment portion value
-     * NOTE only organization (planterType = 2) can call this function
+    /**
+     * @dev oragnization can update the share of its members
+     * @param _planter address of planter
+     * @param _organizationMemberShareAmount member share value
      */
-    function updateOrganizationPlanterPayment(
-        address _planterAddress,
-        uint256 _planterAutomaticPaymentPortion
-    ) external onlyOrganization existPlanter(_planterAddress) {
-        require(planters[_planterAddress].status > 0, "invalid planter status");
+    function updateOrganizationMemberShare(
+        address _planter,
+        uint256 _organizationMemberShareAmount
+    ) external onlyOrganization existPlanter(_planter) {
+        require(planters[_planter].status > 0, "invalid planter status");
+        require(memberOf[_planter] == _msgSender(), "invalid input planter");
         require(
-            memberOf[_planterAddress] == _msgSender(),
-            "invalid input planter"
-        );
-        require(
-            _planterAutomaticPaymentPortion < 10001,
+            _organizationMemberShareAmount < 10001,
             "invalid payment portion"
         );
 
-        organizationRules[_msgSender()][
-            _planterAddress
-        ] = _planterAutomaticPaymentPortion;
+        organizationMemberShare[_msgSender()][
+            _planter
+        ] = _organizationMemberShareAmount;
 
-        emit PortionUpdated(_planterAddress);
+        emit OrganizationMemberShareUpdated(_planter);
     }
 
-    /** @dev return planter paymentPortion for an accepted organizationPlanter
-     * @param _planterAddress address of planter to get payment portion
-     * @return {true} as first param in valid planter case and seccond param is
-     * address of organization that {_planterAddress} is member of it.
-     * and third param is address of referral and the last one is portion value
+    /**
+     * @dev return organization member data
+     * @param _planter address of organization member planter to get data
+     * @return true in case of valid planter
+     * @return address of organization that {_planter} is member of it.
+     * @return address of referrer
+     * @return share of {_plnater}
      */
-    function getPlanterPaymentPortion(address _planterAddress)
+    function getOrganizationMemberData(address _planter)
         external
         view
         returns (
@@ -464,113 +479,109 @@ contract Planter is Initializable, RelayRecipient {
             uint256
         )
     {
-        PlanterData storage tempPlanter = planters[_planterAddress];
-        if (tempPlanter.status == 4 || tempPlanter.planterType == 0) {
+        PlanterData storage planterData = planters[_planter];
+        if (planterData.status == 4 || planterData.planterType == 0) {
             return (false, address(0), address(0), 0);
         } else {
             if (
-                tempPlanter.planterType == 1 ||
-                tempPlanter.planterType == 2 ||
-                tempPlanter.status == 0
+                planterData.planterType == 1 ||
+                planterData.planterType == 2 ||
+                planterData.status == 0
             ) {
-                return (true, address(0), refferedBy[_planterAddress], 10000);
+                return (true, address(0), invitedBy[_planter], 10000);
             } else {
                 return (
                     true,
-                    memberOf[_planterAddress],
-                    refferedBy[_planterAddress],
-                    organizationRules[memberOf[_planterAddress]][
-                        _planterAddress
-                    ]
+                    memberOf[_planter],
+                    invitedBy[_planter],
+                    organizationMemberShare[memberOf[_planter]][_planter]
                 );
             }
         }
     }
 
-    /** @dev when tree plant of {_planterAddress} rejected, plantedCount of {_planterAddress}
-     * must reduce 1 time and if planter status is full capacity {2} update it to active {1}
-     * @param _planterAddress address of planter
-     * NOTE only treeFactory contract can call this function
+    /**
+     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
+     * must reduce by 1 and if planter status is full, set it to active.
+     * @param _planter address of planter
      */
-    function reducePlantCount(address _planterAddress)
+    function reducePlantedCount(address _planter)
         external
-        existPlanter(_planterAddress)
+        existPlanter(_planter)
         onlyTreejerContract
     {
-        PlanterData storage tempPlanter = planters[_planterAddress];
+        PlanterData storage planterData = planters[_planter];
 
-        tempPlanter.plantedCount -= 1;
+        planterData.plantedCount -= 1;
 
-        if (tempPlanter.status == 2) {
-            tempPlanter.status = 1;
+        if (planterData.status == 2) {
+            planterData.status = 1;
         }
     }
 
-    /** @dev check that planter {_planterAddress} can plant regular tree
-     * @param _planterAddress address of planter
-     * NOTE treeFactory contract can call this function
-     * NOTE change status to full capacity if plantedCount be equal with
-     * planter capacity after increase plantedCount by 1
-     * @return true in case of planter status is active {1}
+    /**
+     * @dev check that planter {_planter} can plant regular tree
+     * NOTE if plantedCount reach to supplyCap status of planter
+     * set to full (value of full is '2')
+     * @param _planter address of planter
+     * @return true in case of planter status is active (value of active is '1')
      */
-    function planterCheck(address _planterAddress)
+    function manageTreePermission(address _planter)
         external
-        existPlanter(_planterAddress)
+        existPlanter(_planter)
         onlyTreejerContract
         returns (bool)
     {
-        PlanterData storage tempPlanter = planters[_planterAddress];
+        PlanterData storage planterData = planters[_planter];
 
-        if (tempPlanter.status == 1) {
-            tempPlanter.plantedCount += 1;
+        if (planterData.status == 1) {
+            planterData.plantedCount += 1;
 
-            if (tempPlanter.plantedCount == tempPlanter.capacity) {
-                tempPlanter.status = 2;
+            if (planterData.plantedCount == planterData.supplyCap) {
+                planterData.status = 2;
             }
             return true;
         }
         return false;
     }
 
-    /** @dev check that {_verifier} can verify plant or update requests of {_planterAddress}
-     * @param _planterAddress address of planter
+    /**
+     * @dev check that {_verifier} can verify plant or tree update requests of {_planter}
+     * @param _planter address of planter
      * @param _verifier address of verifier
-     * @return true in case of {_verifier} can verify {_planterAddress} and false otherwise
+     * @return true in case of {_verifier} can verify {_planter} and false otherwise
      */
-    function canVerify(address _planterAddress, address _verifier)
+    function canVerify(address _planter, address _verifier)
         external
         view
         returns (bool)
     {
-        uint8 _planterType = planters[_planterAddress].planterType;
+        uint8 planterType = planters[_planter].planterType;
 
-        uint8 _verifierStatus = planters[_verifier].status;
+        uint8 verifierStatus = planters[_verifier].status;
 
-        if (_planterType > 1) {
-            if (_verifierStatus == 1 || _verifierStatus == 2) {
-                if (_planterType == 2) {
-                    return memberOf[_verifier] == _planterAddress;
-                } else if (_planterType == 3) {
+        if (planterType > 1) {
+            if (verifierStatus == 1 || verifierStatus == 2) {
+                if (planterType == 2) {
+                    return memberOf[_verifier] == _planter;
+                } else if (planterType == 3) {
                     return
-                        memberOf[_verifier] == memberOf[_planterAddress] ||
-                        memberOf[_planterAddress] == _verifier;
+                        memberOf[_verifier] == memberOf[_planter] ||
+                        memberOf[_planter] == _verifier;
                 }
             }
         }
         return false;
     }
 
-    /** @dev check allowance to assign tree to planter {_planterAddress}
-     * @param _planterAddress address of assignee planter
+    /**
+     * @dev check allowance to assign tree to planter
+     * @param _planter address of assignee planter
      * @return true in case of active planter or orgnization planter and false otherwise
      */
-    function canAssignTreeToPlanter(address _planterAddress)
-        external
-        view
-        returns (bool)
-    {
-        PlanterData storage tempPlanter = planters[_planterAddress];
+    function canAssignTree(address _planter) external view returns (bool) {
+        PlanterData storage planterData = planters[_planter];
 
-        return tempPlanter.status == 1 || tempPlanter.planterType == 2;
+        return planterData.status == 1 || planterData.planterType == 2;
     }
 }

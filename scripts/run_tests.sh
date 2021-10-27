@@ -29,7 +29,7 @@ gsn_running() {
 }
 
 start_ganache() {
-  ganache-cli ganache-cli --networkId 1337 --chainId 1337 --port "$ganache_port" --accounts 20 > /dev/null &
+  ganache-cli ganache-cli --networkId 1337 --chainId 1337 -l 20000000  --port "$ganache_port" --accounts 20 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."
@@ -41,18 +41,18 @@ start_ganache() {
   echo "Ganache launched!"
 }
 
-start_gsn() {
-  node_modules/.bin/gsn start > /dev/null &
-  gsn_pid=$!
+# start_gsn() {
+#   node_modules/.bin/gsn start > /dev/null &
+#   gsn_pid=$!
 
-  echo "Waiting for gsn to launch ..."
-  sleep 5
-  while ! gsn_running; do
-    sleep 5 # wait for 1/10 of the second before check again
-  done
+#   echo "Waiting for gsn to launch ..."
+#   sleep 5
+#   while ! gsn_running; do
+#     sleep 5 # wait for 1/10 of the second before check again
+#   done
 
-  echo "GSN started!"
-}
+#   echo "GSN started!"
+# }
 
 if ganache_running; then
   echo "Using existing ganache instance"
@@ -63,12 +63,12 @@ else
 fi
 
 
-if gsn_running; then
-  echo "Using existing gsn instance"
-else
-  echo "Starting our own gsn instance"
-  start_gsn
-fi
+# if gsn_running; then
+#   echo "Using existing gsn instance"
+# else
+#   echo "Starting our own gsn instance"
+#   start_gsn
+# fi
 
 npx truffle version
 npx truffle test "$@"

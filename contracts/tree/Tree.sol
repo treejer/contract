@@ -13,6 +13,30 @@ contract Tree is ERC721Upgradeable {
     IAccessRestriction public accessRestriction;
     string private baseURI;
 
+    struct Attribute {
+        uint8 attribute1;
+        uint8 attribute2;
+        uint8 attribute3;
+        uint8 attribute4;
+        uint8 attribute5;
+        uint8 attribute6;
+        uint8 attribute7;
+        uint8 attribute8;
+        uint8 generationType;
+    }
+    struct Symbol {
+        uint8 shape;
+        uint8 trunkColor;
+        uint8 crownColor;
+        uint8 effect;
+        uint8 coefficient;
+        uint8 generationType;
+    }
+    /** NOTE mapping of tokenId to attributes */
+    mapping(uint256 => Attribute) public attributes;
+    /** NOTE mapping of tokenId to symbols */
+    mapping(uint256 => Symbol) public symbols;
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -25,8 +49,8 @@ contract Tree is ERC721Upgradeable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTree
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isTree
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      * @param baseURI_ initial baseURI
      */
     function initialize(
@@ -56,7 +80,6 @@ contract Tree is ERC721Upgradeable {
 
     /**
      * @dev mint {_tokenId} to {_to}
-     * NOTE must call by TreeFactory
      */
     function safeMint(address _to, uint256 _tokenId)
         external
@@ -77,5 +100,65 @@ contract Tree is ERC721Upgradeable {
     /** @return return baseURI */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
+    }
+
+    /**
+     * @dev set attribute and symbol for a tokenId based on {_uniquenessFactor}
+     * NOTE symbol set when {_generationType} is more than 15 (for HonoraryTree and IncremetalSale)
+     * @param _tokenId id of token
+     * @param _uniquenessFactor uniqueness factor
+     * @param _generationType type of generation
+     */
+    function setAttributes(
+        uint256 _tokenId,
+        uint256 _uniquenessFactor,
+        uint8 _generationType
+    ) external onlyTreejerContract {
+        uint8[] memory attribute = new uint8[](8);
+
+        for (uint256 i = 0; i < 8; i++) {
+            attribute[i] = uint8(_uniquenessFactor & 255);
+            _uniquenessFactor >>= 8;
+        }
+        attributes[_tokenId] = Attribute(
+            attribute[0],
+            attribute[1],
+            attribute[2],
+            attribute[3],
+            attribute[4],
+            attribute[5],
+            attribute[6],
+            attribute[7],
+            _generationType
+        );
+        if (_generationType > 15) {
+            for (uint256 i = 0; i < 5; i++) {
+                attribute[i] = uint8(_uniquenessFactor & 255);
+
+                _uniquenessFactor >>= 8;
+            }
+            symbols[_tokenId] = Symbol(
+                attribute[0],
+                attribute[1],
+                attribute[2],
+                attribute[3],
+                attribute[4],
+                _generationType
+            );
+        }
+    }
+
+    /**
+     * @dev check attribute existance for a tokenId
+     * @param _tokenId id of token
+     * @return true if attributes exist for {_tokenId}
+     */
+    function attributeExists(uint256 _tokenId)
+        external
+        view
+        onlyTreejerContract
+        returns (bool)
+    {
+        return attributes[_tokenId].generationType > 0;
     }
 }

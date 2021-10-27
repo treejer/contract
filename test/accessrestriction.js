@@ -1,5 +1,5 @@
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 const AccessRestriction = artifacts.require("AccessRestriction");
-
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
@@ -9,7 +9,6 @@ const { CommonErrorMsg } = require("./enumes");
 
 contract("AccessRestriction", (accounts) => {
   let arInstance;
-
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -20,113 +19,82 @@ contract("AccessRestriction", (accounts) => {
   const userAccount6 = accounts[7];
   const adminAccount = accounts[8];
   const userAccount8 = accounts[9];
-
   const DEFAULT_ADMIN_ROLE =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
-
   beforeEach(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
   });
-
   it("should add admin", async () => {
     await arInstance
       .ifAdmin(adminAccount)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
     const before = await arInstance.isAdmin(adminAccount);
-
     let tx = await arInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, {
       from: deployerAccount,
     });
-
     await arInstance.ifAdmin(adminAccount);
-
     const after = await arInstance.isAdmin(adminAccount);
-
     assert.equal(before, false, "admin role is not correct");
     assert.equal(after, true, "admin role is not correct");
-
     truffleAssert.eventEmitted(tx, "RoleGranted", (ev) => {
       return (
         ev.account.toString() === adminAccount && ev.role === DEFAULT_ADMIN_ROLE
       );
     });
   });
-
   it("should add planter and check data", async () => {
     await arInstance
       .ifPlanter(userAccount1)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);
-
     const before = await arInstance.isPlanter(userAccount1);
-
     await Common.addPlanter(arInstance, userAccount1, deployerAccount);
-
     await arInstance.ifPlanter(userAccount1);
-
     const after = await arInstance.isPlanter(userAccount1);
-
     assert.equal(before, false, "planter role is not correct");
     assert.equal(after, true, "planter role is not correct");
   });
-
   it("should add treejer contract and check data", async () => {
     await arInstance
       .ifTreejerContract(userAccount1)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
     const before = await arInstance.isTreejerContract(userAccount1);
-
     await Common.addTreejerContractRole(
       arInstance,
       userAccount1,
       deployerAccount
     );
-
     await arInstance.ifTreejerContract(userAccount1);
-
     const after = await arInstance.isTreejerContract(userAccount1);
-
     assert.equal(before, false, "TreejerContract role is not correct");
     assert.equal(after, true, "TreejerContract role is not correct");
   });
-
   it("should add data manager and check data", async () => {
     await arInstance
       .ifDataManager(userAccount1)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
-
     const before = await arInstance.isDataManager(userAccount1);
-
     await Common.addDataManager(arInstance, userAccount1, deployerAccount);
-
     await arInstance.ifDataManager(userAccount1);
-
     const after = await arInstance.isDataManager(userAccount1);
-
     assert.equal(before, false, "DataManager role is not correct");
     assert.equal(after, true, "DataManager role is not correct");
   });
-
   it("should add script and check data", async () => {
     await arInstance
       .ifScript(userAccount1)
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
-
+      .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
     const before = await arInstance.isScript(userAccount1);
-
-    await Common.addBuyerRank(arInstance, userAccount1, deployerAccount);
-
+    await Common.addScriptRole(arInstance, userAccount1, deployerAccount);
     await arInstance.ifScript(userAccount1);
-
     const after = await arInstance.isScript(userAccount1);
-
-    assert.equal(before, false, "BuyerRank role is not correct");
-    assert.equal(after, true, "BuyerRank role is not correct");
+    assert.equal(before, false, "FunderRank role is not correct");
+    assert.equal(after, true, "FunderRank role is not correct");
   });
   it("check if data manager or treejer contract", async () => {
     await Common.addDataManager(arInstance, userAccount1, deployerAccount);
@@ -140,7 +108,6 @@ contract("AccessRestriction", (accounts) => {
       .should.be.rejectedWith(
         CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
       );
-
     await arInstance.ifDataManagerOrTreejerContract(userAccount1);
     await arInstance.ifDataManagerOrTreejerContract(userAccount2);
   });
@@ -148,48 +115,35 @@ contract("AccessRestriction", (accounts) => {
     await arInstance
       .ifPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_PAUSED);
-
     await arInstance.ifNotPaused();
-
     await arInstance
       .pause({ from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
     await arInstance.pause({ from: deployerAccount });
-
     await arInstance
       .pause({ from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_NOT_PAUSED);
-
     await arInstance.ifPaused();
-
     await arInstance
       .ifNotPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_NOT_PAUSED);
   });
   it("check unpause", async () => {
     await arInstance.ifNotPaused();
-
     await arInstance
       .ifPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_PAUSED);
-
     await arInstance
       .unpause({ from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_PAUSED);
-
     await arInstance.pause({ from: deployerAccount });
-
     await arInstance
       .ifNotPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_NOT_PAUSED);
-
     await arInstance
       .unpause({ from: userAccount1 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
     await arInstance.unpause({ from: deployerAccount });
-
     await arInstance.ifNotPaused();
   });
 });

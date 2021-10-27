@@ -72,26 +72,6 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
         return hasRole(DEFAULT_ADMIN_ROLE, _address);
     }
 
-    /** @dev check if functionality is not puased */
-    function ifNotPaused() external view {
-        require(!paused(), "Pausable: paused");
-    }
-
-    /** @dev check if functionality is puased */
-    function ifPaused() external view {
-        require(paused(), "Pausable: not paused");
-    }
-
-    /** @dev pause functionality */
-    function pause() external onlyAdmin {
-        _pause();
-    }
-
-    /** @dev unpause functionality */
-    function unpause() external onlyAdmin {
-        _unpause();
-    }
-
     /**
      * @dev check if given address is Treejer contract
      * @param _address input address
@@ -131,7 +111,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      * @param _address input address
      */
     function ifScript(address _address) external view {
-        require(isScript(_address), "caller is not buyer rank");
+        require(isScript(_address), "caller is not script");
     }
 
     /**
@@ -152,5 +132,25 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
             isDataManager(_address) || isTreejerContract(_address),
             "not Data Manager or Treejer Contract"
         );
+    }
+
+    /** @dev check if functionality is not puased */
+    function ifNotPaused() external view {
+        require(!paused(), "Pausable: paused");
+    }
+
+    /** @dev check if functionality is puased */
+    function ifPaused() external view {
+        require(paused(), "Pausable: not paused");
+    }
+
+    /** @dev pause functionality */
+    function pause() external onlyAdmin {
+        _pause();
+    }
+
+    /** @dev unpause functionality */
+    function unpause() external onlyAdmin {
+        _unpause();
     }
 }

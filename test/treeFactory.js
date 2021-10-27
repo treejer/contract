@@ -1,16 +1,18 @@
-const AccessRestriction = artifacts.require("AccessRestriction");
-const TreeFactory = artifacts.require("TreeFactory.sol");
-const Tree = artifacts.require("Tree.sol");
-const TreeAuction = artifacts.require("TreeAuction.sol");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const Planter = artifacts.require("Planter.sol");
-const Dai = artifacts.require("Dai.sol");
-const FinancialModel = artifacts.require("FinancialModel.sol");
-const PlanterFund = artifacts.require("PlanterFund.sol");
-const DaiFunds = artifacts.require("DaiFunds.sol");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const TreeFactory = artifacts.require("TreeFactory");
+const Tree = artifacts.require("Tree");
+const Auction = artifacts.require("Auction");
+
+const Planter = artifacts.require("Planter");
+const Dai = artifacts.require("Dai");
+const Allocation = artifacts.require("Allocation");
+const PlanterFund = artifacts.require("PlanterFund");
+const DaiFund = artifacts.require("DaiFund");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
@@ -18,7 +20,7 @@ const {
   TimeEnumes,
   CommonErrorMsg,
   TreeFactoryErrorMsg,
-  TreeAuctionErrorMsg,
+  AuctionErrorMsg,
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
@@ -37,7 +39,7 @@ contract("TreeFactory", (accounts) => {
   let arInstance;
 
   let planterInstance;
-  let financialModelInstance;
+  let allocationInstance;
   let planterFundInstnce;
   let daiFundInstance;
   let daiInstance;
@@ -61,49 +63,54 @@ contract("TreeFactory", (accounts) => {
 
   describe("deploy and set addresses", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
-
-      planterFundInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
     });
 
     it("deploys successfully and check addresses", async () => {
@@ -154,12 +161,17 @@ contract("TreeFactory", (accounts) => {
 
       ////////////------------------------------------ set planter address ----------------------------------------//
 
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       await treeFactoryInstance
-        .setPlanterAddress(planterInstance.address, { from: userAccount1 })
+        .setPlanterContractAddress(planterInstance.address, {
+          from: userAccount1,
+        })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       ////////////////////------------------------------------ tree token address ----------------------------------------//
@@ -175,44 +187,44 @@ contract("TreeFactory", (accounts) => {
 
   describe("just treeFactory methods", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
     });
 
-    ////////////////////------------------------------------ test set updateInterval  ----------------------------------------//
+    ////////////////////------------------------------------ test set treeUpdateInterval  ----------------------------------------//
 
-    it("set updateInterval", async () => {
-      let dayBefore = await treeFactoryInstance.updateInterval();
+    it("set treeUpdateInterval", async () => {
+      let dayBefore = await treeFactoryInstance.treeUpdateInterval();
 
       await treeFactoryInstance
-        .setUpdateInterval(10, { from: userAccount1 })
+        .setUpdateInterval(10 * 24 * 60 * 60, { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      let tx = await treeFactoryInstance.setUpdateInterval(10, {
+      let tx = await treeFactoryInstance.setUpdateInterval(10 * 24 * 60 * 60, {
         from: dataManager,
       });
 
-      let dayAfter = await treeFactoryInstance.updateInterval();
+      let dayAfter = await treeFactoryInstance.treeUpdateInterval();
 
       assert.equal(dayBefore, 7 * 24 * 60 * 60, "dayBefore not true");
       assert.equal(dayAfter, 10 * 24 * 60 * 60, "dayAfter not true");
 
-      truffleAssert.eventEmitted(tx, "UpdateIntervalSet");
+      truffleAssert.eventEmitted(tx, "TreeUpdateIntervalChanged");
     });
     /////////////////------------------------------------ add tree ----------------------------------------//
 
@@ -220,26 +232,22 @@ contract("TreeFactory", (accounts) => {
       let treeId = 1;
 
       await treeFactoryInstance
-        .addTree(treeId, ipfsHash, { from: userAccount1 })
+        .listTree(treeId, ipfsHash, { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      const eventTx = await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      const eventTx = await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      truffleAssert.eventEmitted(eventTx, "TreeAdded", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreeListed", (ev) => {
         return ev.treeId == treeId;
       });
 
-      let result1 = await treeFactoryInstance.treeData.call(treeId);
+      let result1 = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(result1.planterId, 0x0, "invalid planter id in add tree");
-      assert.equal(Number(result1.treeType), 0, "incorrect treeType");
-      assert.equal(
-        Number(result1.provideStatus),
-        0,
-        "incorrect provide status"
-      );
+      assert.equal(result1.planter, 0x0, "invalid planter id in add tree");
+      assert.equal(Number(result1.species), 0, "incorrect treeType");
+      assert.equal(Number(result1.saleType), 0, "incorrect provide status");
       assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
       assert.equal(Number(result1.countryCode), 0, "incorrect country code");
       assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
@@ -249,7 +257,7 @@ contract("TreeFactory", (accounts) => {
       //////////// fail to add tree
 
       await treeFactoryInstance
-        .addTree(treeId, ipfsHash, { from: dataManager })
+        .listTree(treeId, ipfsHash, { from: dataManager })
         .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
     });
 
@@ -258,15 +266,21 @@ contract("TreeFactory", (accounts) => {
       const treeId = 0;
       const newIpfs = "new ipfs hash";
 
-      await Common.addBuyerRank(arInstance, dataManager, deployerAccount); // give buyer rank role to data manager
-
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      const treeData1 = await treeFactoryInstance.treeData.call(treeId);
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
+      const treeData1 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(treeData1.treeSpecs, ipfsHash, "ipfs hash is not correct");
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, newIpfs, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_SCRIPT_ROLE);
 
       const eventTx = await treeFactoryInstance.updateTreeSpecs(
         treeId,
@@ -276,61 +290,62 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      truffleAssert.eventEmitted(eventTx, "TreeSpecsUpdate", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreeSpecsUpdated", (ev) => {
         return Number(ev.treeId) == treeId && ev.treeSpecs == newIpfs;
       });
 
-      const treeData2 = await treeFactoryInstance.treeData.call(treeId);
+      const treeData2 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
         treeData2.treeSpecs,
         newIpfs,
         "new ipfs hash is not correct"
       );
-
-      await treeFactoryInstance
-        .updateTreeSpecs(treeId, newIpfs, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_BUYER_RANK);
     });
   });
 
   describe("add tree,assign and plant tree,verify plant", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
     });
     //////////// tests
 
@@ -339,7 +354,7 @@ contract("TreeFactory", (accounts) => {
     it("asign tree to planter and fail in invalid situation", async () => {
       let treeId = 1;
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
@@ -369,13 +384,13 @@ contract("TreeFactory", (accounts) => {
       ////// ---------- fail to assign not data manager
 
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId, userAccount2, {
+        .assignTree(treeId, userAccount2, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       //asign to planter user2
-      let asign1 = await treeFactoryInstance.assignTreeToPlanter(
+      let asign1 = await treeFactoryInstance.assignTree(
         treeId,
         userAccount2,
 
@@ -386,20 +401,16 @@ contract("TreeFactory", (accounts) => {
         return ev.treeId == treeId;
       });
 
-      let result1 = await treeFactoryInstance.treeData.call(treeId);
+      let result1 = await treeFactoryInstance.trees.call(treeId);
       //////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        result1.planterId,
+        result1.planter,
         userAccount2,
         "invalid planter id in add tree"
       );
-      assert.equal(Number(result1.treeType), 0, "incorrect treeType");
-      assert.equal(
-        Number(result1.provideStatus),
-        0,
-        "incorrect provide status"
-      );
+      assert.equal(Number(result1.species), 0, "incorrect treeType");
+      assert.equal(Number(result1.saleType), 0, "incorrect provide status");
       assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
       assert.equal(Number(result1.countryCode), 0, "incorrect country code");
       assert.equal(Number(result1.plantDate), 0, "incorrect plant date");
@@ -409,31 +420,25 @@ contract("TreeFactory", (accounts) => {
       ////////////////////////////////////////////////////
 
       //asign to planter user3
-      let asign2 = await treeFactoryInstance.assignTreeToPlanter(
-        treeId,
-        userAccount3,
-        { from: dataManager }
-      );
+      let asign2 = await treeFactoryInstance.assignTree(treeId, userAccount3, {
+        from: dataManager,
+      });
 
       truffleAssert.eventEmitted(asign2, "TreeAssigned", (ev) => {
         return ev.treeId == treeId;
       });
 
-      let result2 = await treeFactoryInstance.treeData.call(treeId);
+      let result2 = await treeFactoryInstance.trees.call(treeId);
 
       ///////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        result2.planterId,
+        result2.planter,
         userAccount3,
         "invalid planter id in add tree"
       );
-      assert.equal(Number(result2.treeType), 0, "incorrect treeType");
-      assert.equal(
-        Number(result2.provideStatus),
-        0,
-        "incorrect provide status"
-      );
+      assert.equal(Number(result2.species), 0, "incorrect treeType");
+      assert.equal(Number(result2.saleType), 0, "incorrect provide status");
       assert.equal(Number(result2.treeStatus), 2, "tree status is incorrect"); //updated
       assert.equal(Number(result2.countryCode), 0, "incorrect country code");
       assert.equal(Number(result2.plantDate), 0, "incorrect plant date");
@@ -442,7 +447,7 @@ contract("TreeFactory", (accounts) => {
       ///////////////// ----------------- fail to assign
 
       await treeFactoryInstance
-        .assignTreeToPlanter(10, userAccount2, {
+        .assignTree(10, userAccount2, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
@@ -454,16 +459,16 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.plantTree(treeId, ipfsHash, 2, 4, {
+      await treeFactoryInstance.plantAssignedTree(treeId, ipfsHash, 2, 4, {
         from: userAccount3,
       });
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId, userAccount2, { from: dataManager })
+        .assignTree(treeId, userAccount2, { from: dataManager })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
     });
 
@@ -477,23 +482,23 @@ contract("TreeFactory", (accounts) => {
       const countryCode = 2;
 
       ///////////////// ------------------------- add trees
-      await treeFactoryInstance.addTree(treeId1, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId1, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId3, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId3, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId4, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId4, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId5, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId5, ipfsHash, {
         from: dataManager,
       });
       ///////////////////////// -------------------- add treeFactory role
@@ -537,17 +542,17 @@ contract("TreeFactory", (accounts) => {
         userAccount2
       );
 
-      /////////////////////////// ------------------ update planter (userAccount1) capacity to 1 and plant a tree to change planter status to 2
+      /////////////////////////// ------------------ update planter (userAccount1) supplyCap to 1 and plant a tree to change planter status to 2
 
-      await planterInstance.updateCapacity(userAccount1, 1, {
+      await planterInstance.updateSupplyCap(userAccount1, 1, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId1, userAccount1, {
+      await treeFactoryInstance.assignTree(treeId1, userAccount1, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId1,
         ipfsHash,
         birthDate,
@@ -556,7 +561,7 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId2, userAccount1, {
+        .assignTree(treeId2, userAccount1, {
           from: dataManager,
         })
         .should.be.rejectedWith(
@@ -565,26 +570,26 @@ contract("TreeFactory", (accounts) => {
 
       ///////////////////////// test userAccount3 (orgizationPlanter) --------------
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId2, userAccount3, {
+        .assignTree(treeId2, userAccount3, {
           from: dataManager,
         })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER
         );
 
-      await planterInstance.updateCapacity(userAccount3, 1, {
+      await planterInstance.updateSupplyCap(userAccount3, 1, {
         from: dataManager,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount3, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
         from: userAccount2,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId2, userAccount3, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId2,
         ipfsHash,
         birthDate,
@@ -593,21 +598,21 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId3, userAccount3, { from: dataManager })
+        .assignTree(treeId3, userAccount3, { from: dataManager })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER
         );
 
       /////////////////---------------------- assign tree to userAccount2(orgnization) (unlimited assign)
-      await treeFactoryInstance.assignTreeToPlanter(treeId3, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId3, userAccount2, {
         from: dataManager,
       });
 
-      await planterInstance.updateCapacity(userAccount2, 1, {
+      await planterInstance.updateSupplyCap(userAccount2, 1, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId3,
         ipfsHash,
         birthDate,
@@ -615,26 +620,26 @@ contract("TreeFactory", (accounts) => {
         { from: userAccount2 }
       );
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId4, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId4, userAccount2, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId5, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId5, userAccount2, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId4, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId4, ipfsHash, birthDate, countryCode, {
           from: userAccount2,
         })
 
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      await planterInstance.updateCapacity(userAccount3, 2, {
+      await planterInstance.updateSupplyCap(userAccount3, 2, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId4,
         ipfsHash,
         birthDate,
@@ -643,7 +648,7 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount3,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
@@ -668,16 +673,16 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(10, updateIpfsHash1, birthDate, countryCode, {
+        .plantAssignedTree(10, updateIpfsHash1, birthDate, countryCode, {
           from: userAccount2,
         })
         .should.be.rejectedWith(
@@ -685,7 +690,7 @@ contract("TreeFactory", (accounts) => {
         );
 
       await treeFactoryInstance
-        .plantTree(treeId, updateIpfsHash1, birthDate, countryCode, {
+        .plantAssignedTree(treeId, updateIpfsHash1, birthDate, countryCode, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -696,7 +701,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      const tx = await treeFactoryInstance.plantTree(
+      const tx = await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -704,24 +709,24 @@ contract("TreeFactory", (accounts) => {
         { from: userAccount2 }
       );
 
-      truffleAssert.eventEmitted(tx, "TreePlanted", (ev) => {
+      truffleAssert.eventEmitted(tx, "AssignedTreePlanted", (ev) => {
         return Number(ev.treeId) == treeId;
       });
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      const treeFactoryResult = await treeFactoryInstance.treeData.call(treeId);
+      const treeFactoryResult = await treeFactoryInstance.trees.call(treeId);
       /////////////////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResult.planterId,
+        treeFactoryResult.planter,
         userAccount2,
         "invalid planter id in add tree"
       );
-      assert.equal(Number(treeFactoryResult.treeType), 0, "incorrect treeType");
+      assert.equal(Number(treeFactoryResult.species), 0, "incorrect treeType");
 
       assert.equal(
-        Number(treeFactoryResult.provideStatus),
+        Number(treeFactoryResult.saleType),
         0,
         "incorrect provide status"
       );
@@ -758,7 +763,7 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////////////////////////////////////////////////////////////////////////////////
 
-      let updateGenResult = await treeFactoryInstance.updateTrees.call(treeId);
+      let updateGenResult = await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(
         updateGenResult.updateSpecs,
@@ -773,7 +778,7 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .plantTree(treeId, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId, ipfsHash, birthDate, countryCode, {
           from: userAccount2,
         })
         .should.be.rejectedWith(
@@ -861,39 +866,39 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////// ------------------- should fail because of planting permision (1)
-      await treeFactoryInstance.addTree(treeId1, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId1, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId1, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId1, userAccount2, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId1, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId1, ipfsHash, birthDate, countryCode, {
           from: userAccount1,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId1, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId1, ipfsHash, birthDate, countryCode, {
           from: userAccount3,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId1, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId1, ipfsHash, birthDate, countryCode, {
           from: userAccount4,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId1, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId1, ipfsHash, birthDate, countryCode, {
           from: userAccount8,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId1,
         ipfsHash,
         birthDate,
@@ -904,27 +909,27 @@ contract("TreeFactory", (accounts) => {
       );
       /////////// -------------- should fail because of planting permision (assign to type 2 and test with type 1 and type 2)
 
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId2, userAccount3, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId2, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId2, ipfsHash, birthDate, countryCode, {
           from: userAccount1,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId2, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId2, ipfsHash, birthDate, countryCode, {
           from: userAccount6,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId2,
         ipfsHash,
         birthDate,
@@ -936,35 +941,35 @@ contract("TreeFactory", (accounts) => {
 
       ////////////////// --------------- should fail because of planting permision (assign to type 2 and test with type 3)
 
-      ///////////////////------------------ update planter usrAccount4 capacity to 1 so he can plant just 1 tree
+      ///////////////////------------------ update planter usrAccount4 SupplyCap to 1 so he can plant just 1 tree
 
-      await planterInstance.updateCapacity(userAccount4, 1, {
+      await planterInstance.updateSupplyCap(userAccount4, 1, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId3, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId3, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.addTree(treeId4, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId4, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId3, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId3, userAccount3, {
         from: dataManager,
       });
-      await treeFactoryInstance.assignTreeToPlanter(treeId4, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId4, userAccount3, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId3, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId3, ipfsHash, birthDate, countryCode, {
           from: userAccount7,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId3, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId3, ipfsHash, birthDate, countryCode, {
           from: userAccount8,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
@@ -972,17 +977,17 @@ contract("TreeFactory", (accounts) => {
       ///////////////-------------- it must fail because planter status is not active
 
       await treeFactoryInstance
-        .plantTree(treeId3, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId3, ipfsHash, birthDate, countryCode, {
           from: userAccount4,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
       //////////////------------------ accept user to organiztion
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId3,
         ipfsHash,
         birthDate,
@@ -993,18 +998,18 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .plantTree(treeId4, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId4, ipfsHash, birthDate, countryCode, {
           from: userAccount4,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
-      ////////////////------------- update capacity to 5 and now an plant
+      ////////////////------------- update SupplyCap to 5 and now an plant
 
-      await planterInstance.updateCapacity(userAccount4, 5, {
+      await planterInstance.updateSupplyCap(userAccount4, 5, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId4,
         ipfsHash,
         birthDate,
@@ -1013,59 +1018,59 @@ contract("TreeFactory", (accounts) => {
       );
       ///////////////// -------------------------- should fail because of planting permision assign to type 3
 
-      await treeFactoryInstance.addTree(treeId5, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId5, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId5, userAccount4, {
+      await treeFactoryInstance.assignTree(treeId5, userAccount4, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount1,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount3,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
       //////////////-------------- call with user5 in same orgnization but not assignee
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount5,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       /////////////-------------- accept user account5 as planter to organization 3 but it should be fail because tree asigned to userAccount4 in organization 3
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount5,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       /////////////////////////////////------------ type 3 from other organization want to plant
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount7,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       ///////////////////////////--------------------- accept user from other org and must be fail because not assignee
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
       await treeFactoryInstance
-        .plantTree(treeId5, ipfsHash, birthDate, countryCode, {
+        .plantAssignedTree(treeId5, ipfsHash, birthDate, countryCode, {
           from: userAccount7,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
@@ -1073,7 +1078,7 @@ contract("TreeFactory", (accounts) => {
 
       //////////////////////// ---------------------  plant succusfully
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId5,
         ipfsHash,
         birthDate,
@@ -1116,21 +1121,21 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: dataManager })
+        .verifyAssignedTree(treeId, true, { from: dataManager })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
         );
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -1142,28 +1147,28 @@ contract("TreeFactory", (accounts) => {
       ////////////////// ---------------------- check data before reject
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-      let treeFactoryResult = await treeFactoryInstance.treeData.call(treeId);
+      let treeFactoryResult = await treeFactoryInstance.trees.call(treeId);
 
       await treeFactoryInstance
-        .verifyPlant(invalidTreeId, true, { from: dataManager })
+        .verifyAssignedTree(invalidTreeId, true, { from: dataManager })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
         );
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount2 })
+        .verifyAssignedTree(treeId, true, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
       ///////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResult.planterId,
+        treeFactoryResult.planter,
         userAccount2,
         "plnter id is incorrect"
       );
 
       assert.equal(
-        Number(treeFactoryResult.provideStatus),
+        Number(treeFactoryResult.saleType),
         0,
         "incorrect provide status"
       );
@@ -1200,7 +1205,7 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////////////////////////////////////////////////////////////////////////
 
-      let updateGenResult = await treeFactoryInstance.updateTrees.call(treeId);
+      let updateGenResult = await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(
         updateGenResult.updateSpecs,
@@ -1215,30 +1220,31 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////////////////// -------------------------- reject
-      await treeFactoryInstance.verifyPlant(treeId, false, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, false, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .verifyPlant(treeId, false, { from: userAccount1 })
+        .verifyAssignedTree(treeId, false, { from: userAccount1 })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
         );
       ///////////////////// check data after reject
 
-      let treeFactoryResultAfterVerify =
-        await treeFactoryInstance.treeData.call(treeId);
+      let treeFactoryResultAfterVerify = await treeFactoryInstance.trees.call(
+        treeId
+      );
 
       /////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResultAfterVerify.planterId,
+        treeFactoryResultAfterVerify.planter,
         userAccount2,
         "plnter id is incorrect"
       );
 
       assert.equal(
-        Number(treeFactoryResultAfterVerify.provideStatus),
+        Number(treeFactoryResultAfterVerify.saleType),
         0,
         "incorrect provide status"
       );
@@ -1276,7 +1282,7 @@ contract("TreeFactory", (accounts) => {
       /////////////////////////////////////////////////////////////////////
 
       let updateGenResultAfterVerify =
-        await treeFactoryInstance.updateTrees.call(treeId);
+        await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(
         updateGenResultAfterVerify.updateSpecs,
@@ -1291,15 +1297,15 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////////////////////////////////// ------------- add tree2
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId2, userAccount3, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId2,
         updateIpfsHash1,
         birthDate,
@@ -1309,16 +1315,16 @@ contract("TreeFactory", (accounts) => {
       //////////////////// ---------------- check data before verify
 
       const plantDate2 = await Common.timeInitial(TimeEnumes.seconds, 0);
-      let treeFactoryResult2 = await treeFactoryInstance.treeData.call(treeId2);
+      let treeFactoryResult2 = await treeFactoryInstance.trees.call(treeId2);
 
       assert.equal(
-        treeFactoryResult2.planterId,
+        treeFactoryResult2.planter,
         userAccount3,
         "plnter id is incorrect"
       );
 
       assert.equal(
-        Number(treeFactoryResult2.provideStatus),
+        Number(treeFactoryResult2.saleType),
         0,
         "incorrect provide status"
       );
@@ -1354,7 +1360,7 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////////////////////////
-      let updateGenResult2 = await treeFactoryInstance.updateTrees.call(
+      let updateGenResult2 = await treeFactoryInstance.treeUpdates.call(
         treeId2
       );
 
@@ -1370,23 +1376,24 @@ contract("TreeFactory", (accounts) => {
         "invlid updateGen update status"
       );
 
-      await treeFactoryInstance.verifyPlant(treeId2, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId2, true, {
         from: dataManager,
       });
       ////////////// ---------------- check data after verify
-      let treeFactoryResultAfterVerify2 =
-        await treeFactoryInstance.treeData.call(treeId2);
+      let treeFactoryResultAfterVerify2 = await treeFactoryInstance.trees.call(
+        treeId2
+      );
 
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       assert.equal(
-        treeFactoryResultAfterVerify2.planterId,
+        treeFactoryResultAfterVerify2.planter,
         userAccount3,
         "plnter id is incorrect"
       );
 
       assert.equal(
-        Number(treeFactoryResultAfterVerify2.provideStatus),
+        Number(treeFactoryResultAfterVerify2.saleType),
         0,
         "incorrect provide status"
       );
@@ -1424,7 +1431,7 @@ contract("TreeFactory", (accounts) => {
       ///////////////////////////////////////////////////////////////////////////////////
 
       const updateGenResultAfterVerify2 =
-        await treeFactoryInstance.updateTrees.call(treeId2);
+        await treeFactoryInstance.treeUpdates.call(treeId2);
 
       assert.equal(
         updateGenResultAfterVerify2.updateSpecs,
@@ -1439,14 +1446,14 @@ contract("TreeFactory", (accounts) => {
       );
       ////////////// ------------------------------ fail too verify
       await treeFactoryInstance
-        .verifyPlant(treeId2, true, { from: userAccount4 })
+        .verifyAssignedTree(treeId2, true, { from: userAccount4 })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
         );
 
       /////////////// plant treeId1 after reject again
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -1454,15 +1461,15 @@ contract("TreeFactory", (accounts) => {
         { from: userAccount2 }
       );
 
-      await treeFactoryInstance.verifyPlant(treeId, false, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, false, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId, userAccount3, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -1511,10 +1518,10 @@ contract("TreeFactory", (accounts) => {
         userAccount3
       );
       //////////////----------------- accept org planter
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
       await Common.addTreejerContractRole(
@@ -1523,13 +1530,13 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
       //////////////////// verify type 1 by admin
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -1538,83 +1545,83 @@ contract("TreeFactory", (accounts) => {
           from: userAccount2,
         }
       );
-      const tx1 = await treeFactoryInstance.verifyPlant(treeId, true, {
+      const tx1 = await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
-      truffleAssert.eventEmitted(tx1, "PlantVerified", (ev) => {
+      truffleAssert.eventEmitted(tx1, "AssignedTreeVerified", (ev) => {
         return Number(ev.treeId) == treeId;
       });
       //////////////////---------------- assign to type 2 anad verify by org
-      await treeFactoryInstance.addTree(treeId2, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
         from: dataManager,
       });
-      await treeFactoryInstance.assignTreeToPlanter(treeId2, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId2, userAccount3, {
         from: dataManager,
       });
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId2,
         ipfsHash,
         birthDate,
         countryCode,
         { from: userAccount3 }
       );
-      const tx2 = await treeFactoryInstance.verifyPlant(treeId2, false, {
+      const tx2 = await treeFactoryInstance.verifyAssignedTree(treeId2, false, {
         from: userAccount4,
       });
-      truffleAssert.eventEmitted(tx2, "PlantRejected", (ev) => {
+      truffleAssert.eventEmitted(tx2, "AssignedTreeRejected", (ev) => {
         return Number(ev.treeId) == treeId2;
       });
       ///////////////////////////---------------- assign to type 3 and  verify by org
-      await treeFactoryInstance.addTree(treeId3, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId3, ipfsHash, {
         from: dataManager,
       });
-      await treeFactoryInstance.assignTreeToPlanter(treeId3, userAccount4, {
+      await treeFactoryInstance.assignTree(treeId3, userAccount4, {
         from: dataManager,
       });
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId3,
         ipfsHash,
         birthDate,
         countryCode,
         { from: userAccount4 }
       );
-      const tx3 = await treeFactoryInstance.verifyPlant(treeId3, true, {
+      const tx3 = await treeFactoryInstance.verifyAssignedTree(treeId3, true, {
         from: userAccount3,
       });
-      truffleAssert.eventEmitted(tx3, "PlantVerified", (ev) => {
+      truffleAssert.eventEmitted(tx3, "AssignedTreeVerified", (ev) => {
         return Number(ev.treeId) == treeId3;
       });
       ///////////////////////////---------------- assign to type 3 and  verify by other planters in org
-      await treeFactoryInstance.addTree(treeId4, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId4, ipfsHash, {
         from: dataManager,
       });
-      await treeFactoryInstance.assignTreeToPlanter(treeId4, userAccount4, {
+      await treeFactoryInstance.assignTree(treeId4, userAccount4, {
         from: dataManager,
       });
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId4,
         ipfsHash,
         birthDate,
         countryCode,
         { from: userAccount4 }
       );
-      const tx4 = await treeFactoryInstance.verifyPlant(treeId4, true, {
+      const tx4 = await treeFactoryInstance.verifyAssignedTree(treeId4, true, {
         from: userAccount5,
       });
-      truffleAssert.eventEmitted(tx4, "PlantVerified", (ev) => {
+      truffleAssert.eventEmitted(tx4, "AssignedTreeVerified", (ev) => {
         return Number(ev.treeId) == treeId4;
       });
 
       ////////////// ------------- fail to assing or plant after verify
 
       await treeFactoryInstance
-        .assignTreeToPlanter(treeId4, userAccount4, {
+        .assignTree(treeId4, userAccount4, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
 
       await treeFactoryInstance
-        .plantTree(treeId4, updateIpfsHash1, birthDate, countryCode, {
+        .plantAssignedTree(treeId4, updateIpfsHash1, birthDate, countryCode, {
           from: userAccount2,
         })
         .should.be.rejectedWith(
@@ -1696,34 +1703,34 @@ contract("TreeFactory", (accounts) => {
         userAccount6
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
       ///////////////---------------- accept org planter by org
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -1732,30 +1739,30 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount2 })
+        .verifyAssignedTree(treeId, true, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount1 })
+        .verifyAssignedTree(treeId, true, { from: userAccount1 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount3 })
+        .verifyAssignedTree(treeId, true, { from: userAccount3 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount4 })
+        .verifyAssignedTree(treeId, true, { from: userAccount4 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount6 })
+        .verifyAssignedTree(treeId, true, { from: userAccount6 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount8 })
+        .verifyAssignedTree(treeId, true, { from: userAccount8 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
     });
@@ -1841,30 +1848,30 @@ contract("TreeFactory", (accounts) => {
         userAccount6
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId, userAccount3, {
         from: dataManager,
       });
 
       ///////////////---------------- accept org planter by org
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -1873,28 +1880,28 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount1 })
+        .verifyAssignedTree(treeId, true, { from: userAccount1 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount2 })
+        .verifyAssignedTree(treeId, true, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount6 })
+        .verifyAssignedTree(treeId, true, { from: userAccount6 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount7 })
+        .verifyAssignedTree(treeId, true, { from: userAccount7 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount4 })
+        .verifyAssignedTree(treeId, true, { from: userAccount4 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       //////////////--------------- verify successfully
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: userAccount5,
       });
     });
@@ -1980,29 +1987,29 @@ contract("TreeFactory", (accounts) => {
         userAccount6
       );
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId, userAccount3, {
         from: dataManager,
       });
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
       ///////////////-------------------------- plant tree
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         updateIpfsHash1,
         birthDate,
@@ -2012,30 +2019,30 @@ contract("TreeFactory", (accounts) => {
       //////////////////----------- try to verify:fail
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount2 })
+        .verifyAssignedTree(treeId, true, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount6 })
+        .verifyAssignedTree(treeId, true, { from: userAccount6 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount7 })
+        .verifyAssignedTree(treeId, true, { from: userAccount7 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       await treeFactoryInstance
-        .verifyPlant(treeId, true, { from: userAccount5 })
+        .verifyAssignedTree(treeId, true, { from: userAccount5 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       /////////////////------------- try to verify: success
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: userAccount3,
       });
     });
 
-    ////////////////////------------------------------------ test manageProvideStatus func  ----------------------------------------//
+    ////////////////////------------------------------------ test manageSaleTypeBatch func  ----------------------------------------//
 
-    it("test manageProvideStatus function", async () => {
+    it("test manageSaleTypeBatch function", async () => {
       await Common.addTreejerContractRole(
         arInstance,
         treeFactoryInstance.address,
@@ -2043,7 +2050,7 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .manageProvideStatus(102, 103, 2, { from: deployerAccount })
+        .manageSaleTypeBatch(102, 103, 2, { from: deployerAccount })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
       await Common.addTreejerContractRole(
@@ -2062,11 +2069,11 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.updateOwner(102, userAccount2, 1, {
+      await treeFactoryInstance.mintAssignedTree(102, userAccount2, {
         from: deployerAccount,
       });
 
-      let result = await treeFactoryInstance.manageProvideStatus.call(
+      let result = await treeFactoryInstance.manageSaleTypeBatch.call(
         102,
         103,
         2,
@@ -2077,17 +2084,17 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(result, false, "result not true");
 
-      let result2 = await treeFactoryInstance.manageProvideStatus(103, 104, 2, {
+      let result2 = await treeFactoryInstance.manageSaleTypeBatch(103, 104, 2, {
         from: deployerAccount,
       });
 
       assert.equal(
-        Number((await treeFactoryInstance.treeData.call(103)).provideStatus),
+        Number((await treeFactoryInstance.trees.call(103)).saleType),
         2,
-        "provideStatus not true"
+        "saleType not true"
       );
 
-      let result3 = await treeFactoryInstance.manageProvideStatus.call(
+      let result3 = await treeFactoryInstance.manageSaleTypeBatch.call(
         103,
         104,
         3,
@@ -2104,49 +2111,54 @@ contract("TreeFactory", (accounts) => {
 
   describe("deploy and set addresses", () => {
     beforeEach(async () => {
-      arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-        initializer: "initialize",
+      arInstance = await AccessRestriction.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
-      treeFactoryInstance = await deployProxy(
-        TreeFactory,
-        [arInstance.address],
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
         {
-          initializer: "initialize",
           from: deployerAccount,
-          unsafeAllowCustomTypes: true,
         }
       );
-
-      planterFundInstnce = await deployProxy(
-        PlanterFund,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
-
-      treeTokenInstance = await deployProxy(Tree, [arInstance.address, ""], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      planterInstance = await deployProxy(Planter, [arInstance.address], {
-        initializer: "initialize",
-        from: deployerAccount,
-        unsafeAllowCustomTypes: true,
-      });
-
-      await treeFactoryInstance.setPlanterAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
     });
 
     it("Should update tree work successfully", async () => {
@@ -2168,7 +2180,7 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      let tree = await treeFactoryInstance.treeData.call(treeId);
+      let tree = await treeFactoryInstance.trees.call(treeId);
       let travelTime = Math.mul(
         Math.add(
           Math.mul(Number(tree.treeStatus), 3600),
@@ -2183,7 +2195,15 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
 
-      let result = await treeFactoryInstance.updateTrees.call(treeId);
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, "new ipfs", {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_HAS_PENDING_UPDATE);
+
+      let result = await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(
         result.updateStatus.toNumber(),
@@ -2228,7 +2248,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      let tree = await treeFactoryInstance.treeData.call(treeId);
+      let tree = await treeFactoryInstance.trees.call(treeId);
       let travelTime = Math.add(
         Math.mul(Number(tree.treeStatus), 3600),
         Math.mul(3 * 24, 3600)
@@ -2242,11 +2262,17 @@ contract("TreeFactory", (accounts) => {
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
 
-      const updateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(3, {
-        from: dataManager,
-      });
+      const treeUpdateIntervalTx1 = await treeFactoryInstance.setUpdateInterval(
+        3 * 24 * 60 * 60,
+        {
+          from: dataManager,
+        }
+      );
 
-      truffleAssert.eventEmitted(updateIntervalTx1, "UpdateIntervalSet");
+      truffleAssert.eventEmitted(
+        treeUpdateIntervalTx1,
+        "TreeUpdateIntervalChanged"
+      );
 
       await treeFactoryInstance.updateTree(treeId, ipfsHash, {
         from: userAccount2,
@@ -2256,11 +2282,17 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      const updateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(4, {
-        from: dataManager,
-      });
+      const treeUpdateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(
+        4 * 24 * 60 * 60,
+        {
+          from: dataManager,
+        }
+      );
 
-      truffleAssert.eventEmitted(updateIntervalTx2, "UpdateIntervalSet");
+      truffleAssert.eventEmitted(
+        treeUpdateIntervalTx2,
+        "TreeUpdateIntervalChanged"
+      );
 
       let travelTime2 = Math.add(
         Math.mul(Number(tree.treeStatus), 3600),
@@ -2281,8 +2313,6 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
     });
-
-    it("should fail to update tree", async () => {});
 
     it("Should update tree not work because update time not reach", async () => {
       const treeId = 1;
@@ -2339,7 +2369,7 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      let tree = await treeFactoryInstance.treeData.call(treeId);
+      let tree = await treeFactoryInstance.trees.call(treeId);
       let travelTime = Math.subtract(
         Math.add(
           Math.mul(Number(tree.treeStatus), 3600),
@@ -2399,12 +2429,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       const fundTreeAmount = web3.utils.toWei("0.1");
@@ -2429,33 +2459,33 @@ contract("TreeFactory", (accounts) => {
 
       //////////// -------------- deploy dauFunds
 
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
+      ////////////// ---------- deploy allocation
 
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount1,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -2481,7 +2511,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      let tree = await treeFactoryInstance.treeData.call(treeId);
+      let tree = await treeFactoryInstance.trees.call(treeId);
 
       let travelTime = Math.add(
         Math.add(
@@ -2551,7 +2581,7 @@ contract("TreeFactory", (accounts) => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
@@ -2565,7 +2595,7 @@ contract("TreeFactory", (accounts) => {
         zeroAddress
       );
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
@@ -2581,7 +2611,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -2609,12 +2639,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -2637,32 +2667,33 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount1,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -2688,7 +2719,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      let tree = await treeFactoryInstance.treeData.call(treeId);
+      let tree = await treeFactoryInstance.trees.call(treeId);
       let travelTime = Math.add(
         Math.mul(Number(tree.treeStatus), 3600),
         Math.mul(7 * 24, 3600)
@@ -2720,6 +2751,12 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
+      await Common.addScriptRole(arInstance, dataManager, deployerAccount); // give script role to data manager
+
+      await treeFactoryInstance.updateTreeSpecs(treeId, "new ipfs", {
+        from: dataManager,
+      });
+
       await treeFactoryInstance
         .updateTree(treeId, ipfsHash, { from: userAccount2 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
@@ -2737,6 +2774,12 @@ contract("TreeFactory", (accounts) => {
       await treeFactoryInstance.updateTree(treeId, ipfsHash, {
         from: userAccount2,
       });
+
+      await treeFactoryInstance
+        .updateTreeSpecs(treeId, "new ipfs", {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_HAS_PENDING_UPDATE);
     });
 
     ////////////////////-----------------------------------------------------------verifyUpdate test--------------------------------------------
@@ -2784,20 +2827,25 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
-      let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultBeforeUGT = await treeFactoryInstance.treeUpdates.call(treeId);
+      let resultBeforeGT = await treeFactoryInstance.trees.call(treeId);
 
       let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
       });
 
       let now = await Common.timeInitial(TimeEnumes.seconds, 0);
-      let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
-      let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
+      let resultAfterGT = await treeFactoryInstance.trees.call(treeId);
 
-      let pFund = await planterFundInstnce.planterFunds.call(treeId);
-      let rFund = await planterFundInstnce.referralFunds.call(treeId);
-      let planterPaid = await planterFundInstnce.plantersPaid.call(treeId);
+      let pFund = await planterFundInstnce.treeToPlanterProjectedEarning.call(
+        treeId
+      );
+      let rFund =
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
+      let planterPaid = await planterFundInstnce.treeToPlanterTotalClaimed.call(
+        treeId
+      );
 
       assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
 
@@ -2814,7 +2862,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
-      truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreeUpdatedVerified", (ev) => {
         return ev.treeId == treeId;
       });
 
@@ -2832,12 +2880,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("0.219");
 
@@ -2884,32 +2932,33 @@ contract("TreeFactory", (accounts) => {
       );
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -2921,11 +2970,14 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      const pFund = await planterFundInstnce.planterFunds.call(treeId);
-      const rFund = await planterFundInstnce.referralFunds.call(treeId);
+      const pFund = await planterFundInstnce.treeToPlanterProjectedEarning.call(
+        treeId
+      );
+      const rFund =
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       const planterPaidBeforeVerify =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         Number(pFund),
@@ -2945,22 +2997,22 @@ contract("TreeFactory", (accounts) => {
         "planter paid before verify update is not ok"
       );
 
-      const totalFundsBefore = await planterFundInstnce.totalFunds.call();
+      const totalBalancesBefore = await planterFundInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsBefore.planterFund),
+        Number(totalBalancesBefore.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsBefore.referralFund),
+        Number(totalBalancesBefore.ambassador),
         referralTotalFund,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsBefore.localDevelop),
+        Number(totalBalancesBefore.localDevelopment),
         0,
-        "local develop total fund is not ok"
+        "local development total fund is not ok"
       );
 
       await Common.travelTime(TimeEnumes.seconds, 7 * 172800); // 7 * 172800 is equal to 7 * 48 hours
@@ -2969,22 +3021,21 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
 
-      let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
-      let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultBeforeUGT = await treeFactoryInstance.treeUpdates.call(treeId);
+      let resultBeforeGT = await treeFactoryInstance.trees.call(treeId);
 
       let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
       });
 
-      const resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
+      const resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
 
-      const resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
+      const resultAfterGT = await treeFactoryInstance.trees.call(treeId);
 
       const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      const planterPaidAfterVerify = await planterFundInstnce.plantersPaid.call(
-        treeId
-      );
+      const planterPaidAfterVerify =
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       const expectedPaid = parseInt(
         Math.divide(
@@ -3007,25 +3058,26 @@ contract("TreeFactory", (accounts) => {
         "planter paid after verify is not ok"
       );
 
-      const totalFundsAfterVerify = await planterFundInstnce.totalFunds.call();
+      const totalBalancesAfterVerify =
+        await planterFundInstnce.totalBalances.call();
 
       assert.equal(
-        Number(totalFundsAfterVerify.planterFund),
-        Math.subtract(Number(totalFundsBefore.planterFund), expectedPaid),
+        Number(totalBalancesAfterVerify.planter),
+        Math.subtract(Number(totalBalancesBefore.planter), expectedPaid),
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsAfterVerify.referralFund),
+        Number(totalBalancesAfterVerify.ambassador),
         Math.subtract(
-          Number(totalFundsBefore.referralFund),
+          Number(totalBalancesBefore.ambassador),
           expectedReferralPaid
         ),
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFundsAfterVerify.localDevelop),
+        Number(totalBalancesAfterVerify.localDevelopment),
         expectedReferralPaid,
-        "local develop total fund is not ok"
+        "local development total fund is not ok"
       );
 
       assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
@@ -3043,7 +3095,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
-      truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreeUpdatedVerified", (ev) => {
         return ev.treeId == treeId;
       });
     });
@@ -3055,12 +3107,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
 
       const fundTreeAmount = web3.utils.toWei("1");
@@ -3108,32 +3160,33 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -3145,11 +3198,14 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      const pFund = await planterFundInstnce.planterFunds.call(treeId);
-      const rFund = await planterFundInstnce.referralFunds.call(treeId);
+      const pFund = await planterFundInstnce.treeToPlanterProjectedEarning.call(
+        treeId
+      );
+      const rFund =
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
       const planterPaidBeforeVerify =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         Number(pFund),
@@ -3177,22 +3233,21 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
 
-      let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
-      let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultBeforeUGT = await treeFactoryInstance.treeUpdates.call(treeId);
+      let resultBeforeGT = await treeFactoryInstance.trees.call(treeId);
 
       let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
       });
 
-      const resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
+      const resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
 
-      const resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
+      const resultAfterGT = await treeFactoryInstance.trees.call(treeId);
 
       const now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      const planterPaidAfterVerify = await planterFundInstnce.plantersPaid.call(
-        treeId
-      );
+      const planterPaidAfterVerify =
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         Number(planterPaidAfterVerify),
@@ -3216,7 +3271,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
-      truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreeUpdatedVerified", (ev) => {
         return ev.treeId == treeId;
       });
 
@@ -3232,12 +3287,12 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      const resultAfterGT2 = await treeFactoryInstance.treeData.call(treeId);
+      const resultAfterGT2 = await treeFactoryInstance.trees.call(treeId);
 
       const nowAfterVerify = await Common.timeInitial(TimeEnumes.seconds, 0);
 
       const planterPaidAfterVerify2 =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         resultAfterGT2.treeStatus.toNumber(),
@@ -3267,12 +3322,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -3325,32 +3380,30 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
 
-      await financialModelInstance.addFundDistributionModel(
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await allocationInstance.addAllocationData(
         fundsPercent.planterFund,
         fundsPercent.referralFund,
-        fundsPercent.treeResearch,
-        fundsPercent.localDevelop,
-        fundsPercent.rescueFund,
-        fundsPercent.treejerDevelop,
-        fundsPercent.reserveFund1,
-        fundsPercent.reserveFund2,
+        fundsPercent.research,
+        fundsPercent.localDevelopment,
+        fundsPercent.insurance,
+        fundsPercent.treasury,
+        fundsPercent.reserve1,
+        fundsPercent.reserve2,
         {
           from: dataManager,
         }
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(0, 10, 0, {
+      await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
       });
 
@@ -3360,17 +3413,18 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.availability(treeId, 1, {
+      await treeFactoryInstance.manageSaleType(treeId, 1, {
         from: userAccount5,
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
 
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
@@ -3396,12 +3450,12 @@ contract("TreeFactory", (accounts) => {
         fundTreeAmount,
         fundsPercent.planterFund,
         fundsPercent.referralFund,
-        fundsPercent.treeResearch,
-        fundsPercent.localDevelop,
-        fundsPercent.rescueFund,
-        fundsPercent.treejerDevelop,
-        fundsPercent.reserveFund1,
-        fundsPercent.reserveFund2,
+        fundsPercent.research,
+        fundsPercent.localDevelopment,
+        fundsPercent.insurance,
+        fundsPercent.treasury,
+        fundsPercent.reserve1,
+        fundsPercent.reserve2,
         {
           from: userAccount5,
         }
@@ -3409,13 +3463,16 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////////////////////////////////////////////
 
-      const pFund = await planterFundInstnce.planterFunds.call(treeId);
-      const rFund = await planterFundInstnce.referralFunds.call(treeId);
+      const pFund = await planterFundInstnce.treeToPlanterProjectedEarning.call(
+        treeId
+      );
+      const rFund =
+        await planterFundInstnce.treeToAmbassadorProjectedEarning.call(treeId);
 
-      const totalFunds1 = await planterFundInstnce.totalFunds.call();
+      const totalBalances1 = await planterFundInstnce.totalBalances.call();
 
       const planterPaidBeforeVerify =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         Number(pFund),
@@ -3430,19 +3487,19 @@ contract("TreeFactory", (accounts) => {
       ////////////////// ------------ check total funds
 
       assert.equal(
-        Number(totalFunds1.planterFund),
+        Number(totalBalances1.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds1.referralFund),
+        Number(totalBalances1.ambassador),
         referralTotalFund,
-        "referral total fund is not ok"
+        "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds1.localDevelop),
+        Number(totalBalances1.localDevelopment),
         0,
-        "local develop total fund is not ok"
+        "local developmentment total fund is not ok"
       );
       /////////// ------------------ check planter paid
       assert.equal(
@@ -3457,41 +3514,41 @@ contract("TreeFactory", (accounts) => {
         from: userAccount2,
       });
 
-      let resultBeforeUGT = await treeFactoryInstance.updateTrees.call(treeId);
-      let resultBeforeGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultBeforeUGT = await treeFactoryInstance.treeUpdates.call(treeId);
+      let resultBeforeGT = await treeFactoryInstance.trees.call(treeId);
 
       let tx = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
       });
 
-      const totalFunds2 = await planterFundInstnce.totalFunds.call();
+      const totalBalances2 = await planterFundInstnce.totalBalances.call();
 
       ////////////////// ------------ check total funds
 
       assert.equal(
-        Number(totalFunds2.planterFund),
+        Number(totalBalances2.planter),
         planterTotalFund,
         "planter total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds2.referralFund),
+        Number(totalBalances2.ambassador),
         referralTotalFund,
-        "planter total fund is not ok"
+        "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalFunds2.localDevelop),
+        Number(totalBalances2.localDevelopment),
         0,
-        "planter total fund is not ok"
+        "local development total fund is not ok"
       );
 
-      let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
+      let resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
 
-      let resultAfterGT = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfterGT = await treeFactoryInstance.trees.call(treeId);
 
       let now = await Common.timeInitial(TimeEnumes.seconds, 0);
 
       const planterPaidAfterVerify1 =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         Number(planterPaidAfterVerify1),
@@ -3515,13 +3572,13 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(resultAfterUGT.updateStatus.toNumber(), 3);
 
-      truffleAssert.eventEmitted(tx, "UpdateVerified", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreeUpdatedVerified", (ev) => {
         return ev.treeId == treeId;
       });
 
       /////////////////// verify 2 and set token owner ////////////////////////
 
-      await treeFactoryInstance.updateOwner(treeId, userAccount8, 2, {
+      await treeFactoryInstance.mintAssignedTree(treeId, userAccount8, {
         from: userAccount5,
       });
 
@@ -3535,12 +3592,12 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      let resultAfterGT2 = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfterGT2 = await treeFactoryInstance.trees.call(treeId);
 
       const nowAfterVerify2 = await Common.timeInitial(TimeEnumes.seconds, 0);
 
       const planterPaidAfterVerify2 =
-        await planterFundInstnce.plantersPaid.call(treeId);
+        await planterFundInstnce.treeToPlanterTotalClaimed.call(treeId);
 
       assert.equal(
         resultAfterGT2.treeStatus.toNumber(),
@@ -3570,7 +3627,7 @@ contract("TreeFactory", (accounts) => {
         )
       );
 
-      const totalFunds3 = await planterFundInstnce.totalFunds.call();
+      const totalBalances3 = await planterFundInstnce.totalBalances.call();
 
       const planterBalance = await planterFundInstnce.balances.call(
         userAccount2
@@ -3582,22 +3639,22 @@ contract("TreeFactory", (accounts) => {
         "planter balance is not ok"
       );
 
-      //// because there is no refferal , referral share added to totalFunds.localDevelop
+      //// because there is no referral , referral share added to totalBalances.localDevelopment
       assert.equal(
-        Number(totalFunds3.localDevelop),
+        Number(totalBalances3.localDevelopment),
         expectedReferralPaid,
-        "local develop total fund is not correct"
+        "local development total fund is not correct"
       );
 
       assert.equal(
-        Math.add(Number(totalFunds3.planterFund), expectedPaid),
+        Math.add(Number(totalBalances3.planter), expectedPaid),
         planterTotalFund,
         "planter total fund is not correct"
       );
       assert.equal(
-        Math.add(Number(totalFunds3.referralFund), expectedReferralPaid),
+        Math.add(Number(totalBalances3.ambassador), expectedReferralPaid),
         referralTotalFund,
-        "referral total fund is not correct"
+        "ambassador total fund is not correct"
       );
 
       assert.equal(
@@ -3649,11 +3706,11 @@ contract("TreeFactory", (accounts) => {
         from: dataManager,
       });
 
-      let resultAfterUGT = await treeFactoryInstance.updateTrees.call(treeId);
+      let resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
 
       assert.equal(resultAfterUGT.updateStatus.toNumber(), 2);
 
-      truffleAssert.eventEmitted(tx, "UpdateRejected", (ev) => {
+      truffleAssert.eventEmitted(tx, "TreeUpdateRejected", (ev) => {
         return ev.treeId == treeId;
       });
     });
@@ -3751,15 +3808,15 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount3, {
+      await treeFactoryInstance.assignTree(treeId, userAccount3, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -3769,24 +3826,24 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -3818,7 +3875,7 @@ contract("TreeFactory", (accounts) => {
         from: userAccount4,
       });
 
-      truffleAssert.eventEmitted(verifyTx, "UpdateVerified", (ev) => {
+      truffleAssert.eventEmitted(verifyTx, "TreeUpdatedVerified", (ev) => {
         return Number(ev.treeId) == treeId;
       });
     });
@@ -3899,15 +3956,15 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -3929,15 +3986,15 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount4, {
+      await treeFactoryInstance.assignTree(treeId, userAccount4, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -3947,7 +4004,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
 
@@ -3979,7 +4036,7 @@ contract("TreeFactory", (accounts) => {
         .verifyUpdate(treeId, true, { from: userAccount5 })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
@@ -4064,19 +4121,19 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -4098,15 +4155,15 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount4, {
+      await treeFactoryInstance.assignTree(treeId, userAccount4, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -4116,7 +4173,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
 
@@ -4225,19 +4282,19 @@ contract("TreeFactory", (accounts) => {
       );
 
       ///////////////---------------- accept org planter by org
-      await planterInstance.acceptPlanterFromOrganization(userAccount4, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount4, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount5, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount7, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount7, true, {
         from: userAccount6,
       });
 
-      await planterInstance.acceptPlanterFromOrganization(userAccount8, true, {
+      await planterInstance.acceptPlanterByOrganization(userAccount8, true, {
         from: userAccount6,
       });
 
@@ -4259,15 +4316,15 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -4277,7 +4334,7 @@ contract("TreeFactory", (accounts) => {
         }
       );
 
-      await treeFactoryInstance.verifyPlant(treeId, true, {
+      await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
       });
 
@@ -4321,12 +4378,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -4363,32 +4420,32 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
       });
 
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -4426,12 +4483,12 @@ contract("TreeFactory", (accounts) => {
       const fundsPercent = {
         planterFund: 5000,
         referralFund: 1000,
-        treeResearch: 1000,
-        localDevelop: 1000,
-        rescueFund: 1000,
-        treejerDevelop: 1000,
-        reserveFund1: 0,
-        reserveFund2: 0,
+        research: 1000,
+        localDevelopment: 1000,
+        insurance: 1000,
+        treasury: 1000,
+        reserve1: 0,
+        reserve2: 0,
       };
       const fundTreeAmount = web3.utils.toWei("1");
 
@@ -4468,31 +4525,33 @@ contract("TreeFactory", (accounts) => {
       });
 
       //////////// -------------- deploy dauFunds
-      daiFundInstance = await deployProxy(DaiFunds, [arInstance.address], {
-        initializer: "initialize",
+
+      daiFundInstance = await DaiFund.new({
         from: deployerAccount,
-        unsafeAllowCustomTypes: true,
       });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
       //////////// ----------- deploy dai
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.successFundTree(
         arInstance,
         deployerAccount,
         treeFactoryInstance.address,
         userAccount7,
-        financialModelInstance,
+        allocationInstance,
         daiFundInstance,
         daiInstance,
         planterFundInstnce,
@@ -4528,7 +4587,7 @@ contract("TreeFactory", (accounts) => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
 
-      await treeFactoryInstance.addTree(treeId, ipfsHash, {
+      await treeFactoryInstance.listTree(treeId, ipfsHash, {
         from: dataManager,
       });
 
@@ -4542,7 +4601,7 @@ contract("TreeFactory", (accounts) => {
         zeroAddress
       );
 
-      await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+      await treeFactoryInstance.assignTree(treeId, userAccount2, {
         from: dataManager,
       });
 
@@ -4552,7 +4611,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.plantTree(
+      await treeFactoryInstance.plantAssignedTree(
         treeId,
         ipfsHash,
         birthDate,
@@ -4601,9 +4660,9 @@ contract("TreeFactory", (accounts) => {
       await arInstance.unpause({ from: deployerAccount });
     });
 
-    ////////////////--------------------------------------------------availability test----------------------------------------
+    ////////////////--------------------------------------------------manageSaleType test----------------------------------------
 
-    it("availability should be success", async () => {
+    it("manageSaleType should be success", async () => {
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -4639,26 +4698,26 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      let resultBefore = await treeFactoryInstance.treeData.call(treeId);
+      let resultBefore = await treeFactoryInstance.trees.call(treeId);
 
-      let lastProvideStatus = await treeFactoryInstance.availability(1, 1, {
+      let lastProvideStatus = await treeFactoryInstance.manageSaleType(1, 1, {
         from: userAccount5,
       });
 
-      let resultAfter = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfter = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        resultAfter.provideStatus.toNumber(),
-        Math.add(resultBefore.provideStatus.toNumber(), 1),
-        "provideStatus not true update"
+        resultAfter.saleType.toNumber(),
+        Math.add(resultBefore.saleType.toNumber(), 1),
+        "saleType not true update"
       );
     });
 
-    it("availability should be fail because invalid access(just auction access for this function)", async () => {
+    it("manageSaleType should be fail because invalid access(just auction access for this function)", async () => {
       arInstance.revoke;
 
       await treeFactoryInstance
-        .availability(1, 1, {
+        .manageSaleType(1, 1, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -4670,12 +4729,12 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .availability(1, 1, {
+        .manageSaleType(1, 1, {
           from: userAccount1,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
 
-      //////////////// ------------------- availability should be fail because tree has owner
+      //////////////// ------------------- manageSaleType should be fail because tree has owner
 
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
@@ -4709,30 +4768,30 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      let resultBefore = await treeFactoryInstance.treeData.call(treeId);
+      let resultBefore = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        resultBefore.provideStatus.toNumber(),
+        resultBefore.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
 
-      await treeFactoryInstance.availability(1, 3, {
+      await treeFactoryInstance.manageSaleType(1, 3, {
         from: userAccount1,
       });
 
-      let resultAfter = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfter = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        resultAfter.provideStatus.toNumber(),
+        resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
     });
 
-    /////////////////-------------------------------------------------------updateOwner test-------------------------------------------------------------
+    /////////////////-------------------------------------------------------mintAssignedTree test-------------------------------------------------------------
 
-    it("updateOwner should be success", async () => {
+    it("mintAssignedTree should be success", async () => {
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -4757,7 +4816,7 @@ contract("TreeFactory", (accounts) => {
 
       //////// ----------- fail invalid access
       await treeFactoryInstance
-        .updateOwner(1, userAccount4, 2, {
+        .mintAssignedTree(1, userAccount4, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -4774,34 +4833,34 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.availability(1, 1, {
+      await treeFactoryInstance.manageSaleType(1, 1, {
         from: userAccount5,
       });
 
-      await treeFactoryInstance.updateOwner(1, userAccount4, 2, {
+      await treeFactoryInstance.mintAssignedTree(1, userAccount4, {
         from: userAccount5,
       });
 
-      let resultAfter = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfter = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        resultAfter.provideStatus.toNumber(),
+        resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
 
       let addressGetToken = await treeTokenInstance.ownerOf(1);
 
       assert.equal(addressGetToken, userAccount4, "token not true mint");
 
-      await treeFactoryInstance.updateOwner(1, userAccount6, 2, {
+      await treeFactoryInstance.mintAssignedTree(1, userAccount6, {
         from: userAccount5,
       }).should.be.rejected;
     });
 
-    //////////////////////---------------------------------------------------------updateAvailability----------------------------------
+    //////////////////////---------------------------------------------------------resetSaleType----------------------------------
 
-    it("updateAvailability should be success", async () => {
+    it("resetSaleType should be success", async () => {
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -4830,33 +4889,33 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.availability(treeId, 1, {
+      await treeFactoryInstance.manageSaleType(treeId, 1, {
         from: userAccount5,
       });
 
       ////////////// -------------- fail because of invalid access
       await treeFactoryInstance
-        .updateAvailability(treeId, {
+        .resetSaleType(treeId, {
           from: userAccount6,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      await treeFactoryInstance.updateAvailability(treeId, {
+      await treeFactoryInstance.resetSaleType(treeId, {
         from: userAccount5,
       });
 
-      let resultAfter = await treeFactoryInstance.treeData.call(treeId);
+      let resultAfter = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        resultAfter.provideStatus.toNumber(),
+        resultAfter.saleType.toNumber(),
         0,
-        "provideStatus not true update"
+        "saleType not true update"
       );
     });
 
-    //-----------------------------mintRegularTrees---------------------------------
+    //-----------------------------mintTree---------------------------------
 
-    it("mintRegularTrees should be successfully (tree not planted)", async () => {
+    it("mintTree should be successfully (tree not planted)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -4877,7 +4936,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.mintRegularTrees(15000, userAccount4, {
+      await treeFactoryInstance.mintTree(15000, userAccount4, {
         from: deployerAccount,
       });
 
@@ -4886,7 +4945,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(addressGetToken, userAccount4, "address not true");
     });
 
-    it("mintRegularTrees should be successfully(tree planted)", async () => {
+    it("mintTree should be successfully(tree planted)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -4901,7 +4960,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -4912,7 +4971,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
@@ -4922,7 +4981,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      let genTreeBefore = await treeFactoryInstance.treeData.call(10001);
+      let genTreeBefore = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTreeBefore.treeStatus),
@@ -4931,12 +4990,12 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        Number(genTreeBefore.provideStatus),
+        Number(genTreeBefore.saleType),
         4,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
-      await treeFactoryInstance.mintRegularTrees(10000, userAccount4, {
+      await treeFactoryInstance.mintTree(10000, userAccount4, {
         from: deployerAccount,
       });
 
@@ -4944,7 +5003,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(addressGetToken, userAccount4, "address not true");
 
-      let genTreeAfter = await treeFactoryInstance.treeData.call(10001);
+      let genTreeAfter = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTreeAfter.treeStatus),
@@ -4953,13 +5012,13 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        Number(genTreeAfter.provideStatus),
+        Number(genTreeAfter.saleType),
         0,
-        "provideStatusAfter not true update"
+        "saleTypeAfter not true update"
       );
     });
 
-    it("3.mintRegularTrees should be successfully", async () => {
+    it("3.mintTree should be successfully", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -4974,7 +5033,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -4985,7 +5044,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
@@ -4995,7 +5054,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.mintRegularTrees(10000, userAccount4, {
+      await treeFactoryInstance.mintTree(10000, userAccount4, {
         from: deployerAccount,
       });
 
@@ -5003,7 +5062,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(addressGetToken, userAccount4, "address not true");
 
-      await treeFactoryInstance.mintRegularTrees(10000, userAccount5, {
+      await treeFactoryInstance.mintTree(10000, userAccount5, {
         from: deployerAccount,
       });
 
@@ -5011,7 +5070,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(addressGetToken2, userAccount5, "2-address not true");
 
-      let genTreeBefore = await treeFactoryInstance.treeData.call(10002);
+      let genTreeBefore = await treeFactoryInstance.trees.call(10002);
 
       assert.equal(
         Number(genTreeBefore.treeStatus),
@@ -5020,12 +5079,12 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        Number(genTreeBefore.provideStatus),
+        Number(genTreeBefore.saleType),
         0,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
-      await treeFactoryInstance.mintRegularTrees(10002, userAccount6, {
+      await treeFactoryInstance.mintTree(10002, userAccount6, {
         from: deployerAccount,
       });
 
@@ -5034,7 +5093,7 @@ contract("TreeFactory", (accounts) => {
       assert.equal(addressGetToken3, userAccount6, "3-address not true");
     });
 
-    it("mintRegularTrees should be fail(only RegularSellContract call)", async () => {
+    it("mintTree should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5049,7 +5108,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5060,12 +5119,12 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .mintRegularTrees(9999, userAccount4, {
+        .mintTree(9999, userAccount4, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -5073,9 +5132,9 @@ contract("TreeFactory", (accounts) => {
 
     /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
 
-    // //--------------------------regularPlantTree test----------------------------------------------
+    // //--------------------------plantTree test----------------------------------------------
 
-    it("regularPlantTree should be success (Individual Planter)", async () => {
+    it("plantTree should be success (Individual Planter)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5096,7 +5155,7 @@ contract("TreeFactory", (accounts) => {
         zeroAddress
       );
 
-      const eventTx = await treeFactoryInstance.regularPlantTree(
+      const eventTx = await treeFactoryInstance.plantTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -5107,7 +5166,7 @@ contract("TreeFactory", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      let result = await treeFactoryInstance.regularTrees.call(0);
+      let result = await treeFactoryInstance.tempTrees.call(0);
 
       assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -5129,7 +5188,7 @@ contract("TreeFactory", (accounts) => {
         "plantDate not true"
       );
 
-      assert.equal(result.planterAddress, planter, "planter address not true");
+      assert.equal(result.planter, planter, "planter address not true");
 
       let planterPlantedCount = (await planterInstance.planters.call(planter))
         .plantedCount;
@@ -5140,12 +5199,12 @@ contract("TreeFactory", (accounts) => {
         "planter PlantedCount address not true"
       );
 
-      truffleAssert.eventEmitted(eventTx, "RegularTreePlanted", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreePlanted", (ev) => {
         return ev.treeId == 0;
       });
     });
 
-    it("regularPlantTree should be success (Planter of organization)", async () => {
+    it("plantTree should be success (Planter of organization)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5175,11 +5234,11 @@ contract("TreeFactory", (accounts) => {
         organizationAdmin
       );
 
-      await planterInstance.acceptPlanterFromOrganization(planter, true, {
+      await planterInstance.acceptPlanterByOrganization(planter, true, {
         from: organizationAdmin,
       });
 
-      const eventTx = await treeFactoryInstance.regularPlantTree(
+      const eventTx = await treeFactoryInstance.plantTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -5190,7 +5249,7 @@ contract("TreeFactory", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      let result = await treeFactoryInstance.regularTrees.call(0);
+      let result = await treeFactoryInstance.tempTrees.call(0);
 
       assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -5212,7 +5271,7 @@ contract("TreeFactory", (accounts) => {
         "plantDate not true"
       );
 
-      assert.equal(result.planterAddress, planter, "planter address not true");
+      assert.equal(result.planter, planter, "planter address not true");
 
       let planterPlantedCount = (await planterInstance.planters.call(planter))
         .plantedCount;
@@ -5223,12 +5282,12 @@ contract("TreeFactory", (accounts) => {
         "planter PlantedCount address not true"
       );
 
-      truffleAssert.eventEmitted(eventTx, "RegularTreePlanted", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreePlanted", (ev) => {
         return ev.treeId == 0;
       });
     });
 
-    it("regularPlantTree should be rejected (organizationAdmin not accepted planter)", async () => {
+    it("plantTree should be rejected (organizationAdmin not accepted planter)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5258,19 +5317,14 @@ contract("TreeFactory", (accounts) => {
         organizationAdmin
       );
 
-      await treeFactoryInstance.regularPlantTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        {
-          from: planter,
-        }
-      ).should.be.rejected;
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      }).should.be.rejected;
     });
 
-    //---------------------------------------------verifyRegularPlant-----------------------------------------------
+    //---------------------------------------------verifyTree-----------------------------------------------
 
-    it("verifyRegularPlant should be success(Admin Verify)", async () => {
+    it("verifyTree should be success(Admin Verify)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5285,7 +5339,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5296,13 +5350,13 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      let regularTree = await treeFactoryInstance.regularTrees.call(0);
+      let regularTree = await treeFactoryInstance.tempTrees.call(0);
 
-      const eventTx = await treeFactoryInstance.verifyRegularPlant(0, true, {
+      const eventTx = await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
-      let genTree = await treeFactoryInstance.treeData.call(10001);
+      let genTree = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTree.birthDate),
@@ -5329,25 +5383,21 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterId,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.provideStatus),
-        4,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
-      truffleAssert.eventEmitted(eventTx, "RegularPlantVerified", (ev) => {
-        return ev.treeId == 10001;
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
     });
 
-    it("2.verifyRegularPlant should be success", async () => {
+    it("2.verifyTree should be success", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5363,7 +5413,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccessOrganization(
+      await Common.plantTreeSuccessOrganization(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5376,13 +5426,13 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      let regularTree = await treeFactoryInstance.regularTrees.call(0);
+      let regularTree = await treeFactoryInstance.tempTrees.call(0);
 
-      const eventTx = await treeFactoryInstance.verifyRegularPlant(0, true, {
+      const eventTx = await treeFactoryInstance.verifyTree(0, true, {
         from: organizationAddress,
       });
 
-      let genTree = await treeFactoryInstance.treeData.call(10001);
+      let genTree = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTree.birthDate),
@@ -5409,25 +5459,21 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterId,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.provideStatus),
-        4,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 4, "saleType not true update");
 
-      truffleAssert.eventEmitted(eventTx, "RegularPlantVerified", (ev) => {
-        return ev.treeId == 10001;
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
     });
 
-    it("3.verifyRegularPlant should be success(isVerified is false)", async () => {
+    it("3.verifyTree should be success(isVerified is false)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5443,7 +5489,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccessOrganization(
+      await Common.plantTreeSuccessOrganization(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5456,26 +5502,22 @@ contract("TreeFactory", (accounts) => {
         dataManager
       );
 
-      const eventTx = await treeFactoryInstance.verifyRegularPlant(0, false, {
+      const eventTx = await treeFactoryInstance.verifyTree(0, false, {
         from: organizationAddress,
       });
 
-      let genTree = await treeFactoryInstance.treeData.call(10001);
+      let genTree = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(genTree.treeSpecs, "", "treeSpecs not true update");
 
-      assert.equal(
-        genTree.planterId,
-        zeroAddress,
-        "planterAddress not true update"
-      );
+      assert.equal(genTree.planter, zeroAddress, "planter not true update");
 
-      truffleAssert.eventEmitted(eventTx, "RegularPlantRejected", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreeRejected", (ev) => {
         return ev.treeId == 0;
       });
     });
 
-    it("verifyRegularPlant should be success(tree has owner)", async () => {
+    it("verifyTree should be success(tree has owner)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5490,7 +5532,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5501,7 +5543,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      let regularTree = await treeFactoryInstance.regularTrees.call(0);
+      let regularTree = await treeFactoryInstance.tempTrees.call(0);
 
       // tree mint for userAccount4
       await Common.addTreejerContractRole(
@@ -5513,11 +5555,11 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
-      let genTree = await treeFactoryInstance.treeData.call(10001);
+      let genTree = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTree.birthDate),
@@ -5544,21 +5586,17 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        genTree.planterId,
-        regularTree.planterAddress,
-        "planterAddress not true update"
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
       );
 
       assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
 
-      assert.equal(
-        Number(genTree.provideStatus),
-        0,
-        "provideStatus not true update"
-      );
+      assert.equal(Number(genTree.saleType), 0, "saleType not true update");
     });
 
-    it("verifyRegularPlant should be reject", async () => {
+    it("verifyTree should be reject", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5573,7 +5611,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5586,21 +5624,21 @@ contract("TreeFactory", (accounts) => {
 
       ////////// --------------- fail regularTree not exist
       await treeFactoryInstance
-        .verifyRegularPlant(1, true, {
+        .verifyTree(1, true, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.REGULAR_TREE_NOT_EXIST);
 
       /////////// ------------ Other planter can't verify update
       await treeFactoryInstance
-        .verifyRegularPlant(0, true, {
+        .verifyTree(0, true, {
           from: userAccount5,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
 
       /////////------------   Planter of tree can't verify update
       await treeFactoryInstance
-        .verifyRegularPlant(0, true, {
+        .verifyTree(0, true, {
           from: planter,
         })
         .should.be.rejectedWith(
@@ -5608,18 +5646,16 @@ contract("TreeFactory", (accounts) => {
         );
     });
 
-    it("Check lastRegularPlantedTree count", async () => {
+    it("Check lastRegualarTreeId count", async () => {
       //// deploy tree auction
 
-      treeAuctionInstance = await deployProxy(
-        TreeAuction,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      auctionInstance = await Auction.new({
+        from: deployerAccount,
+      });
+
+      await auctionInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -5634,12 +5670,9 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeAuctionInstance.setTreeFactoryAddress(
-        treeFactoryInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
 
       await Common.addTreejerContractRole(
         arInstance,
@@ -5647,7 +5680,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5658,29 +5691,23 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.addTree(10001, ipfsHash, {
+      await treeFactoryInstance.listTree(10001, ipfsHash, {
         from: dataManager,
       });
 
-      ////////////// ---------- deploy financial model
-      financialModelInstance = await deployProxy(
-        FinancialModel,
-        [arInstance.address],
-        {
-          initializer: "initialize",
-          from: deployerAccount,
-          unsafeAllowCustomTypes: true,
-        }
-      );
+      ////////////// ---------- deploy allocation
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
 
-      await treeAuctionInstance.setFinancialModelAddress(
-        financialModelInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+      await auctionInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
 
-      await financialModelInstance.addFundDistributionModel(
+      await allocationInstance.addAllocationData(
         3000,
         1200,
         1200,
@@ -5696,20 +5723,15 @@ contract("TreeFactory", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        treeAuctionInstance.address,
+        auctionInstance.address,
         deployerAccount
       );
 
-      await financialModelInstance.assignTreeFundDistributionModel(
-        0,
-        100000,
-        0,
-        {
-          from: dataManager,
-        }
-      );
+      await allocationInstance.assignAllocationToTree(0, 100000, 0, {
+        from: dataManager,
+      });
 
-      await treeAuctionInstance.createAuction(
+      await auctionInstance.createAuction(
         treeId,
         Number(startTime),
         Number(endTime),
@@ -5718,20 +5740,20 @@ contract("TreeFactory", (accounts) => {
         { from: dataManager }
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
-      let result1 = await treeFactoryInstance.lastRegularPlantedTree();
+      let result1 = await treeFactoryInstance.lastRegualarTreeId();
 
-      assert.equal(result1, 10002, "1-lastRegularPlantedTree not true");
+      assert.equal(result1, 10002, "1-lastRegualarTreeId not true");
 
       for (let i = 10003; i < 10006; i++) {
-        await treeFactoryInstance.addTree(i, ipfsHash, {
+        await treeFactoryInstance.listTree(i, ipfsHash, {
           from: dataManager,
         });
 
-        await treeAuctionInstance.createAuction(
+        await auctionInstance.createAuction(
           i,
           Number(startTime),
           Number(endTime),
@@ -5741,27 +5763,22 @@ contract("TreeFactory", (accounts) => {
         );
       }
 
-      await treeFactoryInstance.regularPlantTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        {
-          from: planter,
-        }
-      );
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
 
-      await treeFactoryInstance.verifyRegularPlant(1, true, {
+      await treeFactoryInstance.verifyTree(1, true, {
         from: dataManager,
       });
 
-      let result2 = await treeFactoryInstance.lastRegularPlantedTree();
+      let result2 = await treeFactoryInstance.lastRegualarTreeId();
 
-      assert.equal(result2, 10006, "2-lastRegularPlantedTree not true");
+      assert.equal(result2, 10006, "2-lastRegualarTreeId not true");
     });
 
-    // //----------------------------------------requestRegularTree---------------------------------
+    // //----------------------------------------mintTreeById---------------------------------
 
-    it("requestRegularTree should be successfully", async () => {
+    it("mintTreeById should be successfully", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5776,7 +5793,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5787,7 +5804,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
@@ -5797,7 +5814,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      let genTreeBefore = await treeFactoryInstance.treeData.call(10001);
+      let genTreeBefore = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTreeBefore.treeStatus),
@@ -5806,12 +5823,12 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        Number(genTreeBefore.provideStatus),
+        Number(genTreeBefore.saleType),
         4,
-        "provideStatusBefore not true update"
+        "saleTypeBefore not true update"
       );
 
-      await treeFactoryInstance.requestRegularTree(10001, userAccount5, {
+      await treeFactoryInstance.mintTreeById(10001, userAccount5, {
         from: deployerAccount,
       });
 
@@ -5819,7 +5836,7 @@ contract("TreeFactory", (accounts) => {
 
       assert.equal(addressGetToken2, userAccount5, "address not true");
 
-      let genTreeAfter = await treeFactoryInstance.treeData.call(10001);
+      let genTreeAfter = await treeFactoryInstance.trees.call(10001);
 
       assert.equal(
         Number(genTreeAfter.treeStatus),
@@ -5828,13 +5845,13 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(
-        Number(genTreeAfter.provideStatus),
+        Number(genTreeAfter.saleType),
         0,
-        "provideStatusAfter not true update"
+        "saleTypeAfter not true update"
       );
     });
 
-    it("requestRegularTree should be fail(only RegularSellContract call)", async () => {
+    it("mintTreeById should be fail(only RegularSaleContract call)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -5849,7 +5866,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await Common.regularPlantTreeSuccess(
+      await Common.plantTreeSuccess(
         arInstance,
         treeFactoryInstance,
         planterInstance,
@@ -5860,18 +5877,18 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeFactoryInstance.verifyRegularPlant(0, true, {
+      await treeFactoryInstance.verifyTree(0, true, {
         from: dataManager,
       });
 
       await treeFactoryInstance
-        .requestRegularTree(10000, userAccount5, {
+        .mintTreeById(10000, userAccount5, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
     });
 
-    it("requestRegularTree should be fail(tree must be planted)", async () => {
+    it("mintTreeById should be fail(tree must be planted)", async () => {
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });
@@ -5889,13 +5906,11 @@ contract("TreeFactory", (accounts) => {
       );
 
       await treeFactoryInstance
-        .requestRegularTree(10000, userAccount5, {
+        .mintTreeById(10000, userAccount5, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_MUST_BE_PLANTED);
     });
-
-    /////////////////////////////////////////////////////////mahdiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii////////////////////////////////////////////////////////////////////////
 
     // ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -5959,8 +5974,8 @@ contract("TreeFactory", (accounts) => {
     //   const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
     //   const countryCode = 2;
 
-    //    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
-    //    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
 
     //   await Common.joinOrganizationPlanter(
     //     planterInstance,
@@ -5977,7 +5992,7 @@ contract("TreeFactory", (accounts) => {
     //     userAccount1
     //   );
 
-    //   await planterInstance.acceptPlanterFromOrganization(userAccount2, true, {
+    //   await planterInstance.acceptPlanterByOrganization(userAccount2, true, {
     //     from: userAccount1,
     //   });
 
@@ -5987,11 +6002,11 @@ contract("TreeFactory", (accounts) => {
     //     deployerAccount
     //   );
 
-    //   await treeFactoryInstance.addTree(treeId, ipfsHash, {
+    //   await treeFactoryInstance.listTree(treeId, ipfsHash, {
     //     from: dataManager,
     //   });
 
-    //   await treeFactoryInstance.assignTreeToPlanter(treeId, userAccount2, {
+    //   await treeFactoryInstance.assignTree(treeId, userAccount2, {
     //     from: dataManager,
     //   });
 
@@ -5999,9 +6014,14 @@ contract("TreeFactory", (accounts) => {
 
     //   let ambassadorBeforeBalance = await web3.eth.getBalance(userAccount1);
 
-    //   await contractPlanter.plantTree(treeId, ipfsHash, birthDate, countryCode);
+    //   await contractPlanter.plantAssignedTree(
+    //     treeId,
+    //     ipfsHash,
+    //     birthDate,
+    //     countryCode
+    //   );
 
-    //   await contractAmbassador.verifyPlant(treeId, true);
+    //   await contractAmbassador.verifyAssignedTree(treeId, true);
 
     //   let planterAfterBalance = await web3.eth.getBalance(userAccount2);
 

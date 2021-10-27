@@ -28,7 +28,7 @@ const CommonErrorMsg = {
     "not Data Manager or Treejer Contract",
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_DATA_MANAGER: "caller is not data manager",
-  CHECK_BUYER_RANK: "caller is not buyer rank",
+  CHECK_SCRIPT_ROLE: "caller is not script",
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
@@ -36,7 +36,7 @@ const CommonErrorMsg = {
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
 };
 
-const TreeAuctionErrorMsg = {
+const AuctionErrorMsg = {
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
   TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
@@ -72,35 +72,35 @@ const TreeFactoryErrorMsg = {
   CALLER_IS_NOT_AUCTION: "Caller is not Auction",
   TREE_MUST_BE_PLANTED: "tree must be planted",
   REGULAR_TREE_NOT_EXIST: "regularTree not exist",
+  TREE_HAS_PENDING_UPDATE: "tree has pending update",
 };
 const TreasuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   PLANTER_FUND_NOT_EXIST: "planter fund not exist",
   SUM_INVALID: "sum must be 10000",
   INVALID_FUND_MODEL: "invalid fund model",
-  ONLY_AUCTION_OR_INCREAMENTAL: "not IncrementalSell or Auction",
   INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
-  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
 };
 
-const DaiFundsErrorMsg = {
+const DaiFundErrorMsg = {
   INSUFFICIENT_AMOUNT: "insufficient amount",
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
 };
-const FinancialModelErrorMsg = {
+const AllocationErrorMsg = {
   SUM_INVALID: "sum must be 10000",
-  DISTRIBUTION_MODEL_NOT_FOUND: "Distribution model not found",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
   INVALID_FUND_MODEL: "invalid fund model",
 };
 
 const PlanterErrorMsg = {
   ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
   ONLY_PLANTER: "User exist or not planter",
-  INVALID_CAPACITY: "invalid capacity",
+  INVALID_SUPPLYCAP: "invalid supplyCap",
   PLANTER_NOT_EXIST: "planter does not exist",
   PLANTERTYPE_ALLOWED_VALUE: "planterType not allowed values",
   ORGANIZATION_NOT_VALID: "organization address not valid",
-  REFFERED_NOT_TRUE: "refferedBy not true",
+  REFFERED_NOT_TRUE: "invitedBy not true",
   INVALID_PLANTER_TYPE: "invalid planterType in change",
   PLANTER_NOT_ORGANIZATION: "Planter is not organization",
   INVALID_PLANTER: "invalid input planter",
@@ -109,7 +109,7 @@ const PlanterErrorMsg = {
   ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
 };
 
-const RegularSellErrors = {
+const RegularSaleErrors = {
   INVALID_TREE: "invalid tree",
   INVALID_AMOUNT: "invalid amount",
   INVALID_COUNT: "invalid count",
@@ -117,7 +117,7 @@ const RegularSellErrors = {
   INVALID_GIFT_OWNER: "invalid gift owner",
 };
 
-const IncrementalSellErrorMsg = {
+const IncrementalSaleErrorMsg = {
   TREE_TO_SELL: "assign at least one tree",
   INVALID_COUNT: "Count must be lt 100",
   OCCUPIED_TREES: "trees are under Auction",
@@ -126,51 +126,52 @@ const IncrementalSellErrorMsg = {
   INVALID_TREE: "Not enough tree in incremental sell",
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
-  FREE_INCREMENTALSELL_FAIL:
-    "IncrementalSell not exist or count must be lt endTree",
+  FREE_INCREMENTALSALE_FAIL:
+    "IncrementalSale not exist or count must be lt endTree",
 };
 
-const TreeAttributeErrorMsg = {
-  DUPLICATE_TREE_ATTRIBUTES: "the tree attributes are taken",
-  TREE_HAS_ATTRIBUTES: "tree attributes are set before",
-  TREE_WITH_NO_ATTRIBUTES: "no need to tree attributes",
-  ATTRIBUTE_TAKEN: "the tree attributes are taken",
-  ATTRIBUTE_NOT_RESERVED: "the tree attributes not reserved",
+const AttributeErrorMsg = {
+  DUPLICATE_TREE_ATTRIBUTES: "the attributes are taken",
+  ATTRIBUTE_TAKEN: "the attributes are taken",
+  ATTRIBUTE_NOT_RESERVED: "the attributes not reserved",
+  SYMBOL_IS_TAKEN: "the symbol is taken",
 };
 
-const CommunityGiftErrorMsg = {
+const HonoraryTreeErrorMsg = {
   CLAIMED_BEFORE: "Claimed before",
   MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
   TREES_ARE_NOT_AVAILABLE: "trees are not available",
-  EXPIREDATE_REACHED: "CommunityGift ended",
   USER_NOT_EXIST: "User not exist",
-  EXPIREDATE_NOT_REACHED: "CommunityGift Time not yet ended",
   SYMBOL_NOT_RESERVED: "Symbol not reserved",
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
   INVALID_RANGE: "invalid range",
+  UPDATE_RECIPIENT_INVALID_STATUS: "Status must be one",
+  CANT_SET_RANGE: "cant set gift range",
+  CANT_CLAIM: "you cant claim tree",
+  SYMBOL_NOT_EXIST: "no symbol exists for gift",
 };
 
-const WethFundsErrorMsg = {
+const WethFundErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
-  TOTALDAI_INVALID: "totalDaiToPlanterSwap invalid",
+  TOTALDAI_INVALID: "totalDaiDebtToPlanterContract invalid",
 };
 
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
-  TreeAuctionErrorMsg,
+  AuctionErrorMsg,
   TreeFactoryErrorMsg,
   TreasuryManagerErrorMsg,
   PlanterErrorMsg,
-  RegularSellErrors,
-  IncrementalSellErrorMsg,
-  TreeAttributeErrorMsg,
-  DaiFundsErrorMsg,
-  FinancialModelErrorMsg,
-  CommunityGiftErrorMsg,
+  RegularSaleErrors,
+  IncrementalSaleErrorMsg,
+  AttributeErrorMsg,
+  DaiFundErrorMsg,
+  AllocationErrorMsg,
+  HonoraryTreeErrorMsg,
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,
-  WethFundsErrorMsg,
+  WethFundErrorMsg,
 };

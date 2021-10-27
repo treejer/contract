@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 
@@ -15,49 +15,51 @@ import "../gsn/RelayRecipient.sol";
 contract PlanterFund is Initializable, RelayRecipient {
     /** NOTE {isPlanterFund} set inside the initialize to {true} */
     bool public isPlanterFund;
-    uint256 public withdrawThreshold;
+
+    /** NOTE minimum withdrawable amount */
+    uint256 public minWithdrawable;
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
     IERC20Upgradeable public daiToken;
 
-    struct TotalFunds {
-        uint256 planterFund;
-        uint256 referralFund;
-        uint256 localDevelop;
+    struct TotalBalances {
+        uint256 planter;
+        uint256 ambassador;
+        uint256 localDevelopment;
     }
 
-    /** NOTE {totalFunds} is struct of TotalFund that keep total share of
-     * planterFund, referralFund, localDevelop
+    /** NOTE totalBalances keep total share of
+     * planter, ambassador, localDevelopment
      */
-    TotalFunds public totalFunds;
+    TotalBalances public totalBalances;
 
-    /** NOTE mapping of treeId to planterFunds*/
-    mapping(uint256 => uint256) public planterFunds;
+    /** NOTE mapping of treeId to planterProjectedEarning*/
+    mapping(uint256 => uint256) public treeToPlanterProjectedEarning;
 
-    /** NOTE mapping of treeId to referralFunds*/
-    mapping(uint256 => uint256) public referralFunds;
+    /** NOTE mapping of treeId to ambassadorProjectedEarning*/
+    mapping(uint256 => uint256) public treeToAmbassadorProjectedEarning;
 
-    /** NOTE  mpping of treeId to planterPaid balance*/
-    mapping(uint256 => uint256) public plantersPaid;
+    /** NOTE mpping of treeId to treeToPlanterTotalClaimed balance*/
+    mapping(uint256 => uint256) public treeToPlanterTotalClaimed;
 
     /** NOTE mapping of planter address to planter balance*/
     mapping(address => uint256) public balances;
 
-    event PlanterFunded(
+    event PlanterTotalClaimedUpdated(
         uint256 treeId,
-        address planterId,
+        address planter,
         uint256 amount,
-        address referral
+        address ambassador
     );
-    event PlanterBalanceWithdrawn(uint256 amount, address account);
-    event PlanterFundSet(
+    event BalanceWithdrew(uint256 amount, address account);
+    event ProjectedEarningUpdated(
         uint256 treeId,
         uint256 planterAmount,
-        uint256 referralAmount
+        uint256 ambassadorAmount
     );
 
-    event WithdrawThresholdSet();
+    event MinWithdrawableAmountUpdated();
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -71,7 +73,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
+    /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
@@ -90,8 +92,8 @@ contract PlanterFund is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isPlanterFund
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isPlanterFund
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -104,7 +106,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         require(candidateContract.isAccessRestriction());
 
         isPlanterFund = true;
-        withdrawThreshold = .5 ether;
+        minWithdrawable = .5 ether;
         accessRestriction = candidateContract;
     }
 
@@ -143,119 +145,134 @@ contract PlanterFund is Initializable, RelayRecipient {
         daiToken = candidateContract;
     }
 
-    /** @dev admin can set the minimum amount to withdraw
-     * @param _amount is withdraw treshold
+    /** @dev admin set the minimum amount to withdraw
+     * @param _amount is minimum withdrawable amount
      */
-    function setWithdrawThreshold(uint256 _amount) external onlyDataManager {
-        withdrawThreshold = _amount;
+    function updateWithdrawableAmount(uint256 _amount)
+        external
+        onlyDataManager
+    {
+        minWithdrawable = _amount;
 
-        emit WithdrawThresholdSet();
+        emit MinWithdrawableAmountUpdated();
     }
 
     /**
-     * @dev set planterFunds and refferalFunds of a tree with id {_treeId}
-     * and add {_planterFund} to planterFund part of totalFunds and add
-     * {_referralFund} to referralFund part of totalFunds
+     * @dev set projected earnings
+     * @param _treeId id of tree to set projected earning for
+     * @param _planterAmount planter amount
+     * @param _ambassadorAmount ambassador amount
      */
-    function setPlanterFunds(
+    function updateProjectedEarnings(
         uint256 _treeId,
-        uint256 _planterFund,
-        uint256 _referralFund
+        uint256 _planterAmount,
+        uint256 _ambassadorAmount
     ) external onlyTreejerContract {
-        planterFunds[_treeId] = _planterFund;
-        referralFunds[_treeId] = _referralFund;
+        treeToPlanterProjectedEarning[_treeId] = _planterAmount;
+        treeToAmbassadorProjectedEarning[_treeId] = _ambassadorAmount;
 
-        totalFunds.planterFund += _planterFund;
-        totalFunds.referralFund += _referralFund;
+        totalBalances.planter += _planterAmount;
+        totalBalances.ambassador += _ambassadorAmount;
 
-        emit PlanterFundSet(_treeId, _planterFund, _referralFund);
+        emit ProjectedEarningUpdated(
+            _treeId,
+            _planterAmount,
+            _ambassadorAmount
+        );
     }
 
     /**
-     * @dev based on the {_treeStatus} planter charged in every tree update verifying
-     * @param _treeId id of a tree to fund
-     * @param _planterId  address of planter to fund
+     * @dev based on the {_treeStatus} planter total claimable amount updated in every tree
+     * update verifying
+     * @param _treeId id of a tree that planter's total claimable amount updated for
+     * @param _planter  address of planter to fund
      * @param _treeStatus status of tree
      */
-
-    function fundPlanter(
+    function updatePlanterTotalClaimed(
         uint256 _treeId,
-        address _planterId,
+        address _planter,
         uint64 _treeStatus
     ) external onlyTreejerContract {
-        require(planterFunds[_treeId] > 0, "planter fund not exist");
+        require(
+            treeToPlanterProjectedEarning[_treeId] > 0,
+            "planter fund not exist"
+        );
 
         (
-            bool getBool,
-            address gottenOrganizationAddress,
-            address gottenReferralAddress,
-            uint256 gottenPortion
-        ) = planterContract.getPlanterPaymentPortion(_planterId);
+            bool exists,
+            address organizationAddress,
+            address ambassadorAddress,
+            uint256 share
+        ) = planterContract.getOrganizationMemberData(_planter);
 
-        if (getBool) {
-            uint256 totalPayablePlanter;
+        if (exists) {
+            uint256 totalPayableAmountToPlanter;
 
             if (_treeStatus > 25920) {
                 //25920 = 30 * 24 * 36
 
-                totalPayablePlanter =
-                    planterFunds[_treeId] -
-                    plantersPaid[_treeId];
+                totalPayableAmountToPlanter =
+                    treeToPlanterProjectedEarning[_treeId] -
+                    treeToPlanterTotalClaimed[_treeId];
             } else {
-                totalPayablePlanter =
-                    ((planterFunds[_treeId] * _treeStatus) / 25920) -
-                    plantersPaid[_treeId];
+                totalPayableAmountToPlanter =
+                    ((treeToPlanterProjectedEarning[_treeId] * _treeStatus) /
+                        25920) -
+                    treeToPlanterTotalClaimed[_treeId];
             }
 
-            if (totalPayablePlanter > 0) {
-                uint256 totalPayableRefferal = (referralFunds[_treeId] *
-                    totalPayablePlanter) / planterFunds[_treeId];
+            if (totalPayableAmountToPlanter > 0) {
+                uint256 totalPayableAmountToAmbassador = (treeToAmbassadorProjectedEarning[
+                        _treeId
+                    ] * totalPayableAmountToPlanter) /
+                        treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
-                totalFunds.referralFund -= totalPayableRefferal;
+                totalBalances.ambassador -= totalPayableAmountToAmbassador;
 
-                if (gottenReferralAddress == address(0)) {
-                    totalFunds.localDevelop += totalPayableRefferal;
+                if (ambassadorAddress == address(0)) {
+                    totalBalances
+                        .localDevelopment += totalPayableAmountToAmbassador;
                 } else {
-                    balances[gottenReferralAddress] += totalPayableRefferal;
+                    balances[
+                        ambassadorAddress
+                    ] += totalPayableAmountToAmbassador;
                 }
 
-                totalFunds.planterFund -= totalPayablePlanter;
+                totalBalances.planter -= totalPayableAmountToPlanter;
 
-                //Organization calculation section
-                uint256 fullPortion = 10000;
-
-                balances[gottenOrganizationAddress] +=
-                    (totalPayablePlanter * (fullPortion - gottenPortion)) /
-                    fullPortion;
+                balances[organizationAddress] +=
+                    (totalPayableAmountToPlanter * (10000 - share)) /
+                    10000;
 
                 //planter calculation section
 
-                plantersPaid[_treeId] += totalPayablePlanter;
+                treeToPlanterTotalClaimed[
+                    _treeId
+                ] += totalPayableAmountToPlanter;
 
-                balances[_planterId] +=
-                    (totalPayablePlanter * gottenPortion) /
-                    fullPortion;
+                balances[_planter] +=
+                    (totalPayableAmountToPlanter * share) /
+                    10000;
 
-                emit PlanterFunded(
+                emit PlanterTotalClaimedUpdated(
                     _treeId,
-                    _planterId,
-                    totalPayablePlanter,
-                    gottenReferralAddress
+                    _planter,
+                    totalPayableAmountToPlanter,
+                    ambassadorAddress
                 );
             }
         }
     }
 
     /**
-     * @dev planter withdraw {_amount} from planter's balances in case of
-     * valid {_amount} and daiToken transfer to planters address (to msgSender())
+     * @dev planter withdraw {_amount} from balances
      * @param _amount amount to withdraw
      */
-    function withdrawPlanterBalance(uint256 _amount) external ifNotPaused {
+    function withdrawBalance(uint256 _amount) external ifNotPaused {
         require(
-            _amount <= balances[_msgSender()] && _amount >= withdrawThreshold,
+            _amount <= balances[_msgSender()] && _amount >= minWithdrawable,
             "insufficient amount"
         );
 
@@ -265,6 +282,6 @@ contract PlanterFund is Initializable, RelayRecipient {
 
         require(success, "unsuccessful transfer");
 
-        emit PlanterBalanceWithdrawn(_amount, _msgSender());
+        emit BalanceWithdrew(_amount, _msgSender());
     }
 }

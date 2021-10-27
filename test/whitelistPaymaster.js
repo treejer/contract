@@ -1,7 +1,8 @@
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
+
+const AccessRestriction = artifacts.require("AccessRestriction");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const Common = require("./common");
 
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
@@ -19,10 +20,12 @@ contract("WhitelistPaymaster", (accounts) => {
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);

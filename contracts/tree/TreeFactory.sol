@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 
@@ -18,7 +18,7 @@ contract TreeFactory is Initializable, RelayRecipient {
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
 
-    CountersUpgradeable.Counter private regularTreeId;
+    CountersUpgradeable.Counter private pendingRegularTreeId;
 
     /** NOTE {isTreeFactory} set inside the initialize to {true} */
     bool public isTreeFactory;
@@ -26,56 +26,55 @@ contract TreeFactory is Initializable, RelayRecipient {
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
     IPlanterFund public planterFund;
-    IPlanter public planter;
+    IPlanter public planterContract;
 
-    uint256 public lastRegularPlantedTree;
-    uint256 public updateInterval;
+    uint256 public lastRegualarTreeId;
+    uint256 public treeUpdateInterval;
 
-    struct TreeStruct {
-        address planterId;
-        uint256 treeType;
-        uint16 mintStatus;
-        uint16 countryCode;
-        uint32 provideStatus;
+    struct TreeData {
+        address planter;
+        uint256 species;
+        uint32 countryCode;
+        uint32 saleType;
         uint64 treeStatus;
         uint64 plantDate;
         uint64 birthDate;
         string treeSpecs;
     }
 
-    struct UpdateTree {
+    struct TreeUpdate {
         string updateSpecs;
         uint64 updateStatus;
     }
 
-    struct RegularTree {
+    struct TempTree {
         uint64 birthDate;
         uint64 plantDate;
         uint64 countryCode;
         uint64 otherData;
-        address planterAddress;
+        address planter;
         string treeSpecs;
     }
-    /** NOTE mapping of treeId to Tree Struct */
-    mapping(uint256 => TreeStruct) public treeData;
-    /** NOTE mapping of treeId to UpdateTree struct */
-    mapping(uint256 => UpdateTree) public updateTrees;
-    /** NOTE mapping of treeId to RegularTree struct */
-    mapping(uint256 => RegularTree) public regularTrees;
+    /** NOTE mapping of treeId to TreeData Struct */
+    mapping(uint256 => TreeData) public trees;
+    /** NOTE mapping of treeId to TreeUpdate struct */
+    mapping(uint256 => TreeUpdate) public treeUpdates;
+    /** NOTE mapping of treeId to TempTree struct */
+    mapping(uint256 => TempTree) public tempTrees;
 
-    event TreeAdded(uint256 treeId);
+    event TreeListed(uint256 treeId);
     event TreeAssigned(uint256 treeId);
-    event TreePlanted(uint256 treeId);
-    event PlantVerified(uint256 treeId);
-    event PlantRejected(uint256 treeId);
+    event AssignedTreePlanted(uint256 treeId);
+    event AssignedTreeVerified(uint256 treeId);
+    event AssignedTreeRejected(uint256 treeId);
     event TreeUpdated(uint256 treeId);
-    event UpdateVerified(uint256 treeId);
-    event UpdateRejected(uint256 treeId);
-    event RegularTreePlanted(uint256 treeId);
-    event RegularPlantVerified(uint256 treeId);
-    event RegularPlantRejected(uint256 treeId);
-    event UpdateIntervalSet();
-    event TreeSpecsUpdate(uint256 treeId, string treeSpecs);
+    event TreeUpdatedVerified(uint256 treeId);
+    event TreeUpdateRejected(uint256 treeId);
+    event TreePlanted(uint256 treeId);
+    event TreeVerified(uint256 treeId, uint256 tempTreeId);
+    event TreeRejected(uint256 treeId);
+    event TreeUpdateIntervalChanged();
+    event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -109,7 +108,16 @@ contract TreeFactory is Initializable, RelayRecipient {
 
     /** NOTE modifier for check treeId to be valid tree */
     modifier validTree(uint256 _treeId) {
-        require(treeData[_treeId].treeStatus > 0, "invalid tree");
+        require(trees[_treeId].treeStatus > 0, "invalid tree");
+        _;
+    }
+
+    /** NOTE modifier for check tree has not pending update */
+    modifier notHavePendingUpdate(uint256 _treeId) {
+        require(
+            treeUpdates[_treeId].updateStatus != 1,
+            "tree has pending update"
+        );
         _;
     }
 
@@ -120,9 +128,9 @@ contract TreeFactory is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isTreeFactory
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
-     * NOTE set lastRegularPlantedTree to 10000
+     * @dev initialize AccessRestriction contract and set true for isTreeFactory
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     * NOTE set lastRegualarTreeId to 10000
      */
     function initialize(address _accessRestrictionAddress)
         external
@@ -136,8 +144,8 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         isTreeFactory = true;
         accessRestriction = candidateContract;
-        lastRegularPlantedTree = 10000;
-        updateInterval = 604800;
+        lastRegualarTreeId = 10000;
+        treeUpdateInterval = 604800;
     }
 
     /**
@@ -168,12 +176,12 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev admin set Planter contract address
      * @param _address set to the address of Planter contract
      */
-    function setPlanterAddress(address _address) external onlyAdmin {
+    function setPlanterContractAddress(address _address) external onlyAdmin {
         IPlanter candidateContract = IPlanter(_address);
 
         require(candidateContract.isPlanter());
 
-        planter = candidateContract;
+        planterContract = candidateContract;
     }
 
     /**
@@ -188,242 +196,244 @@ contract TreeFactory is Initializable, RelayRecipient {
         treeToken = candidateContract;
     }
 
-    /** @dev admin can set the minimum time to send next update request
-     * @param _day time to next update request
+    /** @dev admin set the minimum time to send next update request
+     * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _day) external onlyDataManager {
-        updateInterval = _day * 86400;
+    function setUpdateInterval(uint256 _seconds) external onlyDataManager {
+        treeUpdateInterval = _seconds;
 
-        emit UpdateIntervalSet();
+        emit TreeUpdateIntervalChanged();
     }
 
     /**
-     * @dev admin add tree
-     * @param _treeId id of tree to add
-     * @param _treeDescription tree description
+     * @dev admin list tree
+     * @param _treeId id of tree to list
+     * @param _treeSpecs tree specs
      */
-    function addTree(uint256 _treeId, string calldata _treeDescription)
+    function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
         onlyDataManager
     {
-        require(treeData[_treeId].treeStatus == 0, "duplicate tree");
+        require(trees[_treeId].treeStatus == 0, "duplicate tree");
 
-        TreeStruct storage tree = treeData[_treeId];
+        TreeData storage treeData = trees[_treeId];
 
-        tree.treeStatus = 2;
-        tree.treeSpecs = _treeDescription;
+        treeData.treeStatus = 2;
+        treeData.treeSpecs = _treeSpecs;
 
-        emit TreeAdded(_treeId);
+        emit TreeListed(_treeId);
     }
 
     /**
      * @dev admin assign an existing tree to planter
-     * @param _treeId id of tree to assign
-     * @param _planterId assignee planter
      * NOTE tree must be not planted
+     * @param _treeId id of tree to assign
+     * @param _planter assignee planter
      */
-    function assignTreeToPlanter(uint256 _treeId, address _planterId)
+    function assignTree(uint256 _treeId, address _planter)
         external
         onlyDataManager
     {
-        TreeStruct storage tempTree = treeData[_treeId];
+        TreeData storage treeData = trees[_treeId];
 
-        require(tempTree.treeStatus == 2, "invalid tree to assign");
+        require(treeData.treeStatus == 2, "invalid tree to assign");
 
         require(
-            planter.canAssignTreeToPlanter(_planterId),
+            planterContract.canAssignTree(_planter),
             "can't assign tree to planter"
         );
 
-        tempTree.planterId = _planterId;
+        treeData.planter = _planter;
 
         emit TreeAssigned(_treeId);
     }
 
     /**
-     * @dev planter with permission to plant, can plan their trees
+     * @dev planter with permission to plant, can plant its assigned tree
      * @param _treeId id of tree to plant
      * @param _treeSpecs tree specs
      * @param _birthDate birth date of tree
      * @param _countryCode country code of tree
      */
-    function plantTree(
+    function plantAssignedTree(
         uint256 _treeId,
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external {
-        TreeStruct storage tempGenTree = treeData[_treeId];
+        TreeData storage treeData = trees[_treeId];
 
-        require(tempGenTree.treeStatus == 2, "invalid tree status for plant");
+        require(treeData.treeStatus == 2, "invalid tree status for plant");
 
-        bool _canPlant = planter.plantingPermission(
+        bool canPlant = planterContract.manageAssignedTreePermission(
             _msgSender(),
-            tempGenTree.planterId
+            treeData.planter
         );
 
-        require(_canPlant, "planting permission denied");
+        require(canPlant, "planting permission denied");
 
-        if (_msgSender() != tempGenTree.planterId) {
-            tempGenTree.planterId = _msgSender();
+        if (_msgSender() != treeData.planter) {
+            treeData.planter = _msgSender();
         }
 
-        UpdateTree storage updateGenTree = updateTrees[_treeId];
+        TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
-        updateGenTree.updateSpecs = _treeSpecs;
-        updateGenTree.updateStatus = 1;
+        treeUpdateData.updateSpecs = _treeSpecs;
+        treeUpdateData.updateStatus = 1;
 
-        tempGenTree.countryCode = _countryCode;
-        tempGenTree.birthDate = _birthDate;
-        tempGenTree.plantDate = block.timestamp.toUint64();
-        tempGenTree.treeStatus = 3;
+        treeData.countryCode = _countryCode;
+        treeData.birthDate = _birthDate;
+        treeData.plantDate = block.timestamp.toUint64();
+        treeData.treeStatus = 3;
 
-        emit TreePlanted(_treeId);
+        emit AssignedTreePlanted(_treeId);
     }
 
     /**
-     * @dev admin or allowed verifier can verify a plant or reject.
+     * @dev admin or allowed verifier can verify or reject plant for assigned tree.
      * @param _treeId id of tree to verifiy
      * @param _isVerified true for verify and false for reject
      */
-    function verifyPlant(uint256 _treeId, bool _isVerified)
+    function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
     {
-        TreeStruct storage tempGenTree = treeData[_treeId];
+        TreeData storage treeData = trees[_treeId];
 
-        require(tempGenTree.treeStatus == 3, "invalid tree status");
+        require(treeData.treeStatus == 3, "invalid tree status");
 
         require(
-            tempGenTree.planterId != _msgSender(),
+            treeData.planter != _msgSender(),
             "Planter of tree can't accept update"
         );
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(tempGenTree.planterId, _msgSender()),
+                planterContract.canVerify(treeData.planter, _msgSender()),
             "invalid access to verify"
         );
 
-        UpdateTree storage tempUpdateGenTree = updateTrees[_treeId];
+        TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
         if (_isVerified) {
-            tempGenTree.treeSpecs = tempUpdateGenTree.updateSpecs;
-            tempGenTree.treeStatus = 4;
-            tempUpdateGenTree.updateStatus = 3;
+            treeData.treeSpecs = treeUpdateData.updateSpecs;
+            treeData.treeStatus = 4;
+            treeUpdateData.updateStatus = 3;
 
-            emit PlantVerified(_treeId);
+            emit AssignedTreeVerified(_treeId);
         } else {
-            tempGenTree.treeStatus = 2;
-            tempUpdateGenTree.updateStatus = 2;
-            planter.reducePlantCount(tempGenTree.planterId);
+            treeData.treeStatus = 2;
+            treeUpdateData.updateStatus = 2;
+            planterContract.reducePlantedCount(treeData.planter);
 
-            emit PlantRejected(_treeId);
+            emit AssignedTreeRejected(_treeId);
         }
     }
 
     /**
-     * @dev planter of  tree send update request for tree
+     * @dev planter of tree send update request for tree
      * @param _treeId id of tree to update
      * @param _treeSpecs tree specs
      */
     function updateTree(uint256 _treeId, string memory _treeSpecs) external {
         require(
-            treeData[_treeId].planterId == _msgSender(),
+            trees[_treeId].planter == _msgSender(),
             "Only Planter of tree can send update"
         );
 
-        require(treeData[_treeId].treeStatus > 3, "Tree not planted");
+        require(trees[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
-            updateTrees[_treeId].updateStatus != 1,
+            treeUpdates[_treeId].updateStatus != 1,
             "update tree status is pending"
         );
 
         require(
             block.timestamp >=
-                treeData[_treeId].plantDate +
-                    ((treeData[_treeId].treeStatus * 3600) + updateInterval),
+                trees[_treeId].plantDate +
+                    ((trees[_treeId].treeStatus * 3600) + treeUpdateInterval),
             "Update time not reach"
         );
 
-        UpdateTree storage updateGenTree = updateTrees[_treeId];
+        TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
-        updateGenTree.updateSpecs = _treeSpecs;
-        updateGenTree.updateStatus = 1;
+        treeUpdateData.updateSpecs = _treeSpecs;
+        treeUpdateData.updateStatus = 1;
 
         emit TreeUpdated(_treeId);
     }
 
     /**
      * @dev admin or allowed verifier can verifiy or reject update request for tree.
-     * @param _treeId id of tree to verify update request
-     * @param _isVerified true for verify and false for reject
      * NOTE based on the current time of verifing and plant date, age of tree
      * calculated and set as the treeStatus
      * NOTE if a token exist for that tree (minted before) planter of tree funded
      * based on calculated tree status
+     * @param _treeId id of tree to verify update request
+     * @param _isVerified true for verify and false for reject
      */
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
     {
         require(
-            treeData[_treeId].planterId != _msgSender(),
+            trees[_treeId].planter != _msgSender(),
             "Planter of tree can't verify update"
         );
 
         require(
-            updateTrees[_treeId].updateStatus == 1,
+            treeUpdates[_treeId].updateStatus == 1,
             "update status must be pending"
         );
 
-        require(treeData[_treeId].treeStatus > 3, "Tree not planted");
+        require(trees[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(treeData[_treeId].planterId, _msgSender()),
+                planterContract.canVerify(trees[_treeId].planter, _msgSender()),
             "invalid access to verify"
         );
 
-        UpdateTree storage updateGenTree = updateTrees[_treeId];
+        TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
         if (_isVerified) {
-            TreeStruct storage tree = treeData[_treeId];
+            TreeData storage treeData = trees[_treeId];
 
-            updateGenTree.updateStatus = 3;
+            treeUpdateData.updateStatus = 3;
 
-            uint32 age = ((block.timestamp - treeData[_treeId].plantDate) /
-                3600).toUint32();
+            uint32 age = ((block.timestamp - treeData.plantDate) / 3600)
+                .toUint32();
 
-            if (age > tree.treeStatus) {
-                tree.treeStatus = age;
+            if (age > treeData.treeStatus) {
+                treeData.treeStatus = age;
             }
 
-            tree.treeSpecs = updateGenTree.updateSpecs;
+            treeData.treeSpecs = treeUpdateData.updateSpecs;
 
             if (treeToken.exists(_treeId)) {
-                planterFund.fundPlanter(
+                planterFund.updatePlanterTotalClaimed(
                     _treeId,
-                    tree.planterId,
-                    tree.treeStatus
+                    treeData.planter,
+                    treeData.treeStatus
                 );
             }
 
-            emit UpdateVerified(_treeId);
+            emit TreeUpdatedVerified(_treeId);
         } else {
-            updateGenTree.updateStatus = 2;
+            treeUpdateData.updateStatus = 2;
 
-            emit UpdateRejected(_treeId);
+            emit TreeUpdateRejected(_treeId);
         }
     }
 
     /**
-     * @dev check if a tree is valid to take part in an auction
-     * set {_provideType} to provideStatus when tree is not in use
-     * @return 0 if a tree ready for auction and 1 if a tree is in auction or minted before
+     * @dev check if a tree is free to take part in sale and set {_saleType}
+     * to saleType of tree when tree is not in use
+     * @param _treeId id of tree to check
+     * @param _saleType saleType for tree
+     * @return 0 if a tree ready for a sale and 1 if a tree is in use or minted before
      */
-    function availability(uint256 _treeId, uint32 _provideType)
+    function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         onlyTreejerContract
         validTree(_treeId)
@@ -433,115 +443,92 @@ contract TreeFactory is Initializable, RelayRecipient {
             return 1;
         }
 
-        uint32 nowProvideStatus = treeData[_treeId].provideStatus;
+        uint32 currentSaleType = trees[_treeId].saleType;
 
-        if (nowProvideStatus == 0) {
-            treeData[_treeId].provideStatus = _provideType;
+        if (currentSaleType == 0) {
+            trees[_treeId].saleType = _saleType;
         }
 
-        return nowProvideStatus;
+        return currentSaleType;
     }
 
-    /** @dev mint {_treeId} to {_ownerId} and set mintStatus to {_mintStatus} and privdeStatus to 0  */
-    function updateOwner(
-        uint256 _treeId,
-        address _ownerId,
-        uint16 _mintStatus
-    ) external onlyTreejerContract {
-        treeData[_treeId].provideStatus = 0;
-        treeData[_treeId].mintStatus = _mintStatus;
-        treeToken.safeMint(_ownerId, _treeId);
-    }
-
-    /** @dev exit a {_treeId} from auction */
-    function updateAvailability(uint256 _treeId) external onlyTreejerContract {
-        treeData[_treeId].provideStatus = 0;
-    }
-
-    /** @dev cancel all old incremental sell of trees starting from {_startTreeId} and end at {_endTreeId} */
-    function bulkRevert(uint256 _startTreeId, uint256 _endTreeId)
+    /**
+     * @dev mint a tree to funder and set saleType to 0
+     * @param _treeId id of tree to mint
+     * @param _funder address of funder to mint tree for
+     */
+    function mintAssignedTree(uint256 _treeId, address _funder)
         external
         onlyTreejerContract
     {
+        trees[_treeId].saleType = 0;
+        treeToken.safeMint(_funder, _treeId);
+    }
+
+    /**
+     * @dev reset saleType value of tree
+     * @param _treeId id of tree to reset saleType value
+     */
+    function resetSaleType(uint256 _treeId) external onlyTreejerContract {
+        trees[_treeId].saleType = 0;
+    }
+
+    /**
+     * @dev reset saleType of trees in range of {_startTreeId} and {_endTreeId}
+     * with saleType value of {_saleType}
+     * @param _startTreeId starting tree id to reset saleType
+     * @param _endTreeId ending tree id to reset saleType
+     * @param _saleType saleType value of trees
+     */
+    function resetSaleTypeBatch(
+        uint256 _startTreeId,
+        uint256 _endTreeId,
+        uint256 _saleType
+    ) external onlyTreejerContract {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (treeData[i].provideStatus == 2) {
-                treeData[i].provideStatus = 0;
+            if (trees[i].saleType == _saleType) {
+                trees[i].saleType = 0;
             }
         }
     }
 
     /**
-     * @dev set incremental and communityGifts sell for trees starting from {_startTreeId}
-     * and end at {_endTreeId} by setting {_provideStatus} to provideStatus
+     * @dev set {_saleType} to saleType of trees in range {_startTreeId} and {_endTreeId}
+     * @param _startTreeId starting tree id to set saleType value
+     * @param _endTreeId _ending tree id to set saleType value
+     * @param _saleType saleType value
+     * @return true if all trees saleType value successfully set and false otherwise
      */
-    function manageProvideStatus(
+    function manageSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
-        uint32 _provideStatus
+        uint32 _saleType
     ) external onlyTreejerContract returns (bool) {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (treeData[i].provideStatus > 0 || treeToken.exists(i)) {
+            if (trees[i].saleType > 0 || treeToken.exists(i)) {
                 return false;
             }
         }
         for (uint256 j = _startTreeId; j < _endTreeId; j++) {
-            treeData[j].provideStatus = _provideStatus;
+            trees[j].saleType = _saleType;
         }
         return true;
     }
 
     /**
-     *
-     */
-    function checkMintStatus(uint256 _treeId, address _buyer)
-        external
-        view
-        returns (bool, bytes32)
-    {
-        uint16 minted = treeData[_treeId].mintStatus;
-
-        bool flag = ((minted == 1 || minted == 2) &&
-            treeToken.ownerOf(_treeId) == _buyer);
-
-        if (flag) {
-            TreeStruct storage tempTree = treeData[_treeId];
-            UpdateTree storage tempUpdateTree = updateTrees[_treeId];
-
-            return (
-                true,
-                keccak256(
-                    abi.encodePacked(
-                        lastRegularPlantedTree,
-                        tempTree.birthDate,
-                        tempTree.treeSpecs,
-                        tempTree.treeStatus,
-                        tempTree.planterId,
-                        tempUpdateTree.updateSpecs
-                    )
-                )
-            );
-        }
-
-        return (false, 0);
-    }
-
-    /**
-     * @dev This function is called by planter who have planted a new tree
-     * The planter enters the information of the new tree
-     * Information is stored in The {regularTrees} mapping
-     * And finally the tree is waiting for approval
-     * @param _treeSpecs //TODO: what is _treeSpecs ??
+     * @dev planter plant a tree
+     * @param _treeSpecs tree specs
      * @param _birthDate birthDate of the tree
-     * @param _countryCode Code of the country where the tree was planted
+     * @param _countryCode country code of tree
      */
-    function regularPlantTree(
+    function plantTree(
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
     ) external {
-        require(planter.planterCheck(_msgSender()));
+        require(planterContract.manageTreePermission(_msgSender()));
 
-        regularTrees[regularTreeId.current()] = RegularTree(
+        tempTrees[pendingRegularTreeId.current()] = TempTree(
             _birthDate,
             block.timestamp.toUint64(),
             _countryCode,
@@ -550,133 +537,132 @@ contract TreeFactory is Initializable, RelayRecipient {
             _treeSpecs
         );
 
-        emit RegularTreePlanted(regularTreeId.current());
+        emit TreePlanted(pendingRegularTreeId.current());
 
-        regularTreeId.increment();
+        pendingRegularTreeId.increment();
     }
 
     /**
-     * @dev In this function, the admin approves or rejects the pending trees
-     * After calling this function, if the tree is approved the tree information will be transferred to the {treeData}
-     *
-     * @param _regularTreeId _regularTreeId
-     * @param _isVerified Tree approved or not
+     * @dev admin or allowed verifier can verify or rejects the pending trees
+     * @param _tempTreeId tempTreeId to verify
+     * @param _isVerified true for verify and false for reject
      */
-    function verifyRegularPlant(uint256 _regularTreeId, bool _isVerified)
-        external
-    {
-        RegularTree storage regularTree = regularTrees[_regularTreeId];
+    function verifyTree(uint256 _tempTreeId, bool _isVerified) external {
+        TempTree storage tempTreeData = tempTrees[_tempTreeId];
 
         require(
-            regularTree.planterAddress != _msgSender(),
+            tempTreeData.planter != _msgSender(),
             "Planter of tree can't verify update"
         );
 
         require(
             accessRestriction.isDataManager(_msgSender()) ||
-                planter.canVerify(regularTree.planterAddress, _msgSender()),
+                planterContract.canVerify(tempTreeData.planter, _msgSender()),
             "invalid access to verify"
         );
 
-        require(regularTree.plantDate > 0, "regularTree not exist");
+        require(tempTreeData.plantDate > 0, "regularTree not exist");
 
         if (_isVerified) {
-            uint256 tempLastRegularPlantedTree = lastRegularPlantedTree + 1;
+            uint256 tempLastRegularTreeId = lastRegualarTreeId + 1;
 
             while (
-                !(treeData[tempLastRegularPlantedTree].treeStatus == 0 &&
-                    treeData[tempLastRegularPlantedTree].provideStatus == 0)
+                !(trees[tempLastRegularTreeId].treeStatus == 0 &&
+                    trees[tempLastRegularTreeId].saleType == 0)
             ) {
-                tempLastRegularPlantedTree = tempLastRegularPlantedTree + 1;
+                tempLastRegularTreeId = tempLastRegularTreeId + 1;
             }
 
-            lastRegularPlantedTree = tempLastRegularPlantedTree;
+            lastRegualarTreeId = tempLastRegularTreeId;
 
-            TreeStruct storage tree = treeData[lastRegularPlantedTree];
+            TreeData storage treeData = trees[lastRegualarTreeId];
 
-            tree.plantDate = regularTree.plantDate;
-            tree.countryCode = uint16(regularTree.countryCode);
-            tree.birthDate = regularTree.birthDate;
-            tree.treeSpecs = regularTree.treeSpecs;
-            tree.planterId = regularTree.planterAddress;
-            tree.treeStatus = 4;
+            treeData.plantDate = tempTreeData.plantDate;
+            treeData.countryCode = uint16(tempTreeData.countryCode);
+            treeData.birthDate = tempTreeData.birthDate;
+            treeData.treeSpecs = tempTreeData.treeSpecs;
+            treeData.planter = tempTreeData.planter;
+            treeData.treeStatus = 4;
 
-            if (!treeToken.exists(lastRegularPlantedTree)) {
-                tree.provideStatus = 4;
+            if (!treeToken.exists(lastRegualarTreeId)) {
+                treeData.saleType = 4;
             }
-            emit RegularPlantVerified(lastRegularPlantedTree);
+            emit TreeVerified(lastRegualarTreeId, _tempTreeId);
         } else {
-            emit RegularPlantRejected(_regularTreeId);
+            emit TreeRejected(_tempTreeId);
         }
 
-        delete regularTrees[_regularTreeId];
+        delete tempTrees[_tempTreeId];
     }
 
     /**
-     * @dev Transfer ownership of trees purchased by funders and Update the last tree sold
-     * This function is called only by the regularSell contract
-     * @param _lastSold The last tree sold in the regular
-     * @param _owner Owner of a new tree sold in Regular
-     * @return The last tree sold after update
+     * @dev mint a tree to funder of tree
+     * @param _lastFundedTreeId The last tree funded in the regular sale
+     * @param _funder funder of a new tree sold in Regular
+     * @return the last tree funded after update
      */
-    function mintRegularTrees(uint256 _lastSold, address _owner)
+    function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
         onlyTreejerContract
         returns (uint256)
     {
-        uint256 localLastSold = _lastSold + 1;
+        uint256 tempLastFundedTreeId = _lastFundedTreeId + 1;
 
-        bool flag = (treeData[localLastSold].treeStatus == 0 &&
-            treeData[localLastSold].provideStatus == 0) ||
-            (treeData[localLastSold].treeStatus == 4 &&
-                treeData[localLastSold].provideStatus == 4);
+        bool flag = (trees[tempLastFundedTreeId].treeStatus == 0 &&
+            trees[tempLastFundedTreeId].saleType == 0) ||
+            (trees[tempLastFundedTreeId].treeStatus == 4 &&
+                trees[tempLastFundedTreeId].saleType == 4);
 
         while (!flag) {
-            localLastSold = localLastSold + 1;
+            tempLastFundedTreeId = tempLastFundedTreeId + 1;
 
             flag =
-                (treeData[localLastSold].treeStatus == 0 &&
-                    treeData[localLastSold].provideStatus == 0) ||
-                (treeData[localLastSold].treeStatus == 4 &&
-                    treeData[localLastSold].provideStatus == 4);
+                (trees[tempLastFundedTreeId].treeStatus == 0 &&
+                    trees[tempLastFundedTreeId].saleType == 0) ||
+                (trees[tempLastFundedTreeId].treeStatus == 4 &&
+                    trees[tempLastFundedTreeId].saleType == 4);
         }
 
-        treeData[localLastSold].provideStatus = 0;
+        trees[tempLastFundedTreeId].saleType = 0;
 
-        treeToken.safeMint(_owner, localLastSold);
+        treeToken.safeMint(_funder, tempLastFundedTreeId);
 
-        return localLastSold;
+        return tempLastFundedTreeId;
     }
 
     /**
-     * @dev Request to buy a tree with a specific Id already planted and this function transfer ownership to funder
-     * This function is called only by the regularSell contract
-     * @param _treeId Tree with special Id (The Id must be larger than the last tree sold)
-     * @param _owner Owner of a new tree sold in Regular
+     * @dev mint an already planted tree with id to funder
+     * @param _treeId tree id to mint
+     * @param _funder address of funder
      */
-    function requestRegularTree(uint256 _treeId, address _owner)
+    function mintTreeById(uint256 _treeId, address _funder)
         external
         onlyTreejerContract
     {
-        TreeStruct storage tree = treeData[_treeId];
+        TreeData storage treeData = trees[_treeId];
 
         require(
-            tree.treeStatus == 4 && tree.provideStatus == 4,
+            treeData.treeStatus == 4 && treeData.saleType == 4,
             "tree must be planted"
         );
 
-        tree.provideStatus = 0;
+        treeData.saleType = 0;
 
-        treeToken.safeMint(_owner, _treeId);
+        treeToken.safeMint(_funder, _treeId);
     }
 
-    /** @dev script role update {_treeSpecs} of {_treeId} */
+    /**
+     * @dev script role update treeSpecs
+     * @param _treeId id of tree to update treeSpecs
+     * @param _treeSpecs new tree specs
+     */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
         onlyScript
+        notHavePendingUpdate(_treeId)
     {
-        treeData[_treeId].treeSpecs = _treeSpecs;
+        trees[_treeId].treeSpecs = _treeSpecs;
 
-        emit TreeSpecsUpdate(_treeId, _treeSpecs);
+        emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
 }

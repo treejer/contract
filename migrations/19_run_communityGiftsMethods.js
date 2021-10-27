@@ -1,7 +1,7 @@
 require("dotenv").config();
 
-const CommunityGifts = artifacts.require("CommunityGifts.sol");
-const TreeAttribute = artifacts.require("TreeAttribute.sol");
+const HonoraryTree = artifacts.require("HonoraryTree.sol");
+const Attribute = artifacts.require("Attribute.sol");
 const TreeFactory = artifacts.require("TreeFactory.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
@@ -11,7 +11,7 @@ module.exports = async function (deployer, network, accounts) {
 
   const treeFactoryAddress = TreeFactory.address;
   const planterFundsAddress = PlanterFund.address;
-  const treeAttributeAddress = TreeAttribute.address;
+  const attributeAddress = Attribute.address;
   let daiTokenAddress;
   let trustedForwarder;
 
@@ -28,11 +28,11 @@ module.exports = async function (deployer, network, accounts) {
     );
   }
 
-  console.log("Call CommunityGifts Methods...");
-  await CommunityGifts.deployed().then(async (instance) => {
+  console.log("Call HonoraryTree Methods...");
+  await HonoraryTree.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setDaiTokenAddress(daiTokenAddress);
-    await instance.setTreeAttributesAddress(treeAttributeAddress);
+    await instance.setAttributesAddress(attributeAddress);
     await instance.setTreeFactoryAddress(treeFactoryAddress);
     await instance.setPlanterFundAddress(planterFundsAddress);
   });

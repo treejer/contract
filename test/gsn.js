@@ -1,9 +1,9 @@
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
+// const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
-const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const RelayRecipient = artifacts.require("RelayRecipient.sol");
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
-const Planter = artifacts.require("Planter.sol");
+const AccessRestriction = artifacts.require("AccessRestriction");
+const RelayRecipient = artifacts.require("RelayRecipient");
+const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+const Planter = artifacts.require("Planter");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 
@@ -12,7 +12,7 @@ const { CommonErrorMsg, GsnErrorMsg } = require("./enumes");
 const Common = require("./common");
 
 //test
-const TestWhitelistPaymaster = artifacts.require("TestWhitelistPaymaster.sol");
+const TestWhitelistPaymaster = artifacts.require("TestWhitelistPaymaster");
 
 contract("Gsn", (accounts) => {
   const deployerAccount = accounts[0];
@@ -33,10 +33,12 @@ contract("Gsn", (accounts) => {
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   before(async () => {
-    arInstance = await deployProxy(AccessRestriction, [deployerAccount], {
-      initializer: "initialize",
+    arInstance = await AccessRestriction.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await arInstance.initialize(deployerAccount, {
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
@@ -53,10 +55,12 @@ contract("Gsn", (accounts) => {
       { from: deployerAccount }
     );
 
-    planterInstance = await deployProxy(Planter, [arInstance.address], {
-      initializer: "initialize",
+    planterInstance = await Planter.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
+    });
+
+    await planterInstance.initialize(arInstance.address, {
+      from: deployerAccount,
     });
   });
 
@@ -293,13 +297,11 @@ contract("Gsn", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
-  it("test TestTreeAttributes", async () => {
+  it("test TestAttributes", async () => {
     //deploy TestWhitelistPaymaster
 
-    testInstance = await deployProxy(TestWhitelistPaymaster, [], {
-      initializer: "initialize",
+    testInstance = await TestWhitelistPaymaster.new({
       from: deployerAccount,
-      unsafeAllowCustomTypes: true,
     });
 
     await testInstance.test(whitelistPaymasterInstance.address, {

@@ -417,7 +417,6 @@ contract WethFund is Initializable {
      */
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(researchAddress)
     {
@@ -444,7 +443,7 @@ contract WethFund is Initializable {
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
-    ) external ifNotPaused onlyAdmin validAddress(localDevelopmentAddress) {
+    ) external onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
@@ -471,7 +470,6 @@ contract WethFund is Initializable {
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(insuranceAddress)
     {
@@ -497,7 +495,6 @@ contract WethFund is Initializable {
      */
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(treasuryAddress)
     {
@@ -523,7 +520,6 @@ contract WethFund is Initializable {
      */
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(reserve1Address)
     {
@@ -549,7 +545,6 @@ contract WethFund is Initializable {
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(reserve2Address)
     {

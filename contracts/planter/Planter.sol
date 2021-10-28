@@ -60,6 +60,12 @@ contract Planter is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check if function is not paused */
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     /** NOTE modifier for check _planter is exist*/
     modifier existPlanter(address _planter) {
         require(planters[_planter].planterType > 0, "planter does not exist");
@@ -134,7 +140,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         address _invitedBy,
         address _organization
-    ) external {
+    ) external ifNotPaused {
         require(
             accessRestriction.isPlanter(_msgSender()) &&
                 planters[_msgSender()].planterType == 0,
@@ -203,7 +209,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         address _invitedBy,
         address _organization
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(
             accessRestriction.isPlanter(_planter) &&
                 planters[_planter].planterType == 0,
@@ -263,7 +269,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         uint32 _supplyCap,
         address _invitedBy
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(
             planters[_organization].planterType == 0 &&
                 accessRestriction.isPlanter(_organization),
@@ -309,6 +315,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function updatePlanterType(uint8 _planterType, address _organization)
         external
+        ifNotPaused
         existPlanter(_msgSender())
     {
         require(
@@ -361,6 +368,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function acceptPlanterByOrganization(address _planter, bool _acceptance)
         external
+        ifNotPaused
         onlyOrganization
         existPlanter(_planter)
     {
@@ -392,6 +400,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function updateSupplyCap(address _planter, uint32 _supplyCap)
         external
+        ifNotPaused
         onlyDataManager
         existPlanter(_planter)
     {
@@ -446,7 +455,7 @@ contract Planter is Initializable, RelayRecipient {
     function updateOrganizationMemberShare(
         address _planter,
         uint256 _organizationMemberShareAmount
-    ) external onlyOrganization existPlanter(_planter) {
+    ) external ifNotPaused onlyOrganization existPlanter(_planter) {
         require(planters[_planter].status > 0, "invalid planter status");
         require(memberOf[_planter] == _msgSender(), "invalid input planter");
         require(

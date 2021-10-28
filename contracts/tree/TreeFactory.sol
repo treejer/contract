@@ -205,7 +205,11 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** @dev admin set the minimum time to send next update request
      * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _seconds) external onlyDataManager {
+    function setUpdateInterval(uint256 _seconds)
+        external
+        ifNotPaused
+        onlyDataManager
+    {
         treeUpdateInterval = _seconds;
 
         emit TreeUpdateIntervalChanged();
@@ -218,6 +222,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(trees[_treeId].treeStatus == 0, "duplicate tree");
@@ -238,6 +243,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function assignTree(uint256 _treeId, address _planter)
         external
+        ifNotPaused
         onlyDataManager
     {
         TreeData storage treeData = trees[_treeId];
@@ -266,7 +272,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external {
+    ) external ifNotPaused {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 2, "invalid tree status for plant");
@@ -344,7 +350,10 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @param _treeId id of tree to update
      * @param _treeSpecs tree specs
      */
-    function updateTree(uint256 _treeId, string memory _treeSpecs) external {
+    function updateTree(uint256 _treeId, string memory _treeSpecs)
+        external
+        ifNotPaused
+    {
         require(
             trees[_treeId].planter == _msgSender(),
             "Only Planter of tree can send update"
@@ -537,7 +546,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external {
+    ) external ifNotPaused {
         require(planterContract.manageTreePermission(_msgSender()));
 
         tempTrees[pendingRegularTreeId.current()] = TempTree(
@@ -561,6 +570,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function verifyTree(uint256 _tempTreeId, bool _isVerified)
         external
+        ifNotPaused
         onlyVerifier
     {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
@@ -675,6 +685,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
+        ifNotPaused
         onlyScript
         notHavePendingUpdate(_treeId)
     {

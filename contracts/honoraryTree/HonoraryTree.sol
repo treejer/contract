@@ -70,6 +70,12 @@ contract HonoraryTree is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check if function is not paused*/
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "invalid address");
@@ -172,7 +178,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _sponsor,
         uint256 _startTreeId,
         uint256 _upTo
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(_upTo > _startTreeId, "invalid range");
         require(upTo == currentTreeId, "cant set gift range");
 
@@ -214,7 +220,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * NOTE calculate prePaidCount value to deducte from number of tree count
      * when new tree range set
      */
-    function releaseTreeRange() external onlyDataManager {
+    function releaseTreeRange() external ifNotPaused onlyDataManager {
         treeFactory.resetSaleTypeBatch(currentTreeId, upTo, 5);
         prePaidTreeCount += upTo - currentTreeId;
         upTo = 0;
@@ -226,7 +232,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @dev admin reserve a symbol
      * @param _uniquenessFactor unique symbol to reserve
      */
-    function reserveSymbol(uint64 _uniquenessFactor) external onlyDataManager {
+    function reserveSymbol(uint64 _uniquenessFactor)
+        external
+        ifNotPaused
+        onlyDataManager
+    {
         attribute.reserveSymbol(_uniquenessFactor);
         symbols.push(_uniquenessFactor);
         used.push(false);
@@ -235,7 +245,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
     /**
      * @dev admin release all reserved and not used symbols
      */
-    function releaseReservedSymbol() external onlyDataManager {
+    function releaseReservedSymbol() external ifNotPaused onlyDataManager {
         for (uint256 i = 0; i < symbols.length; i++) {
             if (!used[i]) {
                 attribute.releaseReservedSymbol(symbols[i]);
@@ -257,7 +267,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _recipient,
         uint64 _startDate,
         uint64 _expiryDate
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
         recipientData.expiryDate = _expiryDate;
@@ -277,7 +287,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _recipient,
         uint64 _startDate,
         uint64 _expiryDate
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
         require(recipientData.status == 1, "Status must be one");
@@ -294,7 +304,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         referralTreePaymentToPlanter = _referralTreePaymentToPlanter;
         referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
 
@@ -308,7 +318,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @dev recipient claim a tree and tree minted to recipient.
      * projected earnings updated and random attributes set for that tree
      */
-    function claim() external {
+    function claim() external ifNotPaused {
         Recipient storage recipientData = recipients[_msgSender()];
         require(
             recipientData.expiryDate > block.timestamp &&

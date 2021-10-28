@@ -54,6 +54,12 @@ contract Allocation is Initializable {
         _;
     }
 
+    /** NOTE modifier for check if function is not paused */
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     /**
      * @dev initialize accessRestriction contract and set true for isAllocation
      * @param _accessRestrictionAddress set to the address of accessRestriction contract
@@ -93,7 +99,7 @@ contract Allocation is Initializable {
         uint16 _treasuryShare,
         uint16 _reserve1Share,
         uint16 _reserve2Share
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(
             _planterShare +
                 _ambassadorShare +
@@ -135,7 +141,7 @@ contract Allocation is Initializable {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint256 _allocationDataId
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(
             allocations[_allocationDataId].exists > 0,
             "Allocation model not found"

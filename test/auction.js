@@ -1010,10 +1010,6 @@ contract("Auction", (accounts) => {
       await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
-      ///////////////------------------- pause
-      await arInstance.pause({
-        from: deployerAccount,
-      });
 
       const treeId = 1;
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
@@ -1036,6 +1032,11 @@ contract("Auction", (accounts) => {
 
       await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
+      });
+
+      ///////////////------------------- pause
+      await arInstance.pause({
+        from: deployerAccount,
       });
 
       await auctionInstance

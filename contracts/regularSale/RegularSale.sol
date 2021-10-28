@@ -96,6 +96,12 @@ contract RegularSale is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier for check if function is not paused */
+    modifier ifNotPaused() {
+        accessRestriction.ifNotPaused();
+        _;
+    }
+
     /** NOTE modifier for check msg.sender has TreejerContract role*/
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(_msgSender());
@@ -230,7 +236,7 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set the price of trees
      * @param _price price of tree
      */
-    function updatePrice(uint256 _price) external onlyDataManager {
+    function updatePrice(uint256 _price) external ifNotPaused onlyDataManager {
         price = _price;
         emit PriceUpdated(_price);
     }
@@ -241,6 +247,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(
@@ -270,7 +277,7 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 _count,
         address _referrer,
         address _recipient
-    ) external {
+    ) external ifNotPaused {
         require(_count > 0 && _count < 101, "invalid count");
 
         uint256 totalPrice = price * _count;
@@ -372,7 +379,7 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 _treeId,
         address _referrer,
         address _recipient
-    ) external {
+    ) external ifNotPaused {
         require(_treeId > lastFundedTreeId, "invalid tree");
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
@@ -436,7 +443,7 @@ contract RegularSale is Initializable, RelayRecipient {
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         referralTreePaymentToPlanter = _referralTreePaymentToPlanter;
         referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
 
@@ -452,6 +459,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateReferralTriggerCount(uint256 _count)
         external
+        ifNotPaused
         onlyDataManager
     {
         referralTriggerCount = _count;
@@ -494,7 +502,7 @@ contract RegularSale is Initializable, RelayRecipient {
      * @dev referrer claim rewards and trees mint to the referral
      * NOTE referrer can claim up to 45 trees in each request
      */
-    function claimReferralReward() external {
+    function claimReferralReward() external ifNotPaused {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
 

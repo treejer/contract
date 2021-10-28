@@ -361,7 +361,7 @@ contract WethFund is Initializable {
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
         uint256 _daiAmountToSwap
-    ) external onlyScript {
+    ) external ifNotPaused onlyScript {
         require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
 
         require(

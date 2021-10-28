@@ -202,7 +202,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint64 _treeCount,
         uint64 _increments,
         uint64 _priceJump
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(_treeCount > 0, "assign at least one tree");
         require(_startTreeId > 100, "trees are under Auction");
         require(_increments > 0, "incremental period should be positive");
@@ -246,7 +246,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * NOTE {_count} trees removed from first of the incremetalSale tree range
      * @param _count is number of trees to remove
      */
-    function removeIncrementalSale(uint256 _count) external onlyDataManager {
+    function removeIncrementalSale(uint256 _count)
+        external
+        ifNotPaused
+        onlyDataManager
+    {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         uint256 newStartTreeId = incSaleData.startTreeId + _count;
@@ -274,7 +278,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @param _treeCount number of trees added at the end of the incrementalSale
      * tree range
      */
-    function updateEndTreeId(uint256 _treeCount) external onlyDataManager {
+    function updateEndTreeId(uint256 _treeCount)
+        external
+        ifNotPaused
+        onlyDataManager
+    {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
         require(
             incSaleData.increments > 0,
@@ -395,7 +403,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _initialPrice,
         uint64 _increments,
         uint64 _priceJump
-    ) external onlyDataManager {
+    ) external ifNotPaused onlyDataManager {
         require(_increments > 0, "incremental period should be positive");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;

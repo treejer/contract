@@ -150,6 +150,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function updateWithdrawableAmount(uint256 _amount)
         external
+        ifNotPaused
         onlyDataManager
     {
         minWithdrawable = _amount;

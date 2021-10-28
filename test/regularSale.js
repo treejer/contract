@@ -77,6 +77,8 @@ contract("regularSale", (accounts) => {
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
+    await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
     await Common.addTreejerContractRole(
       arInstance,
       userAccount8,

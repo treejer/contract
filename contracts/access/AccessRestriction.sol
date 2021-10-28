@@ -12,6 +12,7 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
     bytes32 public constant TREEJER_CONTRACT_ROLE =
         keccak256("TREEJER_CONTRACT_ROLE");
     bytes32 public constant DATA_MANAGER_ROLE = keccak256("DATA_MANAGER_ROLE");
+    bytes32 public constant VERIFIER_ROLE = keccak256("VERIFIER_ROLE");
     bytes32 public constant SCRIPT_ROLE = keccak256("SCRIPT_ROLE");
 
     /** NOTE {isAccessRestriction} set inside the initialize to {true} */
@@ -104,6 +105,23 @@ contract AccessRestriction is AccessControlUpgradeable, PausableUpgradeable {
      */
     function isDataManager(address _address) public view returns (bool) {
         return hasRole(DATA_MANAGER_ROLE, _address);
+    }
+
+    /**
+     * @dev check if given address is verifier
+     * @param _address input address
+     */
+    function ifVerifier(address _address) external view {
+        require(isVerifier(_address), "caller is not verifier");
+    }
+
+    /**
+     * @dev check if given address has verifier role
+     * @param _address input address
+     * @return if given address has verifier role
+     */
+    function isVerifier(address _address) public view returns (bool) {
+        return hasRole(VERIFIER_ROLE, _address);
     }
 
     /**

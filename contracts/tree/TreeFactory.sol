@@ -88,6 +88,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has verifier role */
+    modifier onlyVerifier() {
+        accessRestriction.ifVerifier(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -297,21 +303,24 @@ contract TreeFactory is Initializable, RelayRecipient {
     function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
+        onlyVerifier
     {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 3, "invalid tree status");
 
-        require(
-            treeData.planter != _msgSender(),
-            "Planter of tree can't accept update"
-        );
+        //TODO:Remove Require
 
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(treeData.planter, _msgSender()),
-            "invalid access to verify"
-        );
+        // require(
+        //     treeData.planter != _msgSender(),
+        //     "Planter of tree can't accept update"
+        // );
+
+        // require(
+        //     accessRestriction.isDataManager(_msgSender()) ||
+        //         planterContract.canVerify(treeData.planter, _msgSender()),
+        //     "invalid access to verify"
+        // );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -375,11 +384,13 @@ contract TreeFactory is Initializable, RelayRecipient {
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
+        onlyVerifier
     {
-        require(
-            trees[_treeId].planter != _msgSender(),
-            "Planter of tree can't verify update"
-        );
+        //TODO: Remove Require
+        // require(
+        //     trees[_treeId].planter != _msgSender(),
+        //     "Planter of tree can't verify update"
+        // );
 
         require(
             treeUpdates[_treeId].updateStatus == 1,
@@ -388,11 +399,12 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
 
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(trees[_treeId].planter, _msgSender()),
-            "invalid access to verify"
-        );
+        //TODO: Remove Require
+        // require(
+        //     accessRestriction.isDataManager(_msgSender()) ||
+        //         planterContract.canVerify(trees[_treeId].planter, _msgSender()),
+        //     "invalid access to verify"
+        // );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -547,19 +559,24 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @param _tempTreeId tempTreeId to verify
      * @param _isVerified true for verify and false for reject
      */
-    function verifyTree(uint256 _tempTreeId, bool _isVerified) external {
+    function verifyTree(uint256 _tempTreeId, bool _isVerified)
+        external
+        onlyVerifier
+    {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
 
-        require(
-            tempTreeData.planter != _msgSender(),
-            "Planter of tree can't verify update"
-        );
+        //TODO: Remove Require
 
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(tempTreeData.planter, _msgSender()),
-            "invalid access to verify"
-        );
+        // require(
+        //     tempTreeData.planter != _msgSender(),
+        //     "Planter of tree can't verify update"
+        // );
+
+        // require(
+        //     accessRestriction.isDataManager(_msgSender()) ||
+        //         planterContract.canVerify(tempTreeData.planter, _msgSender()),
+        //     "invalid access to verify"
+        // );
 
         require(tempTreeData.plantDate > 0, "regularTree not exist");
 

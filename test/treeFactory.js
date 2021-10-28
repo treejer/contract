@@ -73,6 +73,8 @@ contract("TreeFactory", (accounts) => {
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
       });
@@ -197,6 +199,8 @@ contract("TreeFactory", (accounts) => {
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
       });
@@ -315,6 +319,8 @@ contract("TreeFactory", (accounts) => {
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
 
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
@@ -1157,7 +1163,7 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount2 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       ///////////////////////////////////////////////////////////////////////////////////
 
@@ -1225,7 +1231,7 @@ contract("TreeFactory", (accounts) => {
       });
 
       await treeFactoryInstance
-        .verifyAssignedTree(treeId, false, { from: userAccount1 })
+        .verifyAssignedTree(treeId, false, { from: dataManager })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
         );
@@ -1445,6 +1451,9 @@ contract("TreeFactory", (accounts) => {
         "invlid updateGen update status"
       );
       ////////////// ------------------------------ fail too verify
+
+      await Common.addVerifierRole(arInstance, userAccount4, deployerAccount);
+
       await treeFactoryInstance
         .verifyAssignedTree(treeId2, true, { from: userAccount4 })
         .should.be.rejectedWith(
@@ -1565,9 +1574,13 @@ contract("TreeFactory", (accounts) => {
         countryCode,
         { from: userAccount3 }
       );
+
+      await Common.addVerifierRole(arInstance, userAccount4, deployerAccount);
+
       const tx2 = await treeFactoryInstance.verifyAssignedTree(treeId2, false, {
         from: userAccount4,
       });
+
       truffleAssert.eventEmitted(tx2, "AssignedTreeRejected", (ev) => {
         return Number(ev.treeId) == treeId2;
       });
@@ -1585,6 +1598,9 @@ contract("TreeFactory", (accounts) => {
         countryCode,
         { from: userAccount4 }
       );
+
+      await Common.addVerifierRole(arInstance, userAccount3, deployerAccount);
+
       const tx3 = await treeFactoryInstance.verifyAssignedTree(treeId3, true, {
         from: userAccount3,
       });
@@ -1606,7 +1622,7 @@ contract("TreeFactory", (accounts) => {
         { from: userAccount4 }
       );
       const tx4 = await treeFactoryInstance.verifyAssignedTree(treeId4, true, {
-        from: userAccount5,
+        from: dataManager,
       });
       truffleAssert.eventEmitted(tx4, "AssignedTreeVerified", (ev) => {
         return Number(ev.treeId) == treeId4;
@@ -1740,27 +1756,27 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount2 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount3 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount4 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount8 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: dataManager,
@@ -1881,25 +1897,27 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount2 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount4 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       //////////////--------------- verify successfully
+
+      await Common.addVerifierRole(arInstance, userAccount5, deployerAccount);
 
       await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: userAccount5,
@@ -2020,19 +2038,21 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount2 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount5 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
+
+      await Common.addVerifierRole(arInstance, userAccount3, deployerAccount);
 
       /////////////////------------- try to verify: success
       await treeFactoryInstance.verifyAssignedTree(treeId, true, {
@@ -2120,6 +2140,8 @@ contract("TreeFactory", (accounts) => {
       });
 
       await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
 
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
@@ -3855,21 +3877,21 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount3 })
-        .should.be.rejectedWith(
-          TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
+
+      await Common.addVerifierRole(arInstance, userAccount4, deployerAccount);
 
       const verifyTx = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: userAccount4,
@@ -4016,29 +4038,29 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount4 })
-        .should.be.rejectedWith(
-          TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount5 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await planterInstance.acceptPlanterByOrganization(userAccount5, true, {
         from: userAccount3,
       });
+
+      await Common.addVerifierRole(arInstance, userAccount5, deployerAccount);
 
       await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: userAccount5,
@@ -4185,21 +4207,21 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount4 })
-        .should.be.rejectedWith(
-          TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
+
+      await Common.addVerifierRole(arInstance, userAccount3, deployerAccount);
 
       await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: userAccount3,
@@ -4346,25 +4368,23 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount1 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount3 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount4 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount6 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, { from: userAccount2 })
-        .should.be.rejectedWith(
-          TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
@@ -4641,7 +4661,7 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(treeId, true, {
-          from: userAccount1,
+          from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
     });
@@ -4653,7 +4673,7 @@ contract("TreeFactory", (accounts) => {
 
       await treeFactoryInstance
         .verifyUpdate(1, true, {
-          from: userAccount1,
+          from: dataManager,
         })
         .should.be.rejectedWith(CommonErrorMsg.PAUSE);
 
@@ -5428,6 +5448,12 @@ contract("TreeFactory", (accounts) => {
 
       let regularTree = await treeFactoryInstance.tempTrees.call(0);
 
+      await Common.addVerifierRole(
+        arInstance,
+        organizationAddress,
+        deployerAccount
+      );
+
       const eventTx = await treeFactoryInstance.verifyTree(0, true, {
         from: organizationAddress,
       });
@@ -5500,6 +5526,12 @@ contract("TreeFactory", (accounts) => {
         organizationAddress,
         deployerAccount,
         dataManager
+      );
+
+      await Common.addVerifierRole(
+        arInstance,
+        organizationAddress,
+        deployerAccount
       );
 
       const eventTx = await treeFactoryInstance.verifyTree(0, false, {
@@ -5634,16 +5666,14 @@ contract("TreeFactory", (accounts) => {
         .verifyTree(0, true, {
           from: userAccount5,
         })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_ACCESS_TO_VERIFY);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       /////////------------   Planter of tree can't verify update
       await treeFactoryInstance
         .verifyTree(0, true, {
           from: planter,
         })
-        .should.be.rejectedWith(
-          TreeFactoryErrorMsg.INVALID_ACCESS_PLANTER_OF_TREE
-        );
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
     });
 
     it("Check lastRegualarTreeId count", async () => {
@@ -5976,6 +6006,8 @@ contract("TreeFactory", (accounts) => {
 
     //   await Common.addPlanter(arInstance, userAccount2, deployerAccount);
     //   await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+
+    // await Common.addVerifierRole(arInstance, userAccount1, deployerAccount);
 
     //   await Common.joinOrganizationPlanter(
     //     planterInstance,

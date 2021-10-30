@@ -17,6 +17,7 @@ import "../treasury/IWethFund.sol";
 contract RegularSale is Initializable, RelayRecipient {
     uint256 public lastFundedTreeId;
     uint256 public price;
+    uint256 public maxTreeSupply;
 
     /** NOTE {isRegularSale} set inside the initialize to {true} */
     bool public isRegularSale;
@@ -72,6 +73,7 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 amount
     );
     event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
+    event MaxTreeSupplyUpdated(uint256 maxTreeSupply);
     event ReferralTriggerCountUpdated(uint256 count);
     event ReferralTreePaymentsUpdated(
         uint256 referralTreePaymentToPlanter,
@@ -132,6 +134,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
         isRegularSale = true;
         lastFundedTreeId = 10000;
+        maxTreeSupply = 1000000;
 
         referralTriggerCount = 20;
         price = _price;
@@ -176,9 +179,6 @@ contract RegularSale is Initializable, RelayRecipient {
         daiFund = candidateContract;
     }
 
-    /** @dev admin set DaiToken contract address
-     * @param _address set to the address of DaiToken contract
-     */
     function setDaiTokenAddress(address _address)
         external
         onlyAdmin
@@ -261,6 +261,23 @@ contract RegularSale is Initializable, RelayRecipient {
     }
 
     /**
+     * @dev admin update maxTreeSupply
+     */
+    function updateMaxTreeSupply(uint256 _maxTreeSupply)
+        external
+        onlyDataManager
+    {
+        require(
+            _maxTreeSupply > maxTreeSupply,
+            "Input must be gt last tree supply"
+        );
+
+        maxTreeSupply = _maxTreeSupply;
+
+        emit MaxTreeSupplyUpdated(_maxTreeSupply);
+    }
+
+    /**
      * @dev fund {_count} tree
      * NOTE if {_recipient} address exist trees minted to the {_recipient}
      * and mint to the function caller otherwise
@@ -278,6 +295,8 @@ contract RegularSale is Initializable, RelayRecipient {
         address _referrer,
         address _recipient
     ) external ifNotPaused {
+        require(lastFundedTreeId + _count <= maxTreeSupply, "max supply");
+
         require(_count > 0 && _count < 101, "invalid count");
 
         uint256 totalPrice = price * _count;
@@ -380,6 +399,8 @@ contract RegularSale is Initializable, RelayRecipient {
         address _referrer,
         address _recipient
     ) external ifNotPaused {
+        require(_treeId <= maxTreeSupply, "max supply");
+
         require(_treeId > lastFundedTreeId, "invalid tree");
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
@@ -397,6 +418,7 @@ contract RegularSale is Initializable, RelayRecipient {
             : _recipient;
 
         uint256 treeId = _treeId;
+        address referrer = _referrer;
 
         treeFactory.mintTreeById(treeId, recipient);
 
@@ -426,11 +448,11 @@ contract RegularSale is Initializable, RelayRecipient {
             reserve2Share
         );
 
-        if (_referrer != address(0)) {
-            _calculateReferrerCount(_referrer, 1);
+        if (referrer != address(0)) {
+            _calculateReferrerCount(referrer, 1);
         }
 
-        emit TreeFundedById(_msgSender(), recipient, _referrer, treeId, price);
+        emit TreeFundedById(_msgSender(), recipient, referrer, treeId, price);
     }
 
     // **** REFERRAL SECTION ****

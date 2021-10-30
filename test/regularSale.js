@@ -294,9 +294,9 @@ contract("regularSale", (accounts) => {
       });
     });
 
-    /////////////////---------------------------------set lastFundedTreeId address--------------------------------------------------------
+    /////////////////---------------------------------update lastFundedTreeId--------------------------------------------------------
 
-    it("set lastFundedTreeId address", async () => {
+    it("update lastFundedTreeId", async () => {
       Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
       await regularSaleInstance
@@ -353,6 +353,66 @@ contract("regularSale", (accounts) => {
         Number(lastRegularSaleTreeAfter2),
         15001,
         "2-lastRegularSaleTreeAfter not true"
+      );
+    });
+
+    /////////////////---------------------------------update maxTreeSupply--------------------------------------------------------
+
+    it("update maxTreeSupply", async () => {
+      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+
+      await regularSaleInstance
+        .updateMaxTreeSupply(500000, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(
+          RegularSaleErrors.INVALID_SET_LAST_REGULAR_TREE_SUPPLY_INPUT
+        );
+
+      await regularSaleInstance
+        .updateMaxTreeSupply(1500000, {
+          from: userAccount2,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      let tx = await regularSaleInstance.updateMaxTreeSupply(1500000, {
+        from: userAccount1,
+      });
+
+      truffleAssert.eventEmitted(tx, "MaxTreeSupplyUpdated", (ev) => {
+        return Number(ev.maxTreeSupply) == 1500000;
+      });
+
+      let maxTreeSuuplyAfter = await regularSaleInstance.maxTreeSupply();
+
+      assert.equal(
+        Number(maxTreeSuuplyAfter),
+        1500000,
+        "maxTreeSuuplyAfter not true"
+      );
+
+      await regularSaleInstance
+        .updateMaxTreeSupply(1500000, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(
+          RegularSaleErrors.INVALID_SET_LAST_REGULAR_TREE_SUPPLY_INPUT
+        );
+
+      let tx2 = await regularSaleInstance.updateMaxTreeSupply(1500001, {
+        from: userAccount1,
+      });
+
+      truffleAssert.eventEmitted(tx2, "MaxTreeSupplyUpdated", (ev) => {
+        return Number(ev.maxTreeSupply) == 1500001;
+      });
+
+      let maxTreeSuuplyAfter2 = await regularSaleInstance.maxTreeSupply();
+
+      assert.equal(
+        Number(maxTreeSuuplyAfter2),
+        1500001,
+        "2-maxTreeSuuplyAfter not true"
       );
     });
 
@@ -457,6 +517,49 @@ contract("regularSale", (accounts) => {
         })
         .should.be.rejectedWith(RegularSaleErrors.INVALID_APPROVE);
 
+      ///----------------test3 (max supply)
+
+      //mint dai for funder
+      await daiInstance.setMint(userAccount4, web3.utils.toWei("10000"));
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("10000"),
+        {
+          from: userAccount4,
+        }
+      );
+
+      await regularSaleInstance.updateLastFundedTreeId(999980, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance
+        .fundTree(21, zeroAddress, zeroAddress, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
+      await regularSaleInstance.updateLastFundedTreeId(999990, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance
+        .fundTree(11, zeroAddress, zeroAddress, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
+      await regularSaleInstance.updateLastFundedTreeId(1000000, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance
+        .fundTree(1, zeroAddress, zeroAddress, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
       await daiInstance.resetAcc(funder);
       await daiInstance.resetAcc(userAccount4);
     });
@@ -538,6 +641,24 @@ contract("regularSale", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(RegularSaleErrors.CommonErrorMsg);
+
+      ////--------------test3
+      //mint dai for funder
+      await daiInstance.setMint(userAccount1, web3.utils.toWei("10000"));
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("10000"),
+        {
+          from: userAccount1,
+        }
+      );
+
+      await regularSaleInstance
+        .fundTreeById(1000010, zeroAddress, zeroAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
 
       await daiInstance.resetAcc(userAccount1);
     });
@@ -1027,6 +1148,30 @@ contract("regularSale", (accounts) => {
         13340,
         "lastFundedTreeId not true"
       );
+
+      ///--------------check max supply
+
+      await regularSaleInstance.updateLastFundedTreeId(999993, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance.fundTree(4, userAccount5, zeroAddress, {
+        from: funder,
+      });
+
+      await regularSaleInstance
+        .fundTree(4, userAccount5, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
+      await regularSaleInstance.updateMaxTreeSupply(1000001, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance.fundTree(4, userAccount5, zeroAddress, {
+        from: funder,
+      });
 
       await daiInstance.resetAcc(funder);
     });
@@ -3654,6 +3799,14 @@ contract("regularSale", (accounts) => {
         from: dataManager,
       });
 
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
+
+      await treeFactoryInstance.verifyTree(2, true, {
+        from: dataManager,
+      });
+
       ///////////////////////////////////////////
 
       //mint dai for funder
@@ -3757,6 +3910,33 @@ contract("regularSale", (accounts) => {
           ev.funder == userAccount1 &&
           Number(ev.amount) == Number(web3.utils.toWei("7"))
         );
+      });
+
+      ///---------test supply
+
+      //mint dai for funder
+      await daiInstance.setMint(userAccount1, web3.utils.toWei("1000"));
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("1000"),
+        {
+          from: userAccount1,
+        }
+      );
+
+      await regularSaleInstance.updateLastFundedTreeId(1000000, {
+        from: dataManager,
+      });
+
+      await regularSaleInstance
+        .fundTreeById(1000001, userAccount7, zeroAddress, {
+          from: userAccount2,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
+      await regularSaleInstance.updateMaxTreeSupply(1000001, {
+        from: dataManager,
       });
 
       await daiInstance.resetAcc(userAccount1);

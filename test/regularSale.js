@@ -361,13 +361,9 @@ contract("regularSale", (accounts) => {
     it("update maxTreeSupply", async () => {
       Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
-      await regularSaleInstance
-        .updateMaxTreeSupply(500000, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(
-          RegularSaleErrors.INVALID_SET_LAST_REGULAR_TREE_SUPPLY_INPUT
-        );
+      await regularSaleInstance.updateMaxTreeSupply(500000, {
+        from: userAccount1,
+      });
 
       await regularSaleInstance
         .updateMaxTreeSupply(1500000, {
@@ -390,14 +386,6 @@ contract("regularSale", (accounts) => {
         1500000,
         "maxTreeSuuplyAfter not true"
       );
-
-      await regularSaleInstance
-        .updateMaxTreeSupply(1500000, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(
-          RegularSaleErrors.INVALID_SET_LAST_REGULAR_TREE_SUPPLY_INPUT
-        );
 
       let tx2 = await regularSaleInstance.updateMaxTreeSupply(1500001, {
         from: userAccount1,

@@ -115,8 +115,6 @@ const RegularSaleErrors = {
   INVALID_AMOUNT: "invalid amount",
   INVALID_COUNT: "invalid count",
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
-  INVALID_SET_LAST_REGULAR_TREE_SUPPLY_INPUT:
-    "Input must be gt last tree supply",
   INVALID_GIFT_OWNER: "invalid gift owner",
   MAX_SUPPLY: "max supply",
 };

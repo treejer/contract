@@ -268,11 +268,6 @@ contract RegularSale is Initializable, RelayRecipient {
         ifNotPaused
         onlyDataManager
     {
-        require(
-            _maxTreeSupply > maxTreeSupply,
-            "Input must be gt last tree supply"
-        );
-
         maxTreeSupply = _maxTreeSupply;
 
         emit MaxTreeSupplyUpdated(_maxTreeSupply);

@@ -265,6 +265,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateMaxTreeSupply(uint256 _maxTreeSupply)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(

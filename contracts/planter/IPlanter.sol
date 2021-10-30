@@ -213,19 +213,6 @@ interface IPlanter {
      */
     function manageTreePermission(address _planter) external returns (bool);
 
-    //TODO:Remove Require
-
-    // /**
-    //  * @dev check that {_verifier} can verify plant or tree update requests of {_planter}
-    //  * @param _planter address of planter
-    //  * @param _verifier address of verifier
-    //  * @return true in case of {_verifier} can verify {_planter} and false otherwise
-    //  */
-    // function canVerify(address _planter, address _verifier)
-    //     external
-    //     view
-    //     returns (bool);
-
     /**
      * @dev check allowance to assign tree to planter
      * @param _planter address of assignee planter

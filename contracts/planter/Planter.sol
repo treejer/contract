@@ -554,36 +554,6 @@ contract Planter is Initializable, RelayRecipient {
         return false;
     }
 
-    //TODO:Remove Require
-    // /**
-    //  * @dev check that {_verifier} can verify plant or tree update requests of {_planter}
-    //  * @param _planter address of planter
-    //  * @param _verifier address of verifier
-    //  * @return true in case of {_verifier} can verify {_planter} and false otherwise
-    //  */
-    // function canVerify(address _planter, address _verifier)
-    //     external
-    //     view
-    //     returns (bool)
-    // {
-    //     uint8 planterType = planters[_planter].planterType;
-
-    //     uint8 verifierStatus = planters[_verifier].status;
-
-    //     if (planterType > 1) {
-    //         if (verifierStatus == 1 || verifierStatus == 2) {
-    //             if (planterType == 2) {
-    //                 return memberOf[_verifier] == _planter;
-    //             } else if (planterType == 3) {
-    //                 return
-    //                     memberOf[_verifier] == memberOf[_planter] ||
-    //                     memberOf[_planter] == _verifier;
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
-
     /**
      * @dev check allowance to assign tree to planter
      * @param _planter address of assignee planter

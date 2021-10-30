@@ -315,19 +315,6 @@ contract TreeFactory is Initializable, RelayRecipient {
 
         require(treeData.treeStatus == 3, "invalid tree status");
 
-        //TODO:Remove Require
-
-        // require(
-        //     treeData.planter != _msgSender(),
-        //     "Planter of tree can't accept update"
-        // );
-
-        // require(
-        //     accessRestriction.isDataManager(_msgSender()) ||
-        //         planterContract.canVerify(treeData.planter, _msgSender()),
-        //     "invalid access to verify"
-        // );
-
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
         if (_isVerified) {
@@ -395,25 +382,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         ifNotPaused
         onlyVerifier
     {
-        //TODO: Remove Require
-        // require(
-        //     trees[_treeId].planter != _msgSender(),
-        //     "Planter of tree can't verify update"
-        // );
-
         require(
             treeUpdates[_treeId].updateStatus == 1,
             "update status must be pending"
         );
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
-
-        //TODO: Remove Require
-        // require(
-        //     accessRestriction.isDataManager(_msgSender()) ||
-        //         planterContract.canVerify(trees[_treeId].planter, _msgSender()),
-        //     "invalid access to verify"
-        // );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -574,19 +548,6 @@ contract TreeFactory is Initializable, RelayRecipient {
         onlyVerifier
     {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
-
-        //TODO: Remove Require
-
-        // require(
-        //     tempTreeData.planter != _msgSender(),
-        //     "Planter of tree can't verify update"
-        // );
-
-        // require(
-        //     accessRestriction.isDataManager(_msgSender()) ||
-        //         planterContract.canVerify(tempTreeData.planter, _msgSender()),
-        //     "invalid access to verify"
-        // );
 
         require(tempTreeData.plantDate > 0, "regularTree not exist");
 

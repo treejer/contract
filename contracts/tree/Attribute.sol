@@ -99,6 +99,7 @@ contract Attribute is Initializable {
      */
     function reserveSymbol(uint64 _uniquenessFactor)
         external
+        ifNotPaused
         onlyDataManagerOrTreejerContract
     {
         require(
@@ -117,6 +118,7 @@ contract Attribute is Initializable {
 
     function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(
@@ -153,7 +155,7 @@ contract Attribute is Initializable {
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
         uint8 _generationType
-    ) external onlyDataManagerOrTreejerContract {
+    ) external ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
             "the symbol is taken"
@@ -191,7 +193,7 @@ contract Attribute is Initializable {
         address _funder,
         uint8 _funderRank,
         uint8 _generationType
-    ) external ifNotPaused onlyTreejerContract returns (bool) {
+    ) external onlyTreejerContract returns (bool) {
         if (!treeToken.attributeExists(_treeId)) {
             bool flag = false;
             uint64 tempRandomValue;
@@ -243,7 +245,6 @@ contract Attribute is Initializable {
 
     function createAttribute(uint256 _treeId)
         external
-        ifNotPaused
         onlyTreejerContract
         returns (bool)
     {

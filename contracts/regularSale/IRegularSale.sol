@@ -7,6 +7,9 @@ interface IRegularSale {
     /** @return last funded regular tree */
     function lastFundedTreeId() external view returns (uint256);
 
+    /** @return last funded regular tree */
+    function maxTreeSupply() external view returns (uint256);
+
     /** @return price of tree */
     function price() external view returns (uint256);
 
@@ -95,6 +98,11 @@ interface IRegularSale {
      * @param _lastFundedTreeId id of last funded tree
      */
     function updateLastFundedTreeId(uint256 _lastFundedTreeId) external;
+
+    /**
+     * @dev admin update maxTreeSupply
+     */
+    function updateMaxTreeSupply(uint256 _maxTreeSupply) external;
 
     /**
      * @dev fund {_count} tree

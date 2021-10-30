@@ -9,6 +9,7 @@ const DEFAULT_ADMIN_ROLE =
 
 const PLANTER_ROLE = web3.utils.soliditySha3("PLANTER_ROLE");
 const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
+const VERIFIER_ROLE = web3.utils.soliditySha3("VERIFIER_ROLE");
 const SCRIPT_ROLE = web3.utils.soliditySha3("SCRIPT_ROLE");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
@@ -29,6 +30,12 @@ Common.getNewAccountPublicKey = async () => {
 
 Common.addTreejerContractRole = async (instance, account, adminAccount) => {
   await instance.grantRole(TREEJER_CONTRACT_ROLE, account, {
+    from: adminAccount,
+  });
+};
+
+Common.addVerifierRole = async (instance, account, adminAccount) => {
+  await instance.grantRole(VERIFIER_ROLE, account, {
     from: adminAccount,
   });
 };

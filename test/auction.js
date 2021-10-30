@@ -99,6 +99,8 @@ contract("Auction", (accounts) => {
     //////////////////////////////////////////////////////////////////////
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+    await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
   });
 
   describe("deployment and set addresses", () => {
@@ -1010,10 +1012,6 @@ contract("Auction", (accounts) => {
       await auctionInstance.setWethTokenAddress(wethInstance.address, {
         from: deployerAccount,
       });
-      ///////////////------------------- pause
-      await arInstance.pause({
-        from: deployerAccount,
-      });
 
       const treeId = 1;
       await treeFactoryInstance.listTree(treeId, ipfsHash, {
@@ -1036,6 +1034,11 @@ contract("Auction", (accounts) => {
 
       await allocationInstance.assignAllocationToTree(0, 10, 0, {
         from: dataManager,
+      });
+
+      ///////////////------------------- pause
+      await arInstance.pause({
+        from: deployerAccount,
       });
 
       await auctionInstance
@@ -1763,11 +1766,13 @@ contract("Auction", (accounts) => {
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount7 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_BY_PLANTER);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
 
       await treeFactoryInstance
         .verifyAssignedTree(treeId, true, { from: userAccount3 })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.VERIFY_PLANT_ACCESS);
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
+
+      await Common.addVerifierRole(arInstance, userAccount8, deployerAccount);
 
       await treeFactoryInstance.verifyAssignedTree(treeId, true, {
         from: userAccount8,
@@ -3614,6 +3619,9 @@ contract("Auction", (accounts) => {
       await treeFactoryInstance.plantAssignedTree(treeId1, ipfsHash, 1, 1, {
         from: userAccount2,
       });
+
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
       await treeFactoryInstance.verifyAssignedTree(treeId1, true, {
         from: dataManager,
       });

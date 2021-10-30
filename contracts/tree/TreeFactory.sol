@@ -88,6 +88,12 @@ contract TreeFactory is Initializable, RelayRecipient {
         _;
     }
 
+    /** NOTE modifier to check msg.sender has verifier role */
+    modifier onlyVerifier() {
+        accessRestriction.ifVerifier(_msgSender());
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused*/
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -199,7 +205,11 @@ contract TreeFactory is Initializable, RelayRecipient {
     /** @dev admin set the minimum time to send next update request
      * @param _seconds time to next update request
      */
-    function setUpdateInterval(uint256 _seconds) external onlyDataManager {
+    function setUpdateInterval(uint256 _seconds)
+        external
+        ifNotPaused
+        onlyDataManager
+    {
         treeUpdateInterval = _seconds;
 
         emit TreeUpdateIntervalChanged();
@@ -212,6 +222,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
+        ifNotPaused
         onlyDataManager
     {
         require(trees[_treeId].treeStatus == 0, "duplicate tree");
@@ -232,6 +243,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function assignTree(uint256 _treeId, address _planter)
         external
+        ifNotPaused
         onlyDataManager
     {
         TreeData storage treeData = trees[_treeId];
@@ -260,7 +272,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external {
+    ) external ifNotPaused {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 2, "invalid tree status for plant");
@@ -297,21 +309,11 @@ contract TreeFactory is Initializable, RelayRecipient {
     function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
+        onlyVerifier
     {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 3, "invalid tree status");
-
-        require(
-            treeData.planter != _msgSender(),
-            "Planter of tree can't accept update"
-        );
-
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(treeData.planter, _msgSender()),
-            "invalid access to verify"
-        );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -335,7 +337,10 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @param _treeId id of tree to update
      * @param _treeSpecs tree specs
      */
-    function updateTree(uint256 _treeId, string memory _treeSpecs) external {
+    function updateTree(uint256 _treeId, string memory _treeSpecs)
+        external
+        ifNotPaused
+    {
         require(
             trees[_treeId].planter == _msgSender(),
             "Only Planter of tree can send update"
@@ -375,24 +380,14 @@ contract TreeFactory is Initializable, RelayRecipient {
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         ifNotPaused
+        onlyVerifier
     {
-        require(
-            trees[_treeId].planter != _msgSender(),
-            "Planter of tree can't verify update"
-        );
-
         require(
             treeUpdates[_treeId].updateStatus == 1,
             "update status must be pending"
         );
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
-
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(trees[_treeId].planter, _msgSender()),
-            "invalid access to verify"
-        );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -525,7 +520,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external {
+    ) external ifNotPaused {
         require(planterContract.manageTreePermission(_msgSender()));
 
         tempTrees[pendingRegularTreeId.current()] = TempTree(
@@ -547,19 +542,12 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @param _tempTreeId tempTreeId to verify
      * @param _isVerified true for verify and false for reject
      */
-    function verifyTree(uint256 _tempTreeId, bool _isVerified) external {
+    function verifyTree(uint256 _tempTreeId, bool _isVerified)
+        external
+        ifNotPaused
+        onlyVerifier
+    {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
-
-        require(
-            tempTreeData.planter != _msgSender(),
-            "Planter of tree can't verify update"
-        );
-
-        require(
-            accessRestriction.isDataManager(_msgSender()) ||
-                planterContract.canVerify(tempTreeData.planter, _msgSender()),
-            "invalid access to verify"
-        );
 
         require(tempTreeData.plantDate > 0, "regularTree not exist");
 
@@ -658,6 +646,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
+        ifNotPaused
         onlyScript
         notHavePendingUpdate(_treeId)
     {

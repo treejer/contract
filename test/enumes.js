@@ -29,6 +29,7 @@ const CommonErrorMsg = {
   CHECK_PLANTER: "Caller is not a planter",
   CHECK_DATA_MANAGER: "caller is not data manager",
   CHECK_SCRIPT_ROLE: "caller is not script",
+  CHECK_VERIFIER_ROLE: "caller is not verifier",
   INVALID_ADDRESS: "invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
@@ -115,6 +116,7 @@ const RegularSaleErrors = {
   INVALID_COUNT: "invalid count",
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
   INVALID_GIFT_OWNER: "invalid gift owner",
+  MAX_SUPPLY: "max supply",
 };
 
 const IncrementalSaleErrorMsg = {

@@ -88,6 +88,19 @@ interface IAccessRestriction {
     function isDataManager(address _address) external view returns (bool);
 
     /**
+     * @dev check if given address is verifier
+     * @param _address input address
+     */
+    function ifVerifier(address _address) external view;
+
+    /**
+     * @dev check if given address has verifier role
+     * @param _address input address
+     * @return if given address has verifier role
+     */
+    function isVerifier(address _address) external view returns (bool);
+
+    /**
      * @dev check if given address is script
      * @param _address input address
      */

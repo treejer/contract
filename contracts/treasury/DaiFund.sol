@@ -341,7 +341,6 @@ contract DaiFund is Initializable {
      */
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(researchAddress)
     {
@@ -368,7 +367,7 @@ contract DaiFund is Initializable {
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
-    ) external ifNotPaused onlyAdmin validAddress(localDevelopmentAddress) {
+    ) external onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
@@ -395,7 +394,6 @@ contract DaiFund is Initializable {
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(insuranceAddress)
     {
@@ -421,7 +419,6 @@ contract DaiFund is Initializable {
      */
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(treasuryAddress)
     {
@@ -447,7 +444,6 @@ contract DaiFund is Initializable {
      */
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(reserve1Address)
     {
@@ -473,7 +469,6 @@ contract DaiFund is Initializable {
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
-        ifNotPaused
         onlyAdmin
         validAddress(reserve2Address)
     {

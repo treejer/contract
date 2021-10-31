@@ -4,82 +4,81 @@ pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
 interface ITreeFactory {
-    /** @return true in case of TreeFactory contract has been initialized */
-    function isTreeFactory() external view returns (bool);
-
-    /** @return AccessRestriction contract address */
-    function accessRestriction() external view returns (address);
-
-    /** @return TreeToken contract address */
-    function treeToken() external view returns (address);
-
-    /** @return PlanterFund contract address */
-    function planterFund() external view returns (address);
-
-    /** @return Planter contract address */
-    function planterContract() external view returns (address);
-
-    /** @return lastRegularTreeId */
-    function lastRegualarTreeId() external view returns (uint256);
-
-    /** @return minimum time to send next update request */
-    function treeUpdateInterval() external view returns (uint256);
-
-    /** return Tree data
-     * @param _treeId  id of tree to get data
-     * @return planter
-     * @return species
-     * @return countryCode
-     * @return saleType
-     * @return treeStatus
-     * @return plantDate
-     * @return birthDate
-     * @return treeSpecs
+    /**
+     * @dev emitted when a tree list
+     * @param treeId id of tree to list
      */
-    function trees(uint256 _treeId)
-        external
-        view
-        returns (
-            address,
-            uint256,
-            uint32,
-            uint32,
-            uint64,
-            uint64,
-            uint64,
-            string memory
-        );
+    event TreeListed(uint256 treeId);
 
-    /** return TreeUpdate data
-     8 @param _treeId id of tree to get data
-     * @return updateSpecs
-     * @return updateStatus
+    /**
+     * @dev emitted when a tree assigned to planter
+     * @param treeId id of tree to assign
      */
-    function treeUpdates(uint256 _treeId)
-        external
-        view
-        returns (string memory, uint64);
+    event TreeAssigned(uint256 treeId);
 
-    /** return TempTree data
-     * @param _tempTreeId id of tempTree to get data
-     * @return birthDate
-     * @return plantDate
-     * @return countryCode
-     * @return otherData
-     * @return planter
-     * @return treeSpecs
+    /**
+     * @dev emitted when  assigned tree planted
+     * @param treeId id of tree that planted
      */
-    function tempTrees(uint256 _tempTreeId)
-        external
-        view
-        returns (
-            uint64,
-            uint64,
-            uint64,
-            uint64,
-            address,
-            string memory
-        );
+    event AssignedTreePlanted(uint256 treeId);
+
+    /**
+     * @dev emitted when planting of assigned tree verified
+     * @param treeId id of tree that verified
+     */
+    event AssignedTreeVerified(uint256 treeId);
+
+    /**
+     * @dev emitted when planting of assigned tree rejected
+     * @param treeId id of tree that rejected
+     */
+    event AssignedTreeRejected(uint256 treeId);
+
+    /**
+     * @dev emitted when planter send update request to tree
+     * @param treeId id of tree that update request sent for
+     */
+    event TreeUpdated(uint256 treeId);
+
+    /**
+     * @dev emitted when update request for tree verified
+     * @param treeId id of tree that update request verified
+     */
+    event TreeUpdatedVerified(uint256 treeId);
+
+    /**
+     * @dev emitted when update request for tree rejected
+     * @param treeId id of tree that update request rejected
+     */
+    event TreeUpdateRejected(uint256 treeId);
+
+    /**
+     * @dev emitted when regular tree planted
+     * @param treeId id of regular tree id that planted
+     */
+    event TreePlanted(uint256 treeId);
+
+    /**
+     * @dev emitted when planting for regular tree verified
+     * @param treeId id of tree that verified
+     * @param tempTreeId id of tempTree
+     */
+    event TreeVerified(uint256 treeId, uint256 tempTreeId);
+
+    /**
+     * @dev emitted when planting for regular tree rejected
+     * @param treeId id of tree that rejected
+     */
+    event TreeRejected(uint256 treeId);
+
+    /** @dev emitted when new treeUpdateInterval set */
+    event TreeUpdateIntervalChanged();
+
+    /**
+     * @dev emitted when treeSpecs of tree updated
+     * @param treeId id of tree to update treeSpecs
+     */
+    event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -256,79 +255,70 @@ interface ITreeFactory {
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
 
-    /**
-     * @dev emitted when a tree list
-     * @param treeId id of tree to list
-     */
-    event TreeListed(uint256 treeId);
+    function initialize(address _accessRestrictionAddress) external;
 
-    /**
-     * @dev emitted when a tree assigned to planter
-     * @param treeId id of tree to assign
-     */
-    event TreeAssigned(uint256 treeId);
+    /** @return true in case of TreeFactory contract has been initialized */
+    function isTreeFactory() external view returns (bool);
 
-    /**
-     * @dev emitted when  assigned tree planted
-     * @param treeId id of tree that planted
-     */
-    event AssignedTreePlanted(uint256 treeId);
+    /** @return lastRegularTreeId */
+    function lastRegualarTreeId() external view returns (uint256);
 
-    /**
-     * @dev emitted when planting of assigned tree verified
-     * @param treeId id of tree that verified
-     */
-    event AssignedTreeVerified(uint256 treeId);
+    /** @return minimum time to send next update request */
+    function treeUpdateInterval() external view returns (uint256);
 
-    /**
-     * @dev emitted when planting of assigned tree rejected
-     * @param treeId id of tree that rejected
+    /** return Tree data
+     * @param _treeId  id of tree to get data
+     * @return planter
+     * @return species
+     * @return countryCode
+     * @return saleType
+     * @return treeStatus
+     * @return plantDate
+     * @return birthDate
+     * @return treeSpecs
      */
-    event AssignedTreeRejected(uint256 treeId);
+    function trees(uint256 _treeId)
+        external
+        view
+        returns (
+            address,
+            uint256,
+            uint32,
+            uint32,
+            uint64,
+            uint64,
+            uint64,
+            string memory
+        );
 
-    /**
-     * @dev emitted when planter send update request to tree
-     * @param treeId id of tree that update request sent for
+    /** return TreeUpdate data
+     8 @param _treeId id of tree to get data
+     * @return updateSpecs
+     * @return updateStatus
      */
-    event TreeUpdated(uint256 treeId);
+    function treeUpdates(uint256 _treeId)
+        external
+        view
+        returns (string memory, uint64);
 
-    /**
-     * @dev emitted when update request for tree verified
-     * @param treeId id of tree that update request verified
+    /** return TempTree data
+     * @param _tempTreeId id of tempTree to get data
+     * @return birthDate
+     * @return plantDate
+     * @return countryCode
+     * @return otherData
+     * @return planter
+     * @return treeSpecs
      */
-    event TreeUpdatedVerified(uint256 treeId);
-
-    /**
-     * @dev emitted when update request for tree rejected
-     * @param treeId id of tree that update request rejected
-     */
-    event TreeUpdateRejected(uint256 treeId);
-
-    /**
-     * @dev emitted when regular tree planted
-     * @param treeId id of regular tree id that planted
-     */
-    event TreePlanted(uint256 treeId);
-
-    /**
-     * @dev emitted when planting for regular tree verified
-     * @param treeId id of tree that verified
-     * @param tempTreeId id of tempTree
-     */
-    event TreeVerified(uint256 treeId, uint256 tempTreeId);
-
-    /**
-     * @dev emitted when planting for regular tree rejected
-     * @param treeId id of tree that rejected
-     */
-    event TreeRejected(uint256 treeId);
-
-    /** @dev emitted when new treeUpdateInterval set */
-    event TreeUpdateIntervalChanged();
-
-    /**
-     * @dev emitted when treeSpecs of tree updated
-     * @param treeId id of tree to update treeSpecs
-     */
-    event TreeSpecsUpdated(uint256 treeId);
+    function tempTrees(uint256 _tempTreeId)
+        external
+        view
+        returns (
+            uint64,
+            uint64,
+            uint64,
+            uint64,
+            address,
+            string memory
+        );
 }

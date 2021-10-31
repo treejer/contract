@@ -6,34 +6,33 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITree.sol";
+import "./IAttribute.sol";
 
 /** @title Attribute Contract */
-contract Attribute is Initializable {
+contract Attribute is Initializable, IAttribute {
     using SafeCastUpgradeable for uint256;
 
-    bool public isAttribute;
-    IAccessRestriction public accessRestriction;
-    ITree public treeToken;
-
     /** NOTE parameters of randomTreeGeneration*/
-
     struct SymbolStatus {
         uint128 generatedCount;
         uint128 status; // 0 free, 1 reserved , 2 set, 3 setByAdmin
     }
 
-    uint8 public specialTreeCount;
+    bool public override isAttribute;
+    uint8 public override specialTreeCount;
+    IAccessRestriction public accessRestriction;
+    ITree public treeToken;
 
     /** NOTE mapping from unique attributes id to number of generations */
-    mapping(uint64 => uint32) public uniquenessFactorToGeneratedAttributesCount;
+    mapping(uint64 => uint32)
+        public
+        override uniquenessFactorToGeneratedAttributesCount;
 
     /** NOTE mapping from unique symbol id to number of generations  */
-    mapping(uint64 => SymbolStatus) public uniquenessFactorToSymbolStatus;
+    mapping(uint64 => SymbolStatus)
+        public
+        override uniquenessFactorToSymbolStatus;
 
-    event AttributeGenerated(uint256 treeId);
-    event AttributeGenerationFailed(uint256 treeId);
-    event SymbolReserved(uint64 uniquenessFactor);
-    event ReservedSymbolReleased(uint64 uniquenessFactor);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -70,6 +69,7 @@ contract Attribute is Initializable {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -85,7 +85,7 @@ contract Attribute is Initializable {
      * @dev admin set TreeToken contract address
      * @param _address set to the address of TreeToken contract
      */
-    function setTreeTokenAddress(address _address) external onlyAdmin {
+    function setTreeTokenAddress(address _address) external override onlyAdmin {
         ITree candidateContract = ITree(_address);
 
         require(candidateContract.isTree());
@@ -99,6 +99,7 @@ contract Attribute is Initializable {
      */
     function reserveSymbol(uint64 _uniquenessFactor)
         external
+        override
         ifNotPaused
         onlyDataManagerOrTreejerContract
     {
@@ -118,6 +119,7 @@ contract Attribute is Initializable {
 
     function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -137,6 +139,7 @@ contract Attribute is Initializable {
      */
     function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
+        override
         onlyTreejerContract
     {
         if (uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1) {
@@ -155,7 +158,7 @@ contract Attribute is Initializable {
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
         uint8 _generationType
-    ) external ifNotPaused onlyDataManagerOrTreejerContract {
+    ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
             "the symbol is taken"
@@ -193,7 +196,7 @@ contract Attribute is Initializable {
         address _funder,
         uint8 _funderRank,
         uint8 _generationType
-    ) external onlyTreejerContract returns (bool) {
+    ) external override onlyTreejerContract returns (bool) {
         if (!treeToken.attributeExists(_treeId)) {
             bool flag = false;
             uint64 tempRandomValue;
@@ -245,6 +248,7 @@ contract Attribute is Initializable {
 
     function createAttribute(uint256 _treeId)
         external
+        override
         onlyTreejerContract
         returns (bool)
     {
@@ -274,7 +278,7 @@ contract Attribute is Initializable {
     function manageAttributeUniquenessFactor(
         uint256 _treeId,
         uint64 _uniquenessFactor
-    ) external onlyTreejerContract returns (uint64) {
+    ) external override onlyTreejerContract returns (uint64) {
         if (
             uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] == 0
         ) {
@@ -298,7 +302,12 @@ contract Attribute is Initializable {
      * his/her wallet
      * @param _funder address of funder
      */
-    function getFunderRank(address _funder) external view returns (uint8) {
+    function getFunderRank(address _funder)
+        external
+        view
+        override
+        returns (uint8)
+    {
         uint256 ownedTrees = treeToken.balanceOf(_funder);
 
         if (ownedTrees > 10000) {

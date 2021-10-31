@@ -3,26 +3,14 @@ pragma solidity ^0.8.6;
 
 /** @title Attribute interfce */
 interface IAttribute {
-    /** @return true in case of Attribute contract have been initialized */
-    function isAttribute() external view returns (bool);
-
-    /** @return AccessRestriction contract address */
-    function accessRestriction() external view returns (address);
-
-    /** @return treeToken contract address */
-    function treeToken() external view returns (address);
-
-    function specialTreeCount() external view returns (uint256);
-
-    function uniquenessFactorToGeneratedAttributesCount(uint64 _attribute)
-        external
-        view
-        returns (uint32);
-
-    function uniquenessFactorToSymbolStatus(uint64 _uniqueSymbol)
-        external
-        view
-        returns (uint128 generatedCount, uint128 status);
+    /** @dev emitted when unique attribute generated successfully for {treeId} */
+    event AttributeGenerated(uint256 treeId);
+    /** @dev emitted when unique attribute fail to generate for {treeId} */
+    event AttributeGenerationFailed(uint256 treeId);
+    /** @dev emitted when a unique symbol reserved */
+    event SymbolReserved(uint64 uniquenessFactor);
+    /** @dev emitted when reservation of a unique symbol freed */
+    event ReservedSymbolReleased(uint64 uniquenessFactor);
 
     function setTreeTokenAddress(address _address) external;
 
@@ -77,19 +65,27 @@ interface IAttribute {
         uint64 _uniquenessFactor
     ) external returns (uint64);
 
+    function initialize(address _accessRestrictionAddress) external;
+
+    /** @return true in case of Attribute contract have been initialized */
+    function isAttribute() external view returns (bool);
+
+    function specialTreeCount() external view returns (uint8);
+
+    function uniquenessFactorToGeneratedAttributesCount(uint64 _attribute)
+        external
+        view
+        returns (uint32);
+
+    function uniquenessFactorToSymbolStatus(uint64 _uniqueSymbol)
+        external
+        view
+        returns (uint128 generatedCount, uint128 status);
+
     /**
      * @dev the function Tries to Calculate the rank of funder
      * @param _funder address of funder
      * NOTE emit a {getFunderRank} event
      */
     function getFunderRank(address _funder) external view returns (uint8);
-
-    /** @dev emitted when unique attribute generated successfully for {treeId} */
-    event AttributeGenerated(uint256 treeId);
-    /** @dev emitted when unique attribute fail to generate for {treeId} */
-    event AttributeGenerationFailed(uint256 treeId);
-    /** @dev emitted when a unique symbol reserved */
-    event SymbolReserved(uint32 generatedCode);
-    /** @dev emitted when reservation of a unique symbol freed */
-    event ReservedSymbolReleased(uint32 generatedCode);
 }

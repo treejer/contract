@@ -11,25 +11,13 @@ import "../gsn/RelayRecipient.sol";
 import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanter.sol";
+import "./ITreeFactory.sol";
 
 /** @title TreeFactory Contract */
-contract TreeFactory is Initializable, RelayRecipient {
+contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
-
-    CountersUpgradeable.Counter private pendingRegularTreeId;
-
-    /** NOTE {isTreeFactory} set inside the initialize to {true} */
-    bool public isTreeFactory;
-
-    IAccessRestriction public accessRestriction;
-    ITree public treeToken;
-    IPlanterFund public planterFund;
-    IPlanter public planterContract;
-
-    uint256 public lastRegualarTreeId;
-    uint256 public treeUpdateInterval;
 
     struct TreeData {
         address planter;
@@ -55,26 +43,25 @@ contract TreeFactory is Initializable, RelayRecipient {
         address planter;
         string treeSpecs;
     }
-    /** NOTE mapping of treeId to TreeData Struct */
-    mapping(uint256 => TreeData) public trees;
-    /** NOTE mapping of treeId to TreeUpdate struct */
-    mapping(uint256 => TreeUpdate) public treeUpdates;
-    /** NOTE mapping of treeId to TempTree struct */
-    mapping(uint256 => TempTree) public tempTrees;
 
-    event TreeListed(uint256 treeId);
-    event TreeAssigned(uint256 treeId);
-    event AssignedTreePlanted(uint256 treeId);
-    event AssignedTreeVerified(uint256 treeId);
-    event AssignedTreeRejected(uint256 treeId);
-    event TreeUpdated(uint256 treeId);
-    event TreeUpdatedVerified(uint256 treeId);
-    event TreeUpdateRejected(uint256 treeId);
-    event TreePlanted(uint256 treeId);
-    event TreeVerified(uint256 treeId, uint256 tempTreeId);
-    event TreeRejected(uint256 treeId);
-    event TreeUpdateIntervalChanged();
-    event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
+    CountersUpgradeable.Counter private _pendingRegularTreeId;
+
+    /** NOTE {isTreeFactory} set inside the initialize to {true} */
+    bool public override isTreeFactory;
+    uint256 public override lastRegualarTreeId;
+    uint256 public override treeUpdateInterval;
+
+    IAccessRestriction public accessRestriction;
+    ITree public treeToken;
+    IPlanterFund public planterFund;
+    IPlanter public planterContract;
+
+    /** NOTE mapping of treeId to TreeData Struct */
+    mapping(uint256 => TreeData) public override trees;
+    /** NOTE mapping of treeId to TreeUpdate struct */
+    mapping(uint256 => TreeUpdate) public override treeUpdates;
+    /** NOTE mapping of treeId to TempTree struct */
+    mapping(uint256 => TempTree) public override tempTrees;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -140,6 +127,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -160,6 +148,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -170,7 +159,11 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev admin set PlanterFund contract address
      * @param _address set to the address of PlanterFund contract
      */
-    function setPlanterFundAddress(address _address) external onlyAdmin {
+    function setPlanterFundAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanterFund candidateContract = IPlanterFund(_address);
 
         require(candidateContract.isPlanterFund());
@@ -182,7 +175,11 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev admin set Planter contract address
      * @param _address set to the address of Planter contract
      */
-    function setPlanterContractAddress(address _address) external onlyAdmin {
+    function setPlanterContractAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanter candidateContract = IPlanter(_address);
 
         require(candidateContract.isPlanter());
@@ -194,7 +191,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev admin set TreeToken contract address
      * @param _address set to the address of TreeToken contract
      */
-    function setTreeTokenAddress(address _address) external onlyAdmin {
+    function setTreeTokenAddress(address _address) external override onlyAdmin {
         ITree candidateContract = ITree(_address);
 
         require(candidateContract.isTree());
@@ -207,6 +204,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function setUpdateInterval(uint256 _seconds)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -222,6 +220,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -243,6 +242,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function assignTree(uint256 _treeId, address _planter)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -272,7 +272,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 2, "invalid tree status for plant");
@@ -308,6 +308,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
+        override
         ifNotPaused
         onlyVerifier
     {
@@ -339,6 +340,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function updateTree(uint256 _treeId, string memory _treeSpecs)
         external
+        override
         ifNotPaused
     {
         require(
@@ -379,6 +381,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
+        override
         ifNotPaused
         onlyVerifier
     {
@@ -430,6 +433,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
+        override
         onlyTreejerContract
         validTree(_treeId)
         returns (uint32)
@@ -454,6 +458,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function mintAssignedTree(uint256 _treeId, address _funder)
         external
+        override
         onlyTreejerContract
     {
         trees[_treeId].saleType = 0;
@@ -464,7 +469,11 @@ contract TreeFactory is Initializable, RelayRecipient {
      * @dev reset saleType value of tree
      * @param _treeId id of tree to reset saleType value
      */
-    function resetSaleType(uint256 _treeId) external onlyTreejerContract {
+    function resetSaleType(uint256 _treeId)
+        external
+        override
+        onlyTreejerContract
+    {
         trees[_treeId].saleType = 0;
     }
 
@@ -479,7 +488,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint256 _saleType
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (trees[i].saleType == _saleType) {
                 trees[i].saleType = 0;
@@ -498,7 +507,7 @@ contract TreeFactory is Initializable, RelayRecipient {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint32 _saleType
-    ) external onlyTreejerContract returns (bool) {
+    ) external override onlyTreejerContract returns (bool) {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (trees[i].saleType > 0 || treeToken.exists(i)) {
                 return false;
@@ -520,10 +529,10 @@ contract TreeFactory is Initializable, RelayRecipient {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         require(planterContract.manageTreePermission(_msgSender()));
 
-        tempTrees[pendingRegularTreeId.current()] = TempTree(
+        tempTrees[_pendingRegularTreeId.current()] = TempTree(
             _birthDate,
             block.timestamp.toUint64(),
             _countryCode,
@@ -532,9 +541,9 @@ contract TreeFactory is Initializable, RelayRecipient {
             _treeSpecs
         );
 
-        emit TreePlanted(pendingRegularTreeId.current());
+        emit TreePlanted(_pendingRegularTreeId.current());
 
-        pendingRegularTreeId.increment();
+        _pendingRegularTreeId.increment();
     }
 
     /**
@@ -544,6 +553,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function verifyTree(uint256 _tempTreeId, bool _isVerified)
         external
+        override
         ifNotPaused
         onlyVerifier
     {
@@ -591,6 +601,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
+        override
         onlyTreejerContract
         returns (uint256)
     {
@@ -625,6 +636,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function mintTreeById(uint256 _treeId, address _funder)
         external
+        override
         onlyTreejerContract
     {
         TreeData storage treeData = trees[_treeId];
@@ -646,6 +658,7 @@ contract TreeFactory is Initializable, RelayRecipient {
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
+        override
         ifNotPaused
         onlyScript
         notHavePendingUpdate(_treeId)

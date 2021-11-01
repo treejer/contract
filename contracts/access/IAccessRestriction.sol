@@ -2,38 +2,21 @@
 
 pragma solidity ^0.8.6;
 
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+
 /** @title AccessRestriction interface*/
 
-interface IAccessRestriction {
+interface IAccessRestriction is IAccessControlUpgradeable {
+    /** @dev pause functionality */
+    function pause() external;
+
+    /** @dev unpause functionality */
+    function unpause() external;
+
+    function initialize(address _deployer) external;
+
     /** @return true if AccessRestriction contract has been initialized  */
     function isAccessRestriction() external view returns (bool);
-
-    /** @return if account {account} has role {role} or not */
-    function hasRole(bytes32 role, address account)
-        external
-        view
-        returns (bool);
-
-    /** @return admin role */
-    function getRoleAdmin(bytes32 role) external view returns (bytes32);
-
-    /**
-     * @dev grant role {role} to account {account}
-     * NOTE emit a {RoleGranted} event
-     */
-    function grantRole(bytes32 role, address account) external;
-
-    /**
-     * @dev revoke role {role} from account {account}
-     * NOTE emit a {RoleRevoked} event
-     */
-    function revokeRole(bytes32 role, address account) external;
-
-    /**
-     * @dev renounce role {role} from account {account}
-     * NOTE emit a {RoleRevoked} event
-     */
-    function renounceRole(bytes32 role, address account) external;
 
     /**
      * @dev check if given address is planter
@@ -125,26 +108,6 @@ interface IAccessRestriction {
     /** @dev check if functionality is puased */
     function ifPaused() external view;
 
-    /** @dev pause functionality */
-    function pause() external;
-
-    /** @dev unpause functionality */
-    function unpause() external;
-
     /** @return if functionality is paused*/
     function paused() external view returns (bool);
-
-    /** @dev emitted when role granted to account */
-    event RoleGranted(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
-
-    /** @dev emitted when role revoked from account */
-    event RoleRevoked(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
 }

@@ -1,75 +1,60 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 /** @title Auction interface */
 interface IAuction {
     /**
-     * @return true if Auction contract has been initialized
+     * @dev emitted when admin create an auction
+     * @param auctionId  is id of auction
      */
-    function isAuction() external view returns (bool);
+    event AuctionCreated(uint256 auctionId);
 
     /**
-     * @return AccessRestriction contract address
+     * @dev emitted when new bid done for auction
+     * @param auctionId id of auction that bid done for
+     * @param treeId id of tree in auction
+     * @param bidder address of bidder
+     * @param amount bid amount
+     * @param referrer referrer address of bidder
      */
-    function accessRestriction() external view returns (address);
+    event HighestBidIncreased(
+        uint256 auctionId,
+        uint256 treeId,
+        address bidder,
+        uint256 amount,
+        address referrer
+    );
 
     /**
-     * @return TreeFactory contract address
+     * @dev emmited when user bids less than 10 minutes left to the end of auction
+     * @param auctionId id of auction to increase end time
+     * @param newAuctionEndTime new value of auction end time
      */
-    function treeFactory() external view returns (address);
+    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
 
     /**
-     * @return WethFund contract address
+     * @dev emitted when auction ended and there is winner
+     * @param auctionId id of auction that end
+     * @param treeId id of tree in auction
+     * @param winner address of winner
+     * @param amount highest bid amount
+     * @param referrer referrer address of winner
      */
-    function wethFund() external view returns (address);
+
+    event AuctionSettled(
+        uint256 auctionId,
+        uint256 treeId,
+        address winner,
+        uint256 amount,
+        address referrer
+    );
 
     /**
-     * @return Allocation contract address
+     * @dev emitted when auction end and there is no bidder.
+     * @param auctionId id of auction that end
+     * @param treeId id of tree in auction
      */
-    function allocation() external view returns (address);
-
-    /**
-     * @return WethToken contract address
-     */
-    function wethToken() external view returns (address);
-
-    /**
-     * @return RegularSale contract address
-     */
-    function regularSale() external view returns (address);
-
-    /**
-     * @dev return data of an auction with {_auctionId}
-     * @param _auctionId id of auction to get data
-     * @return treeId
-     * @return bidder
-     * @return startDate of auction
-     * @return endDate of auction
-     * @return highestBid
-     * @return bidInterval
-     */
-    function auctions(uint256 _auctionId)
-        external
-        view
-        returns (
-            uint256,
-            address,
-            uint64,
-            uint64,
-            uint256,
-            uint256
-        );
-
-    /**
-     * @dev return referrer address of {_bidder} in auction with id {_auctionId}
-     * @param _bidder id of bidder
-     * @param _auctionId id of auction
-     * @return address of referrer
-     */
-    function referrals(address _bidder, uint256 _auctionId)
-        external
-        view
-        returns (address);
+    event AuctionEnded(uint256 auctionId, uint256 treeId);
 
     /** @dev set {_address} to trustedForwarder */
     function setTrustedForwarder(address _address) external;
@@ -134,56 +119,43 @@ interface IAuction {
      */
     function endAuction(uint256 _auctionId) external;
 
-    /**
-     * @dev emitted when admin create an auction
-     * @param auctionId  is id of auction
-     */
-    event AuctionCreated(uint256 auctionId);
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when new bid done for auction
-     * @param auctionId id of auction that bid done for
-     * @param treeId id of tree in auction
-     * @param bidder address of bidder
-     * @param amount bid amount
-     * @param referrer referrer address of bidder
+     * @return true if Auction contract has been initialized
      */
-    event HighestBidIncreased(
-        uint256 auctionId,
-        uint256 treeId,
-        address bidder,
-        uint256 amount,
-        address referrer
-    );
+    function isAuction() external view returns (bool);
 
     /**
-     * @dev emmited when user bids less than 10 minutes left to the end of auction
-     * @param auctionId id of auction to increase end time
-     * @param newAuctionEndTime new value of auction end time
+     * @dev return data of an auction with {_auctionId}
+     * @param _auctionId id of auction to get data
+     * @return treeId
+     * @return bidder
+     * @return startDate of auction
+     * @return endDate of auction
+     * @return highestBid
+     * @return bidInterval
      */
-    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
+    function auctions(uint256 _auctionId)
+        external
+        view
+        returns (
+            uint256,
+            address,
+            uint64,
+            uint64,
+            uint256,
+            uint256
+        );
 
     /**
-     * @dev emitted when auction ended and there is winner
-     * @param auctionId id of auction that end
-     * @param treeId id of tree in auction
-     * @param winner address of winner
-     * @param amount highest bid amount
-     * @param referrer referrer address of winner
+     * @dev return referrer address of {_bidder} in auction with id {_auctionId}
+     * @param _bidder id of bidder
+     * @param _auctionId id of auction
+     * @return address of referrer
      */
-
-    event AuctionSettled(
-        uint256 auctionId,
-        uint256 treeId,
-        address winner,
-        uint256 amount,
-        address referrer
-    );
-
-    /**
-     * @dev emitted when auction end and there is no bidder.
-     * @param auctionId id of auction that end
-     * @param treeId id of tree in auction
-     */
-    event AuctionEnded(uint256 auctionId, uint256 treeId);
+    function referrals(address _bidder, uint256 _auctionId)
+        external
+        view
+        returns (address);
 }

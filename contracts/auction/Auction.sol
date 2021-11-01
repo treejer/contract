@@ -11,24 +11,12 @@ import "../treasury/IAllocation.sol";
 import "../treasury/IWethFund.sol";
 import "../gsn/RelayRecipient.sol";
 import "../regularSale/IRegularSale.sol";
+import "./IAuction.sol";
 
 /** @title Auction */
 
-contract Auction is Initializable, RelayRecipient {
+contract Auction is Initializable, RelayRecipient, IAuction {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    CountersUpgradeable.Counter private auctionId;
-
-    /** NOTE {isAuction} set inside the initialize to {true} */
-
-    bool public isAuction;
-
-    IAccessRestriction public accessRestriction;
-    ITreeFactory public treeFactory;
-    IWethFund public wethFund;
-    IAllocation public allocation;
-    IERC20Upgradeable public wethToken;
-    IRegularSale public regularSale;
 
     struct AuctionData {
         uint256 treeId;
@@ -39,30 +27,24 @@ contract Auction is Initializable, RelayRecipient {
         uint256 bidInterval;
     }
 
+    CountersUpgradeable.Counter private _auctionId;
+
+    /** NOTE {isAuction} set inside the initialize to {true} */
+
+    bool public override isAuction;
+
+    IAccessRestriction public accessRestriction;
+    ITreeFactory public treeFactory;
+    IWethFund public wethFund;
+    IAllocation public allocation;
+    IERC20Upgradeable public wethToken;
+    IRegularSale public regularSale;
+
     /** NOTE mapping of auctionId to AuctionData struct */
-    mapping(uint256 => AuctionData) public auctions;
+    mapping(uint256 => AuctionData) public override auctions;
 
     /**NOTE mapping of bidder to mapping of auctionId to referral */
-    mapping(address => mapping(uint256 => address)) public referrals;
-
-    event AuctionCreated(uint256 auctionId);
-    event HighestBidIncreased(
-        uint256 auctionId,
-        uint256 treeId,
-        address bidder,
-        uint256 amount,
-        address referrer
-    );
-    event AuctionEndTimeIncreased(uint256 auctionId, uint256 newAuctionEndTime);
-
-    event AuctionSettled(
-        uint256 auctionId,
-        uint256 treeId,
-        address winner,
-        uint256 amount,
-        address referrer
-    );
-    event AuctionEnded(uint256 auctionId, uint256 treeId);
+    mapping(address => mapping(uint256 => address)) public override referrals;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -94,6 +76,7 @@ contract Auction is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -111,6 +94,7 @@ contract Auction is Initializable, RelayRecipient {
 
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -121,7 +105,11 @@ contract Auction is Initializable, RelayRecipient {
      * @dev admin set TreeFactory contract address
      * @param _address set to the address of TreeFactory contract
      */
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
+    function setTreeFactoryAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
@@ -132,7 +120,11 @@ contract Auction is Initializable, RelayRecipient {
      * @param _address set to the address of Allocation contract
      */
 
-    function setAllocationAddress(address _address) external onlyAdmin {
+    function setAllocationAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAllocation candidateContract = IAllocation(_address);
         require(candidateContract.isAllocation());
         allocation = candidateContract;
@@ -143,7 +135,7 @@ contract Auction is Initializable, RelayRecipient {
      * @param _address set to the address of WethFund contract
      */
 
-    function setWethFundAddress(address _address) external onlyAdmin {
+    function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
         require(candidateContract.isWethFund());
         wethFund = candidateContract;
@@ -154,7 +146,11 @@ contract Auction is Initializable, RelayRecipient {
      * @param _address set to the address of RegularSale contract
      */
 
-    function setRegularSaleAddress(address _address) external onlyAdmin {
+    function setRegularSaleAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IRegularSale candidateContract = IRegularSale(_address);
         require(candidateContract.isRegularSale());
         regularSale = candidateContract;
@@ -167,6 +163,7 @@ contract Auction is Initializable, RelayRecipient {
 
     function setWethTokenAddress(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -190,14 +187,14 @@ contract Auction is Initializable, RelayRecipient {
         uint64 _endDate,
         uint256 _intialPrice,
         uint256 _bidInterval
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(allocation.exists(_treeId), "equivalant fund Model not exists");
 
         uint32 saleType = treeFactory.manageSaleType(_treeId, 1);
 
         require(saleType == 0, "not available for auction");
 
-        AuctionData storage auctionData = auctions[auctionId.current()];
+        AuctionData storage auctionData = auctions[_auctionId.current()];
 
         auctionData.treeId = _treeId;
         auctionData.startDate = _startDate;
@@ -205,9 +202,9 @@ contract Auction is Initializable, RelayRecipient {
         auctionData.highestBid = _intialPrice;
         auctionData.bidInterval = _bidInterval;
 
-        emit AuctionCreated(auctionId.current());
+        emit AuctionCreated(_auctionId.current());
 
-        auctionId.increment();
+        _auctionId.increment();
     }
 
     /**
@@ -215,15 +212,15 @@ contract Auction is Initializable, RelayRecipient {
      * NOTE its require to send at least {higestBid + bidInterval } {_amount}.
      * NOTE if new bid done old bidder refund automatically.
      * NOTE if user bid 10 minutes left to auction end, auction's end time increase 10 minute
-     * @param _auctionId auctionId that user bid for it.
+     * @param auctionId_ auctionId that user bid for it.
      */
 
     function bid(
-        uint256 _auctionId,
+        uint256 auctionId_,
         uint256 _amount,
         address _referrer
-    ) external ifNotPaused {
-        AuctionData storage auctionData = auctions[_auctionId];
+    ) external override ifNotPaused {
+        AuctionData storage auctionData = auctions[auctionId_];
 
         require(
             block.timestamp <= auctionData.endDate,
@@ -255,9 +252,9 @@ contract Auction is Initializable, RelayRecipient {
 
         if (
             _referrer != address(0) &&
-            referrals[_msgSender()][_auctionId] == address(0)
+            referrals[_msgSender()][auctionId_] == address(0)
         ) {
-            referrals[_msgSender()][_auctionId] = _referrer;
+            referrals[_msgSender()][auctionId_] = _referrer;
         }
 
         address oldBidder = auctionData.bidder;
@@ -267,14 +264,14 @@ contract Auction is Initializable, RelayRecipient {
         auctionData.bidder = _msgSender();
 
         emit HighestBidIncreased(
-            _auctionId,
+            auctionId_,
             auctionData.treeId,
             _msgSender(),
             _amount,
             _referrer
         );
 
-        _increaseAuctionEndTime(_auctionId);
+        _increaseAuctionEndTime(auctionId_);
 
         if (oldBidder != address(0)) {
             bool successTransfer = wethToken.transfer(oldBidder, oldBid);
@@ -288,10 +285,10 @@ contract Auction is Initializable, RelayRecipient {
      * NOTE if winner has referrer, claimable trees of that referrer increase by 1
      * NOTE if auction does not have bidder, saleType of tree in auction reset
      * and admin can put that tree in another auction
-     * @param _auctionId id of auction to end.
+     * @param auctionId_ id of auction to end.
      */
-    function endAuction(uint256 _auctionId) external ifNotPaused {
-        AuctionData storage auctionData = auctions[_auctionId];
+    function endAuction(uint256 auctionId_) external override ifNotPaused {
+        AuctionData storage auctionData = auctions[auctionId_];
 
         require(auctionData.endDate > 0, "Auction is unavailable");
 
@@ -338,7 +335,7 @@ contract Auction is Initializable, RelayRecipient {
             );
 
             address referrerOfWinner = referrals[auctionData.bidder][
-                _auctionId
+                auctionId_
             ];
 
             if (referrerOfWinner != address(0)) {
@@ -349,7 +346,7 @@ contract Auction is Initializable, RelayRecipient {
             }
 
             emit AuctionSettled(
-                _auctionId,
+                auctionId_,
                 auctionData.treeId,
                 auctionData.bidder,
                 auctionData.highestBid,
@@ -357,22 +354,22 @@ contract Auction is Initializable, RelayRecipient {
             );
         } else {
             treeFactory.resetSaleType(auctionData.treeId);
-            emit AuctionEnded(_auctionId, auctionData.treeId);
+            emit AuctionEnded(auctionId_, auctionData.treeId);
         }
 
-        delete auctions[_auctionId];
+        delete auctions[auctionId_];
     }
 
     /** @dev if user bids less than 10 minutes left to the end of auction,
      * aution end time increase 10 minutes
-     * @param _auctionId id of auction to increase end time.
+     * @param auctionId_ id of auction to increase end time.
      */
-    function _increaseAuctionEndTime(uint256 _auctionId) private {
-        if (auctions[_auctionId].endDate - block.timestamp <= 600) {
-            auctions[_auctionId].endDate += 600;
+    function _increaseAuctionEndTime(uint256 auctionId_) private {
+        if (auctions[auctionId_].endDate - block.timestamp <= 600) {
+            auctions[auctionId_].endDate += 600;
             emit AuctionEndTimeIncreased(
-                _auctionId,
-                auctions[_auctionId].endDate
+                auctionId_,
+                auctions[auctionId_].endDate
             );
         }
     }

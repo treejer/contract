@@ -1,59 +1,31 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 interface IIncrementalSale {
     /**
-     * @return true if IncrementalSale contract have been initialized
+     * @dev emitted when trees funded
+     * @param funder address of funder
+     * @param recipient address of recipient
+     * @param referrer address of referrer
+     * @param startTreeId starting tree id
+     * @param count count of funded trees
      */
-    function isIncrementalSale() external view returns (bool);
+
+    event TreeFunded(
+        address funder,
+        address recipient,
+        address referrer,
+        uint256 startTreeId,
+        uint256 count
+    );
 
     /**
-     * @return last tree id sold in incremetal sale
+     * @dev emitted when incremental sale created or removed or incremetal sale end tree id updated
      */
-    function lastSold() external view returns (uint256);
+    event IncrementalSaleUpdated();
 
-    /** @return AccessRestriction contract address */
-    function accessRestriction() external view returns (address);
-
-    /** @return TreeFactory contract address */
-    function treeFactory() external view returns (address);
-
-    /** @return WethFund contract address */
-    function wethFund() external view returns (address);
-
-    /** @return Allocation contract address */
-    function allocation() external view returns (address);
-
-    /** @return Attribute contract address */
-    function attribute() external view returns (address);
-
-    /** @return PlanterFund contract address */
-    function planterFundContract() external view returns (address);
-
-    /** @return RegularSale contract address */
-    function regularSale() external view returns (address);
-
-    /** @return WethToken contract address */
-    function wethToken() external view returns (address);
-
-    /**
-     * @dev return incrementalSaleData struct data
-     * @return startTreeId
-     * @return endTreeId
-     * @return initialPrice
-     * @return increments
-     * @return priceJump
-     */
-    function incrementalSaleData()
-        external
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint64,
-            uint64
-        );
+    /** @dev emitted when incremental sale data updated */
+    event IncrementalSaleDataUpdated();
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -145,28 +117,34 @@ interface IIncrementalSale {
         uint64 _priceJump
     ) external;
 
-    /**
-     * @dev emitted when trees funded
-     * @param funder address of funder
-     * @param recipient address of recipient
-     * @param referrer address of referrer
-     * @param startTreeId starting tree id
-     * @param count count of funded trees
-     */
-
-    event TreeFunded(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 startTreeId,
-        uint256 count
-    );
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when incremental sale created or removed or incremetal sale end tree id updated
+     * @return true if IncrementalSale contract have been initialized
      */
-    event IncrementalSaleUpdated();
+    function isIncrementalSale() external view returns (bool);
 
-    /** @dev emitted when incremental sale data updated */
-    event IncrementalSaleDataUpdated();
+    /**
+     * @return last tree id sold in incremetal sale
+     */
+    function lastSold() external view returns (uint256);
+
+    /**
+     * @dev return incrementalSaleData struct data
+     * @return startTreeId
+     * @return endTreeId
+     * @return initialPrice
+     * @return increments
+     * @return priceJump
+     */
+    function incrementalSaleData()
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint64,
+            uint64
+        );
 }

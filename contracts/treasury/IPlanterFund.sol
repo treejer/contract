@@ -5,71 +5,40 @@ pragma solidity ^0.8.6;
 /** @title PlanterFund interfce */
 interface IPlanterFund {
     /**
-     * @return true in case of PlanterFund contract has been initialized
+     * @dev emitted when planter total claimable amount updated
+     * @param treeId id of tree that planter total claimable amount updated for
+     * @param planter address of planter
+     * @param amount amount added to planter total claimable amount
+     * @param ambassador address of ambassador
      */
-    function isPlanterFund() external view returns (bool);
-
-    /** @return minimum amount to withdraw */
-    function minWithdrawable() external view returns (uint256);
-
-    /**
-     * @return AccessRestriction contract address
-     */
-    function accessRestriction() external view returns (address);
-
-    /**
-     * @return Planter contract address
-     */
-    function planterContract() external view returns (address);
+    event PlanterTotalClaimedUpdated(
+        uint256 treeId,
+        address planter,
+        uint256 amount,
+        address ambassador
+    );
 
     /**
-     * @return DaiToken contract address
+     * @dev emitted when a planter withdraw
+     * @param amount amount of withdraw
+     * @param account address of planter
      */
-    function daiToken() external view returns (address);
+    event BalanceWithdrew(uint256 amount, address account);
 
     /**
-     * @dev return totalBalances struct data
-     * @return planter total balance
-     * @return ambassador total balance
-     * @return localDevelopment total balance
+     * @dev emitted when ProjectedEarning set for tree
+     * @param treeId id of tree ProjectedEarning set for
+     * @param planterAmount planter amount
+     * @param ambassadorAmount ambassador amount
      */
-    function totalBalances()
-        external
-        view
-        returns (
-            uint256 planter,
-            uint256 ambassador,
-            uint256 localDevelopment
-        );
+    event ProjectedEarningUpdated(
+        uint256 treeId,
+        uint256 planterAmount,
+        uint256 ambassadorAmount
+    );
 
-    /**
-     * @return treeToPlanterProjectedEarning of {_treeId}
-     */
-    function treeToPlanterProjectedEarning(uint256 _treeId)
-        external
-        view
-        returns (uint256);
-
-    /**
-     * @return treeToAmbassadorProjectedEarning of {_treeId}
-     */
-    function treeToAmbassadorProjectedEarning(uint256 _treeId)
-        external
-        view
-        returns (uint256);
-
-    /**
-     * @return treeToPlanterTotalClaimed of {_treeId}
-     */
-    function treeToPlanterTotalClaimed(uint256 _treeId)
-        external
-        view
-        returns (uint256);
-
-    /**
-     * @return balance of {_planter}
-     */
-    function balances(address _planter) external view returns (uint256);
+    /** @dev emitted when minimum withdrable amount set */
+    event MinWithdrawableAmountUpdated();
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -121,39 +90,57 @@ interface IPlanterFund {
      */
     function withdrawBalance(uint256 _amount) external;
 
-    /**
-     * @dev emitted when planter total claimable amount updated
-     * @param treeId id of tree that planter total claimable amount updated for
-     * @param planter address of planter
-     * @param amount amount added to planter total claimable amount
-     * @param ambassador address of ambassador
-     */
-    event PlanterTotalClaimedUpdated(
-        uint256 treeId,
-        address planter,
-        uint256 amount,
-        address ambassador
-    );
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when a planter withdraw
-     * @param amount amount of withdraw
-     * @param account address of planter
+     * @return true in case of PlanterFund contract has been initialized
      */
-    event BalanceWithdrew(uint256 amount, address account);
+    function isPlanterFund() external view returns (bool);
+
+    /** @return minimum amount to withdraw */
+    function minWithdrawable() external view returns (uint256);
 
     /**
-     * @dev emitted when ProjectedEarning set for tree
-     * @param treeId id of tree ProjectedEarning set for
-     * @param planterAmount planter amount
-     * @param ambassadorAmount ambassador amount
+     * @dev return totalBalances struct data
+     * @return planter total balance
+     * @return ambassador total balance
+     * @return localDevelopment total balance
      */
-    event ProjectedEarningUpdated(
-        uint256 treeId,
-        uint256 planterAmount,
-        uint256 ambassadorAmount
-    );
+    function totalBalances()
+        external
+        view
+        returns (
+            uint256 planter,
+            uint256 ambassador,
+            uint256 localDevelopment
+        );
 
-    /** @dev emitted when minimum withdrable amount set */
-    event MinWithdrawableAmountUpdated();
+    /**
+     * @return treeToPlanterProjectedEarning of {_treeId}
+     */
+    function treeToPlanterProjectedEarning(uint256 _treeId)
+        external
+        view
+        returns (uint256);
+
+    /**
+     * @return treeToAmbassadorProjectedEarning of {_treeId}
+     */
+    function treeToAmbassadorProjectedEarning(uint256 _treeId)
+        external
+        view
+        returns (uint256);
+
+    /**
+     * @return treeToPlanterTotalClaimed of {_treeId}
+     */
+    function treeToPlanterTotalClaimed(uint256 _treeId)
+        external
+        view
+        returns (uint256);
+
+    /**
+     * @return balance of {_planter}
+     */
+    function balances(address _planter) external view returns (uint256);
 }

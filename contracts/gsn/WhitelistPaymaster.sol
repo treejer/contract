@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
+
 pragma abicoder v2;
 
 import "./../external/gsn/forwarder/IForwarder.sol";
@@ -8,9 +9,11 @@ import "./../external/gsn/BasePaymaster.sol";
 
 import "../access/IAccessRestriction.sol";
 
-contract WhitelistPaymaster is BasePaymaster {
-    mapping(address => bool) public funderTargetWhitelist;
-    mapping(address => bool) public planterTargetWhitelist;
+import "./IWhitelistPaymaster.sol";
+
+contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
+    mapping(address => bool) public override funderTargetWhitelist;
+    mapping(address => bool) public override planterTargetWhitelist;
 
     //related contracts
     IAccessRestriction public accessRestriction;
@@ -37,13 +40,18 @@ contract WhitelistPaymaster is BasePaymaster {
 
     function addPlanterWhitelistTarget(address _target)
         external
+        override
         onlyAdmin
         validAddress(_target)
     {
         planterTargetWhitelist[_target] = true;
     }
 
-    function removePlanterWhitelistTarget(address _target) external onlyAdmin {
+    function removePlanterWhitelistTarget(address _target)
+        external
+        override
+        onlyAdmin
+    {
         require(
             planterTargetWhitelist[_target],
             "Target not exists in white list"
@@ -54,13 +62,18 @@ contract WhitelistPaymaster is BasePaymaster {
 
     function addFunderWhitelistTarget(address _target)
         external
+        override
         onlyAdmin
         validAddress(_target)
     {
         funderTargetWhitelist[_target] = true;
     }
 
-    function removeFunderWhitelistTarget(address _target) external onlyAdmin {
+    function removeFunderWhitelistTarget(address _target)
+        external
+        override
+        onlyAdmin
+    {
         require(
             funderTargetWhitelist[_target],
             "Target not exists in white list"

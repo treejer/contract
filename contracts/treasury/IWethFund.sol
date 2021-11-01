@@ -5,90 +5,102 @@ pragma solidity ^0.8.6;
 /** @title WethFund interfce */
 interface IWethFund {
     /**
-     * @return true in case of WethFund contract has been initialized
+     * @dev emitted when admin withdraw research balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function isWethFund() external view returns (bool);
+    event ResearchBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return AccessRestriction contract address
+     * @dev emitted when admin withdraw localDevelopment balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function accessRestriction() external view returns (address);
+    event LocalDevelopmentBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return PlanterFund contract address
+     * @dev emitted when admin withdraw insurance balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function planterFundContract() external view returns (address);
+    event InsuranceBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return WethToken contract address
+     * @dev emitted when admin withdraw treasury balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function wethToken() external view returns (address);
+    event TreasuryBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return UniswapRouter contract address
+     * @dev emitted when admin withdraw reserve1 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function uniswapRouter() external view returns (address);
+    event Reserve1BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return DaiToken address
+     * @dev emitted when admin withdraw reserve2 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function daiAddress() external view returns (address);
+    event Reserve2BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return totalDaiDebtToPlanterContract
+     * @dev emitted when a tree funded
+     * @param treeId id of tree that is funded
+     * @param amount total amount
+     * @param planterPart sum of planter amount and ambassador amount
      */
-    function totalDaiDebtToPlanterContract() external view returns (uint256);
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
     /**
-     * @dev return totalBalances struct data
-     * @return research share
-     * @return localDevelopment share
-     * @return insurance share
-     * @return treasury share
-     * @return reserve1 share
-     * @return reserve2 share
+     * @dev emitted when trees are fund in batches
      */
-    function totalBalances()
-        external
-        view
-        returns (
-            uint256 research,
-            uint256 localDevelopment,
-            uint256 insurance,
-            uint256 treasury,
-            uint256 reserve1,
-            uint256 reserve2
-        );
+    event TreeFundedBatch();
 
     /**
-     * @return research address
+     * @dev emitted when dai debt to Planter contract paid
+     * @param wethMaxUse maximum weth to use
+     * @param daiAmount dai amount to swap
+     * @param wethAmount weth amount used
      */
-    function researchAddress() external view returns (address);
 
-    /**
-     * @return localDevelopment address
-     */
-    function localDevelopmentAddress() external view returns (address);
-
-    /**
-     * @return insurance address
-     */
-    function insuranceAddress() external view returns (address);
-
-    /**
-     * @return treasury address
-     */
-    function treasuryAddress() external view returns (address);
-
-    /**
-     * @return reserve1 address
-     */
-    function reserve1Address() external view returns (address);
-
-    /**
-     * @return reserve2 address
-     */
-    function reserve2Address() external view returns (address);
+    event DaiDebtToPlanterContractPaid(
+        uint256 wethMaxUse,
+        uint256 daiAmount,
+        uint256 wethAmount
+    );
 
     /** @dev set {_address} to DaiToken address */
     function setDaiAddress(address _daiAddress) external;
@@ -265,101 +277,71 @@ interface IWethFund {
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external;
 
-    /**
-     * @dev emitted when admin withdraw research balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event ResearchBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when admin withdraw localDevelopment balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @return true in case of WethFund contract has been initialized
      */
-    event LocalDevelopmentBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function isWethFund() external view returns (bool);
 
     /**
-     * @dev emitted when admin withdraw insurance balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @return DaiToken address
      */
-    event InsuranceBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function daiAddress() external view returns (address);
 
     /**
-     * @dev emitted when admin withdraw treasury balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @return totalDaiDebtToPlanterContract
      */
-    event TreasuryBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function totalDaiDebtToPlanterContract() external view returns (uint256);
 
     /**
-     * @dev emitted when admin withdraw reserve1 balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @dev return totalBalances struct data
+     * @return research share
+     * @return localDevelopment share
+     * @return insurance share
+     * @return treasury share
+     * @return reserve1 share
+     * @return reserve2 share
      */
-    event Reserve1BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function totalBalances()
+        external
+        view
+        returns (
+            uint256 research,
+            uint256 localDevelopment,
+            uint256 insurance,
+            uint256 treasury,
+            uint256 reserve1,
+            uint256 reserve2
+        );
 
     /**
-     * @dev emitted when admin withdraw reserve2 balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @return research address
      */
-    event Reserve2BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function researchAddress() external view returns (address);
 
     /**
-     * @dev emitted when a tree funded
-     * @param treeId id of tree that is funded
-     * @param amount total amount
-     * @param planterPart sum of planter amount and ambassador amount
+     * @return localDevelopment address
      */
-    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+    function localDevelopmentAddress() external view returns (address);
 
     /**
-     * @dev emitted when trees are fund in batches
+     * @return insurance address
      */
-    event TreeFundedBatch();
+    function insuranceAddress() external view returns (address);
 
     /**
-     * @dev emitted when dai debt to Planter contract paid
-     * @param wethMaxUse maximum weth to use
-     * @param daiAmount dai amount to swap
-     * @param wethAmount weth amount used
+     * @return treasury address
      */
+    function treasuryAddress() external view returns (address);
 
-    event DaiDebtToPlanterContractPaid(
-        uint256 wethMaxUse,
-        uint256 daiAmount,
-        uint256 wethAmount
-    );
+    /**
+     * @return reserve1 address
+     */
+    function reserve1Address() external view returns (address);
+
+    /**
+     * @return reserve2 address
+     */
+    function reserve2Address() external view returns (address);
 }

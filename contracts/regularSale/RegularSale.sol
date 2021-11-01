@@ -12,30 +12,10 @@ import "../treasury/IAllocation.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IPlanterFund.sol";
 import "../treasury/IWethFund.sol";
+import "./IRegularSale.sol";
 
 /** @title RegularSale contract */
-contract RegularSale is Initializable, RelayRecipient {
-    uint256 public lastFundedTreeId;
-    uint256 public price;
-    uint256 public maxTreeSupply;
-
-    /** NOTE {isRegularSale} set inside the initialize to {true} */
-    bool public isRegularSale;
-
-    /** NOTE referralTreePaymentToPlanter amount */
-    uint256 public referralTreePaymentToPlanter;
-
-    /** NOTE referralTreePaymentToAmbassador amount */
-    uint256 public referralTreePaymentToAmbassador;
-    /** NOTE referralTriggerCount   */
-    uint256 public referralTriggerCount;
-    /** NOTE mapping of referrer address to claimableTreesWeth */
-    mapping(address => uint256) public referrerClaimableTreesWeth;
-    /** NOTE mapping of referrer address to claimableTreesDai */
-    mapping(address => uint256) public referrerClaimableTreesDai;
-    /** NOTE mapping of referrer address to referrerCount */
-    mapping(address => uint256) public referrerCount;
-
+contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     struct TotalBalances {
         uint256 planter;
         uint256 ambassador;
@@ -47,6 +27,27 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 reserve2;
     }
 
+    uint256 public override lastFundedTreeId;
+    uint256 public override price;
+    uint256 public override maxTreeSupply;
+
+    /** NOTE {isRegularSale} set inside the initialize to {true} */
+    bool public override isRegularSale;
+
+    /** NOTE referralTreePaymentToPlanter amount */
+    uint256 public override referralTreePaymentToPlanter;
+
+    /** NOTE referralTreePaymentToAmbassador amount */
+    uint256 public override referralTreePaymentToAmbassador;
+    /** NOTE referralTriggerCount   */
+    uint256 public override referralTriggerCount;
+    /** NOTE mapping of referrer address to claimableTreesWeth */
+    mapping(address => uint256) public override referrerClaimableTreesWeth;
+    /** NOTE mapping of referrer address to claimableTreesDai */
+    mapping(address => uint256) public override referrerClaimableTreesDai;
+    /** NOTE mapping of referrer address to referrerCount */
+    mapping(address => uint256) public override referrerCount;
+
     IAccessRestriction public accessRestriction;
     ITreeFactory public treeFactory;
     IAttribute public attribute;
@@ -55,36 +56,6 @@ contract RegularSale is Initializable, RelayRecipient {
     IERC20Upgradeable public daiToken;
     IPlanterFund public planterFundContract;
     IWethFund public wethFund;
-
-    event PriceUpdated(uint256 price);
-    event TreeFunded(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 count,
-        uint256 amount
-    );
-    event RegularMint(address recipient, uint256 treeId, uint256 price);
-    event TreeFundedById(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 treeId,
-        uint256 amount
-    );
-    event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
-    event MaxTreeSupplyUpdated(uint256 maxTreeSupply);
-    event ReferralTriggerCountUpdated(uint256 count);
-    event ReferralTreePaymentsUpdated(
-        uint256 referralTreePaymentToPlanter,
-        uint256 referralTreePaymentToAmbassador
-    );
-
-    event ReferralRewardClaimed(
-        address referrer,
-        uint256 count,
-        uint256 amount
-    );
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -124,6 +95,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress, uint256 _price)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -151,6 +123,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -160,7 +133,11 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set TreeFactory contract address
      * @param _address set to the address of TreeFactory contract
      */
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
+    function setTreeFactoryAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         ITreeFactory candidateContract = ITreeFactory(_address);
 
         require(candidateContract.isTreeFactory());
@@ -171,7 +148,7 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set DaiFund contract address
      * @param _address set to the address of DaiFund contract
      */
-    function setDaiFundAddress(address _address) external onlyAdmin {
+    function setDaiFundAddress(address _address) external override onlyAdmin {
         IDaiFund candidateContract = IDaiFund(_address);
 
         require(candidateContract.isDaiFund());
@@ -181,6 +158,7 @@ contract RegularSale is Initializable, RelayRecipient {
 
     function setDaiTokenAddress(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -192,7 +170,11 @@ contract RegularSale is Initializable, RelayRecipient {
      * @dev admin set Allocation contract address
      * @param _address set to the address of Allocation contract
      */
-    function setAllocationAddress(address _address) external onlyAdmin {
+    function setAllocationAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAllocation candidateContract = IAllocation(_address);
         require(candidateContract.isAllocation());
         allocation = candidateContract;
@@ -201,7 +183,11 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set PlanterFund contract address
      * @param _address set to the address of PlanterFund contract
      */
-    function setPlanterFundAddress(address _address) external onlyAdmin {
+    function setPlanterFundAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanterFund candidateContract = IPlanterFund(_address);
 
         require(candidateContract.isPlanterFund());
@@ -212,7 +198,7 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set WethFund contract address
      * @param _address set to the address of WethFund contract
      */
-    function setWethFundAddress(address _address) external onlyAdmin {
+    function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
 
         require(candidateContract.isWethFund());
@@ -225,7 +211,11 @@ contract RegularSale is Initializable, RelayRecipient {
      * @param _address set to the address of Attribute contract
      */
 
-    function setAttributesAddress(address _address) external onlyAdmin {
+    function setAttributesAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAttribute candidateContract = IAttribute(_address);
         require(candidateContract.isAttribute());
         attribute = candidateContract;
@@ -236,7 +226,12 @@ contract RegularSale is Initializable, RelayRecipient {
     /** @dev admin set the price of trees
      * @param _price price of tree
      */
-    function updatePrice(uint256 _price) external ifNotPaused onlyDataManager {
+    function updatePrice(uint256 _price)
+        external
+        override
+        ifNotPaused
+        onlyDataManager
+    {
         price = _price;
         emit PriceUpdated(_price);
     }
@@ -247,6 +242,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -265,6 +261,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateMaxTreeSupply(uint256 _maxTreeSupply)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -290,7 +287,7 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 _count,
         address _referrer,
         address _recipient
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         require(lastFundedTreeId + _count <= maxTreeSupply, "max supply");
 
         require(_count > 0 && _count < 101, "invalid count");
@@ -394,7 +391,7 @@ contract RegularSale is Initializable, RelayRecipient {
         uint256 _treeId,
         address _referrer,
         address _recipient
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         require(_treeId <= maxTreeSupply, "max supply");
 
         require(_treeId > lastFundedTreeId, "invalid tree");
@@ -461,7 +458,7 @@ contract RegularSale is Initializable, RelayRecipient {
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         referralTreePaymentToPlanter = _referralTreePaymentToPlanter;
         referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
 
@@ -477,6 +474,7 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateReferralTriggerCount(uint256 _count)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -491,36 +489,17 @@ contract RegularSale is Initializable, RelayRecipient {
      */
     function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external
+        override
         onlyTreejerContract
     {
         referrerClaimableTreesWeth[_referrer] += _count;
     }
 
     /**
-     * @dev update referrerCount and calculate referrerClaimableTreesDai based on
-     * referrerCount and referralTriggerCount
-     * @param _referrer address of referrer
-     * @param _count added number to referrerCount of referrer
-     */
-    function _calculateReferrerCount(address _referrer, uint256 _count)
-        private
-    {
-        uint256 tempReferrerCount = referrerCount[_referrer] + _count;
-
-        if (tempReferrerCount >= referralTriggerCount) {
-            uint256 toClaimCount = tempReferrerCount / referralTriggerCount;
-            tempReferrerCount -= toClaimCount * referralTriggerCount;
-            referrerClaimableTreesDai[_referrer] += toClaimCount;
-        }
-
-        referrerCount[_referrer] = tempReferrerCount;
-    }
-
-    /**
      * @dev referrer claim rewards and trees mint to the referral
      * NOTE referrer can claim up to 45 trees in each request
      */
-    function claimReferralReward() external ifNotPaused {
+    function claimReferralReward() external override ifNotPaused {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
 
@@ -576,6 +555,26 @@ contract RegularSale is Initializable, RelayRecipient {
         );
 
         _mintReferralReward(claimableTreesCount, _msgSender());
+    }
+
+    /**
+     * @dev update referrerCount and calculate referrerClaimableTreesDai based on
+     * referrerCount and referralTriggerCount
+     * @param _referrer address of referrer
+     * @param _count added number to referrerCount of referrer
+     */
+    function _calculateReferrerCount(address _referrer, uint256 _count)
+        private
+    {
+        uint256 tempReferrerCount = referrerCount[_referrer] + _count;
+
+        if (tempReferrerCount >= referralTriggerCount) {
+            uint256 toClaimCount = tempReferrerCount / referralTriggerCount;
+            tempReferrerCount -= toClaimCount * referralTriggerCount;
+            referrerClaimableTreesDai[_referrer] += toClaimCount;
+        }
+
+        referrerCount[_referrer] = tempReferrerCount;
     }
 
     /**

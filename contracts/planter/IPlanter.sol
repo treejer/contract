@@ -3,53 +3,29 @@
 pragma solidity ^0.8.6;
 
 interface IPlanter {
-    /**
-     * @return true in case of Planter contract has been initialized
-     */
-    function isPlanter() external view returns (bool);
+    /** @dev emitted when a planter join with address {planter} */
+    event PlanterJoined(address planter);
+
+    /** @dev emitted when an organization join with address {organization} */
+    event OrganizationJoined(address organization);
+
+    /** @dev emitted when a planters data updated (supplyCap , planterType) */
+    event PlanterUpdated(address planter);
 
     /**
-     * @return AccessRestriction contract address
+     * @dev emitted when a planter with address {planter} is
+     * accepted by organization
      */
-    function accessRestriction() external view returns (address);
+    event AcceptedByOrganization(address planter);
 
     /**
-     * @dev return planter data
-     * @param _planter planter address to get data
-     * @return planterType
-     * @return status
-     * @return countryCode
-     * @return score
-     * @return supplyCap
-     * @return plantedCount
-     * @return longitude
-     * @return latitude
+     * @dev emitted when a planter with address {planter} is
+     * rejected by organization
      */
-    function planters(address _planter)
-        external
-        view
-        returns (
-            uint8 planterType,
-            uint8 status,
-            uint16 countryCode,
-            uint32 score,
-            uint32 supplyCap,
-            uint32 plantedCount,
-            uint64 longitude,
-            uint64 latitude
-        );
+    event RejectedByOrganization(address planter);
 
-    /** @return referrer address of {_planter} */
-    function invitedBy(address _planter) external view returns (address);
-
-    /** @return organization address of {_planter} */
-    function memberOf(address _planter) external view returns (address);
-
-    /** @return share of {_planter} in {_organization} */
-    function organizationMemberShare(address _organization, address _planter)
-        external
-        view
-        returns (uint256);
+    /** @dev emited when a planter with address {planter} payment portion updated */
+    event OrganizationMemberShareUpdated(address planter);
 
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
@@ -180,6 +156,67 @@ interface IPlanter {
     ) external;
 
     /**
+     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
+     * must reduce by 1 and if planter status is full, set it to active.
+     * @param _planter address of planter
+     */
+    function reducePlantedCount(address _planter) external;
+
+    /**
+     * @dev check that planter {_planter} can plant regular tree
+     * NOTE if plantedCount reach to supplyCap status of planter
+     * set to full (value of full is '2')
+     * @param _planter address of planter
+     * @return true in case of planter status is active (value of active is '1')
+     */
+    function manageTreePermission(address _planter) external returns (bool);
+
+    function initialize(address _accessRestrictionAddress) external;
+
+    /**
+     * @return true in case of Planter contract has been initialized
+     */
+    function isPlanter() external view returns (bool);
+
+    /**
+     * @dev return planter data
+     * @param _planter planter address to get data
+     * @return planterType
+     * @return status
+     * @return countryCode
+     * @return score
+     * @return supplyCap
+     * @return plantedCount
+     * @return longitude
+     * @return latitude
+     */
+    function planters(address _planter)
+        external
+        view
+        returns (
+            uint8 planterType,
+            uint8 status,
+            uint16 countryCode,
+            uint32 score,
+            uint32 supplyCap,
+            uint32 plantedCount,
+            uint64 longitude,
+            uint64 latitude
+        );
+
+    /** @return referrer address of {_planter} */
+    function invitedBy(address _planter) external view returns (address);
+
+    /** @return organization address of {_planter} */
+    function memberOf(address _planter) external view returns (address);
+
+    /** @return share of {_planter} in {_organization} */
+    function organizationMemberShare(address _organization, address _planter)
+        external
+        view
+        returns (uint256);
+
+    /**
      * @dev return organization member data
      * @param _planter address of organization member planter to get data
      * @return true in case of valid planter
@@ -198,49 +235,9 @@ interface IPlanter {
         );
 
     /**
-     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
-     * must reduce by 1 and if planter status is full, set it to active.
-     * @param _planter address of planter
-     */
-    function reducePlantedCount(address _planter) external;
-
-    /**
-     * @dev check that planter {_planter} can plant regular tree
-     * NOTE if plantedCount reach to supplyCap status of planter
-     * set to full (value of full is '2')
-     * @param _planter address of planter
-     * @return true in case of planter status is active (value of active is '1')
-     */
-    function manageTreePermission(address _planter) external returns (bool);
-
-    /**
      * @dev check allowance to assign tree to planter
      * @param _planter address of assignee planter
      * @return true in case of active planter or orgnization planter and false otherwise
      */
     function canAssignTree(address _planter) external view returns (bool);
-
-    /** @dev emitted when a planter join with address {planter} */
-    event PlanterJoined(address planter);
-
-    /** @dev emitted when an organization join with address {organization} */
-    event OrganizationJoined(address organization);
-
-    /** @dev emitted when a planters data updated (supplyCap , planterType) */
-    event PlanterUpdated(address planter);
-
-    /**
-     * @dev emitted when a planter with address {planter} is
-     * accepted by organization
-     */
-    event AcceptedByOrganization(address planter);
-
-    /**
-     * @dev emitted when a planter with address {planter} is
-     * rejected by organization
-     */
-    event RejectedByOrganization(address planter);
-
-    /** @dev emited when a planter with address {planter} payment portion updated */
-    event OrganizationMemberShareUpdated(address planter);
 }

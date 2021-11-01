@@ -9,54 +9,42 @@ import "../tree/ITreeFactory.sol";
 import "../tree/IAttribute.sol";
 import "../treasury/IPlanterFund.sol";
 import "../gsn/RelayRecipient.sol";
+import "./IHonoraryTree.sol";
 
 /** @title HonoraryTree */
 
-contract HonoraryTree is Initializable, RelayRecipient {
-    IAccessRestriction public accessRestriction;
-    ITreeFactory public treeFactory;
-    IPlanterFund public planterFundContract;
-    IAttribute public attribute;
-    IERC20Upgradeable public daiToken;
-
+contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
     struct Recipient {
         uint64 expiryDate;
         uint64 startDate;
         uint64 status;
     }
-    /** NOTE mapping of recipient address to Recipient struct */
-    mapping(address => Recipient) public recipients;
-    /** NOTE array of symbols */
-    uint64[] public symbols;
-    /** array of bool to show a symbol is used or not*/
-    bool[] public used;
 
     /** NOTE {isHonoraryTree} set inside the initialize to {true} */
-    bool public isHonoraryTree;
+    bool public override isHonoraryTree;
 
-    uint256 public claimedCount;
-    uint256 public currentTreeId;
-    uint256 public upTo;
-    uint256 public prePaidTreeCount;
+    uint256 public override claimedCount;
+    uint256 public override currentTreeId;
+    uint256 public override upTo;
+    uint256 public override prePaidTreeCount;
 
     /**NOTE {referralTreePaymentToPlanter} is share of plater when a tree claimed for someone*/
-    uint256 public referralTreePaymentToPlanter;
+    uint256 public override referralTreePaymentToPlanter;
     /**NOTE {referralTreePaymentToAmbassador} is share of ambassador when a tree claimed for someone*/
-    uint256 public referralTreePaymentToAmbassador;
+    uint256 public override referralTreePaymentToAmbassador;
 
-    event TreeRangeSet();
-    event TreeRangeReleased();
+    /** NOTE mapping of recipient address to Recipient struct */
+    mapping(address => Recipient) public override recipients;
+    /** NOTE array of symbols */
+    uint64[] public override symbols;
+    /** array of bool to show a symbol is used or not*/
+    bool[] public override used;
 
-    event RecipientUpdated(address recipient);
-    event RecipientAdded(address recipient);
-
-    event ReferralTreePaymentsUpdated(
-        uint256 referralTreePaymentToPlanter,
-        uint256 referralTreePaymentToAmbassador
-    );
-
-    event Claimed(uint256 treeId);
-    event ClaimFailed(address recipient);
+    IAccessRestriction public accessRestriction;
+    ITreeFactory public treeFactory;
+    IPlanterFund public planterFundContract;
+    IAttribute public attribute;
+    IERC20Upgradeable public daiToken;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -93,7 +81,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _accessRestrictionAddress,
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
-    ) external initializer {
+    ) external override initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -111,6 +99,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
 
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -123,6 +112,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      */
     function setDaiTokenAddress(address _daiTokenAddress)
         external
+        override
         onlyAdmin
         validAddress(_daiTokenAddress)
     {
@@ -137,7 +127,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @param _address set to the address of Attribute contract
      */
 
-    function setAttributesAddress(address _address) external onlyAdmin {
+    function setAttributesAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAttribute candidateContract = IAttribute(_address);
         require(candidateContract.isAttribute());
         attribute = candidateContract;
@@ -148,7 +142,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @param _address set to the address of TreeFactory contract
      */
 
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
+    function setTreeFactoryAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
@@ -159,7 +157,11 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @param _address set to the address of PlanterFund contract
      */
 
-    function setPlanterFundAddress(address _address) external onlyAdmin {
+    function setPlanterFundAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanterFund candidateContract = IPlanterFund(_address);
         require(candidateContract.isPlanterFund());
         planterFundContract = candidateContract;
@@ -178,7 +180,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _sponsor,
         uint256 _startTreeId,
         uint256 _upTo
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(_upTo > _startTreeId, "invalid range");
         require(upTo == currentTreeId, "cant set gift range");
 
@@ -220,7 +222,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * NOTE calculate prePaidCount value to deducte from number of tree count
      * when new tree range set
      */
-    function releaseTreeRange() external ifNotPaused onlyDataManager {
+    function releaseTreeRange() external override ifNotPaused onlyDataManager {
         treeFactory.resetSaleTypeBatch(currentTreeId, upTo, 5);
         prePaidTreeCount += upTo - currentTreeId;
         upTo = 0;
@@ -234,6 +236,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      */
     function reserveSymbol(uint64 _uniquenessFactor)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -245,7 +248,12 @@ contract HonoraryTree is Initializable, RelayRecipient {
     /**
      * @dev admin release all reserved and not used symbols
      */
-    function releaseReservedSymbol() external ifNotPaused onlyDataManager {
+    function releaseReservedSymbol()
+        external
+        override
+        ifNotPaused
+        onlyDataManager
+    {
         for (uint256 i = 0; i < symbols.length; i++) {
             if (!used[i]) {
                 attribute.releaseReservedSymbol(symbols[i]);
@@ -267,7 +275,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _recipient,
         uint64 _startDate,
         uint64 _expiryDate
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
         recipientData.expiryDate = _expiryDate;
@@ -287,7 +295,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
         address _recipient,
         uint64 _startDate,
         uint64 _expiryDate
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
         require(recipientData.status == 1, "Status must be one");
@@ -304,7 +312,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         referralTreePaymentToPlanter = _referralTreePaymentToPlanter;
         referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
 
@@ -318,7 +326,7 @@ contract HonoraryTree is Initializable, RelayRecipient {
      * @dev recipient claim a tree and tree minted to recipient.
      * projected earnings updated and random attributes set for that tree
      */
-    function claim() external ifNotPaused {
+    function claim() external override ifNotPaused {
         Recipient storage recipientData = recipients[_msgSender()];
         require(
             recipientData.expiryDate > block.timestamp &&

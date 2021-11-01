@@ -6,34 +6,36 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITree.sol";
+import "./IAttribute.sol";
 
 /** @title Attribute Contract */
-contract Attribute is Initializable {
+contract Attribute is Initializable, IAttribute {
     using SafeCastUpgradeable for uint256;
-
-    bool public isAttribute;
-    IAccessRestriction public accessRestriction;
-    ITree public treeToken;
-
-    /** NOTE parameters of randomTreeGeneration*/
 
     struct SymbolStatus {
         uint128 generatedCount;
         uint128 status; // 0 free, 1 reserved , 2 set, 3 setByAdmin
     }
 
-    uint8 public specialTreeCount;
+    /** NOTE {isAttribute} set inside the initialize to {true} */
+    bool public override isAttribute;
 
-    /** NOTE mapping from unique attributes id to number of generations */
-    mapping(uint64 => uint32) public uniquenessFactorToGeneratedAttributesCount;
+    /** NOTE total number of special tree created */
+    uint8 public override specialTreeCount;
 
-    /** NOTE mapping from unique symbol id to number of generations  */
-    mapping(uint64 => SymbolStatus) public uniquenessFactorToSymbolStatus;
+    IAccessRestriction public accessRestriction;
+    ITree public treeToken;
 
-    event AttributeGenerated(uint256 treeId);
-    event AttributeGenerationFailed(uint256 treeId);
-    event SymbolReserved(uint64 uniquenessFactor);
-    event ReservedSymbolReleased(uint64 uniquenessFactor);
+    /** NOTE mapping from generated attributes to count of generations */
+    mapping(uint64 => uint32)
+        public
+        override uniquenessFactorToGeneratedAttributesCount;
+
+    /** NOTE mapping from unique symbol id to SymbolStatus struct */
+    mapping(uint64 => SymbolStatus)
+        public
+        override uniquenessFactorToSymbolStatus;
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(msg.sender);
@@ -65,11 +67,13 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev initialize accessRestriction contract and set true for isAttribute
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @dev initialize AccessRestriction contract and set true for isAttribute and
+     * specialTreeCount to 0
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -85,7 +89,7 @@ contract Attribute is Initializable {
      * @dev admin set TreeToken contract address
      * @param _address set to the address of TreeToken contract
      */
-    function setTreeTokenAddress(address _address) external onlyAdmin {
+    function setTreeTokenAddress(address _address) external override onlyAdmin {
         ITree candidateContract = ITree(_address);
 
         require(candidateContract.isTree());
@@ -99,6 +103,7 @@ contract Attribute is Initializable {
      */
     function reserveSymbol(uint64 _uniquenessFactor)
         external
+        override
         ifNotPaused
         onlyDataManagerOrTreejerContract
     {
@@ -112,12 +117,12 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev free reservation of a unique symbol
-     * @param _uniquenessFactor unique symbol to reserve
+     * @dev release reservation of a unique symbol by admin
+     * @param _uniquenessFactor unique symbol to release reservation
      */
-
     function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -132,11 +137,12 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev free reservation of a unique symbol
-     * @param _uniquenessFactor unique symbol to reserve
+     * @dev release reservation of a unique symbol
+     * @param _uniquenessFactor unique symbol to release reservation
      */
     function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
+        override
         onlyTreejerContract
     {
         if (uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1) {
@@ -146,16 +152,18 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev admin assigns symbol to specified treeId
+     * @dev admin assigns symbol and attribute to the specified treeId
      * @param _treeId id of tree
-     * @param _attributeUniquenessFactor unique symbol code to assign
+     * @param _attributeUniquenessFactor unique attribute code to assign
+     * @param _symbolUniquenessFactor unique symbol to assign
+     * @param _generationType type of attribute assignement
      */
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
         uint8 _generationType
-    ) external ifNotPaused onlyDataManagerOrTreejerContract {
+    ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
             "the symbol is taken"
@@ -182,10 +190,13 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev generate a 256 bits random number as a base for attributes and slice it
-     * in 28 bits parts
+     * @dev generate a random unique symbol using tree attributes 64 bit value
      * @param _treeId id of tree
-     * @return if unique attribute generated successfully
+     * @param _randomValue base random value
+     * @param _funder address of funder
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @param _generationType type of attribute assignement
+     * @return if unique symbol generated successfully
      */
     function createSymbol(
         uint256 _treeId,
@@ -193,7 +204,7 @@ contract Attribute is Initializable {
         address _funder,
         uint8 _funderRank,
         uint8 _generationType
-    ) external onlyTreejerContract returns (bool) {
+    ) external override onlyTreejerContract returns (bool) {
         if (!treeToken.attributeExists(_treeId)) {
             bool flag = false;
             uint64 tempRandomValue;
@@ -243,8 +254,14 @@ contract Attribute is Initializable {
         }
     }
 
+    /**
+     * @dev generate a random unique attribute using tree attributes 64 bit value
+     * @param _treeId id of tree
+     * @return if unique attribute generated successfully
+     */
     function createAttribute(uint256 _treeId)
         external
+        override
         onlyTreejerContract
         returns (bool)
     {
@@ -271,10 +288,16 @@ contract Attribute is Initializable {
         }
     }
 
+    /**
+     * @dev check and generate random attributes for honorary trees
+     * @param _treeId id of tree
+     * @param _uniquenessFactor random to check existance
+     * @return a unique random value
+     */
     function manageAttributeUniquenessFactor(
         uint256 _treeId,
         uint64 _uniquenessFactor
-    ) external onlyTreejerContract returns (uint64) {
+    ) external override onlyTreejerContract returns (uint64) {
         if (
             uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] == 0
         ) {
@@ -294,11 +317,15 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev the function Tries to Calculate the rank of buyer based on transaction statistics of
-     * his/her wallet
+     * @dev the function tries to calculate the rank of funder based trees owned in Treejer
      * @param _funder address of funder
      */
-    function getFunderRank(address _funder) external view returns (uint8) {
+    function getFunderRank(address _funder)
+        external
+        view
+        override
+        returns (uint8)
+    {
         uint256 ownedTrees = treeToken.balanceOf(_funder);
 
         if (ownedTrees > 10000) {
@@ -312,6 +339,12 @@ contract Attribute is Initializable {
         return 0;
     }
 
+    /**
+     * @dev create a unique 64 bit random number
+     * @param _treeId id of tree
+     * @return true when uniquenessFactor is unique and false otherwise
+     * @return uniquenessFactor
+     */
     function _generateAttributeUniquenessFactor(uint256 _treeId)
         private
         returns (bool, uint64)
@@ -345,10 +378,12 @@ contract Attribute is Initializable {
     }
 
     /**
-     * @dev calculates the random attributes from random number
+     * @dev calculates the random symbol parameters
      * @param _treeId id of tree
-     * @param _randomValue a 28 bits random attribute generator number
-     * @return if generated random attribute is unique
+     * @param _randomValue base random value
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @param _generationType type of attribute assignement
+     * @return if generated random symbol is unique
      */
     function _generateUniquenessFactor(
         uint256 _treeId,
@@ -417,6 +452,12 @@ contract Attribute is Initializable {
         }
     }
 
+    /**
+     * @dev generate statistical shape based on {_randomValue} and {_funderRank}
+     * @param _randomValue base random value
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @return shape type id
+     */
     function _calcShape(uint16 _randomValue, uint8 _funderRank)
         private
         returns (uint8)
@@ -506,6 +547,15 @@ contract Attribute is Initializable {
         return shape;
     }
 
+    /**
+     * @dev generate statistical colors based on {_randomValue1} and {_randomValue2} and
+     * {_funderRank}
+     * @param _randomValue1 base random1 value
+     * @param _randomValue2 base random2 value
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @return trunk color id
+     * @return crown color id
+     */
     function _calcColors(
         uint8 _randomValue1,
         uint8 _randomValue2,
@@ -556,6 +606,12 @@ contract Attribute is Initializable {
         );
     }
 
+    /**
+     * @dev set trunk color and crown color id base on special shape
+     * @param _shape shape type id
+     * @return trunk color id
+     * @return crown color id
+     */
     function _setSpecialTreeColors(uint8 _shape)
         private
         pure
@@ -600,6 +656,12 @@ contract Attribute is Initializable {
         return (trunks[_shape - 128], crowns[_shape - 128]);
     }
 
+    /**
+     * @dev generate statistical effect based on {_randomValue} and {_funderRank}
+     * @param _randomValue base random value
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @return effect id
+     */
     function _calcEffects(uint8 _randomValue, uint8 _funderRank)
         private
         pure
@@ -699,6 +761,12 @@ contract Attribute is Initializable {
         return 0;
     }
 
+    /**
+     * @dev generate statistical coefficient value based on {_randomValue} and {_funderRank}
+     * @param _randomValue base random value
+     * @param _funderRank rank of funder based on trees owned in treejer
+     * @return coefficient value
+     */
     function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
         private
         pure

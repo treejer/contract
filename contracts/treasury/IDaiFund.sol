@@ -5,75 +5,85 @@ pragma solidity ^0.8.6;
 /** @title DaiFund interfce */
 interface IDaiFund {
     /**
-     * @return true in case of DaiFund contract has been initialized
+     * @dev emitted when admin withdraw research balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function isDaiFund() external view returns (bool);
+    event ResearchBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw localDevelopment balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
+     */
+    event LocalDevelopmentBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw insurance balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
+     */
+    event InsuranceBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw treasury balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
+     */
+    event TreasuryBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+    /**
+     * @dev emitted when admin withdraw reserve1 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
+     */
+    event Reserve1BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return AccessRestriction contract address
+     * @dev emitted when admin withdraw reserve2 balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
      */
-    function accessRestriction() external view returns (address);
+    event Reserve2BalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
 
     /**
-     * @return PlanterFund contract address
+     * @dev emitted when a tree funded
+     * @param treeId id of tree that is funded
+     * @param amount total amount
+     * @param planterPart sum of planter amount and ambassador amount
      */
-    function planterFundContract() external view returns (address);
+    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
 
     /**
-     * @return DaiToken contract address
+     * @dev emitted when trees are fund in batches
      */
-    function daiToken() external view returns (address);
-
-    /**
-     * @dev return totalBalances struct data
-     * @return research share
-     * @return localDevelopment share
-     * @return insurance share
-     * @return treasury share
-     * @return reserve1 share
-     * @return reserve2 share
-     */
-    function totalBalances()
-        external
-        view
-        returns (
-            uint256 research,
-            uint256 localDevelopment,
-            uint256 insurance,
-            uint256 treasury,
-            uint256 reserve1,
-            uint256 reserve2
-        );
-
-    /**
-     * @return research address
-     */
-    function researchAddress() external view returns (address);
-
-    /**
-     * @return localDevelopment address
-     */
-    function localDevelopmentAddress() external view returns (address);
-
-    /**
-     * @return insurance address
-     */
-    function insuranceAddress() external view returns (address);
-
-    /**
-     * @return treasury address
-     */
-    function treasuryAddress() external view returns (address);
-
-    /**
-     * @return reserve1 address
-     */
-    function reserve1Address() external view returns (address);
-
-    /**
-     * @return reserve2 address
-     */
-    function reserve2Address() external view returns (address);
+    event TreeFundedBatch();
 
     /** @dev set {_address} to DaiToken contract address */
     function setDaiTokenAddress(address _daiTokenAddress) external;
@@ -233,84 +243,61 @@ interface IDaiFund {
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external;
 
-    /**
-     * @dev emitted when admin withdraw research balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event ResearchBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    /**
-     * @dev emitted when admin withdraw localDevelopment balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event LocalDevelopmentBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    /**
-     * @dev emitted when admin withdraw insurance balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event InsuranceBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    /**
-     * @dev emitted when admin withdraw treasury balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event TreasuryBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    /**
-     * @dev emitted when admin withdraw reserve1 balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
-     */
-    event Reserve1BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when admin withdraw reserve2 balance
-     * @param amount amount to withdraw
-     * @param account address of destination account
-     * @param reason reason of withdraw
+     * @return true in case of DaiFund contract has been initialized
      */
-    event Reserve2BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    function isDaiFund() external view returns (bool);
 
     /**
-     * @dev emitted when a tree funded
-     * @param treeId id of tree that is funded
-     * @param amount total amount
-     * @param planterPart sum of planter amount and ambassador amount
+     * @dev return totalBalances struct data
+     * @return research share
+     * @return localDevelopment share
+     * @return insurance share
+     * @return treasury share
+     * @return reserve1 share
+     * @return reserve2 share
      */
-    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+    function totalBalances()
+        external
+        view
+        returns (
+            uint256 research,
+            uint256 localDevelopment,
+            uint256 insurance,
+            uint256 treasury,
+            uint256 reserve1,
+            uint256 reserve2
+        );
 
     /**
-     * @dev emitted when trees are fund in batches
+     * @return research address
      */
-    event TreeFundedBatch();
+    function researchAddress() external view returns (address);
+
+    /**
+     * @return localDevelopment address
+     */
+    function localDevelopmentAddress() external view returns (address);
+
+    /**
+     * @return insurance address
+     */
+    function insuranceAddress() external view returns (address);
+
+    /**
+     * @return treasury address
+     */
+    function treasuryAddress() external view returns (address);
+
+    /**
+     * @return reserve1 address
+     */
+    function reserve1Address() external view returns (address);
+
+    /**
+     * @return reserve2 address
+     */
+    function reserve2Address() external view returns (address);
 }

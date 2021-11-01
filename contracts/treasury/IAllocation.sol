@@ -5,19 +5,18 @@ pragma solidity ^0.8.6;
 /** @title Allocation interfce */
 interface IAllocation {
     /**
-     * @return true in case of Allocation contract has been initialized
+     * @dev emitted when a AllocationData added
+     * @param allocationDataId id of allocationData
      */
-    function isAllocation() external view returns (bool);
+
+    event AllocationDataAdded(uint256 allocationDataId);
 
     /**
-     * @return maxAssignedIndex
+     * @dev emitted when AllocationData assigned to a range of tree
+     * @param allocationToTreesLength length of allocationToTrees
      */
-    function maxAssignedIndex() external view returns (uint256);
 
-    /**
-     * @return AccessRestriction contract address
-     */
-    function accessRestriction() external view returns (address);
+    event AllocationToTreeAssigned(uint256 allocationToTreesLength);
 
     /** return allocationToTrees data (strating tree with specific allocation)
      * for example from startingId of allocationToTrees[0] to startingId of
@@ -29,33 +28,6 @@ interface IAllocation {
     function allocationToTrees(uint256 _index)
         external
         returns (uint256 startingTreeId, uint256 allocationDataId);
-
-    /** return allocations data
-     * @param _allocationDataId id of allocation to get data
-     * @return planterShare
-     * @return ambassadorShare
-     * @return researchShare
-     * @return localDevelopmentShare
-     * @return insuranceShare
-     * @return treasuryShare
-     * @return reserve1Share
-     * @return reserve2Share
-     * @return exists is true when there is a allocations for _allocationDataId
-     */
-    function allocations(uint256 _allocationDataId)
-        external
-        view
-        returns (
-            uint16 planterShare,
-            uint16 ambassadorShare,
-            uint16 researchShare,
-            uint16 localDevelopmentShare,
-            uint16 insuranceShare,
-            uint16 treasuryShare,
-            uint16 reserve1Share,
-            uint16 reserve2Share,
-            uint16 exists
-        );
 
     /**
      * @dev admin add a model for allocation data that sum of the
@@ -96,13 +68,6 @@ interface IAllocation {
     ) external;
 
     /**
-     * @dev check if there is allocation data for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a allocation data
-     * @return true if allocation data exists for {_treeId} and false otherwise
-     */
-    function exists(uint256 _treeId) external view returns (bool);
-
-    /**
      * @dev return allocation data
      * @param _treeId id of tree to find allocation data
      * @return planterShare
@@ -127,17 +92,49 @@ interface IAllocation {
             uint16 reserve2Share
         );
 
-    /**
-     * @dev emitted when a AllocationData added
-     * @param allocationDataId id of allocationData
-     */
-
-    event AllocationDataAdded(uint256 allocationDataId);
+    function initialize(address _accessRestrictionAddress) external;
 
     /**
-     * @dev emitted when AllocationData assigned to a range of tree
-     * @param allocationToTreesLength length of allocationToTrees
+     * @return true in case of Allocation contract has been initialized
      */
+    function isAllocation() external view returns (bool);
 
-    event AllocationToTreeAssigned(uint256 allocationToTreesLength);
+    /**
+     * @return maxAssignedIndex
+     */
+    function maxAssignedIndex() external view returns (uint256);
+
+    /** return allocations data
+     * @param _allocationDataId id of allocation to get data
+     * @return planterShare
+     * @return ambassadorShare
+     * @return researchShare
+     * @return localDevelopmentShare
+     * @return insuranceShare
+     * @return treasuryShare
+     * @return reserve1Share
+     * @return reserve2Share
+     * @return exists is true when there is a allocations for _allocationDataId
+     */
+    function allocations(uint256 _allocationDataId)
+        external
+        view
+        returns (
+            uint16 planterShare,
+            uint16 ambassadorShare,
+            uint16 researchShare,
+            uint16 localDevelopmentShare,
+            uint16 insuranceShare,
+            uint16 treasuryShare,
+            uint16 reserve1Share,
+            uint16 reserve2Share,
+            uint16 exists
+        );
+
+    /**
+     * @dev check if there is allocation data for {_treeId} or not
+     * @param _treeId id of a tree to check if there is a allocation data
+     * @return true if allocation data exists for {_treeId} and false otherwise
+     */
+    function exists(uint256 _treeId) external view returns (bool);
 }

@@ -7,15 +7,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
+import "./IPlanter.sol";
 
 /** @title Planter contract */
-contract Planter is Initializable, RelayRecipient {
+contract Planter is Initializable, RelayRecipient, IPlanter {
     using SafeCastUpgradeable for uint256;
-
-    /** NOTE {isPlanter} set inside the initialize to {true} */
-    bool public isPlanter;
-
-    IAccessRestriction public accessRestriction;
 
     struct PlanterData {
         uint8 planterType;
@@ -28,25 +24,24 @@ contract Planter is Initializable, RelayRecipient {
         uint64 latitude;
     }
 
+    /** NOTE {isPlanter} set inside the initialize to {true} */
+    bool public override isPlanter;
+
+    IAccessRestriction public accessRestriction;
+
     /** NOTE mapping of planter address to PlanterData */
-    mapping(address => PlanterData) public planters;
+    mapping(address => PlanterData) public override planters;
 
     /** NOTE mapping of planter address to address of invitedBy */
-    mapping(address => address) public invitedBy;
+    mapping(address => address) public override invitedBy;
 
     /** NOTE mapping of planter address to organization address that planter is member of it */
-    mapping(address => address) public memberOf;
+    mapping(address => address) public override memberOf;
 
     /** NOTE mapping of organization address to mapping of planter address to portionValue */
     mapping(address => mapping(address => uint256))
-        public organizationMemberShare;
-
-    event PlanterJoined(address planter);
-    event OrganizationJoined(address organization);
-    event PlanterUpdated(address planter);
-    event AcceptedByOrganization(address planter);
-    event RejectedByOrganization(address planter);
-    event OrganizationMemberShareUpdated(address planter);
+        public
+        override organizationMemberShare;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -99,6 +94,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -115,6 +111,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -140,7 +137,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         address _invitedBy,
         address _organization
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         require(
             accessRestriction.isPlanter(_msgSender()) &&
                 planters[_msgSender()].planterType == 0,
@@ -209,7 +206,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         address _invitedBy,
         address _organization
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(
             accessRestriction.isPlanter(_planter) &&
                 planters[_planter].planterType == 0,
@@ -269,7 +266,7 @@ contract Planter is Initializable, RelayRecipient {
         uint16 _countryCode,
         uint32 _supplyCap,
         address _invitedBy
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(
             planters[_organization].planterType == 0 &&
                 accessRestriction.isPlanter(_organization),
@@ -315,6 +312,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function updatePlanterType(uint8 _planterType, address _organization)
         external
+        override
         ifNotPaused
         existPlanter(_msgSender())
     {
@@ -368,6 +366,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function acceptPlanterByOrganization(address _planter, bool _acceptance)
         external
+        override
         ifNotPaused
         onlyOrganization
         existPlanter(_planter)
@@ -400,6 +399,7 @@ contract Planter is Initializable, RelayRecipient {
      */
     function updateSupplyCap(address _planter, uint32 _supplyCap)
         external
+        override
         ifNotPaused
         onlyDataManager
         existPlanter(_planter)
@@ -422,7 +422,7 @@ contract Planter is Initializable, RelayRecipient {
     function manageAssignedTreePermission(
         address _planter,
         address _assignedPlanterAddress
-    ) external onlyTreejerContract returns (bool) {
+    ) external override onlyTreejerContract returns (bool) {
         PlanterData storage planterData = planters[_planter];
         if (planterData.planterType > 0) {
             if (
@@ -455,7 +455,7 @@ contract Planter is Initializable, RelayRecipient {
     function updateOrganizationMemberShare(
         address _planter,
         uint256 _organizationMemberShareAmount
-    ) external ifNotPaused onlyOrganization existPlanter(_planter) {
+    ) external override ifNotPaused onlyOrganization existPlanter(_planter) {
         require(planters[_planter].status > 0, "invalid planter status");
         require(memberOf[_planter] == _msgSender(), "invalid input planter");
         require(
@@ -471,6 +471,53 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
+     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
+     * must reduce by 1 and if planter status is full, set it to active.
+     * @param _planter address of planter
+     */
+    function reducePlantedCount(address _planter)
+        external
+        override
+        existPlanter(_planter)
+        onlyTreejerContract
+    {
+        PlanterData storage planterData = planters[_planter];
+
+        planterData.plantedCount -= 1;
+
+        if (planterData.status == 2) {
+            planterData.status = 1;
+        }
+    }
+
+    /**
+     * @dev check that planter {_planter} can plant regular tree
+     * NOTE if plantedCount reach to supplyCap status of planter
+     * set to full (value of full is '2')
+     * @param _planter address of planter
+     * @return true in case of planter status is active (value of active is '1')
+     */
+    function manageTreePermission(address _planter)
+        external
+        override
+        existPlanter(_planter)
+        onlyTreejerContract
+        returns (bool)
+    {
+        PlanterData storage planterData = planters[_planter];
+
+        if (planterData.status == 1) {
+            planterData.plantedCount += 1;
+
+            if (planterData.plantedCount == planterData.supplyCap) {
+                planterData.status = 2;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @dev return organization member data
      * @param _planter address of organization member planter to get data
      * @return true in case of valid planter
@@ -481,6 +528,7 @@ contract Planter is Initializable, RelayRecipient {
     function getOrganizationMemberData(address _planter)
         external
         view
+        override
         returns (
             bool,
             address,
@@ -510,56 +558,16 @@ contract Planter is Initializable, RelayRecipient {
     }
 
     /**
-     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
-     * must reduce by 1 and if planter status is full, set it to active.
-     * @param _planter address of planter
-     */
-    function reducePlantedCount(address _planter)
-        external
-        existPlanter(_planter)
-        onlyTreejerContract
-    {
-        PlanterData storage planterData = planters[_planter];
-
-        planterData.plantedCount -= 1;
-
-        if (planterData.status == 2) {
-            planterData.status = 1;
-        }
-    }
-
-    /**
-     * @dev check that planter {_planter} can plant regular tree
-     * NOTE if plantedCount reach to supplyCap status of planter
-     * set to full (value of full is '2')
-     * @param _planter address of planter
-     * @return true in case of planter status is active (value of active is '1')
-     */
-    function manageTreePermission(address _planter)
-        external
-        existPlanter(_planter)
-        onlyTreejerContract
-        returns (bool)
-    {
-        PlanterData storage planterData = planters[_planter];
-
-        if (planterData.status == 1) {
-            planterData.plantedCount += 1;
-
-            if (planterData.plantedCount == planterData.supplyCap) {
-                planterData.status = 2;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @dev check allowance to assign tree to planter
      * @param _planter address of assignee planter
      * @return true in case of active planter or orgnization planter and false otherwise
      */
-    function canAssignTree(address _planter) external view returns (bool) {
+    function canAssignTree(address _planter)
+        external
+        view
+        override
+        returns (bool)
+    {
         PlanterData storage planterData = planters[_planter];
 
         return planterData.status == 1 || planterData.planterType == 2;

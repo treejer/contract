@@ -11,22 +11,9 @@ import "../treasury/IPlanterFund.sol";
 import "../tree/IAttribute.sol";
 import "../regularSale/IRegularSale.sol";
 import "../gsn/RelayRecipient.sol";
+import "./IIncrementalSale.sol";
 
-contract IncrementalSale is Initializable, RelayRecipient {
-    /** NOTE {isIncrementalSale} set inside the initialize to {true} */
-    bool public isIncrementalSale;
-    /** NOTE last tree id sold in incremetal sale */
-    uint256 public lastSold;
-
-    IAccessRestriction public accessRestriction;
-    ITreeFactory public treeFactory;
-    IWethFund public wethFund;
-    IAllocation public allocation;
-    IAttribute public attribute;
-    IPlanterFund public planterFundContract;
-    IRegularSale public regularSale;
-    IERC20Upgradeable public wethToken;
-
+contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
     struct IncrementalSaleData {
         uint256 startTreeId;
         uint256 endTreeId;
@@ -46,20 +33,24 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 reserve2;
     }
 
+    /** NOTE {isIncrementalSale} set inside the initialize to {true} */
+    bool public override isIncrementalSale;
+    /** NOTE last tree id sold in incremetal sale */
+    uint256 public override lastSold;
+
     /** NOTE {incrementalSaleData} store startTreeId, endTreeId, initialPrice,
      *  increments, priceJump values
      */
-    IncrementalSaleData public incrementalSaleData;
+    IncrementalSaleData public override incrementalSaleData;
 
-    event TreeFunded(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 startTreeId,
-        uint256 count
-    );
-    event IncrementalSaleUpdated();
-    event IncrementalSaleDataUpdated();
+    IAccessRestriction public accessRestriction;
+    ITreeFactory public treeFactory;
+    IWethFund public wethFund;
+    IAllocation public allocation;
+    IAttribute public attribute;
+    IPlanterFund public planterFundContract;
+    IRegularSale public regularSale;
+    IERC20Upgradeable public wethToken;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -91,6 +82,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -107,6 +99,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      */
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -118,7 +111,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @param _address set to the address of PlanterFund contract
      */
 
-    function setPlanterFundAddress(address _address) external onlyAdmin {
+    function setPlanterFundAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanterFund candidateContract = IPlanterFund(_address);
         require(candidateContract.isPlanterFund());
         planterFundContract = candidateContract;
@@ -128,7 +125,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @dev admin set RegularSale contract address
      * @param _address set to the address of RegularSale contract
      */
-    function setRegularSaleAddress(address _address) external onlyAdmin {
+    function setRegularSaleAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IRegularSale candidateContract = IRegularSale(_address);
         require(candidateContract.isRegularSale());
         regularSale = candidateContract;
@@ -137,7 +138,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
     /** @dev admin set TreeFactory contract address
      * @param _address set to the address of TreeFactory contract
      */
-    function setTreeFactoryAddress(address _address) external onlyAdmin {
+    function setTreeFactoryAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         ITreeFactory candidateContract = ITreeFactory(_address);
         require(candidateContract.isTreeFactory());
         treeFactory = candidateContract;
@@ -146,7 +151,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
     /** @dev admin set WethFund contract address
      * @param _address set to the address of WethFund contract
      */
-    function setWethFundAddress(address _address) external onlyAdmin {
+    function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
 
         require(candidateContract.isWethFund());
@@ -159,6 +164,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      */
     function setWethTokenAddress(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -170,7 +176,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @dev admin set Allocation contract address
      * @param _address set to the address of Allocation contract
      */
-    function setAllocationAddress(address _address) external onlyAdmin {
+    function setAllocationAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAllocation candidateContract = IAllocation(_address);
         require(candidateContract.isAllocation());
         allocation = candidateContract;
@@ -181,7 +191,11 @@ contract IncrementalSale is Initializable, RelayRecipient {
      * @param _address set to the address of Attribute contract
      */
 
-    function setAttributesAddress(address _address) external onlyAdmin {
+    function setAttributesAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IAttribute candidateContract = IAttribute(_address);
         require(candidateContract.isAttribute());
         attribute = candidateContract;
@@ -202,7 +216,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint64 _treeCount,
         uint64 _increments,
         uint64 _priceJump
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(_treeCount > 0, "assign at least one tree");
         require(_startTreeId > 100, "trees are under Auction");
         require(_increments > 0, "incremental period should be positive");
@@ -248,6 +262,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      */
     function removeIncrementalSale(uint256 _count)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -280,6 +295,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
      */
     function updateEndTreeId(uint256 _treeCount)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -318,7 +334,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _count,
         address _referrer,
         address _recipient
-    ) external ifNotPaused {
+    ) external override ifNotPaused {
         require(_count < 101 && _count > 0, "Count must be lt 100");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
@@ -403,7 +419,7 @@ contract IncrementalSale is Initializable, RelayRecipient {
         uint256 _initialPrice,
         uint64 _increments,
         uint64 _priceJump
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(_increments > 0, "incremental period should be positive");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;

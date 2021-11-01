@@ -127,6 +127,10 @@ contract("AccessRestriction", (accounts) => {
     await arInstance
       .ifNotPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_NOT_PAUSED);
+
+    let result = await arInstance.paused.call();
+
+    assert.equal(result, true, "result is not correct");
   });
   it("check unpause", async () => {
     await arInstance.ifNotPaused();

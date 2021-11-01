@@ -1,67 +1,90 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.6;
+pragma solidity ^0.8.6;
 
 /** @title RegularSale interface */
 interface IRegularSale {
-    /** @return last funded regular tree */
-    function lastFundedTreeId() external view returns (uint256);
-
-    /** @return last funded regular tree */
-    function maxTreeSupply() external view returns (uint256);
-
-    /** @return price of tree */
-    function price() external view returns (uint256);
+    /**
+     * @dev emited when price of tree updated
+     * @param price is price of tree
+     */
+    event PriceUpdated(uint256 price);
 
     /**
-     * @return true if RegularSale contract has been initialized
+     * @dev emited when {count} trees fund
+     * @param funder address of funder
+     * @param recipient address of recipient
+     * @param referrer address of referrer
+     * @param count number of trees to fund
+     * @param amount total price of trees
      */
-    function isRegularSale() external view returns (bool);
+    event TreeFunded(
+        address funder,
+        address recipient,
+        address referrer,
+        uint256 count,
+        uint256 amount
+    );
 
-    /** @return referralTreePaymentToPlanter */
-    function referralTreePaymentToPlanter() external view returns (uint256);
+    /**
+     * @dev emitted when each Regular Tree minted by {funder}
+     * @param recipient address of recipient
+     * @param treeId id of tree
+     * @param price price of tree
+     */
+    event RegularMint(address recipient, uint256 treeId, uint256 price);
 
-    /** @return referralTreePaymentToAmbassador */
-    function referralTreePaymentToAmbassador() external view returns (uint256);
+    /**
+     * @dev emitted when tree with id {treeId} fund
+     * @param funder address of funder
+     * @param recipient address of recipient
+     * @param referrer address of referrer
+     * @param treeId id of tree to fund
+     * @param amount total price of trees
+     */
+    event TreeFundedById(
+        address funder,
+        address recipient,
+        address referrer,
+        uint256 treeId,
+        uint256 amount
+    );
 
-    /** @return referralTriggerCount */
-    function referralTriggerCount() external view returns (uint256);
+    /**
+     * @dev emitted when lastFundedTreeId updatd
+     * @param lastFundedTreeId id of tree lastFundedTreeId updated to
+     */
+    event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
 
-    /** @return referrerClaimableTreesWeth */
-    function referrerClaimableTreesWeth(address _referrer)
-        external
-        view
-        returns (uint256);
+    event MaxTreeSupplyUpdated(uint256 maxTreeSupply);
 
-    /** @return referrerClaimableTreesDai  */
-    function referrerClaimableTreesDai(address _referrer)
-        external
-        view
-        returns (uint256);
+    /**
+     * @dev emitted when referralTriggerCount updated
+     * @param count number set to referralTriggerCount
+     */
+    event ReferralTriggerCountUpdated(uint256 count);
 
-    /** @return referrerCount */
-    function referrerCount(address _referrer) external view returns (uint256);
+    /**
+     * @dev emitted when referralTreePayments updated
+     * @param referralTreePaymentToPlanter is referralTreePaymentToPlanter amount
+     * @param referralTreePaymentToAmbassador is referralTreePaymentToAmbassador amount
+     */
+    event ReferralTreePaymentsUpdated(
+        uint256 referralTreePaymentToPlanter,
+        uint256 referralTreePaymentToAmbassador
+    );
 
-    /** @return AccessRestriction contract address */
-    function accessRestriction() external view returns (address);
-
-    /** @return TreeFactory contract address */
-    function treeFactory() external view returns (address);
-
-    /** @return DaiFund contract address */
-    function daiFund() external view returns (address);
-
-    /** @return Allocation contract address */
-    function allocation() external view returns (address);
-
-    /** @return DaiToken contract address */
-    function daiToken() external view returns (address);
-
-    /** @return PlanterFund contract address */
-    function planterFundContract() external view returns (address);
-
-    /** @return WethFund contract address */
-    function wethFund() external view returns (address);
+    /**
+     * @dev emitted when referral reward claimed
+     * @param referrer address of referrer
+     * @param count number of trees claimed
+     * @param amount total price of claimed trees
+     */
+    event ReferralRewardClaimed(
+        address referrer,
+        uint256 count,
+        uint256 amount
+    );
 
     /** @dev admin set trusted forwarder address */
     function setTrustedForwarder(address _address) external;
@@ -83,6 +106,12 @@ interface IRegularSale {
 
     /** @dev set {_address} to WethFund contract address */
     function setWethFundAddress(address _address) external;
+
+    /**
+     * @dev admin set Attributes contract address
+     * @param _address set to the address of Attribute contract
+     */
+    function setAttributesAddress(address _address) external;
 
     // **** FUNDTREE SECTION ****
 
@@ -179,82 +208,44 @@ interface IRegularSale {
      */
     function claimReferralReward() external;
 
-    /**
-     * @dev emited when price of tree updated
-     * @param price is price of tree
-     */
-    event PriceUpdated(uint256 price);
+    function initialize(address _accessRestrictionAddress, uint256 _price)
+        external;
+
+    /** @return last funded regular tree */
+    function lastFundedTreeId() external view returns (uint256);
+
+    /** @return last funded regular tree */
+    function maxTreeSupply() external view returns (uint256);
+
+    /** @return price of tree */
+    function price() external view returns (uint256);
 
     /**
-     * @dev emited when {count} trees fund
-     * @param funder address of funder
-     * @param recipient address of recipient
-     * @param referrer address of referrer
-     * @param count number of trees to fund
-     * @param amount total price of trees
+     * @return true if RegularSale contract has been initialized
      */
-    event TreeFunded(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 count,
-        uint256 amount
-    );
+    function isRegularSale() external view returns (bool);
 
-    /**
-     * @dev emitted when each Regular Tree minted by {funder}
-     * @param recipient address of recipient
-     * @param treeId id of tree
-     * @param price price of tree
-     */
-    event RegularMint(address recipient, uint256 treeId, uint256 price);
+    /** @return referralTreePaymentToPlanter */
+    function referralTreePaymentToPlanter() external view returns (uint256);
 
-    /**
-     * @dev emitted when tree with id {treeId} fund
-     * @param funder address of funder
-     * @param recipient address of recipient
-     * @param referrer address of referrer
-     * @param treeId id of tree to fund
-     * @param amount total price of trees
-     */
-    event TreeFundedById(
-        address funder,
-        address recipient,
-        address referrer,
-        uint256 treeId,
-        uint256 amount
-    );
+    /** @return referralTreePaymentToAmbassador */
+    function referralTreePaymentToAmbassador() external view returns (uint256);
 
-    /**
-     * @dev emitted when lastFundedTreeId updatd
-     * @param lastFundedTreeId id of tree lastFundedTreeId updated to
-     */
-    event LastFundedTreeIdUpdated(uint256 lastFundedTreeId);
-    /**
-     * @dev emitted when referralTriggerCount updated
-     * @param count number set to referralTriggerCount
-     */
-    event ReferralTriggerCountUpdated(uint256 count);
+    /** @return referralTriggerCount */
+    function referralTriggerCount() external view returns (uint256);
 
-    /**
-     * @dev emitted when referralTreePayments updated
-     * @param referralTreePaymentToPlanter is referralTreePaymentToPlanter amount
-     * @param referralTreePaymentToAmbassador is referralTreePaymentToAmbassador amount
-     */
-    event ReferralTreePaymentsUpdated(
-        uint256 referralTreePaymentToPlanter,
-        uint256 referralTreePaymentToAmbassador
-    );
+    /** @return referrerClaimableTreesWeth */
+    function referrerClaimableTreesWeth(address _referrer)
+        external
+        view
+        returns (uint256);
 
-    /**
-     * @dev emitted when referral reward claimed
-     * @param referrer address of referrer
-     * @param count number of trees claimed
-     * @param amount total price of claimed trees
-     */
-    event ReferralRewardClaimed(
-        address referrer,
-        uint256 count,
-        uint256 amount
-    );
+    /** @return referrerClaimableTreesDai  */
+    function referrerClaimableTreesDai(address _referrer)
+        external
+        view
+        returns (uint256);
+
+    /** @return referrerCount */
+    function referrerCount(address _referrer) external view returns (uint256);
 }

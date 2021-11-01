@@ -5,37 +5,41 @@ pragma solidity ^0.8.6;
 /** @title IHonoraryTree */
 
 interface IHonoraryTree {
-    /** @return AccessRestriction contract address */
-    function accessRestriction() external view returns (address);
-
-    /** @return TreeFactory contract address */
-    function treeFactory() external view returns (address);
-
-    /** @return PlanterFund contract address */
-    function planterFundContract() external view returns (address);
-
-    /** @return Attribute contract address */
-    function attribute() external view returns (address);
-
-    /** @return DaiToken contract address */
-    function daiToken() external view returns (address);
+    /** @dev emitted when a tree range set for honorary trees */
+    event TreeRangeSet();
+    /** @dev emitted when a tree range released from honorary trees */
+    event TreeRangeReleased();
 
     /**
-     * @dev return data of an recipient {_address}
-     * @param _address of recipient to get data
-     * @return expiryDate
-     * @return startDate
-     * @return status 
-
+     * @dev emitted when admin add a recipient
+     * @param recipient address of recipient
      */
-    function recipients(address _address)
-        external
-        view
-        returns (
-            uint64 expiryDate,
-            uint64 startDate,
-            uint64 status
-        );
+    event RecipientAdded(address recipient);
+
+    /**
+     * @dev emitted when admin update date of a recipient
+     * @param recipient address of recipient
+     */
+    event RecipientUpdated(address recipient);
+
+    /** @dev emitted when referral tree payments set by admin
+     * @param referralTreePaymentToPlanter referral tree payment to planter amount
+     * @param referralTreePaymentToAmbassador referral tree payment to ambassador amount
+     */
+    event ReferralTreePaymentsUpdated(
+        uint256 referralTreePaymentToPlanter,
+        uint256 referralTreePaymentToAmbassador
+    );
+
+    /** @dev emitted when a tree claimed by recipient
+     * @param treeId is id of climed tree
+     */
+    event Claimed(uint256 treeId);
+
+    /** @dev emitted when claim failed
+     * @param recipient address of recipient
+     */
+    event ClaimFailed(address recipient);
 
     /**
      * @dev return symbol in {_index}
@@ -50,27 +54,6 @@ interface IHonoraryTree {
      * @return isUsed , if symbol in {_index} is used or not
      */
     function used(uint256 _index) external returns (bool isUsed);
-
-    /** @return true in case of HonoraryTree contract have been initialized */
-    function isHonoraryTree() external view returns (bool);
-
-    /** @return number of claimed trees */
-    function claimedCount() external view returns (uint256);
-
-    /** @return id of tree to claim */
-    function currentTreeId() external view returns (uint256);
-
-    /** @return maximum id of trees can be claimed up to it */
-    function upTo() external view returns (uint256);
-
-    /** @return tree count that paid before for it*/
-    function prePaidTreeCount() external view returns (uint256);
-
-    /** @return referralTreePaymentToPlanter amount */
-    function referralTreePaymentToPlanter() external view returns (uint256);
-
-    /** @return referralTreePaymentToAmbassador amount */
-    function referralTreePaymentToAmbassador() external view returns (uint256);
 
     /** @dev admin set {_address} to trust forwarder*/
     function setTrustedForwarder(address _address) external;
@@ -167,39 +150,47 @@ interface IHonoraryTree {
 
     function claim() external;
 
-    /** @dev emitted when a tree range set for honorary trees */
-    event TreeRangeSet();
-    /** @dev emitted when a tree range released from honorary trees */
-    event TreeRangeReleased();
+    function initialize(
+        address _accessRestrictionAddress,
+        uint256 _referralTreePaymentToPlanter,
+        uint256 _referralTreePaymentToAmbassador
+    ) external;
 
     /**
-     * @dev emitted when admin add a recipient
-     * @param recipient address of recipient
-     */
-    event RecipientAdded(address recipient);
+     * @dev return data of an recipient {_address}
+     * @param _address of recipient to get data
+     * @return expiryDate
+     * @return startDate
+     * @return status 
 
-    /**
-     * @dev emitted when admin update date of a recipient
-     * @param recipient address of recipient
      */
-    event RecipientUpdated(address recipient);
+    function recipients(address _address)
+        external
+        view
+        returns (
+            uint64 expiryDate,
+            uint64 startDate,
+            uint64 status
+        );
 
-    /** @dev emitted when referral tree payments set by admin
-     * @param referralTreePaymentToPlanter referral tree payment to planter amount
-     * @param referralTreePaymentToAmbassador referral tree payment to ambassador amount
-     */
-    event ReferralTreePaymentsUpdated(
-        uint256 referralTreePaymentToPlanter,
-        uint256 referralTreePaymentToAmbassador
-    );
+    /** @return true in case of HonoraryTree contract have been initialized */
+    function isHonoraryTree() external view returns (bool);
 
-    /** @dev emitted when a tree claimed by recipient
-     * @param treeId is id of climed tree
-     */
-    event Claimed(uint256 treeId);
+    /** @return number of claimed trees */
+    function claimedCount() external view returns (uint256);
 
-    /** @dev emitted when claim failed
-     * @param recipient address of recipient
-     */
-    event ClaimFailed(address recipient);
+    /** @return id of tree to claim */
+    function currentTreeId() external view returns (uint256);
+
+    /** @return maximum id of trees can be claimed up to it */
+    function upTo() external view returns (uint256);
+
+    /** @return tree count that paid before for it*/
+    function prePaidTreeCount() external view returns (uint256);
+
+    /** @return referralTreePaymentToPlanter amount */
+    function referralTreePaymentToPlanter() external view returns (uint256);
+
+    /** @return referralTreePaymentToAmbassador amount */
+    function referralTreePaymentToAmbassador() external view returns (uint256);
 }

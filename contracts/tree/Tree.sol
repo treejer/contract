@@ -4,15 +4,10 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
+import "./ITree.sol";
 
 /** @title Tree Contract */
-contract Tree is ERC721Upgradeable {
-    /** NOTE {isTree} set inside the initialize to {true} */
-    bool public isTree;
-
-    IAccessRestriction public accessRestriction;
-    string private baseURI;
-
+contract Tree is ERC721Upgradeable, ITree {
     struct Attribute {
         uint8 attribute1;
         uint8 attribute2;
@@ -32,10 +27,18 @@ contract Tree is ERC721Upgradeable {
         uint8 coefficient;
         uint8 generationType;
     }
+
+    /** NOTE {isTree} set inside the initialize to {true} */
+    bool public override isTree;
+
+    IAccessRestriction public accessRestriction;
+
+    string public override baseURI;
+
     /** NOTE mapping of tokenId to attributes */
-    mapping(uint256 => Attribute) public attributes;
+    mapping(uint256 => Attribute) public override attributes;
     /** NOTE mapping of tokenId to symbols */
-    mapping(uint256 => Symbol) public symbols;
+    mapping(uint256 => Symbol) public override symbols;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -56,7 +59,7 @@ contract Tree is ERC721Upgradeable {
     function initialize(
         address _accessRestrictionAddress,
         string calldata baseURI_
-    ) external initializer {
+    ) external override initializer {
         isTree = true;
 
         __ERC721_init("Tree", "TREE");
@@ -71,10 +74,10 @@ contract Tree is ERC721Upgradeable {
     }
 
     /**
-     * @dev admin set baseURI
+     * @dev admin set _baseURI
      * @param baseURI_ baseURI value
      */
-    function setBaseURI(string calldata baseURI_) external onlyAdmin {
+    function setBaseURI(string calldata baseURI_) external override onlyAdmin {
         baseURI = baseURI_;
     }
 
@@ -83,23 +86,10 @@ contract Tree is ERC721Upgradeable {
      */
     function safeMint(address _to, uint256 _tokenId)
         external
+        override
         onlyTreejerContract
     {
         _safeMint(_to, _tokenId);
-    }
-
-    /**
-     * @dev check that _tokenId exist or not
-     * @param _tokenId id of token to check existance
-     * @return true if {_tokenId} exist
-     */
-    function exists(uint256 _tokenId) external view returns (bool) {
-        return _exists(_tokenId);
-    }
-
-    /** @return return baseURI */
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
     }
 
     /**
@@ -113,13 +103,14 @@ contract Tree is ERC721Upgradeable {
         uint256 _tokenId,
         uint256 _uniquenessFactor,
         uint8 _generationType
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         uint8[] memory attribute = new uint8[](8);
 
         for (uint256 i = 0; i < 8; i++) {
             attribute[i] = uint8(_uniquenessFactor & 255);
             _uniquenessFactor >>= 8;
         }
+
         attributes[_tokenId] = Attribute(
             attribute[0],
             attribute[1],
@@ -131,6 +122,7 @@ contract Tree is ERC721Upgradeable {
             attribute[7],
             _generationType
         );
+
         if (_generationType > 15) {
             for (uint256 i = 0; i < 5; i++) {
                 attribute[i] = uint8(_uniquenessFactor & 255);
@@ -149,6 +141,15 @@ contract Tree is ERC721Upgradeable {
     }
 
     /**
+     * @dev check that _tokenId exist or not
+     * @param _tokenId id of token to check existance
+     * @return true if {_tokenId} exist
+     */
+    function exists(uint256 _tokenId) external view override returns (bool) {
+        return _exists(_tokenId);
+    }
+
+    /**
      * @dev check attribute existance for a tokenId
      * @param _tokenId id of token
      * @return true if attributes exist for {_tokenId}
@@ -156,9 +157,15 @@ contract Tree is ERC721Upgradeable {
     function attributeExists(uint256 _tokenId)
         external
         view
+        override
         onlyTreejerContract
         returns (bool)
     {
         return attributes[_tokenId].generationType > 0;
+    }
+
+    /** @return return baseURI */
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
     }
 }

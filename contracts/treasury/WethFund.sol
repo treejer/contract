@@ -9,35 +9,11 @@ import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
 import "./interfaces/IUniswapV2Router02New.sol";
 
+import "./IWethFund.sol";
+
 /** @title WethFund Contract */
 
-contract WethFund is Initializable {
-    /** NOTE {isWethFund} set inside the initialize to {true} */
-    bool public isWethFund;
-
-    IAccessRestriction public accessRestriction;
-    IPlanterFund public planterFundContract;
-    IERC20Upgradeable public wethToken;
-    IUniswapV2Router02New public uniswapRouter;
-
-    /** NOTE Dai contract address */
-    address public daiAddress;
-
-    uint256 public totalDaiDebtToPlanterContract;
-
-    /** NOTE {totalBalances} keep total share of
-     * research, localDevelopment,insurance,treasury,reserve1
-     * and reserve2
-     */
-    TotalBalances public totalBalances;
-
-    address public researchAddress;
-    address public localDevelopmentAddress;
-    address public insuranceAddress;
-    address public treasuryAddress;
-    address public reserve1Address;
-    address public reserve2Address;
-
+contract WethFund is Initializable, IWethFund {
     struct TotalBalances {
         uint256 research;
         uint256 localDevelopment;
@@ -47,45 +23,31 @@ contract WethFund is Initializable {
         uint256 reserve2;
     }
 
-    event ResearchBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event LocalDevelopmentBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event InsuranceBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event TreasuryBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event Reserve1BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event Reserve2BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+    /** NOTE {isWethFund} set inside the initialize to {true} */
+    bool public override isWethFund;
 
-    event TreeFundedBatch();
+    /** NOTE Dai contract address */
+    address public override daiAddress;
 
-    event DaiDebtToPlanterContractPaid(
-        uint256 wethMaxUse,
-        uint256 daiAmount,
-        uint256 wethAmount
-    );
+    uint256 public override totalDaiDebtToPlanterContract;
+
+    /** NOTE {totalBalances} keep total share of
+     * research, localDevelopment,insurance,treasury,reserve1
+     * and reserve2
+     */
+    TotalBalances public override totalBalances;
+
+    address public override researchAddress;
+    address public override localDevelopmentAddress;
+    address public override insuranceAddress;
+    address public override treasuryAddress;
+    address public override reserve1Address;
+    address public override reserve2Address;
+
+    IAccessRestriction public accessRestriction;
+    IPlanterFund public planterFundContract;
+    IERC20Upgradeable public wethToken;
+    IUniswapV2Router02New public uniswapRouter;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -123,6 +85,7 @@ contract WethFund is Initializable {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -141,6 +104,7 @@ contract WethFund is Initializable {
      */
     function setDaiAddress(address _daiAddress)
         external
+        override
         onlyAdmin
         validAddress(_daiAddress)
     {
@@ -153,6 +117,7 @@ contract WethFund is Initializable {
      */
     function setWethTokenAddress(address _wethTokenAddress)
         external
+        override
         onlyAdmin
         validAddress(_wethTokenAddress)
     {
@@ -168,6 +133,7 @@ contract WethFund is Initializable {
      */
     function setUniswapRouterAddress(address _uniswapRouterAddress)
         external
+        override
         onlyAdmin
         validAddress(_uniswapRouterAddress)
     {
@@ -184,6 +150,7 @@ contract WethFund is Initializable {
      */
     function setPlanterFundContractAddress(address _address)
         external
+        override
         onlyAdmin
     {
         IPlanterFund candidateContract = IPlanterFund(_address);
@@ -197,6 +164,7 @@ contract WethFund is Initializable {
      */
     function setResearchAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -209,6 +177,7 @@ contract WethFund is Initializable {
      */
     function setLocalDevelopmentAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -221,6 +190,7 @@ contract WethFund is Initializable {
      */
     function setInsuranceAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -233,6 +203,7 @@ contract WethFund is Initializable {
      */
     function setTreasuryAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -245,6 +216,7 @@ contract WethFund is Initializable {
      */
     function setReserve1Address(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -257,6 +229,7 @@ contract WethFund is Initializable {
      */
     function setReserve2Address(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -289,7 +262,7 @@ contract WethFund is Initializable {
         uint16 _treasuryShare,
         uint16 _reserve1Share,
         uint16 _reserve2Share
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         totalBalances.research += (_amount * _researchShare) / 10000;
 
         totalBalances.localDevelopment +=
@@ -329,7 +302,7 @@ contract WethFund is Initializable {
         uint256 _totalTreasury,
         uint256 _totalReserve1,
         uint256 _totalReserve2
-    ) external onlyTreejerContract returns (uint256) {
+    ) external override onlyTreejerContract returns (uint256) {
         totalBalances.research += _totalResearch;
 
         totalBalances.localDevelopment += _totalLocalDevelopment;
@@ -361,7 +334,7 @@ contract WethFund is Initializable {
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
         uint256 _daiAmountToSwap
-    ) external ifNotPaused onlyScript {
+    ) external override ifNotPaused onlyScript {
         require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
 
         require(
@@ -404,6 +377,7 @@ contract WethFund is Initializable {
      */
     function updateDaiDebtToPlanterContract(uint256 _amount)
         external
+        override
         onlyTreejerContract
     {
         totalDaiDebtToPlanterContract += _amount;
@@ -417,6 +391,7 @@ contract WethFund is Initializable {
      */
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(researchAddress)
     {
@@ -443,7 +418,7 @@ contract WethFund is Initializable {
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
-    ) external onlyAdmin validAddress(localDevelopmentAddress) {
+    ) external override onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
@@ -470,6 +445,7 @@ contract WethFund is Initializable {
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(insuranceAddress)
     {
@@ -495,6 +471,7 @@ contract WethFund is Initializable {
      */
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(treasuryAddress)
     {
@@ -520,6 +497,7 @@ contract WethFund is Initializable {
      */
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(reserve1Address)
     {
@@ -545,6 +523,7 @@ contract WethFund is Initializable {
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(reserve2Address)
     {

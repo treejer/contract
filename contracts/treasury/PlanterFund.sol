@@ -10,56 +10,45 @@ import "../access/IAccessRestriction.sol";
 import "../planter/IPlanter.sol";
 import "../gsn/RelayRecipient.sol";
 
+import "./IPlanterFund.sol";
+
 /** @title PlanterFund Contract */
 
-contract PlanterFund is Initializable, RelayRecipient {
-    /** NOTE {isPlanterFund} set inside the initialize to {true} */
-    bool public isPlanterFund;
-
-    /** NOTE minimum withdrawable amount */
-    uint256 public minWithdrawable;
-
-    IAccessRestriction public accessRestriction;
-    IPlanter public planterContract;
-    IERC20Upgradeable public daiToken;
-
+contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     struct TotalBalances {
         uint256 planter;
         uint256 ambassador;
         uint256 localDevelopment;
     }
 
+    /** NOTE {isPlanterFund} set inside the initialize to {true} */
+    bool public override isPlanterFund;
+
+    /** NOTE minimum withdrawable amount */
+    uint256 public override minWithdrawable;
+
+    IAccessRestriction public accessRestriction;
+    IPlanter public planterContract;
+    IERC20Upgradeable public daiToken;
+
     /** NOTE totalBalances keep total share of
      * planter, ambassador, localDevelopment
      */
-    TotalBalances public totalBalances;
+    TotalBalances public override totalBalances;
 
     /** NOTE mapping of treeId to planterProjectedEarning*/
-    mapping(uint256 => uint256) public treeToPlanterProjectedEarning;
+    mapping(uint256 => uint256) public override treeToPlanterProjectedEarning;
 
     /** NOTE mapping of treeId to ambassadorProjectedEarning*/
-    mapping(uint256 => uint256) public treeToAmbassadorProjectedEarning;
+    mapping(uint256 => uint256)
+        public
+        override treeToAmbassadorProjectedEarning;
 
     /** NOTE mpping of treeId to treeToPlanterTotalClaimed balance*/
-    mapping(uint256 => uint256) public treeToPlanterTotalClaimed;
+    mapping(uint256 => uint256) public override treeToPlanterTotalClaimed;
 
     /** NOTE mapping of planter address to planter balance*/
-    mapping(address => uint256) public balances;
-
-    event PlanterTotalClaimedUpdated(
-        uint256 treeId,
-        address planter,
-        uint256 amount,
-        address ambassador
-    );
-    event BalanceWithdrew(uint256 amount, address account);
-    event ProjectedEarningUpdated(
-        uint256 treeId,
-        uint256 planterAmount,
-        uint256 ambassadorAmount
-    );
-
-    event MinWithdrawableAmountUpdated();
+    mapping(address => uint256) public override balances;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -97,6 +86,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -116,6 +106,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function setTrustedForwarder(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -126,7 +117,11 @@ contract PlanterFund is Initializable, RelayRecipient {
      * @dev admin set Planter contract address
      * @param _address set to the address of Planter contract
      */
-    function setPlanterContractAddress(address _address) external onlyAdmin {
+    function setPlanterContractAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
         IPlanter candidateContract = IPlanter(_address);
         require(candidateContract.isPlanter());
         planterContract = candidateContract;
@@ -138,6 +133,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function setDaiTokenAddress(address _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -150,6 +146,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      */
     function updateWithdrawableAmount(uint256 _amount)
         external
+        override
         ifNotPaused
         onlyDataManager
     {
@@ -168,7 +165,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         uint256 _planterAmount,
         uint256 _ambassadorAmount
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         treeToPlanterProjectedEarning[_treeId] = _planterAmount;
         treeToAmbassadorProjectedEarning[_treeId] = _ambassadorAmount;
 
@@ -193,7 +190,7 @@ contract PlanterFund is Initializable, RelayRecipient {
         uint256 _treeId,
         address _planter,
         uint64 _treeStatus
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         require(
             treeToPlanterProjectedEarning[_treeId] > 0,
             "planter fund not exist"
@@ -271,7 +268,7 @@ contract PlanterFund is Initializable, RelayRecipient {
      * @dev planter withdraw {_amount} from balances
      * @param _amount amount to withdraw
      */
-    function withdrawBalance(uint256 _amount) external ifNotPaused {
+    function withdrawBalance(uint256 _amount) external override ifNotPaused {
         require(
             _amount <= balances[_msgSender()] && _amount >= minWithdrawable,
             "insufficient amount"

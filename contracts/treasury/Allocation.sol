@@ -5,22 +5,12 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
-
-pragma abicoder v2;
+import "./IAllocation.sol";
 
 /** @title Allocation Contract */
 
-contract Allocation is Initializable {
+contract Allocation is Initializable, IAllocation {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-
-    CountersUpgradeable.Counter private allocationCount;
-
-    /** NOTE {isAllocation} set inside the initialize to {true} */
-    bool public isAllocation;
-    /** NOTE maximum index assigned */
-    uint256 public maxAssignedIndex;
-
-    IAccessRestriction public accessRestriction;
 
     struct AllocationData {
         uint16 planterShare;
@@ -38,15 +28,21 @@ contract Allocation is Initializable {
         uint256 startingTreeId;
         uint256 allocationDataId;
     }
+
+    CountersUpgradeable.Counter private _allocationCount;
+
+    /** NOTE {isAllocation} set inside the initialize to {true} */
+    bool public override isAllocation;
+    /** NOTE maximum index assigned */
+    uint256 public override maxAssignedIndex;
+
+    IAccessRestriction public accessRestriction;
+
     /**array of strating tree with specific allocation  */
-    AllocationToTree[] public allocationToTrees;
+    AllocationToTree[] public override allocationToTrees;
 
     /** NOTE mapping of allocationDataId to AllocationData*/
-    mapping(uint256 => AllocationData) public allocations;
-
-    event AllocationDataAdded(uint256 allocationDataId);
-
-    event AllocationToTreeAssigned(uint256 allocationToTreesLength);
+    mapping(uint256 => AllocationData) public override allocations;
 
     /** NOTE modifier to check msg.sender has data manager role */
     modifier onlyDataManager() {
@@ -66,6 +62,7 @@ contract Allocation is Initializable {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -99,7 +96,7 @@ contract Allocation is Initializable {
         uint16 _treasuryShare,
         uint16 _reserve1Share,
         uint16 _reserve2Share
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(
             _planterShare +
                 _ambassadorShare +
@@ -113,7 +110,7 @@ contract Allocation is Initializable {
             "sum must be 10000"
         );
 
-        allocations[allocationCount.current()] = AllocationData(
+        allocations[_allocationCount.current()] = AllocationData(
             _planterShare,
             _ambassadorShare,
             _researchShare,
@@ -125,9 +122,9 @@ contract Allocation is Initializable {
             1
         );
 
-        emit AllocationDataAdded(allocationCount.current());
+        emit AllocationDataAdded(_allocationCount.current());
 
-        allocationCount.increment();
+        _allocationCount.increment();
     }
 
     /**
@@ -141,7 +138,7 @@ contract Allocation is Initializable {
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint256 _allocationDataId
-    ) external ifNotPaused onlyDataManager {
+    ) external override ifNotPaused onlyDataManager {
         require(
             allocations[_allocationDataId].exists > 0,
             "Allocation model not found"
@@ -225,7 +222,7 @@ contract Allocation is Initializable {
      * @return true if allocation data exists for {_treeId} and false otherwise
      */
 
-    function exists(uint256 _treeId) external view returns (bool) {
+    function exists(uint256 _treeId) external view override returns (bool) {
         if (allocationToTrees.length == 0) {
             return false;
         }
@@ -248,6 +245,7 @@ contract Allocation is Initializable {
     function findAllocationData(uint256 _treeId)
         external
         view
+        override
         returns (
             uint16 planterShare,
             uint16 ambassadorShare,

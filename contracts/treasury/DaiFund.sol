@@ -7,28 +7,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPlanterFund.sol";
+import "./IDaiFund.sol";
 
 /** @title DaiFund Contract */
-contract DaiFund is Initializable {
-    /** NOTE {isDaiFund} set inside the initialize to {true} */
-    bool public isDaiFund;
-
-    IAccessRestriction public accessRestriction;
-    IPlanterFund public planterFundContract;
-    IERC20Upgradeable public daiToken;
-
-    /** NOTE {totalBalances} keep total share of research, localDevelopment,
-     * insurance,treejerDeveop,reserve1 and reserve2
-     */
-    TotalBalances public totalBalances;
-
-    address public researchAddress;
-    address public localDevelopmentAddress;
-    address public insuranceAddress;
-    address public treasuryAddress;
-    address public reserve1Address;
-    address public reserve2Address;
-
+contract DaiFund is Initializable, IDaiFund {
     struct TotalBalances {
         uint256 research;
         uint256 localDevelopment;
@@ -38,40 +20,24 @@ contract DaiFund is Initializable {
         uint256 reserve2;
     }
 
-    event ResearchBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event LocalDevelopmentBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event InsuranceBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event TreasuryBalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event Reserve1BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
-    event Reserve2BalanceWithdrew(
-        uint256 amount,
-        address account,
-        string reason
-    );
+    /** NOTE {isDaiFund} set inside the initialize to {true} */
+    bool public override isDaiFund;
 
-    event TreeFunded(uint256 treeId, uint256 amount, uint256 planterPart);
+    /** NOTE {totalBalances} keep total share of research, localDevelopment,
+     * insurance,treejerDeveop,reserve1 and reserve2
+     */
+    TotalBalances public override totalBalances;
 
-    event TreeFundedBatch();
+    address public override researchAddress;
+    address public override localDevelopmentAddress;
+    address public override insuranceAddress;
+    address public override treasuryAddress;
+    address public override reserve1Address;
+    address public override reserve2Address;
+
+    IAccessRestriction public accessRestriction;
+    IPlanterFund public planterFundContract;
+    IERC20Upgradeable public daiToken;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -102,6 +68,7 @@ contract DaiFund is Initializable {
      */
     function initialize(address _accessRestrictionAddress)
         external
+        override
         initializer
     {
         IAccessRestriction candidateContract = IAccessRestriction(
@@ -120,6 +87,7 @@ contract DaiFund is Initializable {
      */
     function setDaiTokenAddress(address _daiTokenAddress)
         external
+        override
         onlyAdmin
         validAddress(_daiTokenAddress)
     {
@@ -135,6 +103,7 @@ contract DaiFund is Initializable {
      */
     function setPlanterFundContractAddress(address _address)
         external
+        override
         onlyAdmin
     {
         IPlanterFund candidateContract = IPlanterFund(_address);
@@ -148,6 +117,7 @@ contract DaiFund is Initializable {
      */
     function setResearchAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -160,6 +130,7 @@ contract DaiFund is Initializable {
      */
     function setLocalDevelopmentAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -172,6 +143,7 @@ contract DaiFund is Initializable {
      */
     function setInsuranceAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -184,6 +156,7 @@ contract DaiFund is Initializable {
      */
     function setTreasuryAddress(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -196,6 +169,7 @@ contract DaiFund is Initializable {
      */
     function setReserve1Address(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -208,6 +182,7 @@ contract DaiFund is Initializable {
      */
     function setReserve2Address(address payable _address)
         external
+        override
         onlyAdmin
         validAddress(_address)
     {
@@ -240,7 +215,7 @@ contract DaiFund is Initializable {
         uint16 _treasuryShare,
         uint16 _reserve1Share,
         uint16 _reserve2Share
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         totalBalances.insurance += (_amount * _insuranceShare) / 10000;
 
         totalBalances.localDevelopment +=
@@ -295,7 +270,7 @@ contract DaiFund is Initializable {
         uint256 _totalTreasury,
         uint256 _totalReserve1,
         uint256 _totalReserve2
-    ) external onlyTreejerContract {
+    ) external override onlyTreejerContract {
         totalBalances.research += _totalResearch;
 
         totalBalances.localDevelopment += _totalLocalDevelopment;
@@ -323,7 +298,11 @@ contract DaiFund is Initializable {
      * referrer want to claim reward
      * @param _amount amount to transfer
      */
-    function transferReferrerDai(uint256 _amount) external onlyTreejerContract {
+    function transferReferrerDai(uint256 _amount)
+        external
+        override
+        onlyTreejerContract
+    {
         require(totalBalances.treasury >= _amount, "Liquidity not enough");
 
         totalBalances.treasury -= _amount;
@@ -341,6 +320,7 @@ contract DaiFund is Initializable {
      */
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(researchAddress)
     {
@@ -367,7 +347,7 @@ contract DaiFund is Initializable {
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
-    ) external onlyAdmin validAddress(localDevelopmentAddress) {
+    ) external override onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
             "insufficient amount"
@@ -394,6 +374,7 @@ contract DaiFund is Initializable {
      */
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(insuranceAddress)
     {
@@ -419,6 +400,7 @@ contract DaiFund is Initializable {
      */
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(treasuryAddress)
     {
@@ -444,6 +426,7 @@ contract DaiFund is Initializable {
      */
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(reserve1Address)
     {
@@ -469,6 +452,7 @@ contract DaiFund is Initializable {
      */
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
+        override
         onlyAdmin
         validAddress(reserve2Address)
     {

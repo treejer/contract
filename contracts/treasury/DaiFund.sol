@@ -45,12 +45,6 @@ contract DaiFund is Initializable, IDaiFund {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused*/
-    modifier ifNotPaused() {
-        accessRestriction.ifNotPaused();
-        _;
-    }
-
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(msg.sender);

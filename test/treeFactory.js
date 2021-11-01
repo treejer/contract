@@ -83,10 +83,6 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
       planterFundInstnce = await PlanterFund.new({
         from: deployerAccount,
       });

@@ -80,6 +80,8 @@ interface ITreeFactory {
      */
     event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
 
+    event LastRegualarTreeIdUpdated(uint256 lastRegualarTreeId);
+
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
 
@@ -220,6 +222,8 @@ interface ITreeFactory {
         uint64 _birthDate,
         uint16 _countryCode
     ) external;
+
+    function updateLastRegualarTreeId(uint256 _lastRegualarTreeId) external;
 
     /**
      * @dev admin or allowed verifier can verify or rejects the pending trees

@@ -265,6 +265,67 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
     });
 
+    /////////////////---------------------------------update lastRegualarTreeId--------------------------------------------------------
+
+    it("update lastRegualarTreeId", async () => {
+      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+
+      await treeFactoryInstance
+        .updateLastRegualarTreeId(500, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.INVALID_SET_LAST_REGULAR_TREE_INPUT
+        );
+
+      await treeFactoryInstance
+        .updateLastRegualarTreeId(15000, {
+          from: userAccount2,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      let tx = await treeFactoryInstance.updateLastRegualarTreeId(15000, {
+        from: userAccount1,
+      });
+
+      truffleAssert.eventEmitted(tx, "LastRegualarTreeIdUpdated", (ev) => {
+        return Number(ev.lastRegualarTreeId) == 15000;
+      });
+
+      let lastRegularTreeAfter = await treeFactoryInstance.lastRegualarTreeId();
+
+      assert.equal(
+        Number(lastRegularTreeAfter),
+        15000,
+        "lastRegularTreeAfter not true"
+      );
+
+      await treeFactoryInstance
+        .updateLastRegualarTreeId(15000, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.INVALID_SET_LAST_REGULAR_TREE_INPUT
+        );
+
+      let tx2 = await treeFactoryInstance.updateLastRegualarTreeId(15001, {
+        from: userAccount1,
+      });
+
+      truffleAssert.eventEmitted(tx2, "LastRegualarTreeIdUpdated", (ev) => {
+        return Number(ev.lastRegualarTreeId) == 15001;
+      });
+
+      let lastRegularTreeAfter2 =
+        await treeFactoryInstance.lastRegualarTreeId();
+
+      assert.equal(
+        Number(lastRegularTreeAfter2),
+        15001,
+        "lastRegularTreeAfter2 not true"
+      );
+    });
+
     ///////////////////////------------------ test updateTreeSpecs -----------------
     it("should updateTreeSpecs succeusfully and fail in invalid accesses", async () => {
       const treeId = 0;
@@ -5497,6 +5558,32 @@ contract("TreeFactory", (accounts) => {
       truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
         return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
+
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
+
+      await treeFactoryInstance.updateLastRegualarTreeId(1500000, {
+        from: dataManager,
+      });
+
+      await treeFactoryInstance.verifyTree(1, true, {
+        from: dataManager,
+      });
+
+      let genTreeBefore2 = await treeFactoryInstance.trees.call(1500001);
+
+      assert.equal(
+        Number(genTreeBefore2.treeStatus),
+        4,
+        "treeStatusBefore not true update"
+      );
+
+      assert.equal(
+        Number(genTreeBefore2.saleType),
+        4,
+        "saleTypeBefore not true update"
+      );
     });
 
     it("3.verifyTree should be success(isVerified is false)", async () => {

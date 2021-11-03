@@ -547,6 +547,26 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     }
 
     /**
+     * @dev admin update lastRegualarTreeId
+     * @param _lastRegualarTreeId id of last funded tree
+     */
+    function updateLastRegualarTreeId(uint256 _lastRegualarTreeId)
+        external
+        override
+        ifNotPaused
+        onlyDataManager
+    {
+        require(
+            _lastRegualarTreeId > lastRegualarTreeId,
+            "Input must be gt last regular tree"
+        );
+
+        lastRegualarTreeId = _lastRegualarTreeId;
+
+        emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
+    }
+
+    /**
      * @dev admin or allowed verifier can verify or rejects the pending trees
      * @param _tempTreeId tempTreeId to verify
      * @param _isVerified true for verify and false for reject

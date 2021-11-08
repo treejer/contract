@@ -74,11 +74,11 @@ contract("Tree", (accounts) => {
   it("safe mint and exist", async () => {
     const tokenId1 = 2;
     await treeInstance
-      .safeMint(userAccount1, tokenId1, { from: userAccount2 })
+      .mint(userAccount1, tokenId1, { from: userAccount2 })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
     await treeInstance
-      .safeMint(userAccount1, tokenId1, { from: deployerAccount })
+      .mint(userAccount1, tokenId1, { from: deployerAccount })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
     await Common.addTreejerContractRole(
@@ -91,13 +91,17 @@ contract("Tree", (accounts) => {
 
     assert.equal(isExistBefore, false, "exist is not true");
 
-    await treeInstance.safeMint(userAccount1, tokenId1, { from: userAccount3 });
+    await treeInstance.mint(userAccount1, tokenId1, { from: userAccount3 });
 
     const owner = await treeInstance.ownerOf(tokenId1);
     const isExistAfter = await treeInstance.exists(tokenId1);
 
     assert.equal(owner, userAccount1, "owner is not correct");
     assert.equal(isExistAfter, true, "exist is not correct");
+
+    await treeInstance.mint(treeInstance.address, 5, {
+      from: userAccount3,
+    });
   });
 
   it("minted before", async () => {
@@ -109,10 +113,10 @@ contract("Tree", (accounts) => {
       deployerAccount
     );
 
-    await treeInstance.safeMint(userAccount1, tokenId1, { from: userAccount3 });
+    await treeInstance.mint(userAccount1, tokenId1, { from: userAccount3 });
 
     await treeInstance
-      .safeMint(userAccount2, tokenId1, { from: userAccount3 })
+      .mint(userAccount2, tokenId1, { from: userAccount3 })
       .should.be.rejectedWith(erc721ErrorMsg.MINTED_BEFORE);
   });
 
@@ -125,7 +129,7 @@ contract("Tree", (accounts) => {
       deployerAccount
     );
 
-    await treeInstance.safeMint(userAccount1, tokenId1, {
+    await treeInstance.mint(userAccount1, tokenId1, {
       from: userAccount3,
     });
 

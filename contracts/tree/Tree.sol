@@ -84,12 +84,12 @@ contract Tree is ERC721Upgradeable, ITree {
     /**
      * @dev mint {_tokenId} to {_to}
      */
-    function safeMint(address _to, uint256 _tokenId)
+    function mint(address _to, uint256 _tokenId)
         external
         override
         onlyTreejerContract
     {
-        _safeMint(_to, _tokenId);
+        _mint(_to, _tokenId);
     }
 
     /**

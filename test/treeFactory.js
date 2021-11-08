@@ -4845,7 +4845,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      await treeTokenInstance.safeMint(userAccount2, treeId, {
+      await treeTokenInstance.mint(userAccount2, treeId, {
         from: deployerAccount,
       });
 
@@ -5670,7 +5670,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount,
         deployerAccount
       );
-      await treeTokenInstance.safeMint(userAccount4, 10001, {
+      await treeTokenInstance.mint(userAccount4, 10001, {
         from: deployerAccount,
       });
 

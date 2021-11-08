@@ -462,7 +462,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         onlyTreejerContract
     {
         trees[_treeId].saleType = 0;
-        treeToken.safeMint(_funder, _treeId);
+        treeToken.mint(_funder, _treeId);
     }
 
     /**
@@ -644,7 +644,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         trees[tempLastFundedTreeId].saleType = 0;
 
-        treeToken.safeMint(_funder, tempLastFundedTreeId);
+        treeToken.mint(_funder, tempLastFundedTreeId);
 
         return tempLastFundedTreeId;
     }
@@ -668,7 +668,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         treeData.saleType = 0;
 
-        treeToken.safeMint(_funder, _treeId);
+        treeToken.mint(_funder, _treeId);
     }
 
     /**

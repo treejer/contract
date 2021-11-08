@@ -20,7 +20,7 @@ interface ITree is IERC721Upgradeable {
     /**
      * @dev mint {_tokenId} to {_to}
      */
-    function safeMint(address _to, uint256 _tokenId) external;
+    function mint(address _to, uint256 _tokenId) external;
 
     /**
      * @dev set attribute and symbol for a tokenId based on {_uniquenessFactor}

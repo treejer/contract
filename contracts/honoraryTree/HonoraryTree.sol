@@ -351,7 +351,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
             )
         );
 
-        uint64 selectedSymbol;
+        uint64 selectedSymbol = 0;
         uint256 remainedSymbolCount;
         uint256 selectedFreeSymbolIndex;
         uint256 index;

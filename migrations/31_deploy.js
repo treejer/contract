@@ -1,21 +1,17 @@
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
-const Planter = artifacts.require("Planter.sol");
-const B = artifacts.require("B.sol");
-
-const A = artifacts.require("A.sol");
 
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 module.exports = async function (deployer, network, accounts) {
   const PLANTER_ROLE =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
-  console.log("Deploying AccessRestriction...");
-  await deployProxy(AccessRestriction, [accounts[0]], {
-    deployer,
-    initializer: "initialize",
-    unsafeAllowCustomTypes: true,
-  }).then(() => {
-    console.log("ar address", AccessRestriction.address);
-  });
+  // console.log("Deploying AccessRestriction...");
+  // await deployProxy(AccessRestriction, [accounts[0]], {
+  //   deployer,
+  //   initializer: "initialize",
+  //   unsafeAllowCustomTypes: true,
+  // }).then(() => {
+  //   console.log("ar address", AccessRestriction.address);
+  // });
 
   await AccessRestriction.deployed().then(async (instance) => {
     await instance.grantRole(PLANTER_ROLE, accounts[1], { from: accounts[0] });
@@ -37,4 +33,3 @@ module.exports = async function (deployer, network, accounts) {
   // let b = await B.deployed();
   // console.log("b.address", b.address);
 };
-

@@ -17,7 +17,8 @@ contract PlanterEchidnaTest {
     /** NOTE {isPlanter} set inside the initialize to {true} */
     bool internal isPlanter;
 
-    IAccessRestriction internal accessRestriction;
+    IAccessRestriction internal accessRestriction =
+        IAccessRestriction(0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c);
 
     /** NOTE mapping of planter address to PlanterData */
     mapping(address => PlanterData) internal planters;
@@ -33,9 +34,12 @@ contract PlanterEchidnaTest {
         internal organizationMemberShare;
 
     bytes32 internal constant PLANTER_ROLE = keccak256("PLANTER_ROLE");
+    bytes32 internal constant TREEJER_CONTRACT_ROLE =
+        keccak256("TREEJER_CONTRACT_ROLE");
     bytes32 internal constant DATA_MANAGER_ROLE =
         keccak256("DATA_MANAGER_ROLE");
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
+    Planter internal planterContract = new Planter();
 
     function _msgSender() internal view returns (address) {
         return msg.sender;
@@ -48,13 +52,7 @@ contract PlanterEchidnaTest {
         uint16 _countryCode,
         address _invitedBy,
         address _organization
-    ) internal {
-        Planter b = new Planter();
-
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-
+    ) public {
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
         if (_invitedBy != address(0)) {
@@ -67,33 +65,35 @@ contract PlanterEchidnaTest {
             accessRestriction.grantRole(PLANTER_ROLE, _organization);
             accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-            (bool success1, bytes memory data1) = address(b).delegatecall(
-                abi.encodeWithSignature(
-                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                    _organization,
-                    0,
-                    0,
-                    0,
-                    100,
-                    address(0)
-                )
-            );
+            (bool success1, bytes memory data1) = address(planterContract)
+                .delegatecall(
+                    abi.encodeWithSignature(
+                        "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                        _organization,
+                        0,
+                        0,
+                        0,
+                        100,
+                        address(0)
+                    )
+                );
             accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
             require(success1, "organization join problem");
         }
 
-        (bool success2, bytes memory data2) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "join(uint8,uint64,uint64,uint16,address,address)",
-                tempPlanterType,
-                _longitude,
-                _latitude,
-                _countryCode,
-                _invitedBy,
-                _organization
-            )
-        );
+        (bool success2, bytes memory data2) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "join(uint8,uint64,uint64,uint16,address,address)",
+                    tempPlanterType,
+                    _longitude,
+                    _latitude,
+                    _countryCode,
+                    _invitedBy,
+                    _organization
+                )
+            );
 
         require(success2, "planter join problem");
 
@@ -129,13 +129,7 @@ contract PlanterEchidnaTest {
         uint16 _countryCode,
         uint32 _supplyCap,
         address _invitedBy
-    ) internal {
-        Planter b = new Planter();
-
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-
+    ) public {
         if (_invitedBy != address(0)) {
             accessRestriction.grantRole(PLANTER_ROLE, _invitedBy);
         }
@@ -145,17 +139,18 @@ contract PlanterEchidnaTest {
         }
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-        (bool success1, bytes memory data1) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                _organization,
-                _longitude,
-                _latitude,
-                _countryCode,
-                _supplyCap,
-                _invitedBy
-            )
-        );
+        (bool success1, bytes memory data1) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                    _organization,
+                    _longitude,
+                    _latitude,
+                    _countryCode,
+                    _supplyCap,
+                    _invitedBy
+                )
+            );
         accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
         require(success1, "organization join problem");
@@ -179,13 +174,7 @@ contract PlanterEchidnaTest {
         uint256 _planterType,
         address _organization1,
         address _organization2
-    ) internal {
-        Planter b = new Planter();
-
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-
+    ) public {
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
         uint256 tempPlanterType = _planterType % 2 == 0 ? 1 : 3;
@@ -195,33 +184,35 @@ contract PlanterEchidnaTest {
 
             accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-            (bool success1, bytes memory data1) = address(b).delegatecall(
-                abi.encodeWithSignature(
-                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                    _organization1,
-                    0,
-                    0,
-                    0,
-                    100,
-                    address(0)
-                )
-            );
+            (bool success1, bytes memory data1) = address(planterContract)
+                .delegatecall(
+                    abi.encodeWithSignature(
+                        "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                        _organization1,
+                        0,
+                        0,
+                        0,
+                        100,
+                        address(0)
+                    )
+                );
             accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
             require(success1, "organization join problem");
         }
 
-        (bool success2, bytes memory data2) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "join(uint8,uint64,uint64,uint16,address,address)",
-                tempPlanterType,
-                0,
-                0,
-                0,
-                0,
-                _organization1
-            )
-        );
+        (bool success2, bytes memory data2) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "join(uint8,uint64,uint64,uint16,address,address)",
+                    tempPlanterType,
+                    0,
+                    0,
+                    0,
+                    0,
+                    _organization1
+                )
+            );
 
         require(success2, "planter join problem");
 
@@ -232,29 +223,31 @@ contract PlanterEchidnaTest {
 
             accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-            (bool success4, bytes memory data4) = address(b).delegatecall(
-                abi.encodeWithSignature(
-                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                    _organization2,
-                    0,
-                    0,
-                    0,
-                    100,
-                    address(0)
-                )
-            );
+            (bool success4, bytes memory data4) = address(planterContract)
+                .delegatecall(
+                    abi.encodeWithSignature(
+                        "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                        _organization2,
+                        0,
+                        0,
+                        0,
+                        100,
+                        address(0)
+                    )
+                );
             accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
             require(success4, "organization join problem");
         }
 
-        (bool success3, bytes memory data3) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "updatePlanterType(uint8,address)",
-                newPlanterType,
-                _organization2
-            )
-        );
+        (bool success3, bytes memory data3) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "updatePlanterType(uint8,address)",
+                    newPlanterType,
+                    _organization2
+                )
+            );
 
         require(success3, "update planter type is not ok");
 
@@ -271,30 +264,25 @@ contract PlanterEchidnaTest {
     function check_accept_planter_by_organization(
         address _planter,
         bool _acceptance
-    ) internal {
-        Planter b = new Planter();
-
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-
+    ) public {
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
         accessRestriction.grantRole(PLANTER_ROLE, _planter);
 
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-        (bool success1, bytes memory data1) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                msg.sender,
-                0,
-                0,
-                0,
-                100,
-                address(0)
-            )
-        );
+        (bool success1, bytes memory data1) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                    msg.sender,
+                    0,
+                    0,
+                    0,
+                    100,
+                    address(0)
+                )
+            );
 
         accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
@@ -307,13 +295,14 @@ contract PlanterEchidnaTest {
             memberOf[_planter] = msg.sender;
         }
 
-        (bool success2, bytes memory data2) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "acceptPlanterByOrganization(address,bool)",
-                _planter,
-                _acceptance
-            )
-        );
+        (bool success2, bytes memory data2) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "acceptPlanterByOrganization(address,bool)",
+                    _planter,
+                    _acceptance
+                )
+            );
 
         require(success2, "planter accept problem");
 
@@ -325,29 +314,24 @@ contract PlanterEchidnaTest {
         }
     }
 
-    function check_update_supply_cap(uint32 _supplyCap) internal {
-        Planter b = new Planter();
-
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-
+    function check_update_supply_cap(uint32 _supplyCap) public {
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
         // accessRestriction.grantRole(PLANTER_ROLE, _planter);
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-        (bool success1, bytes memory data1) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "join(uint8,uint64,uint64,uint16,address,address)",
-                1,
-                0,
-                0,
-                0,
-                address(0),
-                address(0)
-            )
-        );
+        (bool success1, bytes memory data1) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "join(uint8,uint64,uint64,uint16,address,address)",
+                    1,
+                    0,
+                    0,
+                    0,
+                    address(0),
+                    address(0)
+                )
+            );
 
         require(success1, "planter join problem");
 
@@ -358,13 +342,14 @@ contract PlanterEchidnaTest {
 
         // assert(memberOf[msg.sender] == _organization);
         assert(_planterData.supplyCap == 100);
-        (bool success2, bytes memory data2) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "updateSupplyCap(address,uint32)",
-                msg.sender,
-                _supplyCap
-            )
-        );
+        (bool success2, bytes memory data2) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "updateSupplyCap(address,uint32)",
+                    msg.sender,
+                    _supplyCap
+                )
+            );
 
         require(success2, "can't update supply cap");
 
@@ -383,25 +368,24 @@ contract PlanterEchidnaTest {
         address _planter,
         uint256 _share
     ) public {
-        Planter b = _initialize_contracts();
-
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
         accessRestriction.grantRole(PLANTER_ROLE, _planter);
 
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
-        (bool success1, bytes memory data1) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
-                msg.sender,
-                0,
-                0,
-                0,
-                100,
-                address(0)
-            )
-        );
+        (bool success1, bytes memory data1) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "joinOrganization(address,uint64,uint64,uint16,uint32,address)",
+                    msg.sender,
+                    0,
+                    0,
+                    0,
+                    100,
+                    address(0)
+                )
+            );
 
         accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
 
@@ -417,27 +401,43 @@ contract PlanterEchidnaTest {
 
         uint256 shareValue = _share % 11003;
 
-        (bool success2, bytes memory data2) = address(b).delegatecall(
-            abi.encodeWithSignature(
-                "updateOrganizationMemberShare(address,uint256)",
-                _planter,
-                shareValue
-            )
-        );
+        (bool success2, bytes memory data2) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "updateOrganizationMemberShare(address,uint256)",
+                    _planter,
+                    shareValue
+                )
+            );
 
         require(success2);
 
         assert(organizationMemberShare[msg.sender][_planter] == shareValue);
     }
 
-    function check_reduce_planted_count(address _planter) public {}
+    function check_reduce_planted_count(address _planter, uint32 _plantedCount)
+        public
+    {
+        require(_planter != address(0));
 
-    function _initialize_contracts() internal returns (Planter) {
-        Planter planter = new Planter();
+        accessRestriction.grantRole(TREEJER_CONTRACT_ROLE, msg.sender);
+        PlanterData storage planterData = planters[_planter];
 
-        accessRestriction = IAccessRestriction(
-            0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c
-        );
-        return (planter);
+        uint32 plantedCount = _plantedCount % 100;
+
+        if (_planter != address(0)) {
+            planterData.planterType = 2;
+            planterData.plantedCount = plantedCount;
+        }
+
+        (bool success, bytes memory data) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature("reducePlantedCount(address)", _planter)
+            );
+
+        require(success);
+        // assert(planterData.plantedCount == -1);
+
+        assert(planterData.plantedCount == plantedCount - 1);
     }
 }

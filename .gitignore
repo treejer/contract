@@ -39,3 +39,4 @@ backup-migrations
 
 #echidna
 crytic-export
+echidna-test

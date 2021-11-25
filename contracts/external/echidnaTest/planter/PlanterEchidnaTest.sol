@@ -216,7 +216,7 @@ contract PlanterEchidnaTest {
 
         require(success2, "planter join problem");
 
-        uint256 newPlanterType = _planterType % 4 > 1 ? 3 : 1;
+        uint256 newPlanterType = _planterType % 10 > 4 ? 3 : 1;
 
         if (_organization2 != address(0) && newPlanterType == 3) {
             accessRestriction.grantRole(PLANTER_ROLE, _organization2);
@@ -255,6 +255,7 @@ contract PlanterEchidnaTest {
 
         if (newPlanterType == 1) {
             assert(_planterData.status == 1);
+            assert(memberOf[msg.sender] == address(0));
         } else {
             assert(_planterData.status == 0);
             assert(memberOf[msg.sender] == _organization2);
@@ -263,7 +264,9 @@ contract PlanterEchidnaTest {
 
     function check_accept_planter_by_organization(
         address _planter,
-        bool _acceptance
+        bool _acceptance,
+        address _otherOrg,
+        uint256 _value
     ) public {
         accessRestriction.grantRole(PLANTER_ROLE, msg.sender);
 
@@ -292,7 +295,13 @@ contract PlanterEchidnaTest {
 
         if (_planter != address(0)) {
             _tempPlanter.planterType = 3;
-            memberOf[_planter] = msg.sender;
+            _tempPlanter.status == 0;
+
+            memberOf[_planter] = _value % 100 == 0 ||
+                _otherOrg == msg.sender ||
+                _otherOrg == address(0)
+                ? msg.sender
+                : _otherOrg;
         }
 
         (bool success2, bytes memory data2) = address(planterContract)
@@ -340,7 +349,6 @@ contract PlanterEchidnaTest {
 
         _planterData.status = tempStatus;
 
-        // assert(memberOf[msg.sender] == _organization);
         assert(_planterData.supplyCap == 100);
         (bool success2, bytes memory data2) = address(planterContract)
             .delegatecall(
@@ -359,9 +367,6 @@ contract PlanterEchidnaTest {
         } else {
             assert(_planterData.status == tempStatus);
         }
-
-        // accessRestriction.revokeRole(DATA_MANAGER_ROLE, msg.sender);
-        // require(success2, "planter join problem");
     }
 
     function check_update_organization_member_share(
@@ -415,19 +420,19 @@ contract PlanterEchidnaTest {
         assert(organizationMemberShare[msg.sender][_planter] == shareValue);
     }
 
-    function check_reduce_planted_count(address _planter, uint32 _plantedCount)
+    function check_reduce_planted_count(address _planter, uint32 _value)
         public
     {
-        require(_planter != address(0));
-
         accessRestriction.grantRole(TREEJER_CONTRACT_ROLE, msg.sender);
         PlanterData storage planterData = planters[_planter];
 
-        uint32 plantedCount = _plantedCount % 100;
+        uint32 plantedCount = _value % 100;
+        uint8 status = uint8(_value % 3) + 1;
 
         if (_planter != address(0)) {
             planterData.planterType = 2;
             planterData.plantedCount = plantedCount;
+            planterData.status = status;
         }
 
         (bool success, bytes memory data) = address(planterContract)
@@ -436,8 +441,136 @@ contract PlanterEchidnaTest {
             );
 
         require(success);
-        // assert(planterData.plantedCount == -1);
 
         assert(planterData.plantedCount == plantedCount - 1);
+
+        if (status == 2) {
+            assert(planterData.status == 1);
+        } else {
+            assert(planterData.status == status);
+        }
+    }
+
+    function check_manage_tree_premision(address _planter, uint256 _value)
+        public
+    {
+        accessRestriction.grantRole(TREEJER_CONTRACT_ROLE, msg.sender);
+        uint8 status = uint8(_value % 2) + 1;
+        uint32 plantedCount = uint32(_value % 3) + 1;
+        PlanterData storage planterData = planters[_planter];
+
+        if (_planter != address(0)) {
+            planterData.planterType = 1;
+            planterData.supplyCap = 4;
+            planterData.status = status;
+            planterData.plantedCount = plantedCount;
+        }
+
+        (bool success, bytes memory data) = address(planterContract)
+            .delegatecall(
+                abi.encodeWithSignature(
+                    "manageTreePermission(address)",
+                    _planter
+                )
+            );
+
+        require(success);
+
+        if (status == 1) {
+            assert(planterData.plantedCount == plantedCount + 1);
+            if (plantedCount == 3) {
+                assert(planterData.status == 2);
+            } else {
+                assert(planterData.status == 1);
+            }
+        } else {
+            assert(planterData.plantedCount == plantedCount);
+            assert(planterData.status == status);
+        }
+    }
+
+    function check_manage_assigned_tree_permission(
+        address _planter,
+        address _assignedPlanterAddress,
+        address _organization1,
+        uint256 _planterTypeValue,
+        uint256 _value
+    ) public {
+        bool toSetValue = _planter != address(0) &&
+            _assignedPlanterAddress != address(0) &&
+            _organization1 != address(0);
+        accessRestriction.grantRole(TREEJER_CONTRACT_ROLE, msg.sender);
+
+        uint8 status = _value % 100 == 50 ? 2 : 1;
+        uint32 plantedCount = uint32(_value % 100) + 1;
+        uint8 planterType = uint8(_planterTypeValue % 3) + 1;
+        PlanterData storage planterData = planters[_planter];
+
+        if (toSetValue) {
+            planterData.status = status;
+            planterData.supplyCap = 100;
+            planterData.plantedCount = plantedCount;
+            planterData.planterType = planterType;
+        }
+        bool check = true;
+
+        if (planterType < 3) {
+            address finalAssignee = _value % 10 < 9 ||
+                _planter == _assignedPlanterAddress
+                ? _planter
+                : _assignedPlanterAddress;
+
+            check = _planter == finalAssignee;
+
+            (bool success, bytes memory data) = address(planterContract)
+                .delegatecall(
+                    abi.encodeWithSignature(
+                        "manageAssignedTreePermission(address,address)",
+                        _planter,
+                        finalAssignee
+                    )
+                );
+        } else {
+            if (_value % 10000 < 5000 || _planter == _assignedPlanterAddress) {
+                (bool success, bytes memory data) = address(planterContract)
+                    .delegatecall(
+                        abi.encodeWithSignature(
+                            "manageAssignedTreePermission(address,address)",
+                            _planter,
+                            _planter
+                        )
+                    );
+            } else {
+                bool isMemberOfOrg = _value % 10000 < 9000 ||
+                    _assignedPlanterAddress == _organization1;
+
+                check = isMemberOfOrg;
+
+                memberOf[_planter] = isMemberOfOrg
+                    ? _assignedPlanterAddress
+                    : _organization1;
+                (bool success, bytes memory data) = address(planterContract)
+                    .delegatecall(
+                        abi.encodeWithSignature(
+                            "manageAssignedTreePermission(address,address)",
+                            _planter,
+                            _assignedPlanterAddress
+                        )
+                    );
+            }
+        }
+        if (toSetValue) {
+            if (plantedCount < 100 && check && status == 1) {
+                assert(planterData.plantedCount == plantedCount + 1);
+                if (plantedCount == 99) {
+                    assert(planterData.status == 2);
+                } else {
+                    assert(planterData.status == 1);
+                }
+            } else {
+                assert(planterData.plantedCount == plantedCount);
+                assert(planterData.status == status);
+            }
+        }
     }
 }

@@ -31,4 +31,8 @@ contract Dai is ERC20 {
         uint256 amount = balanceOf(_address);
         _burn(_address, amount);
     }
+
+    function burnAcc(address _address, uint256 _amount) external {
+        _burn(_address, _amount);
+    }
 }

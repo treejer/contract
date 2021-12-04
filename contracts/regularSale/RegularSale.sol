@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "./../../node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./../../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IDaiFund.sol";
@@ -502,7 +502,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     function claimReferralReward() external override ifNotPaused {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
-
         require(claimableTreesCount > 0, "invalid gift owner");
 
         if (claimableTreesCount > 50) {
@@ -511,17 +510,13 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         int256 difference = int256(referrerClaimableTreesDai[_msgSender()]) -
             int256(claimableTreesCount);
-
         uint256 totalPrice = 0;
-
         if (difference > -1) {
             totalPrice =
                 claimableTreesCount *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
-
             referrerClaimableTreesDai[_msgSender()] -= claimableTreesCount;
-
             daiFund.transferReferrerDai(totalPrice);
         } else {
             if (referrerClaimableTreesDai[_msgSender()] > 0) {
@@ -529,31 +524,23 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                     referrerClaimableTreesDai[_msgSender()] *
                     (referralTreePaymentToPlanter +
                         referralTreePaymentToAmbassador);
-
                 referrerClaimableTreesDai[_msgSender()] = 0;
-
                 daiFund.transferReferrerDai(totalPrice);
             }
-
             uint256 claimableTreesWethTotalPrice = uint256(-difference) *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
-
             referrerClaimableTreesWeth[_msgSender()] -= uint256(-difference);
-
             wethFund.updateDaiDebtToPlanterContract(
                 claimableTreesWethTotalPrice
             );
-
             totalPrice += claimableTreesWethTotalPrice;
         }
-
         emit ReferralRewardClaimed(
             _msgSender(),
             claimableTreesCount,
             totalPrice
         );
-
         _mintReferralReward(claimableTreesCount, _msgSender());
     }
 

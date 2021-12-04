@@ -1,7 +1,7 @@
-prefix: "echidna_"
+prefix: "sakan_"
 initialize: "contracts/external/echidnaTest/regularSale/regularSaleData.json"
 multi-abi: true
-seqLen: 1
+seqLen: 100
 testLimit: 5000
 stopOnFail: true
 # sender: ["0x00000000000000000000000000000000DeaDBeef"]
@@ -10,7 +10,7 @@ shrinkLimit: 200
 # coverage: true
 # corpusDir: "cover"
 
-# seed: -2977987884183527761
+# seed: 2422014062571935111
 # cryticArgs: ['--truffle-build-directory', 'app/src/contracts/'] # needed by drizzle
 
 #format can be "text" or "json" for different output (human or machine readable)

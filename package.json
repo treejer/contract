@@ -17,6 +17,8 @@
     "arb-ethers-web3-bridge": "^0.7.3",
     "dotenv": "^8.2.0",
     "ethers": "^5.1.0",
+    "ganache": "^6.4.5",
+    "ganache-cli": "^6.12.2",
     "truffle": "^5.4.16"
   },
   "devDependencies": {

@@ -147,6 +147,7 @@ contract PlanterEchidnaTest {
         if (_organization != address(0)) {
             accessRestriction.grantRole(PLANTER_ROLE, _organization);
         }
+        
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
         (bool success1, bytes memory data1) = address(planterContract)

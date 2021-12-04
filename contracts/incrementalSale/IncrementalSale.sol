@@ -1,8 +1,8 @@
 // // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "./../../node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./../../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IWethFund.sol";

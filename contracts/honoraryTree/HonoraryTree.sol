@@ -28,7 +28,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
     uint256 public override upTo;
     uint256 public override prePaidTreeCount;
 
-    /**NOTE {referralTreePaymentToPlanter} is share of plater when a tree claimed for someone*/
+    /**NOTE {referralTreePaymentToPlanter} is share of planter when a tree claimed for someone*/
     uint256 public override referralTreePaymentToPlanter;
     /**NOTE {referralTreePaymentToAmbassador} is share of ambassador when a tree claimed for someone*/
     uint256 public override referralTreePaymentToAmbassador;

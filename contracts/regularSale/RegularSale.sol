@@ -106,7 +106,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         isRegularSale = true;
         lastFundedTreeId = 10000;
-        maxTreeSupply = 1000000;
+        maxTreeSupply = 1e6;
 
         referralTriggerCount = 20;
         price = _price;

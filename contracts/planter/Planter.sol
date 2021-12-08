@@ -250,7 +250,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     }
 
     /**
-     * @dev admin add a plater as organization (planterType 2) so planterType 3
+     * @dev admin add a planter as organization (planterType 2) so planterType 3
      * can be member of these planters.
      * @param _organization address of organization planter
      * @param _longitude longitude value

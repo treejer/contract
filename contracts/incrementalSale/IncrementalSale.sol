@@ -221,7 +221,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         require(_startTreeId > 100, "trees are under Auction");
         require(_increments > 0, "incremental period should be positive");
         require(
-            allocation.exists(_startTreeId),
+            allocation.allocationExists(_startTreeId),
             "equivalant fund Model not exists"
         );
 
@@ -546,8 +546,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
     ) private {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        uint8 funderRank = attribute.getFunderRank(_funder);
-
         for (uint256 i = 0; i < _count; i++) {
             uint256 treePrice = incSaleData.initialPrice +
                 (((_tempLastSold - incSaleData.startTreeId) /
@@ -577,15 +575,27 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
                 )
             );
 
-            attribute.createSymbol(
-                _tempLastSold,
-                randTree,
-                _funder,
-                funderRank,
-                16
-            );
+            _createSymbol(_tempLastSold, randTree, _funder);
 
             _tempLastSold += 1;
         }
+    }
+
+    function _createSymbol(
+        uint256 _tempLastSold,
+        bytes32 _randTree,
+        address _funder
+    ) private {
+        uint8 funderRank = attribute.getFunderRank(_funder);
+
+        bool symbolCreated = attribute.createSymbol(
+            _tempLastSold,
+            _randTree,
+            _funder,
+            funderRank,
+            16
+        );
+
+        require(symbolCreated, "symbol not generated");
     }
 }

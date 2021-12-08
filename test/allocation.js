@@ -762,7 +762,7 @@ contract("Allocation", (accounts) => {
 
   //--------------------------------------------------- exists ------------------------------------
   it("Check AllocationDataExist event", async () => {
-    let hasAllocation0 = await allocationInstance.exists(0);
+    let hasAllocation0 = await allocationInstance.allocationExists(0);
 
     assert.equal(hasAllocation0, false, "hasAllocation not true");
 
@@ -783,11 +783,11 @@ contract("Allocation", (accounts) => {
     await allocationInstance.assignAllocationToTree(4, 10, 0, {
       from: dataManager,
     });
-    let hasAllocation1 = await allocationInstance.exists(1);
+    let hasAllocation1 = await allocationInstance.allocationExists(1);
 
-    let hasAllocation7 = await allocationInstance.exists(7);
+    let hasAllocation7 = await allocationInstance.allocationExists(7);
 
-    let hasAllocation11 = await allocationInstance.exists(11);
+    let hasAllocation11 = await allocationInstance.allocationExists(11);
 
     assert.equal(hasAllocation1, false, "hasAllocation not true");
     assert.equal(hasAllocation7, true, "hasAllocation not true");

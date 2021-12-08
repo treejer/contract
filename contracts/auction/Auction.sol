@@ -188,7 +188,10 @@ contract Auction is Initializable, RelayRecipient, IAuction {
         uint256 _intialPrice,
         uint256 _bidInterval
     ) external override ifNotPaused onlyDataManager {
-        require(allocation.exists(_treeId), "equivalant fund Model not exists");
+        require(
+            allocation.allocationExists(_treeId),
+            "equivalant fund Model not exists"
+        );
 
         uint32 saleType = treeFactory.manageSaleType(_treeId, 1);
 

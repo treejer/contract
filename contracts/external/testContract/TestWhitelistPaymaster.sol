@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
-import "./IWhitelistPaymaster.sol";
+import "./ITestWhitelistPaymaster.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./../../external/gsn/forwarder/IForwarder.sol";
 
@@ -9,7 +9,7 @@ contract TestWhitelistPaymaster is Initializable {
     function initialize() external initializer {}
 
     function test(address _address) external {
-        IWhitelistPaymaster test1 = IWhitelistPaymaster(_address);
+        ITestWhitelistPaymaster test1 = ITestWhitelistPaymaster(_address);
         bytes memory context;
         bool success = false;
         uint256 gasUseWithoutPost = 110;
@@ -18,7 +18,7 @@ contract TestWhitelistPaymaster is Initializable {
     }
 
     function testPreRelayedCall(address _address) external {
-        IWhitelistPaymaster test1 = IWhitelistPaymaster(_address);
+        ITestWhitelistPaymaster test1 = ITestWhitelistPaymaster(_address);
 
         GsnTypes.RelayRequest memory relayRequest;
         bytes memory signature;

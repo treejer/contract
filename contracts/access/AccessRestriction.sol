@@ -137,7 +137,7 @@ contract AccessRestriction is
         override(PausableUpgradeable, IAccessRestriction)
         returns (bool)
     {
-        return super.paused();
+        return PausableUpgradeable.paused();
     }
 
     /**

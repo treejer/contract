@@ -106,7 +106,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         isRegularSale = true;
         lastFundedTreeId = 10000;
-        maxTreeSupply = 1000000;
+        maxTreeSupply = 1e6;
 
         referralTriggerCount = 20;
         price = _price;
@@ -323,7 +323,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 recipient
             );
 
-            attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+
+            require(successAttr, "attribute not generated");
 
             (
                 uint16 planterShare,
@@ -415,7 +417,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         treeFactory.mintTreeById(treeId, recipient);
 
-        attribute.createAttribute(treeId);
+        bool successAttr = attribute.createAttribute(treeId);
+
+        require(successAttr, "attribute not generated");
 
         (
             uint16 planterShare,
@@ -591,7 +595,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 _referrer
             );
 
-            attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+
+            require(successAttr, "attribute not generated");
 
             planterFundContract.updateProjectedEarnings(
                 tempLastFundedTreeId,

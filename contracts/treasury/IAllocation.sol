@@ -136,5 +136,5 @@ interface IAllocation {
      * @param _treeId id of a tree to check if there is a allocation data
      * @return true if allocation data exists for {_treeId} and false otherwise
      */
-    function exists(uint256 _treeId) external view returns (bool);
+    function allocationExists(uint256 _treeId) external view returns (bool);
 }

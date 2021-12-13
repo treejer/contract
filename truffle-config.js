@@ -156,14 +156,16 @@ module.exports = {
   plugins: ["solidity-coverage"],
   mocha: {
     timeout: 0,
-    // reporter: 'eth-gas-reporter',
-    // reporterOptions: {
-    //   currency: 'USD',
-    //   outputFile: 'eth-gas-reporter.log',
-    //   showTimeSpent: true,
-    //   coinmarketcap: process.env.COINMARKETCAP_APIKEY,
-    //   excludeContracts: ['Migrations']
-    // }
+    reporter: 'eth-gas-reporter',
+    reporterOptions: {
+      token: process.env.GAS_REPORTER_TOKEN,
+      gasPriceApi: process.env.GAS_PRICE_API,
+      currency: 'USD',
+      outputFile: 'eth-gas-reporter.log',
+      showTimeSpent: true,
+      coinmarketcap: process.env.COINMARKETCAP_APIKEY,
+      excludeContracts: ['Migrations']
+    }
   },
 
   // Configure your compilers

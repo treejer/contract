@@ -118,6 +118,8 @@ const RegularSaleErrors = {
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
   INVALID_GIFT_OWNER: "invalid gift owner",
   MAX_SUPPLY: "max supply",
+  MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "max supply must gt lastFundedTree",
+  COUNT_MUST_BE_GT_ZERO: "count must be gt zero",
 };
 
 const IncrementalSaleErrorMsg = {

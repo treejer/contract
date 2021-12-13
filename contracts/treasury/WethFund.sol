@@ -554,27 +554,33 @@ contract WethFund is Initializable, IWethFund {
         uint16 _planterShare,
         uint16 _ambassadorShare
     ) private {
-        uint256 planterAmount = (_amount * _planterShare) / 10000;
-        uint256 ambassadorAmount = (_amount * _ambassadorShare) / 10000;
+        uint256 planterAmount = 0;
+        uint256 ambassadorAmount = 0;
 
-        uint256 sumAmount = planterAmount + ambassadorAmount;
         uint16 sumShare = _planterShare + _ambassadorShare;
 
-        address[] memory path;
-        path = new address[](2);
+        //TODO:add if here
+        if (sumShare > 0) {
+            planterAmount = (_amount * _planterShare) / 10000;
+            ambassadorAmount = (_amount * _ambassadorShare) / 10000;
 
-        path[0] = address(wethToken);
-        path[1] = daiAddress;
+            uint256 sumAmount = planterAmount + ambassadorAmount;
 
-        uint256 daiAmount = sumAmount > 0
-            ? _swapExactTokensForTokens(sumAmount)
-            : 0;
+            address[] memory path;
+            path = new address[](2);
 
-        planterFundContract.updateProjectedEarnings(
-            _treeId,
-            (_planterShare * daiAmount) / sumShare,
-            (_ambassadorShare * daiAmount) / sumShare
-        );
+            path[0] = address(wethToken);
+            path[1] = daiAddress;
+
+            //TODO://remove if
+            uint256 daiAmount = _swapExactTokensForTokens(sumAmount);
+
+            planterFundContract.updateProjectedEarnings(
+                _treeId,
+                (_planterShare * daiAmount) / sumShare,
+                (_ambassadorShare * daiAmount) / sumShare
+            );
+        }
 
         emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }

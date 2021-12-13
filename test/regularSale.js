@@ -361,6 +361,14 @@ contract("regularSale", (accounts) => {
     it("update maxTreeSupply", async () => {
       Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
+      await regularSaleInstance
+        .updateMaxTreeSupply(9900, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(
+          CommonErrorMsg.MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE
+        );
+
       await regularSaleInstance.updateMaxTreeSupply(500000, {
         from: userAccount1,
       });
@@ -646,7 +654,7 @@ contract("regularSale", (accounts) => {
         .fundTreeById(1000010, zeroAddress, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_TREE);
 
       await daiInstance.resetAcc(userAccount1);
     });
@@ -813,6 +821,12 @@ contract("regularSale", (accounts) => {
         Number(await regularSaleInstance.referralTriggerCount()),
         20
       );
+
+      await regularSaleInstance
+        .updateReferralTriggerCount(0, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.COUNT_MUST_BE_GT_ZERO);
 
       let tx = await regularSaleInstance.updateReferralTriggerCount(8, {
         from: dataManager,
@@ -3921,7 +3935,7 @@ contract("regularSale", (accounts) => {
         .fundTreeById(1000001, userAccount7, zeroAddress, {
           from: userAccount2,
         })
-        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_TREE);
 
       await regularSaleInstance.updateMaxTreeSupply(1000001, {
         from: dataManager,

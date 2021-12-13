@@ -1283,7 +1283,7 @@ contract("Planter", (accounts) => {
       .acceptPlanterByOrganization(userAccount6, true, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+      .should.be.rejectedWith(PlanterErrorMsg.ACCEPT_PLANTER_ACCESS_ERROR);
 
     await planterInstance
       .acceptPlanterByOrganization(userAccount4, true, { from: userAccount1 })

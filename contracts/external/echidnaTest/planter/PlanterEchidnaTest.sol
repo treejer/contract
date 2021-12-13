@@ -10,8 +10,8 @@ contract PlanterEchidnaTest {
         uint32 score;
         uint32 supplyCap;
         uint32 plantedCount;
-        uint64 longitude;
-        uint64 latitude;
+        int64 longitude;
+        int64 latitude;
     }
 
     /** NOTE {isPlanter} set inside the initialize to {true} */
@@ -47,8 +47,8 @@ contract PlanterEchidnaTest {
 
     function check_join_planter(
         uint8 _planterType,
-        uint64 _longitude,
-        uint64 _latitude,
+        int64 _longitude,
+        int64 _latitude,
         uint16 _countryCode,
         address _invitedBy,
         address _organization
@@ -134,8 +134,8 @@ contract PlanterEchidnaTest {
 
     function check_join_orgnization(
         address _organization,
-        uint64 _longitude,
-        uint64 _latitude,
+        int64 _longitude,
+        int64 _latitude,
         uint16 _countryCode,
         uint32 _supplyCap,
         address _invitedBy
@@ -147,7 +147,7 @@ contract PlanterEchidnaTest {
         if (_organization != address(0)) {
             accessRestriction.grantRole(PLANTER_ROLE, _organization);
         }
-        
+
         accessRestriction.grantRole(DATA_MANAGER_ROLE, msg.sender);
 
         (bool success1, bytes memory data1) = address(planterContract)

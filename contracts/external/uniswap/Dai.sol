@@ -19,8 +19,20 @@ contract Dai is ERC20 {
         _mint(_address, _amount);
     }
 
+    function setApprove(
+        address _sender,
+        address _spender,
+        uint256 _amount
+    ) external {
+        _approve(_sender, _spender, _amount);
+    }
+
     function resetAcc(address _address) external {
         uint256 amount = balanceOf(_address);
         _burn(_address, amount);
+    }
+
+    function burnAcc(address _address, uint256 _amount) external {
+        _burn(_address, _amount);
     }
 }

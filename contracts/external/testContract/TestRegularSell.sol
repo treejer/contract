@@ -9,4 +9,11 @@ contract TestRegularSale is RegularSale {
     {
         referrerClaimableTreesDai[_referrer] += _count;
     }
+
+    function updateReferrerClaimableTreesWeth2(
+        address _referrer,
+        uint256 _count
+    ) external {
+        referrerClaimableTreesWeth[_referrer] += _count;
+    }
 }

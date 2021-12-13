@@ -1,0 +1,9 @@
+prefix: "sakan_"
+initialize: "contracts/external/echidnaTest/regularSale/regularSaleData.json"
+multi-abi: false
+seqLen: 1
+testLimit: 1
+stopOnFail: true
+contractAddr: "0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb"
+shrinkLimit: 0
+format: "text"

@@ -217,7 +217,8 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        require(_treeCount > 0, "assign at least one tree");
+        //TODO:add treeCount check limit
+        require(_treeCount > 0 && _treeCount < 201, "invalid treeCount");
         require(_startTreeId > 100, "trees are under Auction");
         require(_increments > 0, "incremental period should be positive");
         require(
@@ -266,6 +267,8 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         ifNotPaused
         onlyDataManager
     {
+        //TODO:add limited count check
+        require(_count > 0 && _count < 201, "invalid count");
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         uint256 newStartTreeId = incSaleData.startTreeId + _count;
@@ -299,11 +302,12 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         ifNotPaused
         onlyDataManager
     {
+        //TODO:add treeCount limit
+        require(_treeCount > 0 && _treeCount < 201, "invalid count");
+
         IncrementalSaleData storage incSaleData = incrementalSaleData;
-        require(
-            incSaleData.increments > 0,
-            "incremental period should be positive"
-        );
+        //TODO: change require error
+        require(incSaleData.increments > 0, "incremental sale should be exist");
         require(
             treeFactory.manageSaleTypeBatch(
                 incSaleData.endTreeId,
@@ -423,6 +427,8 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         require(_increments > 0, "incremental period should be positive");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
+        //TODO:add require
+        require(incSaleData.increments > 0, "incremental sale should be exist");
 
         incSaleData.initialPrice = _initialPrice;
         incSaleData.increments = _increments;
@@ -491,7 +497,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
             treeFactory.mintAssignedTree(tempLastSold, recipient);
-
             tempLastSold += 1;
         }
 

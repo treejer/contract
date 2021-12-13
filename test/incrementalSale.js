@@ -394,17 +394,23 @@ contract("IncrementalSale", (accounts) => {
         .createIncrementalSale(101, web3.utils.toWei("0.005"), 0, 100, 400, {
           from: dataManager,
         })
-        .should.be.rejectedWith(IncrementalSaleErrorMsg.TREE_TO_SELL); //must be faild because treeCount is zero
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero
+
+      await iSaleInstance
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 201, 100, 400, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero
 
       /////-----added incrementalSale should has startTreeId>100
 
       await iSaleInstance
-        .createIncrementalSale(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
+        .createIncrementalSale(98, web3.utils.toWei("0.005"), 100, 100, 400, {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.OCCUPIED_TREES); //treeStartId should be >100
 
-      /////-----added incrementalSale should reject becuase caller has not admin role
+      // /////-----added incrementalSale should reject becuase caller has not admin role
 
       await iSaleInstance
         .createIncrementalSale(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
@@ -412,10 +418,10 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      /////-----added incrementalSale should has steps of price change>0
+      // /////-----added incrementalSale should has steps of price change>0
 
       await iSaleInstance
-        .createIncrementalSale(101, web3.utils.toWei("0.005"), 9900, 0, 400, {
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 100, 0, 400, {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
@@ -441,16 +447,9 @@ contract("IncrementalSale", (accounts) => {
       });
 
       await iSaleInstance
-        .createIncrementalSale(
-          101,
-          web3.utils.toWei("0.005"),
-          9900,
-          100,
-          1000,
-          {
-            from: dataManager,
-          }
-        )
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 100, 100, 1000, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
     });
 
@@ -526,16 +525,9 @@ contract("IncrementalSale", (accounts) => {
         { from: dataManager }
       );
       await iSaleInstance
-        .createIncrementalSale(
-          101,
-          web3.utils.toWei("0.005"),
-          9900,
-          100,
-          1000,
-          {
-            from: dataManager,
-          }
-        )
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 150, 100, 1000, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.TREE_PROVIDED_BEFORE); // trees shouldnot be on other provides
     });
 
@@ -692,7 +684,7 @@ contract("IncrementalSale", (accounts) => {
 
     it("Should removeIncrementalSale succesfully", async () => {
       await iSaleInstance
-        .removeIncrementalSale(400, { from: dataManager })
+        .removeIncrementalSale(200, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
@@ -749,12 +741,20 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(Number(tree1301_1.saleType), 0, "sale type is not correct");
 
       await iSaleInstance
-        .removeIncrementalSale(500, {
+        .removeIncrementalSale(200, {
           from: userAccount4,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      const eventTx1 = await iSaleInstance.removeIncrementalSale(500, {
+      const eventTx1 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(100, {
         from: dataManager,
       });
 
@@ -793,7 +793,11 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree601_2.saleType), 2, "2 sale type is not correct");
 
-      const eventTx2 = await iSaleInstance.removeIncrementalSale(400, {
+      const eventTx2 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(200, {
         from: dataManager,
       });
 
@@ -840,13 +844,17 @@ contract("IncrementalSale", (accounts) => {
         "2 sale type is not correct"
       );
 
+      const eventTx3 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
       await iSaleInstance
-        .removeIncrementalSale(400, { from: dataManager })
+        .removeIncrementalSale(200, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      const eventTx3 = await iSaleInstance.removeIncrementalSale(300, {
+      await iSaleInstance.removeIncrementalSale(100, {
         from: dataManager,
       });
 
@@ -1024,7 +1032,7 @@ contract("IncrementalSale", (accounts) => {
         .updateEndTreeId(100, {
           from: dataManager,
         })
-        .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INCREMENTAL_SALE_EXIST);
 
       ////-------updateEndTreeId Should reject because a tree is not available
 
@@ -1095,10 +1103,43 @@ contract("IncrementalSale", (accounts) => {
     ////----------------------------------------------------test updateIncrementalSaleData------------------------------
 
     it("updateIncrementalSaleData should be work successfully", async () => {
-      let eventTx = await iSaleInstance.updateIncrementalSaleData(
+      await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
+
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.createIncrementalSale(
+        101,
         web3.utils.toWei("0.01"),
+        100,
         20,
         1000,
+        {
+          from: dataManager,
+        }
+      );
+
+      const eventTx = await iSaleInstance.updateIncrementalSaleData(
+        web3.utils.toWei("0.02"),
+        50,
+        2000,
         {
           from: dataManager,
         }
@@ -1108,19 +1149,19 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(incrementalSaleData.initialPrice),
-        Number(web3.utils.toWei("0.01")),
+        Number(web3.utils.toWei("0.02")),
         "initialPrice not true"
       );
 
       assert.equal(
         Number(incrementalSaleData.increments),
-        20,
+        50,
         "increments not true"
       );
 
       assert.equal(
         Number(incrementalSaleData.priceJump),
-        1000,
+        2000,
         "priceJump not true"
       );
 
@@ -1148,6 +1189,12 @@ contract("IncrementalSale", (accounts) => {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
+
+      await iSaleInstance
+        .updateIncrementalSaleData(web3.utils.toWei("0.01"), 20, 1000, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INCREMENTAL_SALE_EXIST);
     });
   });
   describe("with financial section", () => {
@@ -2544,7 +2591,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.createIncrementalSale(
         101,
         web3.utils.toWei("0.01"),
-        220,
+        200,
         100,
         1000,
         {

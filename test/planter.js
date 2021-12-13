@@ -2141,7 +2141,7 @@ contract("Planter", (accounts) => {
       from: userAccount1,
     });
 
-    /////////////////// ------------------ fail: plater address not in oragization
+    /////////////////// ------------------ fail: planter address not in oragization
 
     await planterInstance
       .updateOrganizationMemberShare(userAccount3, 2000, {

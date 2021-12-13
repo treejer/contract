@@ -222,7 +222,12 @@ contract Allocation is Initializable, IAllocation {
      * @return true if allocation data exists for {_treeId} and false otherwise
      */
 
-    function exists(uint256 _treeId) external view override returns (bool) {
+    function allocationExists(uint256 _treeId)
+        external
+        view
+        override
+        returns (bool)
+    {
         if (allocationToTrees.length == 0) {
             return false;
         }

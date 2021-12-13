@@ -106,7 +106,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         isRegularSale = true;
         lastFundedTreeId = 10000;
-        maxTreeSupply = 1000000;
+        maxTreeSupply = 1e6;
 
         referralTriggerCount = 20;
         price = _price;
@@ -323,7 +323,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 recipient
             );
 
-            attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+
+            require(successAttr, "attribute not generated");
 
             (
                 uint16 planterShare,
@@ -415,7 +417,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         treeFactory.mintTreeById(treeId, recipient);
 
-        attribute.createAttribute(treeId);
+        bool successAttr = attribute.createAttribute(treeId);
+
+        require(successAttr, "attribute not generated");
 
         (
             uint16 planterShare,
@@ -502,7 +506,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     function claimReferralReward() external override ifNotPaused {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
-
         require(claimableTreesCount > 0, "invalid gift owner");
 
         if (claimableTreesCount > 50) {
@@ -511,17 +514,13 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         int256 difference = int256(referrerClaimableTreesDai[_msgSender()]) -
             int256(claimableTreesCount);
-
         uint256 totalPrice = 0;
-
         if (difference > -1) {
             totalPrice =
                 claimableTreesCount *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
-
             referrerClaimableTreesDai[_msgSender()] -= claimableTreesCount;
-
             daiFund.transferReferrerDai(totalPrice);
         } else {
             if (referrerClaimableTreesDai[_msgSender()] > 0) {
@@ -529,31 +528,23 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                     referrerClaimableTreesDai[_msgSender()] *
                     (referralTreePaymentToPlanter +
                         referralTreePaymentToAmbassador);
-
                 referrerClaimableTreesDai[_msgSender()] = 0;
-
                 daiFund.transferReferrerDai(totalPrice);
             }
-
             uint256 claimableTreesWethTotalPrice = uint256(-difference) *
                 (referralTreePaymentToPlanter +
                     referralTreePaymentToAmbassador);
-
             referrerClaimableTreesWeth[_msgSender()] -= uint256(-difference);
-
             wethFund.updateDaiDebtToPlanterContract(
                 claimableTreesWethTotalPrice
             );
-
             totalPrice += claimableTreesWethTotalPrice;
         }
-
         emit ReferralRewardClaimed(
             _msgSender(),
             claimableTreesCount,
             totalPrice
         );
-
         _mintReferralReward(claimableTreesCount, _msgSender());
     }
 
@@ -591,7 +582,9 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 _referrer
             );
 
-            attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+
+            require(successAttr, "attribute not generated");
 
             planterFundContract.updateProjectedEarnings(
                 tempLastFundedTreeId,

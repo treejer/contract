@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 import "./../../external/gsn/forwarder/IForwarder.sol";
 import "./../../external/gsn/BasePaymaster.sol";
 
-interface IWhitelistPaymaster {
+interface ITestWhitelistPaymaster {
     function postRelayedCall(
         bytes calldata context,
         bool success,

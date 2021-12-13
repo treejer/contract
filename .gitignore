@@ -35,3 +35,8 @@ slither.json
 final-coverage-json
 final-coverage
 backup-migrations
+
+
+#echidna
+crytic-export
+echidna-test

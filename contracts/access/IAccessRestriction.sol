@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.6;
 
-import "./../../node_modules/@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /** @title AccessRestriction interface*/
 

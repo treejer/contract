@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.6;
 
-import "./../../../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Weth is ERC20 {
     constructor(string memory _name, string memory _symbol)

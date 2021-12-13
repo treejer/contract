@@ -81,8 +81,6 @@ contract RegularSaleEchidnaTest {
     bytes32 internal constant DATA_MANAGER_ROLE =
         keccak256("DATA_MANAGER_ROLE");
 
-    event AssertionFailed();
-
     constructor() {
         isRegularSale = true;
         lastFundedTreeId = 10000;
@@ -370,21 +368,30 @@ contract RegularSaleEchidnaTest {
                                 referralTreePaymentToAmbassador))
             );
         } else {
-            _checkClaimReferralReward(data2, countDai);
+            _checkClaimReferralReward(
+                data2,
+                userDaiTreeBefore,
+                userWethTreeBefore
+            );
         }
     }
 
-    function _checkClaimReferralReward(bytes memory _data, uint256 _countDai)
-        private
-        pure
-    {
+    function _checkClaimReferralReward(
+        bytes memory _data,
+        uint256 userDaiTreeBefore,
+        uint256 userWethTreeBefore
+    ) private pure {
+        if (_data.length < 68) {
+            assert(false);
+        }
+
         assembly {
             _data := add(_data, 0x04)
         }
 
         string memory result = abi.decode(_data, (string));
 
-        if (_countDai == 0) {
+        if (userDaiTreeBefore == 0 && userWethTreeBefore == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
                     keccak256(abi.encodePacked(("invalid gift owner")))
@@ -400,6 +407,10 @@ contract RegularSaleEchidnaTest {
         uint256 randomMint,
         uint256 randomApprove
     ) private pure {
+        if (_data.length < 68) {
+            assert(false);
+        }
+
         assembly {
             _data := add(_data, 0x04)
         }

@@ -339,9 +339,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
 
       ////// --------------- fail because of invalid assing allocation data
 
@@ -457,9 +457,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
       //////////////////// ----------------- handle allocation data
 
       await allocationInstance.addAllocationData(
@@ -716,9 +716,9 @@ contract("Auction", (accounts) => {
 
       /////////////////// --------------- handle add tree
 
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
       //////////////////// ----------------- handle allocation data
 
       await allocationInstance.addAllocationData(
@@ -1014,9 +1014,9 @@ contract("Auction", (accounts) => {
       });
 
       const treeId = 1;
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
 
       await allocationInstance.addAllocationData(
         3000,
@@ -1247,13 +1247,13 @@ contract("Auction", (accounts) => {
 
       /////////////////--------------- handle add tree
 
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
 
-      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId2, ipfsHash, {
+      //   from: dataManager,
+      // });
 
       //////////////////// ----------------- handle allocation data
 
@@ -1441,9 +1441,9 @@ contract("Auction", (accounts) => {
 
       /////////////////--------------- handle add tree
 
-      await treeFactoryInstance.listTree(treeId, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId, ipfsHash, {
+      //   from: dataManager,
+      // });
 
       //////////////////// ----------------- handle allocation data
 
@@ -3041,28 +3041,28 @@ contract("Auction", (accounts) => {
         from: dataManager,
       });
 
-      //////// ----------- fail to create auction <<invalid-tree>>
-      await auctionInstance
-        .createAuction(
-          treeId1,
-          Number(startTime),
-          Number(endTime),
-          initialPrice,
-          bidInterval,
-          {
-            from: dataManager,
-          }
-        )
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
+      // //////// ----------- fail to create auction <<invalid-tree>>
+      // await auctionInstance
+      //   .createAuction(
+      //     treeId1,
+      //     Number(startTime),
+      //     Number(endTime),
+      //     initialPrice,
+      //     bidInterval,
+      //     {
+      //       from: dataManager,
+      //     }
+      //   )
+      //   .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
 
       /////////------------------ add tree
-      await treeFactoryInstance.listTree(treeId1, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId1, ipfsHash, {
+      //   from: dataManager,
+      // });
 
-      await treeFactoryInstance.listTree(treeId2, ipfsHash, {
-        from: dataManager,
-      });
+      // await treeFactoryInstance.listTree(treeId2, ipfsHash, {
+      //   from: dataManager,
+      // });
 
       //////////////// ---------------- create auction
 

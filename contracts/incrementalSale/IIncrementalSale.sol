@@ -102,7 +102,8 @@ interface IIncrementalSale {
     function fundTree(
         uint256 _count,
         address _referrer,
-        address _recipient
+        address _recipient,
+        uint256 minDaiOut
     ) external;
 
     /** @dev admin update incrementalSaleData

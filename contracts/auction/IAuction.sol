@@ -117,7 +117,7 @@ interface IAuction {
      * NOTE emit an {AuctionEnded} event if auction does not have bidder
      * @param _auctionId id of auction to end.
      */
-    function endAuction(uint256 _auctionId) external;
+    function endAuction(uint256 _auctionId, uint256 _minDaiout) external;
 
     function initialize(address _accessRestrictionAddress) external;
 

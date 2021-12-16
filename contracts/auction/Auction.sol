@@ -290,7 +290,11 @@ contract Auction is Initializable, RelayRecipient, IAuction {
      * and admin can put that tree in another auction
      * @param auctionId_ id of auction to end.
      */
-    function endAuction(uint256 auctionId_) external override ifNotPaused {
+    function endAuction(uint256 auctionId_, uint256 _minDaiOut)
+        external
+        override
+        ifNotPaused
+    {
         AuctionData storage auctionData = auctions[auctionId_];
 
         require(auctionData.endDate > 0, "Auction is unavailable");
@@ -308,29 +312,7 @@ contract Auction is Initializable, RelayRecipient, IAuction {
 
             require(success, "unsuccessful transfer");
 
-            (
-                uint16 planterShare,
-                uint16 ambassadorShare,
-                uint16 researchShare,
-                uint16 localDevelopmentShare,
-                uint16 insuranceShare,
-                uint16 treasuryShare,
-                uint16 reserve1Share,
-                uint16 reserve2Share
-            ) = allocation.findAllocationData(auctionData.treeId);
-
-            wethFund.fundTree(
-                auctionData.treeId,
-                auctionData.highestBid,
-                planterShare,
-                ambassadorShare,
-                researchShare,
-                localDevelopmentShare,
-                insuranceShare,
-                treasuryShare,
-                reserve1Share,
-                reserve2Share
-            );
+            _mintTree(auctionId_, _minDaiOut);
 
             treeFactory.mintAssignedTree(
                 auctionData.treeId,
@@ -375,5 +357,34 @@ contract Auction is Initializable, RelayRecipient, IAuction {
                 auctions[auctionId_].endDate
             );
         }
+    }
+
+    function _mintTree(uint256 auctionId_, uint256 _minDaiOut) private {
+        AuctionData storage auctionData = auctions[auctionId_];
+
+        (
+            uint16 planterShare,
+            uint16 ambassadorShare,
+            uint16 researchShare,
+            uint16 localDevelopmentShare,
+            uint16 insuranceShare,
+            uint16 treasuryShare,
+            uint16 reserve1Share,
+            uint16 reserve2Share
+        ) = allocation.findAllocationData(auctionData.treeId);
+
+        wethFund.fundTree(
+            _minDaiOut,
+            auctionData.treeId,
+            auctionData.highestBid,
+            planterShare,
+            ambassadorShare,
+            researchShare,
+            localDevelopmentShare,
+            insuranceShare,
+            treasuryShare,
+            reserve1Share,
+            reserve2Share
+        );
     }
 }

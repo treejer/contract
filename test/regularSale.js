@@ -1183,7 +1183,7 @@ contract("regularSale", (accounts) => {
         })
         .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
 
-      await regularSaleInstance.updateMaxTreeSupply(1000001, {
+      await regularSaleInstance.updateMaxTreeSupply(1000002, {
         from: dataManager,
       });
 
@@ -2195,7 +2195,7 @@ contract("regularSale", (accounts) => {
       }
     });
 
-    it.only("2.should request trees successfully (recipient)", async () => {
+    it("2.should request trees successfully (recipient)", async () => {
       const price = Units.convert("7", "eth", "wei");
       const birthDate = parseInt(new Date().getTime() / 1000);
       const countryCode = 2;

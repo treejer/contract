@@ -259,9 +259,10 @@ contract Attribute is Initializable, IAttribute {
     /**
      * @dev generate a random unique attribute using tree attributes 64 bit value
      * @param _treeId id of tree
+     * @param _generationType generation type
      * @return if unique attribute generated successfully
      */
-    function createAttribute(uint256 _treeId)
+    function createAttribute(uint256 _treeId, uint8 _generationType)
         external
         override
         onlyTreejerContract
@@ -274,7 +275,11 @@ contract Attribute is Initializable, IAttribute {
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
-                treeToken.setAttributes(_treeId, uniquenessFactor, 1);
+                treeToken.setAttributes(
+                    _treeId,
+                    uniquenessFactor,
+                    _generationType
+                );
                 uniquenessFactorToGeneratedAttributesCount[
                     uniquenessFactor
                 ] = 1;

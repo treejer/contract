@@ -472,6 +472,7 @@ contract("Attribute", (accounts) => {
           generatedCode1,
           generatedSymbol1,
           generationType1,
+          2,
           { from: userAccount7 }
         )
         .should.be.rejectedWith(
@@ -485,6 +486,7 @@ contract("Attribute", (accounts) => {
         generatedCode1,
         generatedSymbol1,
         generationType1,
+        2,
         { from: dataManager }
       );
 
@@ -644,6 +646,7 @@ contract("Attribute", (accounts) => {
           generatedCode1,
           generatedSymbol1,
           generationType1,
+          2,
           { from: dataManager }
         )
         .should.be.rejectedWith(AttributeErrorMsg.SYMBOL_IS_TAKEN);

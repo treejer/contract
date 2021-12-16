@@ -57,13 +57,15 @@ interface IAttribute {
      * @param _attributeUniquenessFactor unique attribute code to assign
      * @param _symbolUniquenessFactor unique symbol to assign
      * @param _generationType type of attribute assignement
+     * @param _coefficient coefficient value
      * NOTE emit a {AttributeGenerated} event
      */
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
-        uint8 _generationType
+        uint8 _generationType,
+        uint64 _coefficient
     ) external;
 
     /**

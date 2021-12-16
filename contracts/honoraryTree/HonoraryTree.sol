@@ -17,7 +17,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
     struct Recipient {
         uint64 expiryDate;
         uint64 startDate;
-        uint64 status;
+        uint64 coefficient;
     }
 
     /** NOTE {isHonoraryTree} set inside the initialize to {true} */
@@ -270,17 +270,19 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
      * @param _recipient address of recipient
      * @param _startDate start date for {_recipient} to claim tree
      * @param _expiryDate expiry date for {_recipient} to claim tree
+     * @param _coefficient coefficient value
      */
     function addRecipient(
         address _recipient,
         uint64 _startDate,
-        uint64 _expiryDate
+        uint64 _expiryDate,
+        uint64 _coefficient
     ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
         recipientData.expiryDate = _expiryDate;
         recipientData.startDate = _startDate;
-        recipientData.status = 1;
+        recipientData.coefficient = _coefficient;
 
         emit RecipientAdded(_recipient);
     }
@@ -290,18 +292,21 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
      * @param _recipient address of recipient to update date
      * @param _startDate new start date for {_recipient} to claim tree
      * @param _expiryDate new expiry date for {_recipient} to claim tree
+     * @param _coefficient coefficient value
      */
     function updateRecipient(
         address _recipient,
         uint64 _startDate,
-        uint64 _expiryDate
+        uint64 _expiryDate,
+        uint64 _coefficient
     ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
-        require(recipientData.status == 1, "Status must be one");
+        require(recipientData.startDate > 0, "Status must be one");
 
         recipientData.expiryDate = _expiryDate;
         recipientData.startDate = _startDate;
+        recipientData.coefficient = _coefficient;
         emit RecipientUpdated(_recipient);
     }
 
@@ -331,7 +336,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         require(
             recipientData.expiryDate > block.timestamp &&
                 recipientData.startDate < block.timestamp &&
-                recipientData.status == 1,
+                recipientData.startDate > 0,
             "you cant claim tree"
         );
 
@@ -397,7 +402,8 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
                 currentTreeId,
                 uniquenessFactor,
                 selectedSymbol,
-                18
+                18,
+                recipientData.coefficient
             );
 
             planterFundContract.updateProjectedEarnings(

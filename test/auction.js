@@ -423,6 +423,12 @@ contract("Auction", (accounts) => {
 
       let result = await auctionInstance.auctions.call(0);
 
+      assert.equal(
+        (await treeFactoryInstance.trees.call(treeId)).treeStatus,
+        2,
+        "tree status is not correct"
+      );
+
       assert.equal(result.treeId.toNumber(), treeId);
       assert.equal(Number(result.highestBid), Number(initialValue));
       assert.equal(Number(result.bidInterval), Number(bidInterval));
@@ -1310,6 +1316,20 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       }); //succesfully end the auction
 
+      //------------------------- check tree data
+      const treeData1 = await treeFactoryInstance.trees.call(treeId);
+
+      assert.equal(
+        Number(treeData1.treeStatus),
+        2,
+        "tree1 status is not correct"
+      );
+      assert.equal(
+        Number(treeData1.saleType),
+        0,
+        "tree1 sale type is not correct"
+      );
+
       let addressGetToken = await treeTokenInstance.ownerOf(treeId);
 
       assert.equal(addressGetToken, bidderAccount, "token not true mint");
@@ -1354,14 +1374,43 @@ contract("Auction", (accounts) => {
       let failEndNoBidder = await auctionInstance.endAuction(1, {
         from: deployerAccount,
       });
-
+      // check tree data
       const treeData2 = await treeFactoryInstance.trees.call(treeId2);
 
       assert.equal(Number(treeData2.saleType), 0, "provide status is not ok");
 
+      assert.equal(
+        Number(treeData2.treeStatus),
+        2,
+        "tree2 status is not correct"
+      );
+
       truffleAssert.eventEmitted(failEndNoBidder, "AuctionEnded", (ev) => {
         return Number(ev.auctionId) == 1 && Number(ev.treeId) == treeId2;
       });
+
+      //////////////////////// create another auction for treeId2 that ended with no bidder
+
+      await auctionInstance.createAuction(
+        treeId2,
+        Number(startTime),
+        Number(endTime),
+        web3.utils.toWei("1.5"),
+        web3.utils.toWei("0.5"),
+        { from: dataManager }
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId2)).saleType),
+        1,
+        "provide status is not ok"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId2)).treeStatus),
+        2,
+        "tree2 status is not correct"
+      );
 
       await wethInstance.resetAcc(bidderAccount2);
     });
@@ -1785,7 +1834,7 @@ contract("Auction", (accounts) => {
 
     // ---------------------------------------complex test (auction and treeFactory and treasury)-------------------------------------
 
-    it("complex test 1 with referral", async () => {
+    it.only("complex test 1 with referral", async () => {
       regularSaleInstance = await RegularSale.new({
         from: deployerAccount,
       });
@@ -1865,6 +1914,21 @@ contract("Auction", (accounts) => {
         planterInstance,
         dataManager
       );
+
+      ///////////////// check tree data
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).treeStatus),
+        4,
+        "tree status is not correct"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).saleType),
+        0,
+        "tree sale type is not correct"
+      );
+
       /////////////////////////////////// fail to create auction and allocation data
 
       await allocationInstance
@@ -1918,6 +1982,20 @@ contract("Auction", (accounts) => {
         { from: dataManager }
       );
 
+      ///////////////// check tree data
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).treeStatus),
+        4,
+        "tree status is not correct"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).saleType),
+        1,
+        "tree sale type is not correct"
+      );
+
       ////////////////// charge bidder account
 
       await wethInstance.setMint(bidderAccount1, bidderInitialBalance1);
@@ -1968,9 +2046,15 @@ contract("Auction", (accounts) => {
       let failResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        failResult.saleType,
+        Number(failResult.saleType),
         0,
-        "sale type not true update when auction fail"
+        "sale type not true after end auction"
+      );
+
+      assert.equal(
+        Number(failResult.treeStatus),
+        4,
+        "tree status not true after end auction"
       );
 
       startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -1987,12 +2071,20 @@ contract("Auction", (accounts) => {
         }
       );
 
+      ///////////////// check tree data
+
       let createResult2 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        createResult2.saleType,
+        Number(createResult2.saleType),
         1,
-        "sale type not true update when auction create"
+        "sale type not true after auction create"
+      );
+
+      assert.equal(
+        Number(createResult2.treeStatus),
+        4,
+        "tree status is not true after auction create"
       );
 
       await auctionInstance

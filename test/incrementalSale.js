@@ -9,6 +9,7 @@ const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
 const Attribute = artifacts.require("Attribute");
 const RegularSale = artifacts.require("RegularSale");
+const Planter = artifacts.require("Planter");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
@@ -103,6 +104,7 @@ contract("IncrementalSale", (accounts) => {
     );
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+    await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
   });
 
   describe("deployment and set addresses", () => {
@@ -323,6 +325,21 @@ contract("IncrementalSale", (accounts) => {
       await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
@@ -554,6 +571,48 @@ contract("IncrementalSale", (accounts) => {
         from: dataManager,
       });
 
+      //plant tree
+
+      let tree119_before = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_before.saleType), 0);
+      assert.equal(Number(tree119_before.treeStatus), 0);
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+
+      for (let i = 110; i < 120; i++) {
+        if (i == 119) {
+          await Common.successPlant(
+            treeFactoryInstance,
+            arInstance,
+            "ipfs exists",
+            i,
+            birthDate,
+            1,
+            [userAccount2],
+            userAccount2,
+            deployerAccount,
+            planterInstance,
+            dataManager
+          );
+        } else {
+          await treeFactoryInstance.listTree(i, "ipfs exists");
+        }
+      }
+      await treeFactoryInstance.assignTree(118, userAccount2);
+
+      let tree119_before_2 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_before_2.saleType), 0);
+      assert.equal(Number(tree119_before_2.treeStatus), 4);
+      assert.equal(tree119_before_2.planter, userAccount2);
+
+      let tree118_before_2 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118_before_2.saleType), 0);
+      assert.equal(Number(tree118_before_2.treeStatus), 2);
+      assert.equal(tree118_before_2.planter, userAccount2);
+
       let eventTx = await iSaleInstance.createIncrementalSale(
         105,
         web3.utils.toWei("0.01"),
@@ -604,14 +663,32 @@ contract("IncrementalSale", (accounts) => {
       let tree105 = await treeFactoryInstance.trees(105);
 
       assert.equal(Number(tree105.saleType), 2);
+      assert.equal(Number(tree105.treeStatus), 2);
+
+      let tree110 = await treeFactoryInstance.trees(110);
+
+      assert.equal(Number(tree110.saleType), 2);
+      assert.equal(Number(tree110.treeStatus), 2);
+
+      let tree118 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118.saleType), 2);
+      assert.equal(Number(tree118.treeStatus), 2);
+
+      let tree119 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119.saleType), 2);
+      assert.equal(Number(tree119.treeStatus), 4);
 
       let tree150 = await treeFactoryInstance.trees(254);
 
       assert.equal(Number(tree150.saleType), 2);
+      assert.equal(Number(tree150.treeStatus), 2);
 
       let tree151 = await treeFactoryInstance.trees(255);
 
       assert.equal(Number(tree151.saleType), 0);
+      assert.equal(Number(tree151.treeStatus), 0);
 
       await iSaleInstance.createIncrementalSale(
         135,
@@ -662,22 +739,39 @@ contract("IncrementalSale", (accounts) => {
       let tree105_2 = await treeFactoryInstance.trees(105);
 
       assert.equal(Number(tree105_2.saleType), 0);
+      assert.equal(Number(tree105_2.treeStatus), 2);
+
+      let tree118_2 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118_2.saleType), 0);
+      assert.equal(Number(tree118_2.treeStatus), 2);
+      assert.equal(tree118_2.planter, zeroAddress);
+
+      let tree119_2 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_2.saleType), 0);
+      assert.equal(Number(tree119_2.treeStatus), 4);
+      assert.equal(tree119_2.planter, userAccount2);
 
       let tree134 = await treeFactoryInstance.trees(134);
 
       assert.equal(Number(tree134.saleType), 0);
+      assert.equal(Number(tree134.treeStatus), 2);
 
       let tree135 = await treeFactoryInstance.trees(135);
 
       assert.equal(Number(tree135.saleType), 2);
+      assert.equal(Number(tree135.treeStatus), 2);
 
       let tree284 = await treeFactoryInstance.trees(284);
 
       assert.equal(Number(tree284.saleType), 2);
+      assert.equal(Number(tree284.treeStatus), 2);
 
       let tree285 = await treeFactoryInstance.trees(285);
 
       assert.equal(Number(tree285.saleType), 0);
+      assert.equal(Number(tree285.treeStatus), 0);
     });
 
     ////////////// -------------------------------- removeIncrementalSale ---------------------------------
@@ -1225,6 +1319,21 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
       });
@@ -1364,9 +1473,25 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount timeout", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
+
+      await Common.successPlant(
+        treeFactoryInstance,
+        arInstance,
+        "ipfs exists",
+        101,
+        birthDate,
+        1,
+        [userAccount2],
+        userAccount2,
+        deployerAccount,
+        planterInstance,
+        dataManager
+      );
 
       await iSaleInstance.createIncrementalSale(
         101,
@@ -1424,6 +1549,8 @@ contract("IncrementalSale", (accounts) => {
       let tree101 = await treeFactoryInstance.trees(101);
 
       assert.equal(Number(tree101.saleType), 0);
+      assert.equal(Number(tree101.planter), userAccount2);
+      assert.equal(Number(tree101.treeStatus), 4);
 
       await treeTokenInstance.ownerOf(102).should.be.rejected;
 
@@ -1674,6 +1801,7 @@ contract("IncrementalSale", (accounts) => {
       let tree102 = await treeFactoryInstance.trees(102);
 
       assert.equal(Number(tree102.saleType), 0);
+      assert.equal(Number(tree102.treeStatus), 2);
 
       /////-----------------fund 110
 
@@ -1684,6 +1812,7 @@ contract("IncrementalSale", (accounts) => {
       let tree110 = await treeFactoryInstance.trees(110);
 
       assert.equal(Number(tree110.saleType), 0);
+      assert.equal(Number(tree110.treeStatus), 2);
 
       /////-----------------fund 120
 
@@ -1694,6 +1823,7 @@ contract("IncrementalSale", (accounts) => {
       let tree120 = await treeFactoryInstance.trees(120);
 
       assert.equal(Number(tree120.saleType), 0);
+      assert.equal(Number(tree120.treeStatus), 2);
 
       /////-----------------fund 121
 
@@ -1704,6 +1834,7 @@ contract("IncrementalSale", (accounts) => {
       let tree121 = await treeFactoryInstance.trees(121);
 
       assert.equal(Number(tree121.saleType), 0);
+      assert.equal(Number(tree121.treeStatus), 2);
 
       /////-----------------not fund 122
 
@@ -1712,6 +1843,7 @@ contract("IncrementalSale", (accounts) => {
       let tree122 = await treeFactoryInstance.trees(122);
 
       assert.equal(Number(tree122.saleType), 2);
+      assert.equal(Number(tree121.treeStatus), 2);
 
       ///////////////////
 
@@ -2200,6 +2332,12 @@ contract("IncrementalSale", (accounts) => {
           Number((await treeFactoryInstance.trees(i)).saleType),
           0,
           `saleType is not true for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees(i)).treeStatus),
+          2,
+          `treeStatus is not true for tree ${i}`
         );
       }
 

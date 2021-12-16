@@ -505,8 +505,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
                 //TODO://add treeStatus check
 
                 if (treeData.treeStatus == 2) {
-                    treeData.planter == address(0);
-                    treeData.treeStatus = 0;
+                    treeData.planter = address(0);
                 }
             }
         }

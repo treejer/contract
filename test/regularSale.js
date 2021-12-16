@@ -35,6 +35,7 @@ const {
   TreeFactoryErrorMsg,
   RegularSaleErrors,
   TreasuryManagerErrorMsg,
+  TimeEnumes,
 } = require("./enumes");
 
 contract("regularSale", (accounts) => {
@@ -868,6 +869,21 @@ contract("regularSale", (accounts) => {
       await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
@@ -2179,8 +2195,23 @@ contract("regularSale", (accounts) => {
       }
     });
 
-    it("2.should request trees successfully (recipient)", async () => {
+    it.only("2.should request trees successfully (recipient)", async () => {
+      const price = Units.convert("7", "eth", "wei");
+      const birthDate = parseInt(new Date().getTime() / 1000);
+      const countryCode = 2;
+      const planter = userAccount2;
+      const ipfsHash = "some ipfs hash here";
+
       let funder = userAccount3;
+
+      /////////////////////////-------------------- deploy contracts --------------------------
+      let planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       //mint dai for funder
       await daiInstance.setMint(funder, web3.utils.toWei("56"));
@@ -2205,14 +2236,8 @@ contract("regularSale", (accounts) => {
         from: dataManager,
       });
 
-      /////////////////////////-------------------- deploy contracts --------------------------
-      let planterInstance = await Planter.new({
-        from: deployerAccount,
-      });
+      ///------------------------------------------------------
 
-      await planterInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
       ///////////////////// ------------------- handle addresses here --------------------------
 
       await regularSaleInstance.setTreeFactoryAddress(
@@ -2295,6 +2320,39 @@ contract("regularSale", (accounts) => {
         attributeInstance.address,
         deployerAccount
       );
+
+      ///------------------------------ plant tree ------------------------
+
+      await Common.plantTreeSuccess(
+        arInstance,
+        treeFactoryInstance,
+        planterInstance,
+        ipfsHash,
+        birthDate,
+        countryCode,
+        planter,
+        deployerAccount
+      );
+
+      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      });
+
+      await treeFactoryInstance.verifyTree(0, true, {
+        from: dataManager,
+      });
+
+      let travelTime = Math.add(Math.mul(4, 3600), Math.mul(7 * 24, 3600));
+
+      await Common.travelTime(TimeEnumes.seconds, travelTime);
+
+      await treeFactoryInstance.updateTree(10001, ipfsHash, {
+        from: planter,
+      });
+
+      await treeFactoryInstance.verifyUpdate(10001, true, {
+        from: dataManager,
+      });
 
       ///////////////////////--------------------- handle referral  ----------------
 
@@ -2387,6 +2445,13 @@ contract("regularSale", (accounts) => {
 
       let tokentOwner;
       let attributes;
+
+      ////check tree status
+
+      const tree10001 = await treeFactoryInstance.trees.call(10001);
+
+      assert.equal(Number(tree10001.treeStatus), 172, "treeStatus not true");
+
       for (let i = 10001; i < 10008; i++) {
         ///////////// check token owner
         tokentOwner = await treeTokenInstance.ownerOf(i);
@@ -3809,6 +3874,18 @@ contract("regularSale", (accounts) => {
         from: dataManager,
       });
 
+      let travelTime = Math.add(Math.mul(4, 3600), Math.mul(7 * 24, 3600));
+
+      await Common.travelTime(TimeEnumes.seconds, travelTime);
+
+      await treeFactoryInstance.updateTree(10001, ipfsHash, {
+        from: planter,
+      });
+
+      await treeFactoryInstance.verifyUpdate(10001, true, {
+        from: dataManager,
+      });
+
       ///////////////////////////////////////////
 
       //mint dai for funder
@@ -3855,6 +3932,13 @@ contract("regularSale", (accounts) => {
         `generationType for tree ${10001} is inccorect`
       );
 
+      ////check tree status
+
+      const tree10001 = await treeFactoryInstance.trees.call(10001);
+
+      assert.equal(Number(tree10001.treeStatus), 172, "treeStatus not true");
+
+      ///////////////////////
       await daiInstance.setMint(userAccount2, web3.utils.toWei("7"));
 
       await daiInstance.approve(

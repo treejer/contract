@@ -682,8 +682,10 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         TreeData storage treeData = trees[_treeId];
 
+        //TODO:change check  treeData.treeStatus == 4 => treeData.treeStatus > 3
+
         require(
-            treeData.treeStatus == 4 && treeData.saleType == 4,
+            treeData.treeStatus > 3 && treeData.saleType == 4,
             "tree must be planted"
         );
 

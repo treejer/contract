@@ -27,6 +27,9 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     /** NOTE minimum withdrawable amount */
     uint256 public override minWithdrawable;
 
+    /** NOTE localDevelopment address */
+    address public override localDevelopmentAddress;
+
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
     IERC20Upgradeable public daiToken;
@@ -141,6 +144,19 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         daiToken = candidateContract;
     }
 
+    /**
+     * @dev admin set localDevelopment address to fund
+     * @param _address localDevelopment address
+     */
+    function setLocalDevelopmentAddress(address payable _address)
+        external
+        override
+        onlyAdmin
+        validAddress(_address)
+    {
+        localDevelopmentAddress = _address;
+    }
+
     /** @dev admin set the minimum amount to withdraw
      * @param _amount is minimum withdrawable amount
      */
@@ -220,10 +236,11 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
             }
 
             if (totalPayableAmountToPlanter > 0) {
-                uint256 totalPayableAmountToAmbassador = (treeToAmbassadorProjectedEarning[
-                        _treeId
-                    ] * totalPayableAmountToPlanter) /
-                        treeToPlanterProjectedEarning[_treeId];
+
+                    uint256 totalPayableAmountToAmbassador
+                 = (treeToAmbassadorProjectedEarning[_treeId] *
+                    totalPayableAmountToPlanter) /
+                    treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
@@ -281,5 +298,33 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         require(success, "unsuccessful transfer");
 
         emit BalanceWithdrew(_amount, _msgSender());
+    }
+
+    /**
+     * @dev admin withdraw from localDevelopment totalBalances
+     * NOTE amount transfer to localDevelopmentAddress
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawLocalDevelopmentBalance(
+        uint256 _amount,
+        string calldata _reason
+    ) external override onlyAdmin validAddress(localDevelopmentAddress) {
+        require(
+            _amount <= totalBalances.localDevelopment && _amount > 0,
+            "insufficient amount"
+        );
+
+        totalBalances.localDevelopment -= _amount;
+
+        bool success = daiToken.transfer(localDevelopmentAddress, _amount);
+
+        require(success, "unsuccessful transfer");
+
+        emit LocalDevelopmentBalanceWithdrew(
+            _amount,
+            localDevelopmentAddress,
+            _reason
+        );
     }
 }

@@ -423,6 +423,12 @@ contract("Auction", (accounts) => {
 
       let result = await auctionInstance.auctions.call(0);
 
+      assert.equal(
+        (await treeFactoryInstance.trees.call(treeId)).treeStatus,
+        2,
+        "tree status is not correct"
+      );
+
       assert.equal(result.treeId.toNumber(), treeId);
       assert.equal(Number(result.highestBid), Number(initialValue));
       assert.equal(Number(result.bidInterval), Number(bidInterval));
@@ -1061,7 +1067,7 @@ contract("Auction", (accounts) => {
       await Common.travelTime(TimeEnumes.hours, 2);
 
       await auctionInstance
-        .endAuction(auctionId, { from: deployerAccount })
+        .endAuction(auctionId, 0, { from: deployerAccount })
         .should.be.rejectedWith(CommonErrorMsg.PAUSE);
 
       await arInstance.unpause({
@@ -1295,7 +1301,7 @@ contract("Auction", (accounts) => {
       /////////////////------------------- end auction with bidder
 
       await auctionInstance
-        .endAuction(0, {
+        .endAuction(0, 0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME); //end time dont reach and must be rejected
@@ -1306,9 +1312,23 @@ contract("Auction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.seconds, 670);
 
-      let successEnd = await auctionInstance.endAuction(0, {
+      let successEnd = await auctionInstance.endAuction(0, 0, {
         from: deployerAccount,
       }); //succesfully end the auction
+
+      //------------------------- check tree data
+      const treeData1 = await treeFactoryInstance.trees.call(treeId);
+
+      assert.equal(
+        Number(treeData1.treeStatus),
+        2,
+        "tree1 status is not correct"
+      );
+      assert.equal(
+        Number(treeData1.saleType),
+        0,
+        "tree1 sale type is not correct"
+      );
 
       let addressGetToken = await treeTokenInstance.ownerOf(treeId);
 
@@ -1331,7 +1351,7 @@ contract("Auction", (accounts) => {
       assert.equal(Number(result.startDate), 0, "auction not true");
 
       await auctionInstance
-        .endAuction(0, {
+        .endAuction(0, 0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(AuctionErrorMsg.AUCTION_IS_UNAVAILABLE); //auction already ended and must be rejected
@@ -1351,17 +1371,46 @@ contract("Auction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.seconds, 70);
 
-      let failEndNoBidder = await auctionInstance.endAuction(1, {
+      let failEndNoBidder = await auctionInstance.endAuction(1, 0, {
         from: deployerAccount,
       });
-
+      // check tree data
       const treeData2 = await treeFactoryInstance.trees.call(treeId2);
 
       assert.equal(Number(treeData2.saleType), 0, "provide status is not ok");
 
+      assert.equal(
+        Number(treeData2.treeStatus),
+        2,
+        "tree2 status is not correct"
+      );
+
       truffleAssert.eventEmitted(failEndNoBidder, "AuctionEnded", (ev) => {
         return Number(ev.auctionId) == 1 && Number(ev.treeId) == treeId2;
       });
+
+      //////////////////////// create another auction for treeId2 that ended with no bidder
+
+      await auctionInstance.createAuction(
+        treeId2,
+        Number(startTime),
+        Number(endTime),
+        web3.utils.toWei("1.5"),
+        web3.utils.toWei("0.5"),
+        { from: dataManager }
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId2)).saleType),
+        1,
+        "provide status is not ok"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId2)).treeStatus),
+        2,
+        "tree2 status is not correct"
+      );
 
       await wethInstance.resetAcc(bidderAccount2);
     });
@@ -1546,7 +1595,7 @@ contract("Auction", (accounts) => {
       });
 
       await auctionInstance
-        .endAuction(0, { from: deployerAccount })
+        .endAuction(0, 0, { from: deployerAccount })
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
 
       const auction4 = await auctionInstance.auctions.call(0);
@@ -1601,7 +1650,15 @@ contract("Auction", (accounts) => {
           daiInstance.address,
         ]);
 
-      await auctionInstance.endAuction(0, { from: userAccount3 });
+      await auctionInstance
+        .endAuction(0, expectedSwapTokenAmount[1] + 1, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.UNISWAP_OUTPUT_AMOUNT);
+
+      await auctionInstance.endAuction(0, expectedSwapTokenAmount[1], {
+        from: userAccount3,
+      });
 
       /////////// --------------- check referral for zero address
       regularSaleInstance = await RegularSale.new({
@@ -1865,6 +1922,21 @@ contract("Auction", (accounts) => {
         planterInstance,
         dataManager
       );
+
+      ///////////////// check tree data
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).treeStatus),
+        4,
+        "tree status is not correct"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).saleType),
+        0,
+        "tree sale type is not correct"
+      );
+
       /////////////////////////////////// fail to create auction and allocation data
 
       await allocationInstance
@@ -1918,6 +1990,20 @@ contract("Auction", (accounts) => {
         { from: dataManager }
       );
 
+      ///////////////// check tree data
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).treeStatus),
+        4,
+        "tree status is not correct"
+      );
+
+      assert.equal(
+        Number((await treeFactoryInstance.trees.call(treeId)).saleType),
+        1,
+        "tree sale type is not correct"
+      );
+
       ////////////////// charge bidder account
 
       await wethInstance.setMint(bidderAccount1, bidderInitialBalance1);
@@ -1952,7 +2038,7 @@ contract("Auction", (accounts) => {
       ////////////////// ----------------- fail to end auction
 
       await auctionInstance
-        .endAuction(0, {
+        .endAuction(0, 0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
@@ -1961,16 +2047,22 @@ contract("Auction", (accounts) => {
 
       /////////////////// -------------- end auction
 
-      await auctionInstance.endAuction(0, {
+      await auctionInstance.endAuction(0, 0, {
         from: deployerAccount,
       });
 
       let failResult = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        failResult.saleType,
+        Number(failResult.saleType),
         0,
-        "sale type not true update when auction fail"
+        "sale type not true after end auction"
+      );
+
+      assert.equal(
+        Number(failResult.treeStatus),
+        4,
+        "tree status not true after end auction"
       );
 
       startTime = await Common.timeInitial(TimeEnumes.seconds, 0);
@@ -1987,12 +2079,20 @@ contract("Auction", (accounts) => {
         }
       );
 
+      ///////////////// check tree data
+
       let createResult2 = await treeFactoryInstance.trees.call(treeId);
 
       assert.equal(
-        createResult2.saleType,
+        Number(createResult2.saleType),
         1,
-        "sale type not true update when auction create"
+        "sale type not true after auction create"
+      );
+
+      assert.equal(
+        Number(createResult2.treeStatus),
+        4,
+        "tree status is not true after auction create"
       );
 
       await auctionInstance
@@ -2034,7 +2134,7 @@ contract("Auction", (accounts) => {
       );
 
       await auctionInstance
-        .endAuction(1, {
+        .endAuction(1, 0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
@@ -2075,9 +2175,13 @@ contract("Auction", (accounts) => {
 
       const auctionDataBeforeEnd = await auctionInstance.auctions.call(1);
 
-      let successEnd = await auctionInstance.endAuction(1, {
-        from: deployerAccount,
-      });
+      let successEnd = await auctionInstance.endAuction(
+        1,
+        expectedSwapTokenAmount[1],
+        {
+          from: deployerAccount,
+        }
+      );
 
       //////////////// --------------------------------- check refferal part
 
@@ -2581,7 +2685,7 @@ contract("Auction", (accounts) => {
       assert.equal(planterBalance, 0, "1.planter balance not true in treasury");
 
       await auctionInstance
-        .endAuction(auctionId, {
+        .endAuction(auctionId, 0, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
@@ -2669,7 +2773,7 @@ contract("Auction", (accounts) => {
           daiInstance.address,
         ]);
 
-      let successEnd = await auctionInstance.endAuction(auctionId, {
+      let successEnd = await auctionInstance.endAuction(auctionId, 0, {
         from: userAccount4,
       });
 
@@ -3289,7 +3393,7 @@ contract("Auction", (accounts) => {
       // //------------- end auction
 
       await auctionInstance
-        .endAuction(auctionId1)
+        .endAuction(auctionId1, 0)
         .should.be.rejectedWith(AuctionErrorMsg.END_AUCTION_BEFORE_END_TIME);
 
       await Common.travelTime(TimeEnumes.minutes, 20);
@@ -3330,7 +3434,7 @@ contract("Auction", (accounts) => {
 
       const auction1BeforeEnd = await auctionInstance.auctions.call(auctionId1);
 
-      const endAuctionTx = await auctionInstance.endAuction(auctionId1);
+      const endAuctionTx = await auctionInstance.endAuction(auctionId1, 0);
 
       /////////////////---------------------- check referral part
 
@@ -3462,7 +3566,7 @@ contract("Auction", (accounts) => {
           daiInstance.address,
         ]);
 
-      const endAuctionTx2 = await auctionInstance.endAuction(auctionId2);
+      const endAuctionTx2 = await auctionInstance.endAuction(auctionId2, 0);
 
       /////////////////---------------------- check referral part
 

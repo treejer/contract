@@ -252,9 +252,9 @@ contract WethFund is Initializable, IWethFund {
      * @param _reserve2Share reserve2 share
      */
     function fundTree(
-        uint256 _minDaiOut,
         uint256 _treeId,
         uint256 _amount,
+        uint256 _minDaiOut,
         uint16 _planterShare,
         uint16 _ambassadorShare,
         uint16 _researchShare,

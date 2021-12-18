@@ -329,7 +329,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 recipient
             );
 
-            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(
+                tempLastFundedTreeId,
+                1
+            );
 
             require(successAttr, "attribute not generated");
 
@@ -427,7 +430,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         treeFactory.mintTreeById(treeId, recipient);
 
-        bool successAttr = attribute.createAttribute(treeId);
+        bool successAttr = attribute.createAttribute(treeId, 1);
 
         require(successAttr, "attribute not generated");
 
@@ -595,7 +598,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 _referrer
             );
 
-            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(
+                tempLastFundedTreeId,
+                1
+            );
 
             require(successAttr, "attribute not generated");
 

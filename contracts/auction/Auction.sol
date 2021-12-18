@@ -314,11 +314,6 @@ contract Auction is Initializable, RelayRecipient, IAuction {
 
             _mintTree(auctionId_, _minDaiOut);
 
-            treeFactory.mintAssignedTree(
-                auctionData.treeId,
-                auctionData.bidder
-            );
-
             address referrerOfWinner = referrals[auctionData.bidder][
                 auctionId_
             ];
@@ -374,9 +369,9 @@ contract Auction is Initializable, RelayRecipient, IAuction {
         ) = allocation.findAllocationData(auctionData.treeId);
 
         wethFund.fundTree(
-            _minDaiOut,
             auctionData.treeId,
             auctionData.highestBid,
+            _minDaiOut,
             planterShare,
             ambassadorShare,
             researchShare,
@@ -386,5 +381,7 @@ contract Auction is Initializable, RelayRecipient, IAuction {
             reserve1Share,
             reserve2Share
         );
+
+        treeFactory.mintAssignedTree(auctionData.treeId, auctionData.bidder);
     }
 }

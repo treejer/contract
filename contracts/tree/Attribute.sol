@@ -157,12 +157,14 @@ contract Attribute is Initializable, IAttribute {
      * @param _attributeUniquenessFactor unique attribute code to assign
      * @param _symbolUniquenessFactor unique symbol to assign
      * @param _generationType type of attribute assignement
+     * @param _coefficient coefficient value
      */
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
-        uint8 _generationType
+        uint8 _generationType,
+        uint64 _coefficient
     ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
@@ -182,7 +184,7 @@ contract Attribute is Initializable, IAttribute {
             .generatedCount += 1;
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64);
+            ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
 
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
@@ -257,9 +259,10 @@ contract Attribute is Initializable, IAttribute {
     /**
      * @dev generate a random unique attribute using tree attributes 64 bit value
      * @param _treeId id of tree
+     * @param _generationType generation type
      * @return if unique attribute generated successfully
      */
-    function createAttribute(uint256 _treeId)
+    function createAttribute(uint256 _treeId, uint8 _generationType)
         external
         override
         onlyTreejerContract
@@ -272,7 +275,11 @@ contract Attribute is Initializable, IAttribute {
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
-                treeToken.setAttributes(_treeId, uniquenessFactor, 1);
+                treeToken.setAttributes(
+                    _treeId,
+                    uniquenessFactor,
+                    _generationType
+                );
                 uniquenessFactorToGeneratedAttributesCount[
                     uniquenessFactor
                 ] = 1;

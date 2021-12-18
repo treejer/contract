@@ -1537,9 +1537,27 @@ contract("IncrementalSale", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
-        from: userAccount3,
-      });
+      await iSaleInstance
+        .fundTree(
+          1,
+          zeroAddress,
+          zeroAddress,
+          expectedSwapTokenAmountTreeid101[1] + 1000,
+          {
+            from: userAccount3,
+          }
+        )
+        .should.be.rejectedWith(CommonErrorMsg.UNISWAP_OUTPUT_AMOUNT);
+
+      await iSaleInstance.fundTree(
+        1,
+        zeroAddress,
+        zeroAddress,
+        expectedSwapTokenAmountTreeid101[1],
+        {
+          from: userAccount3,
+        }
+      );
 
       //////////--------------check tree owner
       let addressGetToken101 = await treeTokenInstance.ownerOf(101);
@@ -1745,11 +1763,11 @@ contract("IncrementalSale", (accounts) => {
         .times(0.00462)
         .div(0.08442);
 
-      let tx = await iSaleInstance.fundTree(15, userAccount6, zeroAddress, {
+      let tx = await iSaleInstance.fundTree(15, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(5, userAccount6, zeroAddress, {
+      await iSaleInstance.fundTree(5, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2071,7 +2089,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      let tx2 = await iSaleInstance.fundTree(19, zeroAddress, zeroAddress, {
+      let tx2 = await iSaleInstance.fundTree(19, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2110,7 +2128,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, userAccount6, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2146,7 +2164,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2182,14 +2200,14 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(5, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
 
-      await iSaleInstance.fundTree(14, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(14, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2213,7 +2231,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2239,7 +2257,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2292,11 +2310,17 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      let tx1 = await iSaleInstance.fundTree(15, userAccount6, userAccount7, {
-        from: userAccount3,
-      });
+      let tx1 = await iSaleInstance.fundTree(
+        15,
+        userAccount6,
+        userAccount7,
+        0,
+        {
+          from: userAccount3,
+        }
+      );
 
-      let tx2 = await iSaleInstance.fundTree(5, userAccount6, userAccount5, {
+      let tx2 = await iSaleInstance.fundTree(5, userAccount6, userAccount5, 0, {
         from: userAccount3,
       });
 
@@ -2440,7 +2464,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2464,7 +2488,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(4, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(4, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2495,7 +2519,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(16, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(16, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2517,7 +2541,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, {
+        .fundTree(1, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -2533,7 +2557,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2567,19 +2591,19 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(9, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(9, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2594,7 +2618,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2658,11 +2682,11 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(15, userAccount3, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount3, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2716,7 +2740,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(lastSold), 130, "lastSold not true");
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2749,11 +2773,11 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await iSaleInstance
-        .fundTree(1, userAccount3, zeroAddress, { from: userAccount3 })
+        .fundTree(1, userAccount3, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2800,11 +2824,11 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2861,13 +2885,13 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(120, zeroAddress, zeroAddress, {
+        .fundTree(120, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
 
       await iSaleInstance
-        .fundTree(120, userAccount2, zeroAddress, {
+        .fundTree(120, userAccount2, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
@@ -2909,17 +2933,17 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(21, zeroAddress, zeroAddress, {
+        .fundTree(21, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
       await iSaleInstance
-        .fundTree(16, zeroAddress, zeroAddress, {
+        .fundTree(16, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
@@ -2961,7 +2985,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, {
+        .fundTree(1, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -2978,7 +3002,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2994,7 +3018,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(11, zeroAddress, zeroAddress, {
+        .fundTree(11, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -3081,14 +3105,14 @@ contract("IncrementalSale", (accounts) => {
     //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
 
     //   await contractFunder
-    //     .fundTree(1, zeroAddress, zeroAddress)
+    //     .fundTree(1, zeroAddress, zeroAddress,0)
     //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
 
     //   await paymaster.addFunderWhitelistTarget(iSaleInstance.address, {
     //     from: deployerAccount,
     //   });
 
-    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress);
+    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress,0);
 
     //   //////////--------------check tree owner
     //   let addressGetToken = await treeTokenInstance.ownerOf(101);

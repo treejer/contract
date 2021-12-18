@@ -373,7 +373,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
             ? _msgSender()
             : _recipient;
 
-        tempLastSold = _setAllocation(
+        _setAllocation(
             tempLastSold,
             _count,
             _msgSender(),
@@ -383,13 +383,13 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
             _minDaiOut
         );
 
-        lastSold = tempLastSold - 1;
+        lastSold = tempLastSold + _count - 1;
 
         emit TreeFunded(
             _msgSender(),
             recipient,
             _referrer,
-            tempLastSold - _count,
+            tempLastSold,
             _count
         );
     }
@@ -427,7 +427,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
      * @param _recipient address of recipient
      * @param _referrer address of referrer
      * @param _totalPrice total price of trees
-     * @return new last sold tree id
      */
     function _setAllocation(
         uint256 _tempLastSold,
@@ -437,11 +436,12 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         address _referrer,
         uint256 _totalPrice,
         uint256 _minDaiOut
-    ) private returns (uint256) {
-        (
-            uint256 tempLastSold,
-            TotalBalances memory totalBalances
-        ) = _mintFundedTree(_tempLastSold, _count, _recipient);
+    ) private {
+        TotalBalances memory totalBalances = _mintFundedTree(
+            _tempLastSold,
+            _count,
+            _recipient
+        );
 
         uint256 daiAmount = wethFund.fundTreeBatch(
             totalBalances.planter,
@@ -470,8 +470,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         if (_referrer != address(0)) {
             regularSale.updateReferrerClaimableTreesWeth(_referrer, _count);
         }
-
-        return tempLastSold;
     }
 
     /**
@@ -570,7 +568,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         uint256 _tempLastSold,
         uint256 _count,
         address _recipient
-    ) private returns (uint256, TotalBalances memory) {
+    ) private returns (TotalBalances memory) {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         TotalBalances memory totalBalances;
@@ -612,7 +610,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
             tempLastSold += 1;
         }
 
-        return (tempLastSold, totalBalances);
+        return (totalBalances);
     }
 
     function _createSymbol(

@@ -35,6 +35,7 @@ const CommonErrorMsg = {
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
   CHECK_IF_PAUSED: "Pausable: not paused",
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
+  UNISWAP_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
 };
 
 const AuctionErrorMsg = {

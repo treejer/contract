@@ -18,12 +18,6 @@ const Math = require("./math");
 
 const Units = require("ethereumjs-units");
 
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
-
 //treasury section
 const WethFund = artifacts.require("WethFund");
 const Allocation = artifacts.require("Allocation");
@@ -37,7 +31,6 @@ const {
   CommonErrorMsg,
   IncrementalSaleErrorMsg,
   TreasuryManagerErrorMsg,
-  GsnErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -173,30 +166,6 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("set incrementalSale address and fail in invalid situation", async () => {
-      ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
-
-      await iSaleInstance
-        .setTrustedForwarder(userAccount2, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await iSaleInstance
-        .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      await iSaleInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        userAccount2,
-        await iSaleInstance.trustedForwarder(),
-        "address set incorect"
-      );
-
       ///////////////---------------------------------set Attributes address--------------------------------------------------------
 
       await iSaleInstance
@@ -3026,109 +2995,5 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount3);
       await wethInstance.resetAcc(userAccount4);
     });
-
-    ////////////////-------------------------------------------- gsn ------------------------------------------------
-    // it("test gsn [ @skip-on-coverage ]", async () => {
-    //   await allocationInstance.assignAllocationToTree(100, 10000, 0, {
-    //     from: dataManager,
-    //   });
-
-    //   await iSaleInstance.createIncrementalSale(
-    //     101,
-    //     web3.utils.toWei("0.01"),
-    //     100,
-    //     20,
-    //     1000,
-    //     {
-    //       from: dataManager,
-    //     }
-    //   );
-
-    //   await Common.addTreejerContractRole(
-    //     arInstance,
-    //     treeFactoryInstance.address,
-    //     deployerAccount
-    //   );
-
-    //   ///////------------------------------handle gsn---------------------------------
-
-    //   let env = await GsnTestEnvironment.startGsn("localhost");
-
-    //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
-    //     env.contractsDeployment;
-
-    //   await iSaleInstance.setTrustedForwarder(forwarderAddress, {
-    //     from: deployerAccount,
-    //   });
-
-    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-    //   await paymaster.setRelayHub(relayHubAddress);
-    //   await paymaster.setTrustedForwarder(forwarderAddress);
-
-    //   web3.eth.sendTransaction({
-    //     from: accounts[0],
-    //     to: paymaster.address,
-    //     value: web3.utils.toWei("1"),
-    //   });
-
-    //   origProvider = web3.currentProvider;
-
-    //   conf = { paymasterAddress: paymaster.address };
-
-    //   gsnProvider = await Gsn.RelayProvider.newProvider({
-    //     provider: origProvider,
-    //     config: conf,
-    //   }).init();
-
-    //   provider = new ethers.providers.Web3Provider(gsnProvider);
-
-    //   let signerFunder = provider.getSigner(3);
-
-    //   let contractFunder = await new ethers.Contract(
-    //     iSaleInstance.address,
-    //     iSaleInstance.abi,
-    //     signerFunder
-    //   );
-
-    //   //mint weth for funder
-    //   await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
-
-    //   await wethInstance.approve(
-    //     iSaleInstance.address,
-    //     web3.utils.toWei("0.01"),
-    //     {
-    //       from: userAccount2,
-    //     }
-    //   );
-
-    //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
-
-    //   await contractFunder
-    //     .fundTree(1, zeroAddress, zeroAddress,0)
-    //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
-
-    //   await paymaster.addFunderWhitelistTarget(iSaleInstance.address, {
-    //     from: deployerAccount,
-    //   });
-
-    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress,0);
-
-    //   //////////--------------check tree owner
-    //   let addressGetToken = await treeTokenInstance.ownerOf(101);
-
-    //   assert.equal(addressGetToken, userAccount2, "1.mint not true");
-
-    //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
-
-    //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
-    //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
-
-    //   assert.equal(
-    //     balanceAccountAfter,
-    //     balanceAccountBefore,
-    //     "Gsn not true work"
-    //   );
-    // });
   });
 });

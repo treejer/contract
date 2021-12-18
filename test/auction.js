@@ -160,30 +160,6 @@ contract("Auction", (accounts) => {
       assert.notEqual(address, null);
       assert.notEqual(address, undefined);
 
-      ///// ---------------- set trusted forwarder
-
-      await auctionInstance
-        .setTrustedForwarder(userAccount2, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await auctionInstance
-        .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      await auctionInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        userAccount2,
-        await auctionInstance.trustedForwarder(),
-        "address set incorrect"
-      );
-
       ///// ---------------- set treeFactory
 
       await auctionInstance

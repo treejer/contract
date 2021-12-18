@@ -9,13 +9,12 @@ import "../access/IAccessRestriction.sol";
 import "../tree/ITreeFactory.sol";
 import "../treasury/IAllocation.sol";
 import "../treasury/IWethFund.sol";
-import "../gsn/RelayRecipient.sol";
 import "../regularSale/IRegularSale.sol";
 import "./IAuction.sol";
 
 /** @title Auction */
 
-contract Auction is Initializable, RelayRecipient, IAuction {
+contract Auction is Initializable, IAuction {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     struct AuctionData {
@@ -48,13 +47,13 @@ contract Auction is Initializable, RelayRecipient, IAuction {
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has data manager role */
     modifier onlyDataManager() {
-        accessRestriction.ifDataManager(_msgSender());
+        accessRestriction.ifDataManager(msg.sender);
         _;
     }
 
@@ -85,20 +84,6 @@ contract Auction is Initializable, RelayRecipient, IAuction {
         require(candidateContract.isAccessRestriction());
         isAuction = true;
         accessRestriction = candidateContract;
-    }
-
-    /**
-     * @dev admin set the trustedForwarder adress
-     * @param _address is the address of trusted forwarder
-     */
-
-    function setTrustedForwarder(address _address)
-        external
-        override
-        onlyAdmin
-        validAddress(_address)
-    {
-        trustedForwarder = _address;
     }
 
     /**
@@ -241,12 +226,12 @@ contract Auction is Initializable, RelayRecipient, IAuction {
         );
 
         require(
-            wethToken.balanceOf(_msgSender()) >= _amount,
+            wethToken.balanceOf(msg.sender) >= _amount,
             "insufficient balance"
         );
 
         bool success = wethToken.transferFrom(
-            _msgSender(),
+            msg.sender,
             address(this),
             _amount
         );
@@ -255,21 +240,21 @@ contract Auction is Initializable, RelayRecipient, IAuction {
 
         if (
             _referrer != address(0) &&
-            referrals[_msgSender()][auctionId_] == address(0)
+            referrals[msg.sender][auctionId_] == address(0)
         ) {
-            referrals[_msgSender()][auctionId_] = _referrer;
+            referrals[msg.sender][auctionId_] = _referrer;
         }
 
         address oldBidder = auctionData.bidder;
         uint256 oldBid = auctionData.highestBid;
 
         auctionData.highestBid = _amount;
-        auctionData.bidder = _msgSender();
+        auctionData.bidder = msg.sender;
 
         emit HighestBidIncreased(
             auctionId_,
             auctionData.treeId,
-            _msgSender(),
+            msg.sender,
             _amount,
             _referrer
         );

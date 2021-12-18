@@ -27,9 +27,6 @@ interface IIncrementalSale {
     /** @dev emitted when incremental sale data updated */
     event IncrementalSaleDataUpdated();
 
-    /** @dev set {_address} to trusted forwarder */
-    function setTrustedForwarder(address _address) external;
-
     /** @dev set {_address} to PlanterFund contract address */
     function setPlanterFundAddress(address _address) external;
 

@@ -10,10 +10,9 @@ import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/IAttribute.sol";
 import "../regularSale/IRegularSale.sol";
-import "../gsn/RelayRecipient.sol";
 import "./IIncrementalSale.sol";
 
-contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
+contract IncrementalSale is Initializable, IIncrementalSale {
     struct IncrementalSaleData {
         uint256 startTreeId;
         uint256 endTreeId;
@@ -54,13 +53,13 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has data manager role */
     modifier onlyDataManager() {
-        accessRestriction.ifDataManager(_msgSender());
+        accessRestriction.ifDataManager(msg.sender);
         _;
     }
 
@@ -91,19 +90,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         require(candidateContract.isAccessRestriction());
         isIncrementalSale = true;
         accessRestriction = candidateContract;
-    }
-
-    /**
-     * @dev admin set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
-    function setTrustedForwarder(address _address)
-        external
-        override
-        onlyAdmin
-        validAddress(_address)
-    {
-        trustedForwarder = _address;
     }
 
     /**
@@ -357,26 +343,24 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
 
         //transfer totalPrice to wethFund
         require(
-            wethToken.balanceOf(_msgSender()) >= totalPrice,
+            wethToken.balanceOf(msg.sender) >= totalPrice,
             "low price paid"
         );
 
         bool success = wethToken.transferFrom(
-            _msgSender(),
+            msg.sender,
             address(wethFund),
             totalPrice
         );
 
         require(success, "unsuccessful transfer");
 
-        address recipient = _recipient == address(0)
-            ? _msgSender()
-            : _recipient;
+        address recipient = _recipient == address(0) ? msg.sender : _recipient;
 
         _setAllocation(
             tempLastSold,
             _count,
-            _msgSender(),
+            msg.sender,
             recipient,
             _referrer,
             totalPrice,
@@ -385,13 +369,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
 
         lastSold = tempLastSold + _count - 1;
 
-        emit TreeFunded(
-            _msgSender(),
-            recipient,
-            _referrer,
-            tempLastSold,
-            _count
-        );
+        emit TreeFunded(msg.sender, recipient, _referrer, tempLastSold, _count);
     }
 
     /** @dev admin update incrementalSaleData

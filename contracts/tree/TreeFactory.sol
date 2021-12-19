@@ -240,7 +240,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         ifNotPaused
         onlyDataManager
     {
-        for (uint256 i = _startTreeId; i <= _endTreeId; i++) {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (trees[i].treeStatus == 2) {
                 trees[i].treeStatus = 0;
             }

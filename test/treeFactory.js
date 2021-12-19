@@ -276,7 +276,7 @@ contract("TreeFactory", (accounts) => {
       }
 
       await treeFactoryInstance
-        .resetTreeStatusBatch(100, 200, {
+        .resetTreeStatusBatch(100, 201, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
@@ -287,7 +287,7 @@ contract("TreeFactory", (accounts) => {
 
       truffleAssert.eventEmitted(tx, "TreeStatusBatchReset");
 
-      for (let i = 100; i < 200; i++) {
+      for (let i = 100; i <= 200; i++) {
         assert.equal(
           (await treeFactoryInstance.trees.call(i)).treeStatus,
           0,

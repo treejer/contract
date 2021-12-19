@@ -383,7 +383,7 @@ contract("IncrementalSale", (accounts) => {
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero
 
       await iSaleInstance
-        .createIncrementalSale(101, web3.utils.toWei("0.005"), 201, 100, 400, {
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 501, 100, 400, {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero

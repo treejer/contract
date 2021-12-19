@@ -203,7 +203,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        require(_treeCount > 0 && _treeCount < 201, "invalid treeCount");
+        require(_treeCount > 0 && _treeCount < 501, "invalid treeCount");
 
         require(_startTreeId > 100, "trees are under Auction");
 
@@ -254,7 +254,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         onlyDataManager
     {
         //TODO:add limited count check
-        require(_count > 0 && _count < 201, "invalid count");
+        require(_count > 0 && _count < 501, "invalid count");
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         uint256 newStartTreeId = incSaleData.startTreeId + _count;
@@ -289,7 +289,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         onlyDataManager
     {
         //TODO:add treeCount limit
-        require(_treeCount > 0 && _treeCount < 201, "invalid count");
+        require(_treeCount > 0 && _treeCount < 501, "invalid count");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
         //TODO: change require error

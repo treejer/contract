@@ -203,24 +203,24 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        //TODO:add treeCount check limit
         require(_treeCount > 0 && _treeCount < 201, "invalid treeCount");
+
         require(_startTreeId > 100, "trees are under Auction");
+
         require(_increments > 0, "incremental period should be positive");
+
+        IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        require(
+            incSaleData.endTreeId == lastSold + 1 ||
+                incSaleData.increments == 0,
+            "can't create new IncrementalSale"
+        );
+
         require(
             allocation.allocationExists(_startTreeId),
             "equivalant fund Model not exists"
         );
-
-        IncrementalSaleData storage incSaleData = incrementalSaleData;
-
-        if (incSaleData.increments > 0) {
-            treeFactory.resetSaleTypeBatch(
-                incSaleData.startTreeId,
-                incSaleData.endTreeId,
-                2
-            );
-        }
 
         require(
             treeFactory.manageSaleTypeBatch(

@@ -155,7 +155,7 @@ const HonoraryTreeErrorMsg = {
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
   INVALID_RANGE: "invalid range",
-  UPDATE_RECIPIENT_INVALID_STATUS: "Status must be one",
+  RECIPIENT_NOT_EXIST: "recipient not exist",
   CANT_SET_RANGE: "cant set gift range",
   CANT_CLAIM: "you cant claim tree",
   SYMBOL_NOT_EXIST: "no symbol exists for gift",

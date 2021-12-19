@@ -302,7 +302,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
     ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
-        require(recipientData.startDate > 0, "Status must be one");
+        require(recipientData.startDate > 0, "recipient not exist");
 
         recipientData.expiryDate = _expiryDate;
         recipientData.startDate = _startDate;
@@ -333,6 +333,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
      */
     function claim() external override ifNotPaused {
         Recipient storage recipientData = recipients[_msgSender()];
+
         require(
             recipientData.expiryDate > block.timestamp &&
                 recipientData.startDate < block.timestamp &&

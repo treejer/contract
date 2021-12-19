@@ -10,8 +10,6 @@ import "./../../uniswap/Dai.sol";
 import "./../../miniUniswap/UniSwapMini.sol";
 
 contract IncrementalSaleEchidnaTest {
-    address internal trustedForwarder;
-
     struct IncrementalSaleData {
         uint256 startTreeId;
         uint256 endTreeId;
@@ -107,10 +105,6 @@ contract IncrementalSaleEchidnaTest {
         daiContract.setMint(address(uniSwap), 1e15 * 10**18);
     }
 
-    function _msgSender() internal view returns (address) {
-        return msg.sender;
-    }
-
     uint256 randomApprove;
 
     function fundTreeEchidna(
@@ -183,10 +177,11 @@ contract IncrementalSaleEchidnaTest {
         (bool success1, bytes memory data1) = address(incrementalSaleContract)
             .delegatecall(
                 abi.encodeWithSignature(
-                    "fundTree(uint256,address,address)",
+                    "fundTree(uint256,address,address,uint256)",
                     count,
                     referrer,
-                    recipient
+                    recipient,
+                    0
                 )
             );
 

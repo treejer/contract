@@ -459,7 +459,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     function updateOrganizationMemberShare(
         address _planter,
         uint256 _organizationMemberShareAmount
-    ) external override ifNotPaused onlyOrganization existPlanter(_planter) {
+    ) external override ifNotPaused onlyOrganization {
         //TODO://remove existPlanter(_planter)
 
         require(planters[_planter].status > 0, "invalid planter status");

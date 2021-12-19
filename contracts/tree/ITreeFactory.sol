@@ -82,6 +82,8 @@ interface ITreeFactory {
 
     event LastRegualarTreeIdUpdated(uint256 lastRegualarTreeId);
 
+    event TreeStatusBatchReset();
+
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
 
@@ -107,6 +109,9 @@ interface ITreeFactory {
      * @param _treeSpecs tree specs
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs) external;
+
+    function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
+        external;
 
     /**
      * @dev admin assign an existing tree to planter

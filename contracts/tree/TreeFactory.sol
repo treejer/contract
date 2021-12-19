@@ -234,6 +234,21 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeListed(_treeId);
     }
 
+    function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        override
+        ifNotPaused
+        onlyDataManager
+    {
+        for (uint256 i = _startTreeId; i <= _endTreeId; i++) {
+            if (trees[i].treeStatus == 2) {
+                trees[i].treeStatus = 0;
+            }
+        }
+
+        emit TreeStatusBatchReset();
+    }
+
     /**
      * @dev admin assign an existing tree to planter
      * NOTE tree must be not planted

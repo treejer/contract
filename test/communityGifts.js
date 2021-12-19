@@ -415,9 +415,7 @@ contract("HonoraryTree", (accounts) => {
         .updateRecipient(userAccount1, startDate1, expiryDate1, 2, {
           from: dataManager,
         })
-        .should.be.rejectedWith(
-          HonoraryTreeErrorMsg.UPDATE_RECIPIENT_INVALID_STATUS
-        );
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.RECIPIENT_NOT_EXIST);
 
       await honoraryTreeInstance.addRecipient(
         userAccount1,

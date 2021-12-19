@@ -136,6 +136,7 @@ const IncrementalSaleErrorMsg = {
   LOW_PRICE_PAID: "low price paid",
   FREE_INCREMENTALSALE_FAIL:
     "IncrementalSale not exist or count must be lt endTree",
+  CANT_CREATE_NEW_INCREMENTALSALE: "can't create new IncrementalSale",
 };
 
 const AttributeErrorMsg = {

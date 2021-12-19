@@ -659,6 +659,18 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(Number(tree151.saleType), 0);
       assert.equal(Number(tree151.treeStatus), 0);
 
+      await iSaleInstance
+        .createIncrementalSale(135, web3.utils.toWei("0.01"), 150, 100, 1000, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(
+          IncrementalSaleErrorMsg.CANT_CREATE_NEW_INCREMENTALSALE
+        );
+
+      await iSaleInstance.removeIncrementalSale(150, {
+        from: dataManager,
+      });
+
       await iSaleInstance.createIncrementalSale(
         135,
         web3.utils.toWei("0.01"),

@@ -265,6 +265,37 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
     });
 
+    /////////////////---------------------------------resetTreeStatusBatch--------------------------------------------------------
+    it.only("check resetTreeStatusBatch", async () => {
+      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+
+      for (let i = 100; i < 150; i++) {
+        await treeFactoryInstance.listTree(i, "Ipfs", {
+          from: userAccount1,
+        });
+      }
+
+      await treeFactoryInstance
+        .resetTreeStatusBatch(100, 201, {
+          from: userAccount2,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      let tx = await treeFactoryInstance.resetTreeStatusBatch(100, 200, {
+        from: userAccount1,
+      });
+
+      truffleAssert.eventEmitted(tx, "TreeStatusBatchReset");
+
+      for (let i = 100; i <= 200; i++) {
+        assert.equal(
+          (await treeFactoryInstance.trees.call(i)).treeStatus,
+          0,
+          `treeStatus not okey  ${i}`
+        );
+      }
+    });
+
     /////////////////---------------------------------update lastRegualarTreeId--------------------------------------------------------
 
     it("update lastRegualarTreeId", async () => {

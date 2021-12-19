@@ -81,7 +81,9 @@ contract Attribute is Initializable, IAttribute {
         );
         require(candidateContract.isAccessRestriction());
         isAttribute = true;
-        specialTreeCount = 0;
+        //TODO:remove set zero
+        //specialTreeCount = 0;
+
         accessRestriction = candidateContract;
     }
 
@@ -180,8 +182,9 @@ contract Attribute is Initializable, IAttribute {
             _attributeUniquenessFactor
         ] = 1;
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status = 3;
+        //TODO:change (+=1) to (=1)
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
-            .generatedCount += 1;
+            .generatedCount = 1;
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
             ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
@@ -210,8 +213,8 @@ contract Attribute is Initializable, IAttribute {
         if (!treeToken.attributeExists(_treeId)) {
             bool flag = false;
             uint64 tempRandomValue;
-
-            for (uint256 j = 0; j < 10000; j++) {
+            //TODO:change 10000 to 10
+            for (uint256 j = 0; j < 10; j++) {
                 uint256 randomValue = uint256(
                     keccak256(
                         abi.encodePacked(
@@ -358,7 +361,8 @@ contract Attribute is Initializable, IAttribute {
     {
         uint64 uniquenessFactor;
 
-        for (uint256 j = 0; j < 10000; j++) {
+        //TODO://change 10000 to 10
+        for (uint256 j = 0; j < 10; j++) {
             uint256 randomValue = uint256(
                 keccak256(abi.encodePacked(msg.sig, _treeId, j))
             );
@@ -434,11 +438,16 @@ contract Attribute is Initializable, IAttribute {
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
                 0
             ) {
+                //TODO:change code
+                // uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
+                //     .generatedCount =
+                //     uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
+                //         .generatedCount +
+                //     1;
+
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                    .generatedCount =
-                    uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                        .generatedCount +
-                    1;
+                    .generatedCount += 1;
+
                 return false;
             }
             uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);

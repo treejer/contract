@@ -568,7 +568,6 @@ contract WethFund is Initializable, IWethFund {
 
         uint16 sumShare = _planterShare + _ambassadorShare;
 
-        //TODO:add if here
         if (sumShare > 0) {
             planterAmount = (_amount * _planterShare) / 10000;
             ambassadorAmount = (_amount * _ambassadorShare) / 10000;
@@ -581,7 +580,6 @@ contract WethFund is Initializable, IWethFund {
             path[0] = address(wethToken);
             path[1] = daiAddress;
 
-            //TODO://remove if
             uint256 daiAmount = _swapExactTokensForTokens(
                 sumAmount,
                 _minDaiOut

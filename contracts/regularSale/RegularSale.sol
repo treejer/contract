@@ -265,7 +265,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         ifNotPaused
         onlyDataManager
     {
-        //TODO://add check lastFundedTreeId
         require(
             lastFundedTreeId < _maxTreeSupply,
             "max supply must gt lastFundedTree"
@@ -403,9 +402,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         address _referrer,
         address _recipient
     ) external override ifNotPaused {
-        //TODO://remove require
-        // require(_treeId <= maxTreeSupply, "max supply");
-
         require(
             _treeId > lastFundedTreeId && _treeId < maxTreeSupply,
             "invalid tree"
@@ -495,8 +491,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         ifNotPaused
         onlyDataManager
     {
-        //TODO://add this require
-
         require(_count > 0, "count must be gt zero");
         referralTriggerCount = _count;
         emit ReferralTriggerCountUpdated(_count);

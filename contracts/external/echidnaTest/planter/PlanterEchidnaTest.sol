@@ -94,16 +94,6 @@ contract PlanterEchidnaTest {
                     _organization
                 )
             );
-        //TODO: GET_REVERT_MESSAGE
-        // if (!success2) {
-        //     // Next 5 lines from https://ethereum.stackexchange.com/a/83577
-        //     if (data2.length < 68) revert();
-        //     assembly {
-        //         data2 := add(data2, 0x04)
-        //     }
-
-        // access to returned message abi.decode(data2, (string));
-        // }
 
         require(success2, "planter join problem");
 

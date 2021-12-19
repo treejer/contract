@@ -345,9 +345,6 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
                 "invalid planterType in change"
             );
 
-            //TODO://remove if
-            // if (planterData.planterType == 3) {}
-
             memberOf[_msgSender()] = address(0);
 
             if (planterData.status == 0) {
@@ -371,8 +368,6 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         ifNotPaused
         onlyOrganization
     {
-        //TODO://remove existPlanter(_planter) modifier
-
         require(
             memberOf[_planter] == _msgSender() &&
                 planters[_planter].status == 0,
@@ -427,12 +422,6 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     ) external override onlyTreejerContract returns (bool) {
         PlanterData storage planterData = planters[_planter];
         if (planterData.planterType > 0) {
-            //TODO: remove if
-            // if (
-            //         planterData.status == 1 &&
-            //         planterData.plantedCount < planterData.supplyCap
-            //     ) {
-
             if (
                 planterData.status == 1 &&
                 (_planter == _assignedPlanterAddress ||
@@ -460,8 +449,6 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         address _planter,
         uint256 _organizationMemberShareAmount
     ) external override ifNotPaused onlyOrganization {
-        //TODO://remove existPlanter(_planter)
-
         require(planters[_planter].status > 0, "invalid planter status");
         require(memberOf[_planter] == _msgSender(), "invalid input planter");
         require(

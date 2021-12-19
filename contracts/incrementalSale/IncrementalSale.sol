@@ -203,6 +203,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
+        //TODO:change limited count check
         require(_treeCount > 0 && _treeCount < 501, "invalid treeCount");
 
         require(_startTreeId > 100, "trees are under Auction");
@@ -292,8 +293,9 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         require(_treeCount > 0 && _treeCount < 501, "invalid count");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
-        //TODO: change require error
+
         require(incSaleData.increments > 0, "incremental sale should be exist");
+
         require(
             treeFactory.manageSaleTypeBatch(
                 incSaleData.endTreeId,
@@ -385,7 +387,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         require(_increments > 0, "incremental period should be positive");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
-        //TODO:add require
+
         require(incSaleData.increments > 0, "incremental sale should be exist");
 
         incSaleData.initialPrice = _initialPrice;
@@ -471,6 +473,8 @@ contract IncrementalSale is Initializable, IIncrementalSale {
     ) private {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
+        uint8 funderRank = attribute.getFunderRank(_funder);
+
         for (uint256 i = 0; i < _count; i++) {
             uint256 treePrice = incSaleData.initialPrice +
                 (((_tempLastSold - incSaleData.startTreeId) /
@@ -500,7 +504,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
                 )
             );
 
-            _createSymbol(_tempLastSold, randTree, _funder);
+            _createSymbol(_tempLastSold, randTree, _funder, funderRank);
 
             _tempLastSold += 1;
         }
@@ -594,15 +598,14 @@ contract IncrementalSale is Initializable, IIncrementalSale {
     function _createSymbol(
         uint256 _tempLastSold,
         bytes32 _randTree,
-        address _funder
+        address _funder,
+        uint8 _funderRank
     ) private {
-        uint8 funderRank = attribute.getFunderRank(_funder);
-
         bool symbolCreated = attribute.createSymbol(
             _tempLastSold,
             _randTree,
             _funder,
-            funderRank,
+            _funderRank,
             16
         );
 

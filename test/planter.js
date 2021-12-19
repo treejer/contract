@@ -2116,7 +2116,7 @@ contract("Planter", (accounts) => {
       .updateOrganizationMemberShare(userAccount6, 2000, {
         from: userAccount1,
       })
-      .should.be.rejectedWith(PlanterErrorMsg.PLANTER_NOT_EXIST);
+      .should.be.rejectedWith(PlanterErrorMsg.INVALID_PLANTER_STATUS);
     ////////////////// --------------------- caller is not planter organization
     await planterInstance
       .updateOrganizationMemberShare(userAccount3, 2000, {

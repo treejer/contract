@@ -494,9 +494,9 @@ contract("WethFund", (accounts) => {
         );
 
       const eventTx = await wethFund.fundTree(
-        expectedSwapTokenAmount[1],
         treeId,
         amount,
+        expectedSwapTokenAmount[1],
         4000,
         2000,
         1000,
@@ -2588,9 +2588,9 @@ contract("WethFund", (accounts) => {
         }
       );
       await wethFund.fundTree(
-        0,
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,

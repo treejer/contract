@@ -452,8 +452,6 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         onlyTreejerContract
         returns (uint32)
     {
-        //TODO: ommit  validTree(_treeId) modifier
-
         if (treeToken.exists(_treeId)) {
             return 1;
         }
@@ -464,7 +462,6 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         if (currentSaleType == 0) {
             treeData.saleType = _saleType;
-            //TODO://add if(check tree status)
             if (treeData.treeStatus == 0) {
                 treeData.treeStatus = 2;
             }
@@ -517,8 +514,6 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
             if (treeData.saleType == _saleType) {
                 treeData.saleType = 0;
 
-                //TODO://add treeStatus check
-
                 if (treeData.treeStatus == 2) {
                     treeData.planter = address(0);
                 }
@@ -547,7 +542,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
             TreeData storage treeData = trees[j];
 
             treeData.saleType = _saleType;
-            //TODO://add set treeStatus
+
             if (treeData.treeStatus == 0) {
                 treeData.treeStatus = 2;
             }
@@ -696,8 +691,6 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         onlyTreejerContract
     {
         TreeData storage treeData = trees[_treeId];
-
-        //TODO:change check  treeData.treeStatus == 4 => treeData.treeStatus > 3
 
         require(
             treeData.treeStatus > 3 && treeData.saleType == 4,

@@ -81,8 +81,6 @@ contract Attribute is Initializable, IAttribute {
         );
         require(candidateContract.isAccessRestriction());
         isAttribute = true;
-        //TODO:remove set zero
-        //specialTreeCount = 0;
 
         accessRestriction = candidateContract;
     }
@@ -182,7 +180,7 @@ contract Attribute is Initializable, IAttribute {
             _attributeUniquenessFactor
         ] = 1;
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status = 3;
-        //TODO:change (+=1) to (=1)
+
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
             .generatedCount = 1;
 
@@ -213,7 +211,7 @@ contract Attribute is Initializable, IAttribute {
         if (!treeToken.attributeExists(_treeId)) {
             bool flag = false;
             uint64 tempRandomValue;
-            //TODO:change 10000 to 10
+
             for (uint256 j = 0; j < 10; j++) {
                 uint256 randomValue = uint256(
                     keccak256(
@@ -361,7 +359,6 @@ contract Attribute is Initializable, IAttribute {
     {
         uint64 uniquenessFactor;
 
-        //TODO://change 10000 to 10
         for (uint256 j = 0; j < 10; j++) {
             uint256 randomValue = uint256(
                 keccak256(abi.encodePacked(msg.sig, _treeId, j))
@@ -438,13 +435,6 @@ contract Attribute is Initializable, IAttribute {
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
                 0
             ) {
-                //TODO:change code
-                // uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                //     .generatedCount =
-                //     uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                //         .generatedCount +
-                //     1;
-
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
                     .generatedCount += 1;
 

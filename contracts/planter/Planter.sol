@@ -20,8 +20,8 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         uint32 score;
         uint32 supplyCap;
         uint32 plantedCount;
-        uint64 longitude;
-        uint64 latitude;
+        int64 longitude;
+        int64 latitude;
     }
 
     /** NOTE {isPlanter} set inside the initialize to {true} */
@@ -132,8 +132,8 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
      */
     function join(
         uint8 _planterType,
-        uint64 _longitude,
-        uint64 _latitude,
+        int64 _longitude,
+        int64 _latitude,
         uint16 _countryCode,
         address _invitedBy,
         address _organization
@@ -201,8 +201,8 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     function joinByAdmin(
         address _planter,
         uint8 _planterType,
-        uint64 _longitude,
-        uint64 _latitude,
+        int64 _longitude,
+        int64 _latitude,
         uint16 _countryCode,
         address _invitedBy,
         address _organization
@@ -261,8 +261,8 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
      */
     function joinOrganization(
         address _organization,
-        uint64 _longitude,
-        uint64 _latitude,
+        int64 _longitude,
+        int64 _latitude,
         uint16 _countryCode,
         uint32 _supplyCap,
         address _invitedBy
@@ -345,9 +345,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
                 "invalid planterType in change"
             );
 
-            if (planterData.planterType == 3) {
-                memberOf[_msgSender()] = address(0);
-            }
+            memberOf[_msgSender()] = address(0);
 
             if (planterData.status == 0) {
                 planterData.status = 1;
@@ -369,7 +367,6 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         override
         ifNotPaused
         onlyOrganization
-        existPlanter(_planter)
     {
         require(
             memberOf[_planter] == _msgSender() &&
@@ -426,21 +423,17 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         PlanterData storage planterData = planters[_planter];
         if (planterData.planterType > 0) {
             if (
-                _planter == _assignedPlanterAddress ||
-                (planterData.planterType == 3 &&
-                    memberOf[_planter] == _assignedPlanterAddress)
+                planterData.status == 1 &&
+                (_planter == _assignedPlanterAddress ||
+                    (planterData.planterType == 3 &&
+                        memberOf[_planter] == _assignedPlanterAddress))
             ) {
-                if (
-                    planterData.status == 1 &&
-                    planterData.plantedCount < planterData.supplyCap
-                ) {
-                    planterData.plantedCount += 1;
+                planterData.plantedCount += 1;
 
-                    if (planterData.plantedCount >= planterData.supplyCap) {
-                        planterData.status = 2;
-                    }
-                    return true;
+                if (planterData.plantedCount >= planterData.supplyCap) {
+                    planterData.status = 2;
                 }
+                return true;
             }
         }
 
@@ -455,7 +448,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     function updateOrganizationMemberShare(
         address _planter,
         uint256 _organizationMemberShareAmount
-    ) external override ifNotPaused onlyOrganization existPlanter(_planter) {
+    ) external override ifNotPaused onlyOrganization {
         require(planters[_planter].status > 0, "invalid planter status");
         require(memberOf[_planter] == _msgSender(), "invalid input planter");
         require(

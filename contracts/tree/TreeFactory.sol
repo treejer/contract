@@ -234,6 +234,21 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeListed(_treeId);
     }
 
+    function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
+        external
+        override
+        ifNotPaused
+        onlyDataManager
+    {
+        for (uint256 i = _startTreeId; i < _endTreeId; i++) {
+            if (trees[i].treeStatus == 2) {
+                trees[i].treeStatus = 0;
+            }
+        }
+
+        emit TreeStatusBatchReset();
+    }
+
     /**
      * @dev admin assign an existing tree to planter
      * NOTE tree must be not planted
@@ -435,17 +450,21 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         external
         override
         onlyTreejerContract
-        validTree(_treeId)
         returns (uint32)
     {
         if (treeToken.exists(_treeId)) {
             return 1;
         }
 
-        uint32 currentSaleType = trees[_treeId].saleType;
+        TreeData storage treeData = trees[_treeId];
+
+        uint32 currentSaleType = treeData.saleType;
 
         if (currentSaleType == 0) {
-            trees[_treeId].saleType = _saleType;
+            treeData.saleType = _saleType;
+            if (treeData.treeStatus == 0) {
+                treeData.treeStatus = 2;
+            }
         }
 
         return currentSaleType;
@@ -490,8 +509,14 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         uint256 _saleType
     ) external override onlyTreejerContract {
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
-            if (trees[i].saleType == _saleType) {
-                trees[i].saleType = 0;
+            TreeData storage treeData = trees[i];
+
+            if (treeData.saleType == _saleType) {
+                treeData.saleType = 0;
+
+                if (treeData.treeStatus == 2) {
+                    treeData.planter = address(0);
+                }
             }
         }
     }
@@ -514,7 +539,13 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
             }
         }
         for (uint256 j = _startTreeId; j < _endTreeId; j++) {
-            trees[j].saleType = _saleType;
+            TreeData storage treeData = trees[j];
+
+            treeData.saleType = _saleType;
+
+            if (treeData.treeStatus == 0) {
+                treeData.treeStatus = 2;
+            }
         }
         return true;
     }
@@ -629,7 +660,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         bool flag = (trees[tempLastFundedTreeId].treeStatus == 0 &&
             trees[tempLastFundedTreeId].saleType == 0) ||
-            (trees[tempLastFundedTreeId].treeStatus == 4 &&
+            (trees[tempLastFundedTreeId].treeStatus > 3 &&
                 trees[tempLastFundedTreeId].saleType == 4);
 
         while (!flag) {
@@ -638,7 +669,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
             flag =
                 (trees[tempLastFundedTreeId].treeStatus == 0 &&
                     trees[tempLastFundedTreeId].saleType == 0) ||
-                (trees[tempLastFundedTreeId].treeStatus == 4 &&
+                (trees[tempLastFundedTreeId].treeStatus > 3 &&
                     trees[tempLastFundedTreeId].saleType == 4);
         }
 
@@ -662,7 +693,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         TreeData storage treeData = trees[_treeId];
 
         require(
-            treeData.treeStatus == 4 && treeData.saleType == 4,
+            treeData.treeStatus > 3 && treeData.saleType == 4,
             "tree must be planted"
         );
 

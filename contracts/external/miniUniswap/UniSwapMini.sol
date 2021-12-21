@@ -28,6 +28,16 @@ contract UniSwapMini {
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts) {
+        uint256[] memory out;
+        out = new uint256[](2);
+
+        out = getAmountsOut(amountIn, path);
+
+        require(
+            out[1] >= amountOutMin,
+            "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+
         bool success = wethToken.transferFrom(
             msg.sender,
             address(this),

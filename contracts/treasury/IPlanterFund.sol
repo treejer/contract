@@ -26,6 +26,18 @@ interface IPlanterFund {
     event BalanceWithdrew(uint256 amount, address account);
 
     /**
+     * @dev emitted when admin withdraw localDevelopment balance
+     * @param amount amount to withdraw
+     * @param account address of destination account
+     * @param reason reason of withdraw
+     */
+    event LocalDevelopmentBalanceWithdrew(
+        uint256 amount,
+        address account,
+        string reason
+    );
+
+    /**
      * @dev emitted when ProjectedEarning set for tree
      * @param treeId id of tree ProjectedEarning set for
      * @param planterAmount planter amount
@@ -48,6 +60,11 @@ interface IPlanterFund {
 
     /** @dev set {_address} to DaiToken contract address */
     function setDaiTokenAddress(address _address) external;
+
+    /**
+     * @dev set {_address} to localDevelopmentAddress
+     */
+    function setLocalDevelopmentAddress(address payable _address) external;
 
     /**
      * @dev admin set the minimum amount to withdraw
@@ -90,6 +107,18 @@ interface IPlanterFund {
      */
     function withdrawBalance(uint256 _amount) external;
 
+    /**
+     * @dev admin withdraw from localDevelopment totalBalances
+     * NOTE amount transfer to localDevelopmentAddress
+     * NOTE emit a {LocalDevelopmentBalanceWithdrew} event
+     * @param _amount amount to withdraw
+     * @param _reason reason to withdraw
+     */
+    function withdrawLocalDevelopmentBalance(
+        uint256 _amount,
+        string calldata _reason
+    ) external;
+
     function initialize(address _accessRestrictionAddress) external;
 
     /**
@@ -99,6 +128,11 @@ interface IPlanterFund {
 
     /** @return minimum amount to withdraw */
     function minWithdrawable() external view returns (uint256);
+
+    /**
+     * @return localDevelopment address
+     */
+    function localDevelopmentAddress() external view returns (address);
 
     /**
      * @dev return totalBalances struct data

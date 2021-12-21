@@ -81,7 +81,7 @@ contract Attribute is Initializable, IAttribute {
         );
         require(candidateContract.isAccessRestriction());
         isAttribute = true;
-        specialTreeCount = 0;
+
         accessRestriction = candidateContract;
     }
 
@@ -157,12 +157,14 @@ contract Attribute is Initializable, IAttribute {
      * @param _attributeUniquenessFactor unique attribute code to assign
      * @param _symbolUniquenessFactor unique symbol to assign
      * @param _generationType type of attribute assignement
+     * @param _coefficient coefficient value
      */
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
-        uint8 _generationType
+        uint8 _generationType,
+        uint64 _coefficient
     ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
@@ -178,11 +180,12 @@ contract Attribute is Initializable, IAttribute {
             _attributeUniquenessFactor
         ] = 1;
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status = 3;
+
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
-            .generatedCount += 1;
+            .generatedCount = 1;
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            ((uint256(_symbolUniquenessFactor) + (2 << 32)) << 64);
+            ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
 
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
@@ -209,7 +212,7 @@ contract Attribute is Initializable, IAttribute {
             bool flag = false;
             uint64 tempRandomValue;
 
-            for (uint256 j = 0; j < 10000; j++) {
+            for (uint256 j = 0; j < 10; j++) {
                 uint256 randomValue = uint256(
                     keccak256(
                         abi.encodePacked(
@@ -257,9 +260,10 @@ contract Attribute is Initializable, IAttribute {
     /**
      * @dev generate a random unique attribute using tree attributes 64 bit value
      * @param _treeId id of tree
+     * @param _generationType generation type
      * @return if unique attribute generated successfully
      */
-    function createAttribute(uint256 _treeId)
+    function createAttribute(uint256 _treeId, uint8 _generationType)
         external
         override
         onlyTreejerContract
@@ -272,7 +276,11 @@ contract Attribute is Initializable, IAttribute {
             ) = _generateAttributeUniquenessFactor(_treeId);
 
             if (flag) {
-                treeToken.setAttributes(_treeId, uniquenessFactor, 1);
+                treeToken.setAttributes(
+                    _treeId,
+                    uniquenessFactor,
+                    _generationType
+                );
                 uniquenessFactorToGeneratedAttributesCount[
                     uniquenessFactor
                 ] = 1;
@@ -351,7 +359,7 @@ contract Attribute is Initializable, IAttribute {
     {
         uint64 uniquenessFactor;
 
-        for (uint256 j = 0; j < 10000; j++) {
+        for (uint256 j = 0; j < 10; j++) {
             uint256 randomValue = uint256(
                 keccak256(abi.encodePacked(msg.sig, _treeId, j))
             );
@@ -428,10 +436,8 @@ contract Attribute is Initializable, IAttribute {
                 0
             ) {
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                    .generatedCount =
-                    uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
-                        .generatedCount +
-                    1;
+                    .generatedCount += 1;
+
                 return false;
             }
             uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);

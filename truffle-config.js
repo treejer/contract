@@ -22,7 +22,7 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 const wrapProvider = require("arb-ethers-web3-bridge").wrapProvider;
 // const infuraKey = "fj4jll3k.....";
 
-const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY, process.env.PV2];
+const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
 
 module.exports = {
   /**

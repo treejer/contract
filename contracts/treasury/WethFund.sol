@@ -254,6 +254,7 @@ contract WethFund is Initializable, IWethFund {
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
+        uint256 _minDaiOut,
         uint16 _planterShare,
         uint16 _ambassadorShare,
         uint16 _researchShare,
@@ -277,7 +278,13 @@ contract WethFund is Initializable, IWethFund {
 
         totalBalances.reserve2 += (_amount * _reserve2Share) / 10000;
 
-        _swapPlanterShare(_treeId, _amount, _planterShare, _ambassadorShare);
+        _swapPlanterShare(
+            _treeId,
+            _amount,
+            _planterShare,
+            _ambassadorShare,
+            _minDaiOut
+        );
     }
 
     /**
@@ -301,7 +308,8 @@ contract WethFund is Initializable, IWethFund {
         uint256 _totalInsurance,
         uint256 _totalTreasury,
         uint256 _totalReserve1,
-        uint256 _totalReserve2
+        uint256 _totalReserve2,
+        uint256 _minDaiOut
     ) external override onlyTreejerContract returns (uint256) {
         totalBalances.research += _totalResearch;
 
@@ -318,7 +326,7 @@ contract WethFund is Initializable, IWethFund {
         uint256 sumAmount = _totalPlanterAmount + _totalAmbassadorAmount;
 
         uint256 daiAmount = sumAmount > 0
-            ? _swapExactTokensForTokens(sumAmount)
+            ? _swapExactTokensForTokens(sumAmount, _minDaiOut)
             : 0;
 
         emit TreeFundedBatch();
@@ -552,29 +560,37 @@ contract WethFund is Initializable, IWethFund {
         uint256 _treeId,
         uint256 _amount,
         uint16 _planterShare,
-        uint16 _ambassadorShare
+        uint16 _ambassadorShare,
+        uint256 _minDaiOut
     ) private {
-        uint256 planterAmount = (_amount * _planterShare) / 10000;
-        uint256 ambassadorAmount = (_amount * _ambassadorShare) / 10000;
+        uint256 planterAmount = 0;
+        uint256 ambassadorAmount = 0;
 
-        uint256 sumAmount = planterAmount + ambassadorAmount;
         uint16 sumShare = _planterShare + _ambassadorShare;
 
-        address[] memory path;
-        path = new address[](2);
+        if (sumShare > 0) {
+            planterAmount = (_amount * _planterShare) / 10000;
+            ambassadorAmount = (_amount * _ambassadorShare) / 10000;
 
-        path[0] = address(wethToken);
-        path[1] = daiAddress;
+            uint256 sumAmount = planterAmount + ambassadorAmount;
 
-        uint256 daiAmount = sumAmount > 0
-            ? _swapExactTokensForTokens(sumAmount)
-            : 0;
+            address[] memory path;
+            path = new address[](2);
 
-        planterFundContract.updateProjectedEarnings(
-            _treeId,
-            (_planterShare * daiAmount) / sumShare,
-            (_ambassadorShare * daiAmount) / sumShare
-        );
+            path[0] = address(wethToken);
+            path[1] = daiAddress;
+
+            uint256 daiAmount = _swapExactTokensForTokens(
+                sumAmount,
+                _minDaiOut
+            );
+
+            planterFundContract.updateProjectedEarnings(
+                _treeId,
+                (_planterShare * daiAmount) / sumShare,
+                (_ambassadorShare * daiAmount) / sumShare
+            );
+        }
 
         emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
@@ -584,7 +600,7 @@ contract WethFund is Initializable, IWethFund {
      * @param _amount is amount of weth token to swap
      * @return amount of dai
      */
-    function _swapExactTokensForTokens(uint256 _amount)
+    function _swapExactTokensForTokens(uint256 _amount, uint256 _minDaiOut)
         private
         returns (uint256 amount)
     {
@@ -600,7 +616,7 @@ contract WethFund is Initializable, IWethFund {
 
         uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
             _amount,
-            1,
+            _minDaiOut,
             path,
             address(planterFundContract),
             block.timestamp + 1800 // 30 * 60 (30 min)

@@ -472,6 +472,7 @@ contract("Attribute", (accounts) => {
           generatedCode1,
           generatedSymbol1,
           generationType1,
+          2,
           { from: userAccount7 }
         )
         .should.be.rejectedWith(
@@ -485,6 +486,7 @@ contract("Attribute", (accounts) => {
         generatedCode1,
         generatedSymbol1,
         generationType1,
+        2,
         { from: dataManager }
       );
 
@@ -644,6 +646,7 @@ contract("Attribute", (accounts) => {
           generatedCode1,
           generatedSymbol1,
           generationType1,
+          2,
           { from: dataManager }
         )
         .should.be.rejectedWith(AttributeErrorMsg.SYMBOL_IS_TAKEN);
@@ -803,7 +806,7 @@ contract("Attribute", (accounts) => {
 
     it("should createAttribute work successfully", async () => {
       await attributeInstance
-        .createAttribute(10001, { from: userAccount6 })
+        .createAttribute(10001, 1, { from: userAccount6 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
       await Common.addTreejerContractRole(
@@ -818,7 +821,7 @@ contract("Attribute", (accounts) => {
         deployerAccount
       );
 
-      let eventTx1 = await attributeInstance.createAttribute(10001, {
+      let eventTx1 = await attributeInstance.createAttribute(10001, 1, {
         from: deployerAccount,
       });
 
@@ -827,7 +830,7 @@ contract("Attribute", (accounts) => {
 
       await treeTokenInstance.attributes(10001);
 
-      let eventTx2 = await attributeInstance.createAttribute(10001, {
+      let eventTx2 = await attributeInstance.createAttribute(10001, 1, {
         from: deployerAccount,
       });
 
@@ -862,13 +865,13 @@ contract("Attribute", (accounts) => {
         deployerAccount
       );
 
-      await attributeInstance.createAttribute(10001, {
+      await attributeInstance.createAttribute(10001, 1, {
         from: deployerAccount,
       });
 
       await testInstance.test(10001);
 
-      await attributeInstance.createAttribute(10001, {
+      await attributeInstance.createAttribute(10001, 1, {
         from: deployerAccount,
       });
     });

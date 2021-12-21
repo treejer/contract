@@ -112,11 +112,13 @@ interface IHonoraryTree {
      * @param _recipient address of recipient
      * @param _startDate start date for {_recipient} to claim tree
      * @param _expiryDate expiry date for {_recipient} to claim tree
+     * @param _coefficient coefficient value
      */
     function addRecipient(
         address _recipient,
         uint64 _startDate,
-        uint64 _expiryDate
+        uint64 _expiryDate,
+        uint64 _coefficient
     ) external;
 
     /**
@@ -125,11 +127,13 @@ interface IHonoraryTree {
      * @param _recipient address of recipient to update date
      * @param _startDate new start date for {_recipient} to claim tree
      * @param _expiryDate new expiry date for {_recipient} to claim tree
+     * @param _coefficient coefficient value
      */
     function updateRecipient(
         address _recipient,
         uint64 _startDate,
-        uint64 _expiryDate
+        uint64 _expiryDate,
+        uint64 _coefficient
     ) external;
 
     /** @dev admin can set referral tree payments
@@ -161,8 +165,6 @@ interface IHonoraryTree {
      * @param _address of recipient to get data
      * @return expiryDate
      * @return startDate
-     * @return status 
-
      */
     function recipients(address _address)
         external
@@ -170,7 +172,7 @@ interface IHonoraryTree {
         returns (
             uint64 expiryDate,
             uint64 startDate,
-            uint64 status
+            uint64 coefficient
         );
 
     /** @return true in case of HonoraryTree contract have been initialized */

@@ -35,6 +35,7 @@ const CommonErrorMsg = {
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
   CHECK_IF_PAUSED: "Pausable: not paused",
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
+  UNISWAP_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
 };
 
 const AuctionErrorMsg = {
@@ -118,19 +119,24 @@ const RegularSaleErrors = {
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
   INVALID_GIFT_OWNER: "invalid gift owner",
   MAX_SUPPLY: "max supply",
+  MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "max supply must gt lastFundedTree",
+  COUNT_MUST_BE_GT_ZERO: "count must be gt zero",
 };
 
 const IncrementalSaleErrorMsg = {
   TREE_TO_SELL: "assign at least one tree",
+  INVALID_TREE_COUNT: "invalid treeCount",
   INVALID_COUNT: "Count must be lt 100",
   OCCUPIED_TREES: "trees are under Auction",
   PRICE_CHANGE_PERIODS: "incremental period should be positive",
+  INCREMENTAL_SALE_EXIST: "incremental sale should be exist",
   TREE_PROVIDED_BEFORE: "trees are not available for sell",
   INVALID_TREE: "Not enough tree in incremental sell",
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
   FREE_INCREMENTALSALE_FAIL:
     "IncrementalSale not exist or count must be lt endTree",
+  CANT_CREATE_NEW_INCREMENTALSALE: "can't create new IncrementalSale",
 };
 
 const AttributeErrorMsg = {
@@ -149,7 +155,7 @@ const HonoraryTreeErrorMsg = {
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
   INVALID_RANGE: "invalid range",
-  UPDATE_RECIPIENT_INVALID_STATUS: "Status must be one",
+  RECIPIENT_NOT_EXIST: "recipient not exist",
   CANT_SET_RANGE: "cant set gift range",
   CANT_CLAIM: "you cant claim tree",
   SYMBOL_NOT_EXIST: "no symbol exists for gift",

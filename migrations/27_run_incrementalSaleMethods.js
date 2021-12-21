@@ -22,16 +22,16 @@ module.exports = async function (deployer, network, accounts) {
   let wethTokenAddress;
 
   //gsn
-  let trustedForwarder;
+  // let trustedForwarder;
 
   if (isLocal) {
-    trustedForwarder = require("../build/gsn/Forwarder.json").address;
+    // trustedForwarder = require("../build/gsn/Forwarder.json").address;
     wethTokenAddress = Weth.address;
   } else if (network == "mumbai") {
-    trustedForwarder = process.env.GSN_FORWARDER;
+    // trustedForwarder = process.env.GSN_FORWARDER;
     wethTokenAddress = Weth.address;
   } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
+    // trustedForwarder = process.env.GSN_FORWARDER;
 
     wethTokenAddress = eval(
       `process.env.WETH_TOKEN_ADDRESS_${network.toUpperCase()}`
@@ -40,7 +40,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call IncrementalSale Methods...");
   await IncrementalSale.deployed().then(async (instance) => {
-    await instance.setTrustedForwarder(trustedForwarder);
+    // await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterFundAddress(planterFundAddress);
     await instance.setRegularSaleAddress(regularSaleAddress);
     await instance.setTreeFactoryAddress(treeFactoryAddress);

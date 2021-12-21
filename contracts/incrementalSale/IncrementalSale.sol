@@ -10,10 +10,9 @@ import "../treasury/IAllocation.sol";
 import "../treasury/IPlanterFund.sol";
 import "../tree/IAttribute.sol";
 import "../regularSale/IRegularSale.sol";
-import "../gsn/RelayRecipient.sol";
 import "./IIncrementalSale.sol";
 
-contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
+contract IncrementalSale is Initializable, IIncrementalSale {
     struct IncrementalSaleData {
         uint256 startTreeId;
         uint256 endTreeId;
@@ -54,13 +53,13 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has data manager role */
     modifier onlyDataManager() {
-        accessRestriction.ifDataManager(_msgSender());
+        accessRestriction.ifDataManager(msg.sender);
         _;
     }
 
@@ -91,19 +90,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         require(candidateContract.isAccessRestriction());
         isIncrementalSale = true;
         accessRestriction = candidateContract;
-    }
-
-    /**
-     * @dev admin set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
-    function setTrustedForwarder(address _address)
-        external
-        override
-        onlyAdmin
-        validAddress(_address)
-    {
-        trustedForwarder = _address;
     }
 
     /**
@@ -217,23 +203,24 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        require(_treeCount > 0, "assign at least one tree");
+        require(_treeCount > 0 && _treeCount < 501, "invalid treeCount");
+
         require(_startTreeId > 100, "trees are under Auction");
+
         require(_increments > 0, "incremental period should be positive");
+
+        IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        require(
+            incSaleData.endTreeId == lastSold + 1 ||
+                incSaleData.increments == 0,
+            "can't create new IncrementalSale"
+        );
+
         require(
             allocation.allocationExists(_startTreeId),
             "equivalant fund Model not exists"
         );
-
-        IncrementalSaleData storage incSaleData = incrementalSaleData;
-
-        if (incSaleData.increments > 0) {
-            treeFactory.resetSaleTypeBatch(
-                incSaleData.startTreeId,
-                incSaleData.endTreeId,
-                2
-            );
-        }
 
         require(
             treeFactory.manageSaleTypeBatch(
@@ -266,6 +253,7 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         ifNotPaused
         onlyDataManager
     {
+        require(_count > 0 && _count < 501, "invalid count");
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         uint256 newStartTreeId = incSaleData.startTreeId + _count;
@@ -299,11 +287,12 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         ifNotPaused
         onlyDataManager
     {
+        require(_treeCount > 0 && _treeCount < 501, "invalid count");
+
         IncrementalSaleData storage incSaleData = incrementalSaleData;
-        require(
-            incSaleData.increments > 0,
-            "incremental period should be positive"
-        );
+
+        require(incSaleData.increments > 0, "incremental sale should be exist");
+
         require(
             treeFactory.manageSaleTypeBatch(
                 incSaleData.endTreeId,
@@ -333,7 +322,8 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
     function fundTree(
         uint256 _count,
         address _referrer,
-        address _recipient
+        address _recipient,
+        uint256 _minDaiOut
     ) external override ifNotPaused {
         require(_count < 101 && _count > 0, "Count must be lt 100");
 
@@ -346,68 +336,39 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
 
         uint256 tempLastSold = lastSold + 1;
 
-        uint256 y = (tempLastSold - incSaleData.startTreeId) /
-            incSaleData.increments;
+        //calc total price
 
-        uint256 tempLastSoldPrice = incSaleData.initialPrice +
-            (y * incSaleData.initialPrice * incSaleData.priceJump) /
-            10000;
-
-        uint256 totalPrice = _count * tempLastSoldPrice;
-
-        int256 extra = int256(_count) -
-            int256(
-                (y + 1) *
-                    incSaleData.increments +
-                    incSaleData.startTreeId -
-                    tempLastSold
-            );
-
-        while (extra > 0) {
-            totalPrice +=
-                (uint256(extra) *
-                    incSaleData.initialPrice *
-                    incSaleData.priceJump) /
-                10000;
-            extra -= int64(incSaleData.increments);
-        }
+        uint256 totalPrice = _calcTotalPrice(tempLastSold, _count);
 
         //transfer totalPrice to wethFund
         require(
-            wethToken.balanceOf(_msgSender()) >= totalPrice,
+            wethToken.balanceOf(msg.sender) >= totalPrice,
             "low price paid"
         );
 
         bool success = wethToken.transferFrom(
-            _msgSender(),
+            msg.sender,
             address(wethFund),
             totalPrice
         );
 
         require(success, "unsuccessful transfer");
 
-        address recipient = _recipient == address(0)
-            ? _msgSender()
-            : _recipient;
+        address recipient = _recipient == address(0) ? msg.sender : _recipient;
 
-        tempLastSold = _setAllocation(
+        _setAllocation(
             tempLastSold,
             _count,
-            _msgSender(),
+            msg.sender,
             recipient,
             _referrer,
-            totalPrice
+            totalPrice,
+            _minDaiOut
         );
 
-        lastSold = tempLastSold - 1;
+        lastSold = tempLastSold + _count - 1;
 
-        emit TreeFunded(
-            _msgSender(),
-            recipient,
-            _referrer,
-            tempLastSold - _count,
-            _count
-        );
+        emit TreeFunded(msg.sender, recipient, _referrer, tempLastSold, _count);
     }
 
     /** @dev admin update incrementalSaleData
@@ -423,6 +384,8 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         require(_increments > 0, "incremental period should be positive");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        require(incSaleData.increments > 0, "incremental sale should be exist");
 
         incSaleData.initialPrice = _initialPrice;
         incSaleData.increments = _increments;
@@ -441,7 +404,6 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
      * @param _recipient address of recipient
      * @param _referrer address of referrer
      * @param _totalPrice total price of trees
-     * @return new last sold tree id
      */
     function _setAllocation(
         uint256 _tempLastSold,
@@ -449,15 +411,148 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
         address _funder,
         address _recipient,
         address _referrer,
-        uint256 _totalPrice
-    ) private returns (uint256) {
+        uint256 _totalPrice,
+        uint256 _minDaiOut
+    ) private {
+        TotalBalances memory totalBalances = _mintFundedTree(
+            _tempLastSold,
+            _count,
+            _recipient
+        );
+
+        uint256 daiAmount = wethFund.fundTreeBatch(
+            totalBalances.planter,
+            totalBalances.ambassador,
+            totalBalances.research,
+            totalBalances.localDevelopment,
+            totalBalances.insurance,
+            totalBalances.treasury,
+            totalBalances.reserve1,
+            totalBalances.reserve2,
+            _minDaiOut
+        );
+
+        _setPlanterAllocation(
+            _tempLastSold,
+            _count,
+            daiAmount,
+            (daiAmount * totalBalances.planter) /
+                (totalBalances.planter + totalBalances.ambassador), //planterDaiAmount
+            (daiAmount * totalBalances.ambassador) /
+                (totalBalances.planter + totalBalances.ambassador), //ambassadorDaiAmount
+            _totalPrice,
+            _funder
+        );
+
+        if (_referrer != address(0)) {
+            regularSale.updateReferrerClaimableTreesWeth(_referrer, _count);
+        }
+    }
+
+    /**
+     * @dev update projected earning in PlanterFund and create symbol for tree
+     * @param _tempLastSold last tree id sold in incremetal sale
+     * @param _count number of trees to fund
+     * @param _daiAmount total dai amount
+     * @param _planterDaiAmount total planter dai share
+     * @param _ambassadorDaiAmount total ambassador dai share
+     * @param _totalPrice total price
+     * @param _funder address of funder
+     */
+    function _setPlanterAllocation(
+        uint256 _tempLastSold,
+        uint256 _count,
+        uint256 _daiAmount,
+        uint256 _planterDaiAmount,
+        uint256 _ambassadorDaiAmount,
+        uint256 _totalPrice,
+        address _funder
+    ) private {
+        IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        uint8 funderRank = attribute.getFunderRank(_funder);
+
+        for (uint256 i = 0; i < _count; i++) {
+            uint256 treePrice = incSaleData.initialPrice +
+                (((_tempLastSold - incSaleData.startTreeId) /
+                    incSaleData.increments) *
+                    incSaleData.initialPrice *
+                    incSaleData.priceJump) /
+                10000;
+
+            uint256 planterDaiAmount = (_planterDaiAmount * treePrice) /
+                _totalPrice;
+
+            uint256 ambassadorDaiAmount = (_ambassadorDaiAmount * treePrice) /
+                _totalPrice;
+
+            planterFundContract.updateProjectedEarnings(
+                _tempLastSold,
+                planterDaiAmount,
+                ambassadorDaiAmount
+            );
+
+            bytes32 randTree = keccak256(
+                abi.encodePacked(
+                    planterDaiAmount,
+                    ambassadorDaiAmount,
+                    treePrice,
+                    _daiAmount
+                )
+            );
+
+            _createSymbol(_tempLastSold, randTree, _funder, funderRank);
+
+            _tempLastSold += 1;
+        }
+    }
+
+    function _calcTotalPrice(uint256 _tempLastSold, uint256 _count)
+        private
+        view
+        returns (uint256)
+    {
+        IncrementalSaleData storage incSaleData = incrementalSaleData;
+
+        uint256 y = (_tempLastSold - incSaleData.startTreeId) /
+            incSaleData.increments;
+
+        uint256 tempLastSoldPrice = incSaleData.initialPrice +
+            (y * incSaleData.initialPrice * incSaleData.priceJump) /
+            10000;
+
+        uint256 totalPrice = _count * tempLastSoldPrice;
+
+        int256 extra = int256(_count) -
+            int256(
+                (y + 1) *
+                    incSaleData.increments +
+                    incSaleData.startTreeId -
+                    _tempLastSold
+            );
+
+        while (extra > 0) {
+            totalPrice +=
+                (uint256(extra) *
+                    incSaleData.initialPrice *
+                    incSaleData.priceJump) /
+                10000;
+            extra -= int64(incSaleData.increments);
+        }
+
+        return totalPrice;
+    }
+
+    function _mintFundedTree(
+        uint256 _tempLastSold,
+        uint256 _count,
+        address _recipient
+    ) private returns (TotalBalances memory) {
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         TotalBalances memory totalBalances;
 
         uint256 tempLastSold = _tempLastSold;
-
-        address funder = _funder;
         address recipient = _recipient;
 
         for (uint256 i = 0; i < _count; i++) {
@@ -491,108 +586,23 @@ contract IncrementalSale is Initializable, RelayRecipient, IIncrementalSale {
             totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
 
             treeFactory.mintAssignedTree(tempLastSold, recipient);
-
             tempLastSold += 1;
         }
 
-        uint256 daiAmount = wethFund.fundTreeBatch(
-            totalBalances.planter,
-            totalBalances.ambassador,
-            totalBalances.research,
-            totalBalances.localDevelopment,
-            totalBalances.insurance,
-            totalBalances.treasury,
-            totalBalances.reserve1,
-            totalBalances.reserve2
-        );
-
-        _setPlanterAllocation(
-            _tempLastSold,
-            _count,
-            daiAmount,
-            (daiAmount * totalBalances.planter) /
-                (totalBalances.planter + totalBalances.ambassador), //planterDaiAmount
-            (daiAmount * totalBalances.ambassador) /
-                (totalBalances.planter + totalBalances.ambassador), //ambassadorDaiAmount
-            _totalPrice,
-            funder
-        );
-
-        if (_referrer != address(0)) {
-            regularSale.updateReferrerClaimableTreesWeth(_referrer, _count);
-        }
-
-        return tempLastSold;
-    }
-
-    /**
-     * @dev update projected earning in PlanterFund and create symbol for tree
-     * @param _tempLastSold last tree id sold in incremetal sale
-     * @param _count number of trees to fund
-     * @param _daiAmount total dai amount
-     * @param _planterDaiAmount total planter dai share
-     * @param _ambassadorDaiAmount total ambassador dai share
-     * @param _totalPrice total price
-     * @param _funder address of funder
-     */
-    function _setPlanterAllocation(
-        uint256 _tempLastSold,
-        uint256 _count,
-        uint256 _daiAmount,
-        uint256 _planterDaiAmount,
-        uint256 _ambassadorDaiAmount,
-        uint256 _totalPrice,
-        address _funder
-    ) private {
-        IncrementalSaleData storage incSaleData = incrementalSaleData;
-
-        for (uint256 i = 0; i < _count; i++) {
-            uint256 treePrice = incSaleData.initialPrice +
-                (((_tempLastSold - incSaleData.startTreeId) /
-                    incSaleData.increments) *
-                    incSaleData.initialPrice *
-                    incSaleData.priceJump) /
-                10000;
-
-            uint256 planterDaiAmount = (_planterDaiAmount * treePrice) /
-                _totalPrice;
-
-            uint256 ambassadorDaiAmount = (_ambassadorDaiAmount * treePrice) /
-                _totalPrice;
-
-            planterFundContract.updateProjectedEarnings(
-                _tempLastSold,
-                planterDaiAmount,
-                ambassadorDaiAmount
-            );
-
-            bytes32 randTree = keccak256(
-                abi.encodePacked(
-                    planterDaiAmount,
-                    ambassadorDaiAmount,
-                    treePrice,
-                    _daiAmount
-                )
-            );
-
-            _createSymbol(_tempLastSold, randTree, _funder);
-
-            _tempLastSold += 1;
-        }
+        return (totalBalances);
     }
 
     function _createSymbol(
         uint256 _tempLastSold,
         bytes32 _randTree,
-        address _funder
+        address _funder,
+        uint8 _funderRank
     ) private {
-        uint8 funderRank = attribute.getFunderRank(_funder);
-
         bool symbolCreated = attribute.createSymbol(
             _tempLastSold,
             _randTree,
             _funder,
-            funderRank,
+            _funderRank,
             16
         );
 

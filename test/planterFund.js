@@ -179,6 +179,39 @@ contract("PlanterFund", (accounts) => {
       });
     });
 
+    it("set local address", async () => {
+      let localDevelopmentAddress = userAccount4;
+
+      //------------------------------- check failure --------------------------------
+
+      await planterFundInstance
+        .setLocalDevelopmentAddress(localDevelopmentAddress, {
+          from: userAccount5,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await planterFundInstance
+        .setLocalDevelopmentAddress(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      //------------------------------- set address --------------------------------
+
+      await planterFundInstance.setLocalDevelopmentAddress(
+        localDevelopmentAddress,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        await planterFundInstance.localDevelopmentAddress(),
+        localDevelopmentAddress,
+        "Set localDevelopmentAddress address not true"
+      );
+    });
+
     ///////----------------------------------------------------test set minWithdrawable----------------------------
 
     it("should set minWithdrawable successfully", async () => {
@@ -2818,26 +2851,6 @@ contract("PlanterFund", (accounts) => {
         );
       });
 
-      //TODO: we can check here transfer local development fund and check total funds
-
-      // const txLocalDevelop = await planterFundInstance.withdrawLocalDevelop(
-      //   web3.utils.toWei("0.1"),
-      //   "some reason",
-      //   { from: deployerAccount }
-      // );
-
-      // truffleAssert.eventEmitted(
-      //   txLocalDevelop,
-      //   "LocalDevelopBalanceWithdrawn",
-      //   (ev) => {
-      //     return (
-      //       Number(ev.amount) == Number(web3.utils.toWei("0.1")) &&
-      //       ev.account == userAccount6 &&
-      //       ev.reason == "some reason"
-      //     );
-      //   }
-      // );
-
       const contractBalanceAfterWithdraw1 = await daiInstance.balanceOf.call(
         planterFundInstance.address
       );
@@ -2855,16 +2868,12 @@ contract("PlanterFund", (accounts) => {
 
       const totalBalances2 = await planterFundInstance.totalBalances();
 
-      const accountlocalDevelopBalance2 = await daiInstance.balanceOf.call(
-        userAccount6
-      );
-
       assert.equal(
         Math.subtract(Number(totalPlanterFund), planterWithdrawAmount1),
         Number(organizationPlanterBalance2),
         "organization planter blance is not ok 2"
       );
-      //TODO: we can check here transfer local development fund and check total funds
+
       assert.equal(
         totalAmbassadorFund,
         Number(totalBalances2.localDevelopment),
@@ -2892,30 +2901,12 @@ contract("PlanterFund", (accounts) => {
         { from: userAccount3 }
       );
 
-      // const txLocalDevelop2 = await planterFundInstance.withdrawLocalDevelop(
-      //   web3.utils.toWei("0.3"),
-      //   "some reason",
-      //   { from: deployerAccount }
-      // );
-
       truffleAssert.eventEmitted(tx2, "BalanceWithdrew", (ev) => {
         return (
           Number(ev.amount) == planterWithdrawAmount2 &&
           ev.account == userAccount3
         );
       });
-
-      // truffleAssert.eventEmitted(
-      //   txLocalDevelop2,
-      //   "LocalDevelopBalanceWithdrawn",
-      //   (ev) => {
-      //     return (
-      //       Number(ev.amount) == Number(web3.utils.toWei("0.3")) &&
-      //       ev.account == userAccount6 &&
-      //       ev.reason == "some reason"
-      //     );
-      //   }
-      // );
 
       const contractBalanceAfterWithdraw2 = await daiInstance.balanceOf.call(
         planterFundInstance.address
@@ -2961,7 +2952,6 @@ contract("PlanterFund", (accounts) => {
 
       const accountOrganizationPlanterBalance3 =
         await daiInstance.balanceOf.call(userAccount3);
-      // const accountlocalDevelopBalance3 = await web3.eth.getBalance(userAccount6);
 
       assert.equal(
         Number(accountOrganizationPlanterBalance3),
@@ -2973,15 +2963,229 @@ contract("PlanterFund", (accounts) => {
 
         "planter balance is not ok 3"
       );
+    });
 
-      // assert.equal(
-      //   Number(accountlocalDevelopBalance3),
-      //   Math.add(
-      //     Number(accountlocalDevelopBalance2),
-      //     Number(web3.utils.toWei("0.3"))
-      //   ),
-      //   "localDevelopment balance is not ok 3"
-      // );
+    it("withdraw local development", async () => {
+      await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+
+      await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      const treeId = 1;
+      const planterFund = Units.convert("100", "eth", "wei");
+      const ambassadorFund = Units.convert("50", "eth", "wei");
+
+      await planterFundInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.successJoinOrganization(
+        arInstance,
+        planterInstance,
+        userAccount3,
+        zeroAddress,
+        deployerAccount,
+        dataManager
+      );
+
+      const totalPlanterFund = planterFund;
+
+      const totalAmbassadorFund = ambassadorFund;
+
+      await daiInstance.transfer(
+        planterFundInstance.address,
+        Units.convert("150", "eth", "wei"),
+        { from: deployerAccount }
+      );
+
+      const contractBalanceAfterFund = await daiInstance.balanceOf.call(
+        planterFundInstance.address
+      );
+
+      await planterFundInstance.updateProjectedEarnings(
+        treeId,
+        planterFund,
+        ambassadorFund,
+        {
+          from: userAccount8,
+        }
+      );
+
+      const fundTx = await planterFundInstance.updatePlanterTotalClaimed(
+        treeId,
+        userAccount3,
+        25920,
+        {
+          from: userAccount6,
+        }
+      );
+
+      truffleAssert.eventEmitted(fundTx, "PlanterTotalClaimedUpdated", (ev) => {
+        return (
+          ev.treeId == treeId &&
+          ev.planter == userAccount3 &&
+          Number(ev.amount) == Number(planterFund) &&
+          ev.ambassador == zeroAddress
+        );
+      });
+
+      const planterBalance1 = await planterFundInstance.balances.call(
+        userAccount3
+      );
+
+      const totalBalances = await planterFundInstance.totalBalances();
+
+      assert.equal(
+        Number(planterBalance1),
+        Number(totalPlanterFund),
+        "Organization planter balance is not ok 1"
+      );
+
+      assert.equal(
+        Number(totalBalances.planter),
+        0,
+        "total planter fund is not ok"
+      );
+
+      assert.equal(
+        Number(totalBalances.ambassador),
+        0,
+        "total referrar fund is not ok"
+      );
+
+      assert.equal(
+        Number(totalBalances.localDevelopment),
+        totalAmbassadorFund,
+        "localDevelopment balance is not ok 1"
+      );
+
+      const withdrawAmount1 = web3.utils.toWei("20");
+      const withdrawAmount2 = web3.utils.toWei("30");
+      const invalidWithdrawAmount = web3.utils.toWei("40");
+
+      /////////////////// check withdraw failure
+
+      await planterFundInstance
+        .withdrawLocalDevelopmentBalance(withdrawAmount1, "some reason", {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await planterFundInstance
+        .withdrawLocalDevelopmentBalance(withdrawAmount1, "some reason", {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      await planterFundInstance.setLocalDevelopmentAddress(userAccount8, {
+        from: deployerAccount,
+      });
+
+      await planterFundInstance
+        .withdrawLocalDevelopmentBalance(0, "some reason", {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+      const txLocalDevelop =
+        await planterFundInstance.withdrawLocalDevelopmentBalance(
+          withdrawAmount1,
+          "some reason",
+          { from: deployerAccount }
+        );
+
+      truffleAssert.eventEmitted(
+        txLocalDevelop,
+        "LocalDevelopmentBalanceWithdrew",
+        (ev) => {
+          return (
+            Number(ev.amount) == Number(withdrawAmount1) &&
+            ev.account == userAccount8 &&
+            ev.reason == "some reason"
+          );
+        }
+      );
+
+      ////////////// check contract balance
+
+      assert.equal(
+        Math.add(
+          Number(await daiInstance.balanceOf.call(planterFundInstance.address)),
+          Number(withdrawAmount1)
+        ),
+        Number(contractBalanceAfterFund),
+        "contract balance after withdraw1 is not ok"
+      );
+
+      //////////////////// check total balances
+
+      const totalBalances2 = await planterFundInstance.totalBalances();
+
+      assert.equal(
+        Math.subtract(Number(totalAmbassadorFund), Number(withdrawAmount1)),
+        Number(totalBalances2.localDevelopment),
+        "localDevelopment blance is not ok 2"
+      );
+
+      //////////////////////check user8 balance after withdraw
+
+      assert.equal(
+        Number(await daiInstance.balanceOf.call(userAccount8)),
+        Number(withdrawAmount1),
+        "local development address amount is not ok"
+      );
+
+      ///////////////// ------------ 2nd withdraw (invalid amount)
+
+      await planterFundInstance
+        .withdrawLocalDevelopmentBalance(invalidWithdrawAmount, "some reason", {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+      ///////////////// ------------ 2nd withdraw
+      await planterFundInstance.withdrawLocalDevelopmentBalance(
+        withdrawAmount2,
+        "some reason",
+        {
+          from: deployerAccount,
+        }
+      );
+
+      ////////////// check contract balance
+
+      assert.equal(
+        Math.add(
+          Number(await daiInstance.balanceOf.call(planterFundInstance.address)),
+          Number(withdrawAmount1),
+          Number(withdrawAmount2)
+        ),
+        Number(contractBalanceAfterFund),
+        "contract balance after withdraw2 is not ok"
+      );
+
+      //////////////////// check total balances
+
+      assert.equal(
+        Math.subtract(
+          Number(totalAmbassadorFund),
+          Math.add(Number(withdrawAmount1), Number(withdrawAmount2))
+        ),
+        Number((await planterFundInstance.totalBalances()).localDevelopment),
+        "localDevelopment blance is not ok 3"
+      );
+
+      //////////////////////check user8 balance after withdraw
+
+      assert.equal(
+        Number(await daiInstance.balanceOf.call(userAccount8)),
+        Math.add(Number(withdrawAmount1), Number(withdrawAmount2)),
+        "local development address amount is not ok"
+      );
     });
 
     it("should fail withdraw planter", async () => {

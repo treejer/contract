@@ -56,9 +56,6 @@ interface IAuction {
      */
     event AuctionEnded(uint256 auctionId, uint256 treeId);
 
-    /** @dev set {_address} to trustedForwarder */
-    function setTrustedForwarder(address _address) external;
-
     /** @dev set {_address} to TreeFactory contract address */
     function setTreeFactoryAddress(address _address) external;
 
@@ -117,7 +114,7 @@ interface IAuction {
      * NOTE emit an {AuctionEnded} event if auction does not have bidder
      * @param _auctionId id of auction to end.
      */
-    function endAuction(uint256 _auctionId) external;
+    function endAuction(uint256 _auctionId, uint256 _minDaiout) external;
 
     function initialize(address _accessRestrictionAddress) external;
 

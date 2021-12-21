@@ -9,6 +9,7 @@ const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
 const Attribute = artifacts.require("Attribute");
 const RegularSale = artifacts.require("RegularSale");
+const Planter = artifacts.require("Planter");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
@@ -16,12 +17,6 @@ const Common = require("./common");
 const Math = require("./math");
 
 const Units = require("ethereumjs-units");
-
-//gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
 
 //treasury section
 const WethFund = artifacts.require("WethFund");
@@ -36,7 +31,6 @@ const {
   CommonErrorMsg,
   IncrementalSaleErrorMsg,
   TreasuryManagerErrorMsg,
-  GsnErrorMsg,
 } = require("./enumes");
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -103,6 +97,7 @@ contract("IncrementalSale", (accounts) => {
     );
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
+    await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
   });
 
   describe("deployment and set addresses", () => {
@@ -171,30 +166,6 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("set incrementalSale address and fail in invalid situation", async () => {
-      ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
-
-      await iSaleInstance
-        .setTrustedForwarder(userAccount2, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await iSaleInstance
-        .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      await iSaleInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        userAccount2,
-        await iSaleInstance.trustedForwarder(),
-        "address set incorect"
-      );
-
       ///////////////---------------------------------set Attributes address--------------------------------------------------------
 
       await iSaleInstance
@@ -324,6 +295,21 @@ contract("IncrementalSale", (accounts) => {
         from: deployerAccount,
       });
 
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
       });
@@ -394,17 +380,23 @@ contract("IncrementalSale", (accounts) => {
         .createIncrementalSale(101, web3.utils.toWei("0.005"), 0, 100, 400, {
           from: dataManager,
         })
-        .should.be.rejectedWith(IncrementalSaleErrorMsg.TREE_TO_SELL); //must be faild because treeCount is zero
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero
+
+      await iSaleInstance
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 501, 100, 400, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE_COUNT); //must be faild because treeCount is zero
 
       /////-----added incrementalSale should has startTreeId>100
 
       await iSaleInstance
-        .createIncrementalSale(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
+        .createIncrementalSale(98, web3.utils.toWei("0.005"), 100, 100, 400, {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.OCCUPIED_TREES); //treeStartId should be >100
 
-      /////-----added incrementalSale should reject becuase caller has not admin role
+      // /////-----added incrementalSale should reject becuase caller has not admin role
 
       await iSaleInstance
         .createIncrementalSale(98, web3.utils.toWei("0.005"), 9900, 100, 400, {
@@ -412,10 +404,10 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      /////-----added incrementalSale should has steps of price change>0
+      // /////-----added incrementalSale should has steps of price change>0
 
       await iSaleInstance
-        .createIncrementalSale(101, web3.utils.toWei("0.005"), 9900, 0, 400, {
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 100, 0, 400, {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
@@ -441,16 +433,9 @@ contract("IncrementalSale", (accounts) => {
       });
 
       await iSaleInstance
-        .createIncrementalSale(
-          101,
-          web3.utils.toWei("0.005"),
-          9900,
-          100,
-          1000,
-          {
-            from: dataManager,
-          }
-        )
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 100, 100, 1000, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INVALID_ASSIGN_MODEL); // steps of price change should be >0
     });
 
@@ -526,16 +511,9 @@ contract("IncrementalSale", (accounts) => {
         { from: dataManager }
       );
       await iSaleInstance
-        .createIncrementalSale(
-          101,
-          web3.utils.toWei("0.005"),
-          9900,
-          100,
-          1000,
-          {
-            from: dataManager,
-          }
-        )
+        .createIncrementalSale(101, web3.utils.toWei("0.005"), 150, 100, 1000, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.TREE_PROVIDED_BEFORE); // trees shouldnot be on other provides
     });
 
@@ -561,6 +539,48 @@ contract("IncrementalSale", (accounts) => {
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
+
+      //plant tree
+
+      let tree119_before = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_before.saleType), 0);
+      assert.equal(Number(tree119_before.treeStatus), 0);
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+
+      for (let i = 110; i < 120; i++) {
+        if (i == 119) {
+          await Common.successPlant(
+            treeFactoryInstance,
+            arInstance,
+            "ipfs exists",
+            i,
+            birthDate,
+            1,
+            [userAccount2],
+            userAccount2,
+            deployerAccount,
+            planterInstance,
+            dataManager
+          );
+        } else {
+          await treeFactoryInstance.listTree(i, "ipfs exists");
+        }
+      }
+      await treeFactoryInstance.assignTree(118, userAccount2);
+
+      let tree119_before_2 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_before_2.saleType), 0);
+      assert.equal(Number(tree119_before_2.treeStatus), 4);
+      assert.equal(tree119_before_2.planter, userAccount2);
+
+      let tree118_before_2 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118_before_2.saleType), 0);
+      assert.equal(Number(tree118_before_2.treeStatus), 2);
+      assert.equal(tree118_before_2.planter, userAccount2);
 
       let eventTx = await iSaleInstance.createIncrementalSale(
         105,
@@ -612,14 +632,44 @@ contract("IncrementalSale", (accounts) => {
       let tree105 = await treeFactoryInstance.trees(105);
 
       assert.equal(Number(tree105.saleType), 2);
+      assert.equal(Number(tree105.treeStatus), 2);
+
+      let tree110 = await treeFactoryInstance.trees(110);
+
+      assert.equal(Number(tree110.saleType), 2);
+      assert.equal(Number(tree110.treeStatus), 2);
+
+      let tree118 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118.saleType), 2);
+      assert.equal(Number(tree118.treeStatus), 2);
+
+      let tree119 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119.saleType), 2);
+      assert.equal(Number(tree119.treeStatus), 4);
 
       let tree150 = await treeFactoryInstance.trees(254);
 
       assert.equal(Number(tree150.saleType), 2);
+      assert.equal(Number(tree150.treeStatus), 2);
 
       let tree151 = await treeFactoryInstance.trees(255);
 
       assert.equal(Number(tree151.saleType), 0);
+      assert.equal(Number(tree151.treeStatus), 0);
+
+      await iSaleInstance
+        .createIncrementalSale(135, web3.utils.toWei("0.01"), 150, 100, 1000, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(
+          IncrementalSaleErrorMsg.CANT_CREATE_NEW_INCREMENTALSALE
+        );
+
+      await iSaleInstance.removeIncrementalSale(150, {
+        from: dataManager,
+      });
 
       await iSaleInstance.createIncrementalSale(
         135,
@@ -670,29 +720,46 @@ contract("IncrementalSale", (accounts) => {
       let tree105_2 = await treeFactoryInstance.trees(105);
 
       assert.equal(Number(tree105_2.saleType), 0);
+      assert.equal(Number(tree105_2.treeStatus), 2);
+
+      let tree118_2 = await treeFactoryInstance.trees(118);
+
+      assert.equal(Number(tree118_2.saleType), 0);
+      assert.equal(Number(tree118_2.treeStatus), 2);
+      assert.equal(tree118_2.planter, zeroAddress);
+
+      let tree119_2 = await treeFactoryInstance.trees(119);
+
+      assert.equal(Number(tree119_2.saleType), 0);
+      assert.equal(Number(tree119_2.treeStatus), 4);
+      assert.equal(tree119_2.planter, userAccount2);
 
       let tree134 = await treeFactoryInstance.trees(134);
 
       assert.equal(Number(tree134.saleType), 0);
+      assert.equal(Number(tree134.treeStatus), 2);
 
       let tree135 = await treeFactoryInstance.trees(135);
 
       assert.equal(Number(tree135.saleType), 2);
+      assert.equal(Number(tree135.treeStatus), 2);
 
       let tree284 = await treeFactoryInstance.trees(284);
 
       assert.equal(Number(tree284.saleType), 2);
+      assert.equal(Number(tree284.treeStatus), 2);
 
       let tree285 = await treeFactoryInstance.trees(285);
 
       assert.equal(Number(tree285.saleType), 0);
+      assert.equal(Number(tree285.treeStatus), 0);
     });
 
     ////////////// -------------------------------- removeIncrementalSale ---------------------------------
 
     it("Should removeIncrementalSale succesfully", async () => {
       await iSaleInstance
-        .removeIncrementalSale(400, { from: dataManager })
+        .removeIncrementalSale(200, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
@@ -749,12 +816,20 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(Number(tree1301_1.saleType), 0, "sale type is not correct");
 
       await iSaleInstance
-        .removeIncrementalSale(500, {
+        .removeIncrementalSale(200, {
           from: userAccount4,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      const eventTx1 = await iSaleInstance.removeIncrementalSale(500, {
+      const eventTx1 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(100, {
         from: dataManager,
       });
 
@@ -793,7 +868,11 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree601_2.saleType), 2, "2 sale type is not correct");
 
-      const eventTx2 = await iSaleInstance.removeIncrementalSale(400, {
+      const eventTx2 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.removeIncrementalSale(200, {
         from: dataManager,
       });
 
@@ -840,13 +919,17 @@ contract("IncrementalSale", (accounts) => {
         "2 sale type is not correct"
       );
 
+      const eventTx3 = await iSaleInstance.removeIncrementalSale(200, {
+        from: dataManager,
+      });
+
       await iSaleInstance
-        .removeIncrementalSale(400, { from: dataManager })
+        .removeIncrementalSale(200, { from: dataManager })
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.FREE_INCREMENTALSALE_FAIL
         );
 
-      const eventTx3 = await iSaleInstance.removeIncrementalSale(300, {
+      await iSaleInstance.removeIncrementalSale(100, {
         from: dataManager,
       });
 
@@ -1024,7 +1107,7 @@ contract("IncrementalSale", (accounts) => {
         .updateEndTreeId(100, {
           from: dataManager,
         })
-        .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INCREMENTAL_SALE_EXIST);
 
       ////-------updateEndTreeId Should reject because a tree is not available
 
@@ -1095,10 +1178,43 @@ contract("IncrementalSale", (accounts) => {
     ////----------------------------------------------------test updateIncrementalSaleData------------------------------
 
     it("updateIncrementalSaleData should be work successfully", async () => {
-      let eventTx = await iSaleInstance.updateIncrementalSaleData(
+      await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
+
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
+        from: dataManager,
+      });
+
+      await iSaleInstance.createIncrementalSale(
+        101,
         web3.utils.toWei("0.01"),
+        100,
         20,
         1000,
+        {
+          from: dataManager,
+        }
+      );
+
+      const eventTx = await iSaleInstance.updateIncrementalSaleData(
+        web3.utils.toWei("0.02"),
+        50,
+        2000,
         {
           from: dataManager,
         }
@@ -1108,19 +1224,19 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(
         Number(incrementalSaleData.initialPrice),
-        Number(web3.utils.toWei("0.01")),
+        Number(web3.utils.toWei("0.02")),
         "initialPrice not true"
       );
 
       assert.equal(
         Number(incrementalSaleData.increments),
-        20,
+        50,
         "increments not true"
       );
 
       assert.equal(
         Number(incrementalSaleData.priceJump),
-        1000,
+        2000,
         "priceJump not true"
       );
 
@@ -1148,6 +1264,12 @@ contract("IncrementalSale", (accounts) => {
           from: dataManager,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.PRICE_CHANGE_PERIODS);
+
+      await iSaleInstance
+        .updateIncrementalSaleData(web3.utils.toWei("0.01"), 20, 1000, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INCREMENTAL_SALE_EXIST);
     });
   });
   describe("with financial section", () => {
@@ -1177,6 +1299,21 @@ contract("IncrementalSale", (accounts) => {
       await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
@@ -1317,9 +1454,25 @@ contract("IncrementalSale", (accounts) => {
     });
 
     it("check discount timeout", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
+
+      await Common.successPlant(
+        treeFactoryInstance,
+        arInstance,
+        "ipfs exists",
+        101,
+        birthDate,
+        1,
+        [userAccount2],
+        userAccount2,
+        deployerAccount,
+        planterInstance,
+        dataManager
+      );
 
       await iSaleInstance.createIncrementalSale(
         101,
@@ -1365,9 +1518,27 @@ contract("IncrementalSale", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
-        from: userAccount3,
-      });
+      await iSaleInstance
+        .fundTree(
+          1,
+          zeroAddress,
+          zeroAddress,
+          expectedSwapTokenAmountTreeid101[1] + 1000,
+          {
+            from: userAccount3,
+          }
+        )
+        .should.be.rejectedWith(CommonErrorMsg.UNISWAP_OUTPUT_AMOUNT);
+
+      await iSaleInstance.fundTree(
+        1,
+        zeroAddress,
+        zeroAddress,
+        expectedSwapTokenAmountTreeid101[1],
+        {
+          from: userAccount3,
+        }
+      );
 
       //////////--------------check tree owner
       let addressGetToken101 = await treeTokenInstance.ownerOf(101);
@@ -1377,6 +1548,8 @@ contract("IncrementalSale", (accounts) => {
       let tree101 = await treeFactoryInstance.trees(101);
 
       assert.equal(Number(tree101.saleType), 0);
+      assert.equal(Number(tree101.planter), userAccount2);
+      assert.equal(Number(tree101.treeStatus), 4);
 
       await treeTokenInstance.ownerOf(102).should.be.rejected;
 
@@ -1571,11 +1744,11 @@ contract("IncrementalSale", (accounts) => {
         .times(0.00462)
         .div(0.08442);
 
-      let tx = await iSaleInstance.fundTree(15, userAccount6, zeroAddress, {
+      let tx = await iSaleInstance.fundTree(15, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(5, userAccount6, zeroAddress, {
+      await iSaleInstance.fundTree(5, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -1627,6 +1800,7 @@ contract("IncrementalSale", (accounts) => {
       let tree102 = await treeFactoryInstance.trees(102);
 
       assert.equal(Number(tree102.saleType), 0);
+      assert.equal(Number(tree102.treeStatus), 2);
 
       /////-----------------fund 110
 
@@ -1637,6 +1811,7 @@ contract("IncrementalSale", (accounts) => {
       let tree110 = await treeFactoryInstance.trees(110);
 
       assert.equal(Number(tree110.saleType), 0);
+      assert.equal(Number(tree110.treeStatus), 2);
 
       /////-----------------fund 120
 
@@ -1647,6 +1822,7 @@ contract("IncrementalSale", (accounts) => {
       let tree120 = await treeFactoryInstance.trees(120);
 
       assert.equal(Number(tree120.saleType), 0);
+      assert.equal(Number(tree120.treeStatus), 2);
 
       /////-----------------fund 121
 
@@ -1657,6 +1833,7 @@ contract("IncrementalSale", (accounts) => {
       let tree121 = await treeFactoryInstance.trees(121);
 
       assert.equal(Number(tree121.saleType), 0);
+      assert.equal(Number(tree121.treeStatus), 2);
 
       /////-----------------not fund 122
 
@@ -1665,6 +1842,7 @@ contract("IncrementalSale", (accounts) => {
       let tree122 = await treeFactoryInstance.trees(122);
 
       assert.equal(Number(tree122.saleType), 2);
+      assert.equal(Number(tree121.treeStatus), 2);
 
       ///////////////////
 
@@ -1892,7 +2070,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      let tx2 = await iSaleInstance.fundTree(19, zeroAddress, zeroAddress, {
+      let tx2 = await iSaleInstance.fundTree(19, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -1931,7 +2109,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, userAccount6, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount6, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -1967,7 +2145,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2003,14 +2181,14 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(5, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
 
-      await iSaleInstance.fundTree(14, userAccount5, zeroAddress, {
+      await iSaleInstance.fundTree(14, userAccount5, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2034,7 +2212,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2060,7 +2238,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2113,11 +2291,17 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      let tx1 = await iSaleInstance.fundTree(15, userAccount6, userAccount7, {
-        from: userAccount3,
-      });
+      let tx1 = await iSaleInstance.fundTree(
+        15,
+        userAccount6,
+        userAccount7,
+        0,
+        {
+          from: userAccount3,
+        }
+      );
 
-      let tx2 = await iSaleInstance.fundTree(5, userAccount6, userAccount5, {
+      let tx2 = await iSaleInstance.fundTree(5, userAccount6, userAccount5, 0, {
         from: userAccount3,
       });
 
@@ -2153,6 +2337,12 @@ contract("IncrementalSale", (accounts) => {
           Number((await treeFactoryInstance.trees(i)).saleType),
           0,
           `saleType is not true for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees(i)).treeStatus),
+          2,
+          `treeStatus is not true for tree ${i}`
         );
       }
 
@@ -2255,7 +2445,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2279,7 +2469,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(4, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(4, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2310,7 +2500,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(16, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(16, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2332,7 +2522,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, {
+        .fundTree(1, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -2348,7 +2538,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2382,19 +2572,19 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
-      await iSaleInstance.fundTree(9, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(9, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2409,7 +2599,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2473,11 +2663,11 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(15, userAccount3, zeroAddress, {
+      await iSaleInstance.fundTree(15, userAccount3, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2531,7 +2721,7 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(lastSold), 130, "lastSold not true");
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2544,7 +2734,7 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.createIncrementalSale(
         101,
         web3.utils.toWei("0.01"),
-        220,
+        200,
         100,
         1000,
         {
@@ -2564,11 +2754,11 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, { from: userAccount3 })
+        .fundTree(1, zeroAddress, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await iSaleInstance
-        .fundTree(1, userAccount3, zeroAddress, { from: userAccount3 })
+        .fundTree(1, userAccount3, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2615,11 +2805,11 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(15, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2676,13 +2866,13 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(120, zeroAddress, zeroAddress, {
+        .fundTree(120, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
 
       await iSaleInstance
-        .fundTree(120, userAccount2, zeroAddress, {
+        .fundTree(120, userAccount2, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
@@ -2724,17 +2914,17 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(21, zeroAddress, zeroAddress, {
+        .fundTree(21, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
 
-      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
       await iSaleInstance
-        .fundTree(16, zeroAddress, zeroAddress, {
+        .fundTree(16, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_TREE);
@@ -2776,7 +2966,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(1, zeroAddress, zeroAddress, {
+        .fundTree(1, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -2793,7 +2983,7 @@ contract("IncrementalSale", (accounts) => {
         }
       );
 
-      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, {
+      await iSaleInstance.fundTree(10, zeroAddress, zeroAddress, 0, {
         from: userAccount4,
       });
 
@@ -2809,7 +2999,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       await iSaleInstance
-        .fundTree(11, zeroAddress, zeroAddress, {
+        .fundTree(11, zeroAddress, zeroAddress, 0, {
           from: userAccount3,
         })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
@@ -2817,109 +3007,5 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount3);
       await wethInstance.resetAcc(userAccount4);
     });
-
-    ////////////////-------------------------------------------- gsn ------------------------------------------------
-    // it("test gsn [ @skip-on-coverage ]", async () => {
-    //   await allocationInstance.assignAllocationToTree(100, 10000, 0, {
-    //     from: dataManager,
-    //   });
-
-    //   await iSaleInstance.createIncrementalSale(
-    //     101,
-    //     web3.utils.toWei("0.01"),
-    //     100,
-    //     20,
-    //     1000,
-    //     {
-    //       from: dataManager,
-    //     }
-    //   );
-
-    //   await Common.addTreejerContractRole(
-    //     arInstance,
-    //     treeFactoryInstance.address,
-    //     deployerAccount
-    //   );
-
-    //   ///////------------------------------handle gsn---------------------------------
-
-    //   let env = await GsnTestEnvironment.startGsn("localhost");
-
-    //   const { forwarderAddress, relayHubAddress, paymasterAddress } =
-    //     env.contractsDeployment;
-
-    //   await iSaleInstance.setTrustedForwarder(forwarderAddress, {
-    //     from: deployerAccount,
-    //   });
-
-    //   let paymaster = await WhitelistPaymaster.new(arInstance.address);
-
-    //   await paymaster.setRelayHub(relayHubAddress);
-    //   await paymaster.setTrustedForwarder(forwarderAddress);
-
-    //   web3.eth.sendTransaction({
-    //     from: accounts[0],
-    //     to: paymaster.address,
-    //     value: web3.utils.toWei("1"),
-    //   });
-
-    //   origProvider = web3.currentProvider;
-
-    //   conf = { paymasterAddress: paymaster.address };
-
-    //   gsnProvider = await Gsn.RelayProvider.newProvider({
-    //     provider: origProvider,
-    //     config: conf,
-    //   }).init();
-
-    //   provider = new ethers.providers.Web3Provider(gsnProvider);
-
-    //   let signerFunder = provider.getSigner(3);
-
-    //   let contractFunder = await new ethers.Contract(
-    //     iSaleInstance.address,
-    //     iSaleInstance.abi,
-    //     signerFunder
-    //   );
-
-    //   //mint weth for funder
-    //   await wethInstance.setMint(userAccount2, web3.utils.toWei("0.01"));
-
-    //   await wethInstance.approve(
-    //     iSaleInstance.address,
-    //     web3.utils.toWei("0.01"),
-    //     {
-    //       from: userAccount2,
-    //     }
-    //   );
-
-    //   let balanceAccountBefore = await web3.eth.getBalance(userAccount2);
-
-    //   await contractFunder
-    //     .fundTree(1, zeroAddress, zeroAddress)
-    //     .should.be.rejectedWith(GsnErrorMsg.ADDRESS_NOT_EXISTS);
-
-    //   await paymaster.addFunderWhitelistTarget(iSaleInstance.address, {
-    //     from: deployerAccount,
-    //   });
-
-    //   await contractFunder.fundTree(1, zeroAddress, zeroAddress);
-
-    //   //////////--------------check tree owner
-    //   let addressGetToken = await treeTokenInstance.ownerOf(101);
-
-    //   assert.equal(addressGetToken, userAccount2, "1.mint not true");
-
-    //   let balanceAccountAfter = await web3.eth.getBalance(userAccount2);
-
-    //   console.log("balanceAccountBefore", Number(balanceAccountBefore));
-    //   console.log("balanceAccountAfter", Number(balanceAccountAfter));
-
-    //   assert.equal(
-    //     balanceAccountAfter,
-    //     balanceAccountBefore,
-    //     "Gsn not true work"
-    //   );
-    // });
   });
 });

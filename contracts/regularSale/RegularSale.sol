@@ -265,6 +265,11 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         ifNotPaused
         onlyDataManager
     {
+        require(
+            lastFundedTreeId < _maxTreeSupply,
+            "max supply must gt lastFundedTree"
+        );
+
         maxTreeSupply = _maxTreeSupply;
 
         emit MaxTreeSupplyUpdated(_maxTreeSupply);
@@ -288,7 +293,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         address _referrer,
         address _recipient
     ) external override ifNotPaused {
-        require(lastFundedTreeId + _count <= maxTreeSupply, "max supply");
+        require(lastFundedTreeId + _count < maxTreeSupply, "max supply");
 
         require(_count > 0 && _count < 101, "invalid count");
 
@@ -323,7 +328,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 recipient
             );
 
-            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(
+                tempLastFundedTreeId,
+                1
+            );
 
             require(successAttr, "attribute not generated");
 
@@ -394,9 +402,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         address _referrer,
         address _recipient
     ) external override ifNotPaused {
-        require(_treeId <= maxTreeSupply, "max supply");
-
-        require(_treeId > lastFundedTreeId, "invalid tree");
+        require(
+            _treeId > lastFundedTreeId && _treeId < maxTreeSupply,
+            "invalid tree"
+        );
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
 
@@ -417,7 +426,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         treeFactory.mintTreeById(treeId, recipient);
 
-        bool successAttr = attribute.createAttribute(treeId);
+        bool successAttr = attribute.createAttribute(treeId, 1);
 
         require(successAttr, "attribute not generated");
 
@@ -482,6 +491,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         ifNotPaused
         onlyDataManager
     {
+        require(_count > 0, "count must be gt zero");
         referralTriggerCount = _count;
         emit ReferralTriggerCountUpdated(_count);
     }
@@ -582,7 +592,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 _referrer
             );
 
-            bool successAttr = attribute.createAttribute(tempLastFundedTreeId);
+            bool successAttr = attribute.createAttribute(
+                tempLastFundedTreeId,
+                1
+            );
 
             require(successAttr, "attribute not generated");
 

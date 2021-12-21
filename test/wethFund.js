@@ -496,6 +496,7 @@ contract("WethFund", (accounts) => {
       const eventTx = await wethFund.fundTree(
         treeId,
         amount,
+        expectedSwapTokenAmount[1],
         4000,
         2000,
         1000,
@@ -684,9 +685,27 @@ contract("WethFund", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
+      await wethFund
+        .fundTree(
+          expectedSwapTokenAmount[1] + 1,
+          treeId,
+          amount,
+          4000,
+          2000,
+          1000,
+          1000,
+          1000,
+          1000,
+          0,
+          0,
+          { from: userAccount3 }
+        )
+        .should.be.rejectedWith(CommonErrorMsg.UNISWAP_OUTPUT_AMOUNT);
+
       await wethFund.fundTree(
         treeId,
         amount,
+        expectedSwapTokenAmount[1],
         4000,
         2000,
         1000,
@@ -799,9 +818,27 @@ contract("WethFund", (accounts) => {
           [wethInstance.address, daiInstance.address]
         );
 
+      await wethFund
+        .fundTree(
+          treeId2,
+          amountTreeId2,
+          expectedSwapTokenAmountTreeId2[1] + 1,
+          2000,
+          1500,
+          1200,
+          1400,
+          1600,
+          1100,
+          600,
+          600,
+          { from: userAccount3 }
+        )
+        .should.be.rejectedWith(CommonErrorMsg.UNISWAP_OUTPUT_AMOUNT);
+
       await wethFund.fundTree(
         treeId2,
         amountTreeId2,
+        expectedSwapTokenAmountTreeId2[1],
         2000,
         1500,
         1200,
@@ -950,7 +987,7 @@ contract("WethFund", (accounts) => {
       });
 
       await wethFund
-        .fundTree(0, amount, 2000, 1500, 1200, 1400, 1600, 1100, 600, 600, {
+        .fundTree(0, amount, 0, 2000, 1500, 1200, 1400, 1600, 1100, 600, 600, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -1047,6 +1084,7 @@ contract("WethFund", (accounts) => {
       const eventTx1 = await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1059,9 +1097,11 @@ contract("WethFund", (accounts) => {
           from: userAccount6,
         }
       );
+
       const eventTx2 = await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1376,6 +1416,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1391,6 +1432,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1678,6 +1720,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1693,6 +1736,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1965,6 +2009,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -1980,6 +2025,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2245,6 +2291,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2260,6 +2307,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2526,6 +2574,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId,
         amount,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2541,6 +2590,7 @@ contract("WethFund", (accounts) => {
       await wethFund.fundTree(
         treeId2,
         amount1,
+        0,
         planterShare,
         ambassadorShare,
         researchShare,
@@ -2772,6 +2822,7 @@ contract("WethFund", (accounts) => {
           totalTreasury1,
           totalReserve1_1,
           totalReserve2_1,
+          0,
           { from: userAccount4 }
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -2785,6 +2836,7 @@ contract("WethFund", (accounts) => {
         totalTreasury1,
         totalReserve1_1,
         totalReserve2_1,
+        0,
         { from: userAccount3 }
       );
 
@@ -2856,6 +2908,7 @@ contract("WethFund", (accounts) => {
         totalTreasury2,
         totalReserve1_2,
         totalReserve2_2,
+        expectedSwapTokenAmountTreeId2[1],
         { from: userAccount3 }
       );
 
@@ -2970,7 +3023,7 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, {
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, 0, {
         from: userAccount3,
       });
 
@@ -3077,7 +3130,7 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, {
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, 0, {
         from: userAccount3,
       });
 
@@ -3127,7 +3180,7 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
 
-      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, {
+      await wethFund.fundTreeBatch(0, 0, 0, 0, 0, totalTreasury2, 0, 0, 0, {
         from: userAccount3,
       });
 

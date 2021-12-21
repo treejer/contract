@@ -161,6 +161,7 @@ interface IWethFund {
      * @param _reserve2Share reserve2 share
      */
     function fundTree(
+        uint256 _minDaiOut,
         uint256 _treeId,
         uint256 _amount,
         uint16 _planterShare,
@@ -195,7 +196,8 @@ interface IWethFund {
         uint256 _totalInsurance,
         uint256 _totalTreasury,
         uint256 _totalReserve1,
-        uint256 _totalReserve2
+        uint256 _totalReserve2,
+        uint256 _minDaiOut
     ) external returns (uint256);
 
     /**

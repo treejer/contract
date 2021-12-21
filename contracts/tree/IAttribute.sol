@@ -57,13 +57,15 @@ interface IAttribute {
      * @param _attributeUniquenessFactor unique attribute code to assign
      * @param _symbolUniquenessFactor unique symbol to assign
      * @param _generationType type of attribute assignement
+     * @param _coefficient coefficient value
      * NOTE emit a {AttributeGenerated} event
      */
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
         uint64 _symbolUniquenessFactor,
-        uint8 _generationType
+        uint8 _generationType,
+        uint64 _coefficient
     ) external;
 
     /**
@@ -87,10 +89,13 @@ interface IAttribute {
     /**
      * @dev generate a random unique attribute using tree attributes 64 bit value
      * @param _treeId id of tree
+     * @param _generationType generation type
      * NOTE emit a {AttributeGenerated} or {AttributeGenerationFailed} event
      * @return if unique attribute generated successfully
      */
-    function createAttribute(uint256 _treeId) external returns (bool);
+    function createAttribute(uint256 _treeId, uint8 _generationType)
+        external
+        returns (bool);
 
     /**
      * @dev check and generate random attributes for honorary trees

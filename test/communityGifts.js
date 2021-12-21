@@ -6,6 +6,7 @@ const TreeFactory = artifacts.require("TreeFactory");
 const PlanterFund = artifacts.require("PlanterFund");
 const Tree = artifacts.require("Tree");
 const Dai = artifacts.require("Dai");
+const Planter = artifacts.require("Planter");
 const TestHonoraryTree = artifacts.require("TestHonoraryTree");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -318,7 +319,7 @@ contract("HonoraryTree", (accounts) => {
       const newExpiryDate = parseInt(new Date().getTime() / 1000) + 9 * 60 * 60;
 
       await honoraryTreeInstance
-        .addRecipient(userAccount1, startDate, expiryDate, {
+        .addRecipient(userAccount1, startDate, expiryDate, 2, {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
@@ -327,6 +328,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -340,7 +342,11 @@ contract("HonoraryTree", (accounts) => {
         userAccount1
       );
 
-      assert.equal(Number(oldRecipient.status), 1, "status is incorrect");
+      assert.equal(
+        Number(oldRecipient.coefficient),
+        2,
+        "coefficient is incorrect"
+      );
 
       assert.equal(
         Number(oldRecipient.expiryDate),
@@ -358,6 +364,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         newStartDate,
         newExpiryDate,
+        3,
         {
           from: dataManager,
         }
@@ -370,7 +377,11 @@ contract("HonoraryTree", (accounts) => {
         userAccount1
       );
 
-      assert.equal(Number(newRecipient.status), 1, "status is incorrect");
+      assert.equal(
+        Number(newRecipient.coefficient),
+        3,
+        "coefficient is incorrect"
+      );
 
       assert.equal(
         Number(newRecipient.expiryDate),
@@ -395,23 +406,22 @@ contract("HonoraryTree", (accounts) => {
         parseInt(new Date().getTime() / 1000) + 2 * 24 * 60 * 60;
 
       await honoraryTreeInstance
-        .updateRecipient(userAccount1, startDate1, expiryDate1, {
+        .updateRecipient(userAccount1, startDate1, expiryDate1, 2, {
           from: userAccount8,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
       await honoraryTreeInstance
-        .updateRecipient(userAccount1, startDate1, expiryDate1, {
+        .updateRecipient(userAccount1, startDate1, expiryDate1, 2, {
           from: dataManager,
         })
-        .should.be.rejectedWith(
-          HonoraryTreeErrorMsg.UPDATE_RECIPIENT_INVALID_STATUS
-        );
+        .should.be.rejectedWith(HonoraryTreeErrorMsg.RECIPIENT_NOT_EXIST);
 
       await honoraryTreeInstance.addRecipient(
         userAccount1,
         startDate1,
         expiryDate1,
+        2,
         { from: dataManager }
       );
 
@@ -419,7 +429,11 @@ contract("HonoraryTree", (accounts) => {
         userAccount1
       );
 
-      assert.equal(Number(recipientAfterAdd.status), 1, "status is incorrect");
+      assert.equal(
+        Number(recipientAfterAdd.coefficient),
+        2,
+        "coefficient is incorrect"
+      );
 
       assert.equal(
         Number(recipientAfterAdd.expiryDate),
@@ -437,6 +451,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate2,
         expiryDate2,
+        3,
         {
           from: dataManager,
         }
@@ -450,9 +465,9 @@ contract("HonoraryTree", (accounts) => {
       );
 
       assert.equal(
-        Number(recipientAfterUpdate.status),
-        1,
-        "status is incorrect"
+        Number(recipientAfterUpdate.coefficient),
+        3,
+        "coefficient is incorrect"
       );
 
       assert.equal(
@@ -722,6 +737,7 @@ contract("HonoraryTree", (accounts) => {
         123456789,
         symbolsArray[3],
         18,
+        2,
         { from: dataManager }
       );
 
@@ -863,10 +879,12 @@ contract("HonoraryTree", (accounts) => {
       const startTree = 11;
       const endTree = 21;
 
-      const newStartTree = 31;
+      const newStartTree = 11;
       const newEndTree = 41;
 
       const transferAmount = web3.utils.toWei("70");
+      const transferAmountRange2 = web3.utils.toWei("140");
+
       const adminWallet = userAccount8;
 
       //////////////// set price
@@ -903,6 +921,12 @@ contract("HonoraryTree", (accounts) => {
           5,
           `saleType is not correct for tree ${i}`
         );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          2,
+          `treeStatus is not correct for tree ${i}`
+        );
       }
 
       assert.equal(
@@ -936,6 +960,7 @@ contract("HonoraryTree", (accounts) => {
       const diffrence =
         Number(await honoraryTreeInstance.upTo.call()) -
         Number(await honoraryTreeInstance.currentTreeId.call());
+
       assert.equal(Number(countBefore), 0, "prePaidTreeCount is incorrect");
 
       const releaseTx = await honoraryTreeInstance.releaseTreeRange({
@@ -949,6 +974,12 @@ contract("HonoraryTree", (accounts) => {
           Number((await treeFactoryInstance.trees.call(i)).saleType),
           0,
           `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          2,
+          `treeStatus is not correct for tree ${i}`
         );
       }
 
@@ -971,6 +1002,21 @@ contract("HonoraryTree", (accounts) => {
         "prePaidTreeCount after is incorrect"
       );
 
+      ///////---------------- handle admin walllet
+
+      await daiInstance.setMint(adminWallet, transferAmountRange2);
+      await daiInstance.approve(
+        honoraryTreeInstance.address,
+        transferAmountRange2,
+        {
+          from: adminWallet,
+        }
+      );
+
+      // await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+      //   from: adminWallet,
+      // });
+
       await honoraryTreeInstance.setTreeRange(
         adminWallet,
         newStartTree,
@@ -980,11 +1026,17 @@ contract("HonoraryTree", (accounts) => {
         }
       );
 
-      for (let i = 31; i < 41; i++) {
+      for (let i = 11; i < 41; i++) {
         assert.equal(
           Number((await treeFactoryInstance.trees.call(i)).saleType),
           5,
           `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          2,
+          `treeStatus is not correct for tree ${i}`
         );
       }
 
@@ -999,6 +1051,170 @@ contract("HonoraryTree", (accounts) => {
         Number(await honoraryTreeInstance.upTo.call()),
         "upTo is not correct"
       );
+    });
+
+    it("should set range for planted trees", async () => {
+      //------------------initial data
+
+      const startTree = 11;
+      const middleTree = 16;
+      const endTree = 21;
+
+      const transferAmount = web3.utils.toWei("70");
+
+      const adminWallet = userAccount8;
+
+      //////////////// set price
+
+      await honoraryTreeInstance.updateReferralTreePayments(
+        await web3.utils.toWei("5"),
+        await web3.utils.toWei("2"),
+        {
+          from: dataManager,
+        }
+      );
+
+      ///////---------------- handle admin walllet
+
+      await daiInstance.setMint(adminWallet, transferAmount);
+
+      await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
+        from: adminWallet,
+      });
+
+      const planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
+      const addresses = [
+        userAccount2,
+        userAccount3,
+        userAccount4,
+        userAccount5,
+        userAccount6,
+      ];
+
+      let count = 0;
+      for (i = startTree; i < middleTree; i++) {
+        await Common.successPlant(
+          treeFactoryInstance,
+          arInstance,
+          "ipfsHash",
+          i,
+          0, //birthDate
+          0, //countryCode,
+          [addresses[count]],
+          addresses[count],
+          deployerAccount,
+          planterInstance,
+          dataManager
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          0,
+          `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          4,
+          `treeStatus is not correct for tree ${i}`
+        );
+
+        count++;
+      }
+      let count2 = 0;
+      for (i = middleTree; i < endTree; i++) {
+        await treeFactoryInstance.listTree(i, "some ipfs hash", {
+          from: dataManager,
+        });
+
+        await treeFactoryInstance.assignTree(i, addresses[count2], {
+          from: dataManager,
+        });
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          0,
+          `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          2,
+          `treeStatus is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          (await treeFactoryInstance.trees.call(i)).planter,
+          addresses[count2],
+          `treeStatus is not correct for tree ${i}`
+        );
+
+        count2++;
+      }
+
+      const eventTx = await honoraryTreeInstance.setTreeRange(
+        adminWallet,
+        startTree,
+        endTree,
+        {
+          from: dataManager,
+        }
+      );
+
+      for (i = startTree; i < endTree; i++) {
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          5,
+          `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          i < middleTree ? 4 : 2,
+          `treeStatus is not correct for tree ${i}`
+        );
+      }
+
+      await honoraryTreeInstance.releaseTreeRange({
+        from: dataManager,
+      });
+      let count3 = 0;
+      for (i = startTree; i < endTree; i++) {
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).saleType),
+          0,
+          `saleType is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          Number((await treeFactoryInstance.trees.call(i)).treeStatus),
+          i < middleTree ? 4 : 2,
+          `treeStatus is not correct for tree ${i}`
+        );
+
+        assert.equal(
+          (await treeFactoryInstance.trees.call(i)).planter,
+          i < middleTree ? addresses[count3] : zeroAddress,
+          `treeStatus is not correct for tree ${i}`
+        );
+        count3++;
+      }
     });
 
     it("should range complex (some trees claimed,first set smaller and then set bigger range)", async () => {
@@ -1085,12 +1301,14 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
         { from: dataManager }
       );
       await honoraryTreeInstance.addRecipient(
         userAccount2,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1099,6 +1317,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount3,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1155,6 +1374,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount4,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1447,6 +1667,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1458,7 +1679,7 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      await honoraryTreeInstance.updateRecipient(userAccount1, 10, 500, {
+      await honoraryTreeInstance.updateRecipient(userAccount1, 10, 500, 2, {
         from: dataManager,
       });
 
@@ -1468,9 +1689,15 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(HonoraryTreeErrorMsg.CANT_CLAIM);
 
-      await honoraryTreeInstance.updateRecipient(userAccount1, 10, expiryDate, {
-        from: dataManager,
-      });
+      await honoraryTreeInstance.updateRecipient(
+        userAccount1,
+        10,
+        expiryDate,
+        2,
+        {
+          from: dataManager,
+        }
+      );
 
       await honoraryTreeInstance
         .claim({
@@ -1517,6 +1744,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1569,7 +1797,11 @@ contract("HonoraryTree", (accounts) => {
       let recipientData = await honoraryTreeInstance.recipients.call(
         userAccount1
       );
-      assert.equal(Number(recipientData.status), 0, "status is not correct");
+      assert.equal(
+        Number(recipientData.coefficient),
+        0,
+        "coefficient is not correct"
+      );
       assert.equal(
         Number(recipientData.expiryDate),
         0,
@@ -1660,6 +1892,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount2,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1683,11 +1916,11 @@ contract("HonoraryTree", (accounts) => {
         from: dataManager,
       });
 
-      await attributeInstance.setAttribute(20, 100012, 1055, 20, {
+      await attributeInstance.setAttribute(20, 100012, 1055, 20, 2, {
         from: dataManager,
       });
 
-      await attributeInstance.setAttribute(22, 2321321, 1058, 20, {
+      await attributeInstance.setAttribute(22, 2321321, 1058, 20, 2, {
         from: dataManager,
       });
 
@@ -1709,6 +1942,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1718,6 +1952,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount2,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1727,6 +1962,7 @@ contract("HonoraryTree", (accounts) => {
         userAccount3,
         startDate,
         expiryDate,
+        2,
         {
           from: dataManager,
         }
@@ -1736,6 +1972,8 @@ contract("HonoraryTree", (accounts) => {
         userAccount4,
         startDate,
         expiryDate,
+        2,
+
         {
           from: dataManager,
         }
@@ -1808,7 +2046,11 @@ contract("HonoraryTree", (accounts) => {
       let recipientData = await honoraryTreeInstance.recipients.call(
         userAccount1
       );
-      assert.equal(Number(recipientData.status), 0, "status is not correct");
+      assert.equal(
+        Number(recipientData.coefficient),
+        0,
+        "coefficient is not correct"
+      );
 
       //check claimedCount
       assert.equal(
@@ -1880,7 +2122,11 @@ contract("HonoraryTree", (accounts) => {
       let recipientData2 = await honoraryTreeInstance.recipients.call(
         userAccount2
       );
-      assert.equal(Number(recipientData2.status), 0, "status is not correct");
+      assert.equal(
+        Number(recipientData2.coefficient),
+        0,
+        "coefficient is not correct"
+      );
 
       //check claimedCount
       assert.equal(
@@ -1949,7 +2195,11 @@ contract("HonoraryTree", (accounts) => {
       let recipientData3 = await honoraryTreeInstance.recipients.call(
         userAccount3
       );
-      assert.equal(Number(recipientData3.status), 0, "status is not correct");
+      assert.equal(
+        Number(recipientData3.coefficient),
+        0,
+        "coefficient is not correct"
+      );
 
       //check claimedCount
       assert.equal(
@@ -2087,6 +2337,8 @@ contract("HonoraryTree", (accounts) => {
         userAccount1,
         startDate,
         expiryDate,
+        2,
+
         {
           from: dataManager,
         }
@@ -2145,7 +2397,7 @@ contract("HonoraryTree", (accounts) => {
       const usedResult2 = await testHonoraryTreeInstance.used.call(4);
       assert.equal(usedResult2, true, "used result is incorrect");
 
-      await attributeInstance.setAttribute(22, 2321321, 1050, 20, {
+      await attributeInstance.setAttribute(22, 2321321, 1050, 20, 2, {
         from: dataManager,
       });
 

@@ -500,6 +500,12 @@ contract("Auction", (accounts) => {
       await wethInstance.setMint(userAccount1, invalidInitialBalance);
 
       await auctionInstance
+        .bid(0, bidAmount1, userAccount1, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(AuctionErrorMsg.INVALID_REFERAL);
+
+      await auctionInstance
         .bid(0, bidAmount1, zeroAddress, {
           from: userAccount1,
         })

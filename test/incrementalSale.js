@@ -2667,7 +2667,7 @@ contract("IncrementalSale", (accounts) => {
         from: userAccount3,
       });
 
-      await iSaleInstance.fundTree(15, userAccount3, zeroAddress, 0, {
+      await iSaleInstance.fundTree(15, userAccount4, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -2702,7 +2702,7 @@ contract("IncrementalSale", (accounts) => {
       assert.equal(
         Number(
           await regularSaleInstance.referrerClaimableTreesWeth.call(
-            userAccount3
+            userAccount4
           )
         ),
         15,
@@ -2758,7 +2758,7 @@ contract("IncrementalSale", (accounts) => {
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await iSaleInstance
-        .fundTree(1, userAccount3, zeroAddress, 0, { from: userAccount3 })
+        .fundTree(1, userAccount4, zeroAddress, 0, { from: userAccount3 })
         .should.be.rejectedWith(IncrementalSaleErrorMsg.LOW_PRICE_PAID);
 
       await wethInstance.resetAcc(userAccount3);
@@ -2824,7 +2824,7 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount3);
     });
 
-    it("fundTree should be reject (INVALID_COUNT)", async () => {
+    it("fundTree should be reject (INVALID_COUNT && INVALID_REFERAL)", async () => {
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });
@@ -2864,6 +2864,12 @@ contract("IncrementalSale", (accounts) => {
           from: userAccount3,
         }
       );
+
+      await iSaleInstance
+        .fundTree(1, userAccount3, zeroAddress, 0, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_REFERAL);
 
       await iSaleInstance
         .fundTree(120, zeroAddress, zeroAddress, 0, {

@@ -463,6 +463,18 @@ contract("regularSale", (accounts) => {
       );
 
       await regularSaleInstance
+        .fundTree(1, userAccount3, userAccount3, {
+          from: funder,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_REFERAL);
+
+      await regularSaleInstance
+        .fundTree(1, funder, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_REFERAL);
+
+      await regularSaleInstance
         .fundTree(0, zeroAddress, zeroAddress, {
           from: funder,
         })
@@ -595,6 +607,16 @@ contract("regularSale", (accounts) => {
           from: userAccount1,
         }
       );
+
+      await regularSaleInstance
+        .fundTreeById(treeId, userAccount1, zeroAddress, { from: userAccount1 })
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_REFERAL);
+
+      await regularSaleInstance
+        .fundTreeById(treeId, userAccount3, userAccount3, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_REFERAL);
 
       await regularSaleInstance
         .fundTreeById(2, zeroAddress, zeroAddress, { from: userAccount1 })

@@ -208,6 +208,8 @@ contract Auction is Initializable, IAuction {
         uint256 _amount,
         address _referrer
     ) external override ifNotPaused {
+        require(msg.sender != _referrer, "Invalid referal address");
+
         AuctionData storage auctionData = auctions[auctionId_];
 
         require(

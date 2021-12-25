@@ -39,6 +39,7 @@ const CommonErrorMsg = {
 };
 
 const AuctionErrorMsg = {
+  INVALID_REFERAL: "Invalid referal address",
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
   TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
@@ -121,6 +122,7 @@ const RegularSaleErrors = {
   MAX_SUPPLY: "max supply",
   MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "max supply must gt lastFundedTree",
   COUNT_MUST_BE_GT_ZERO: "count must be gt zero",
+  INVALID_REFERAL: "Invalid referal address",
 };
 
 const IncrementalSaleErrorMsg = {
@@ -132,6 +134,7 @@ const IncrementalSaleErrorMsg = {
   INCREMENTAL_SALE_EXIST: "incremental sale should be exist",
   TREE_PROVIDED_BEFORE: "trees are not available for sell",
   INVALID_TREE: "Not enough tree in incremental sell",
+  INVALID_REFERAL: "Invalid referal address",
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "low price paid",
   FREE_INCREMENTALSALE_FAIL:

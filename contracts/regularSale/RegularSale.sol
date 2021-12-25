@@ -297,6 +297,12 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         require(_count > 0 && _count < 101, "invalid count");
 
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
+
+        require(recipient != _referrer, "Invalid referal address");
+
         uint256 totalPrice = price * _count;
 
         require(
@@ -311,10 +317,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         );
 
         require(success, "unsuccessful transfer");
-
-        address recipient = _recipient == address(0)
-            ? _msgSender()
-            : _recipient;
 
         emit TreeFunded(_msgSender(), recipient, _referrer, _count, totalPrice);
 
@@ -409,6 +411,12 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
 
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
+
+        require(recipient != _referrer, "Invalid referal address");
+
         bool success = daiToken.transferFrom(
             _msgSender(),
             address(daiFund),
@@ -416,10 +424,6 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         );
 
         require(success, "unsuccessful transfer");
-
-        address recipient = _recipient == address(0)
-            ? _msgSender()
-            : _recipient;
 
         uint256 treeId = _treeId;
         address referrer = _referrer;

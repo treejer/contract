@@ -334,6 +334,10 @@ contract IncrementalSale is Initializable, IIncrementalSale {
             "Not enough tree in incremental sell"
         );
 
+        address recipient = _recipient == address(0) ? msg.sender : _recipient;
+
+        require(recipient != _referrer, "Invalid referal address");
+
         uint256 tempLastSold = lastSold + 1;
 
         //calc total price
@@ -353,8 +357,6 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         );
 
         require(success, "unsuccessful transfer");
-
-        address recipient = _recipient == address(0) ? msg.sender : _recipient;
 
         _setAllocation(
             tempLastSold,

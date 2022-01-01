@@ -5,6 +5,8 @@ import "./../../../treasury/PlanterFund.sol";
 import "./../../uniswap/Dai.sol";
 
 contract PlanterFundEchidnaTest {
+    address private trustedForwarder;
+
     struct TotalBalances {
         uint256 planter;
         uint256 ambassador;
@@ -16,6 +18,8 @@ contract PlanterFundEchidnaTest {
 
     /** NOTE minimum withdrawable amount */
     uint256 internal minWithdrawable;
+
+    address private localDevelopmentAddress;
 
     IAccessRestriction internal accessRestriction =
         IAccessRestriction(0x871DD7C2B4b25E1Aa18728e9D5f2Af4C4e431f5c);
@@ -74,7 +78,7 @@ contract PlanterFundEchidnaTest {
 
         uint256 amount = _amount;
 
-        if (random > 7) {
+        if (true) {
             daiContract.setMint(address(this), amount + (random2 * 10**18));
             balances[msg.sender] += (amount + (random2 * 10**18));
         } else if (random > 4) {
@@ -96,7 +100,6 @@ contract PlanterFundEchidnaTest {
         if (success1) {
             uint256 userDaiAfter = daiContract.balanceOf(address(msg.sender));
             uint256 contractDaiAfter = daiContract.balanceOf(address(this));
-
             assert(userDaiAfter == userDaiBefore + amount);
             assert(contractDaiAfter + amount == contractDaiBefore);
         } else {

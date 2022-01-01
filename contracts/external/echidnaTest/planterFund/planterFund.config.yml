@@ -1,5 +1,5 @@
-prefix: "sakan_"
-initialize: "contracts/external/echidnaTest/regularSale/regularSaleData.json"
+prefix: "echidna_"
+initialize: "contracts/external/echidnaTest/init.json"
 multi-abi: false
 seqLen: 1
 testLimit: 1

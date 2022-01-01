@@ -156,7 +156,7 @@ module.exports = {
   plugins: ["solidity-coverage"],
   mocha: {
     timeout: 0,
-    // reporter: 'eth-gas-reporter',
+    reporter: "eth-gas-reporter",
     reporterOptions: {
       token: process.env.GAS_REPORTER_TOKEN,
       gasPriceApi: process.env.GAS_PRICE_API,
@@ -177,9 +177,8 @@ module.exports = {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 200,
+          runs: 2 ** 32 - 1,
         },
-        //  evmVersion: "byzantium"
       },
     },
   },

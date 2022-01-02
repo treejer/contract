@@ -108,8 +108,8 @@ interface IWethFund {
     /** @dev set {_address} to WethToken contract address */
     function setWethTokenAddress(address _wethTokenAddress) external;
 
-    /** @dev set {_address} to UniswapRouter contract address */
-    function setUniswapRouterAddress(address _uniswapRouterAddress) external;
+    /** @dev set {_address} to DexRouter contract address */
+    function setDexRouterAddress(address _dexRouterAddress) external;
 
     /** @dev set {_address} to PlanterFund contract address */
     function setPlanterFundContractAddress(address _address) external;

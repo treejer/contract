@@ -49,7 +49,7 @@ contract("WethFund", (accounts) => {
   let factoryInstance;
   let wethInstance;
   let daiInstance;
-  let uniswapRouterInstance;
+  let dexRouterInstance;
   let testUniswapInstance;
   let planterFundsInstnce;
   let uniswapV2Router02NewAddress;
@@ -71,12 +71,12 @@ contract("WethFund", (accounts) => {
     WETHAddress = wethInstance.address;
     daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
     DAIAddress = daiInstance.address;
-    uniswapRouterInstance = await UniswapV2Router02New.new(
+    dexRouterInstance = await UniswapV2Router02New.new(
       DAIAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    uniswapV2Router02NewAddress = dexRouterInstance.address;
     await wethInstance.setMint(
       uniswapV2Router02NewAddress,
       web3.utils.toWei("125000", "Ether")
@@ -115,7 +115,7 @@ contract("WethFund", (accounts) => {
   //   from: deployerAccount,
   // });
 
-  //   await wethFund.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
+  //   await wethFund.setDexRouterAddress(uniswapV2Router02NewAddress, {
   //     from: deployerAccount,
   //   });
   //   await wethFund.setWethTokenAddress(WETHAddress, { from: deployerAccount });
@@ -197,25 +197,25 @@ contract("WethFund", (accounts) => {
 
       /////////////------------------------------------ set Uniswap Router address ----------------------------------------//
 
-      await wethFund.setUniswapRouterAddress(uniswapRouterInstance.address, {
+      await wethFund.setDexRouterAddress(dexRouterInstance.address, {
         from: deployerAccount,
       });
 
       await wethFund
-        .setUniswapRouterAddress(uniswapRouterInstance.address, {
+        .setDexRouterAddress(dexRouterInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await wethFund
-        .setUniswapRouterAddress(zeroAddress, {
+        .setDexRouterAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
       assert.equal(
-        await wethFund.uniswapRouter.call(),
-        uniswapRouterInstance.address,
+        await wethFund.dexRouter.call(),
+        dexRouterInstance.address,
         "set uniswap router address not true"
       );
 
@@ -427,7 +427,7 @@ contract("WethFund", (accounts) => {
         from: deployerAccount,
       });
 
-      await wethFund.setUniswapRouterAddress(uniswapV2Router02NewAddress, {
+      await wethFund.setDexRouterAddress(uniswapV2Router02NewAddress, {
         from: deployerAccount,
       });
       await wethFund.setWethTokenAddress(WETHAddress, {
@@ -487,11 +487,10 @@ contract("WethFund", (accounts) => {
 
       ////--------------------call fund tree by auction----------------
 
-      let expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(
-          web3.utils.toWei(".6", "Ether"),
-          [wethInstance.address, daiInstance.address]
-        );
+      let expectedSwapTokenAmount = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei(".6", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
 
       const eventTx = await wethFund.fundTree(
         treeId,
@@ -679,11 +678,10 @@ contract("WethFund", (accounts) => {
 
       ////--------------------call fund tree by auction----------------
 
-      let expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(
-          web3.utils.toWei(".3186", "Ether"),
-          [wethInstance.address, daiInstance.address]
-        );
+      let expectedSwapTokenAmount = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei(".3186", "Ether"),
+        [wethInstance.address, daiInstance.address]
+      );
 
       await wethFund
         .fundTree(
@@ -813,7 +811,7 @@ contract("WethFund", (accounts) => {
 
       ////--------------------call fund tree by auction(treeId2)----------------
       let expectedSwapTokenAmountTreeId2 =
-        await uniswapRouterInstance.getAmountsOut.call(
+        await dexRouterInstance.getAmountsOut.call(
           web3.utils.toWei("1.1382", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
@@ -2805,11 +2803,10 @@ contract("WethFund", (accounts) => {
 
       ////--------------------call fund tree by auction----------------
 
-      let expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(web3.utils.toWei("9"), [
-          wethInstance.address,
-          daiInstance.address,
-        ]);
+      let expectedSwapTokenAmount = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei("9"),
+        [wethInstance.address, daiInstance.address]
+      );
 
       ////////////// fail to call incremental fund because caller is not treejer contract
       await wethFund
@@ -2894,7 +2891,7 @@ contract("WethFund", (accounts) => {
 
       // ////--------------------call fund tree by auction(treeId2)----------------
       let expectedSwapTokenAmountTreeId2 =
-        await uniswapRouterInstance.getAmountsOut.call(web3.utils.toWei("9"), [
+        await dexRouterInstance.getAmountsOut.call(web3.utils.toWei("9"), [
           wethInstance.address,
           daiInstance.address,
         ]);
@@ -3043,7 +3040,7 @@ contract("WethFund", (accounts) => {
       );
 
       let expectedSwapTokenAmountTreeId2 =
-        await uniswapRouterInstance.getAmountsIn.call(
+        await dexRouterInstance.getAmountsIn.call(
           web3.utils.toWei("500", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
@@ -3142,7 +3139,7 @@ contract("WethFund", (accounts) => {
       );
 
       let expectedSwapTokenAmountTreeId2 =
-        await uniswapRouterInstance.getAmountsIn.call(
+        await dexRouterInstance.getAmountsIn.call(
           web3.utils.toWei("4000", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
@@ -3185,7 +3182,7 @@ contract("WethFund", (accounts) => {
       });
 
       let expectedSwapTokenAmountTreeId2 =
-        await uniswapRouterInstance.getAmountsIn.call(
+        await dexRouterInstance.getAmountsIn.call(
           web3.utils.toWei("1000", "Ether"),
           [wethInstance.address, daiInstance.address]
         );

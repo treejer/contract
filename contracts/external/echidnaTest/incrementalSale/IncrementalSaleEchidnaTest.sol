@@ -100,7 +100,7 @@ contract IncrementalSaleEchidnaTest {
         lastSold = 101 - 1;
 
         wethFund.setWethTokenAddress(address(wethContract));
-        wethFund.setUniswapRouterAddress(address(uniSwap));
+        wethFund.setDexRouterAddress(address(uniSwap));
 
         daiContract.setMint(address(uniSwap), 1e15 * 10**18);
     }

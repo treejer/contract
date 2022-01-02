@@ -87,7 +87,7 @@ interface IAuction {
         uint64 _startDate,
         uint64 _endDate,
         uint256 _intialPrice,
-        uint256 _bidInterval
+        uint64 _bidInterval
     ) external;
 
     /**
@@ -130,8 +130,8 @@ interface IAuction {
      * @return bidder
      * @return startDate of auction
      * @return endDate of auction
-     * @return highestBid
      * @return bidInterval
+     * @return highestBid
      */
     function auctions(uint256 _auctionId)
         external
@@ -141,7 +141,7 @@ interface IAuction {
             address,
             uint64,
             uint64,
-            uint256,
+            uint64,
             uint256
         );
 

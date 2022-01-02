@@ -81,12 +81,12 @@ contract("IncrementalSale", (accounts) => {
     WETHAddress = wethInstance.address;
     daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
     DAIAddress = daiInstance.address;
-    uniswapRouterInstance = await UniswapV2Router02New.new(
+    dexRouterInstance = await UniswapV2Router02New.new(
       DAIAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    uniswapV2Router02NewAddress = dexRouterInstance.address;
     await wethInstance.setMint(
       uniswapV2Router02NewAddress,
       web3.utils.toWei("125000", "Ether")
@@ -507,7 +507,7 @@ contract("IncrementalSale", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
       await iSaleInstance
@@ -1164,7 +1164,7 @@ contract("IncrementalSale", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
 
@@ -1393,12 +1393,9 @@ contract("IncrementalSale", (accounts) => {
           from: deployerAccount,
         }
       );
-      await wethFundInstance.setUniswapRouterAddress(
-        uniswapV2Router02NewAddress,
-        {
-          from: deployerAccount,
-        }
-      );
+      await wethFundInstance.setDexRouterAddress(uniswapV2Router02NewAddress, {
+        from: deployerAccount,
+      });
       await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
       });
@@ -1513,7 +1510,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       let expectedSwapTokenAmountTreeid101 =
-        await uniswapRouterInstance.getAmountsOut.call(
+        await dexRouterInstance.getAmountsOut.call(
           web3.utils.toWei("0.0042", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
@@ -1721,7 +1718,7 @@ contract("IncrementalSale", (accounts) => {
       );
 
       let expectedSwapTokenAmountForBuy20Tree =
-        await uniswapRouterInstance.getAmountsOut.call(
+        await dexRouterInstance.getAmountsOut.call(
           web3.utils.toWei("0.08442", "Ether"),
           [wethInstance.address, daiInstance.address]
         );

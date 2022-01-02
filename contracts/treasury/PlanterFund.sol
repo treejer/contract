@@ -18,7 +18,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     struct TotalBalances {
         uint256 planter;
         uint256 ambassador;
-        uint256 localDevelopment;
+        uint256 noAmbsassador;
     }
 
     /** NOTE {isPlanterFund} set inside the initialize to {true} */
@@ -27,15 +27,15 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     /** NOTE minimum withdrawable amount */
     uint256 public override minWithdrawable;
 
-    /** NOTE localDevelopment address */
-    address public override localDevelopmentAddress;
+    /** NOTE outgoing address */
+    address public override outgoingAddress;
 
     IAccessRestriction public accessRestriction;
     IPlanter public planterContract;
     IERC20Upgradeable public daiToken;
 
     /** NOTE totalBalances keep total share of
-     * planter, ambassador, localDevelopment
+     * planter, ambassador, noAmbsassador
      */
     TotalBalances public override totalBalances;
 
@@ -145,16 +145,16 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     }
 
     /**
-     * @dev admin set localDevelopment address to fund
-     * @param _address localDevelopment address
+     * @dev admin set outgoing address to fund
+     * @param _address outgoing address
      */
-    function setLocalDevelopmentAddress(address payable _address)
+    function setOutgoingAddress(address payable _address)
         external
         override
         onlyAdmin
         validAddress(_address)
     {
-        localDevelopmentAddress = _address;
+        outgoingAddress = _address;
     }
 
     /** @dev admin set the minimum amount to withdraw
@@ -236,11 +236,10 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
             }
 
             if (totalPayableAmountToPlanter > 0) {
-
-                    uint256 totalPayableAmountToAmbassador
-                 = (treeToAmbassadorProjectedEarning[_treeId] *
-                    totalPayableAmountToPlanter) /
-                    treeToPlanterProjectedEarning[_treeId];
+                uint256 totalPayableAmountToAmbassador = (treeToAmbassadorProjectedEarning[
+                        _treeId
+                    ] * totalPayableAmountToPlanter) /
+                        treeToPlanterProjectedEarning[_treeId];
 
                 //referral calculation section
 
@@ -248,7 +247,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
 
                 if (ambassadorAddress == address(0)) {
                     totalBalances
-                        .localDevelopment += totalPayableAmountToAmbassador;
+                        .noAmbsassador += totalPayableAmountToAmbassador;
                 } else {
                     balances[
                         ambassadorAddress
@@ -301,30 +300,26 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     }
 
     /**
-     * @dev admin withdraw from localDevelopment totalBalances
-     * NOTE amount transfer to localDevelopmentAddress
+     * @dev admin withdraw from noAmbsassador totalBalances
+     * NOTE amount transfer to outgoingAddress
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawLocalDevelopmentBalance(
+    function withdrawNoAmbsassadorBalance(
         uint256 _amount,
         string calldata _reason
-    ) external override onlyAdmin validAddress(localDevelopmentAddress) {
+    ) external override onlyAdmin validAddress(outgoingAddress) {
         require(
-            _amount <= totalBalances.localDevelopment && _amount > 0,
+            _amount <= totalBalances.noAmbsassador && _amount > 0,
             "insufficient amount"
         );
 
-        totalBalances.localDevelopment -= _amount;
+        totalBalances.noAmbsassador -= _amount;
 
-        bool success = daiToken.transfer(localDevelopmentAddress, _amount);
+        bool success = daiToken.transfer(outgoingAddress, _amount);
 
         require(success, "unsuccessful transfer");
 
-        emit LocalDevelopmentBalanceWithdrew(
-            _amount,
-            localDevelopmentAddress,
-            _reason
-        );
+        emit NoAmbsassadorBalanceWithdrew(_amount, outgoingAddress, _reason);
     }
 }

@@ -40,7 +40,7 @@ contract("Attribute", (accounts) => {
   let daiInstance;
   let treeTokenInstance;
   let factoryInstance;
-  let uniswapRouterInstance;
+  let dexRouterInstance;
   let testUniswapInstance;
   let WETHAddress;
   let DAIAddress;
@@ -78,12 +78,12 @@ contract("Attribute", (accounts) => {
     WETHAddress = wethInstance.address;
     daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
     DAIAddress = daiInstance.address;
-    uniswapRouterInstance = await UniswapV2Router02New.new(
+    dexRouterInstance = await UniswapV2Router02New.new(
       DAIAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    uniswapV2Router02NewAddress = dexRouterInstance.address;
     await wethInstance.setMint(
       uniswapV2Router02NewAddress,
       web3.utils.toWei("125000", "Ether")

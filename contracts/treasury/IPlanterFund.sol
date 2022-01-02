@@ -26,12 +26,12 @@ interface IPlanterFund {
     event BalanceWithdrew(uint256 amount, address account);
 
     /**
-     * @dev emitted when admin withdraw localDevelopment balance
+     * @dev emitted when admin withdraw noAmbsassador balance
      * @param amount amount to withdraw
      * @param account address of destination account
      * @param reason reason of withdraw
      */
-    event LocalDevelopmentBalanceWithdrew(
+    event NoAmbsassadorBalanceWithdrew(
         uint256 amount,
         address account,
         string reason
@@ -62,9 +62,9 @@ interface IPlanterFund {
     function setDaiTokenAddress(address _address) external;
 
     /**
-     * @dev set {_address} to localDevelopmentAddress
+     * @dev set {_address} to outgoingAddress
      */
-    function setLocalDevelopmentAddress(address payable _address) external;
+    function setOutgoingAddress(address payable _address) external;
 
     /**
      * @dev admin set the minimum amount to withdraw
@@ -108,13 +108,13 @@ interface IPlanterFund {
     function withdrawBalance(uint256 _amount) external;
 
     /**
-     * @dev admin withdraw from localDevelopment totalBalances
-     * NOTE amount transfer to localDevelopmentAddress
-     * NOTE emit a {LocalDevelopmentBalanceWithdrew} event
+     * @dev admin withdraw from noAmbsassador totalBalances
+     * NOTE amount transfer to outgoingAddress
+     * NOTE emit a {NoAmbsassadorBalanceWithdrew} event
      * @param _amount amount to withdraw
      * @param _reason reason to withdraw
      */
-    function withdrawLocalDevelopmentBalance(
+    function withdrawNoAmbsassadorBalance(
         uint256 _amount,
         string calldata _reason
     ) external;
@@ -130,15 +130,15 @@ interface IPlanterFund {
     function minWithdrawable() external view returns (uint256);
 
     /**
-     * @return localDevelopment address
+     * @return outgoing address
      */
-    function localDevelopmentAddress() external view returns (address);
+    function outgoingAddress() external view returns (address);
 
     /**
      * @dev return totalBalances struct data
      * @return planter total balance
      * @return ambassador total balance
-     * @return localDevelopment total balance
+     * @return noAmbsassador total balance
      */
     function totalBalances()
         external
@@ -146,7 +146,7 @@ interface IPlanterFund {
         returns (
             uint256 planter,
             uint256 ambassador,
-            uint256 localDevelopment
+            uint256 noAmbsassador
         );
 
     /**

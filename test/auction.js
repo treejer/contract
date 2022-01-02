@@ -44,7 +44,7 @@ contract("Auction", (accounts) => {
   let allocationInstance;
   let wethFundInstance;
   let regularSaleInstance;
-  let uniswapRouterInstance;
+  let dexRouterInstance;
   let factoryInstance;
   let wethInstance;
   let daiInstance;
@@ -81,12 +81,12 @@ contract("Auction", (accounts) => {
     WETHAddress = wethInstance.address;
     daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
     DAIAddress = daiInstance.address;
-    uniswapRouterInstance = await UniswapV2Router02New.new(
+    dexRouterInstance = await UniswapV2Router02New.new(
       DAIAddress,
       WETHAddress,
       { from: deployerAccount }
     );
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    uniswapV2Router02NewAddress = dexRouterInstance.address;
     await wethInstance.setMint(
       uniswapV2Router02NewAddress,
       web3.utils.toWei("125000", "Ether")
@@ -309,7 +309,7 @@ contract("Auction", (accounts) => {
 
       let treeId = 1;
       let initialValue = web3.utils.toWei("1");
-      let bidInterval = web3.utils.toWei("0.1");
+      let bidInterval = 2000;
 
       await auctionInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
@@ -374,6 +374,29 @@ contract("Auction", (accounts) => {
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
+      ///////// fail because of invalid bidinterval
+      await auctionInstance
+        .createAuction(
+          treeId,
+          Number(startTime),
+          Number(endTime),
+          initialValue,
+          0,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(AuctionErrorMsg.INVALID_BIDINTERVAL);
+
+      await auctionInstance
+        .createAuction(
+          treeId,
+          Number(startTime),
+          Number(endTime),
+          initialValue,
+          10002,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(AuctionErrorMsg.INVALID_BIDINTERVAL);
+
       /////////// ---------- create auction
 
       const eventTx = await auctionInstance.createAuction(
@@ -425,12 +448,14 @@ contract("Auction", (accounts) => {
       endTime = await Common.timeInitial(TimeEnumes.hours, 1);
       const bidAmount1 = web3.utils.toWei("1.15");
       let initialValue = web3.utils.toWei("1");
-      let bidInterval = web3.utils.toWei("0.1");
+      let bidInterval = 1000; //web3.utils.toWei("0.1");
       const invalidBidAmmount1 = web3.utils.toWei("1.05");
       const bidderInitialBalance = web3.utils.toWei("2");
       const invalidInitialBalance = web3.utils.toWei("1");
       const treeId = 1;
-      const bidAmount2 = web3.utils.toWei("1.35");
+      const bidAmount2 = web3.utils.toWei("1.265");
+      const invalidBidAmount2 = web3.utils.toWei("1.2649");
+
       const bidderInitialBalance2 = web3.utils.toWei("2");
 
       //////// -----------add auction
@@ -585,6 +610,12 @@ contract("Auction", (accounts) => {
         "highest bid is not correct"
       );
 
+      await auctionInstance
+        .bid(0, invalidBidAmount2, zeroAddress, {
+          from: userAccount2,
+        })
+        .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
+
       const eventTx2 = await auctionInstance.bid(0, bidAmount2, zeroAddress, {
         from: userAccount2,
       });
@@ -664,11 +695,11 @@ contract("Auction", (accounts) => {
       const bidderAccount3 = userAccount5;
       const referralAccount3 = userAccount6;
 
-      const bidAmount1 = web3.utils.toWei("1.15");
-      const bidAmount2 = web3.utils.toWei("1.25");
-      const bidAmount3 = web3.utils.toWei("1.35");
-      const bidAmount4 = web3.utils.toWei("1.45");
-      const bidAmount5 = web3.utils.toWei("1.55");
+      const bidAmount1 = web3.utils.toWei("1.1");
+      const bidAmount2 = web3.utils.toWei("1.21");
+      const bidAmount3 = web3.utils.toWei("1.331");
+      const bidAmount4 = web3.utils.toWei("1.4641");
+      const bidAmount5 = web3.utils.toWei("1.61051");
 
       const bidderInitialBalance = web3.utils.toWei("2");
       const treeId = 1;
@@ -734,7 +765,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
 
@@ -789,7 +820,7 @@ contract("Auction", (accounts) => {
         "referral 1 is not correct"
       );
 
-      /////////////////////////////////////////////////////////////////
+      // /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder1 referral before
       const bidder2RefferalBefore = await auctionInstance.referrals.call(
@@ -834,7 +865,7 @@ contract("Auction", (accounts) => {
         "referral 2 is not correct"
       );
 
-      /////////////////////////////////////////////////////////////////
+      // /////////////////////////////////////////////////////////////////
 
       ///////////// check bidder3 referral before
       const bidder3RefferalBefore = await auctionInstance.referrals.call(
@@ -846,7 +877,7 @@ contract("Auction", (accounts) => {
         zeroAddress,
         "referral 3 is not correct"
       );
-      /////////////////// ------------- bid
+      // /////////////////// ------------- bid
 
       const eventTx3 = await auctionInstance.bid(
         auctionId1,
@@ -891,7 +922,7 @@ contract("Auction", (accounts) => {
         zeroAddress,
         "referral 2 is not correct"
       );
-      /////////////////// ------------- bid
+      // /////////////////// ------------- bid
       await wethInstance.approve(auctionInstance.address, bidAmount4, {
         from: bidderAccount2,
       });
@@ -924,7 +955,7 @@ contract("Auction", (accounts) => {
         referralAccount3,
         "referral 3 is not correct"
       );
-      /////////////////// ------------- bid
+      // /////////////////// ------------- bid
       await wethInstance.approve(auctionInstance.address, bidAmount5, {
         from: bidderAccount3,
       });
@@ -1121,12 +1152,9 @@ contract("Auction", (accounts) => {
         from: deployerAccount,
       });
 
-      await wethFundInstance.setUniswapRouterAddress(
-        uniswapV2Router02NewAddress,
-        {
-          from: deployerAccount,
-        }
-      );
+      await wethFundInstance.setDexRouterAddress(uniswapV2Router02NewAddress, {
+        from: deployerAccount,
+      });
 
       await wethFundInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
@@ -1270,7 +1298,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
 
@@ -1347,7 +1375,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
 
@@ -1371,14 +1399,14 @@ contract("Auction", (accounts) => {
         return Number(ev.auctionId) == 1 && Number(ev.treeId) == treeId2;
       });
 
-      //////////////////////// create another auction for treeId2 that ended with no bidder
+      // //////////////////////// create another auction for treeId2 that ended with no bidder
 
       await auctionInstance.createAuction(
         treeId2,
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1.5"),
-        web3.utils.toWei("0.5"),
+        2000,
         { from: dataManager }
       );
 
@@ -1407,13 +1435,13 @@ contract("Auction", (accounts) => {
       const invalidBidAmount = web3.utils.toWei("1.29");
 
       const bidAmount1_1 = web3.utils.toWei("1.1");
-      const bidAmount1_2 = web3.utils.toWei("1.3");
+      const bidAmount1_2 = web3.utils.toWei("1.4");
       const bidderInitialBalance1 = web3.utils.toWei("2");
       const bidderAccount1 = userAccount1;
-      const bidAmount2_1 = web3.utils.toWei("1.2");
+      const bidAmount2_1 = web3.utils.toWei("1.21");
       const bidderInitialBalance2 = web3.utils.toWei("2");
       const bidderAccount2 = userAccount2;
-      const bidAmount3_1 = web3.utils.toWei("1.4");
+      const bidAmount3_1 = web3.utils.toWei("1.6");
       const bidderInitialBalance3 = web3.utils.toWei("2");
       const bidderAccount3 = userAccount3;
 
@@ -1503,7 +1531,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         initialValue,
-        bidInterval,
+        1000,
 
         { from: dataManager }
       );
@@ -1602,7 +1630,7 @@ contract("Auction", (accounts) => {
         "1.Contract balance not true"
       );
 
-      let amount = Number(web3.utils.toWei("1.4"));
+      let amount = Number(web3.utils.toWei("1.6"));
 
       let expected = {
         planterAmount: Math.divide(Math.mul(40, amount), 100),
@@ -1624,10 +1652,10 @@ contract("Auction", (accounts) => {
         expected.reserve2
       );
 
-      const planterFundShare = web3.utils.toWei("0.728"); // 0.52 (planter and referral share) * 1.4 (highestBid)
+      const planterFundShare = web3.utils.toWei("0.832"); // 0.52 (planter and referral share) * 1.4 (highestBid)
 
       const expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        await dexRouterInstance.getAmountsOut.call(planterFundShare, [
           wethInstance.address,
           daiInstance.address,
         ]);
@@ -1849,7 +1877,7 @@ contract("Auction", (accounts) => {
       const bidderInitialBalance1 = web3.utils.toWei("2");
       const bidderAccount1 = userAccount3;
       const refferal1 = userAccount5;
-      const bidAmount2 = web3.utils.toWei("1.25");
+      const bidAmount2 = web3.utils.toWei("1.265");
       const bidderInitialBalance2 = web3.utils.toWei("2");
       const bidderAccount2 = userAccount4;
       const refferal2 = userAccount6;
@@ -1933,7 +1961,7 @@ contract("Auction", (accounts) => {
           Number(startTime),
           Number(endTime),
           initialValue,
-          bidInterval,
+          1000,
           {
             from: dataManager,
           }
@@ -1967,7 +1995,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         initialValue,
-        bidInterval,
+        1000,
 
         { from: dataManager }
       );
@@ -2010,7 +2038,7 @@ contract("Auction", (accounts) => {
           Number(startTime),
           Number(endTime),
           initialValue,
-          bidInterval,
+          1000,
           {
             from: dataManager,
           }
@@ -2055,7 +2083,7 @@ contract("Auction", (accounts) => {
         Number(startTime),
         Number(endTime),
         initialValue,
-        bidInterval,
+        1000,
         {
           from: dataManager,
         }
@@ -2147,10 +2175,10 @@ contract("Auction", (accounts) => {
         wethFundInstance.address
       );
 
-      const planterFundShare = web3.utils.toWei("0.525"); // 0.42 (planter and referral share) * 1.25 (highestBid)
+      const planterFundShare = web3.utils.toWei("0.5313"); // 0.42 (planter and referral share) * 1.25 (highestBid)
 
       const expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        await dexRouterInstance.getAmountsOut.call(planterFundShare, [
           wethInstance.address,
           daiInstance.address,
         ]);
@@ -2314,17 +2342,17 @@ contract("Auction", (accounts) => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       let initialValue = web3.utils.toWei("1");
-      let bidInterval = web3.utils.toWei("0.1");
+      let bidInterval = 1000;
 
       const invalidBidAmount1 = web3.utils.toWei("1.09");
-      const invalidBidAmount2 = web3.utils.toWei("1.13");
-      const invalidBidAmount3 = web3.utils.toWei("1.24");
+      const invalidBidAmount2 = web3.utils.toWei("1.24");
+      const invalidBidAmount3 = web3.utils.toWei("1.264");
 
       const bidAmount1_1 = web3.utils.toWei("1.15");
       const bidAmount1_2 = web3.utils.toWei("2.12");
       const bidderInitialBalance1 = web3.utils.toWei("3");
       const bidderAccount1 = userAccount3;
-      const bidAmount2_1 = web3.utils.toWei("1.25");
+      const bidAmount2_1 = web3.utils.toWei("1.3");
       const bidAmount2_2 = web3.utils.toWei("2.52");
       const bidderInitialBalance2 = web3.utils.toWei("3");
       const bidderAccount2 = userAccount4;
@@ -2537,7 +2565,7 @@ contract("Auction", (accounts) => {
         })
         .should.be.rejectedWith(AuctionErrorMsg.BID_VALUE);
 
-      /////////////////// ------------ bid for auction
+      // /////////////////// ------------ bid for auction
 
       await auctionInstance.bid(auctionId, bidAmount2_1, zeroAddress, {
         from: bidderAccount2,
@@ -2607,7 +2635,7 @@ contract("Auction", (accounts) => {
 
       await Common.travelTime(TimeEnumes.days, 7);
 
-      /////////////--------------------------- give approve from bidderAccount1 for seccend bid
+      // /////////////--------------------------- give approve from bidderAccount1 for seccend bid
       await wethInstance.approve(auctionInstance.address, bidAmount1_2, {
         from: bidderAccount1,
       });
@@ -2750,7 +2778,7 @@ contract("Auction", (accounts) => {
       const planterFundShare = web3.utils.toWei("1.134"); // 0.45 (planter and referral share) * 2.52 (highestBid)
 
       const expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        await dexRouterInstance.getAmountsOut.call(planterFundShare, [
           wethInstance.address,
           daiInstance.address,
         ]);
@@ -3030,7 +3058,7 @@ contract("Auction", (accounts) => {
       const auctionId1 = 0;
       const auctionId2 = 1;
       const initialPrice = web3.utils.toWei("1");
-      const bidInterval = web3.utils.toWei("0.1");
+      const bidInterval = 1000;
       const bidAmount1 = web3.utils.toWei("1.5");
       const bidderInitialBalance1 = web3.utils.toWei("6");
       const bidderAccount1 = userAccount8;
@@ -3409,7 +3437,7 @@ contract("Auction", (accounts) => {
       const planterFundShare = web3.utils.toWei("1.2"); // 0.6 (planter and referral share) * 2 (highestBid)
 
       const expectedSwapTokenAmount =
-        await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        await dexRouterInstance.getAmountsOut.call(planterFundShare, [
           wethInstance.address,
           daiInstance.address,
         ]);
@@ -3543,7 +3571,7 @@ contract("Auction", (accounts) => {
       const auction2BeforeEnd = await auctionInstance.auctions.call(auctionId2);
 
       const expectedSwapTokenAmount2 =
-        await uniswapRouterInstance.getAmountsOut.call(planterFundShare, [
+        await dexRouterInstance.getAmountsOut.call(planterFundShare, [
           wethInstance.address,
           daiInstance.address,
         ]);

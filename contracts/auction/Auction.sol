@@ -22,8 +22,8 @@ contract Auction is Initializable, IAuction {
         address bidder;
         uint64 startDate;
         uint64 endDate;
+        uint64 bidInterval;
         uint256 highestBid;
-        uint256 bidInterval;
     }
 
     CountersUpgradeable.Counter private _auctionId;
@@ -171,11 +171,16 @@ contract Auction is Initializable, IAuction {
         uint64 _startDate,
         uint64 _endDate,
         uint256 _intialPrice,
-        uint256 _bidInterval
+        uint64 _bidInterval
     ) external override ifNotPaused onlyDataManager {
         require(
             allocation.allocationExists(_treeId),
             "equivalant fund Model not exists"
+        );
+
+        require(
+            0 < _bidInterval && _bidInterval < 10001,
+            "invalid bidInterval"
         );
 
         uint32 saleType = treeFactory.manageSaleType(_treeId, 1);
@@ -222,8 +227,13 @@ contract Auction is Initializable, IAuction {
             "auction not started"
         );
 
+        uint256 priceJump = (auctionData.bidInterval * auctionData.highestBid) /
+            10000;
+
         require(
-            _amount >= auctionData.highestBid + auctionData.bidInterval,
+            _amount >=
+                auctionData.highestBid +
+                    (priceJump > 0.1 ether ? priceJump : 0.1 ether),
             "invalid amount"
         );
 

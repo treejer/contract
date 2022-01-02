@@ -47,7 +47,7 @@ contract WethFund is Initializable, IWethFund {
     IAccessRestriction public accessRestriction;
     IPlanterFund public planterFundContract;
     IERC20Upgradeable public wethToken;
-    IUniswapV2Router02New public uniswapRouter;
+    IUniswapV2Router02New public dexRouter;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -128,20 +128,20 @@ contract WethFund is Initializable, IWethFund {
     }
 
     /**
-     * @dev admin set UniswapRouter contract address
-     * @param _uniswapRouterAddress set to the address of UniswapRouter contract
+     * @dev admin set DexRouter contract address
+     * @param _dexRouterAddress set to the address of DexRouter contract
      */
-    function setUniswapRouterAddress(address _uniswapRouterAddress)
+    function setDexRouterAddress(address _dexRouterAddress)
         external
         override
         onlyAdmin
-        validAddress(_uniswapRouterAddress)
+        validAddress(_dexRouterAddress)
     {
         IUniswapV2Router02New candidateContract = IUniswapV2Router02New(
-            _uniswapRouterAddress
+            _dexRouterAddress
         );
 
-        uniswapRouter = candidateContract;
+        dexRouter = candidateContract;
     }
 
     /**
@@ -357,11 +357,11 @@ contract WethFund is Initializable, IWethFund {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        bool success = wethToken.approve(address(uniswapRouter), _wethMaxUse);
+        bool success = wethToken.approve(address(dexRouter), _wethMaxUse);
 
         require(success, "unsuccessful approve");
 
-        uint256[] memory amounts = uniswapRouter.swapTokensForExactTokens(
+        uint256[] memory amounts = dexRouter.swapTokensForExactTokens(
             _daiAmountToSwap,
             _wethMaxUse,
             path,
@@ -610,11 +610,11 @@ contract WethFund is Initializable, IWethFund {
         path[0] = address(wethToken);
         path[1] = daiAddress;
 
-        bool success = wethToken.approve(address(uniswapRouter), _amount);
+        bool success = wethToken.approve(address(dexRouter), _amount);
 
         require(success, "unsuccessful approve");
 
-        uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
+        uint256[] memory amounts = dexRouter.swapExactTokensForTokens(
             _amount,
             _minDaiOut,
             path,

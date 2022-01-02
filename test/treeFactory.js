@@ -266,7 +266,7 @@ contract("TreeFactory", (accounts) => {
     });
 
     /////////////////---------------------------------resetTreeStatusBatch--------------------------------------------------------
-    it.only("check resetTreeStatusBatch", async () => {
+    it("check resetTreeStatusBatch", async () => {
       Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
       for (let i = 100; i < 150; i++) {
@@ -3124,9 +3124,9 @@ contract("TreeFactory", (accounts) => {
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalBalancesBefore.localDevelopment),
+        Number(totalBalancesBefore.noAmbsassador),
         0,
-        "local development total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
 
       await Common.travelTime(TimeEnumes.seconds, 7 * 172800); // 7 * 172800 is equal to 7 * 48 hours
@@ -3189,9 +3189,9 @@ contract("TreeFactory", (accounts) => {
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalBalancesAfterVerify.localDevelopment),
+        Number(totalBalancesAfterVerify.noAmbsassador),
         expectedReferralPaid,
-        "local development total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
 
       assert.equal(resultAfterGT.treeSpecs, resultBeforeUGT.updateSpecs);
@@ -3611,9 +3611,9 @@ contract("TreeFactory", (accounts) => {
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalBalances1.localDevelopment),
+        Number(totalBalances1.noAmbsassador),
         0,
-        "local developmentment total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
       /////////// ------------------ check planter paid
       assert.equal(
@@ -3650,9 +3650,9 @@ contract("TreeFactory", (accounts) => {
         "ambassador total fund is not ok"
       );
       assert.equal(
-        Number(totalBalances2.localDevelopment),
+        Number(totalBalances2.noAmbsassador),
         0,
-        "local development total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
 
       let resultAfterUGT = await treeFactoryInstance.treeUpdates.call(treeId);
@@ -3753,11 +3753,11 @@ contract("TreeFactory", (accounts) => {
         "planter balance is not ok"
       );
 
-      //// because there is no referral , referral share added to totalBalances.localDevelopment
+      //// because there is no referral , referral share added to totalBalances.noAmbsassador
       assert.equal(
-        Number(totalBalances3.localDevelopment),
+        Number(totalBalances3.noAmbsassador),
         expectedReferralPaid,
-        "local development total fund is not correct"
+        "noAmbsassador total fund is not correct"
       );
 
       assert.equal(
@@ -4826,8 +4826,6 @@ contract("TreeFactory", (accounts) => {
     });
 
     it("manageSaleType should be fail because invalid access(just auction access for this function)", async () => {
-      arInstance.revoke;
-
       await treeFactoryInstance
         .manageSaleType(1, 1, {
           from: userAccount1,
@@ -4839,12 +4837,6 @@ contract("TreeFactory", (accounts) => {
         userAccount1,
         deployerAccount
       );
-
-      await treeFactoryInstance
-        .manageSaleType(1, 1, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE);
 
       //////////////// ------------------- manageSaleType should be fail because tree has owner
 
@@ -5884,7 +5876,7 @@ contract("TreeFactory", (accounts) => {
         Number(startTime),
         Number(endTime),
         web3.utils.toWei("1"),
-        web3.utils.toWei("0.1"),
+        1000,
         { from: dataManager }
       );
 
@@ -5906,7 +5898,7 @@ contract("TreeFactory", (accounts) => {
           Number(startTime),
           Number(endTime),
           web3.utils.toWei("1"),
-          web3.utils.toWei("0.1"),
+          1000,
           { from: dataManager }
         );
       }

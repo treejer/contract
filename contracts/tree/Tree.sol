@@ -154,6 +154,7 @@ contract Tree is ERC721Upgradeable, ITree {
      * @param _tokenId id of token
      * @return true if attributes exist for {_tokenId}
      */
+     
     function attributeExists(uint256 _tokenId)
         external
         view

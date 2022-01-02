@@ -180,35 +180,32 @@ contract("PlanterFund", (accounts) => {
     });
 
     it("set local address", async () => {
-      let localDevelopmentAddress = userAccount4;
+      let outgoingAddress = userAccount4;
 
       //------------------------------- check failure --------------------------------
 
       await planterFundInstance
-        .setLocalDevelopmentAddress(localDevelopmentAddress, {
+        .setOutgoingAddress(outgoingAddress, {
           from: userAccount5,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await planterFundInstance
-        .setLocalDevelopmentAddress(zeroAddress, {
+        .setOutgoingAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
       //------------------------------- set address --------------------------------
 
-      await planterFundInstance.setLocalDevelopmentAddress(
-        localDevelopmentAddress,
-        {
-          from: deployerAccount,
-        }
-      );
+      await planterFundInstance.setOutgoingAddress(outgoingAddress, {
+        from: deployerAccount,
+      });
 
       assert.equal(
-        await planterFundInstance.localDevelopmentAddress(),
-        localDevelopmentAddress,
-        "Set localDevelopmentAddress address not true"
+        await planterFundInstance.outgoingAddress(),
+        outgoingAddress,
+        "Set outgoingAddress address not true"
       );
     });
 
@@ -2826,9 +2823,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalBalances.localDevelopment),
+        Number(totalBalances.noAmbsassador),
         totalAmbassadorFund,
-        "localDevelopment balance is not ok 1"
+        "noAmbsassador balance is not ok 1"
       );
 
       assert.equal(
@@ -2876,8 +2873,8 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         totalAmbassadorFund,
-        Number(totalBalances2.localDevelopment),
-        "localDevelopment blance is not ok 2"
+        Number(totalBalances2.noAmbsassador),
+        "noAmbsassador blance is not ok 2"
       );
 
       assert.equal(
@@ -2946,8 +2943,8 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         totalAmbassadorFund,
-        Number(totalBalances3.localDevelopment),
-        "totallocalDevelop is not ok 3"
+        Number(totalBalances3.noAmbsassador),
+        "noAmbsassador is not ok 3"
       );
 
       const accountOrganizationPlanterBalance3 =
@@ -3058,9 +3055,9 @@ contract("PlanterFund", (accounts) => {
       );
 
       assert.equal(
-        Number(totalBalances.localDevelopment),
+        Number(totalBalances.noAmbsassador),
         totalAmbassadorFund,
-        "localDevelopment balance is not ok 1"
+        "noAmbsassador balance is not ok 1"
       );
 
       const withdrawAmount1 = web3.utils.toWei("20");
@@ -3070,29 +3067,29 @@ contract("PlanterFund", (accounts) => {
       /////////////////// check withdraw failure
 
       await planterFundInstance
-        .withdrawLocalDevelopmentBalance(withdrawAmount1, "some reason", {
+        .withdrawNoAmbsassadorBalance(withdrawAmount1, "some reason", {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await planterFundInstance
-        .withdrawLocalDevelopmentBalance(withdrawAmount1, "some reason", {
+        .withdrawNoAmbsassadorBalance(withdrawAmount1, "some reason", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      await planterFundInstance.setLocalDevelopmentAddress(userAccount8, {
+      await planterFundInstance.setOutgoingAddress(userAccount8, {
         from: deployerAccount,
       });
 
       await planterFundInstance
-        .withdrawLocalDevelopmentBalance(0, "some reason", {
+        .withdrawNoAmbsassadorBalance(0, "some reason", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       const txLocalDevelop =
-        await planterFundInstance.withdrawLocalDevelopmentBalance(
+        await planterFundInstance.withdrawNoAmbsassadorBalance(
           withdrawAmount1,
           "some reason",
           { from: deployerAccount }
@@ -3100,7 +3097,7 @@ contract("PlanterFund", (accounts) => {
 
       truffleAssert.eventEmitted(
         txLocalDevelop,
-        "LocalDevelopmentBalanceWithdrew",
+        "NoAmbsassadorBalanceWithdrew",
         (ev) => {
           return (
             Number(ev.amount) == Number(withdrawAmount1) &&
@@ -3127,8 +3124,8 @@ contract("PlanterFund", (accounts) => {
 
       assert.equal(
         Math.subtract(Number(totalAmbassadorFund), Number(withdrawAmount1)),
-        Number(totalBalances2.localDevelopment),
-        "localDevelopment blance is not ok 2"
+        Number(totalBalances2.noAmbsassador),
+        "noAmbsassador blance is not ok 2"
       );
 
       //////////////////////check user8 balance after withdraw
@@ -3142,13 +3139,13 @@ contract("PlanterFund", (accounts) => {
       ///////////////// ------------ 2nd withdraw (invalid amount)
 
       await planterFundInstance
-        .withdrawLocalDevelopmentBalance(invalidWithdrawAmount, "some reason", {
+        .withdrawNoAmbsassadorBalance(invalidWithdrawAmount, "some reason", {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
 
       ///////////////// ------------ 2nd withdraw
-      await planterFundInstance.withdrawLocalDevelopmentBalance(
+      await planterFundInstance.withdrawNoAmbsassadorBalance(
         withdrawAmount2,
         "some reason",
         {
@@ -3175,8 +3172,8 @@ contract("PlanterFund", (accounts) => {
           Number(totalAmbassadorFund),
           Math.add(Number(withdrawAmount1), Number(withdrawAmount2))
         ),
-        Number((await planterFundInstance.totalBalances()).localDevelopment),
-        "localDevelopment blance is not ok 3"
+        Number((await planterFundInstance.totalBalances()).noAmbsassador),
+        "noAmbsassador blance is not ok 3"
       );
 
       //////////////////////check user8 balance after withdraw

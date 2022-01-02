@@ -43,6 +43,7 @@ const AuctionErrorMsg = {
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
   TREE_STATUS: "not available for auction",
   BID_VALUE: "invalid amount",
+  INVALID_BIDINTERVAL: "invalid bidInterval",
   INSUFFICIENT_AMOUNT: "insufficient balance",
   BID_BEFORE_START: "auction not started",
   BID_AFTER_END: "auction already ended",

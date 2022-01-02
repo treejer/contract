@@ -1869,9 +1869,9 @@ contract("HonoraryTree", (accounts) => {
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.localDevelopment),
+        Number(pfTotalFundAfter.noAmbsassador),
         0,
-        "local develop total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
 
       //////////-------------- check event emitted
@@ -2256,9 +2256,9 @@ contract("HonoraryTree", (accounts) => {
       );
 
       assert.equal(
-        Number(pfTotalFundAfter.localDevelopment),
+        Number(pfTotalFundAfter.noAmbsassador),
         0,
-        "local develop total fund is not ok"
+        "noAmbsassador total fund is not ok"
       );
 
       ////------------------gift 4

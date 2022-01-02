@@ -105,7 +105,8 @@ contract IncrementalSaleEchidnaTest {
         daiContract.setMint(address(uniSwap), 1e15 * 10**18);
     }
 
-    uint256 randomApprove;
+    uint256 private randomApprove;
+    bool private invalidReferal;
 
     function fundTreeEchidna(
         uint256 _count,
@@ -185,9 +186,11 @@ contract IncrementalSaleEchidnaTest {
                 )
             );
 
-        if (success1) {
-            address owner = recipient != address(0) ? recipient : msg.sender;
+        address owner = recipient != address(0) ? recipient : msg.sender;
 
+        invalidReferal = owner == referrer;
+
+        if (success1) {
             _checkSuccessFundTree(
                 lastSoldBefore,
                 count,
@@ -373,6 +376,11 @@ contract IncrementalSaleEchidnaTest {
                             ("Not enough tree in incremental sell")
                         )
                     )
+            );
+        } else if (invalidReferal) {
+            assert(
+                keccak256(abi.encodePacked((result))) ==
+                    keccak256(abi.encodePacked(("Invalid referal address")))
             );
         } else if (
             randomMint < 3 && wethContract.balanceOf(msg.sender) < totalAmount

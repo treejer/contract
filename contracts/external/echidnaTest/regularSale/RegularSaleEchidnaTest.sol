@@ -100,6 +100,8 @@ contract RegularSaleEchidnaTest {
         planterFundContract.setDaiTokenAddress(address(daiContract));
     }
 
+    bool private invalidReferal;
+
     function fundTree(
         uint256 _count,
         address _referrer,
@@ -135,8 +137,11 @@ contract RegularSaleEchidnaTest {
                 _recipient
             )
         );
+
+        address owner = _recipient != address(0) ? _recipient : msg.sender;
+        invalidReferal = owner == _referrer;
+
         if (success1) {
-            address owner = _recipient != address(0) ? _recipient : msg.sender;
             //--------------check msg.sender balance
 
             uint256 newPlanterFundAmount = 0;
@@ -406,7 +411,7 @@ contract RegularSaleEchidnaTest {
         uint256 count,
         uint256 randomMint,
         uint256 randomApprove
-    ) private pure {
+    ) private {
         if (_data.length < 68) {
             assert(false);
         }
@@ -421,6 +426,11 @@ contract RegularSaleEchidnaTest {
             assert(
                 keccak256(abi.encodePacked((result))) ==
                     keccak256(abi.encodePacked(("invalid count")))
+            );
+        } else if (invalidReferal) {
+            assert(
+                keccak256(abi.encodePacked((result))) ==
+                    keccak256(abi.encodePacked(("Invalid referal address")))
             );
         } else if (randomMint == 0) {
             assert(

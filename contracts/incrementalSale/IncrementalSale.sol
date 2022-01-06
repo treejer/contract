@@ -498,6 +498,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
                 abi.encodePacked(
                     planterDaiAmount,
                     ambassadorDaiAmount,
+                    block.timestamp,
                     treePrice,
                     _daiAmount
                 )

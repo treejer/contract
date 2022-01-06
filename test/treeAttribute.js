@@ -11,15 +11,16 @@ const TestAttribute = artifacts.require("TestAttribute");
 
 //treasury section
 const WethFund = artifacts.require("WethFund");
-
 const PlanterFund = artifacts.require("PlanterFund");
 const Token = artifacts.require("Weth");
 const Math = require("./math");
 
 //uniswap
-let UniswapV2Router02New = artifacts.require("UniSwapMini");
+let UniSwapMini = artifacts.require("UniSwapMini");
 
-//test
+var Factory = artifacts.require("Factory.sol");
+var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+var TestUniswap = artifacts.require("TestUniswap.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -39,12 +40,21 @@ contract("Attribute", (accounts) => {
   let wethInstance;
   let daiInstance;
   let treeTokenInstance;
-  let factoryInstance;
   let uniswapRouterInstance;
   let testUniswapInstance;
   let WETHAddress;
   let DAIAddress;
-  let uniswapV2Router02NewAddress;
+  let uniSwapMiniAddress;
+
+  //uniswap varible
+  let dexRouterInstance;
+  let factoryInstance;
+
+  let wethDexInstance;
+  let daiDexInstance;
+  let bnbDexInstance;
+  let adaDexInstance;
+  let unsafeTokenDexInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -78,18 +88,16 @@ contract("Attribute", (accounts) => {
     WETHAddress = wethInstance.address;
     daiInstance = await Token.new("DAI", "dai", { from: accounts[0] });
     DAIAddress = daiInstance.address;
-    uniswapRouterInstance = await UniswapV2Router02New.new(
-      DAIAddress,
-      WETHAddress,
-      { from: deployerAccount }
-    );
-    uniswapV2Router02NewAddress = uniswapRouterInstance.address;
+    uniswapRouterInstance = await UniSwapMini.new(DAIAddress, WETHAddress, {
+      from: deployerAccount,
+    });
+    uniSwapMiniAddress = uniswapRouterInstance.address;
     await wethInstance.setMint(
-      uniswapV2Router02NewAddress,
+      uniSwapMiniAddress,
       web3.utils.toWei("125000", "Ether")
     );
     await daiInstance.setMint(
-      uniswapV2Router02NewAddress,
+      uniSwapMiniAddress,
       web3.utils.toWei("250000000", "Ether")
     );
 
@@ -418,6 +426,150 @@ contract("Attribute", (accounts) => {
     });
   });
 
+  describe.only("check dexRouter", () => {
+    beforeEach(async () => {
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        attributeInstance.address,
+        deployerAccount
+      );
+
+      ////--------------------------uniswap deploy
+
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+
+      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
+
+      daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+
+      bnbDexInstance = await Token.new("BNB", "bnb", {
+        from: accounts[0],
+      });
+
+      adaDexInstance = await Token.new("ADA", "ada", {
+        from: accounts[0],
+      });
+
+      unsafeTokenDexInstance = await Token.new("UNSAFE", "unsafe", {
+        from: accounts[0],
+      });
+
+      dexRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        wethDexInstance.address,
+        { from: deployerAccount }
+      );
+      const dexRouterAddress = dexRouterInstance.address;
+
+      testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+        from: deployerAccount,
+      });
+
+      /////---------------------------addLiquidity-------------------------
+
+      const testUniswapAddress = testUniswapInstance.address;
+
+      await wethDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await daiDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("1000000000", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wethDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        bnbDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        adaDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await factoryInstance.createPair(
+        daiDexInstance.address,
+        unsafeTokenDexInstance.address
+      );
+
+      //-------------------set address
+
+      await attributeInstance.setDexRouterAddress(dexRouterInstance.address, {
+        from: deployerAccount,
+      });
+    });
+
+    it("Check setDexTokens function", async () => {
+      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      let list = [
+        wethDexInstance.address,
+        bnbDexInstance.address,
+        adaDexInstance.address,
+      ];
+
+      await attributeInstance.setDexTokens(list, {
+        from: deployerAccount,
+      });
+
+      list.push(unsafeTokenDexInstance.address);
+
+      await attributeInstance
+        .setDexTokens(list, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("UniswapV2Library: INSUFFICIENT_LIQUIDITY");
+    });
+  });
+
   describe("without financial section", () => {
     beforeEach(async () => {
       attributeInstance = await Attribute.new({
@@ -455,6 +607,74 @@ contract("Attribute", (accounts) => {
 
       await attributeInstance
         .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    });
+
+    it("Check setTreeTokenAddress function", async () => {
+      ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance
+        .setTreeTokenAddress(treeTokenInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    });
+
+    it("Check setDaiAddress function", async () => {
+      let testAddress = userAccount5;
+
+      await attributeInstance
+        .setDaiAddress(testAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await attributeInstance.setDaiAddress(testAddress, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        await attributeInstance.daiAddress(),
+        testAddress,
+        "daiAddress not true set"
+      );
+    });
+
+    it("Check setDexRouterAddress function", async () => {
+      let testAddress = userAccount5;
+
+      await attributeInstance
+        .setDexRouterAddress(testAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await attributeInstance.setDexRouterAddress(testAddress, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        await attributeInstance.dexRouter(),
+        testAddress,
+        "dexRouter not true set"
+      );
+    });
+
+    // ssssss;
+
+    it("Check setTreeTokenAddress function", async () => {
+      ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance
+        .setTreeTokenAddress(treeTokenInstance.address, {
+          from: userAccount1,
+        })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
     });
 

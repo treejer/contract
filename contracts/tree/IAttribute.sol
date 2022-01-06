@@ -31,6 +31,17 @@ interface IAttribute {
     function setTreeTokenAddress(address _address) external;
 
     /**
+     * @dev admin set Dai contract address
+     * @param _daiAddress set to the address of Dai contract
+     */
+
+    function setDaiAddress(address _daiAddress) external;
+
+    function setDexTokens(address[] calldata _tokens) external;
+
+    function setDexRouterAddress(address _dexRouterAddress) external;
+
+    /**
      * @dev reserve a unique symbol
      * @param _uniquenessFactor unique symbol to reserve
      * NOTE emit a {SymbolReserved} event
@@ -117,6 +128,11 @@ interface IAttribute {
     function specialTreeCount() external view returns (uint8);
 
     /**
+     * @return DaiToken address
+     */
+    function daiAddress() external view returns (address);
+
+    /**
      * @dev return generation count
      * @param _attribute generated attributes
      * @return generation count
@@ -136,6 +152,8 @@ interface IAttribute {
         external
         view
         returns (uint128 generatedCount, uint128 status);
+
+    function dexTokens(uint256 _index) external view returns (address);
 
     /**
      * @dev the function tries to calculate the rank of funder based trees owned in Treejer

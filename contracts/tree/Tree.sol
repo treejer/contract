@@ -23,7 +23,6 @@ contract Tree is ERC721Upgradeable, ITree {
         uint8 shape;
         uint8 trunkColor;
         uint8 crownColor;
-        uint8 effect;
         uint8 coefficient;
         uint8 generationType;
     }
@@ -124,17 +123,19 @@ contract Tree is ERC721Upgradeable, ITree {
         );
 
         if (_generationType > 15) {
-            for (uint256 i = 0; i < 5; i++) {
+            //TODO:chagne 5==>4(effect removed)
+            for (uint256 i = 0; i < 4; i++) {
                 attribute[i] = uint8(_uniquenessFactor & 255);
 
                 _uniquenessFactor >>= 8;
             }
+
+            //TODO:remove effect
             symbols[_tokenId] = Symbol(
                 attribute[0],
                 attribute[1],
                 attribute[2],
                 attribute[3],
-                attribute[4],
                 _generationType
             );
         }

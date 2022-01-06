@@ -300,7 +300,7 @@ contract IncrementalSaleEchidnaTest {
 
             //----------------check symbol generated
 
-            (, , , , , uint256 generationTypeSmbol) = treeContract.symbols(i);
+            (, , , , uint256 generationTypeSmbol) = treeContract.symbols(i);
 
             assert(generationTypeSmbol == 16);
 

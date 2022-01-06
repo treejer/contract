@@ -449,7 +449,6 @@ contract Attribute is Initializable, IAttribute {
                         _treeId,
                         amount,
                         selectedDexToken,
-                        amount,
                         seed,
                         j
                     )

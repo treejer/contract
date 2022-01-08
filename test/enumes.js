@@ -147,6 +147,8 @@ const AttributeErrorMsg = {
   ATTRIBUTE_TAKEN: "the attributes are taken",
   ATTRIBUTE_NOT_RESERVED: "the attributes not reserved",
   SYMBOL_IS_TAKEN: "the symbol is taken",
+  EMPTY_TOKEN_LIST: "tokens should not be empty",
+  UNISWAP_INSUFFICIENT_LIQUIDITY: "UniswapV2Library: INSUFFICIENT_LIQUIDITY",
 };
 
 const HonoraryTreeErrorMsg = {

@@ -127,8 +127,7 @@ contract("Attribute", (accounts) => {
     ///////////////---------------------------------test reserveSymbol function--------------------------------------------------------
     it("Should reserveSymbol work successfully", async () => {
       ////------------Should reserveSymbol rejec because caller must be admin or HonoraryTree
-      const generatedCode1 = 12500123;
-
+      const generatedCode1 = 119479171;
       await attributeInstance
         .reserveSymbol(generatedCode1, { from: userAccount7 })
         .should.be.rejectedWith(
@@ -209,7 +208,7 @@ contract("Attribute", (accounts) => {
 
     it("Should releaseReservedSymbolByAdmin work successfully", async () => {
       /////----------------Should releaseReservedSymbolByAdmin rejec because generatedCode hasn't been reserved before
-      let generatedCode1 = 12500123;
+      let generatedCode1 = 119479171;
 
       await attributeInstance
         .releaseReservedSymbolByAdmin(generatedCode1, {
@@ -320,7 +319,7 @@ contract("Attribute", (accounts) => {
     ///////////////---------------------------------test releaseReservedSymbol function--------------------------------------------------------
 
     it("Should releaseReservedSymbol work successfully", async () => {
-      let generatedCode1 = 12500123;
+      let generatedCode1 = 119479171;
 
       /////----------------Should releaseReservedSymbol rejec because caller must be admin or HonoraryTree
 
@@ -426,7 +425,7 @@ contract("Attribute", (accounts) => {
     });
   });
 
-  describe.only("check dexRouter", () => {
+  describe("check dexRouter", () => {
     beforeEach(async () => {
       attributeInstance = await Attribute.new({
         from: deployerAccount,
@@ -561,12 +560,19 @@ contract("Attribute", (accounts) => {
       });
 
       list.push(unsafeTokenDexInstance.address);
+      await attributeInstance
+        .setDexTokens([], {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(AttributeErrorMsg.EMPTY_TOKEN_LIST);
 
       await attributeInstance
         .setDexTokens(list, {
           from: deployerAccount,
         })
-        .should.be.rejectedWith("UniswapV2Library: INSUFFICIENT_LIQUIDITY");
+        .should.be.rejectedWith(
+          AttributeErrorMsg.UNISWAP_INSUFFICIENT_LIQUIDITY
+        );
     });
   });
 
@@ -842,11 +848,12 @@ contract("Attribute", (accounts) => {
         expectedSymbolValue.crownColor,
         "crownColor is incorrect"
       );
-      assert.equal(
-        Number(symbol1Data.effect),
-        expectedSymbolValue.effect,
-        "effect is incorrect"
-      );
+      //TODO:EFFECT_DELETED
+      // assert.equal(
+      //   Number(symbol1Data.effect),
+      //   expectedSymbolValue.effect,
+      //   "effect is incorrect"
+      // );
       assert.equal(
         Number(symbol1Data.coefficient),
         expectedSymbolValue.coefficient,
@@ -941,6 +948,102 @@ contract("Attribute", (accounts) => {
         arInstance,
         attributeInstance.address,
         deployerAccount
+      );
+      /////////////////////////////////////// uniswap
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+
+      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
+
+      daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+
+      bnbDexInstance = await Token.new("BNB", "bnb", {
+        from: accounts[0],
+      });
+
+      adaDexInstance = await Token.new("ADA", "ada", {
+        from: accounts[0],
+      });
+
+      unsafeTokenDexInstance = await Token.new("UNSAFE", "unsafe", {
+        from: accounts[0],
+      });
+
+      dexRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        wethDexInstance.address,
+        { from: deployerAccount }
+      );
+      const dexRouterAddress = dexRouterInstance.address;
+
+      testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+        from: deployerAccount,
+      });
+
+      /////---------------------------addLiquidity-------------------------
+
+      const testUniswapAddress = testUniswapInstance.address;
+
+      await wethDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await daiDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("1000000000", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wethDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        bnbDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        adaDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      //-------------------set address
+
+      await attributeInstance.setDexRouterAddress(dexRouterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance.setDexTokens(
+        [
+          wethDexInstance.address,
+          bnbDexInstance.address,
+          adaDexInstance.address,
+        ],
+        { from: deployerAccount }
       );
     });
 
@@ -1162,6 +1265,86 @@ contract("Attribute", (accounts) => {
   });
 
   describe("RandAvailibity", () => {
+    beforeEach(async () => {
+      /////////////////////////////////////// uniswap
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+
+      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
+
+      daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+
+      bnbDexInstance = await Token.new("BNB", "bnb", {
+        from: accounts[0],
+      });
+
+      adaDexInstance = await Token.new("ADA", "ada", {
+        from: accounts[0],
+      });
+
+      unsafeTokenDexInstance = await Token.new("UNSAFE", "unsafe", {
+        from: accounts[0],
+      });
+
+      dexRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        wethDexInstance.address,
+        { from: deployerAccount }
+      );
+      const dexRouterAddress = dexRouterInstance.address;
+
+      testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+        from: deployerAccount,
+      });
+
+      /////---------------------------addLiquidity-------------------------
+
+      const testUniswapAddress = testUniswapInstance.address;
+
+      await wethDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await daiDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("1000000000", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wethDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        bnbDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        adaDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
+      );
+    });
+
     ////-------------------------------- manageAttributeUniquenessFactor ---------------------------------
 
     it("RandAvailibity work successfully", async () => {
@@ -1174,6 +1357,28 @@ contract("Attribute", (accounts) => {
       await testAttributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      //-------------------set address
+
+      await testAttributeInstance.setDexRouterAddress(
+        dexRouterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testAttributeInstance.setDaiAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testAttributeInstance.setDexTokens(
+        [
+          wethDexInstance.address,
+          bnbDexInstance.address,
+          adaDexInstance.address,
+        ],
+        { from: deployerAccount }
+      );
 
       await testAttributeInstance
         .manageAttributeUniquenessFactor(10001, 10012, {
@@ -1238,6 +1443,219 @@ contract("Attribute", (accounts) => {
       assert.equal(Number(result3), 1, "result is not correct");
     });
   });
+  /*
+  //TODO:check_private_functions
+  describe("check private attribute generations based on dex router", () => {
+    beforeEach(async () => {
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      ////--------------------------uniswap deploy
+
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+
+      wethDexInstance = await Token.new("WETH", "weth", {
+        from: accounts[0],
+      });
+
+      daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+
+      bnbDexInstance = await Token.new("BNB", "bnb", {
+        from: accounts[0],
+      });
+
+      adaDexInstance = await Token.new("ADA", "ada", {
+        from: accounts[0],
+      });
+
+      dexRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        wethDexInstance.address,
+        { from: deployerAccount }
+      );
+      const dexRouterAddress = dexRouterInstance.address;
+
+      testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+        from: deployerAccount,
+      });
+
+      /////---------------------------addLiquidity-------------------------
+
+      const testUniswapAddress = testUniswapInstance.address;
+      console.log("rr", testUniswapAddress);
+
+      await wethDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await daiDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("1000000000", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wethDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        bnbDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        adaDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      //-------------------set address
+
+      await attributeInstance.setDexRouterAddress(dexRouterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      await attributeInstance.setDexTokens(
+        [
+          wethDexInstance.address,
+          bnbDexInstance.address,
+          adaDexInstance.address,
+        ],
+        { from: deployerAccount }
+      );
+    });
+  it("test get amount out", async () => {
+    let bnbAmount = await attributeInstance._getAmountsOut(
+      web3.utils.toWei("0.1"),
+      bnbDexInstance.address
+    );
+    let wethAmount = await attributeInstance._getAmountsOut(
+      web3.utils.toWei("0.1"),
+      wethDexInstance.address
+    );
+    let adaAmount = await attributeInstance._getAmountsOut(
+      web3.utils.toWei("0.1"),
+      adaDexInstance.address
+    );
+
+    assert.isTrue(
+      Number(wethAmount) < Number(bnbAmount) &&
+        Number(bnbAmount) < Number(adaAmount),
+      "swaping is not ok"
+    );
+  });
+  it("test get dex amount", async () => {
+    let tree1WithBnb = await attributeInstance._getDexAmount(
+      1,
+      bnbDexInstance.address
+    );
+    let tree2WithBnb = await attributeInstance._getDexAmount(
+      2,
+      bnbDexInstance.address
+    );
+    let tree2001WithBnb = await attributeInstance._getDexAmount(
+      2001,
+      bnbDexInstance.address
+    );
+
+    let tree1WithAda = await attributeInstance._getDexAmount(
+      1,
+      adaDexInstance.address
+    );
+
+    let tree2001WithAda = await attributeInstance._getDexAmount(
+      2001,
+      adaDexInstance.address
+    );
+
+    assert.isTrue(
+      Number(tree2WithBnb) > Number(tree1WithBnb),
+      "amount for tree 2 must be more than tree 1"
+    );
+    assert.isTrue(
+      Number(tree1WithAda) > Number(tree1WithBnb),
+      "amount for ada must be more than bnb for same tree"
+    );
+    assert.equal(
+      Number(tree1WithAda),
+      Number(tree2001WithAda),
+      "amounts must bee euqal for tree 1 and 2001"
+    );
+    assert.equal(
+      Number(tree1WithBnb),
+      Number(tree2001WithBnb),
+      "amounts must bee euqal for tree 1 and 2001"
+    );
+
+    // swap some dai tokens to ada (to get less amount of ada)
+    const now = new Date();
+    await daiDexInstance.setMint(userAccount3, web3.utils.toWei("50000"));
+
+    await daiDexInstance.approve(
+      dexRouterInstance.address,
+      web3.utils.toWei("50000"),
+      { from: userAccount3 }
+    );
+
+    await dexRouterInstance.swapExactTokensForTokens(
+      web3.utils.toWei("50000"),
+      0,
+      [daiDexInstance.address, adaDexInstance.address],
+      userAccount2,
+      parseInt(now.getTime() / 1000) + 1800,
+      { from: userAccount3 }
+    );
+    let tree1WithAdaAfterSwaping = await attributeInstance._getDexAmount(
+      1,
+      adaDexInstance.address
+    );
+
+    assert.isTrue(
+      Number(tree1WithAda) > Number(tree1WithAdaAfterSwaping),
+      "amounts are not true after swaping"
+    );
+
+    await adaDexInstance.resetAcc(userAccount2);
+  });
+  it("test _generateAttributeUniquenessFactor", async () => {
+    const amount1 =
+      await attributeInstance._generateAttributeUniquenessFactor.call(1);
+
+    const amount2 =
+      await attributeInstance._generateAttributeUniquenessFactor.call(2);
+    console.log(amount1['1'].toString());
+    console.log(amount2['1'].toString());
+  });
+  });
+  */
   /*
   describe("without financial section", () => {
     beforeEach(async () => {

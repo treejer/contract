@@ -256,8 +256,11 @@ contract Attribute is Initializable, IAttribute {
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
             .generatedCount = 1;
 
+        // uint256 uniquenessFactor = _attributeUniquenessFactor +
+        //     ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
+        //TODO:EFFECT_DELETED
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
+            ((uint256(_symbolUniquenessFactor) + (_coefficient << 24)) << 64);
 
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 

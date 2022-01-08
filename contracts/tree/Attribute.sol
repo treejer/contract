@@ -408,11 +408,11 @@ contract Attribute is Initializable, IAttribute {
     {
         uint256 ownedTrees = treeToken.balanceOf(_funder);
 
-        if (ownedTrees > 10000) {
+        if (ownedTrees > 1000) {
             return 3;
-        } else if (ownedTrees > 1000) {
-            return 2;
         } else if (ownedTrees > 100) {
+            return 2;
+        } else if (ownedTrees > 10) {
             return 1;
         }
 
@@ -491,28 +491,31 @@ contract Attribute is Initializable, IAttribute {
         uint8 _generationType
     ) private returns (bool) {
         if (uniquenessFactorToGeneratedAttributesCount[_randomValue] == 0) {
-            uint8[] memory attributes = new uint8[](8);
+            uint16[] memory attributes = new uint16[](4);
 
             uint64 tempRandomValue = _randomValue;
-            for (uint256 j = 0; j < 8; j++) {
-                attributes[j] = uint8(tempRandomValue & 255);
+            for (uint256 j = 0; j < 4; j++) {
+                attributes[j] = uint16(tempRandomValue & type(uint16).max));
 
-                tempRandomValue >>= 8;
+                tempRandomValue >>= 16;
             }
 
-            uint8 shape = _calcShape(uint16(_randomValue & 8191), _funderRank); //8191 = 2^13-1
+            uint8 shape = _calcShape(attributes[0], _funderRank); //8191 = 2^13-1
 
             uint8 trunkColor;
             uint8 crownColor;
 
-            if (shape < 128) {
+            if (shape >31) {
                 (trunkColor, crownColor) = _calcColors(
+                    attributes[1],
                     attributes[2],
-                    attributes[3],
                     _funderRank
                 );
             } else {
-                (trunkColor, crownColor) = _setSpecialTreeColors(shape);
+                // changed by farid 3 lines
+                trunkColor=0;
+                crownColor=0;
+                // (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
             //TODO:remove effect
@@ -533,7 +536,7 @@ contract Attribute is Initializable, IAttribute {
 
                 return false;
             }
-            uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
+            uint8 coefficient = _calcCoefficient(attributes[3], _funderRank);
 
             //TODO:coefficient (32==>24) because effect remove
 
@@ -563,51 +566,43 @@ contract Attribute is Initializable, IAttribute {
         private
         returns (uint8)
     {
-        uint16[9] memory probRank0 = [
-            128,
-            256,
-            320,
-            384,
-            432,
-            480,
-            496,
-            511,
-            512
+        uint16[7] memory probRank0 = [
+           2782,
+           1797,
+           987,
+           459,
+           194,
+           62,
+           1
         ];
-        uint16[9] memory probRank1 = [
-            110,
-            200,
-            290,
-            360,
-            420,
-            470,
-            490,
-            511,
-            512
+        uint16[7] memory probRank1 = [
+            2985,
+            2065,
+            1191,
+            596,
+            266,
+            101,
+            2
         ];
-        uint16[9] memory probRank2 = [
-            90,
-            190,
-            280,
-            350,
-            410,
-            450,
-            480,
-            510,
-            512
+        uint16[7] memory probRank2 = [
+            3114,
+            2264,
+            1389,
+            729,
+            333,
+            135,
+            3
         ];
-        uint16[9] memory probRank3 = [
-            64,
-            176,
-            272,
-            340,
-            400,
-            460,
-            496,
-            508,
-            512
+        uint16[7] memory probRank3 = [
+            3246,
+            2462,
+            1656,
+            931,
+            468,
+            203,
+            5,
         ];
-        uint16[9] memory selectedRankProb;
+        uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -625,24 +620,25 @@ contract Attribute is Initializable, IAttribute {
 
         uint16 probability = _randomValue >> 4;
 
+
         uint8 result = 0;
 
-        for (uint8 j = 0; j < 9; j++) {
-            if (probability < selectedRankProb[j]) {
-                result = j;
+        for (uint8 j = 0; j < 7; j++) {
+            if (probability > selectedRankProb[j]) {
+                result = 7-j;
                 break;
             }
         }
 
-        if (result == 8) {
+        if (result == 0) {
             if (specialTreeCount < 16) {
-                shape = 128 + specialTreeCount;
+                shape = 16 + specialTreeCount;
                 specialTreeCount += 1;
             } else {
-                shape = 112 + randomValueFirstFourBit;
+                shape = 32 + randomValueFirstFourBit;
             }
         } else {
-            shape = result * 16 + randomValueFirstFourBit;
+            shape = (result+1) * 16 + randomValueFirstFourBit;
         }
 
         return shape;
@@ -658,15 +654,15 @@ contract Attribute is Initializable, IAttribute {
      * @return crown color id
      */
     function _calcColors(
-        uint8 _randomValue1,
-        uint8 _randomValue2,
-        uint8 _funderRank
+        uint16 _randomValue1,
+        uint16 _randomValue2,
+        uint16 _funderRank
     ) private pure returns (uint8, uint8) {
-        uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
-        uint8[8] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
-        uint8[8] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
-        uint8[8] memory probRank3 = [4, 8, 12, 16, 20, 24, 28, 32];
-        uint8[8] memory selectedRankProb;
+        uint16[7] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
+        uint16[7] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
+        uint16[7] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
+        uint16[7] memory probRank3 = [4, 8, 12, 16, 20, 24, 28, 32];
+        uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -678,12 +674,11 @@ contract Attribute is Initializable, IAttribute {
             selectedRankProb = probRank0;
         }
 
-        uint8 probability1 = _randomValue1 & 31;
+        uint8 randomValue1Last3Bit = uint8(_randomValue1 & 7);
+        uint16 probability1 = _randomValue1 >> 3;
+        uint8 randomValue2Last3Bit = uint8(_randomValue2 & 7);
+        uint16 probability2 = _randomValue2 >> 3;
 
-        uint8 randomValue1Last3Bit = _randomValue1 >> 5;
-        uint8 probability2 = _randomValue2 & 31;
-
-        uint8 randomValue2Last3Bit = _randomValue2 >> 5;
         uint8 result1 = 0;
         uint8 result2 = 0;
 

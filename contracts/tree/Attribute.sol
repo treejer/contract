@@ -513,8 +513,8 @@ contract Attribute is Initializable, IAttribute {
                 );
             } else {
                 // changed by farid 3 lines
-                trunkColor=0;
-                crownColor=0;
+                trunkColor=1;
+                crownColor=1;
                 // (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
@@ -632,13 +632,13 @@ contract Attribute is Initializable, IAttribute {
 
         if (result == 0) {
             if (specialTreeCount < 16) {
-                shape = 16 + specialTreeCount;
+                shape = 17 + specialTreeCount;
                 specialTreeCount += 1;
             } else {
-                shape = 32 + randomValueFirstFourBit;
+                shape = 33 + randomValueFirstFourBit;
             }
         } else {
-            shape = (result+1) * 16 + randomValueFirstFourBit;
+            shape = (result+1) * 16 + 1 + randomValueFirstFourBit;
         }
 
         return shape;
@@ -656,12 +656,12 @@ contract Attribute is Initializable, IAttribute {
     function _calcColors(
         uint16 _randomValue1,
         uint16 _randomValue2,
-        uint16 _funderRank
+        uint8 _funderRank
     ) private pure returns (uint8, uint8) {
-        uint16[7] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
-        uint16[7] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
-        uint16[7] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
-        uint16[7] memory probRank3 = [4, 8, 12, 16, 20, 24, 28, 32];
+        uint16[7] memory probRank0 = [3112, 2293, 1637, 1064, 671, 343, 97];
+        uint16[7] memory probRank1 = [3440, 2540, 1818, 1162, 736, 375, 113];
+        uint16[7] memory probRank2 = [3603, 2947, 2128, 1391, 818, 408, 130];
+        uint16[7] memory probRank3 = [3767, 3276, 2620, 1637, 981, 490, 162];
         uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
@@ -682,75 +682,75 @@ contract Attribute is Initializable, IAttribute {
         uint8 result1 = 0;
         uint8 result2 = 0;
 
-        for (uint8 i = 0; i < 8; i++) {
-            if (probability1 < selectedRankProb[i]) {
-                result1 = i;
+        for (uint8 i = 0; i < 7; i++) {
+            if (probability1 > selectedRankProb[i]) {
+                result1 = 7-i;
                 break;
             }
         }
 
-        for (uint8 j = 0; j < 8; j++) {
-            if (probability2 < selectedRankProb[j]) {
-                result2 = j;
+        for (uint8 j = 0; j < 7; j++) {
+            if (probability2 > selectedRankProb[j]) {
+                result2 = 7-j;
                 break;
             }
         }
 
         return (
-            result1 * 8 + randomValue1Last3Bit,
-            result2 * 8 + randomValue2Last3Bit
+            result1 * 8 + 2 + randomValue1Last3Bit,
+            result2 * 8 + 2 + randomValue2Last3Bit
         );
     }
 
-    /**
-     * @dev set trunk color and crown color id base on special shape
-     * @param _shape shape type id
-     * @return trunk color id
-     * @return crown color id
-     */
-    function _setSpecialTreeColors(uint8 _shape)
-        private
-        pure
-        returns (uint8, uint8)
-    {
-        uint8[16] memory trunks = [
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32,
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32
-        ];
-        uint8[16] memory crowns = [
-            5,
-            10,
-            15,
-            20,
-            24,
-            28,
-            31,
-            32,
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32
-        ];
-        return (trunks[_shape - 128], crowns[_shape - 128]);
-    }
+    // /**
+    //  * @dev set trunk color and crown color id base on special shape
+    //  * @param _shape shape type id
+    //  * @return trunk color id
+    //  * @return crown color id
+    //  */
+    // function _setSpecialTreeColors(uint8 _shape)
+    //     private
+    //     pure
+    //     returns (uint8, uint8)
+    // {
+    //     uint8[16] memory trunks = [
+    //         6,
+    //         12,
+    //         18,
+    //         22,
+    //         26,
+    //         29,
+    //         31,
+    //         32,
+    //         6,
+    //         12,
+    //         18,
+    //         22,
+    //         26,
+    //         29,
+    //         31,
+    //         32
+    //     ];
+    //     uint8[16] memory crowns = [
+    //         5,
+    //         10,
+    //         15,
+    //         20,
+    //         24,
+    //         28,
+    //         31,
+    //         32,
+    //         6,
+    //         12,
+    //         18,
+    //         22,
+    //         26,
+    //         29,
+    //         31,
+    //         32
+    //     ];
+    //     return (trunks[_shape - 128], crowns[_shape - 128]);
+    // }
 
     /**
      * @dev admin set TreeToken contract address
@@ -801,9 +801,9 @@ contract Attribute is Initializable, IAttribute {
             _symbol >>= 8;
         }
         if (
-            symbs[0] > 160 ||
-            symbs[1] > 64 ||
-            symbs[2] > 64 ||
+            symbs[0] > 144 ||
+            symbs[1] > 65 ||
+            symbs[2] > 65 ||
             symbs[3] > 8 ||
             (symbs[4] + symbs[5] + symbs[6] + symbs[7]) != 0
         ) {
@@ -923,17 +923,17 @@ contract Attribute is Initializable, IAttribute {
      * @param _funderRank rank of funder based on trees owned in treejer
      * @return coefficient value
      */
-    function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
+    function _calcCoefficient(uint16 _randomValue, uint8 _funderRank)
         private
         pure
         returns (uint8)
     {
-        uint8[8] memory probRank0 = [190, 225, 235, 244, 250, 253, 254, 255];
-        uint8[8] memory probRank1 = [175, 205, 225, 240, 248, 252, 254, 255];
-        uint8[8] memory probRank2 = [170, 200, 218, 232, 245, 250, 253, 255];
-        uint8[8] memory probRank3 = [128, 192, 210, 227, 240, 249, 252, 255];
+        uint16[6] memory probRank0 = [49153, 58985, 62916, 64554, 65210, 65472];
+        uint16[6] memory probRank1 = [45877, 57345, 62261, 64227, 65112, 65437];
+        uint16[6] memory probRank2 = [39323, 54069, 60622, 63899, 65013, 65406];
+        uint16[6] memory probRank3 = [26216, 45877, 58985, 63571, 64882, 65374];
 
-        uint8[8] memory selectedRankProb;
+        uint16[6] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -945,12 +945,12 @@ contract Attribute is Initializable, IAttribute {
             selectedRankProb = probRank0;
         }
 
-        for (uint8 j = 0; j < 8; j++) {
-            if (_randomValue <= selectedRankProb[j]) {
-                return j + 1;
+        for (uint8 j = 0; j < 6; j++) {
+            if (_randomValue < selectedRankProb[j]) {
+                return j + 2;
             }
         }
 
-        return 1;
+        return 8;
     }
 }

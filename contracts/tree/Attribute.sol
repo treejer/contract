@@ -503,7 +503,7 @@ contract Attribute is Initializable, IAttribute {
             uint8 trunkColor;
             uint8 crownColor;
 
-            if (shape >32) {
+            if (shape > 32) {
                 (trunkColor, crownColor) = _calcColors(
                     attributes[1],
                     attributes[2],
@@ -511,8 +511,8 @@ contract Attribute is Initializable, IAttribute {
                 );
             } else {
                 // changed by farid 3 lines
-                trunkColor=1;
-                crownColor=1;
+                trunkColor = 1;
+                crownColor = 1;
                 // (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
@@ -557,42 +557,10 @@ contract Attribute is Initializable, IAttribute {
         private
         returns (uint8)
     {
-        uint16[7] memory probRank0 = [
-           2782,
-           1797,
-           987,
-           459,
-           194,
-           62,
-           1
-        ];
-        uint16[7] memory probRank1 = [
-            2985,
-            2065,
-            1191,
-            596,
-            266,
-            101,
-            2
-        ];
-        uint16[7] memory probRank2 = [
-            3114,
-            2264,
-            1389,
-            729,
-            333,
-            135,
-            3
-        ];
-        uint16[7] memory probRank3 = [
-            3246,
-            2462,
-            1656,
-            931,
-            468,
-            203,
-            5,
-        ];
+        uint16[7] memory probRank0 = [2782, 1797, 987, 459, 194, 62, 1];
+        uint16[7] memory probRank1 = [2985, 2065, 1191, 596, 266, 101, 2];
+        uint16[7] memory probRank2 = [3114, 2264, 1389, 729, 333, 135, 3];
+        uint16[7] memory probRank3 = [3246, 2462, 1656, 931, 468, 203, 5];
         uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
@@ -611,12 +579,11 @@ contract Attribute is Initializable, IAttribute {
 
         uint16 probability = _randomValue >> 4;
 
-
         uint8 result = 0;
 
         for (uint8 j = 0; j < 7; j++) {
             if (probability > selectedRankProb[j]) {
-                result = 7-j;
+                result = 7 - j;
                 break;
             }
         }
@@ -629,7 +596,7 @@ contract Attribute is Initializable, IAttribute {
                 shape = 33 + randomValueFirstFourBit;
             }
         } else {
-            shape = (result+1) * 16 + 1 + randomValueFirstFourBit;
+            shape = (result + 1) * 16 + 1 + randomValueFirstFourBit;
         }
 
         return shape;
@@ -675,14 +642,14 @@ contract Attribute is Initializable, IAttribute {
 
         for (uint8 i = 0; i < 7; i++) {
             if (probability1 > selectedRankProb[i]) {
-                result1 = 7-i;
+                result1 = 7 - i;
                 break;
             }
         }
 
         for (uint8 j = 0; j < 7; j++) {
             if (probability2 > selectedRankProb[j]) {
-                result2 = 7-j;
+                result2 = 7 - j;
                 break;
             }
         }

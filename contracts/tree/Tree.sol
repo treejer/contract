@@ -123,14 +123,12 @@ contract Tree is ERC721Upgradeable, ITree {
         );
 
         if (_generationType > 15) {
-            //TODO:chagne 5==>4(effect removed)
             for (uint256 i = 0; i < 4; i++) {
                 attribute[i] = uint8(_uniquenessFactor & 255);
 
                 _uniquenessFactor >>= 8;
             }
 
-            //TODO:remove effect
             symbols[_tokenId] = Symbol(
                 attribute[0],
                 attribute[1],

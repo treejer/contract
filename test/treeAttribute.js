@@ -16,11 +16,11 @@ const Token = artifacts.require("Weth");
 const Math = require("./math");
 
 //uniswap
-let UniSwapMini = artifacts.require("UniSwapMini");
+const UniSwapMini = artifacts.require("UniSwapMini");
 
-var Factory = artifacts.require("Factory.sol");
-var UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
-var TestUniswap = artifacts.require("TestUniswap.sol");
+const Factory = artifacts.require("Factory.sol");
+const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+const TestUniswap = artifacts.require("TestUniswap.sol");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -545,7 +545,7 @@ contract("Attribute", (accounts) => {
     });
 
     it("Check setDexTokens function", async () => {
-      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+      await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount,
       });
 
@@ -629,23 +629,23 @@ contract("Attribute", (accounts) => {
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
     });
 
-    it("Check setDaiAddress function", async () => {
+    it("Check setBaseTokenAddress function", async () => {
       let testAddress = userAccount5;
 
       await attributeInstance
-        .setDaiAddress(testAddress, {
+        .setBaseTokenAddress(testAddress, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await attributeInstance.setDaiAddress(testAddress, {
+      await attributeInstance.setBaseTokenAddress(testAddress, {
         from: deployerAccount,
       });
 
       assert.equal(
-        await attributeInstance.daiAddress(),
+        await attributeInstance.baseTokenAddress(),
         testAddress,
-        "daiAddress not true set"
+        "baseTokenAddress not true set"
       );
     });
 
@@ -1033,7 +1033,7 @@ contract("Attribute", (accounts) => {
         from: deployerAccount,
       });
 
-      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+      await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount,
       });
 
@@ -1347,7 +1347,7 @@ contract("Attribute", (accounts) => {
 
     ////-------------------------------- manageAttributeUniquenessFactor ---------------------------------
 
-    it("RandAvailibity work successfully", async () => {
+    it.only("RandAvailibity work successfully", async () => {
       ////------------------ deploy testAttribute ------------------------------
 
       testAttributeInstance = await TestAttribute.new({
@@ -1367,7 +1367,7 @@ contract("Attribute", (accounts) => {
         }
       );
 
-      await testAttributeInstance.setDaiAddress(daiDexInstance.address, {
+      await testAttributeInstance.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount,
       });
 
@@ -1381,7 +1381,7 @@ contract("Attribute", (accounts) => {
       );
 
       await testAttributeInstance
-        .manageAttributeUniquenessFactor(10001, 10012, {
+        .manageAttributeUniquenessFactor(10001, {
           from: userAccount4,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
@@ -1392,55 +1392,9 @@ contract("Attribute", (accounts) => {
         deployerAccount
       );
 
-      let result =
-        await testAttributeInstance.manageAttributeUniquenessFactor.call(
-          10001,
-          10012,
-          {
-            from: deployerAccount,
-          }
-        );
-
-      assert.equal(Number(result), 10012, "result is not correct");
-
-      await testAttributeInstance.test(10012, {
+      await testAttributeInstance.manageAttributeUniquenessFactor(10001, {
         from: deployerAccount,
       });
-
-      let result2 =
-        await testAttributeInstance.manageAttributeUniquenessFactor.call(
-          10001,
-          10012,
-          { from: deployerAccount }
-        );
-
-      await testAttributeInstance.manageAttributeUniquenessFactor(
-        10001,
-        10012,
-        {
-          from: deployerAccount,
-        }
-      );
-
-      assert.notEqual(Number(result2), 10012, "result2 is not correct");
-
-      let generatedAttributesCount =
-        await testAttributeInstance.uniquenessFactorToGeneratedAttributesCount.call(
-          10012
-        );
-
-      assert.equal(
-        Number(generatedAttributesCount),
-        2,
-        "result is not correct"
-      );
-
-      let result3 =
-        await testAttributeInstance.manageAttributeUniquenessFactor.call(1, 1, {
-          from: deployerAccount,
-        });
-
-      assert.equal(Number(result3), 1, "result is not correct");
     });
   });
   /*
@@ -1539,7 +1493,7 @@ contract("Attribute", (accounts) => {
         from: deployerAccount,
       });
 
-      await attributeInstance.setDaiAddress(daiDexInstance.address, {
+      await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount,
       });
 

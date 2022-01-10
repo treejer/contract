@@ -157,7 +157,7 @@ contract("Tree", (accounts) => {
     await treeInstance
       .setAttributes(
         tokenId,
-        web3.utils.toBN("127230078313845012625111011080416526335"),
+        web3.utils.toBN("13617340432139180820538589183"),
         18,
         { from: userAccount1 }
       )
@@ -171,7 +171,7 @@ contract("Tree", (accounts) => {
     //01011111,10110111,10011111,00101011,11111111,11111111,11111111,11111111,11111111,11111111,11111101,11111110,11111101,11111111,11111111,11111111
     await treeInstance.setAttributes(
       tokenId,
-      web3.utils.toBN("127230078313845012625111011080416526335"),
+      web3.utils.toBN("13617340432139180820538589183"),
       18,
       { from: userAccount1 }
     );
@@ -241,7 +241,6 @@ contract("Tree", (accounts) => {
       shape: 255,
       trunkColor: 255,
       crownColor: 255,
-      effect: 255,
       coefficient: 43,
       generationType: 18,
     };
@@ -265,11 +264,7 @@ contract("Tree", (accounts) => {
       expectedSymbolValue.crownColor,
       "crownColor is incorrect"
     );
-    assert.equal(
-      symbolData.effect,
-      expectedSymbolValue.effect,
-      "effect is incorrect"
-    );
+
     assert.equal(
       symbolData.coefficient,
       expectedSymbolValue.coefficient,

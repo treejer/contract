@@ -24,11 +24,8 @@ contract Attribute is Initializable, IAttribute {
     /** NOTE total number of special tree created */
     uint8 public override specialTreeCount;
 
-    address public override daiAddress;
-
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
-    IUniswapV2Router02New public dexRouter;
 
     /** NOTE mapping from generated attributes to count of generations */
     mapping(uint64 => uint32)
@@ -40,7 +37,11 @@ contract Attribute is Initializable, IAttribute {
         public
         override uniquenessFactorToSymbolStatus;
 
+    IUniswapV2Router02New public dexRouter;
+
     address[] public override dexTokens;
+
+    address public override baseTokenAddress;
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
@@ -111,15 +112,15 @@ contract Attribute is Initializable, IAttribute {
 
     /**
      * @dev admin set Dai contract address
-     * @param _daiAddress set to the address of Dai contract
+     * @param _baseTokenAddress set to the address of Dai contract
      */
-    function setDaiAddress(address _daiAddress)
+    function setBaseTokenAddress(address _baseTokenAddress)
         external
         override
         onlyAdmin
-        validAddress(_daiAddress)
+        validAddress(_baseTokenAddress)
     {
-        daiAddress = _daiAddress;
+        baseTokenAddress = _baseTokenAddress;
     }
 
     /**
@@ -256,9 +257,6 @@ contract Attribute is Initializable, IAttribute {
         uniquenessFactorToSymbolStatus[_symbolUniquenessFactor]
             .generatedCount = 1;
 
-        // uint256 uniquenessFactor = _attributeUniquenessFactor +
-        //     ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
-        //TODO:EFFECT_DELETED
         uint256 uniquenessFactor = _attributeUniquenessFactor +
             ((uint256(_symbolUniquenessFactor) + (_coefficient << 24)) << 64);
 
@@ -374,29 +372,22 @@ contract Attribute is Initializable, IAttribute {
     /**
      * @dev check and generate random attributes for honorary trees
      * @param _treeId id of tree
-     * @param _uniquenessFactor random to check existance
      * @return a unique random value
      */
-    function manageAttributeUniquenessFactor(
-        uint256 _treeId,
-        uint64 _uniquenessFactor
-    ) external override onlyTreejerContract returns (uint64) {
-        if (
-            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] == 0
-        ) {
-            return _uniquenessFactor;
-        } else {
-            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] += 1;
+    function manageAttributeUniquenessFactor(uint256 _treeId)
+        external
+        override
+        onlyTreejerContract
+        returns (uint64)
+    {
+        (
+            bool flag,
+            uint64 uniquenessFactor
+        ) = _generateAttributeUniquenessFactor(_treeId);
 
-            (
-                bool flag,
-                uint64 uniquenessFactor
-            ) = _generateAttributeUniquenessFactor(_treeId);
+        require(flag, "unique attribute not fund");
 
-            require(flag, "unique attribute not fund");
-
-            return uniquenessFactor;
-        }
+        return uniquenessFactor;
     }
 
     /**
@@ -422,6 +413,8 @@ contract Attribute is Initializable, IAttribute {
         return 0;
     }
 
+    address selectedDexToken1;
+
     /**
      * @dev create a unique 64 bit random number
      * @param _treeId id of tree
@@ -441,6 +434,8 @@ contract Attribute is Initializable, IAttribute {
         uint256 selectorDexToken = seed % dexTokens.length;
 
         address selectedDexToken = dexTokens[selectorDexToken];
+
+        selectedDexToken1 = dexTokens[selectorDexToken];
 
         uint256 amount = _getDexAmount(_treeId, selectedDexToken);
 
@@ -518,14 +513,9 @@ contract Attribute is Initializable, IAttribute {
                 (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
-            //TODO:remove effect
-            // uint8 effect = _calcEffects(attributes[4], _funderRank);
-
             uint64 symbolUniquenessFactor = shape +
                 (uint64(trunkColor) << 8) +
                 (uint64(crownColor) << 16);
-
-            // +(uint64(effect) << 24);
 
             if (
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
@@ -537,8 +527,6 @@ contract Attribute is Initializable, IAttribute {
                 return false;
             }
             uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
-
-            //TODO:coefficient (32==>24) because effect remove
 
             uint256 uniquenessFactor = _randomValue +
                 ((symbolUniquenessFactor + (uint256(coefficient) << 24)) << 64);
@@ -790,7 +778,7 @@ contract Attribute is Initializable, IAttribute {
         address[] memory path;
         path = new address[](2);
 
-        path[0] = daiAddress;
+        path[0] = baseTokenAddress;
         path[1] = _token;
 
         uint256[] memory amounts = dexRouter.getAmountsOut(_amount, path);
@@ -808,122 +796,18 @@ contract Attribute is Initializable, IAttribute {
             symbs[i] = uint8(_symbol & 255);
             _symbol >>= 8;
         }
+
         if (
             symbs[0] > 160 ||
             symbs[1] > 64 ||
             symbs[2] > 64 ||
             symbs[3] > 8 ||
-            (symbs[4] + symbs[5] + symbs[6] + symbs[7]) != 0
+            (symbs[4] + symbs[5] + symbs[6] + symbs[7] != 0)
         ) {
             return false;
         }
         return true;
     }
-
-    // /**
-    //  * @dev generate statistical effect based on {_randomValue} and {_funderRank}
-    //  * @param _randomValue base random value
-    //  * @param _funderRank rank of funder based on trees owned in treejer
-    //  * @return effect id
-    //  */
-    // function _calcEffects(uint8 _randomValue, uint8 _funderRank)
-    //     private
-    //     pure
-    //     returns (uint8)
-    // {
-    //     uint8[16] memory probRank0 = [
-    //         50,
-    //         100,
-    //         150,
-    //         200,
-    //         210,
-    //         220,
-    //         230,
-    //         235,
-    //         240,
-    //         245,
-    //         248,
-    //         251,
-    //         252,
-    //         253,
-    //         254,
-    //         255
-    //     ];
-    //     uint8[16] memory probRank1 = [
-    //         42,
-    //         84,
-    //         126,
-    //         168,
-    //         181,
-    //         194,
-    //         207,
-    //         216,
-    //         225,
-    //         234,
-    //         240,
-    //         246,
-    //         250,
-    //         252,
-    //         254,
-    //         255
-    //     ];
-    //     uint8[16] memory probRank2 = [
-    //         40,
-    //         80,
-    //         120,
-    //         160,
-    //         173,
-    //         186,
-    //         199,
-    //         208,
-    //         217,
-    //         226,
-    //         233,
-    //         240,
-    //         244,
-    //         248,
-    //         252,
-    //         255
-    //     ];
-    //     uint8[16] memory probRank3 = [
-    //         25,
-    //         50,
-    //         75,
-    //         100,
-    //         115,
-    //         130,
-    //         145,
-    //         156,
-    //         167,
-    //         178,
-    //         188,
-    //         198,
-    //         214,
-    //         228,
-    //         242,
-    //         255
-    //     ];
-
-    //     uint8[16] memory selectedRankProb;
-
-    //     if (_funderRank == 3) {
-    //         selectedRankProb = probRank3;
-    //     } else if (_funderRank == 2) {
-    //         selectedRankProb = probRank2;
-    //     } else if (_funderRank == 1) {
-    //         selectedRankProb = probRank1;
-    //     } else {
-    //         selectedRankProb = probRank0;
-    //     }
-
-    //     for (uint8 j = 0; j < 16; j++) {
-    //         if (_randomValue <= selectedRankProb[j]) {
-    //             return j;
-    //         }
-    //     }
-
-    //     return 0;
-    // }
 
     /**
      * @dev generate statistical coefficient value based on {_randomValue} and {_funderRank}

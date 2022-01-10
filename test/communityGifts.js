@@ -22,6 +22,12 @@ const Gsn = require("@opengsn/provider");
 const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
 const ethers = require("ethers");
 
+//uniswap
+const Factory = artifacts.require("Factory.sol");
+const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+const TestUniswap = artifacts.require("TestUniswap.sol");
+const Token = artifacts.require("Weth");
+
 const {
   CommonErrorMsg,
   TimeEnumes,
@@ -93,6 +99,15 @@ contract("HonoraryTree", (accounts) => {
       await attributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      await Common.prepareAttributeDex(
+        UniswapV2Router02New,
+        Factory,
+        TestUniswap,
+        Token,
+        attributeInstance,
+        deployerAccount
+      );
 
       planterFundsInstnce = await PlanterFund.new({
         from: deployerAccount,
@@ -508,27 +523,29 @@ contract("HonoraryTree", (accounts) => {
         from: deployerAccount,
       });
 
+      await Common.prepareAttributeDex(
+        UniswapV2Router02New,
+        Factory,
+        TestUniswap,
+        Token,
+        attributeInstance,
+        deployerAccount
+      );
+
       await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         { from: deployerAccount }
       );
     });
 
-    it("should reserve symbol", async () => {
+    it.only("should reserve symbol", async () => {
       await Common.addTreejerContractRole(
         arInstance,
         honoraryTreeInstance.address,
         deployerAccount
       );
 
-      let symbolsArray = [];
-      for (let i = 0; i < 5; i++) {
-        let rand = parseInt(Math.random() * 10e10);
-        while (symbolsArray.includes(rand)) {
-          rand = parseInt(Math.random() * 10e10);
-        }
-        symbolsArray[i] = rand;
-      }
+      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
 
       await honoraryTreeInstance
         .reserveSymbol(symbolsArray[0], { from: userAccount1 })
@@ -560,7 +577,8 @@ contract("HonoraryTree", (accounts) => {
           "uniqueSymbol status is incorrect"
         );
       }
-      const lastSymbolValue = web3.utils.toBN("12345678987654321");
+
+      const lastSymbolValue = web3.utils.toBN("134217728");
       await honoraryTreeInstance.reserveSymbol(lastSymbolValue, {
         from: dataManager,
       });
@@ -587,14 +605,7 @@ contract("HonoraryTree", (accounts) => {
         deployerAccount
       );
 
-      let symbolsArray = [];
-      for (let i = 0; i < 5; i++) {
-        let rand = parseInt(Math.random() * 10e10);
-        while (symbolsArray.includes(rand)) {
-          rand = parseInt(Math.random() * 10e10);
-        }
-        symbolsArray[i] = rand;
-      }
+      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
 
       for (i = 0; i < symbolsArray.length; i++) {
         await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {
@@ -692,14 +703,7 @@ contract("HonoraryTree", (accounts) => {
       });
 
       //////////// ------------------- reserve symbols
-      let symbolsArray = [];
-      for (let i = 0; i < 5; i++) {
-        let rand = parseInt(Math.random() * 10e10);
-        while (symbolsArray.includes(rand)) {
-          rand = parseInt(Math.random() * 10e10);
-        }
-        symbolsArray[i] = rand;
-      }
+      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
 
       for (i = 0; i < symbolsArray.length; i++) {
         await testHonoraryTreeInstance.reserveSymbol(symbolsArray[i], {
@@ -1244,6 +1248,17 @@ contract("HonoraryTree", (accounts) => {
         from: deployerAccount,
       });
 
+      await Common.prepareAttributeDex(
+        UniswapV2Router02New,
+        Factory,
+        TestUniswap,
+        Token,
+        attributeInstance,
+        deployerAccount
+      );
+
+      // ssssss;
+
       ////////////////// handle role
       await Common.addTreejerContractRole(
         arInstance,
@@ -1285,17 +1300,17 @@ contract("HonoraryTree", (accounts) => {
         from: dataManager,
       });
 
-      let symbolsArray = [];
+      let symbolsArray = [
+        135595165, 118817949, 160, 16000, 138362784, 123, 134217728, 16777216,
+        16128, 4144896,
+      ];
+
       for (let i = 0; i < 10; i++) {
-        let rand = parseInt(Math.random() * 10e10);
-        while (symbolsArray.includes(rand)) {
-          rand = parseInt(Math.random() * 10e10);
-        }
-        symbolsArray[i] = rand;
-        await honoraryTreeInstance.reserveSymbol(rand, {
+        await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {
           from: dataManager,
         });
       }
+
       //////////////// --------------- add recipients
       await honoraryTreeInstance.addRecipient(
         userAccount1,
@@ -1567,6 +1582,15 @@ contract("HonoraryTree", (accounts) => {
       await attributeInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      await Common.prepareAttributeDex(
+        UniswapV2Router02New,
+        Factory,
+        TestUniswap,
+        Token,
+        attributeInstance,
+        deployerAccount
+      );
 
       planterFundsInstnce = await PlanterFund.new({
         from: deployerAccount,
@@ -2368,6 +2392,7 @@ contract("HonoraryTree", (accounts) => {
       await testHonoraryTreeInstance.reserveSymbol(1052, {
         from: dataManager,
       });
+
       await testHonoraryTreeInstance.reserveSymbol(1053, {
         from: dataManager,
       });

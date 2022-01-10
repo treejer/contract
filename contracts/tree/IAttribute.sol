@@ -32,10 +32,10 @@ interface IAttribute {
 
     /**
      * @dev admin set Dai contract address
-     * @param _daiAddress set to the address of Dai contract
+     * @param _baseTokenAddress set to the address of Dai contract
      */
 
-    function setDaiAddress(address _daiAddress) external;
+    function setBaseTokenAddress(address _baseTokenAddress) external;
 
     function setDexTokens(address[] calldata _tokens) external;
 
@@ -111,13 +111,11 @@ interface IAttribute {
     /**
      * @dev check and generate random attributes for honorary trees
      * @param _treeId id of tree
-     * @param _uniquenessFactor random to check existance
      * @return a unique random value
      */
-    function manageAttributeUniquenessFactor(
-        uint256 _treeId,
-        uint64 _uniquenessFactor
-    ) external returns (uint64);
+    function manageAttributeUniquenessFactor(uint256 _treeId)
+        external
+        returns (uint64);
 
     function initialize(address _accessRestrictionAddress) external;
 
@@ -130,7 +128,7 @@ interface IAttribute {
     /**
      * @return DaiToken address
      */
-    function daiAddress() external view returns (address);
+    function baseTokenAddress() external view returns (address);
 
     /**
      * @dev return generation count

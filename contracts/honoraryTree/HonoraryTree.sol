@@ -395,8 +395,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
 
         if (flag) {
             uint64 uniquenessFactor = attribute.manageAttributeUniquenessFactor(
-                currentTreeId,
-                uint64(randomValue & type(uint64).max)
+                currentTreeId
             );
 
             attribute.setAttribute(

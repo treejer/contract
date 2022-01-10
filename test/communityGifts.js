@@ -538,14 +538,14 @@ contract("HonoraryTree", (accounts) => {
       );
     });
 
-    it.only("should reserve symbol", async () => {
+    it("should reserve symbol", async () => {
       await Common.addTreejerContractRole(
         arInstance,
         honoraryTreeInstance.address,
         deployerAccount
       );
 
-      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
+      let symbolsArray = [138494352, 121717136, 144, 117506448, 4276480];
 
       await honoraryTreeInstance
         .reserveSymbol(symbolsArray[0], { from: userAccount1 })
@@ -578,7 +578,7 @@ contract("HonoraryTree", (accounts) => {
         );
       }
 
-      const lastSymbolValue = web3.utils.toBN("134217728");
+      const lastSymbolValue = web3.utils.toBN("121717112");
       await honoraryTreeInstance.reserveSymbol(lastSymbolValue, {
         from: dataManager,
       });
@@ -605,7 +605,7 @@ contract("HonoraryTree", (accounts) => {
         deployerAccount
       );
 
-      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
+      let symbolsArray = [138494352, 121717136, 144, 117506448, 4276480];
 
       for (i = 0; i < symbolsArray.length; i++) {
         await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {
@@ -703,7 +703,7 @@ contract("HonoraryTree", (accounts) => {
       });
 
       //////////// ------------------- reserve symbols
-      let symbolsArray = [135595165, 118817949, 160, 16000, 138362784];
+      let symbolsArray = [138494352, 121717136, 144, 117506448, 4276480];
 
       for (i = 0; i < symbolsArray.length; i++) {
         await testHonoraryTreeInstance.reserveSymbol(symbolsArray[i], {
@@ -1301,8 +1301,8 @@ contract("HonoraryTree", (accounts) => {
       });
 
       let symbolsArray = [
-        135595165, 118817949, 160, 16000, 138362784, 123, 134217728, 16777216,
-        16128, 4144896,
+        138494352, 121717136, 144, 117506448, 4276480, 123, 4276600, 121717112,
+        121651320, 24,
       ];
 
       for (let i = 0; i < 10; i++) {

@@ -498,7 +498,7 @@ contract Attribute is Initializable, IAttribute {
                 tempRandomValue >>= 16;
             }
 
-            uint8 shape = _calcShape(attributes[0], _funderRank); //8191 = 2^13-1
+            uint8 shape = _calcShape(attributes[0], _funderRank);
 
             uint8 trunkColor;
             uint8 crownColor;
@@ -510,10 +510,8 @@ contract Attribute is Initializable, IAttribute {
                     _funderRank
                 );
             } else {
-                // changed by farid 3 lines
                 trunkColor = 1;
                 crownColor = 1;
-                // (trunkColor, crownColor) = _setSpecialTreeColors(shape);
             }
 
             uint64 symbolUniquenessFactor = shape +
@@ -545,6 +543,67 @@ contract Attribute is Initializable, IAttribute {
             uniquenessFactorToGeneratedAttributesCount[_randomValue] += 1;
             return false;
         }
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _token token in dex exchange with high liquidity
+     */
+    function _isValidToken(address _token) private view returns (bool) {
+        return _getAmountsOut(2000 * 10**18, _token) > 0;
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _amount dai price to get the
+     * @param _token token in dex exchange with high liquidity
+     */
+    function _getDexAmount(uint256 _amount, address _token)
+        private
+        view
+        returns (uint256)
+    {
+        uint256 amount = ((_amount % 2000) + 1) * 10**18;
+        return _getAmountsOut(amount, _token);
+    }
+
+    function _getAmountsOut(uint256 _amount, address _token)
+        private
+        view
+        returns (uint256)
+    {
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = baseTokenAddress;
+        path[1] = _token;
+
+        uint256[] memory amounts = dexRouter.getAmountsOut(_amount, path);
+
+        return amounts[1];
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _symbol symbol to check its validity
+     */
+    function _checkValidSymbol(uint64 _symbol) private pure returns (bool) {
+        uint8[] memory symbs = new uint8[](8);
+        for (uint256 i = 0; i < 8; i++) {
+            symbs[i] = uint8(_symbol & 255);
+            _symbol >>= 8;
+        }
+
+        if (
+            symbs[0] > 144 ||
+            symbs[1] > 65 ||
+            symbs[2] > 65 ||
+            symbs[3] > 8 ||
+            (symbs[4] + symbs[5] + symbs[6] + symbs[7] != 0)
+        ) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -658,117 +717,6 @@ contract Attribute is Initializable, IAttribute {
             result1 * 8 + 2 + randomValue1Last3Bit,
             result2 * 8 + 2 + randomValue2Last3Bit
         );
-    }
-
-    // /**
-    //  * @dev set trunk color and crown color id base on special shape
-    //  * @param _shape shape type id
-    //  * @return trunk color id
-    //  * @return crown color id
-    //  */
-    // function _setSpecialTreeColors(uint8 _shape)
-    //     private
-    //     pure
-    //     returns (uint8, uint8)
-    // {
-    //     uint8[16] memory trunks = [
-    //         6,
-    //         12,
-    //         18,
-    //         22,
-    //         26,
-    //         29,
-    //         31,
-    //         32,
-    //         6,
-    //         12,
-    //         18,
-    //         22,
-    //         26,
-    //         29,
-    //         31,
-    //         32
-    //     ];
-    //     uint8[16] memory crowns = [
-    //         5,
-    //         10,
-    //         15,
-    //         20,
-    //         24,
-    //         28,
-    //         31,
-    //         32,
-    //         6,
-    //         12,
-    //         18,
-    //         22,
-    //         26,
-    //         29,
-    //         31,
-    //         32
-    //     ];
-    //     return (trunks[_shape - 128], crowns[_shape - 128]);
-    // }
-
-    /**
-     * @dev admin set TreeToken contract address
-     * @param _token token in dex exchange with high liquidity
-     */
-    function _isValidToken(address _token) private view returns (bool) {
-        return _getAmountsOut(2000 * 10**18, _token) > 0;
-    }
-
-    /**
-     * @dev admin set TreeToken contract address
-     * @param _amount dai price to get the
-     * @param _token token in dex exchange with high liquidity
-     */
-    function _getDexAmount(uint256 _amount, address _token)
-        private
-        view
-        returns (uint256)
-    {
-        uint256 amount = ((_amount % 2000) + 1) * 10**18;
-        return _getAmountsOut(amount, _token);
-    }
-
-    function _getAmountsOut(uint256 _amount, address _token)
-        private
-        view
-        returns (uint256)
-    {
-        address[] memory path;
-        path = new address[](2);
-
-        path[0] = baseTokenAddress;
-        path[1] = _token;
-
-        uint256[] memory amounts = dexRouter.getAmountsOut(_amount, path);
-
-        return amounts[1];
-    }
-
-    /**
-     * @dev admin set TreeToken contract address
-     * @param _symbol symbol to check its validity
-     */
-    function _checkValidSymbol(uint64 _symbol) private pure returns (bool) {
-        uint8[] memory symbs = new uint8[](8);
-        for (uint256 i = 0; i < 8; i++) {
-            symbs[i] = uint8(_symbol & 255);
-            _symbol >>= 8;
-        }
-
-        if (
-            symbs[0] > 144 ||
-            symbs[1] > 65 ||
-            symbs[2] > 65 ||
-            symbs[3] > 8 ||
-            (symbs[4] + symbs[5] + symbs[6] + symbs[7] != 0)
-        ) {
-            return false;
-        }
-        return true;
     }
 
     /**

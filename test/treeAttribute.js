@@ -1347,7 +1347,7 @@ contract("Attribute", (accounts) => {
 
     ////-------------------------------- manageAttributeUniquenessFactor ---------------------------------
 
-    it.only("RandAvailibity work successfully", async () => {
+    it("RandAvailibity work successfully", async () => {
       ////------------------ deploy testAttribute ------------------------------
 
       testAttributeInstance = await TestAttribute.new({
@@ -2216,31 +2216,67 @@ contract("Attribute", (accounts) => {
     
     });
 
+        ////--------------------------test _calcCoefficient (private function) -------------------------
+
+    it("Check _calcCoefficient", async () => {
+      ///-------------------------- test _calcCoefficient --------------------------
+
+      let result1 = await attributeInstance._calcCoefficient.call(49152, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1), 2, "_calcCoefficient not true");
+
+      let result1_1 = await attributeInstance._calcCoefficient.call(49153, 0, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result1_1), 3, "_calcCoefficient not true");
+
+      let result2 = await attributeInstance._calcCoefficient.call(45877, 1, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result2), 3, "_calcCoefficient not true");
+
+      let result3 = await attributeInstance._calcCoefficient.call(63899, 2, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result3), 6, "_calcCoefficient not true");
+
+      let result4 = await attributeInstance._calcCoefficient.call(65535, 3, {
+        from: userAccount3,
+      });
+
+      assert.equal(Number(result4), 8, "_calcCoefficient not true");
+    });
+
     ////--------------------------test calc shape (private function) -------------------------
 
     it("Check calc shape", async () => {
       ///-------------------------- test special shape --------------------------
-      // 111111111 111 == 2 ** 13 -1
-      let result1 = await attributeInstance._calcShape.call(2 ** 13 - 1, 0, {
+      // 1111 == 15
+      let result1 = await attributeInstance._calcShape.call(2, 0, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result1), 128, "result1 not true");
+      assert.equal(Number(result1), 17, "result1 not true");
 
       for (let i = 1; i < 17; i++) {
-        await attributeInstance._calcShape(2 ** 13 - 1, 0, {
+        await attributeInstance._calcShape(15, 0, {
           from: userAccount3,
         });
         assert.equal(Number(await attributeInstance.specialTreeCount()), i);
       }
 
-      let result6 = await attributeInstance._calcShape.call(2 ** 13 - 15, 0, {
+      let result6 = await attributeInstance._calcShape.call(0, 0, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result6), 113, "result6 not true");
+      assert.equal(Number(result6), 33, "result6 not true");
 
-      await attributeInstance._calcShape(2 ** 13 - 3, 0, {
+      await attributeInstance._calcShape(3, 0, {
         from: userAccount3,
       });
       assert.equal(Number(await attributeInstance.specialTreeCount()), 16);
@@ -2249,39 +2285,39 @@ contract("Attribute", (accounts) => {
 
       ////----test2
 
-      // 1101110 0000 == 1760
-      let result2 = await attributeInstance._calcShape.call(1760, 1, {
+      // 100001011 1111 == 4287
+      let result2 = await attributeInstance._calcShape.call(4287, 1, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result2), 16, "result2 not true");
+      assert.equal(Number(result2), 80, "result2 not true");
 
       ////----test3
 
-      // 1101101 1111 == 1759
-      let result3 = await attributeInstance._calcShape.call(1759, 1, {
+      // 11 0000 == 3
+      let result3 = await attributeInstance._calcShape.call(48, 1, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result3), 15, "result3 not true");
+      assert.equal(Number(result3), 33, "result3 not true");
 
       ////----test4
 
-      // 111000001 1000 == 7192
-      let result4 = await attributeInstance._calcShape.call(7192, 2, {
+      // 110000101011 1000 == 3115
+      let result4 = await attributeInstance._calcShape.call(49848, 2, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result4), 88, "result4 not true");
+      assert.equal(Number(result4), 137, "result4 not true");
 
       ////----test5
 
-      // 101010100 1010 == 5450
-      let result5 = await attributeInstance._calcShape.call(5450, 3, {
+      // 111111111111 1111 == 4095
+      let result5 = await attributeInstance._calcShape.call(65535, 3, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result5), 74, "result5 not true");
+      assert.equal(Number(result5), 144, "result5 not true");
     });
 
     ////--------------------------test calc colors (private function) -------------------------
@@ -2290,143 +2326,55 @@ contract("Attribute", (accounts) => {
       ///-------------------------- test calcColors --------------------------
 
       ////----test1
-      // a == 111 11111 255
-      // b == 111 11111 255
-      let result1 = await attributeInstance._calcColors.call(255, 255, 0, {
+      // a == 111111111111 1 111 4095
+      // b == 111111111111 1 111 4095
+      let result1 = await attributeInstance._calcColors.call(65535, 65535, 0, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result1[0]), 63, "result1 trunkColor not true");
-      assert.equal(Number(result1[1]), 63, "result1 crownColor not true");
+      assert.equal(Number(result1[0]), 65, "result1 trunkColor not true");
+      assert.equal(Number(result1[1]), 65, "result1 crownColor not true");
 
       ////----test2
-      // a == 000 00000 0
-      // b == 000 00000 0
+      // a == 000 0000000000000 0
+      // b == 000 0000000000000 0
       let result2 = await attributeInstance._calcColors.call(0, 0, 0, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result2[0]), 0, "result2 trunkColor not true");
-      assert.equal(Number(result2[1]), 0, "result2 crownColor not true");
+      assert.equal(Number(result2[0]), 2, "result2 trunkColor not true");
+      assert.equal(Number(result2[1]), 2, "result2 crownColor not true");
 
       ////----test3
-      // a == 101 00000 160
-      // b == 011 00000 96
-      let result3 = await attributeInstance._calcColors.call(160, 96, 0, {
+      // a == 1011100000 0 101 11781
+      // b ==10010001101 0 011 18643
+      let result3 = await attributeInstance._calcColors.call(11781, 18643, 1, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result3[0]), 5, "result3 trunkColor not true");
-      assert.equal(Number(result3[1]), 3, "result3 crownColor not true");
+      assert.equal(Number(result3[0]), 23, "result3 trunkColor not true");
+      assert.equal(Number(result3[1]), 37, "result3 crownColor not true");
 
       ////----test4
-      // a == 101 10100 20
-      // b == 101 10101 21
-      let result4 = await attributeInstance._calcColors.call(180, 181, 3, {
+      // a == 111101011 1 101
+      // b == 1111010110 1 101
+      let result4 = await attributeInstance._calcColors.call(7869, 15725, 3, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result4[0]), 45, "result4 trunkColor not true");
-      assert.equal(Number(result4[1]), 45, "result4 crownColor not true");
+      assert.equal(Number(result4[0]), 23, "result4 trunkColor not true");
+      assert.equal(Number(result4[1]), 31, "result4 crownColor not true");
 
       ////----test5
-      // a == 001 00110 38
-      // b == 000 01011 11
-      let result5 = await attributeInstance._calcColors.call(38, 11, 2, {
+      // a == 10000011 0 001  131
+      // b == 10101101110 1 000
+      let result5 = await attributeInstance._calcColors.call(2097, 22248, 2, {
         from: userAccount3,
       });
 
-      assert.equal(Number(result5[0]), 9, "result5 trunkColor not true");
-      assert.equal(Number(result5[1]), 16, "result5 crownColor not true");
+      assert.equal(Number(result5[0]), 11, "result5 trunkColor not true");
+      assert.equal(Number(result5[1]), 26, "result5 crownColor not true");
     });
-
-    ////--------------------------test _setSpecialTreeColors (private function) -------------------------
-
-    it("Check _setSpecialTreeColors", async () => {
-      ///-------------------------- test _setSpecialTreeColors --------------------------
-
-      let result1 = await attributeInstance._setSpecialTreeColors.call(128, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result1[0]), 6, "result1 trunkColor not true");
-      assert.equal(Number(result1[1]), 5, "result1 trunkColor not true");
-
-      let result2 = await attributeInstance._setSpecialTreeColors.call(143, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result2[0]), 32, "result2 trunkColor not true");
-      assert.equal(Number(result2[1]), 32, "result2 trunkColor not true");
-
-      let result3 = await attributeInstance._setSpecialTreeColors.call(130, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result3[0]), 18, "result3 trunkColor not true");
-      assert.equal(Number(result3[1]), 15, "result3 trunkColor not true");
-    });
-
-    ////--------------------------test _calcEffects (private function) -------------------------
-
-    it("Check _calcEffects", async () => {
-      ///-------------------------- test _calcEffects --------------------------
-
-      let result1 = await attributeInstance._calcEffects.call(255, 0, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result1), 15, "calcEffects not true");
-
-      let result2 = await attributeInstance._calcEffects.call(50, 0, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result2), 0, "calcEffects not true");
-
-      let result3 = await attributeInstance._calcEffects.call(50, 1, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result3), 1, "calcEffects not true");
-
-      let result4 = await attributeInstance._calcEffects.call(241, 2, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result4), 12, "calcEffects not true");
-    });
-
-    ////--------------------------test _calcCoefficient (private function) -------------------------
-
-    it("Check _calcCoefficient", async () => {
-      ///-------------------------- test _calcCoefficient --------------------------
-
-      let result1 = await attributeInstance._calcCoefficient.call(190, 0, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result1), 0, "_calcCoefficient not true");
-
-      let result2 = await attributeInstance._calcCoefficient.call(190, 1, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result2), 1, "_calcCoefficient not true");
-
-      let result3 = await attributeInstance._calcCoefficient.call(254, 2, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result3), 7, "_calcCoefficient not true");
-
-      let result4 = await attributeInstance._calcCoefficient.call(241, 3, {
-        from: userAccount3,
-      });
-
-      assert.equal(Number(result4), 5, "_calcCoefficient not true");
-    });
-  });
 
   /*
   describe("createSymbol", () => {

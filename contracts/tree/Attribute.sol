@@ -495,7 +495,7 @@ contract Attribute is Initializable, IAttribute {
 
             uint64 tempRandomValue = _randomValue;
             for (uint256 j = 0; j < 4; j++) {
-                attributes[j] = uint16(tempRandomValue & type(uint16).max));
+                attributes[j] = uint16(tempRandomValue & type(uint16).max);
 
                 tempRandomValue >>= 16;
             }
@@ -505,7 +505,7 @@ contract Attribute is Initializable, IAttribute {
             uint8 trunkColor;
             uint8 crownColor;
 
-            if (shape >31) {
+            if (shape >32) {
                 (trunkColor, crownColor) = _calcColors(
                     attributes[1],
                     attributes[2],
@@ -675,9 +675,9 @@ contract Attribute is Initializable, IAttribute {
         }
 
         uint8 randomValue1Last3Bit = uint8(_randomValue1 & 7);
-        uint16 probability1 = _randomValue1 >> 3;
+        uint16 probability1 = _randomValue1 >> 4;
         uint8 randomValue2Last3Bit = uint8(_randomValue2 & 7);
-        uint16 probability2 = _randomValue2 >> 3;
+        uint16 probability2 = _randomValue2 >> 4;
 
         uint8 result1 = 0;
         uint8 result2 = 0;

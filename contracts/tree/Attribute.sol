@@ -413,8 +413,6 @@ contract Attribute is Initializable, IAttribute {
         return 0;
     }
 
-    address selectedDexToken1;
-
     /**
      * @dev create a unique 64 bit random number
      * @param _treeId id of tree
@@ -434,8 +432,6 @@ contract Attribute is Initializable, IAttribute {
         uint256 selectorDexToken = seed % dexTokens.length;
 
         address selectedDexToken = dexTokens[selectorDexToken];
-
-        selectedDexToken1 = dexTokens[selectorDexToken];
 
         uint256 amount = _getDexAmount(_treeId, selectedDexToken);
 

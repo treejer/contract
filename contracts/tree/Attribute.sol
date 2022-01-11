@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "../tree/ITree.sol";
 import "./IAttribute.sol";
+import "../treasury/interfaces/IUniswapV2Router02New.sol";
 
 /** @title Attribute Contract */
 contract Attribute is Initializable, IAttribute {
@@ -35,6 +36,18 @@ contract Attribute is Initializable, IAttribute {
     mapping(uint64 => SymbolStatus)
         public
         override uniquenessFactorToSymbolStatus;
+
+    IUniswapV2Router02New public dexRouter;
+
+    address[] public override dexTokens;
+
+    address public override baseTokenAddress;
+
+    /** NOTE modifier for check valid address */
+    modifier validAddress(address _address) {
+        require(_address != address(0), "invalid address");
+        _;
+    }
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -98,6 +111,58 @@ contract Attribute is Initializable, IAttribute {
     }
 
     /**
+     * @dev admin set Dai contract address
+     * @param _baseTokenAddress set to the address of Dai contract
+     */
+    function setBaseTokenAddress(address _baseTokenAddress)
+        external
+        override
+        onlyAdmin
+        validAddress(_baseTokenAddress)
+    {
+        baseTokenAddress = _baseTokenAddress;
+    }
+
+    /**
+     * @dev admin set DexRouter contract address
+     * @param _dexRouterAddress set to the address of DexRouter contract
+     */
+
+    function setDexRouterAddress(address _dexRouterAddress)
+        external
+        override
+        onlyAdmin
+        validAddress(_dexRouterAddress)
+    {
+        IUniswapV2Router02New candidateContract = IUniswapV2Router02New(
+            _dexRouterAddress
+        );
+
+        dexRouter = candidateContract;
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _tokens an array of tokens in dex exchange with high liquidity
+     */
+    function setDexTokens(address[] calldata _tokens)
+        external
+        override
+        onlyAdmin
+    {
+        require(_tokens.length > 0, "tokens should not be empty");
+        bool flag = true;
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (!_isValidToken(_tokens[i])) {
+                flag = false;
+                break;
+            }
+        }
+        require(flag, "invalid pair address");
+        dexTokens = _tokens;
+    }
+
+    /**
      * @dev reserve a unique symbol
      * @param _uniquenessFactor unique symbol to reserve
      */
@@ -107,6 +172,10 @@ contract Attribute is Initializable, IAttribute {
         ifNotPaused
         onlyDataManagerOrTreejerContract
     {
+        require(
+            _checkValidSymbol(_uniquenessFactor),
+            "invalid symbol to reserve"
+        );
         require(
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 0,
             "the attributes are taken"
@@ -167,6 +236,10 @@ contract Attribute is Initializable, IAttribute {
         uint64 _coefficient
     ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
+            _checkValidSymbol(_symbolUniquenessFactor),
+            "invalid symbol to reserve"
+        );
+        require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
             "the symbol is taken"
         );
@@ -185,7 +258,7 @@ contract Attribute is Initializable, IAttribute {
             .generatedCount = 1;
 
         uint256 uniquenessFactor = _attributeUniquenessFactor +
-            ((uint256(_symbolUniquenessFactor) + (_coefficient << 32)) << 64);
+            ((uint256(_symbolUniquenessFactor) + (_coefficient << 24)) << 64);
 
         treeToken.setAttributes(_treeId, uniquenessFactor, _generationType);
 
@@ -299,29 +372,22 @@ contract Attribute is Initializable, IAttribute {
     /**
      * @dev check and generate random attributes for honorary trees
      * @param _treeId id of tree
-     * @param _uniquenessFactor random to check existance
      * @return a unique random value
      */
-    function manageAttributeUniquenessFactor(
-        uint256 _treeId,
-        uint64 _uniquenessFactor
-    ) external override onlyTreejerContract returns (uint64) {
-        if (
-            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] == 0
-        ) {
-            return _uniquenessFactor;
-        } else {
-            uniquenessFactorToGeneratedAttributesCount[_uniquenessFactor] += 1;
+    function manageAttributeUniquenessFactor(uint256 _treeId)
+        external
+        override
+        onlyTreejerContract
+        returns (uint64)
+    {
+        (
+            bool flag,
+            uint64 uniquenessFactor
+        ) = _generateAttributeUniquenessFactor(_treeId);
 
-            (
-                bool flag,
-                uint64 uniquenessFactor
-            ) = _generateAttributeUniquenessFactor(_treeId);
+        require(flag, "unique attribute not fund");
 
-            require(flag, "unique attribute not fund");
-
-            return uniquenessFactor;
-        }
+        return uniquenessFactor;
     }
 
     /**
@@ -336,11 +402,11 @@ contract Attribute is Initializable, IAttribute {
     {
         uint256 ownedTrees = treeToken.balanceOf(_funder);
 
-        if (ownedTrees > 10000) {
+        if (ownedTrees > 1000) {
             return 3;
-        } else if (ownedTrees > 1000) {
-            return 2;
         } else if (ownedTrees > 100) {
+            return 2;
+        } else if (ownedTrees > 10) {
             return 1;
         }
 
@@ -359,9 +425,28 @@ contract Attribute is Initializable, IAttribute {
     {
         uint64 uniquenessFactor;
 
+        uint256 seed = uint256(
+            keccak256(abi.encodePacked(_treeId, block.timestamp))
+        );
+
+        uint256 selectorDexToken = seed % dexTokens.length;
+
+        address selectedDexToken = dexTokens[selectorDexToken];
+
+        uint256 amount = _getDexAmount(_treeId, selectedDexToken);
+
         for (uint256 j = 0; j < 10; j++) {
             uint256 randomValue = uint256(
-                keccak256(abi.encodePacked(msg.sig, _treeId, j))
+                keccak256(
+                    abi.encodePacked(
+                        msg.sig,
+                        _treeId,
+                        amount,
+                        selectedDexToken,
+                        seed,
+                        j
+                    )
+                )
             );
 
             for (uint256 i = 0; i < 4; i++) {
@@ -400,36 +485,34 @@ contract Attribute is Initializable, IAttribute {
         uint8 _generationType
     ) private returns (bool) {
         if (uniquenessFactorToGeneratedAttributesCount[_randomValue] == 0) {
-            uint8[] memory attributes = new uint8[](8);
+            uint16[] memory attributes = new uint16[](4);
 
             uint64 tempRandomValue = _randomValue;
-            for (uint256 j = 0; j < 8; j++) {
-                attributes[j] = uint8(tempRandomValue & 255);
+            for (uint256 j = 0; j < 4; j++) {
+                attributes[j] = uint16(tempRandomValue & type(uint16).max);
 
-                tempRandomValue >>= 8;
+                tempRandomValue >>= 16;
             }
 
-            uint8 shape = _calcShape(uint16(_randomValue & 8191), _funderRank); //8191 = 2^13-1
+            uint8 shape = _calcShape(attributes[0], _funderRank);
 
             uint8 trunkColor;
             uint8 crownColor;
 
-            if (shape < 128) {
+            if (shape > 32) {
                 (trunkColor, crownColor) = _calcColors(
+                    attributes[1],
                     attributes[2],
-                    attributes[3],
                     _funderRank
                 );
             } else {
-                (trunkColor, crownColor) = _setSpecialTreeColors(shape);
+                trunkColor = 1;
+                crownColor = 1;
             }
-
-            uint8 effect = _calcEffects(attributes[4], _funderRank);
 
             uint64 symbolUniquenessFactor = shape +
                 (uint64(trunkColor) << 8) +
-                (uint64(crownColor) << 16) +
-                (uint64(effect) << 24);
+                (uint64(crownColor) << 16);
 
             if (
                 uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status >
@@ -440,10 +523,10 @@ contract Attribute is Initializable, IAttribute {
 
                 return false;
             }
-            uint8 coefficient = _calcCoefficient(attributes[5], _funderRank);
+            uint8 coefficient = _calcCoefficient(attributes[3], _funderRank);
 
             uint256 uniquenessFactor = _randomValue +
-                ((symbolUniquenessFactor + (uint256(coefficient) << 32)) << 64);
+                ((symbolUniquenessFactor + (uint256(coefficient) << 24)) << 64);
 
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor].status = 2;
             uniquenessFactorToSymbolStatus[symbolUniquenessFactor]
@@ -459,6 +542,67 @@ contract Attribute is Initializable, IAttribute {
     }
 
     /**
+     * @dev admin set TreeToken contract address
+     * @param _token token in dex exchange with high liquidity
+     */
+    function _isValidToken(address _token) private view returns (bool) {
+        return _getAmountsOut(2000 * 10**18, _token) > 0;
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _amount dai price to get the
+     * @param _token token in dex exchange with high liquidity
+     */
+    function _getDexAmount(uint256 _amount, address _token)
+        private
+        view
+        returns (uint256)
+    {
+        uint256 amount = ((_amount % 2000) + 1) * 10**18;
+        return _getAmountsOut(amount, _token);
+    }
+
+    function _getAmountsOut(uint256 _amount, address _token)
+        private
+        view
+        returns (uint256)
+    {
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = baseTokenAddress;
+        path[1] = _token;
+
+        uint256[] memory amounts = dexRouter.getAmountsOut(_amount, path);
+
+        return amounts[1];
+    }
+
+    /**
+     * @dev admin set TreeToken contract address
+     * @param _symbol symbol to check its validity
+     */
+    function _checkValidSymbol(uint64 _symbol) private pure returns (bool) {
+        uint8[] memory symbs = new uint8[](8);
+        for (uint256 i = 0; i < 8; i++) {
+            symbs[i] = uint8(_symbol & 255);
+            _symbol >>= 8;
+        }
+
+        if (
+            symbs[0] > 144 ||
+            symbs[1] > 65 ||
+            symbs[2] > 65 ||
+            symbs[3] > 8 ||
+            (symbs[4] + symbs[5] + symbs[6] + symbs[7] != 0)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @dev generate statistical shape based on {_randomValue} and {_funderRank}
      * @param _randomValue base random value
      * @param _funderRank rank of funder based on trees owned in treejer
@@ -468,51 +612,11 @@ contract Attribute is Initializable, IAttribute {
         private
         returns (uint8)
     {
-        uint16[9] memory probRank0 = [
-            128,
-            256,
-            320,
-            384,
-            432,
-            480,
-            496,
-            511,
-            512
-        ];
-        uint16[9] memory probRank1 = [
-            110,
-            200,
-            290,
-            360,
-            420,
-            470,
-            490,
-            511,
-            512
-        ];
-        uint16[9] memory probRank2 = [
-            90,
-            190,
-            280,
-            350,
-            410,
-            450,
-            480,
-            510,
-            512
-        ];
-        uint16[9] memory probRank3 = [
-            64,
-            176,
-            272,
-            340,
-            400,
-            460,
-            496,
-            508,
-            512
-        ];
-        uint16[9] memory selectedRankProb;
+        uint16[7] memory probRank0 = [2782, 1797, 987, 459, 194, 62, 1];
+        uint16[7] memory probRank1 = [2985, 2065, 1191, 596, 266, 101, 2];
+        uint16[7] memory probRank2 = [3114, 2264, 1389, 729, 333, 135, 3];
+        uint16[7] memory probRank3 = [3246, 2462, 1656, 931, 468, 203, 5];
+        uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -532,22 +636,22 @@ contract Attribute is Initializable, IAttribute {
 
         uint8 result = 0;
 
-        for (uint8 j = 0; j < 9; j++) {
-            if (probability < selectedRankProb[j]) {
-                result = j;
+        for (uint8 j = 0; j < 7; j++) {
+            if (probability > selectedRankProb[j]) {
+                result = 7 - j;
                 break;
             }
         }
 
-        if (result == 8) {
+        if (result == 0) {
             if (specialTreeCount < 16) {
-                shape = 128 + specialTreeCount;
+                shape = 17 + specialTreeCount;
                 specialTreeCount += 1;
             } else {
-                shape = 112 + randomValueFirstFourBit;
+                shape = 33 + randomValueFirstFourBit;
             }
         } else {
-            shape = result * 16 + randomValueFirstFourBit;
+            shape = (result + 1) * 16 + 1 + randomValueFirstFourBit;
         }
 
         return shape;
@@ -563,15 +667,15 @@ contract Attribute is Initializable, IAttribute {
      * @return crown color id
      */
     function _calcColors(
-        uint8 _randomValue1,
-        uint8 _randomValue2,
+        uint16 _randomValue1,
+        uint16 _randomValue2,
         uint8 _funderRank
     ) private pure returns (uint8, uint8) {
-        uint8[8] memory probRank0 = [6, 12, 18, 22, 26, 29, 31, 32];
-        uint8[8] memory probRank1 = [5, 10, 15, 20, 24, 28, 31, 32];
-        uint8[8] memory probRank2 = [5, 10, 15, 19, 23, 27, 30, 32];
-        uint8[8] memory probRank3 = [4, 8, 12, 16, 20, 24, 28, 32];
-        uint8[8] memory selectedRankProb;
+        uint16[7] memory probRank0 = [3112, 2293, 1637, 1064, 671, 343, 97];
+        uint16[7] memory probRank1 = [3440, 2540, 1818, 1162, 736, 375, 113];
+        uint16[7] memory probRank2 = [3603, 2947, 2128, 1391, 818, 408, 130];
+        uint16[7] memory probRank3 = [3767, 3276, 2620, 1637, 981, 490, 162];
+        uint16[7] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -583,188 +687,32 @@ contract Attribute is Initializable, IAttribute {
             selectedRankProb = probRank0;
         }
 
-        uint8 probability1 = _randomValue1 & 31;
+        uint8 randomValue1Last3Bit = uint8(_randomValue1 & 7);
+        uint16 probability1 = _randomValue1 >> 4;
+        uint8 randomValue2Last3Bit = uint8(_randomValue2 & 7);
+        uint16 probability2 = _randomValue2 >> 4;
 
-        uint8 randomValue1Last3Bit = _randomValue1 >> 5;
-        uint8 probability2 = _randomValue2 & 31;
-
-        uint8 randomValue2Last3Bit = _randomValue2 >> 5;
         uint8 result1 = 0;
         uint8 result2 = 0;
 
-        for (uint8 i = 0; i < 8; i++) {
-            if (probability1 < selectedRankProb[i]) {
-                result1 = i;
+        for (uint8 i = 0; i < 7; i++) {
+            if (probability1 > selectedRankProb[i]) {
+                result1 = 7 - i;
                 break;
             }
         }
 
-        for (uint8 j = 0; j < 8; j++) {
-            if (probability2 < selectedRankProb[j]) {
-                result2 = j;
+        for (uint8 j = 0; j < 7; j++) {
+            if (probability2 > selectedRankProb[j]) {
+                result2 = 7 - j;
                 break;
             }
         }
 
         return (
-            result1 * 8 + randomValue1Last3Bit,
-            result2 * 8 + randomValue2Last3Bit
+            result1 * 8 + 2 + randomValue1Last3Bit,
+            result2 * 8 + 2 + randomValue2Last3Bit
         );
-    }
-
-    /**
-     * @dev set trunk color and crown color id base on special shape
-     * @param _shape shape type id
-     * @return trunk color id
-     * @return crown color id
-     */
-    function _setSpecialTreeColors(uint8 _shape)
-        private
-        pure
-        returns (uint8, uint8)
-    {
-        uint8[16] memory trunks = [
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32,
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32
-        ];
-        uint8[16] memory crowns = [
-            5,
-            10,
-            15,
-            20,
-            24,
-            28,
-            31,
-            32,
-            6,
-            12,
-            18,
-            22,
-            26,
-            29,
-            31,
-            32
-        ];
-        return (trunks[_shape - 128], crowns[_shape - 128]);
-    }
-
-    /**
-     * @dev generate statistical effect based on {_randomValue} and {_funderRank}
-     * @param _randomValue base random value
-     * @param _funderRank rank of funder based on trees owned in treejer
-     * @return effect id
-     */
-    function _calcEffects(uint8 _randomValue, uint8 _funderRank)
-        private
-        pure
-        returns (uint8)
-    {
-        uint8[16] memory probRank0 = [
-            50,
-            100,
-            150,
-            200,
-            210,
-            220,
-            230,
-            235,
-            240,
-            245,
-            248,
-            251,
-            252,
-            253,
-            254,
-            255
-        ];
-        uint8[16] memory probRank1 = [
-            42,
-            84,
-            126,
-            168,
-            181,
-            194,
-            207,
-            216,
-            225,
-            234,
-            240,
-            246,
-            250,
-            252,
-            254,
-            255
-        ];
-        uint8[16] memory probRank2 = [
-            40,
-            80,
-            120,
-            160,
-            173,
-            186,
-            199,
-            208,
-            217,
-            226,
-            233,
-            240,
-            244,
-            248,
-            252,
-            255
-        ];
-        uint8[16] memory probRank3 = [
-            25,
-            50,
-            75,
-            100,
-            115,
-            130,
-            145,
-            156,
-            167,
-            178,
-            188,
-            198,
-            214,
-            228,
-            242,
-            255
-        ];
-
-        uint8[16] memory selectedRankProb;
-
-        if (_funderRank == 3) {
-            selectedRankProb = probRank3;
-        } else if (_funderRank == 2) {
-            selectedRankProb = probRank2;
-        } else if (_funderRank == 1) {
-            selectedRankProb = probRank1;
-        } else {
-            selectedRankProb = probRank0;
-        }
-
-        for (uint8 j = 0; j < 16; j++) {
-            if (_randomValue <= selectedRankProb[j]) {
-                return j;
-            }
-        }
-
-        return 0;
     }
 
     /**
@@ -773,17 +721,17 @@ contract Attribute is Initializable, IAttribute {
      * @param _funderRank rank of funder based on trees owned in treejer
      * @return coefficient value
      */
-    function _calcCoefficient(uint8 _randomValue, uint8 _funderRank)
+    function _calcCoefficient(uint16 _randomValue, uint8 _funderRank)
         private
         pure
         returns (uint8)
     {
-        uint8[8] memory probRank0 = [190, 225, 235, 244, 250, 253, 254, 255];
-        uint8[8] memory probRank1 = [175, 205, 225, 240, 248, 252, 254, 255];
-        uint8[8] memory probRank2 = [170, 200, 218, 232, 245, 250, 253, 255];
-        uint8[8] memory probRank3 = [128, 192, 210, 227, 240, 249, 252, 255];
+        uint16[6] memory probRank0 = [49153, 58985, 62916, 64554, 65210, 65472];
+        uint16[6] memory probRank1 = [45877, 57345, 62261, 64227, 65112, 65437];
+        uint16[6] memory probRank2 = [39323, 54069, 60622, 63899, 65013, 65406];
+        uint16[6] memory probRank3 = [26216, 45877, 58985, 63571, 64882, 65374];
 
-        uint8[8] memory selectedRankProb;
+        uint16[6] memory selectedRankProb;
 
         if (_funderRank == 3) {
             selectedRankProb = probRank3;
@@ -795,12 +743,12 @@ contract Attribute is Initializable, IAttribute {
             selectedRankProb = probRank0;
         }
 
-        for (uint8 j = 0; j < 8; j++) {
-            if (_randomValue <= selectedRankProb[j]) {
-                return j;
+        for (uint8 j = 0; j < 6; j++) {
+            if (_randomValue < selectedRankProb[j]) {
+                return j + 2;
             }
         }
 
-        return 0;
+        return 8;
     }
 }

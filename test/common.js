@@ -450,4 +450,108 @@ Common.plantTreeSuccessOrganization = async (
   });
 };
 
+Common.prepareAttributeDex = async (
+  UniswapV2Router02New,
+  Factory,
+  TestUniswap,
+  Token,
+  attributeInstance,
+  deployerAccount
+) => {
+  ////--------------------------uniswap deploy
+
+  factoryInstance = await Factory.new(deployerAccount, {
+    from: deployerAccount,
+  });
+  const factoryAddress = factoryInstance.address;
+
+  wethDexInstance = await Token.new("WETH", "weth", { from: deployerAccount });
+
+  daiDexInstance = await Token.new("DAI", "dai", { from: deployerAccount });
+
+  bnbDexInstance = await Token.new("BNB", "bnb", {
+    from: deployerAccount,
+  });
+
+  adaDexInstance = await Token.new("ADA", "ada", {
+    from: deployerAccount,
+  });
+
+  dexRouterInstance = await UniswapV2Router02New.new(
+    factoryAddress,
+    wethDexInstance.address,
+    { from: deployerAccount }
+  );
+  const dexRouterAddress = dexRouterInstance.address;
+
+  testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+    from: deployerAccount,
+  });
+
+  /////---------------------------addLiquidity-------------------------
+
+  const testUniswapAddress = testUniswapInstance.address;
+
+  await wethDexInstance.setMint(
+    testUniswapAddress,
+    web3.utils.toWei("125000", "Ether")
+  );
+
+  await daiDexInstance.setMint(
+    testUniswapAddress,
+    web3.utils.toWei("1000000000", "Ether")
+  );
+
+  await bnbDexInstance.setMint(
+    testUniswapAddress,
+    web3.utils.toWei("500000", "Ether")
+  );
+
+  await adaDexInstance.setMint(
+    testUniswapAddress,
+    web3.utils.toWei("125000000", "Ether")
+  );
+
+  await testUniswapInstance.addLiquidity(
+    daiDexInstance.address,
+    wethDexInstance.address,
+    web3.utils.toWei("250000000", "Ether"),
+    web3.utils.toWei("125000", "Ether")
+  );
+
+  await testUniswapInstance.addLiquidity(
+    daiDexInstance.address,
+    bnbDexInstance.address,
+    web3.utils.toWei("250000000", "Ether"),
+    web3.utils.toWei("500000", "Ether")
+  );
+
+  await testUniswapInstance.addLiquidity(
+    daiDexInstance.address,
+    adaDexInstance.address,
+    web3.utils.toWei("250000000", "Ether"),
+    web3.utils.toWei("125000000", "Ether")
+  );
+
+  //-------------------set address
+
+  await attributeInstance.setDexRouterAddress(dexRouterInstance.address, {
+    from: deployerAccount,
+  });
+
+  await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
+    from: deployerAccount,
+  });
+
+  let list = [
+    wethDexInstance.address,
+    bnbDexInstance.address,
+    adaDexInstance.address,
+  ];
+
+  await attributeInstance.setDexTokens(list, {
+    from: deployerAccount,
+  });
+};
+
 module.exports = Common;

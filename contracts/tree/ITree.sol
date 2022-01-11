@@ -83,7 +83,6 @@ interface ITree is IERC721Upgradeable {
      * @return shape
      * @return trunkColor
      * @return crownColor
-     * @return effect
      * @return coefficient
      * @return generationType
      */
@@ -94,7 +93,6 @@ interface ITree is IERC721Upgradeable {
             uint8 shape,
             uint8 trunkColor,
             uint8 crownColor,
-            uint8 effect,
             uint8 coefficient,
             uint8 generationType
         );

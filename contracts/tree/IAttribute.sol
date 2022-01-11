@@ -31,6 +31,17 @@ interface IAttribute {
     function setTreeTokenAddress(address _address) external;
 
     /**
+     * @dev admin set Dai contract address
+     * @param _baseTokenAddress set to the address of Dai contract
+     */
+
+    function setBaseTokenAddress(address _baseTokenAddress) external;
+
+    function setDexTokens(address[] calldata _tokens) external;
+
+    function setDexRouterAddress(address _dexRouterAddress) external;
+
+    /**
      * @dev reserve a unique symbol
      * @param _uniquenessFactor unique symbol to reserve
      * NOTE emit a {SymbolReserved} event
@@ -100,13 +111,11 @@ interface IAttribute {
     /**
      * @dev check and generate random attributes for honorary trees
      * @param _treeId id of tree
-     * @param _uniquenessFactor random to check existance
      * @return a unique random value
      */
-    function manageAttributeUniquenessFactor(
-        uint256 _treeId,
-        uint64 _uniquenessFactor
-    ) external returns (uint64);
+    function manageAttributeUniquenessFactor(uint256 _treeId)
+        external
+        returns (uint64);
 
     function initialize(address _accessRestrictionAddress) external;
 
@@ -115,6 +124,11 @@ interface IAttribute {
 
     /** @return total number of special tree created */
     function specialTreeCount() external view returns (uint8);
+
+    /**
+     * @return DaiToken address
+     */
+    function baseTokenAddress() external view returns (address);
 
     /**
      * @dev return generation count
@@ -136,6 +150,8 @@ interface IAttribute {
         external
         view
         returns (uint128 generatedCount, uint128 status);
+
+    function dexTokens(uint256 _index) external view returns (address);
 
     /**
      * @dev the function tries to calculate the rank of funder based trees owned in Treejer

@@ -24,6 +24,12 @@ const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
 const Dai = artifacts.require("Dai");
 
+//uniswap
+const Factory = artifacts.require("Factory.sol");
+const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+const TestUniswap = artifacts.require("TestUniswap.sol");
+const Token = artifacts.require("Weth");
+
 //gsn
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Gsn = require("@opengsn/provider");
@@ -947,6 +953,15 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
+      await Common.prepareAttributeDex(
+        UniswapV2Router02New,
+        Factory,
+        TestUniswap,
+        Token,
+        attributeInstance,
+        deployerAccount
+      );
+
       await regularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
@@ -1096,7 +1111,7 @@ contract("regularSale", (accounts) => {
         from: funder,
       });
 
-      ///-------------------- check attributes
+      // ///-------------------- check attributes
 
       let tokentOwner;
       let attributes;
@@ -1152,7 +1167,7 @@ contract("regularSale", (accounts) => {
         from: funder,
       });
 
-      /////----------------------------check referrer tree balance
+      ///----------------------------check referrer tree balance
       assert.equal(
         await regularSaleInstance.referrerCount.call(userAccount5),
         4

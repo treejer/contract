@@ -32,7 +32,7 @@ const {
   CommonErrorMsg,
   TimeEnumes,
   HonoraryTreeErrorMsg,
-
+  AttributeErrorMsg,
   erc20ErrorMsg,
   GsnErrorMsg,
 } = require("./enumes");
@@ -550,6 +550,12 @@ contract("HonoraryTree", (accounts) => {
       await honoraryTreeInstance
         .reserveSymbol(symbolsArray[0], { from: userAccount1 })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      await honoraryTreeInstance
+        .reserveSymbol(145, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(AttributeErrorMsg.INVALID_SYMBOL);
 
       for (i = 0; i < symbolsArray.length; i++) {
         await honoraryTreeInstance.reserveSymbol(symbolsArray[i], {

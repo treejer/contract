@@ -275,6 +275,10 @@ contract("Tree", (accounts) => {
       expectedSymbolValue.generationType,
       "generationType is incorrect"
     );
+
+    await treeInstance.setAttributes(tokenId, web3.utils.toBN("120"), 11, {
+      from: userAccount1,
+    });
   });
 
   it("test attributeExists", async () => {

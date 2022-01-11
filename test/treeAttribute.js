@@ -40,8 +40,6 @@ contract("Attribute", (accounts) => {
   let wethInstance;
   let daiInstance;
   let treeTokenInstance;
-  let factoryInstance;
-  let dexRouterInstance;
   let testUniswapInstance;
   let WETHAddress;
   let DAIAddress;
@@ -94,7 +92,7 @@ contract("Attribute", (accounts) => {
       WETHAddress,
       { from: deployerAccount }
     );
-    uniswapV2Router02NewAddress = dexRouterInstance.address;
+    uniSwapMiniAddress = dexRouterInstance.address;
     await wethInstance.setMint(
       uniSwapMiniAddress,
       web3.utils.toWei("125000", "Ether")

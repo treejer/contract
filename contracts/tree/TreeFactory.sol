@@ -99,12 +99,6 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         _;
     }
 
-    /** NOTE modifier for check treeId to be valid tree */
-    modifier validTree(uint256 _treeId) {
-        require(trees[_treeId].treeStatus > 0, "invalid tree");
-        _;
-    }
-
     /** NOTE modifier for check tree has not pending update */
     modifier notHavePendingUpdate(uint256 _treeId) {
         require(

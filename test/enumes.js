@@ -150,6 +150,7 @@ const AttributeErrorMsg = {
   SYMBOL_IS_TAKEN: "the symbol is taken",
   EMPTY_TOKEN_LIST: "tokens should not be empty",
   UNISWAP_INSUFFICIENT_LIQUIDITY: "UniswapV2Library: INSUFFICIENT_LIQUIDITY",
+  INVALID_SYMBOL: "invalid symbol to reserve",
 };
 
 const HonoraryTreeErrorMsg = {

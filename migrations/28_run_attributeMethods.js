@@ -17,7 +17,7 @@ module.exports = async function (deployer, network, accounts) {
   let UniswapV2RouterAddress;
   let daiAddress;
   let wethAddress;
-  // let uniAddress;
+  let uniAddress;
 
   if (isLocal) {
     UniswapV2RouterAddress = UniswapV2Router02New.address;

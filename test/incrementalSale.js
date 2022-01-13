@@ -1272,6 +1272,257 @@ contract("IncrementalSale", (accounts) => {
         .should.be.rejectedWith(IncrementalSaleErrorMsg.INCREMENTAL_SALE_EXIST);
     });
   });
+
+  describe("test increamental without wethTokenAddress", async () => {
+    beforeEach(async () => {
+      const treePrice = Units.convert("10", "eth", "wei");
+
+      iSaleInstance = await IncrementalSale.new({
+        from: deployerAccount,
+      });
+
+      await iSaleInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      wethFundInstance = await WethFund.new({
+        from: deployerAccount,
+      });
+
+      await wethFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      allocationInstance = await Allocation.new({
+        from: deployerAccount,
+      });
+
+      await allocationInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: deployerAccount,
+        }
+      );
+
+      /////-------------------------handle address here-----------------
+      await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
+        from: deployerAccount,
+      });
+      await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
+        from: deployerAccount,
+      });
+
+      // await iSaleInstance.setWethTokenAddress(WETHAddress, {
+      //   from: deployerAccount,
+      // });
+
+      await iSaleInstance.setAllocationAddress(allocationInstance.address, {
+        from: deployerAccount,
+      });
+      await iSaleInstance.setRegularSaleAddress(regularSaleInstance.address, {
+        from: deployerAccount,
+      });
+      await iSaleInstance.setPlanterFundAddress(planterFundsInstnce.address, {
+        from: deployerAccount,
+      });
+
+      await iSaleInstance.setAttributesAddress(attributeInstance.address, {
+        from: deployerAccount,
+      });
+
+      //-------------wethFundInstance
+
+      await wethFundInstance.setPlanterFundContractAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await wethFundInstance.setDexRouterAddress(uniswapV2Router02NewAddress, {
+        from: deployerAccount,
+      });
+
+      await wethFundInstance.setWethTokenAddress(WETHAddress, {
+        from: deployerAccount,
+      });
+
+      await wethFundInstance.setDaiAddress(DAIAddress, {
+        from: deployerAccount,
+      });
+
+      //-------------treeFactoryInstance
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      //--------------attributeInstance
+
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      ///////////////////////// -------------------- handle roles here ----------------
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      await Common.addTreejerContractRole(
+        arInstance,
+        iSaleInstance.address,
+        deployerAccount
+      );
+      await Common.addTreejerContractRole(
+        arInstance,
+        wethFundInstance.address,
+        deployerAccount
+      );
+      await Common.addTreejerContractRole(
+        arInstance,
+        attributeInstance.address,
+        deployerAccount
+      );
+      /////----------------add allocation data
+      await allocationInstance.addAllocationData(
+        3000,
+        1200,
+        1200,
+        1200,
+        1200,
+        2200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+    });
+    it("test increamental without wethTokenAddress", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+
+      await allocationInstance.assignAllocationToTree(100, 10000, 0, {
+        from: dataManager,
+      });
+
+      await Common.successPlant(
+        treeFactoryInstance,
+        arInstance,
+        "ipfs exists",
+        101,
+        birthDate,
+        1,
+        [userAccount2],
+        userAccount2,
+        deployerAccount,
+        planterInstance,
+        dataManager
+      );
+
+      await iSaleInstance.createIncrementalSale(
+        101,
+        web3.utils.toWei("0.01"),
+        100,
+        20,
+        1000,
+        {
+          from: dataManager,
+        }
+      );
+
+      assert.equal(await iSaleInstance.lastSold(), 100, "lastSold not true");
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+
+      let funderBalance1 = await wethInstance.balanceOf(userAccount3);
+
+      assert.equal(
+        Number(funderBalance1),
+        web3.utils.toWei("0"),
+        "1-funder balance not true"
+      );
+
+      //mint weth for funder
+      await wethInstance.setMint(userAccount3, web3.utils.toWei("0.01"));
+
+      await wethInstance.approve(
+        iSaleInstance.address,
+        web3.utils.toWei("0.01"),
+        {
+          from: userAccount3,
+        }
+      );
+
+      await iSaleInstance.fundTree(1, zeroAddress, zeroAddress, 0, {
+        from: userAccount3,
+      }).should.be.rejected;
+
+      await wethInstance.resetAcc(userAccount3);
+      await wethInstance.resetAcc(userAccount4);
+    });
+  });
+
   describe("with financial section", () => {
     beforeEach(async () => {
       const treePrice = Units.convert("7", "eth", "wei");

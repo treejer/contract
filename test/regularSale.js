@@ -970,6 +970,152 @@ contract("regularSale", (accounts) => {
       );
     });
 
+    it("test regular initialize (set maxTreeSupply==10001) ==> regular stop", async () => {
+      let funder = userAccount3;
+
+      //mint dai for funder
+      await daiInstance.setMint(funder, web3.utils.toWei("10000"));
+
+      ////////////// ------------------- handle allocation data ----------------------
+
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
+        {
+          from: dataManager,
+        }
+      );
+
+      await allocationInstance.assignAllocationToTree(1, 1000000, 0, {
+        from: dataManager,
+      });
+
+      /////////////////////////-------------------- deploy contracts --------------------------
+
+      let planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      ///////////////////// ------------------- handle address here --------------------------
+
+      await regularSaleInstance.setTreeFactoryAddress(
+        treeFactoryInstance.address,
+        { from: deployerAccount }
+      );
+
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      //-------------daiFundInstance
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.setPlanterFundContractAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      //-------------treeFactoryInstance
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      ///////////////////////// -------------------- handle roles here ----------------
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        regularSaleInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        daiFundInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        attributeInstance.address,
+        deployerAccount
+      );
+
+      ///////////////////////--------------------- fundTree --------------------------
+
+      await regularSaleInstance.updateMaxTreeSupply(10001, {
+        from: dataManager,
+      });
+
+      await daiInstance.approve(
+        regularSaleInstance.address,
+        web3.utils.toWei("10000"),
+        {
+          from: funder,
+        }
+      );
+
+      await regularSaleInstance
+        .fundTree(1, zeroAddress, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.MAX_SUPPLY);
+
+      await regularSaleInstance
+        .fundTreeById(10001, zeroAddress, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_TREE);
+    });
+
     /////////////////---------------------------------set lastFundedTreeId address--------------------------------------------------------
 
     it("Should lastFundedTreeId work successfully", async () => {

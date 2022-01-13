@@ -29,6 +29,6 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterContractAddress(planterAddress);
     await instance.setDaiTokenAddress(daiTokenAddress);
-    await instance.setOutgoingAddress(process.env.OUT_GOING_ADDRESS);
+    // await instance.setOutgoingAddress(process.env.OUT_GOING_ADDRESS);
   });
 };

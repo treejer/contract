@@ -10,8 +10,8 @@ const Attribute = artifacts.require("Attribute.sol");
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
-  const referralTreePaymentToPlanter = web3.utils.toWei("0.5");
-  const referralTreePaymentToAmbassador = web3.utils.toWei("0.1");
+  const referralTreePaymentToPlanter = web3.utils.toWei("0.5"); //TODO:set
+  const referralTreePaymentToAmbassador = web3.utils.toWei("0.1"); //TODO:set
   const treeFactoryAddress = TreeFactory.address;
   const daiFundAddress = DaiFund.address;
   const allocationAddress = Allocation.address;

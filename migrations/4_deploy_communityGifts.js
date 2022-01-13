@@ -6,8 +6,8 @@ const HonoraryTree = artifacts.require("HonoraryTree.sol");
 module.exports = async function (deployer, network, accounts) {
   let accessRestrictionAddress = AccessRestriction.address;
 
-  const initialReferralTreePaymentToPlanter = web3.utils.toWei("0.5");
-  const initialReferralTreePaymentToAmbassador = web3.utils.toWei("0.1");
+  const initialReferralTreePaymentToPlanter = web3.utils.toWei("0.5"); //TODO:set
+  const initialReferralTreePaymentToAmbassador = web3.utils.toWei("0.1"); //TODO set
 
   console.log("Deploying HonoraryTree...");
   await deployProxy(

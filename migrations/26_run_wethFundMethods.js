@@ -44,13 +44,13 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setDexRouterAddress(UniswapV2RouterAddress);
     await instance.setPlanterFundContractAddress(planterFundAddress);
 
-    await instance.setResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
-    await instance.setLocalDevelopmentAddress(
-      process.env.LOCAL_DEVELOP_ADDRESS
-    );
-    await instance.setInsuranceAddress(process.env.RESCUE_FUND_ADDRESS);
-    await instance.setTreasuryAddress(process.env.TREEJER_DEVELOP_ADDRESS);
-    await instance.setReserve1Address(process.env.RESERVE_FUND_ADDRESS1);
-    await instance.setReserve2Address(process.env.RESERVE_FUND_ADDRESS2);
+    // await instance.setResearchAddress(process.env.TREE_RESEARCH_ADDRESS);
+    // await instance.setLocalDevelopmentAddress(
+    //   process.env.LOCAL_DEVELOP_ADDRESS
+    // );
+    // await instance.setInsuranceAddress(process.env.RESCUE_FUND_ADDRESS);
+    // await instance.setTreasuryAddress(process.env.TREEJER_DEVELOP_ADDRESS);
+    // await instance.setReserve1Address(process.env.RESERVE_FUND_ADDRESS1);
+    // await instance.setReserve2Address(process.env.RESERVE_FUND_ADDRESS2);
   });
 };

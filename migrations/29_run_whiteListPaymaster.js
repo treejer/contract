@@ -34,9 +34,7 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call WhitelistPaymaster Methods...");
   await WhitelistPaymaster.deployed().then(async (instance) => {
-    // await instance.addFunderWhitelistTarget(auctionAddress);
     await instance.addFunderWhitelistTarget(honoraryTreeAddress);
-    // await instance.addFunderWhitelistTarget(incrementalSaleAddress);
     await instance.addPlanterWhitelistTarget(planterAddress);
     await instance.addFunderWhitelistTarget(regularSaleAddress);
     await instance.addPlanterWhitelistTarget(planterFundAddress);

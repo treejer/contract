@@ -40,7 +40,6 @@ module.exports = async function (deployer, network, accounts) {
 
   console.log("Call IncrementalSale Methods...");
   await IncrementalSale.deployed().then(async (instance) => {
-    // await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterFundAddress(planterFundAddress);
     await instance.setRegularSaleAddress(regularSaleAddress);
     await instance.setTreeFactoryAddress(treeFactoryAddress);
@@ -48,16 +47,5 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setWethTokenAddress(wethTokenAddress);
     await instance.setAllocationAddress(allocationAddress);
     await instance.setAttributesAddress(attributeAddress);
-
-    await instance.createIncrementalSale(
-      101,
-      web3.utils.toWei("0.01"),
-      100,
-      10,
-      1000,
-      {
-        from: accounts[0],
-      }
-    );
   });
 };

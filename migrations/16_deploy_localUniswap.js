@@ -151,6 +151,7 @@ module.exports = async function (deployer, network, accounts) {
 
     let wethInstance = await Weth.deployed();
     let daiInstance = await Dai.deployed();
+    // let uniInstance = await Uni.deployed();
 
     await wethInstance.setMint(
       uniswapV2Router02NewAddress,
@@ -162,6 +163,7 @@ module.exports = async function (deployer, network, accounts) {
     );
 
     console.log("daiAddress=", daiAddress);
+
     console.log("wethAddress=", wethAddress);
     console.log("wmaticAddress=", wmaticAddress);
     console.log("uniswapV2Router02NewAddress=", uniswapV2Router02NewAddress);

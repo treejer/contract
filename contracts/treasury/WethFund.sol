@@ -549,6 +549,20 @@ contract WethFund is Initializable, IWethFund {
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
 
+    //TODO:remove
+    function withdrawContractBalance(address _wallet)
+        external
+        override
+        onlyAdmin
+        validAddress(_wallet)
+    {
+        bool success = wethFund.transfer(
+            _wallet,
+            wethFund.balanceOf(address(this))
+        );
+        require(success);
+    }
+
     /** @dev calculate planter and ambassador dai amount and transfer it to
      * PlanterFund contract and update projected earnings
      * @param _treeId id of tree to updateProjectedEarnings for

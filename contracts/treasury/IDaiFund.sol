@@ -213,6 +213,9 @@ interface IDaiFund {
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external;
 
+    //TODO:remove
+    function withdrawContractBalance(address _wallet) external;
+
     /**
      * @dev admin withdraw from treasury totalBalances
      * NOTE amount transfer to treasuryAddress

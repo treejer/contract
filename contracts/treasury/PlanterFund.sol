@@ -322,4 +322,18 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
 
         emit NoAmbsassadorBalanceWithdrew(_amount, outgoingAddress, _reason);
     }
+
+    //TODO:remove
+    function withdrawContractBalance(address _wallet)
+        external
+        override
+        onlyAdmin
+        validAddress(_wallet)
+    {
+        bool success = daiToken.transfer(
+            _wallet,
+            daiToken.balanceOf(address(this))
+        );
+        require(success);
+    }
 }

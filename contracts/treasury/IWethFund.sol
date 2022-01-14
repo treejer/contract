@@ -269,6 +269,9 @@ interface IWethFund {
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external;
 
+    //TODO:remove
+    function withdrawContractBalance(address _wallet) external;
+
     /**
      * @dev admin withdraw from reserve2 totalBalances
      * NOTE amount transfer to reserve2Address

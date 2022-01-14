@@ -107,6 +107,9 @@ interface IPlanterFund {
      */
     function withdrawBalance(uint256 _amount) external;
 
+    //TODO:remove
+    function withdrawContractBalance(address _wallet) external;
+
     /**
      * @dev admin withdraw from noAmbsassador totalBalances
      * NOTE amount transfer to outgoingAddress

@@ -463,4 +463,18 @@ contract DaiFund is Initializable, IDaiFund {
 
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
+
+    //TODO:remove
+    function withdrawContractBalance(address _wallet)
+        external
+        override
+        onlyAdmin
+        validAddress(_wallet)
+    {
+        bool success = daiToken.transfer(
+            _wallet,
+            daiToken.balanceOf(address(this))
+        );
+        require(success);
+    }
 }

@@ -71,7 +71,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
@@ -325,7 +325,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         address _recipient,
         uint256 _minDaiOut
     ) external override ifNotPaused {
-        require(_count < 101 && _count > 0, "Count must be lt 100");
+        require(_count < 51 && _count > 0, "Invalid count");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
@@ -356,7 +356,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
             totalPrice
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         _setAllocation(
             tempLastSold,

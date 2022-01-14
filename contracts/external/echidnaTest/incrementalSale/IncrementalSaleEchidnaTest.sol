@@ -366,7 +366,7 @@ contract IncrementalSaleEchidnaTest {
         if (count == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("Count must be lt 100")))
+                    keccak256(abi.encodePacked(("Invalid count")))
             );
         } else if (lastSoldBefore + count >= incrementalSaleData.endTreeId) {
             assert(

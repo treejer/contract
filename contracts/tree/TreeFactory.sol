@@ -103,7 +103,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     modifier notHavePendingUpdate(uint256 _treeId) {
         require(
             treeUpdates[_treeId].updateStatus != 1,
-            "tree has pending update"
+            "Pending update exists"
         );
         _;
     }
@@ -114,11 +114,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isTreeFactory
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     * NOTE set lastRegualarTreeId to 10000
-     */
+    /// @inheritdoc ITreeFactory
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -136,10 +132,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         treeUpdateInterval = 604800;
     }
 
-    /**
-     * @dev set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
+    /// @inheritdoc ITreeFactory
     function setTrustedForwarder(address _address)
         external
         override
@@ -149,10 +142,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         trustedForwarder = _address;
     }
 
-    /**
-     * @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
+    /// @inheritdoc ITreeFactory
     function setPlanterFundAddress(address _address)
         external
         override
@@ -165,10 +155,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         planterFund = candidateContract;
     }
 
-    /**
-     * @dev admin set Planter contract address
-     * @param _address set to the address of Planter contract
-     */
+    /// @inheritdoc ITreeFactory
     function setPlanterContractAddress(address _address)
         external
         override
@@ -181,10 +168,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         planterContract = candidateContract;
     }
 
-    /**
-     * @dev admin set TreeToken contract address
-     * @param _address set to the address of TreeToken contract
-     */
+    /// @inheritdoc ITreeFactory
     function setTreeTokenAddress(address _address) external override onlyAdmin {
         ITree candidateContract = ITree(_address);
 
@@ -193,9 +177,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         treeToken = candidateContract;
     }
 
-    /** @dev admin set the minimum time to send next update request
-     * @param _seconds time to next update request
-     */
+    /// @inheritdoc ITreeFactory
     function setUpdateInterval(uint256 _seconds)
         external
         override
@@ -207,18 +189,14 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeUpdateIntervalChanged();
     }
 
-    /**
-     * @dev admin list tree
-     * @param _treeId id of tree to list
-     * @param _treeSpecs tree specs
-     */
+    /// @inheritdoc ITreeFactory
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
         override
         ifNotPaused
         onlyDataManager
     {
-        require(trees[_treeId].treeStatus == 0, "duplicate tree");
+        require(trees[_treeId].treeStatus == 0, "Duplicate tree");
 
         TreeData storage treeData = trees[_treeId];
 
@@ -243,12 +221,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeStatusBatchReset();
     }
 
-    /**
-     * @dev admin assign an existing tree to planter
-     * NOTE tree must be not planted
-     * @param _treeId id of tree to assign
-     * @param _planter assignee planter
-     */
+    /// @inheritdoc ITreeFactory
     function assignTree(uint256 _treeId, address _planter)
         external
         override
@@ -257,11 +230,11 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         TreeData storage treeData = trees[_treeId];
 
-        require(treeData.treeStatus == 2, "invalid tree to assign");
+        require(treeData.treeStatus == 2, "Invalid tree");
 
         require(
             planterContract.canAssignTree(_planter),
-            "can't assign tree to planter"
+            "Not allowed planter"
         );
 
         treeData.planter = _planter;
@@ -269,13 +242,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeAssigned(_treeId);
     }
 
-    /**
-     * @dev planter with permission to plant, can plant its assigned tree
-     * @param _treeId id of tree to plant
-     * @param _treeSpecs tree specs
-     * @param _birthDate birth date of tree
-     * @param _countryCode country code of tree
-     */
+    /// @inheritdoc ITreeFactory
     function plantAssignedTree(
         uint256 _treeId,
         string calldata _treeSpecs,
@@ -284,14 +251,14 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     ) external override ifNotPaused {
         TreeData storage treeData = trees[_treeId];
 
-        require(treeData.treeStatus == 2, "invalid tree status for plant");
+        require(treeData.treeStatus == 2, "Invalid tree status");
 
         bool canPlant = planterContract.manageAssignedTreePermission(
             _msgSender(),
             treeData.planter
         );
 
-        require(canPlant, "planting permission denied");
+        require(canPlant, "Permission denied");
 
         if (_msgSender() != treeData.planter) {
             treeData.planter = _msgSender();
@@ -310,11 +277,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit AssignedTreePlanted(_treeId);
     }
 
-    /**
-     * @dev admin or allowed verifier can verify or reject plant for assigned tree.
-     * @param _treeId id of tree to verifiy
-     * @param _isVerified true for verify and false for reject
-     */
+    /// @inheritdoc ITreeFactory
     function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
         override
@@ -323,7 +286,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         TreeData storage treeData = trees[_treeId];
 
-        require(treeData.treeStatus == 3, "invalid tree status");
+        require(treeData.treeStatus == 3, "Invalid tree status");
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
 
@@ -342,11 +305,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /**
-     * @dev planter of tree send update request for tree
-     * @param _treeId id of tree to update
-     * @param _treeSpecs tree specs
-     */
+    /// @inheritdoc ITreeFactory
     function updateTree(uint256 _treeId, string memory _treeSpecs)
         external
         override
@@ -354,21 +313,21 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         require(
             trees[_treeId].planter == _msgSender(),
-            "Only Planter of tree can send update"
+            "Not owned tree"
         );
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
 
         require(
             treeUpdates[_treeId].updateStatus != 1,
-            "update tree status is pending"
+            "Pending update"
         );
 
         require(
             block.timestamp >=
                 trees[_treeId].plantDate +
                     ((trees[_treeId].treeStatus * 3600) + treeUpdateInterval),
-            "Update time not reach"
+            "Early update"
         );
 
         TreeUpdate storage treeUpdateData = treeUpdates[_treeId];
@@ -379,15 +338,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit TreeUpdated(_treeId);
     }
 
-    /**
-     * @dev admin or allowed verifier can verifiy or reject update request for tree.
-     * NOTE based on the current time of verifing and plant date, age of tree
-     * calculated and set as the treeStatus
-     * NOTE if a token exist for that tree (minted before) planter of tree funded
-     * based on calculated tree status
-     * @param _treeId id of tree to verify update request
-     * @param _isVerified true for verify and false for reject
-     */
+    /// @inheritdoc ITreeFactory
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         override
@@ -396,7 +347,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         require(
             treeUpdates[_treeId].updateStatus == 1,
-            "update status must be pending"
+            "Not pending update"
         );
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
@@ -433,13 +384,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /**
-     * @dev check if a tree is free to take part in sale and set {_saleType}
-     * to saleType of tree when tree is not in use
-     * @param _treeId id of tree to check
-     * @param _saleType saleType for tree
-     * @return 0 if a tree ready for a sale and 1 if a tree is in use or minted before
-     */
+    /// @inheritdoc ITreeFactory
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         override
@@ -464,11 +409,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         return currentSaleType;
     }
 
-    /**
-     * @dev mint a tree to funder and set saleType to 0
-     * @param _treeId id of tree to mint
-     * @param _funder address of funder to mint tree for
-     */
+    /// @inheritdoc ITreeFactory
     function mintAssignedTree(uint256 _treeId, address _funder)
         external
         override
@@ -478,10 +419,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         treeToken.mint(_funder, _treeId);
     }
 
-    /**
-     * @dev reset saleType value of tree
-     * @param _treeId id of tree to reset saleType value
-     */
+    /// @inheritdoc ITreeFactory
     function resetSaleType(uint256 _treeId)
         external
         override
@@ -490,13 +428,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         trees[_treeId].saleType = 0;
     }
 
-    /**
-     * @dev reset saleType of trees in range of {_startTreeId} and {_endTreeId}
-     * with saleType value of {_saleType}
-     * @param _startTreeId starting tree id to reset saleType
-     * @param _endTreeId ending tree id to reset saleType
-     * @param _saleType saleType value of trees
-     */
+    /// @inheritdoc ITreeFactory
     function resetSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -515,13 +447,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /**
-     * @dev set {_saleType} to saleType of trees in range {_startTreeId} and {_endTreeId}
-     * @param _startTreeId starting tree id to set saleType value
-     * @param _endTreeId _ending tree id to set saleType value
-     * @param _saleType saleType value
-     * @return true if all trees saleType value successfully set and false otherwise
-     */
+    /// @inheritdoc ITreeFactory
     function manageSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -544,12 +470,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         return true;
     }
 
-    /**
-     * @dev planter plant a tree
-     * @param _treeSpecs tree specs
-     * @param _birthDate birthDate of the tree
-     * @param _countryCode country code of tree
-     */
+    /// @inheritdoc ITreeFactory
     function plantTree(
         string calldata _treeSpecs,
         uint64 _birthDate,
@@ -571,10 +492,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         _pendingRegularTreeId.increment();
     }
 
-    /**
-     * @dev admin update lastRegualarTreeId
-     * @param _lastRegualarTreeId id of last funded tree
-     */
+    /// @inheritdoc ITreeFactory
     function updateLastRegualarTreeId(uint256 _lastRegualarTreeId)
         external
         override
@@ -583,7 +501,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         require(
             _lastRegualarTreeId > lastRegualarTreeId,
-            "Input must be gt last regular tree"
+            "Invalid lastRegualarTreeId"
         );
 
         lastRegualarTreeId = _lastRegualarTreeId;
@@ -591,11 +509,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
     }
 
-    /**
-     * @dev admin or allowed verifier can verify or rejects the pending trees
-     * @param _tempTreeId tempTreeId to verify
-     * @param _isVerified true for verify and false for reject
-     */
+    /// @inheritdoc ITreeFactory
     function verifyTree(uint256 _tempTreeId, bool _isVerified)
         external
         override
@@ -604,7 +518,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
     {
         TempTree storage tempTreeData = tempTrees[_tempTreeId];
 
-        require(tempTreeData.plantDate > 0, "regularTree not exist");
+        require(tempTreeData.plantDate > 0, "Regular Tree not exists");
 
         if (_isVerified) {
             uint256 tempLastRegularTreeId = lastRegualarTreeId + 1;
@@ -638,12 +552,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         delete tempTrees[_tempTreeId];
     }
 
-    /**
-     * @dev mint a tree to funder of tree
-     * @param _lastFundedTreeId The last tree funded in the regular sale
-     * @param _funder funder of a new tree sold in Regular
-     * @return the last tree funded after update
-     */
+    /// @inheritdoc ITreeFactory
     function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
         override
@@ -674,11 +583,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         return tempLastFundedTreeId;
     }
 
-    /**
-     * @dev mint an already planted tree with id to funder
-     * @param _treeId tree id to mint
-     * @param _funder address of funder
-     */
+    /// @inheritdoc ITreeFactory
     function mintTreeById(uint256 _treeId, address _funder)
         external
         override
@@ -688,7 +593,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         require(
             treeData.treeStatus > 3 && treeData.saleType == 4,
-            "tree must be planted"
+            "Tree not planted"
         );
 
         treeData.saleType = 0;
@@ -696,11 +601,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         treeToken.mint(_funder, _treeId);
     }
 
-    /**
-     * @dev script role update treeSpecs
-     * @param _treeId id of tree to update treeSpecs
-     * @param _treeSpecs new tree specs
-     */
+    /// @inheritdoc ITreeFactory
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
         override

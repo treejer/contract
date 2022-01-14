@@ -50,11 +50,7 @@ contract Tree is ERC721Upgradeable, ITree {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isTree
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     * @param baseURI_ initial baseURI
-     */
+    /// @inheritdoc ITree
     function initialize(
         address _accessRestrictionAddress,
         string calldata baseURI_
@@ -72,17 +68,12 @@ contract Tree is ERC721Upgradeable, ITree {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin set _baseURI
-     * @param baseURI_ baseURI value
-     */
+    /// @inheritdoc ITree
     function setBaseURI(string calldata baseURI_) external override onlyAdmin {
         baseURI = baseURI_;
     }
 
-    /**
-     * @dev mint {_tokenId} to {_to}
-     */
+    /// @inheritdoc ITree
     function mint(address _to, uint256 _tokenId)
         external
         override
@@ -91,13 +82,7 @@ contract Tree is ERC721Upgradeable, ITree {
         _mint(_to, _tokenId);
     }
 
-    /**
-     * @dev set attribute and symbol for a tokenId based on {_uniquenessFactor}
-     * NOTE symbol set when {_generationType} is more than 15 (for HonoraryTree and IncremetalSale)
-     * @param _tokenId id of token
-     * @param _uniquenessFactor uniqueness factor
-     * @param _generationType type of generation
-     */
+    /// @inheritdoc ITree
     function setAttributes(
         uint256 _tokenId,
         uint256 _uniquenessFactor,
@@ -139,21 +124,12 @@ contract Tree is ERC721Upgradeable, ITree {
         }
     }
 
-    /**
-     * @dev check that _tokenId exist or not
-     * @param _tokenId id of token to check existance
-     * @return true if {_tokenId} exist
-     */
+    /// @inheritdoc ITree
     function exists(uint256 _tokenId) external view override returns (bool) {
         return _exists(_tokenId);
     }
 
-    /**
-     * @dev check attribute existance for a tokenId
-     * @param _tokenId id of token
-     * @return true if attributes exist for {_tokenId}
-     */
-     
+    /// @inheritdoc ITree
     function attributeExists(uint256 _tokenId)
         external
         view

@@ -408,7 +408,7 @@ contract("Auction", (accounts) => {
         { from: dataManager }
       );
 
-      /////// --------------- fail duplicate tree id
+      /////// --------------- fail Duplicate tree id
       await auctionInstance
         .createAuction(
           treeId,

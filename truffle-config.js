@@ -116,9 +116,9 @@ module.exports = {
       network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
-      skipDryRun: true,
-      gas: 60000000,
-      gasPrice: 100000000000,
+      gas: 8500000,
+      gasPrice: 101000000000,
+      skipDryRun: false
     },
 
     mumbai: {

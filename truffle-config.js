@@ -98,13 +98,6 @@ module.exports = {
       gasPrice: 10000000000,
     },
 
-    // Useful for private networks
-    // private: {
-    // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-    // network_id: 2111,   // This network is yours, in the cloud.
-    // production: true    // Treats this network as if it was a public net. (default: false)
-    // }
-
     arbitrum: {
       provider: () => {
         // return wrapped provider:
@@ -119,8 +112,8 @@ module.exports = {
 
     matic: {
       provider: () =>
-        new HDWalletProvider(privateKeys, `https://rpc-mumbai.matic.today`),
-      network_id: 80001,
+        new HDWalletProvider(privateKeys, `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
+      network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
@@ -128,22 +121,11 @@ module.exports = {
       gasPrice: 100000000000,
     },
 
-    // matic: {
-    //   provider: () =>
-    //     new HDWalletProvider(
-    //       privateKeys,
-    //       `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATICVIGIL_PROJECT_ID}`
-    //     ),
-    //   network_id: 137,
-    //   confirmations: 2,
-    //   timeoutBlocks: 200,
-    //   skipDryRun: true,
-    // },
     mumbai: {
       provider: () =>
         new HDWalletProvider(
           privateKeys,
-          `wss://rpc-mumbai.maticvigil.com/ws/v1/${process.env.MATICVIGIL_PROJECT_ID}`
+          `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
         ),
       network_id: 80001,
       confirmations: 2,

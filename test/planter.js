@@ -226,7 +226,7 @@ contract("Planter", (accounts) => {
 
     let reffered1 = await planterInstance.invitedBy.call(userAccount3);
 
-    assert.equal(reffered1, userAccount4, "invitedBy not true set");
+    assert.equal(reffered1, userAccount4, "Invalid invitedBy set");
 
     truffleAssert.eventEmitted(eventTx2, "PlanterJoined", (ev) => {
       return userAccount3 == ev.planter;
@@ -266,7 +266,7 @@ contract("Planter", (accounts) => {
 
     let reffered2 = await planterInstance.invitedBy.call(userAccount5);
 
-    assert.equal(reffered2, zeroAddress, "invitedBy not true set");
+    assert.equal(reffered2, zeroAddress, "Invalid invitedBy set");
 
     let organizationAddress1 = await planterInstance.memberOf.call(
       userAccount5
@@ -323,7 +323,7 @@ contract("Planter", (accounts) => {
 
     let reffered3 = await planterInstance.invitedBy.call(userAccount1);
 
-    assert.equal(reffered3, userAccount7, "invitedBy not true set");
+    assert.equal(reffered3, userAccount7, "Invalid invitedBy set");
 
     let organizationAddress2 = await planterInstance.memberOf.call(
       userAccount1
@@ -364,7 +364,7 @@ contract("Planter", (accounts) => {
       userAccount4
     ).should.be.rejectedWith(PlanterErrorMsg.PLANTERTYPE_ALLOWED_VALUE);
 
-    ///////////// --------------- fail organization address not valid
+    ///////////// --------------- fail Invalid organization
     await Common.joinSimplePlanter(
       planterInstance,
       3,
@@ -475,7 +475,7 @@ contract("Planter", (accounts) => {
 
     let reffered1 = await planterInstance.invitedBy.call(userAccount3);
 
-    assert.equal(reffered1, userAccount4, "invitedBy not true set");
+    assert.equal(reffered1, userAccount4, "Invalid invitedBy set");
 
     truffleAssert.eventEmitted(eventTx2, "PlanterJoined", (ev) => {
       return userAccount3 == ev.planter;
@@ -518,7 +518,7 @@ contract("Planter", (accounts) => {
 
     let reffered2 = await planterInstance.invitedBy.call(userAccount5);
 
-    assert.equal(reffered2, zeroAddress, "invitedBy not true set");
+    assert.equal(reffered2, zeroAddress, "Invalid invitedBy set");
 
     let organizationAddress1 = await planterInstance.memberOf.call(
       userAccount5
@@ -578,7 +578,7 @@ contract("Planter", (accounts) => {
 
     let reffered3 = await planterInstance.invitedBy.call(userAccount1);
 
-    assert.equal(reffered3, userAccount7, "invitedBy not true set");
+    assert.equal(reffered3, userAccount7, "Invalid invitedBy set");
 
     let organizationAddress2 = await planterInstance.memberOf.call(
       userAccount1
@@ -625,7 +625,7 @@ contract("Planter", (accounts) => {
       })
       .should.be.rejectedWith(PlanterErrorMsg.PLANTERTYPE_ALLOWED_VALUE);
 
-    ///////////// --------------- fail organization address not valid
+    ///////////// --------------- fail Invalid organization
 
     await planterInstance
       .joinByAdmin(userAccount2, 3, 12, 24, 12, userAccount3, userAccount4, {
@@ -697,7 +697,7 @@ contract("Planter", (accounts) => {
 
     let reffered = await planterInstance.invitedBy.call(userAccount4);
 
-    assert.equal(reffered, zeroAddress, "invitedBy not true set");
+    assert.equal(reffered, zeroAddress, "Invalid invitedBy set");
 
     const eventTx = await Common.joinOrganizationPlanter(
       planterInstance,
@@ -708,7 +708,7 @@ contract("Planter", (accounts) => {
 
     let refferedAfter = await planterInstance.invitedBy.call(userAccount4);
 
-    assert.equal(refferedAfter, userAccount3, "invitedBy not true set");
+    assert.equal(refferedAfter, userAccount3, "Invalid invitedBy set");
 
     let planter = await planterInstance.planters.call(userAccount4);
 
@@ -1000,7 +1000,7 @@ contract("Planter", (accounts) => {
     });
   });
 
-  it("updatePlanterType should be fail because invalid planterType in change", async () => {
+  it("updatePlanterType should be fail because Planter type same", async () => {
     await Common.addPlanter(arInstance, userAccount2, deployerAccount);
 
     await Common.joinSimplePlanter(
@@ -1925,13 +1925,13 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(rule1_3_1.toString()),
       0,
-      "invalid payment portion before update"
+      "Invalid share before update"
     );
 
     assert.equal(
       Number(rule2_4_1.toString()),
       0,
-      "invalid payment portion before update"
+      "Invalid share before update"
     );
 
     ////////////////////--------------------- update1
@@ -1984,19 +1984,19 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(rule1_3_2.toString()),
       2000,
-      "invalid payment portion after update for rule1_3_2"
+      "Invalid share after update for rule1_3_2"
     );
 
     assert.equal(
       Number(rule2_4_2.toString()),
       4000,
-      "invalid payment portion after update for rule2_4_2"
+      "Invalid share after update for rule2_4_2"
     );
 
     assert.equal(
       Number(rule1_5_2.toString()),
       5000,
-      "invalid payment portion for rule1_5_2"
+      "Invalid share for rule1_5_2"
     );
 
     assert.equal(
@@ -2053,13 +2053,13 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(rule1_3_3.toString()),
       3000,
-      "invalid payment portion after update2 for rule1_3_3"
+      "Invalid share after update2 for rule1_3_3"
     );
 
     assert.equal(
       Number(rule1_5_3.toString()),
       5000,
-      "invalid payment portion after update2 for rule1_5_3"
+      "Invalid share after update2 for rule1_5_3"
     );
 
     truffleAssert.eventEmitted(
@@ -2229,7 +2229,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(user2PortionAfterJoin["3"]),
       10000,
-      "invalid payment portion"
+      "Invalid share"
     );
 
     const user1PortionAfterJoin =
@@ -2241,7 +2241,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(user1PortionAfterJoin["3"]),
       10000,
-      "invalid payment portion"
+      "Invalid share"
     );
 
     const user3PortionAfterJoin =
@@ -2253,7 +2253,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(user3PortionAfterJoin["3"]),
       10000,
-      "invalid payment portion"
+      "Invalid share"
     );
 
     await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
@@ -2273,7 +2273,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(user3PortionAferAccept["3"]),
       0,
-      "invalid payment portion /:"
+      "Invalid share /:"
     );
 
     const eventTx = await planterInstance.updateOrganizationMemberShare(
@@ -2305,7 +2305,7 @@ contract("Planter", (accounts) => {
     assert.equal(
       Number(user3PortionAfterUpdate["3"]),
       2000,
-      "invalid payment portion"
+      "Invalid share"
     );
   });
 

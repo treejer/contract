@@ -75,10 +75,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isIncrementalSale
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IIncrementalSale
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -92,11 +89,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
-
+    /// @inheritdoc IIncrementalSale
     function setPlanterFundAddress(address _address)
         external
         override
@@ -107,10 +100,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         planterFundContract = candidateContract;
     }
 
-    /**
-     * @dev admin set RegularSale contract address
-     * @param _address set to the address of RegularSale contract
-     */
+    /// @inheritdoc IIncrementalSale
     function setRegularSaleAddress(address _address)
         external
         override
@@ -121,9 +111,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         regularSale = candidateContract;
     }
 
-    /** @dev admin set TreeFactory contract address
-     * @param _address set to the address of TreeFactory contract
-     */
+    /// @inheritdoc IIncrementalSale
     function setTreeFactoryAddress(address _address)
         external
         override
@@ -134,9 +122,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set WethFund contract address
-     * @param _address set to the address of WethFund contract
-     */
+    /// @inheritdoc IIncrementalSale
     function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
 
@@ -145,9 +131,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         wethFund = candidateContract;
     }
 
-    /** @dev admin set wethToken contract address
-     * @param _address set to the address of WethToken contract
-     */
+    /// @inheritdoc IIncrementalSale
     function setWethTokenAddress(address _address)
         external
         override
@@ -158,10 +142,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         wethToken = candidateContract;
     }
 
-    /**
-     * @dev admin set Allocation contract address
-     * @param _address set to the address of Allocation contract
-     */
+    /// @inheritdoc IIncrementalSale
     function setAllocationAddress(address _address)
         external
         override
@@ -172,11 +153,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         allocation = candidateContract;
     }
 
-    /**
-     * @dev admin set Attribute contract address
-     * @param _address set to the address of Attribute contract
-     */
-
+    /// @inheritdoc IIncrementalSale
     function setAttributesAddress(address _address)
         external
         override
@@ -187,15 +164,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         attribute = candidateContract;
     }
 
-    /**
-     * @dev admin set a tree range from {startTreeId} to {startTreeId + treeCount}
-     * for incremental sales
-     * @param _startTreeId starting treeId
-     * @param _initialPrice initialPrice of trees
-     * @param _treeCount number of tree in incremental sell
-     * @param _increments number of trees after which the price increases
-     * @param _priceJump price jump
-     */
+    /// @inheritdoc IIncrementalSale
     function createIncrementalSale(
         uint256 _startTreeId,
         uint256 _initialPrice,
@@ -203,23 +172,23 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        require(_treeCount > 0 && _treeCount < 501, "invalid treeCount");
+        require(_treeCount > 0 && _treeCount < 501, "Invalid treeCount");
 
-        require(_startTreeId > 100, "trees are under Auction");
+        require(_startTreeId > 100, "Invalid startTreeId");
 
-        require(_increments > 0, "incremental period should be positive");
+        require(_increments > 0, "Invalid increments");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         require(
             incSaleData.endTreeId == lastSold + 1 ||
                 incSaleData.increments == 0,
-            "can't create new IncrementalSale"
+            "Cant create"
         );
 
         require(
             allocation.allocationExists(_startTreeId),
-            "equivalant fund Model not exists"
+            "Allocation not exists"
         );
 
         require(
@@ -228,7 +197,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
                 _startTreeId + _treeCount,
                 2
             ),
-            "trees are not available for sell"
+            "Trees not available"
         );
 
         incSaleData.startTreeId = _startTreeId;
@@ -242,18 +211,14 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         emit IncrementalSaleUpdated();
     }
 
-    /**
-     * @dev remove some trees from incremental sale and reset saleType of that trees
-     * NOTE {_count} trees removed from first of the incremetalSale tree range
-     * @param _count is number of trees to remove
-     */
+    /// @inheritdoc IIncrementalSale
     function removeIncrementalSale(uint256 _count)
         external
         override
         ifNotPaused
         onlyDataManager
     {
-        require(_count > 0 && _count < 501, "invalid count");
+        require(_count > 0 && _count < 501, "Invalid count");
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
         uint256 newStartTreeId = incSaleData.startTreeId + _count;
@@ -261,7 +226,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         require(
             incSaleData.increments > 0 &&
                 newStartTreeId <= incSaleData.endTreeId,
-            "IncrementalSale not exist or count must be lt endTree"
+            "Cant remove"
         );
 
         treeFactory.resetSaleTypeBatch(
@@ -276,22 +241,18 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         emit IncrementalSaleUpdated();
     }
 
-    /**
-     * @dev admin update endTreeId of incrementalSale tree range
-     * @param _treeCount number of trees added at the end of the incrementalSale
-     * tree range
-     */
+    /// @inheritdoc IIncrementalSale
     function updateEndTreeId(uint256 _treeCount)
         external
         override
         ifNotPaused
         onlyDataManager
     {
-        require(_treeCount > 0 && _treeCount < 501, "invalid count");
+        require(_treeCount > 0 && _treeCount < 501, "Invalid count");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        require(incSaleData.increments > 0, "incremental sale should be exist");
+        require(incSaleData.increments > 0, "Not exists");
 
         require(
             treeFactory.manageSaleTypeBatch(
@@ -299,26 +260,14 @@ contract IncrementalSale is Initializable, IIncrementalSale {
                 incSaleData.endTreeId + _treeCount,
                 2
             ),
-            "trees are not available for sell"
+            "Trees not available"
         );
         incSaleData.endTreeId = incSaleData.endTreeId + _treeCount;
 
         emit IncrementalSaleUpdated();
     }
 
-    /**
-     * @dev fund {_count} tree
-     * NOTE if {_recipient} address exist tree minted to the {_recipient}
-     * and mint to the function caller otherwise
-     * NOTE function caller pay for the price of trees
-     * NOTE total price calculated based on the incrementalSaleData
-     * NOTE based on the allocation data for tree totalBalances and PlanterFund
-     * contract balance updated
-     * NOTE generate unique symbols for trees
-     * @param _count number of trees to fund
-     * @param _referrer address of referrer
-     * @param _recipient address of recipient
-     */
+    /// @inheritdoc IIncrementalSale
     function fundTree(
         uint256 _count,
         address _referrer,
@@ -331,12 +280,12 @@ contract IncrementalSale is Initializable, IIncrementalSale {
 
         require(
             lastSold + _count < incSaleData.endTreeId,
-            "Not enough tree in incremental sell"
+            "Insufficient tree"
         );
 
         address recipient = _recipient == address(0) ? msg.sender : _recipient;
 
-        require(recipient != _referrer, "Invalid referal address");
+        require(recipient != _referrer, "Invalid referrer");
 
         uint256 tempLastSold = lastSold + 1;
 
@@ -347,7 +296,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         //transfer totalPrice to wethFund
         require(
             wethToken.balanceOf(msg.sender) >= totalPrice,
-            "low price paid"
+            "Insufficient balance"
         );
 
         bool success = wethToken.transferFrom(
@@ -373,21 +322,17 @@ contract IncrementalSale is Initializable, IIncrementalSale {
         emit TreeFunded(msg.sender, recipient, _referrer, tempLastSold, _count);
     }
 
-    /** @dev admin update incrementalSaleData
-     * @param _initialPrice initialPrice of trees
-     * @param _increments number of trees after which the price increases
-     * @param _priceJump price jump
-     */
+    /// @inheritdoc IIncrementalSale
     function updateIncrementalSaleData(
         uint256 _initialPrice,
         uint64 _increments,
         uint64 _priceJump
     ) external override ifNotPaused onlyDataManager {
-        require(_increments > 0, "incremental period should be positive");
+        require(_increments > 0, "Invalid increments");
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        require(incSaleData.increments > 0, "incremental sale should be exist");
+        require(incSaleData.increments > 0, "Not exists");
 
         incSaleData.initialPrice = _initialPrice;
         incSaleData.increments = _increments;
@@ -609,6 +554,6 @@ contract IncrementalSale is Initializable, IIncrementalSale {
             16
         );
 
-        require(symbolCreated, "symbol not generated");
+        require(symbolCreated, "Symbol not generated");
     }
 }

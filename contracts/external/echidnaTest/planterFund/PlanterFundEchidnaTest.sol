@@ -125,7 +125,7 @@ contract PlanterFundEchidnaTest {
         if (userDaiBefore < amount || amount < .5 * 10**18) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("insufficient amount")))
+                    keccak256(abi.encodePacked(("Invalid amount")))
             );
         } else {
             assert(false);

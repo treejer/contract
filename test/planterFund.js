@@ -2296,7 +2296,7 @@ contract("PlanterFund", (accounts) => {
       );
     });
 
-    it("should fail of insufficient amount", async () => {
+    it("should fail of Invalid amount", async () => {
       await Common.addPlanter(arInstance, userAccount3, deployerAccount);
 
       await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
@@ -3136,7 +3136,7 @@ contract("PlanterFund", (accounts) => {
         "local development address amount is not ok"
       );
 
-      ///////////////// ------------ 2nd withdraw (invalid amount)
+      ///////////////// ------------ 2nd withdraw (Insufficient balance)
 
       await planterFundInstance
         .withdrawNoAmbsassadorBalance(invalidWithdrawAmount, "some reason", {

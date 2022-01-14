@@ -532,7 +532,7 @@ contract("regularSale", (accounts) => {
         })
         .should.be.rejectedWith(RegularSaleErrors.INVALID_APPROVE);
 
-      ///----------------test3 (max supply)
+      ///----------------test3 (Max supply reached)
 
       //mint dai for funder
       await daiInstance.setMint(userAccount4, web3.utils.toWei("10000"));
@@ -601,7 +601,7 @@ contract("regularSale", (accounts) => {
         from: deployerAccount,
       });
 
-      /////////////// ---------------- fail beacuuse of invalid tree id
+      /////////////// ---------------- fail beacuuse of Invalid treeId id
 
       //mint dai for funder
       await daiInstance.setMint(userAccount1, web3.utils.toWei("14"));
@@ -630,7 +630,7 @@ contract("regularSale", (accounts) => {
 
       await daiInstance.resetAcc(userAccount1);
 
-      /////////////////// ------------------ fail because of invalid amount -----------------
+      /////////////////// ------------------ fail because of Insufficient balance -----------------
 
       //mint dai for funder
       await daiInstance.setMint(userAccount1, web3.utils.toWei("5"));
@@ -1350,7 +1350,7 @@ contract("regularSale", (accounts) => {
         "lastFundedTreeId not true"
       );
 
-      ///--------------check max supply
+      ///--------------check Max supply reached
 
       await regularSaleInstance.updateLastFundedTreeId(999993, {
         from: dataManager,
@@ -4693,7 +4693,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalBalancesBefore.treasury),
         0,
-        "invalid treejer develop fund"
+        "Invalid treeIdjer develop fund"
       );
 
       assert.equal(
@@ -4712,12 +4712,12 @@ contract("regularSale", (accounts) => {
 
       const treeBefore = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(Number(treeBefore.treeStatus), 4, "invalid tree status");
+      assert.equal(Number(treeBefore.treeStatus), 4, "Invalid treeId status");
 
       assert.equal(
         Number(treeBefore.saleType),
         4,
-        "invalid tree provide status"
+        "Invalid treeId provide status"
       );
 
       ///////////////////////////---------------------- check treasury and regular sell balance after request
@@ -4873,12 +4873,12 @@ contract("regularSale", (accounts) => {
 
       const treeAfter = await treeFactoryInstance.trees.call(treeId);
 
-      assert.equal(Number(treeAfter.treeStatus), 4, "invalid tree status");
+      assert.equal(Number(treeAfter.treeStatus), 4, "Invalid treeId status");
 
       assert.equal(
         Number(treeAfter.saleType),
         0,
-        "invalid tree provide status"
+        "Invalid treeId provide status"
       );
 
       ////////////////// ---------------------- check total fund after request
@@ -4920,7 +4920,7 @@ contract("regularSale", (accounts) => {
       assert.equal(
         Number(totalBalancesAfter.treasury),
         expected.treasury,
-        "invalid treejer develop fund"
+        "Invalid treeIdjer develop fund"
       );
 
       assert.equal(

@@ -66,17 +66,11 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    /**
-     * @dev initialize accessRestriction contract and set true for isHonoraryTree
-     * set referralTreePaymentToPlanter and referralTreePaymentToAmbassador initial value
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
-     * @param _referralTreePaymentToPlanter initial planter fund
-     * @param _referralTreePaymentToAmbassador initial ambassador fund
-     */
+    /// @inheritdoc IHonoraryTree
     function initialize(
         address _accessRestrictionAddress,
         uint256 _referralTreePaymentToPlanter,
@@ -92,11 +86,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         referralTreePaymentToAmbassador = _referralTreePaymentToAmbassador;
     }
 
-    /**
-     * @dev admin set the trustedForwarder adress
-     * @param _address is the address of trusted forwarder
-     */
-
+    /// @inheritdoc IHonoraryTree
     function setTrustedForwarder(address _address)
         external
         override
@@ -106,10 +96,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         trustedForwarder = _address;
     }
 
-    /**
-     * @dev admin set DaiToken contract address
-     * @param _daiTokenAddress set to the address of DaiToken contract
-     */
+    /// @inheritdoc IHonoraryTree
     function setDaiTokenAddress(address _daiTokenAddress)
         external
         override
@@ -122,11 +109,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         daiToken = candidateContract;
     }
 
-    /**
-     * @dev admin set Attribute contract address
-     * @param _address set to the address of Attribute contract
-     */
-
+    /// @inheritdoc IHonoraryTree
     function setAttributesAddress(address _address)
         external
         override
@@ -137,11 +120,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         attribute = candidateContract;
     }
 
-    /**
-     * @dev admin set TreeFactory contract address
-     * @param _address set to the address of TreeFactory contract
-     */
-
+    /// @inheritdoc IHonoraryTree
     function setTreeFactoryAddress(address _address)
         external
         override
@@ -152,11 +131,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         treeFactory = candidateContract;
     }
 
-    /**
-     * @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
-
+    /// @inheritdoc IHonoraryTree
     function setPlanterFundAddress(address _address)
         external
         override
@@ -167,29 +142,21 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         planterFundContract = candidateContract;
     }
 
-    /**
-     * @dev admin set a range of trees with saleType of '0' for honorary trees
-     * NOTE saleType of tree set to '5'
-     * NOTE the prepaid amount is deducted from the total amount t pay
-     * @param _sponsor address of account pay for value of honorary trees
-     * @param _startTreeId start tree id of honorary tree to claim
-     * @param _upTo end tree id of honorary tree to claim
-     */
-
+    /// @inheritdoc IHonoraryTree
     function setTreeRange(
         address _sponsor,
         uint256 _startTreeId,
         uint256 _upTo
     ) external override ifNotPaused onlyDataManager {
-        require(_upTo > _startTreeId, "invalid range");
-        require(upTo == currentTreeId, "cant set gift range");
+        require(_upTo > _startTreeId, "Invalid range");
+        require(upTo == currentTreeId, "Cant set range");
 
         bool isAvailable = treeFactory.manageSaleTypeBatch(
             _startTreeId,
             _upTo,
             5
         );
-        require(isAvailable, "trees are not available");
+        require(isAvailable, "Tree not available");
 
         currentTreeId = _startTreeId;
         upTo = _upTo;
@@ -206,7 +173,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
                         referralTreePaymentToAmbassador)
             );
 
-            require(success, "unsuccessful transfer");
+            require(success, "Unsuccessful transfer");
 
             prePaidTreeCount = 0;
         } else {
@@ -216,12 +183,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         emit TreeRangeSet();
     }
 
-    /**
-     * @dev admin release tree range
-     * NOTE saleType of trees set to '0'
-     * NOTE calculate prePaidCount value to deducte from number of tree count
-     * when new tree range set
-     */
+    /// @inheritdoc IHonoraryTree
     function releaseTreeRange() external override ifNotPaused onlyDataManager {
         treeFactory.resetSaleTypeBatch(currentTreeId, upTo, 5);
         prePaidTreeCount += upTo - currentTreeId;
@@ -230,10 +192,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         emit TreeRangeReleased();
     }
 
-    /**
-     * @dev admin reserve a symbol
-     * @param _uniquenessFactor unique symbol to reserve
-     */
+    /// @inheritdoc IHonoraryTree
     function reserveSymbol(uint64 _uniquenessFactor)
         external
         override
@@ -245,9 +204,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         used.push(false);
     }
 
-    /**
-     * @dev admin release all reserved and not used symbols
-     */
+    /// @inheritdoc IHonoraryTree
     function releaseReservedSymbol()
         external
         override
@@ -265,13 +222,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         claimedCount = 0;
     }
 
-    /**
-     * @dev admin add recipient
-     * @param _recipient address of recipient
-     * @param _startDate start date for {_recipient} to claim tree
-     * @param _expiryDate expiry date for {_recipient} to claim tree
-     * @param _coefficient coefficient value
-     */
+    /// @inheritdoc IHonoraryTree
     function addRecipient(
         address _recipient,
         uint64 _startDate,
@@ -287,13 +238,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         emit RecipientAdded(_recipient);
     }
 
-    /**
-     * @dev admin update {_recipient} data
-     * @param _recipient address of recipient to update date
-     * @param _startDate new start date for {_recipient} to claim tree
-     * @param _expiryDate new expiry date for {_recipient} to claim tree
-     * @param _coefficient coefficient value
-     */
+    /// @inheritdoc IHonoraryTree
     function updateRecipient(
         address _recipient,
         uint64 _startDate,
@@ -302,7 +247,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
     ) external override ifNotPaused onlyDataManager {
         Recipient storage recipientData = recipients[_recipient];
 
-        require(recipientData.startDate > 0, "recipient not exist");
+        require(recipientData.startDate > 0, "Recipient not exist");
 
         recipientData.expiryDate = _expiryDate;
         recipientData.startDate = _startDate;
@@ -310,10 +255,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         emit RecipientUpdated(_recipient);
     }
 
-    /** @dev admin can set referral tree payments
-     * @param _referralTreePaymentToPlanter is referral tree payment to planter amount
-     * @param _referralTreePaymentToAmbassador is referral tree payment to ambassador amount
-     */
+    /// @inheritdoc IHonoraryTree
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
@@ -327,10 +269,7 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
         );
     }
 
-    /**
-     * @dev recipient claim a tree and tree minted to recipient.
-     * projected earnings updated and random attributes set for that tree
-     */
+    /// @inheritdoc IHonoraryTree
     function claim() external override ifNotPaused {
         Recipient storage recipientData = recipients[_msgSender()];
 
@@ -338,11 +277,11 @@ contract HonoraryTree is Initializable, RelayRecipient, IHonoraryTree {
             recipientData.expiryDate > block.timestamp &&
                 recipientData.startDate < block.timestamp &&
                 recipientData.startDate > 0,
-            "you cant claim tree"
+            "Cant claim"
         );
 
-        require(currentTreeId < upTo, "trees are not available");
-        require(claimedCount < symbols.length, "no symbol exists for gift");
+        require(currentTreeId < upTo, "Tree not available");
+        require(claimedCount < symbols.length, "Insufficient symbol");
 
         bool flag = false;
 

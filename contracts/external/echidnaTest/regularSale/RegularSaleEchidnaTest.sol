@@ -399,7 +399,7 @@ contract RegularSaleEchidnaTest {
         if (userDaiTreeBefore == 0 && userWethTreeBefore == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("invalid gift owner")))
+                    keccak256(abi.encodePacked(("Claimable zero")))
             );
         } else {
             assert(false);
@@ -425,17 +425,17 @@ contract RegularSaleEchidnaTest {
         if (count == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("invalid count")))
+                    keccak256(abi.encodePacked(("Invalid count")))
             );
         } else if (invalidReferal) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("Invalid referal address")))
+                    keccak256(abi.encodePacked(("Invalid referrer")))
             );
         } else if (randomMint == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("invalid amount")))
+                    keccak256(abi.encodePacked(("Insufficient balance")))
             );
         } else if (randomApprove == 0) {
             assert(

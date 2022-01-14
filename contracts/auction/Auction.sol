@@ -65,14 +65,11 @@ contract Auction is Initializable, IAuction {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    /**
-     * @dev initialize accessRestriction contract and set true for isAuction
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
-     */
+    /// @inheritdoc IAuction
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -86,10 +83,7 @@ contract Auction is Initializable, IAuction {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin set TreeFactory contract address
-     * @param _address set to the address of TreeFactory contract
-     */
+    /// @inheritdoc IAuction
     function setTreeFactoryAddress(address _address)
         external
         override
@@ -100,11 +94,7 @@ contract Auction is Initializable, IAuction {
         treeFactory = candidateContract;
     }
 
-    /**
-     * @dev admin set Allocation contract address
-     * @param _address set to the address of Allocation contract
-     */
-
+    /// @inheritdoc IAuction
     function setAllocationAddress(address _address)
         external
         override
@@ -115,22 +105,14 @@ contract Auction is Initializable, IAuction {
         allocation = candidateContract;
     }
 
-    /**
-     * @dev admin set WethFund contract address
-     * @param _address set to the address of WethFund contract
-     */
-
+    /// @inheritdoc IAuction
     function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
         require(candidateContract.isWethFund());
         wethFund = candidateContract;
     }
 
-    /**
-     * @dev admin set RegularSale contract address
-     * @param _address set to the address of RegularSale contract
-     */
-
+    /// @inheritdoc IAuction
     function setRegularSaleAddress(address _address)
         external
         override
@@ -141,11 +123,7 @@ contract Auction is Initializable, IAuction {
         regularSale = candidateContract;
     }
 
-    /**
-     * @dev admin set WethToken contract address
-     * @param _address set to the address of WethToken contract
-     */
-
+    /// @inheritdoc IAuction
     function setWethTokenAddress(address _address)
         external
         override
@@ -156,16 +134,7 @@ contract Auction is Initializable, IAuction {
         wethToken = candidateContract;
     }
 
-    /**
-     * @dev admin put a tree with saleType of '0' in auction.
-     * NOTE set saleType to '1' to that tree
-     * NOTE its necessary that a allocation data has been assigned to {_treeId}
-     * @param _treeId treeId that auction create for
-     * @param _startDate strat time of auction
-     * @param _endDate end time of auction
-     * @param _intialPrice initial price of auction
-     * @param _bidInterval bid interval for auction.if it set to 10 for example and the last bid is 100.new bidder can bid at least for 110
-     */
+    /// @inheritdoc IAuction
     function createAuction(
         uint256 _treeId,
         uint64 _startDate,
@@ -175,17 +144,17 @@ contract Auction is Initializable, IAuction {
     ) external override ifNotPaused onlyDataManager {
         require(
             allocation.allocationExists(_treeId),
-            "equivalant fund Model not exists"
+            "Allocation not exists"
         );
 
         require(
             0 < _bidInterval && _bidInterval < 10001,
-            "invalid bidInterval"
+            "Invalid bidInterval"
         );
 
         uint32 saleType = treeFactory.manageSaleType(_treeId, 1);
 
-        require(saleType == 0, "not available for auction");
+        require(saleType == 0, "Not available");
 
         AuctionData storage auctionData = auctions[_auctionId.current()];
 
@@ -200,31 +169,24 @@ contract Auction is Initializable, IAuction {
         _auctionId.increment();
     }
 
-    /**
-     * @dev user bid for {_auctionId} in a time beetwen start time and end time
-     * NOTE its require to send at least {higestBid + bidInterval } {_amount}.
-     * NOTE if new bid done old bidder refund automatically.
-     * NOTE if user bid 10 minutes left to auction end, auction's end time increase 10 minute
-     * @param auctionId_ auctionId that user bid for it.
-     */
-
+    /// @inheritdoc IAuction
     function bid(
         uint256 auctionId_,
         uint256 _amount,
         address _referrer
     ) external override ifNotPaused {
-        require(msg.sender != _referrer, "Invalid referal address");
+        require(msg.sender != _referrer, "Invalid referrer");
 
         AuctionData storage auctionData = auctions[auctionId_];
 
         require(
             block.timestamp <= auctionData.endDate,
-            "auction already ended"
+            "Auction ended"
         );
 
         require(
             block.timestamp >= auctionData.startDate,
-            "auction not started"
+            "Auction not started"
         );
 
         uint256 priceJump = (auctionData.bidInterval * auctionData.highestBid) /
@@ -234,12 +196,12 @@ contract Auction is Initializable, IAuction {
             _amount >=
                 auctionData.highestBid +
                     (priceJump > 0.1 ether ? priceJump : 0.1 ether),
-            "invalid amount"
+            "Invalid amount"
         );
 
         require(
             wethToken.balanceOf(msg.sender) >= _amount,
-            "insufficient balance"
+            "Insufficient balance"
         );
 
         bool success = wethToken.transferFrom(
@@ -248,7 +210,7 @@ contract Auction is Initializable, IAuction {
             _amount
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         if (
             _referrer != address(0) &&
@@ -276,17 +238,11 @@ contract Auction is Initializable, IAuction {
         if (oldBidder != address(0)) {
             bool successTransfer = wethToken.transfer(oldBidder, oldBid);
 
-            require(successTransfer, "unsuccessful transfer");
+            require(successTransfer, "Unsuccessful transfer");
         }
     }
 
-    /** @dev end auction and mint tree to winner if auction has bidder
-     * and tree funded based on allocation data for that tree
-     * NOTE if winner has referrer, claimable trees of that referrer increase by 1
-     * NOTE if auction does not have bidder, saleType of tree in auction reset
-     * and admin can put that tree in another auction
-     * @param auctionId_ id of auction to end.
-     */
+    /// @inheritdoc IAuction
     function endAuction(uint256 auctionId_, uint256 _minDaiOut)
         external
         override
@@ -294,11 +250,11 @@ contract Auction is Initializable, IAuction {
     {
         AuctionData storage auctionData = auctions[auctionId_];
 
-        require(auctionData.endDate > 0, "Auction is unavailable");
+        require(auctionData.endDate > 0, "Auction unavailable");
 
         require(
             block.timestamp >= auctionData.endDate,
-            "Auction not yet ended"
+            "Auction not ended"
         );
 
         if (auctionData.bidder != address(0)) {
@@ -307,7 +263,7 @@ contract Auction is Initializable, IAuction {
                 auctionData.highestBid
             );
 
-            require(success, "unsuccessful transfer");
+            require(success, "Unsuccessful transfer");
 
             _mintTree(auctionId_, _minDaiOut);
 

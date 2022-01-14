@@ -538,7 +538,7 @@ contract("Auction", (accounts) => {
 
       await wethInstance.resetAcc(userAccount1);
 
-      //////////// ------------ fail because of invalid amount
+      //////////// ------------ fail because of Insufficient balance
 
       await wethInstance.setMint(userAccount1, bidderInitialBalance);
 

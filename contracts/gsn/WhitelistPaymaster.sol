@@ -26,7 +26,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
@@ -54,7 +54,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
     {
         require(
             planterTargetWhitelist[_target],
-            "Target not exists in white list"
+            "Target not exists"
         );
 
         planterTargetWhitelist[_target] = false;
@@ -76,7 +76,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
     {
         require(
             funderTargetWhitelist[_target],
-            "Target not exists in white list"
+            "Target not exists"
         );
 
         funderTargetWhitelist[_target] = false;
@@ -107,7 +107,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
 
         require(
             funderTargetWhitelist[relayRequest.request.to],
-            "Target not exists in white list"
+            "Target not exists"
         );
 
         return ("", false);

@@ -110,7 +110,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 

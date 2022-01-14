@@ -63,13 +63,13 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
 
     /** NOTE modifier for check _planter is exist*/
     modifier existPlanter(address _planter) {
-        require(planters[_planter].planterType > 0, "planter does not exist");
+        require(planters[_planter].planterType > 0, "Planter not exist");
         _;
     }
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
@@ -77,7 +77,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     modifier onlyOrganization() {
         require(
             planters[_msgSender()].planterType == 2,
-            "Planter is not organization"
+            "Planter not organization"
         );
         _;
     }
@@ -88,10 +88,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isPlanter
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IPlanter
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -105,10 +102,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
+    /// @inheritdoc IPlanter
     function setTrustedForwarder(address _address)
         external
         override
@@ -118,18 +112,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         trustedForwarder = _address;
     }
 
-    /**
-     * @dev based on {_planterType} a planter can join as individual planter or
-     * member of an organization
-     * NOTE member of organization planter status set to pendding and wait to be
-     * accepted by organization.
-     * @param _planterType type of planter: 1 for individual and 3 for member of organization
-     * @param _longitude longitude value
-     * @param _latitude latitude value
-     * @param _countryCode country code
-     * @param _invitedBy address of referrer
-     * @param _organization address of organization to be member of
-     */
+    /// @inheritdoc IPlanter
     function join(
         uint8 _planterType,
         int64 _longitude,
@@ -141,18 +124,18 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         require(
             accessRestriction.isPlanter(_msgSender()) &&
                 planters[_msgSender()].planterType == 0,
-            "User exist or not planter"
+            "Exist or not planter"
         );
 
         require(
             _planterType == 1 || _planterType == 3,
-            "planterType not allowed values"
+            "Invalid planterType"
         );
 
         if (_planterType == 3) {
             require(
                 planters[_organization].planterType == 2,
-                "organization address not valid"
+                "Invalid organization"
             );
         }
 
@@ -160,7 +143,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
             require(
                 _invitedBy != _msgSender() &&
                     accessRestriction.isPlanter(_invitedBy),
-                "invitedBy not true"
+                "Invalid invitedBy"
             );
 
             invitedBy[_msgSender()] = _invitedBy;
@@ -185,19 +168,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit PlanterJoined(_msgSender());
     }
 
-    /**
-     * @dev admin add a individual planter or
-     * member of an organization planter based on {_planterType}
-     * NOTE member of organization planter status set to active and no need for
-     * accepting by organization
-     * @param _planter address of planter
-     * @param _planterType type of planter: 1 for individual and 3 for member of organization
-     * @param _longitude longitude value
-     * @param _latitude latitude value
-     * @param _countryCode country code
-     * @param _invitedBy address of referrer
-     * @param _organization address of organization to be member of
-     */
+    /// @inheritdoc IPlanter
     function joinByAdmin(
         address _planter,
         uint8 _planterType,
@@ -210,18 +181,18 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         require(
             accessRestriction.isPlanter(_planter) &&
                 planters[_planter].planterType == 0,
-            "User exist or not planter"
+            "Exist or not planter"
         );
 
         require(
             _planterType == 1 || _planterType == 3,
-            "planterType not allowed values"
+            "Invalid planterType"
         );
 
         if (_planterType == 3) {
             require(
                 planters[_organization].planterType == 2,
-                "organization address not valid"
+                "Invalid organization"
             );
 
             memberOf[_planter] = _organization;
@@ -231,7 +202,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
             require(
                 _invitedBy != _planter &&
                     accessRestriction.isPlanter(_invitedBy),
-                "invitedBy not true"
+                "Invalid invitedBy"
             );
 
             invitedBy[_planter] = _invitedBy;
@@ -249,16 +220,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit PlanterJoined(_planter);
     }
 
-    /**
-     * @dev admin add a planter as organization (planterType 2) so planterType 3
-     * can be member of these planters.
-     * @param _organization address of organization planter
-     * @param _longitude longitude value
-     * @param _latitude latitude value
-     * @param _countryCode country code
-     * @param _supplyCap planting supplyCap of organization planter
-     * @param _invitedBy address of referrer
-     */
+    /// @inheritdoc IPlanter
     function joinOrganization(
         address _organization,
         int64 _longitude,
@@ -270,14 +232,14 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         require(
             planters[_organization].planterType == 0 &&
                 accessRestriction.isPlanter(_organization),
-            "User exist or not planter"
+            "Exist or not planter"
         );
 
         if (_invitedBy != address(0)) {
             require(
                 _invitedBy != _msgSender() &&
                     accessRestriction.isPlanter(_invitedBy),
-                "invitedBy not true"
+                "Invalid invitedBy"
             );
 
             invitedBy[_organization] = _invitedBy;
@@ -295,21 +257,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit OrganizationJoined(_organization);
     }
 
-    /**
-     * @dev planter with planterType 1 , 3 can update their planterType
-     * NOTE planterType 3 (member of organization) can change to
-     * planterType 1 (individual planter) with input value {_planterType}
-     * of 1 and zeroAddress as {_organization}
-     * or choose other organization to be member of with
-     * input value {_planterType} of 3 and {_organization}.
-     * NOTE planterType 1 can only change to planterType 3 with input value
-     * {_planter} of 3 and {_organization}
-     * if planter planterType 3 choose another oraganization or planter with
-     * planterType 1 change it's planterType to 3,they must be accepted by the
-     * organization to be an active planter
-     * @param _planterType type of planter
-     * @param _organization address of organization
-     */
+    /// @inheritdoc IPlanter
     function updatePlanterType(uint8 _planterType, address _organization)
         external
         override
@@ -318,22 +266,22 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     {
         require(
             _planterType == 1 || _planterType == 3,
-            "planterType not allowed values"
+            "Invalid planterType"
         );
 
         PlanterData storage planterData = planters[_msgSender()];
 
         require(
             planterData.status == 0 || planterData.status == 1,
-            "invalid planter status"
+            "Invalid planter status"
         );
 
-        require(planterData.planterType != 2, "Caller is organizationPlanter");
+        require(planterData.planterType != 2, "Caller is organization");
 
         if (_planterType == 3) {
             require(
                 planters[_organization].planterType == 2,
-                "organization address not valid"
+                "Invalid organization"
             );
 
             memberOf[_msgSender()] = _organization;
@@ -342,7 +290,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         } else {
             require(
                 planterData.planterType == 3,
-                "invalid planterType in change"
+                "Planter type same"
             );
 
             memberOf[_msgSender()] = address(0);
@@ -357,11 +305,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit PlanterUpdated(_msgSender());
     }
 
-    /**
-     * @dev organization can accept planter to be it's member or reject
-     * @param _planter address of planter
-     * @param _acceptance accept or reject
-     */
+    /// @inheritdoc IPlanter
     function acceptPlanterByOrganization(address _planter, bool _acceptance)
         external
         override
@@ -371,7 +315,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         require(
             memberOf[_planter] == _msgSender() &&
                 planters[_planter].status == 0,
-            "Planter not request or not pending"
+            "Request not exists"
         );
 
         PlanterData storage planterData = planters[_planter];
@@ -389,11 +333,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         }
     }
 
-    /**
-     * @dev admin update supplyCap of planter
-     * @param _planter address of planter to update supplyCap
-     * @param _supplyCap supplyCap that set to planter supplyCap
-     */
+    /// @inheritdoc IPlanter
     function updateSupplyCap(address _planter, uint32 _supplyCap)
         external
         override
@@ -402,7 +342,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         existPlanter(_planter)
     {
         PlanterData storage planterData = planters[_planter];
-        require(_supplyCap > planterData.plantedCount, "invalid supplyCap");
+        require(_supplyCap > planterData.plantedCount, "Invalid supplyCap");
         planterData.supplyCap = _supplyCap;
         if (planterData.status == 2) {
             planterData.status = 1;
@@ -410,12 +350,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit PlanterUpdated(_planter);
     }
 
-    /**
-     * @dev return if a planter can plant a tree and increase planter plantedCount 1 time.
-     * @param _planter address of planter who want to plant tree
-     * @param _assignedPlanterAddress address of planter that tree assigned to
-     * @return if a planter can plant a tree or not
-     */
+    /// @inheritdoc IPlanter
     function manageAssignedTreePermission(
         address _planter,
         address _assignedPlanterAddress
@@ -440,20 +375,16 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         return false;
     }
 
-    /**
-     * @dev oragnization can update the share of its members
-     * @param _planter address of planter
-     * @param _organizationMemberShareAmount member share value
-     */
+    /// @inheritdoc IPlanter
     function updateOrganizationMemberShare(
         address _planter,
         uint256 _organizationMemberShareAmount
     ) external override ifNotPaused onlyOrganization {
-        require(planters[_planter].status > 0, "invalid planter status");
-        require(memberOf[_planter] == _msgSender(), "invalid input planter");
+        require(planters[_planter].status > 0, "Invalid planter status");
+        require(memberOf[_planter] == _msgSender(), "Not memberOf");
         require(
             _organizationMemberShareAmount < 10001,
-            "invalid payment portion"
+            "Invalid share"
         );
 
         organizationMemberShare[_msgSender()][
@@ -463,11 +394,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         emit OrganizationMemberShareUpdated(_planter);
     }
 
-    /**
-     * @dev when planting of {_planter} rejected, plantedCount of {_planter}
-     * must reduce by 1 and if planter status is full, set it to active.
-     * @param _planter address of planter
-     */
+    /// @inheritdoc IPlanter
     function reducePlantedCount(address _planter)
         external
         override
@@ -483,13 +410,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         }
     }
 
-    /**
-     * @dev check that planter {_planter} can plant regular tree
-     * NOTE if plantedCount reach to supplyCap status of planter
-     * set to full (value of full is '2')
-     * @param _planter address of planter
-     * @return true in case of planter status is active (value of active is '1')
-     */
+    /// @inheritdoc IPlanter
     function manageTreePermission(address _planter)
         external
         override
@@ -510,14 +431,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         return false;
     }
 
-    /**
-     * @dev return organization member data
-     * @param _planter address of organization member planter to get data
-     * @return true in case of valid planter
-     * @return address of organization that {_planter} is member of it.
-     * @return address of referrer
-     * @return share of {_plnater}
-     */
+    /// @inheritdoc IPlanter
     function getOrganizationMemberData(address _planter)
         external
         view
@@ -550,11 +464,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         }
     }
 
-    /**
-     * @dev check allowance to assign tree to planter
-     * @param _planter address of assignee planter
-     * @return true in case of active planter or orgnization planter and false otherwise
-     */
+    /// @inheritdoc IPlanter
     function canAssignTree(address _planter)
         external
         view

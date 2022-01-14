@@ -8,7 +8,7 @@ const TimeEnumes = {
 };
 
 const GsnErrorMsg = {
-  ADDRESS_NOT_EXISTS: "Target not exists in white list",
+  ADDRESS_NOT_EXISTS: "Target not exists",
 };
 
 const erc20ErrorMsg = {
@@ -22,15 +22,16 @@ const erc721ErrorMsg = {
 };
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
-  CHECK_ADMIN: "Caller is not admin",
-  CHECK_TREEJER_CONTTRACT: "caller is not treejer contract",
+  CHECK_ADMIN: "Caller not admin",
+  CHECK_TREEJER_CONTTRACT: "Caller not treejer contract",
   CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT:
-    "not Data Manager or Treejer Contract",
-  CHECK_PLANTER: "Caller is not a planter",
-  CHECK_DATA_MANAGER: "caller is not data manager",
-  CHECK_SCRIPT_ROLE: "caller is not script",
-  CHECK_VERIFIER_ROLE: "caller is not verifier",
-  INVALID_ADDRESS: "invalid address",
+    "Caller not dm or tc",
+  CHECK_PLANTER: "Caller not planter",
+  CHECK_DATA_MANAGER: "Caller not data manager",
+  CHECK_SCRIPT_ROLE: "Caller not script",
+  CHECK_VERIFIER_ROLE: "Caller not verifier",
+
+  INVALID_ADDRESS: "Invalid address",
   INVALID_APPROVE: "ERC20: transfer amount exceeds allowance.",
   ZERO_ADDRESS: "ERC20: transfer to the zero address.",
   CHECK_IF_PAUSED: "Pausable: not paused",
@@ -39,17 +40,17 @@ const CommonErrorMsg = {
 };
 
 const AuctionErrorMsg = {
-  INVALID_REFERAL: "Invalid referal address",
+  INVALID_REFERAL: "Invalid referrer",
   MANUAL_WITHDRAW_USER_BALANCE: "User balance is not enough",
-  TREE_STATUS: "not available for auction",
-  BID_VALUE: "invalid amount",
-  INVALID_BIDINTERVAL: "invalid bidInterval",
-  INSUFFICIENT_AMOUNT: "insufficient balance",
-  BID_BEFORE_START: "auction not started",
-  BID_AFTER_END: "auction already ended",
-  END_AUCTION_BEFORE_END_TIME: "Auction not yet ended",
+  TREE_STATUS: "Not available",
+  BID_VALUE: "Invalid amount",
+  INVALID_BIDINTERVAL: "Invalid bidInterval",
+  INSUFFICIENT_AMOUNT: "Insufficient balance",
+  BID_BEFORE_START: "Auction not started",
+  BID_AFTER_END: "Auction ended",
+  END_AUCTION_BEFORE_END_TIME: "Auction not ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
-  AUCTION_IS_UNAVAILABLE: "Auction is unavailable",
+  AUCTION_IS_UNAVAILABLE: "Auction unavailable",
 };
 
 const TreeFactoryErrorMsg = {
@@ -80,67 +81,67 @@ const TreeFactoryErrorMsg = {
   INVALID_SET_LAST_REGULAR_TREE_INPUT: "Input must be gt last regular tree",
 };
 const TreasuryManagerErrorMsg = {
-  INSUFFICIENT_AMOUNT: "insufficient amount",
-  PLANTER_FUND_NOT_EXIST: "planter fund not exist",
-  SUM_INVALID: "sum must be 10000",
-  INVALID_FUND_MODEL: "invalid fund model",
-  INVALID_ASSIGN_MODEL: "equivalant fund Model not exists",
-  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
+  INSUFFICIENT_AMOUNT: "Invalid amount",
+  PLANTER_FUND_NOT_EXIST: "Projected earning zero",
+  SUM_INVALID: "Invalid sum",
+  INVALID_FUND_MODEL: "Allocation not exists",
+  INVALID_ASSIGN_MODEL: "Allocation not exists",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation not exists",
 };
 
 const DaiFundErrorMsg = {
-  INSUFFICIENT_AMOUNT: "insufficient amount",
-  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
+  INSUFFICIENT_AMOUNT: "Invalid amount",
+  LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
 };
 const AllocationErrorMsg = {
-  SUM_INVALID: "sum must be 10000",
-  ALLOCATION_MODEL_NOT_FOUND: "Allocation model not found",
-  INVALID_FUND_MODEL: "invalid fund model",
+  SUM_INVALID: "Invalid sum",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation not exists",
+  INVALID_FUND_MODEL: "Allocation not exists",
 };
 
 const PlanterErrorMsg = {
-  ORGANIZATION_INVALID_ACCESS: "Caller is organizationPlanter",
-  ONLY_PLANTER: "User exist or not planter",
-  INVALID_SUPPLYCAP: "invalid supplyCap",
-  PLANTER_NOT_EXIST: "planter does not exist",
-  PLANTERTYPE_ALLOWED_VALUE: "planterType not allowed values",
-  ORGANIZATION_NOT_VALID: "organization address not valid",
-  REFFERED_NOT_TRUE: "invitedBy not true",
-  INVALID_PLANTER_TYPE: "invalid planterType in change",
-  PLANTER_NOT_ORGANIZATION: "Planter is not organization",
-  INVALID_PLANTER: "invalid input planter",
-  INVALID_PLANTER_STATUS: "invalid planter status",
-  INVALID_PAYMENT_PORTION: "invalid payment portion",
-  ACCEPT_PLANTER_ACCESS_ERROR: "Planter not request or not pending",
+  ORGANIZATION_INVALID_ACCESS: "Caller is organization",
+  ONLY_PLANTER: "Exist or not planter",
+  INVALID_SUPPLYCAP: "Invalid supplyCap",
+  PLANTER_NOT_EXIST: "Planter not exist",
+  PLANTERTYPE_ALLOWED_VALUE: "Invalid planterType",
+  ORGANIZATION_NOT_VALID: "Invalid organization",
+  REFFERED_NOT_TRUE: "Invalid invitedBy",
+  INVALID_PLANTER_TYPE: "Planter type same",
+  PLANTER_NOT_ORGANIZATION: "Planter not organization",
+  INVALID_PLANTER: "Not memberOf",
+  INVALID_PLANTER_STATUS: "Invalid planter status",
+  INVALID_PAYMENT_PORTION: "Invalid share",
+  ACCEPT_PLANTER_ACCESS_ERROR: "Request not exists",
 };
 
 const RegularSaleErrors = {
-  INVALID_TREE: "invalid tree",
-  INVALID_AMOUNT: "invalid amount",
-  INVALID_COUNT: "invalid count",
-  INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Input must be gt last tree sold",
-  INVALID_GIFT_OWNER: "invalid gift owner",
-  MAX_SUPPLY: "max supply",
-  MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "max supply must gt lastFundedTree",
-  COUNT_MUST_BE_GT_ZERO: "count must be gt zero",
-  INVALID_REFERAL: "Invalid referal address",
+  INVALID_TREE: "Invalid treeId",
+  INVALID_AMOUNT: "Invalid amount",
+  INVALID_COUNT: "Invalid count",
+  INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Invalid lastFundedTreeId",
+  INVALID_GIFT_OWNER: "Claimable zero",
+  MAX_SUPPLY: "Max supply reached",
+  MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "Invalid maxTreeSupply",
+  COUNT_MUST_BE_GT_ZERO: "Invalid count",
+  INVALID_REFERAL: "Invalid referrer",
 };
 
 const IncrementalSaleErrorMsg = {
   TREE_TO_SELL: "assign at least one tree",
-  INVALID_TREE_COUNT: "invalid treeCount",
-  INVALID_COUNT: "Count must be lt 100",
-  OCCUPIED_TREES: "trees are under Auction",
-  PRICE_CHANGE_PERIODS: "incremental period should be positive",
-  INCREMENTAL_SALE_EXIST: "incremental sale should be exist",
-  TREE_PROVIDED_BEFORE: "trees are not available for sell",
-  INVALID_TREE: "Not enough tree in incremental sell",
-  INVALID_REFERAL: "Invalid referal address",
+  INVALID_TREE_COUNT: "Invalid treeCount",
+  INVALID_COUNT: "Invalid count",
+  OCCUPIED_TREES: "Invalid startTreeId",
+  PRICE_CHANGE_PERIODS: "Invalid increments",
+  INCREMENTAL_SALE_EXIST: "Not exists",
+  TREE_PROVIDED_BEFORE: "Trees not available",
+  INVALID_TREE: "Insufficient tree",
+  INVALID_REFERAL: "Invalid referrer",
   // INVALID_TREE: "tree is not in incremental sell",
-  LOW_PRICE_PAID: "low price paid",
+  LOW_PRICE_PAID: "Insufficient balance",
   FREE_INCREMENTALSALE_FAIL:
-    "IncrementalSale not exist or count must be lt endTree",
-  CANT_CREATE_NEW_INCREMENTALSALE: "can't create new IncrementalSale",
+    "Cant remove",
+  CANT_CREATE_NEW_INCREMENTALSALE: "Cant create",
 };
 
 const AttributeErrorMsg = {
@@ -156,21 +157,21 @@ const AttributeErrorMsg = {
 const HonoraryTreeErrorMsg = {
   CLAIMED_BEFORE: "Claimed before",
   MAX_GIFT_AMOUNT_REACHED: "max giftCount reached",
-  TREES_ARE_NOT_AVAILABLE: "trees are not available",
+  TREES_ARE_NOT_AVAILABLE: "Tree not available",
   USER_NOT_EXIST: "User not exist",
   SYMBOL_NOT_RESERVED: "Symbol not reserved",
   CANT_UPDATE_EXPIRE_DATE: "can not update expire date",
   TREE_IS_NOT_FOR_GIFT: "tree is not for community gift",
-  INVALID_RANGE: "invalid range",
-  RECIPIENT_NOT_EXIST: "recipient not exist",
-  CANT_SET_RANGE: "cant set gift range",
-  CANT_CLAIM: "you cant claim tree",
-  SYMBOL_NOT_EXIST: "no symbol exists for gift",
+  INVALID_RANGE: "Invalid range",
+  RECIPIENT_NOT_EXIST: "Recipient not exist",
+  CANT_SET_RANGE: "Cant set range",
+  CANT_CLAIM: "Cant claim",
+  SYMBOL_NOT_EXIST: "Insufficient symbol",
 };
 
 const WethFundErrorMsg = {
-  LIQUDITY_NOT_ENOUGH: "Liquidity not enough",
-  TOTALDAI_INVALID: "totalDaiDebtToPlanterContract invalid",
+  LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
+  TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract ",
 };
 
 module.exports = {

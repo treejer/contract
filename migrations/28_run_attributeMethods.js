@@ -63,12 +63,12 @@ module.exports = async function (deployer, network, accounts) {
     await instance.setTreeTokenAddress(treeAddress);
     await instance.setBaseTokenAddress(wmaticAddress);
     await instance.setDexRouterAddress(UniswapV2RouterAddress);
-    await instance.setDexTokens([
-      wethAddress,
-      sandAddress,
-      usdtAddress,
-      usdtAddress,
-      quickAddress,
-    ]);
+    // await instance.setDexTokens([
+    //   wethAddress,
+    //   sandAddress,
+    //   usdtAddress,
+    //   usdtAddress,
+    //   quickAddress,
+    // ]);
   });
 };

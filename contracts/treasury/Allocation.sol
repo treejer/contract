@@ -56,10 +56,7 @@ contract Allocation is Initializable, IAllocation {
         _;
     }
 
-    /**
-     * @dev initialize accessRestriction contract and set true for isAllocation
-     * @param _accessRestrictionAddress set to the address of accessRestriction contract
-     */
+    /// @inheritdoc IAllocation
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -75,18 +72,7 @@ contract Allocation is Initializable, IAllocation {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin add a model for allocation data that sum of the
-     * inputs must be 10000
-     * @param _planterShare planter share
-     * @param _ambassadorShare ambassador share
-     * @param _researchShare  research share
-     * @param _localDevelopmentShare local development share
-     * @param _insuranceShare insurance share
-     * @param _treasuryShare _treasuryshare
-     * @param _reserve1Share reserve1 share
-     * @param _reserve2Share reserve2 share
-     */
+    /// @inheritdoc IAllocation
     function addAllocationData(
         uint16 _planterShare,
         uint16 _ambassadorShare,
@@ -107,7 +93,7 @@ contract Allocation is Initializable, IAllocation {
                 _reserve1Share +
                 _reserve2Share ==
                 10000,
-            "sum must be 10000"
+            "Invalid sum"
         );
 
         allocations[_allocationCount.current()] = AllocationData(
@@ -127,13 +113,7 @@ contract Allocation is Initializable, IAllocation {
         _allocationCount.increment();
     }
 
-    /**
-     * @dev admin assign a allocation data to trees starting from
-     * {_startTreeId} and end at {_endTreeId}
-     * @param _startTreeId strating tree id to assign alloction to
-     * @param _endTreeId ending tree id to assign alloction to
-     * @param _allocationDataId allocation data id to assign
-     */
+    /// @inheritdoc IAllocation
     function assignAllocationToTree(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -141,7 +121,7 @@ contract Allocation is Initializable, IAllocation {
     ) external override ifNotPaused onlyDataManager {
         require(
             allocations[_allocationDataId].exists > 0,
-            "Allocation model not found"
+            "Allocation not exists"
         );
 
         AllocationToTree[] memory tempAllocationToTree = allocationToTrees;
@@ -216,12 +196,7 @@ contract Allocation is Initializable, IAllocation {
         emit AllocationToTreeAssigned(allocationToTrees.length);
     }
 
-    /**
-     * @dev check if there is allocation data for {_treeId} or not
-     * @param _treeId id of a tree to check if there is a allocation data
-     * @return true if allocation data exists for {_treeId} and false otherwise
-     */
-
+    /// @inheritdoc IAllocation
     function allocationExists(uint256 _treeId)
         external
         view
@@ -235,18 +210,7 @@ contract Allocation is Initializable, IAllocation {
         return _treeId >= allocationToTrees[0].startingTreeId;
     }
 
-    /**
-     * @dev return allocation data
-     * @param _treeId id of tree to find allocation data
-     * @return planterShare
-     * @return ambassadorShare
-     * @return researchShare
-     * @return localDevelopmentShare
-     * @return insuranceShare
-     * @return treasuryShare
-     * @return reserve1Share
-     * @return reserve2Share
-     */
+    /// @inheritdoc IAllocation
     function findAllocationData(uint256 _treeId)
         external
         view
@@ -266,7 +230,7 @@ contract Allocation is Initializable, IAllocation {
 
         for (uint256 i = 0; i < allocationToTrees.length; i++) {
             if (allocationToTrees[i].startingTreeId > _treeId) {
-                require(i > 0, "invalid fund model");
+                require(i > 0, "Allocation not exists");
 
                 allocationData = allocations[
                     allocationToTrees[i - 1].allocationDataId
@@ -285,7 +249,7 @@ contract Allocation is Initializable, IAllocation {
             }
         }
 
-        require(allocationToTrees.length > 0, "invalid fund model");
+        require(allocationToTrees.length > 0, "Allocation not exists");
 
         allocationData = allocations[
             allocationToTrees[allocationToTrees.length - 1].allocationDataId

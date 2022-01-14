@@ -1474,7 +1474,7 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-      ///////////----------------- fail because of invalid range
+      ///////////----------------- fail because of Invalid range
       await honoraryTreeInstance
         .setTreeRange(adminWallet, endTree, startTree, {
           from: dataManager,

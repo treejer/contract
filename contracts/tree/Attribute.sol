@@ -1,4 +1,4 @@
-// // SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.6;
 
@@ -45,7 +45,7 @@ contract Attribute is Initializable, IAttribute {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
@@ -79,11 +79,7 @@ contract Attribute is Initializable, IAttribute {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isAttribute and
-     * specialTreeCount to 0
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IAttribute
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -110,10 +106,7 @@ contract Attribute is Initializable, IAttribute {
         treeToken = candidateContract;
     }
 
-    /**
-     * @dev admin set Dai contract address
-     * @param _baseTokenAddress set to the address of Dai contract
-     */
+    /// @inheritdoc IAttribute
     function setBaseTokenAddress(address _baseTokenAddress)
         external
         override
@@ -123,11 +116,7 @@ contract Attribute is Initializable, IAttribute {
         baseTokenAddress = _baseTokenAddress;
     }
 
-    /**
-     * @dev admin set DexRouter contract address
-     * @param _dexRouterAddress set to the address of DexRouter contract
-     */
-
+    /// @inheritdoc IAttribute
     function setDexRouterAddress(address _dexRouterAddress)
         external
         override
@@ -141,16 +130,13 @@ contract Attribute is Initializable, IAttribute {
         dexRouter = candidateContract;
     }
 
-    /**
-     * @dev admin set TreeToken contract address
-     * @param _tokens an array of tokens in dex exchange with high liquidity
-     */
+    /// @inheritdoc IAttribute
     function setDexTokens(address[] calldata _tokens)
         external
         override
         onlyAdmin
     {
-        require(_tokens.length > 0, "tokens should not be empty");
+        require(_tokens.length > 0, "Invalid tokens");
         bool flag = true;
         for (uint256 i = 0; i < _tokens.length; i++) {
             if (!_isValidToken(_tokens[i])) {
@@ -158,14 +144,11 @@ contract Attribute is Initializable, IAttribute {
                 break;
             }
         }
-        require(flag, "invalid pair address");
+        require(flag, "Invalid pair address");
         dexTokens = _tokens;
     }
 
-    /**
-     * @dev reserve a unique symbol
-     * @param _uniquenessFactor unique symbol to reserve
-     */
+    /// @inheritdoc IAttribute
     function reserveSymbol(uint64 _uniquenessFactor)
         external
         override
@@ -174,21 +157,18 @@ contract Attribute is Initializable, IAttribute {
     {
         require(
             _checkValidSymbol(_uniquenessFactor),
-            "invalid symbol to reserve"
+            "Invalid symbol"
         );
         require(
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 0,
-            "the attributes are taken"
+            "Duplicate symbol"
         );
         uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 1;
 
         emit SymbolReserved(_uniquenessFactor);
     }
 
-    /**
-     * @dev release reservation of a unique symbol by admin
-     * @param _uniquenessFactor unique symbol to release reservation
-     */
+    /// @inheritdoc IAttribute
     function releaseReservedSymbolByAdmin(uint64 _uniquenessFactor)
         external
         override
@@ -197,7 +177,7 @@ contract Attribute is Initializable, IAttribute {
     {
         require(
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 1,
-            "the attributes not reserved"
+            "Attribute not exists"
         );
 
         uniquenessFactorToSymbolStatus[_uniquenessFactor].status = 0;
@@ -205,10 +185,7 @@ contract Attribute is Initializable, IAttribute {
         emit ReservedSymbolReleased(_uniquenessFactor);
     }
 
-    /**
-     * @dev release reservation of a unique symbol
-     * @param _uniquenessFactor unique symbol to release reservation
-     */
+    /// @inheritdoc IAttribute
     function releaseReservedSymbol(uint64 _uniquenessFactor)
         external
         override
@@ -220,14 +197,7 @@ contract Attribute is Initializable, IAttribute {
         }
     }
 
-    /**
-     * @dev admin assigns symbol and attribute to the specified treeId
-     * @param _treeId id of tree
-     * @param _attributeUniquenessFactor unique attribute code to assign
-     * @param _symbolUniquenessFactor unique symbol to assign
-     * @param _generationType type of attribute assignement
-     * @param _coefficient coefficient value
-     */
+    /// @inheritdoc IAttribute
     function setAttribute(
         uint256 _treeId,
         uint64 _attributeUniquenessFactor,
@@ -237,17 +207,17 @@ contract Attribute is Initializable, IAttribute {
     ) external override ifNotPaused onlyDataManagerOrTreejerContract {
         require(
             _checkValidSymbol(_symbolUniquenessFactor),
-            "invalid symbol to reserve"
+            "Invalid symbol"
         );
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
-            "the symbol is taken"
+            "Duplicate symbol"
         );
         require(
             uniquenessFactorToGeneratedAttributesCount[
                 _attributeUniquenessFactor
             ] == 0,
-            "the attributes are taken"
+            "Duplicate attribute"
         );
         uniquenessFactorToGeneratedAttributesCount[
             _attributeUniquenessFactor
@@ -265,15 +235,7 @@ contract Attribute is Initializable, IAttribute {
         emit AttributeGenerated(_treeId);
     }
 
-    /**
-     * @dev generate a random unique symbol using tree attributes 64 bit value
-     * @param _treeId id of tree
-     * @param _randomValue base random value
-     * @param _funder address of funder
-     * @param _funderRank rank of funder based on trees owned in treejer
-     * @param _generationType type of attribute assignement
-     * @return if unique symbol generated successfully
-     */
+    /// @inheritdoc IAttribute
     function createSymbol(
         uint256 _treeId,
         bytes32 _randomValue,
@@ -330,12 +292,7 @@ contract Attribute is Initializable, IAttribute {
         }
     }
 
-    /**
-     * @dev generate a random unique attribute using tree attributes 64 bit value
-     * @param _treeId id of tree
-     * @param _generationType generation type
-     * @return if unique attribute generated successfully
-     */
+    /// @inheritdoc IAttribute
     function createAttribute(uint256 _treeId, uint8 _generationType)
         external
         override
@@ -369,11 +326,7 @@ contract Attribute is Initializable, IAttribute {
         }
     }
 
-    /**
-     * @dev check and generate random attributes for honorary trees
-     * @param _treeId id of tree
-     * @return a unique random value
-     */
+    /// @inheritdoc IAttribute
     function manageAttributeUniquenessFactor(uint256 _treeId)
         external
         override
@@ -385,15 +338,12 @@ contract Attribute is Initializable, IAttribute {
             uint64 uniquenessFactor
         ) = _generateAttributeUniquenessFactor(_treeId);
 
-        require(flag, "unique attribute not fund");
+        require(flag, "Attribute not generated");
 
         return uniquenessFactor;
     }
 
-    /**
-     * @dev the function tries to calculate the rank of funder based trees owned in Treejer
-     * @param _funder address of funder
-     */
+    /// @inheritdoc IAttribute
     function getFunderRank(address _funder)
         external
         view

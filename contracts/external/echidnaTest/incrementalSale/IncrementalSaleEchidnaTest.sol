@@ -366,28 +366,28 @@ contract IncrementalSaleEchidnaTest {
         if (count == 0) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("Count must be lt 100")))
+                    keccak256(abi.encodePacked(("Invalid count")))
             );
         } else if (lastSoldBefore + count >= incrementalSaleData.endTreeId) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
                     keccak256(
                         abi.encodePacked(
-                            ("Not enough tree in incremental sell")
+                            ("Insufficient tree")
                         )
                     )
             );
         } else if (invalidReferal) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("Invalid referal address")))
+                    keccak256(abi.encodePacked(("Invalid referrer")))
             );
         } else if (
             randomMint < 3 && wethContract.balanceOf(msg.sender) < totalAmount
         ) {
             assert(
                 keccak256(abi.encodePacked((result))) ==
-                    keccak256(abi.encodePacked(("low price paid")))
+                    keccak256(abi.encodePacked(("Insufficient balance")))
             );
         } else if (randomApprove < 3) {
             assert(

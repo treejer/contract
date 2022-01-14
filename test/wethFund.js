@@ -3105,7 +3105,7 @@ contract("WethFund", (accounts) => {
       );
     });
 
-    it("Should payDaiDebtToPlanterContract reject (Liquidity not enough)", async () => {
+    it("Should payDaiDebtToPlanterContract reject (Insufficient Liquidity)", async () => {
       const totalTreasury2 = web3.utils.toWei("1.9");
 
       ////--------------check set role----------------

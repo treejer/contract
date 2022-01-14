@@ -2975,7 +2975,7 @@ contract("IncrementalSale", (accounts) => {
       await wethInstance.resetAcc(userAccount3);
     });
 
-    it("low price paid for the tree without discount", async () => {
+    it("Insufficient balance for the tree without discount", async () => {
       await allocationInstance.assignAllocationToTree(100, 10000, 0, {
         from: dataManager,
       });

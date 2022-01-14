@@ -171,6 +171,10 @@ interface IPlanter {
      */
     function manageTreePermission(address _planter) external returns (bool);
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isPlanter
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

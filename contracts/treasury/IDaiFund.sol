@@ -243,6 +243,10 @@ interface IDaiFund {
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external;
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isDaiFund
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

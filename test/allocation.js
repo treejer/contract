@@ -66,7 +66,7 @@ contract("Allocation", (accounts) => {
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
 
-    /////////----------- fail sum must be 10000
+    /////////----------- fail Invalid sum
     await allocationInstance
       .addAllocationData(8000, 1200, 1200, 1200, 1200, 1200, 0, 0, {
         from: dataManager,

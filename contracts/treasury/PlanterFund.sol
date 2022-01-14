@@ -79,14 +79,11 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isPlanterFund
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IPlanterFund
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -103,10 +100,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
+    /// @inheritdoc IPlanterFund
     function setTrustedForwarder(address _address)
         external
         override
@@ -116,10 +110,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         trustedForwarder = _address;
     }
 
-    /**
-     * @dev admin set Planter contract address
-     * @param _address set to the address of Planter contract
-     */
+    /// @inheritdoc IPlanterFund
     function setPlanterContractAddress(address _address)
         external
         override
@@ -130,10 +121,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         planterContract = candidateContract;
     }
 
-    /**
-     * @dev admin set DaiToken contract address
-     * @param _address set to the address of DaiToken contract
-     */
+    /// @inheritdoc IPlanterFund
     function setDaiTokenAddress(address _address)
         external
         override
@@ -144,10 +132,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         daiToken = candidateContract;
     }
 
-    /**
-     * @dev admin set outgoing address to fund
-     * @param _address outgoing address
-     */
+    /// @inheritdoc IPlanterFund
     function setOutgoingAddress(address payable _address)
         external
         override
@@ -157,9 +142,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         outgoingAddress = _address;
     }
 
-    /** @dev admin set the minimum amount to withdraw
-     * @param _amount is minimum withdrawable amount
-     */
+    /// @inheritdoc IPlanterFund
     function updateWithdrawableAmount(uint256 _amount)
         external
         override
@@ -171,12 +154,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         emit MinWithdrawableAmountUpdated();
     }
 
-    /**
-     * @dev set projected earnings
-     * @param _treeId id of tree to set projected earning for
-     * @param _planterAmount planter amount
-     * @param _ambassadorAmount ambassador amount
-     */
+    /// @inheritdoc IPlanterFund
     function updateProjectedEarnings(
         uint256 _treeId,
         uint256 _planterAmount,
@@ -195,13 +173,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         );
     }
 
-    /**
-     * @dev based on the {_treeStatus} planter total claimable amount updated in every tree
-     * update verifying
-     * @param _treeId id of a tree that planter's total claimable amount updated for
-     * @param _planter  address of planter to fund
-     * @param _treeStatus status of tree
-     */
+    /// @inheritdoc IPlanterFund
     function updatePlanterTotalClaimed(
         uint256 _treeId,
         address _planter,
@@ -209,7 +181,7 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
     ) external override onlyTreejerContract {
         require(
             treeToPlanterProjectedEarning[_treeId] > 0,
-            "planter fund not exist"
+            "Projected earning zero"
         );
 
         (
@@ -280,45 +252,37 @@ contract PlanterFund is Initializable, RelayRecipient, IPlanterFund {
         }
     }
 
-    /**
-     * @dev planter withdraw {_amount} from balances
-     * @param _amount amount to withdraw
-     */
+    /// @inheritdoc IPlanterFund
     function withdrawBalance(uint256 _amount) external override ifNotPaused {
         require(
             _amount <= balances[_msgSender()] && _amount >= minWithdrawable,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         balances[_msgSender()] -= _amount;
 
         bool success = daiToken.transfer(_msgSender(), _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit BalanceWithdrew(_amount, _msgSender());
     }
 
-    /**
-     * @dev admin withdraw from noAmbsassador totalBalances
-     * NOTE amount transfer to outgoingAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IPlanterFund
     function withdrawNoAmbsassadorBalance(
         uint256 _amount,
         string calldata _reason
     ) external override onlyAdmin validAddress(outgoingAddress) {
         require(
             _amount <= totalBalances.noAmbsassador && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.noAmbsassador -= _amount;
 
         bool success = daiToken.transfer(outgoingAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit NoAmbsassadorBalanceWithdrew(_amount, outgoingAddress, _reason);
     }

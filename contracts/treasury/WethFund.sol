@@ -556,9 +556,9 @@ contract WethFund is Initializable, IWethFund {
         onlyAdmin
         validAddress(_wallet)
     {
-        bool success = wethFund.transfer(
+        bool success = wethToken.transfer(
             _wallet,
-            wethFund.balanceOf(address(this))
+            wethToken.balanceOf(address(this))
         );
         require(success);
     }

@@ -92,6 +92,10 @@ interface IAllocation {
             uint16 reserve2Share
         );
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isAllocation
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

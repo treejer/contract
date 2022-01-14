@@ -25,14 +25,11 @@ contract AccessRestriction is
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller not admin");
         _;
     }
 
-    /**
-     * @dev initialize accessRestriction contract and set true for {isAccessRestriction}
-     * @param _deployer address of the deployer that DEFAULT_ADMIN_ROLE set to it
-     */
+    /// @inheritdoc IAccessRestriction
     function initialize(address _deployer) external override initializer {
         AccessControlUpgradeable.__AccessControl_init();
         PausableUpgradeable.__Pausable_init();
@@ -44,68 +41,47 @@ contract AccessRestriction is
         }
     }
 
-    /** @dev pause functionality */
+    /// @inheritdoc IAccessRestriction
     function pause() external override onlyAdmin {
         _pause();
     }
 
-    /** @dev unpause functionality */
+    /// @inheritdoc IAccessRestriction
     function unpause() external override onlyAdmin {
         _unpause();
     }
 
-    /**
-     * @dev check if given address is planter
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifPlanter(address _address) external view override {
-        require(isPlanter(_address), "Caller is not a planter");
+        require(isPlanter(_address), "Caller not planter");
     }
 
-    /**
-     * @dev check if given address is admin
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifAdmin(address _address) external view override {
-        require(isAdmin(_address), "Caller is not admin");
+        require(isAdmin(_address), "Caller not admin");
     }
 
-    /**
-     * @dev check if given address is Treejer contract
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifTreejerContract(address _address) external view override {
-        require(isTreejerContract(_address), "caller is not treejer contract");
+        require(isTreejerContract(_address), "Caller not treejer contract");
     }
 
-    /**
-     * @dev check if given address is data manager
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifDataManager(address _address) external view override {
-        require(isDataManager(_address), "caller is not data manager");
+        require(isDataManager(_address), "Caller not data manager");
     }
 
-    /**
-     * @dev check if given address is script
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifScript(address _address) external view override {
-        require(isScript(_address), "caller is not script");
+        require(isScript(_address), "Caller not script");
     }
 
-    /**
-     * @dev check if given address is verifier
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifVerifier(address _address) external view override {
-        require(isVerifier(_address), "caller is not verifier");
+        require(isVerifier(_address), "Caller not verifier");
     }
 
-    /**
-     * @dev check if given address is DataManager or Treejer contract
-     * @param _address input address
-     */
+    /// @inheritdoc IAccessRestriction
     function ifDataManagerOrTreejerContract(address _address)
         external
         view
@@ -113,23 +89,21 @@ contract AccessRestriction is
     {
         require(
             isDataManager(_address) || isTreejerContract(_address),
-            "not Data Manager or Treejer Contract"
+            "Caller not dm or tc"
         );
     }
 
-    /** @dev check if functionality is not puased */
+    /// @inheritdoc IAccessRestriction
     function ifNotPaused() external view override {
         require(!paused(), "Pausable: paused");
     }
 
-    /** @dev check if functionality is puased */
+    /// @inheritdoc IAccessRestriction
     function ifPaused() external view override {
         require(paused(), "Pausable: not paused");
     }
 
-    /**
-     * @dev Returns true if the contract is paused, and false otherwise.
-     */
+    /// @inheritdoc IAccessRestriction
     function paused()
         public
         view
@@ -140,29 +114,17 @@ contract AccessRestriction is
         return PausableUpgradeable.paused();
     }
 
-    /**
-     * @dev check if given address has planter role
-     * @param _address input address
-     * @return if given address has planter role
-     */
+    /// @inheritdoc IAccessRestriction
     function isPlanter(address _address) public view override returns (bool) {
         return hasRole(PLANTER_ROLE, _address);
     }
 
-    /**
-     * @dev check if given address has admin role
-     * @param _address input address
-     * @return if given address has admin role
-     */
+    /// @inheritdoc IAccessRestriction
     function isAdmin(address _address) public view override returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, _address);
     }
 
-    /**
-     * @dev check if given address has Treejer contract role
-     * @param _address input address
-     * @return if given address has Treejer contract role
-     */
+    /// @inheritdoc IAccessRestriction
     function isTreejerContract(address _address)
         public
         view
@@ -172,11 +134,7 @@ contract AccessRestriction is
         return hasRole(TREEJER_CONTRACT_ROLE, _address);
     }
 
-    /**
-     * @dev check if given address has data manager role
-     * @param _address input address
-     * @return if given address has data manager role
-     */
+    /// @inheritdoc IAccessRestriction
     function isDataManager(address _address)
         public
         view
@@ -186,20 +144,12 @@ contract AccessRestriction is
         return hasRole(DATA_MANAGER_ROLE, _address);
     }
 
-    /**
-     * @dev check if given address has verifier role
-     * @param _address input address
-     * @return if given address has verifier role
-     */
+    /// @inheritdoc IAccessRestriction
     function isVerifier(address _address) public view override returns (bool) {
         return hasRole(VERIFIER_ROLE, _address);
     }
 
-    /**
-     * @dev check if given address has script role
-     * @param _address input address
-     * @return if given address has script role
-     */
+    /// @inheritdoc IAccessRestriction
     function isScript(address _address) public view override returns (bool) {
         return hasRole(SCRIPT_ROLE, _address);
     }

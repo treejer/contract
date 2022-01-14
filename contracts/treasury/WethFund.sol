@@ -69,7 +69,7 @@ contract WethFund is Initializable, IWethFund {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
@@ -79,10 +79,7 @@ contract WethFund is Initializable, IWethFund {
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isWethFund
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IWethFund
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -98,10 +95,7 @@ contract WethFund is Initializable, IWethFund {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin set Dai contract address
-     * @param _daiAddress set to the address of Dai contract
-     */
+    /// @inheritdoc IWethFund
     function setDaiAddress(address _daiAddress)
         external
         override
@@ -111,10 +105,7 @@ contract WethFund is Initializable, IWethFund {
         daiAddress = _daiAddress;
     }
 
-    /**
-     * @dev admin set WethToken contract address
-     * @param _wethTokenAddress set to the address of WethToken contract
-     */
+    /// @inheritdoc IWethFund
     function setWethTokenAddress(address _wethTokenAddress)
         external
         override
@@ -127,10 +118,7 @@ contract WethFund is Initializable, IWethFund {
         wethToken = candidateContract;
     }
 
-    /**
-     * @dev admin set DexRouter contract address
-     * @param _dexRouterAddress set to the address of DexRouter contract
-     */
+    /// @inheritdoc IWethFund
     function setDexRouterAddress(address _dexRouterAddress)
         external
         override
@@ -144,10 +132,7 @@ contract WethFund is Initializable, IWethFund {
         dexRouter = candidateContract;
     }
 
-    /**
-     * @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
+    /// @inheritdoc IWethFund
     function setPlanterFundContractAddress(address _address)
         external
         override
@@ -158,10 +143,7 @@ contract WethFund is Initializable, IWethFund {
         planterFundContract = candidateContract;
     }
 
-    /**
-     * @dev admin set research address to fund
-     * @param _address research address
-     */
+    /// @inheritdoc IWethFund
     function setResearchAddress(address payable _address)
         external
         override
@@ -171,10 +153,7 @@ contract WethFund is Initializable, IWethFund {
         researchAddress = _address;
     }
 
-    /**
-     * @dev admin set localDevelopment address to fund
-     * @param _address localDevelopment address
-     */
+    /// @inheritdoc IWethFund
     function setLocalDevelopmentAddress(address payable _address)
         external
         override
@@ -184,10 +163,7 @@ contract WethFund is Initializable, IWethFund {
         localDevelopmentAddress = _address;
     }
 
-    /**
-     * @dev admin set insurance address to fund
-     * @param _address insurance address
-     */
+    /// @inheritdoc IWethFund
     function setInsuranceAddress(address payable _address)
         external
         override
@@ -197,10 +173,7 @@ contract WethFund is Initializable, IWethFund {
         insuranceAddress = _address;
     }
 
-    /**
-     * @dev admin set treasury address to fund
-     * @param _address treasury address
-     */
+    /// @inheritdoc IWethFund
     function setTreasuryAddress(address payable _address)
         external
         override
@@ -210,10 +183,7 @@ contract WethFund is Initializable, IWethFund {
         treasuryAddress = _address;
     }
 
-    /**
-     * @dev admin set reserve1 address to fund
-     * @param _address reserve1 address
-     */
+    /// @inheritdoc IWethFund
     function setReserve1Address(address payable _address)
         external
         override
@@ -223,10 +193,7 @@ contract WethFund is Initializable, IWethFund {
         reserve1Address = _address;
     }
 
-    /**
-     * @dev admin set reserve2 address to fund
-     * @param _address reserve2 address
-     */
+    /// @inheritdoc IWethFund
     function setReserve2Address(address payable _address)
         external
         override
@@ -236,21 +203,7 @@ contract WethFund is Initializable, IWethFund {
         reserve2Address = _address;
     }
 
-    /**
-     * @dev update totalBalances based on share amounts.
-     * NOTE sum of planter and ambassador amount first swap to dai and
-     * then transfer to the PlanterFund contract and update projected earnings
-     * @param _treeId id of a tree to fund
-     * @param _amount total amount
-     * @param _planterShare planter share
-     * @param _ambassadorShare ambassador share
-     * @param _researchShare research share
-     * @param _localDevelopmentShare localDevelopment share
-     * @param _insuranceShare insurance share
-     * @param _treasuryShare treasury share
-     * @param _reserve1Share reserve1 share
-     * @param _reserve2Share reserve2 share
-     */
+    /// @inheritdoc IWethFund
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
@@ -287,19 +240,7 @@ contract WethFund is Initializable, IWethFund {
         );
     }
 
-    /**
-     * @dev update totalBalances based on input amounts.
-     * NOTE sum of planter and ambassador amount first swap to dai and then
-     * transfer to the PlanterFund
-     * @param _totalPlanterAmount total planter amount
-     * @param _totalAmbassadorAmount total ambassador amount
-     * @param _totalResearch total research amount
-     * @param _totalLocalDevelopment total localDevelopment amount
-     * @param _totalInsurance total insurance amount
-     * @param _totalTreasury total treasury amount
-     * @param _totalReserve1 total reserve1 amount
-     * @param _totalReserve2 total reserve2 amount
-     */
+    /// @inheritdoc IWethFund
     function fundTreeBatch(
         uint256 _totalPlanterAmount,
         uint256 _totalAmbassadorAmount,
@@ -334,21 +275,17 @@ contract WethFund is Initializable, IWethFund {
         return daiAmount;
     }
 
-    /**
-     * @dev admin pay daiDebtToPlanterContract.
-     * @param _wethMaxUse maximum amount of weth can use
-     * @param _daiAmountToSwap amount of dai that must swap
-     */
+    /// @inheritdoc IWethFund
     function payDaiDebtToPlanterContract(
         uint256 _wethMaxUse,
         uint256 _daiAmountToSwap
     ) external override ifNotPaused onlyScript {
-        require(_wethMaxUse <= totalBalances.treasury, "Liquidity not enough");
+        require(_wethMaxUse <= totalBalances.treasury, "Insufficient Liquidity");
 
         require(
             _daiAmountToSwap > 0 &&
                 _daiAmountToSwap <= totalDaiDebtToPlanterContract,
-            "totalDaiDebtToPlanterContract invalid"
+            "Invalid totalDaiDebtToPlanterContract "
         );
 
         address[] memory path;
@@ -359,7 +296,7 @@ contract WethFund is Initializable, IWethFund {
 
         bool success = wethToken.approve(address(dexRouter), _wethMaxUse);
 
-        require(success, "unsuccessful approve");
+        require(success, "Unsuccessful approve");
 
         uint256[] memory amounts = dexRouter.swapTokensForExactTokens(
             _daiAmountToSwap,
@@ -379,10 +316,7 @@ contract WethFund is Initializable, IWethFund {
         totalBalances.treasury -= amounts[0];
     }
 
-    /**
-     * @dev update totalDaiDebtToPlanterContract amount
-     * @param _amount is amount add to totalDaiDebtToPlanterContract
-     */
+    /// @inheritdoc IWethFund
     function updateDaiDebtToPlanterContract(uint256 _amount)
         external
         override
@@ -391,12 +325,7 @@ contract WethFund is Initializable, IWethFund {
         totalDaiDebtToPlanterContract += _amount;
     }
 
-    /**
-     * @dev admin withdraw from research totalBalance
-     * NOTE amount transfer to researchAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -405,38 +334,33 @@ contract WethFund is Initializable, IWethFund {
     {
         require(
             _amount <= totalBalances.research && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.research -= _amount;
 
         bool success = wethToken.transfer(researchAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit ResearchBalanceWithdrew(_amount, researchAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from localDevelopment totalBalances
-     * NOTE amount transfer to localDevelopmentAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
     ) external override onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.localDevelopment -= _amount;
 
         bool success = wethToken.transfer(localDevelopmentAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit LocalDevelopmentBalanceWithdrew(
             _amount,
@@ -445,12 +369,7 @@ contract WethFund is Initializable, IWethFund {
         );
     }
 
-    /**
-     * @dev admin withdraw from insurance totalBalances
-     * NOTE amount transfer to insuranceAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -459,24 +378,19 @@ contract WethFund is Initializable, IWethFund {
     {
         require(
             _amount <= totalBalances.insurance && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.insurance -= _amount;
 
         bool success = wethToken.transfer(insuranceAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit InsuranceBalanceWithdrew(_amount, insuranceAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from treasury totalBalances
-     * NOTE amount transfer to treasuryAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -485,24 +399,19 @@ contract WethFund is Initializable, IWethFund {
     {
         require(
             _amount <= totalBalances.treasury && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.treasury -= _amount;
 
         bool success = wethToken.transfer(treasuryAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit TreasuryBalanceWithdrew(_amount, treasuryAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from reserve1 totalBalances
-     * NOTE amount transfer to reserve1Address
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
         override
@@ -511,24 +420,19 @@ contract WethFund is Initializable, IWethFund {
     {
         require(
             _amount <= totalBalances.reserve1 && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.reserve1 -= _amount;
 
         bool success = wethToken.transfer(reserve1Address, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit Reserve1BalanceWithdrew(_amount, reserve1Address, _reason);
     }
 
-    /**
-     * @dev admin withdraw from reserve2 totalBalances
-     * NOTE amount transfer to reserve2Address
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IWethFund
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
         override
@@ -537,14 +441,14 @@ contract WethFund is Initializable, IWethFund {
     {
         require(
             _amount <= totalBalances.reserve2 && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.reserve2 -= _amount;
 
         bool success = wethToken.transfer(reserve2Address, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }
@@ -626,7 +530,7 @@ contract WethFund is Initializable, IWethFund {
 
         bool success = wethToken.approve(address(dexRouter), _amount);
 
-        require(success, "unsuccessful approve");
+        require(success, "Unsuccessful approve");
 
         uint256[] memory amounts = dexRouter.swapExactTokensForTokens(
             _amount,

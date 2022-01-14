@@ -44,11 +44,11 @@ contract UniSwapMini {
             amountIn
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         bool success2 = daiToken.transfer(address(to), amountIn * daiToEther);
 
-        require(success2, "unsuccessful transfer");
+        require(success2, "Unsuccessful transfer");
 
         uint256[] memory amount;
         amount = new uint256[](2);
@@ -72,11 +72,11 @@ contract UniSwapMini {
             amountOut / daiToEther
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         bool success2 = daiToken.transfer(address(to), amountOut);
 
-        require(success2, "unsuccessful transfer");
+        require(success2, "Unsuccessful transfer");
 
         uint256[] memory amount;
         amount = new uint256[](2);

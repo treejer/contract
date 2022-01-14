@@ -83,16 +83,11 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isRegularSale
-     * set {_price} to tree price and 10000 to lastFundedTreeId and 20 to referralTriggerCount
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     * @param _price initial tree price
-     */
+    /// @inheritdoc IRegularSale
     function initialize(address _accessRestrictionAddress, uint256 _price)
         external
         override
@@ -117,10 +112,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
     // **** SET ADDRESS SECTION ****
 
-    /**
-     * @dev admin set trusted forwarder address
-     * @param _address set to {trustedForwarder}
-     */
+    /// @inheritdoc IRegularSale
     function setTrustedForwarder(address _address)
         external
         override
@@ -130,9 +122,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         trustedForwarder = _address;
     }
 
-    /** @dev admin set TreeFactory contract address
-     * @param _address set to the address of TreeFactory contract
-     */
+    /// @inheritdoc IRegularSale
     function setTreeFactoryAddress(address _address)
         external
         override
@@ -145,9 +135,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         treeFactory = candidateContract;
     }
 
-    /** @dev admin set DaiFund contract address
-     * @param _address set to the address of DaiFund contract
-     */
+    /// @inheritdoc IRegularSale
     function setDaiFundAddress(address _address) external override onlyAdmin {
         IDaiFund candidateContract = IDaiFund(_address);
 
@@ -156,6 +144,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         daiFund = candidateContract;
     }
 
+    /// @inheritdoc IRegularSale
     function setDaiTokenAddress(address _address)
         external
         override
@@ -166,10 +155,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         daiToken = candidateContract;
     }
 
-    /**
-     * @dev admin set Allocation contract address
-     * @param _address set to the address of Allocation contract
-     */
+    /// @inheritdoc IRegularSale
     function setAllocationAddress(address _address)
         external
         override
@@ -180,9 +166,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         allocation = candidateContract;
     }
 
-    /** @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
+    /// @inheritdoc IRegularSale
     function setPlanterFundAddress(address _address)
         external
         override
@@ -195,9 +179,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         planterFundContract = candidateContract;
     }
 
-    /** @dev admin set WethFund contract address
-     * @param _address set to the address of WethFund contract
-     */
+    /// @inheritdoc IRegularSale
     function setWethFundAddress(address _address) external override onlyAdmin {
         IWethFund candidateContract = IWethFund(_address);
 
@@ -206,11 +188,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         wethFund = candidateContract;
     }
 
-    /**
-     * @dev admin set Attributes contract address
-     * @param _address set to the address of Attribute contract
-     */
-
+    /// @inheritdoc IRegularSale
     function setAttributesAddress(address _address)
         external
         override
@@ -223,9 +201,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
     // **** FUNDTREE SECTION ****
 
-    /** @dev admin set the price of trees
-     * @param _price price of tree
-     */
+    /// @inheritdoc IRegularSale
     function updatePrice(uint256 _price)
         external
         override
@@ -236,10 +212,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         emit PriceUpdated(_price);
     }
 
-    /**
-     * @dev admin update lastFundedTreeId
-     * @param _lastFundedTreeId id of last funded tree
-     */
+    /// @inheritdoc IRegularSale
     function updateLastFundedTreeId(uint256 _lastFundedTreeId)
         external
         override
@@ -248,7 +221,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     {
         require(
             _lastFundedTreeId > lastFundedTreeId,
-            "Input must be gt last tree sold"
+            "Invalid lastFundedTreeId"
         );
 
         lastFundedTreeId = _lastFundedTreeId;
@@ -256,9 +229,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         emit LastFundedTreeIdUpdated(_lastFundedTreeId);
     }
 
-    /**
-     * @dev admin update maxTreeSupply
-     */
+    /// @inheritdoc IRegularSale
     function updateMaxTreeSupply(uint256 _maxTreeSupply)
         external
         override
@@ -267,7 +238,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     {
         require(
             lastFundedTreeId < _maxTreeSupply,
-            "max supply must gt lastFundedTree"
+            "Invalid maxTreeSupply"
         );
 
         maxTreeSupply = _maxTreeSupply;
@@ -275,39 +246,27 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         emit MaxTreeSupplyUpdated(_maxTreeSupply);
     }
 
-    /**
-     * @dev fund {_count} tree
-     * NOTE if {_recipient} address exist trees minted to the {_recipient}
-     * and mint to the function caller otherwise
-     * NOTE function caller pay for the price of trees
-     * NOTE based on the allocation data for tree totalBalances and PlanterFund
-     * contract balance and projected earnings updated
-     * NOTE generate unique symbols for trees
-     * NOTE if referrer address exists {_count} added to the referrerCount
-     * @param _count number of trees to fund
-     * @param _referrer address of referrer
-     * @param _recipient address of recipient
-     */
+    /// @inheritdoc IRegularSale
     function fundTree(
         uint256 _count,
         address _referrer,
         address _recipient
     ) external override ifNotPaused {
-        require(lastFundedTreeId + _count < maxTreeSupply, "max supply");
+        require(lastFundedTreeId + _count < maxTreeSupply, "Max supply reached");
 
-        require(_count > 0 && _count < 101, "invalid count");
+        require(_count > 0 && _count < 101, "Invalid count");
 
         address recipient = _recipient == address(0)
             ? _msgSender()
             : _recipient;
 
-        require(recipient != _referrer, "Invalid referal address");
+        require(recipient != _referrer, "Invalid referrer");
 
         uint256 totalPrice = price * _count;
 
         require(
             daiToken.balanceOf(_msgSender()) >= totalPrice,
-            "invalid amount"
+            "Insufficient balance"
         );
 
         bool success = daiToken.transferFrom(
@@ -316,7 +275,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
             totalPrice
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit TreeFunded(_msgSender(), recipient, _referrer, _count, totalPrice);
 
@@ -335,7 +294,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 1
             );
 
-            require(successAttr, "attribute not generated");
+            require(successAttr, "Attribute not generated");
 
             (
                 uint16 planterShare,
@@ -386,19 +345,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         }
     }
 
-    /**
-     * @dev fund {_count} tree
-     * NOTE if {_recipient} address exist tree minted to the {_recipient}
-     * and mint to the function caller otherwise
-     * NOTE function caller pay for the price of trees
-     * NOTE based on the allocation data for tree totalBalances and PlanterFund
-     * contract balance and projected earnings updated
-     * NOTE generate unique symbols for trees
-     * NOTE if referrer address exists {_count} added to the referrerCount
-     * @param _treeId id of tree to fund
-     * @param _referrer address of referrer
-     * @param _recipient address of recipient
-     */
+    /// @inheritdoc IRegularSale
     function fundTreeById(
         uint256 _treeId,
         address _referrer,
@@ -406,16 +353,16 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
     ) external override ifNotPaused {
         require(
             _treeId > lastFundedTreeId && _treeId < maxTreeSupply,
-            "invalid tree"
+            "Invalid treeId"
         );
 
-        require(daiToken.balanceOf(_msgSender()) >= price, "invalid amount");
+        require(daiToken.balanceOf(_msgSender()) >= price, "Insufficient balance");
 
         address recipient = _recipient == address(0)
             ? _msgSender()
             : _recipient;
 
-        require(recipient != _referrer, "Invalid referal address");
+        require(recipient != _referrer, "Invalid referrer");
 
         bool success = daiToken.transferFrom(
             _msgSender(),
@@ -423,7 +370,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
             price
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         uint256 treeId = _treeId;
         address referrer = _referrer;
@@ -432,7 +379,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
         bool successAttr = attribute.createAttribute(treeId, 1);
 
-        require(successAttr, "attribute not generated");
+        require(successAttr, "Attribute not generated");
 
         (
             uint16 planterShare,
@@ -467,11 +414,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
 
     // **** REFERRAL SECTION ****
 
-    /**
-     * @dev admin update referral tree payments
-     * @param _referralTreePaymentToPlanter is referral tree payment to planter amount
-     * @param _referralTreePaymentToAmbassador is referral tree payment to ambassador amount
-     */
+    /// @inheritdoc IRegularSale
     function updateReferralTreePayments(
         uint256 _referralTreePaymentToPlanter,
         uint256 _referralTreePaymentToAmbassador
@@ -485,26 +428,19 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         );
     }
 
-    /**
-     * @dev admin update referral trigger count
-     * @param _count number set to referralTriggerCount
-     */
+    /// @inheritdoc IRegularSale
     function updateReferralTriggerCount(uint256 _count)
         external
         override
         ifNotPaused
         onlyDataManager
     {
-        require(_count > 0, "count must be gt zero");
+        require(_count > 0, "Invalid count");
         referralTriggerCount = _count;
         emit ReferralTriggerCountUpdated(_count);
     }
 
-    /**
-     * @dev update referrer claimable trees
-     * @param _referrer address of referrer
-     * @param _count amount added to referrerClaimableTreesWeth
-     */
+    /// @inheritdoc IRegularSale
     function updateReferrerClaimableTreesWeth(address _referrer, uint256 _count)
         external
         override
@@ -513,14 +449,11 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         referrerClaimableTreesWeth[_referrer] += _count;
     }
 
-    /**
-     * @dev referrer claim rewards and trees mint to the referral
-     * NOTE referrer can claim up to 45 trees in each request
-     */
+    /// @inheritdoc IRegularSale
     function claimReferralReward() external override ifNotPaused {
         uint256 claimableTreesCount = referrerClaimableTreesDai[_msgSender()] +
             referrerClaimableTreesWeth[_msgSender()];
-        require(claimableTreesCount > 0, "invalid gift owner");
+        require(claimableTreesCount > 0, "Claimable zero");
 
         if (claimableTreesCount > 50) {
             claimableTreesCount = 50;
@@ -601,7 +534,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
                 1
             );
 
-            require(successAttr, "attribute not generated");
+            require(successAttr, "Attribute not generated");
 
             planterFundContract.updateProjectedEarnings(
                 tempLastFundedTreeId,

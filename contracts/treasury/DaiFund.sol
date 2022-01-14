@@ -52,14 +52,11 @@ contract DaiFund is Initializable, IDaiFund {
     }
     /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
-        require(_address != address(0), "invalid address");
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    /**
-     * @dev initialize AccessRestriction contract and set true for isDaiFund
-     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
-     */
+    /// @inheritdoc IDaiFund
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -75,10 +72,7 @@ contract DaiFund is Initializable, IDaiFund {
         accessRestriction = candidateContract;
     }
 
-    /**
-     * @dev admin set DaiToken contract address
-     * @param _daiTokenAddress set to the address of DaiToken contract
-     */
+    /// @inheritdoc IDaiFund
     function setDaiTokenAddress(address _daiTokenAddress)
         external
         override
@@ -91,10 +85,7 @@ contract DaiFund is Initializable, IDaiFund {
         daiToken = candidateContract;
     }
 
-    /**
-     * @dev admin set PlanterFund contract address
-     * @param _address set to the address of PlanterFund contract
-     */
+    /// @inheritdoc IDaiFund
     function setPlanterFundContractAddress(address _address)
         external
         override
@@ -105,10 +96,7 @@ contract DaiFund is Initializable, IDaiFund {
         planterFundContract = candidateContract;
     }
 
-    /**
-     * @dev admin set research address to fund
-     * @param _address research address
-     */
+    /// @inheritdoc IDaiFund
     function setResearchAddress(address payable _address)
         external
         override
@@ -118,10 +106,7 @@ contract DaiFund is Initializable, IDaiFund {
         researchAddress = _address;
     }
 
-    /**
-     * @dev admin set localDevelopment address to fund
-     * @param _address localDevelopment address
-     */
+    /// @inheritdoc IDaiFund
     function setLocalDevelopmentAddress(address payable _address)
         external
         override
@@ -131,10 +116,7 @@ contract DaiFund is Initializable, IDaiFund {
         localDevelopmentAddress = _address;
     }
 
-    /**
-     * @dev admin set insurance address to fund
-     * @param _address insurance address
-     */
+    /// @inheritdoc IDaiFund
     function setInsuranceAddress(address payable _address)
         external
         override
@@ -144,10 +126,7 @@ contract DaiFund is Initializable, IDaiFund {
         insuranceAddress = _address;
     }
 
-    /**
-     * @dev admin set treasury address to fund
-     * @param _address treasury address
-     */
+    /// @inheritdoc IDaiFund
     function setTreasuryAddress(address payable _address)
         external
         override
@@ -157,10 +136,7 @@ contract DaiFund is Initializable, IDaiFund {
         treasuryAddress = _address;
     }
 
-    /**
-     * @dev admin set reserve1 address to fund
-     * @param _address reserve1 address
-     */
+    /// @inheritdoc IDaiFund
     function setReserve1Address(address payable _address)
         external
         override
@@ -170,10 +146,7 @@ contract DaiFund is Initializable, IDaiFund {
         reserve1Address = _address;
     }
 
-    /**
-     * @dev admin set reserve2 address to fund
-     * @param _address reserve2 address
-     */
+    /// @inheritdoc IDaiFund
     function setReserve2Address(address payable _address)
         external
         override
@@ -183,21 +156,7 @@ contract DaiFund is Initializable, IDaiFund {
         reserve2Address = _address;
     }
 
-    /**
-     * @dev update totalBalances based on share amounts.
-     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
-     * contract and update projected earnings
-     * @param _treeId id of a tree to fund
-     * @param _amount total amount
-     * @param _planterShare planter share
-     * @param _ambassadorShare ambassador share
-     * @param _researchShare research share
-     * @param _localDevelopmentShare localDevelopment share
-     * @param _insuranceShare insurance share
-     * @param _treasuryShare treasury share
-     * @param _reserve1Share reserve1 share
-     * @param _reserve2Share reserve2 share
-     */
+    /// @inheritdoc IDaiFund
     function fundTree(
         uint256 _treeId,
         uint256 _amount,
@@ -232,7 +191,7 @@ contract DaiFund is Initializable, IDaiFund {
             planterAmount + ambassadorAmount
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         planterFundContract.updateProjectedEarnings(
             _treeId,
@@ -243,18 +202,7 @@ contract DaiFund is Initializable, IDaiFund {
         emit TreeFunded(_treeId, _amount, planterAmount + ambassadorAmount);
     }
 
-    /**
-     * @dev update totalBalances based on input amounts.
-     * NOTE sum of planter and ambassador amount transfer to the PlanterFund
-     * @param _totalPlanterAmount total planter amount
-     * @param _totalAmbassadorAmount total ambassador amount
-     * @param _totalResearch total research amount
-     * @param _totalLocalDevelopment total localDevelopment amount
-     * @param _totalInsurance total insurance amount
-     * @param _totalTreasury total treasury amount
-     * @param _totalReserve1 total reserve1 amount
-     * @param _totalReserve2 total reserve2 amount
-     */
+    /// @inheritdoc IDaiFund
     function fundTreeBatch(
         uint256 _totalPlanterAmount,
         uint256 _totalAmbassadorAmount,
@@ -282,36 +230,27 @@ contract DaiFund is Initializable, IDaiFund {
             _totalPlanterAmount + _totalAmbassadorAmount
         );
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit TreeFundedBatch();
     }
 
-    /**
-     * @dev transfer dai from treasury in totalBalances to PlanterFund contract when
-     * referrer want to claim reward
-     * @param _amount amount to transfer
-     */
+    /// @inheritdoc IDaiFund
     function transferReferrerDai(uint256 _amount)
         external
         override
         onlyTreejerContract
     {
-        require(totalBalances.treasury >= _amount, "Liquidity not enough");
+        require(totalBalances.treasury >= _amount, "Insufficient Liquidity");
 
         totalBalances.treasury -= _amount;
 
         bool success = daiToken.transfer(address(planterFundContract), _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
     }
 
-    /**
-     * @dev admin withdraw from research totalBalance
-     * NOTE amount transfer to researchAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawResearchBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -320,38 +259,33 @@ contract DaiFund is Initializable, IDaiFund {
     {
         require(
             _amount <= totalBalances.research && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.research -= _amount;
 
         bool success = daiToken.transfer(researchAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit ResearchBalanceWithdrew(_amount, researchAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from localDevelopment totalBalances
-     * NOTE amount transfer to localDevelopmentAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawLocalDevelopmentBalance(
         uint256 _amount,
         string calldata _reason
     ) external override onlyAdmin validAddress(localDevelopmentAddress) {
         require(
             _amount <= totalBalances.localDevelopment && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.localDevelopment -= _amount;
 
         bool success = daiToken.transfer(localDevelopmentAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit LocalDevelopmentBalanceWithdrew(
             _amount,
@@ -360,12 +294,7 @@ contract DaiFund is Initializable, IDaiFund {
         );
     }
 
-    /**
-     * @dev admin withdraw from insurance totalBalances
-     * NOTE amount transfer to insuranceAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawInsuranceBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -374,24 +303,19 @@ contract DaiFund is Initializable, IDaiFund {
     {
         require(
             _amount <= totalBalances.insurance && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.insurance -= _amount;
 
         bool success = daiToken.transfer(insuranceAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit InsuranceBalanceWithdrew(_amount, insuranceAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from treasury totalBalances
-     * NOTE amount transfer to treasuryAddress
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawTreasuryBalance(uint256 _amount, string calldata _reason)
         external
         override
@@ -400,24 +324,19 @@ contract DaiFund is Initializable, IDaiFund {
     {
         require(
             _amount <= totalBalances.treasury && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.treasury -= _amount;
 
         bool success = daiToken.transfer(treasuryAddress, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit TreasuryBalanceWithdrew(_amount, treasuryAddress, _reason);
     }
 
-    /**
-     * @dev admin withdraw from reserve1 totalBalances
-     * NOTE amount transfer to reserve1Address
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawReserve1Balance(uint256 _amount, string calldata _reason)
         external
         override
@@ -426,24 +345,19 @@ contract DaiFund is Initializable, IDaiFund {
     {
         require(
             _amount <= totalBalances.reserve1 && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.reserve1 -= _amount;
 
         bool success = daiToken.transfer(reserve1Address, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit Reserve1BalanceWithdrew(_amount, reserve1Address, _reason);
     }
 
-    /**
-     * @dev admin withdraw from reserve2 totalBalances
-     * NOTE amount transfer to reserve2Address
-     * @param _amount amount to withdraw
-     * @param _reason reason to withdraw
-     */
+    /// @inheritdoc IDaiFund
     function withdrawReserve2Balance(uint256 _amount, string calldata _reason)
         external
         override
@@ -452,14 +366,14 @@ contract DaiFund is Initializable, IDaiFund {
     {
         require(
             _amount <= totalBalances.reserve2 && _amount > 0,
-            "insufficient amount"
+            "Invalid amount"
         );
 
         totalBalances.reserve2 -= _amount;
 
         bool success = daiToken.transfer(reserve2Address, _amount);
 
-        require(success, "unsuccessful transfer");
+        require(success, "Unsuccessful transfer");
 
         emit Reserve2BalanceWithdrew(_amount, reserve2Address, _reason);
     }

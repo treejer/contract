@@ -570,7 +570,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
     });
 
-    it("should fail to assign because of can't assign tree to planter", async () => {
+    it("should fail to assign because of Not allowed planter", async () => {
       const treeId1 = 1;
       const treeId2 = 2;
       const treeId3 = 3;
@@ -5764,7 +5764,7 @@ contract("TreeFactory", (accounts) => {
         deployerAccount
       );
 
-      ////////// --------------- fail regularTree not exist
+      ////////// --------------- fail Regular Tree not exists
       await treeFactoryInstance
         .verifyTree(1, true, {
           from: dataManager,
@@ -6028,7 +6028,7 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
     });
 
-    it("mintTreeById should be fail(tree must be planted)", async () => {
+    it("mintTreeById should be fail(Tree not planted)", async () => {
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });

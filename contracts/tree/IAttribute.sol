@@ -31,14 +31,21 @@ interface IAttribute {
     function setTreeTokenAddress(address _address) external;
 
     /**
-     * @dev admin set Dai contract address
+     * @dev admin set Base Token contract address
      * @param _baseTokenAddress set to the address of Dai contract
      */
-
     function setBaseTokenAddress(address _baseTokenAddress) external;
 
+    /**
+     * @dev admin set Dex tokens list
+     * @param _tokens an array of tokens in dex exchange with high liquidity
+     */
     function setDexTokens(address[] calldata _tokens) external;
 
+    /**
+     * @dev admin set DexRouter contract address
+     * @param _dexRouterAddress set to the address of DexRouter contract
+     */
     function setDexRouterAddress(address _dexRouterAddress) external;
 
     /**

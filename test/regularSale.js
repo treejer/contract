@@ -452,7 +452,19 @@ contract("regularSale", (accounts) => {
     it("Should request trees rejecet", async () => {
       let funder = userAccount3;
 
+      daiFundInstance = await DaiFund.new({
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
       await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
       });
 
@@ -531,7 +543,7 @@ contract("regularSale", (accounts) => {
         .fundTree(3, zeroAddress, zeroAddress, {
           from: userAccount4,
         })
-        .should.be.rejectedWith(erc20ErrorMsg.APPROVAL_ISSUE);
+        .should.be.rejectedWith(RegularSaleErrors.INVALID_APPROVE);
 
       ///----------------test3 (Max supply reached)
 
@@ -598,6 +610,17 @@ contract("regularSale", (accounts) => {
         return Number(ev.price) == Number(price);
       });
 
+      daiFundInstance = await DaiFund.new({
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
       await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
@@ -666,7 +689,7 @@ contract("regularSale", (accounts) => {
         .fundTreeById(treeId, zeroAddress, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(RegularSaleErrors.CommonErrorMsg);
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_APPROVE);
 
       ////--------------test3
       //mint dai for funder

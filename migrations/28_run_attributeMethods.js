@@ -17,7 +17,11 @@ module.exports = async function (deployer, network, accounts) {
   let UniswapV2RouterAddress;
   let daiAddress;
   let wethAddress;
-  let uniAddress;
+  let sandAddress;
+  let wmaticAddress;
+  let usdtAddress;
+  let usdcAddress;
+  let quickAddress;
 
   if (isLocal) {
     UniswapV2RouterAddress = UniswapV2Router02New.address;
@@ -36,15 +40,35 @@ module.exports = async function (deployer, network, accounts) {
       `process.env.WETH_TOKEN_ADDRESS_${network.toUpperCase()}`
     );
 
-    uniAddress = eval(`process.env.UNI_TOKEN_ADDRESS_${network.toUpperCase()}`);
+    sandAddress = eval(
+      `process.env.SAND_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
+    wmaticAddress = eval(
+      `process.env.WMATIC_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
+    usdtAddress = eval(
+      `process.env.USDT_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
+    usdcAddress = eval(
+      `process.env.USDC_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
+    quickAddress = eval(
+      `process.env.QUICK_TOKEN_ADDRESS_${network.toUpperCase()}`
+    );
   }
 
   console.log("Call Attribute Methods...");
 
   await Attribute.deployed().then(async (instance) => {
     await instance.setTreeTokenAddress(treeAddress);
-    await instance.setBaseTokenAddress(daiAddress);
+    await instance.setBaseTokenAddress(wmaticAddress);
     await instance.setDexRouterAddress(UniswapV2RouterAddress);
-    await instance.setDexTokens([wethAddress, uniAddress]);
+    await instance.setDexTokens([
+      wethAddress,
+      sandAddress,
+      usdtAddress,
+      usdtAddress,
+      quickAddress,
+    ]);
   });
 };

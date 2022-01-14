@@ -115,6 +115,10 @@ interface IIncrementalSale {
         uint64 _priceJump
     ) external;
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isIncrementalSale
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

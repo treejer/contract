@@ -42,6 +42,7 @@ const {
   RegularSaleErrors,
   TreasuryManagerErrorMsg,
   TimeEnumes,
+  erc20ErrorMsg,
 } = require("./enumes");
 
 contract("regularSale", (accounts) => {
@@ -511,7 +512,7 @@ contract("regularSale", (accounts) => {
         .fundTree(3, zeroAddress, zeroAddress, {
           from: funder,
         })
-        .should.be.rejectedWith(RegularSaleErrors.INVALID_AMOUNT);
+        .should.be.rejectedWith(RegularSaleErrors.INSUFFICIENT_AMOUNT);
 
       ///----------------test2
 
@@ -530,7 +531,7 @@ contract("regularSale", (accounts) => {
         .fundTree(3, zeroAddress, zeroAddress, {
           from: userAccount4,
         })
-        .should.be.rejectedWith(RegularSaleErrors.INVALID_APPROVE);
+        .should.be.rejectedWith(erc20ErrorMsg.APPROVAL_ISSUE);
 
       ///----------------test3 (Max supply reached)
 
@@ -647,7 +648,7 @@ contract("regularSale", (accounts) => {
         .fundTreeById(treeId, zeroAddress, zeroAddress, {
           from: userAccount1,
         })
-        .should.be.rejectedWith(RegularSaleErrors.INVALID_AMOUNT);
+        .should.be.rejectedWith(RegularSaleErrors.INSUFFICIENT_AMOUNT);
 
       ////--------------test2
       //mint dai for funder

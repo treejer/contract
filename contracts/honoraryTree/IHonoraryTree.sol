@@ -154,6 +154,14 @@ interface IHonoraryTree {
 
     function claim() external;
 
+    /**
+     * @dev initialize accessRestriction contract and set true for isHonoraryTree
+     * set referralTreePaymentToPlanter and referralTreePaymentToAmbassador initial value
+     * @param _accessRestrictionAddress set to the address of accessRestriction contract
+     * @param _referralTreePaymentToPlanter initial planter fund
+     * @param _referralTreePaymentToAmbassador initial ambassador fund
+     */
+
     function initialize(
         address _accessRestrictionAddress,
         uint256 _referralTreePaymentToPlanter,

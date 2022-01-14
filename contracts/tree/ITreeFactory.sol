@@ -264,6 +264,11 @@ interface ITreeFactory {
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
 
+    /**
+     * @dev initialize AccessRestriction contract,lastRegualarTreeId,treeUpdateInterval
+     * and set true for isTreeFactory
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /** @return true in case of TreeFactory contract has been initialized */

@@ -119,6 +119,11 @@ interface IPlanterFund {
         string calldata _reason
     ) external;
 
+    /**
+     * @dev initialize AccessRestriction contract, minWithdrawable and set true
+     * for isAllocation
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

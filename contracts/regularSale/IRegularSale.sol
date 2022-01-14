@@ -208,6 +208,12 @@ interface IRegularSale {
      */
     function claimReferralReward() external;
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isRegularSale
+     * set {_price} to tree price and 10000 to lastFundedTreeId and 20 to referralTriggerCount
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     * @param _price initial tree price
+     */
     function initialize(address _accessRestrictionAddress, uint256 _price)
         external;
 

@@ -117,6 +117,10 @@ interface IAttribute {
         external
         returns (uint64);
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isAttribute
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /** @return true in case of Attribute contract has been initialized */

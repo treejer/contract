@@ -24,8 +24,7 @@ const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
   CHECK_ADMIN: "Caller not admin",
   CHECK_TREEJER_CONTTRACT: "Caller not treejer contract",
-  CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT:
-    "Caller not dm or tc",
+  CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT: "Caller not dm or tc",
   CHECK_PLANTER: "Caller not planter",
   CHECK_DATA_MANAGER: "Caller not data manager",
   CHECK_SCRIPT_ROLE: "Caller not script",
@@ -117,7 +116,7 @@ const PlanterErrorMsg = {
 
 const RegularSaleErrors = {
   INVALID_TREE: "Invalid treeId",
-  INVALID_AMOUNT: "Invalid amount",
+  INSUFFICIENT_AMOUNT: "Insufficient balance",
   INVALID_COUNT: "Invalid count",
   INVALID_SET_LAST_REGULAR_TREE_SELL_INPUT: "Invalid lastFundedTreeId",
   INVALID_GIFT_OWNER: "Claimable zero",
@@ -139,8 +138,7 @@ const IncrementalSaleErrorMsg = {
   INVALID_REFERAL: "Invalid referrer",
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "Insufficient balance",
-  FREE_INCREMENTALSALE_FAIL:
-    "Cant remove",
+  FREE_INCREMENTALSALE_FAIL: "Cant remove",
   CANT_CREATE_NEW_INCREMENTALSALE: "Cant create",
 };
 

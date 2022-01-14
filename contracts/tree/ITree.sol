@@ -9,6 +9,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol"
  */
 /** @title Tree interface */
 interface ITree is IERC721Upgradeable {
+    /**
+     * @dev initialize AccessRestriction contract, baseURI and set true for isTree
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     * @param baseURI_ initial baseURI
+     */
     function initialize(
         address _accessRestrictionAddress,
         string calldata baseURI_

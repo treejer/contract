@@ -116,6 +116,10 @@ interface IAuction {
      */
     function endAuction(uint256 _auctionId, uint256 _minDaiout) external;
 
+    /**
+     * @dev initialize AccessRestriction contract and set true for isAuction
+     * @param _accessRestrictionAddress set to the address of AccessRestriction contract
+     */
     function initialize(address _accessRestrictionAddress) external;
 
     /**

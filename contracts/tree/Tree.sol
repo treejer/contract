@@ -57,7 +57,7 @@ contract Tree is ERC721Upgradeable, ITree {
     ) external override initializer {
         isTree = true;
 
-        __ERC721_init("Tree", "TREE");
+        __ERC721_init("Treejer Trees", "TREE");
 
         baseURI = baseURI_;
 

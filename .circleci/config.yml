@@ -13,6 +13,10 @@ jobs:
           key: dependency-cache-{{ checksum "package.json"}}
 
       - run:
+          name: run build-serve
+          command: npm run build-serve
+
+      - run:
           name: install-npm
           command: sudo npm install
 

@@ -19,6 +19,7 @@
     "ethers": "^5.1.0",
     "ganache": "^6.4.5",
     "ganache-cli": "^6.12.2",
+    "istanbul-combine": "^0.3.0",
     "truffle": "^5.4.16"
   },
   "devDependencies": {

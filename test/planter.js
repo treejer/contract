@@ -12,11 +12,11 @@ const Common = require("./common");
 const { CommonErrorMsg, GsnErrorMsg, PlanterErrorMsg } = require("./enumes");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 contract("Planter", (accounts) => {
   let planterInstance;
@@ -2226,11 +2226,7 @@ contract("Planter", (accounts) => {
       userAccount5,
       "invalid invitor address"
     );
-    assert.equal(
-      Number(user2PortionAfterJoin["3"]),
-      10000,
-      "Invalid share"
-    );
+    assert.equal(Number(user2PortionAfterJoin["3"]), 10000, "Invalid share");
 
     const user1PortionAfterJoin =
       await planterInstance.getOrganizationMemberData.call(userAccount1);
@@ -2238,11 +2234,7 @@ contract("Planter", (accounts) => {
     assert.equal(user1PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user1PortionAfterJoin["1"], 0x0, "invalid organaizer address");
     assert.equal(user1PortionAfterJoin["2"], 0x0, "invalid invitor address");
-    assert.equal(
-      Number(user1PortionAfterJoin["3"]),
-      10000,
-      "Invalid share"
-    );
+    assert.equal(Number(user1PortionAfterJoin["3"]), 10000, "Invalid share");
 
     const user3PortionAfterJoin =
       await planterInstance.getOrganizationMemberData.call(userAccount3);
@@ -2250,11 +2242,7 @@ contract("Planter", (accounts) => {
     assert.equal(user3PortionAfterJoin["0"], true, "invalid bool");
     assert.equal(user3PortionAfterJoin["1"], 0x0, "invalid organaizer address");
     assert.equal(user3PortionAfterJoin["2"], 0x0, "invalid invitor address");
-    assert.equal(
-      Number(user3PortionAfterJoin["3"]),
-      10000,
-      "Invalid share"
-    );
+    assert.equal(Number(user3PortionAfterJoin["3"]), 10000, "Invalid share");
 
     await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
       from: userAccount1,
@@ -2270,11 +2258,7 @@ contract("Planter", (accounts) => {
       "invalid organaizer address"
     );
     assert.equal(user3PortionAferAccept["2"], 0x0, "invalid invitor address");
-    assert.equal(
-      Number(user3PortionAferAccept["3"]),
-      0,
-      "Invalid share /:"
-    );
+    assert.equal(Number(user3PortionAferAccept["3"]), 0, "Invalid share /:");
 
     const eventTx = await planterInstance.updateOrganizationMemberShare(
       userAccount3,
@@ -2302,11 +2286,7 @@ contract("Planter", (accounts) => {
       "invalid organaizer address"
     );
     assert.equal(user3PortionAfterUpdate["2"], 0x0, "invalid invitor address");
-    assert.equal(
-      Number(user3PortionAfterUpdate["3"]),
-      2000,
-      "Invalid share"
-    );
+    assert.equal(Number(user3PortionAfterUpdate["3"]), 2000, "Invalid share");
   });
 
   ///////////////////////-----------------------------------------------  reduce plant count  --------------------------------------------

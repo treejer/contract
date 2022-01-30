@@ -31,10 +31,10 @@ const TestUniswap = artifacts.require("TestUniswap.sol");
 const Token = artifacts.require("Weth");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 const {
   CommonErrorMsg,

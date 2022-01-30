@@ -17,10 +17,10 @@ const Common = require("./common");
 const math = require("./math");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 //uniswap
 const Factory = artifacts.require("Factory.sol");

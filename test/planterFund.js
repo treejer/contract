@@ -12,10 +12,10 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 var Dai = artifacts.require("Dai");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 const Math = require("./math");
 

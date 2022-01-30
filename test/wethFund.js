@@ -24,6 +24,8 @@ const {
 
 const Common = require("./common");
 
+const FakeToken = artifacts.require("FakeToken");
+
 contract("WethFund", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -64,6 +66,8 @@ contract("WethFund", (accounts) => {
     await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
     });
+
+    fakeTokenInstance = await FakeToken.new({ from: accounts[0] });
 
     wethInstance = await Token.new("WETH", "weth", {
       from: accounts[0],
@@ -132,6 +136,10 @@ contract("WethFund", (accounts) => {
       wethFund = await WethFund.new({
         from: deployerAccount,
       });
+
+      await wethFund.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await wethFund.initialize(arInstance.address, {
         from: deployerAccount,
@@ -220,6 +228,10 @@ contract("WethFund", (accounts) => {
       );
 
       /////////////------------------------------------ set PlanterFund Contract address ----------------------------------------//
+
+      await wethFund.setPlanterFundContractAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await wethFund.setPlanterFundContractAddress(
         planterFundsInstnce.address,
@@ -611,6 +623,21 @@ contract("WethFund", (accounts) => {
         Number(contractBalance),
         Number(expectedSwapTokenAmount[1]),
         "Contract balance not true"
+      );
+
+      await wethFund.fundTree(
+        treeId,
+        amount,
+        expectedSwapTokenAmount[1],
+        0,
+        0,
+        1000,
+        1000,
+        1000,
+        1000,
+        4000,
+        2000,
+        { from: userAccount3 }
       );
     });
 
@@ -1207,6 +1234,20 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawResearchBalance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const tx = await wethFund.withdrawResearchBalance(
         withdrawBalance1,
         withdrawReason,
@@ -1500,6 +1541,20 @@ contract("WethFund", (accounts) => {
 
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
+
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawLocalDevelopmentBalance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
 
       const tx = await wethFund.withdrawLocalDevelopmentBalance(
         withdrawBalance1,
@@ -1798,6 +1853,20 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawInsuranceBalance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const tx = await wethFund.withdrawInsuranceBalance(
         withdrawBalance1,
         withdrawReason,
@@ -2084,6 +2153,20 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawTreasuryBalance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const tx = await wethFund.withdrawTreasuryBalance(
         withdrawBalance1,
         withdrawReason,
@@ -2367,6 +2450,20 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawReserve1Balance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const tx = await wethFund.withdrawReserve1Balance(
         withdrawBalance1,
         withdrawReason,
@@ -2649,6 +2746,20 @@ contract("WethFund", (accounts) => {
       // --------------------- first withdraw and check data ------------------
       const withdrawBalance1 = web3.utils.toWei("0.1");
 
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .withdrawReserve2Balance(withdrawBalance1, withdrawReason, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const tx = await wethFund.withdrawReserve2Balance(
         withdrawBalance1,
         withdrawReason,
@@ -2823,6 +2934,29 @@ contract("WethFund", (accounts) => {
           { from: userAccount4 }
         )
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .fundTreeBatch(
+          totalPlanterAmount1,
+          totalAmbassadorAmount1,
+          totalResearch1,
+          totalLocalDevelop1,
+          totalInsurance1,
+          totalTreasury1,
+          totalReserve1_1,
+          totalReserve2_1,
+          0,
+          { from: userAccount3 }
+        )
+        .should.be.rejectedWith("Unsuccessful approve");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
 
       const eventTx1 = await wethFund.fundTreeBatch(
         totalPlanterAmount1,
@@ -3044,6 +3178,24 @@ contract("WethFund", (accounts) => {
           web3.utils.toWei("500", "Ether"),
           [wethInstance.address, daiInstance.address]
         );
+
+      await wethFund.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await wethFund
+        .payDaiDebtToPlanterContract(
+          expectedSwapTokenAmountTreeId2[0],
+          web3.utils.toWei("500", "Ether"),
+          {
+            from: funderRank,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful approve");
+
+      await wethFund.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
 
       const eventTx = await wethFund.payDaiDebtToPlanterContract(
         expectedSwapTokenAmountTreeId2[0],

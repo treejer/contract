@@ -63,6 +63,17 @@ contract("Tree", (accounts) => {
     assert.notEqual(address, null);
     assert.notEqual(address, undefined);
   });
+
+  it("deploy tree", async () => {
+    treeInstance = await Tree.new({
+      from: deployerAccount,
+    });
+
+    await treeInstance.initialize(zeroAddress, "", {
+      from: deployerAccount,
+    }).should.be.rejected;
+  });
+
   it("set base uri", async () => {
     await treeInstance
       .setBaseURI("base uri", { from: userAccount1 })

@@ -45,6 +45,9 @@ const {
   erc20ErrorMsg,
 } = require("./enumes");
 
+const FakeToken = artifacts.require("FakeToken");
+const FakeAttribute = artifacts.require("FakeAttribute");
+
 contract("regularSale", (accounts) => {
   let regularSaleInstance;
   let treeFactoryInstance;
@@ -58,6 +61,8 @@ contract("regularSale", (accounts) => {
   let planterFundsInstnce;
   let daiInstance;
   let wethFundInstance;
+  let fakeTokenInstance;
+  let fakeAttributeInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -83,6 +88,10 @@ contract("regularSale", (accounts) => {
 
     daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
+    fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
+
+    fakeAttributeInstance = await FakeAttribute.new({ from: deployerAccount });
+
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
 
     await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
@@ -99,6 +108,10 @@ contract("regularSale", (accounts) => {
       regularSaleInstance = await RegularSale.new({
         from: deployerAccount,
       });
+
+      await regularSaleInstance.initialize(zeroAddress, web3.utils.toWei("7"), {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await regularSaleInstance.initialize(
         arInstance.address,
@@ -175,6 +188,10 @@ contract("regularSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+      await regularSaleInstance.setTreeFactoryAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await regularSaleInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         {
@@ -195,6 +212,10 @@ contract("regularSale", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await regularSaleInstance.setDaiFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
         from: deployerAccount,
@@ -238,6 +259,10 @@ contract("regularSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+      await regularSaleInstance.setAllocationAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await regularSaleInstance.setAllocationAddress(
         allocationInstance.address,
         {
@@ -266,6 +291,10 @@ contract("regularSale", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await regularSaleInstance.setWethFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await regularSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
@@ -986,6 +1015,10 @@ contract("regularSale", (accounts) => {
         deployerAccount
       );
 
+      await regularSaleInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await regularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
@@ -1051,6 +1084,10 @@ contract("regularSale", (accounts) => {
           from: deployerAccount,
         }
       );
+
+      await regularSaleInstance.setAttributesAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await regularSaleInstance.setAttributesAddress(
         attributeInstance.address,
@@ -1274,6 +1311,40 @@ contract("regularSale", (accounts) => {
         web3.utils.toWei("10000"),
         {
           from: funder,
+        }
+      );
+
+      await regularSaleInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance
+        .fundTree(7, userAccount5, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setAttributesAddress(
+        fakeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await regularSaleInstance
+        .fundTree(7, userAccount5, zeroAddress, {
+          from: funder,
+        })
+        .should.be.rejectedWith("Attribute not generated");
+
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        {
+          from: deployerAccount,
         }
       );
 
@@ -4114,6 +4185,40 @@ contract("regularSale", (accounts) => {
         "1-funder balance not true"
       );
 
+      await regularSaleInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance
+        .fundTreeById(10001, userAccount7, zeroAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.setAttributesAddress(
+        fakeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await regularSaleInstance
+        .fundTreeById(10001, userAccount7, zeroAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith("Attribute not generated");
+
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       let requestTx = await regularSaleInstance.fundTreeById(
         10001,
         userAccount7,
@@ -5189,6 +5294,38 @@ contract("regularSale", (accounts) => {
         ),
         25,
         "user 1 gift before claim is not correct"
+      );
+
+      await regularSaleInstance.setAttributesAddress(
+        fakeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testRegularSaleInstance.setAttributesAddress(
+        fakeAttributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await testRegularSaleInstance
+        .claimReferralReward({ from: userAccount1 })
+        .should.be.rejectedWith("Attribute not generated");
+
+      await testRegularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await regularSaleInstance.setAttributesAddress(
+        attributeInstance.address,
+        {
+          from: deployerAccount,
+        }
       );
 
       await testRegularSaleInstance.claimReferralReward({ from: userAccount1 });

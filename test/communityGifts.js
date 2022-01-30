@@ -37,6 +37,8 @@ const {
   GsnErrorMsg,
 } = require("./enumes");
 
+const FakeToken = artifacts.require("FakeToken");
+
 contract("HonoraryTree", (accounts) => {
   let honoraryTreeInstance;
   let arInstance;
@@ -46,6 +48,7 @@ contract("HonoraryTree", (accounts) => {
   let treeTokenInstance;
   let planterFundsInstnce;
   let daiInstance;
+  let fakeTokenInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -81,6 +84,16 @@ contract("HonoraryTree", (accounts) => {
       honoraryTreeInstance = await HonoraryTree.new({
         from: deployerAccount,
       });
+
+      await honoraryTreeInstance.initialize(
+        zeroAddress,
+        initialReferralTreePaymentToPlanter,
+        initialReferralTreePaymentToAmbassador,
+
+        {
+          from: deployerAccount,
+        }
+      ).should.be.rejected;
 
       await honoraryTreeInstance.initialize(
         arInstance.address,
@@ -134,6 +147,8 @@ contract("HonoraryTree", (accounts) => {
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
+
+      fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
     });
     it("deploys successfully and set addresses", async () => {
       //////////////////------------------------------------ deploy successfully ----------------------------------------//
@@ -198,6 +213,10 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+      await honoraryTreeInstance.setAttributesAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await honoraryTreeInstance.setAttributesAddress(
         attributeInstance.address,
         {
@@ -219,6 +238,10 @@ contract("HonoraryTree", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+      await honoraryTreeInstance.setTreeFactoryAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await honoraryTreeInstance.setTreeFactoryAddress(
         treeFactoryInstance.address,
         {
@@ -238,6 +261,10 @@ contract("HonoraryTree", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await honoraryTreeInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await honoraryTreeInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
@@ -913,6 +940,20 @@ contract("HonoraryTree", (accounts) => {
 
       await daiInstance.approve(honoraryTreeInstance.address, transferAmount, {
         from: adminWallet,
+      });
+
+      await honoraryTreeInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await honoraryTreeInstance
+        .setTreeRange(adminWallet, startTree, endTree, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await honoraryTreeInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
       });
 
       const eventTx = await honoraryTreeInstance.setTreeRange(

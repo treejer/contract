@@ -23,6 +23,8 @@ contract("Allocation", (accounts) => {
   const userAccount7 = accounts[8];
   const treasuryAddress = accounts[9];
 
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+
   before(async () => {
     arInstance = await AccessRestriction.new({
       from: deployerAccount,
@@ -39,6 +41,10 @@ contract("Allocation", (accounts) => {
     allocationInstance = await Allocation.new({
       from: deployerAccount,
     });
+
+    await allocationInstance.initialize(zeroAddress, {
+      from: deployerAccount,
+    }).should.be.rejected;
 
     await allocationInstance.initialize(arInstance.address, {
       from: deployerAccount,

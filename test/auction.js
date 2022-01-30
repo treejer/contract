@@ -31,6 +31,8 @@ const {
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
+const FakeToken = artifacts.require("FakeToken");
+
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 contract("Auction", (accounts) => {
@@ -52,6 +54,7 @@ contract("Auction", (accounts) => {
   let WETHAddress;
   let DAIAddress;
   let uniswapV2Router02NewAddress;
+  let fakeTokenInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -74,6 +77,8 @@ contract("Auction", (accounts) => {
     await arInstance.initialize(deployerAccount, {
       from: deployerAccount,
     });
+
+    fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
 
     wethInstance = await Token.new("WETH", "weth", {
       from: accounts[0],
@@ -108,6 +113,10 @@ contract("Auction", (accounts) => {
       auctionInstance = await Auction.new({
         from: deployerAccount,
       });
+
+      await auctionInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await auctionInstance.initialize(arInstance.address, {
         from: deployerAccount,
@@ -168,6 +177,10 @@ contract("Auction", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
 
+      await auctionInstance.setTreeFactoryAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await auctionInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
@@ -179,6 +192,10 @@ contract("Auction", (accounts) => {
           from: userAccount2,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN); //must be faild because ots not deployer account
+
+      await auctionInstance.setAllocationAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await auctionInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
@@ -231,6 +248,11 @@ contract("Auction", (accounts) => {
       await auctionInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
+
+      await auctionInstance.setWethFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await auctionInstance
         .setWethFundAddress(wethFundInstance.address, {
           from: userAccount2,
@@ -574,6 +596,21 @@ contract("Auction", (accounts) => {
       );
 
       /////////////////////////// ----------------- bid
+
+      await auctionInstance.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await auctionInstance
+        .bid(0, bidAmount1, zeroAddress, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
       const eventTx = await auctionInstance.bid(0, bidAmount1, zeroAddress, {
         from: userAccount1,
       });
@@ -1220,6 +1257,10 @@ contract("Auction", (accounts) => {
         }
       );
 
+      await auctionInstance.setRegularSaleAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await auctionInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
@@ -1321,6 +1362,20 @@ contract("Auction", (accounts) => {
       });
 
       await Common.travelTime(TimeEnumes.seconds, 670);
+
+      await auctionInstance.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await auctionInstance
+        .endAuction(0, 0, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await auctionInstance.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
 
       let successEnd = await auctionInstance.endAuction(0, 0, {
         from: deployerAccount,

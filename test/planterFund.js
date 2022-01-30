@@ -28,12 +28,15 @@ const {
   GsnErrorMsg,
 } = require("./enumes");
 
+const FakeToken = artifacts.require("FakeToken");
+
 contract("PlanterFund", (accounts) => {
   let planterInstance;
   let planterFundInstance;
 
   let arInstance;
   let daiInstance;
+  let fakeTokenInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -94,11 +97,17 @@ contract("PlanterFund", (accounts) => {
         from: deployerAccount,
       });
 
+      await planterFundInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await planterFundInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
+
+      fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
     });
 
     it("deploys successfully", async () => {
@@ -138,6 +147,10 @@ contract("PlanterFund", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      planterFundInstance.setPlanterContractAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       planterFundInstance.setPlanterContractAddress(planterInstance.address, {
         from: deployerAccount,
@@ -410,6 +423,7 @@ contract("PlanterFund", (accounts) => {
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: deployerAccount });
+      fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
 
       await planterFundInstance.setPlanterContractAddress(
         planterInstance.address,
@@ -469,6 +483,15 @@ contract("PlanterFund", (accounts) => {
         Number(totalFund.ambassador),
         ambassadorFund,
         "total fund is not correct1"
+      );
+
+      await planterFundInstance.updatePlanterTotalClaimed(
+        treeId,
+        userAccount8,
+        treeStatus1,
+        {
+          from: userAccount1,
+        }
       );
 
       let fundP1 = await planterFundInstance.updatePlanterTotalClaimed(
@@ -1732,6 +1755,16 @@ contract("PlanterFund", (accounts) => {
           ev.ambassador == userAccount4
         );
       });
+
+      await planterFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await planterFundInstance
+        .withdrawBalance(planterWithdrawAmount, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
 
       await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
@@ -3087,6 +3120,21 @@ contract("PlanterFund", (accounts) => {
           from: deployerAccount,
         })
         .should.be.rejectedWith(TreasuryManagerErrorMsg.INSUFFICIENT_AMOUNT);
+
+      ///////
+      await planterFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await planterFundInstance
+        .withdrawNoAmbsassadorBalance(withdrawAmount1, "some reason", {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
 
       const txLocalDevelop =
         await planterFundInstance.withdrawNoAmbsassadorBalance(

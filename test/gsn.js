@@ -50,6 +50,9 @@ contract("Gsn", (accounts) => {
       from: deployerAccount,
     });
 
+    await WhitelistPaymaster.new(zeroAddress, { from: deployerAccount }).should
+      .be.rejected;
+
     whitelistPaymasterInstance = await WhitelistPaymaster.new(
       arInstance.address,
       { from: deployerAccount }

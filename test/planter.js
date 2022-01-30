@@ -55,6 +55,10 @@ contract("Planter", (accounts) => {
       from: deployerAccount,
     });
 
+    await planterInstance.initialize(zeroAddress, {
+      from: deployerAccount,
+    }).should.be.rejected;
+
     await planterInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });

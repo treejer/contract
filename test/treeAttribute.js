@@ -125,6 +125,16 @@ contract("Attribute", (accounts) => {
       assert.notEqual(address, undefined);
     });
 
+    it("deploy attribute tree", async () => {
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+    });
+
     ///////////////---------------------------------test reserveSymbol function--------------------------------------------------------
     it("Should reserveSymbol work successfully", async () => {
       ////------------Should reserveSymbol rejec because caller must be admin or HonoraryTree
@@ -546,6 +556,12 @@ contract("Attribute", (accounts) => {
     });
 
     it("Check setDexTokens function", async () => {
+      await attributeInstance
+        .setBaseTokenAddress(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
       await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount,
       });
@@ -619,6 +635,11 @@ contract("Attribute", (accounts) => {
 
     it("Check setTreeTokenAddress function", async () => {
       ////////////////////------------------------------------ tree token address ----------------------------------------//
+
+      await attributeInstance.setTreeTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });
@@ -706,6 +727,12 @@ contract("Attribute", (accounts) => {
           CommonErrorMsg.CHECK_DATA_MANAGER_OR_TREEJER_CONTRACT
         );
 
+      await attributeInstance
+        .setAttribute(treeId1, generatedCode1, 145, generationType1, 2, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(AttributeErrorMsg.INVALID_SYMBOL);
+
       /////////////// add successfully and check data
 
       const eventTx1 = await attributeInstance.setAttribute(
@@ -716,6 +743,12 @@ contract("Attribute", (accounts) => {
         2,
         { from: dataManager }
       );
+
+      await attributeInstance
+        .setAttribute(treeId1, generatedCode1, 144, generationType1, 2, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(AttributeErrorMsg.DUPLICATE_TREE_ATTRIBUTES);
 
       const generatedAttributes1 =
         await attributeInstance.uniquenessFactorToGeneratedAttributesCount.call(

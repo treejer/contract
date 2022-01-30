@@ -108,8 +108,10 @@ run_test() {
     if [[ $isERROR == "TRUE" ]]; 
     then
     printf "\n\n /************** TEST FAILED **********************/ \n\n"
+    exit 1
     else
     printf "\n\n /************** TEST SUCCESSFUL **********************/ \n\n"
+    exit 0
     fi
 
     #backup-migrations config
@@ -120,5 +122,3 @@ run_test() {
 npx truffle version
 
 run_test
-
-

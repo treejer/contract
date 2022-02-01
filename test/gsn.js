@@ -2,6 +2,7 @@
 
 const AccessRestriction = artifacts.require("AccessRestriction");
 const RelayRecipient = artifacts.require("RelayRecipient");
+const TestRelayRecipient = artifacts.require("TestRelayRecipient");
 const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
 const Planter = artifacts.require("Planter");
 const assert = require("chai").assert;
@@ -300,7 +301,7 @@ contract("Gsn", (accounts) => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
   });
 
-  it("test TestAttributes", async () => {
+  it("test postRelayedCall", async () => {
     //deploy TestWhitelistPaymaster
 
     testInstance = await TestWhitelistPaymaster.new({
@@ -310,5 +311,83 @@ contract("Gsn", (accounts) => {
     await testInstance.test(whitelistPaymasterInstance.address, {
       from: deployerAccount,
     });
+  });
+
+  it("test preRelayedCall funder", async () => {
+    //deploy TestWhitelistPaymaster
+
+    testInstance = await TestWhitelistPaymaster.new({
+      from: deployerAccount,
+    });
+
+    testRelayRecipientInstance = await TestRelayRecipient.new({
+      from: deployerAccount,
+    });
+
+    await testInstance
+      .testPreRelayedCall(
+        whitelistPaymasterInstance.address,
+        testRelayRecipientInstance.address,
+        zeroAddress,
+        {
+          from: deployerAccount,
+        }
+      )
+      .should.be.rejectedWith("Target not exists");
+
+    await whitelistPaymasterInstance.addFunderWhitelistTarget(
+      testRelayRecipientInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await testInstance.testPreRelayedCall(
+      whitelistPaymasterInstance.address,
+      testRelayRecipientInstance.address,
+      zeroAddress,
+      {
+        from: deployerAccount,
+      }
+    );
+  });
+
+  it("test preRelayedCall planter", async () => {
+    //deploy TestWhitelistPaymaster
+
+    testInstance = await TestWhitelistPaymaster.new({
+      from: deployerAccount,
+    });
+
+    testRelayRecipientInstance = await TestRelayRecipient.new({
+      from: deployerAccount,
+    });
+
+    await whitelistPaymasterInstance.addPlanterWhitelistTarget(
+      testRelayRecipientInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
+
+    await testInstance.testPreRelayedCall(
+      whitelistPaymasterInstance.address,
+      testRelayRecipientInstance.address,
+      userAccount7,
+      {
+        from: deployerAccount,
+      }
+    ).should.be.rejected;
+
+    await Common.addPlanter(arInstance, userAccount7, deployerAccount);
+
+    await testInstance.testPreRelayedCall(
+      whitelistPaymasterInstance.address,
+      testRelayRecipientInstance.address,
+      userAccount7,
+      {
+        from: deployerAccount,
+      }
+    );
   });
 });

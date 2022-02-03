@@ -2,10 +2,8 @@
 
 ![Background Image](./assets/treejerStory.png)
 [![Twitter Follow](https://img.shields.io/twitter/follow/TreejerTalks?label=Follow)](https://twitter.com/TreejerTalks)
-
 [![CircleCI](https://circleci.com/gh/treejer/contract/tree/circleci-project-setup.svg?style=shield)](https://app.circleci.com/pipelines/github/treejer/contract?branch=circleci-project-setup&filter=all)
 [![Coverage Status](https://coveralls.io/repos/github/treejer/contract/badge.svg?branch=circleci-project-setup)](https://coveralls.io/github/treejer/contract?branch=circleci-project-setup)
-
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://docs.treejer.com/project-charter#da-contributor-covenant-code-of-conduct)
 
 Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum.

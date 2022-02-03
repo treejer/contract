@@ -1,32 +1,39 @@
 # Treejer Protocol Smart Contracts
+
 ![Background Image](./assets/treejerStory.png)
 [![Twitter Follow](https://img.shields.io/twitter/follow/TreejerTalks?label=Follow)](https://twitter.com/TreejerTalks)
-[![Build Status](https://travis-ci.com/treejer/contract.svg?branch=develop)](https://travis-ci.com/treejer/contract)
+[![CircleCI](https://circleci.com/gh/treejer/contract/tree/circleci-project-setup.svg?style=shield)](https://app.circleci.com/pipelines/github/treejer/contract?branch=circleci-project-setup&filter=all)
+[![Coverage Status](https://coveralls.io/repos/github/treejer/contract/badge.svg?branch=circleci-project-setup)](https://coveralls.io/github/treejer/contract?branch=circleci-project-setup)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://docs.treejer.com/project-charter#da-contributor-covenant-code-of-conduct)
 
-
-Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum. 
+Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum.
 
 In-depth documentation on Treejer protocol is available at [Treejer Docs](http://docs.treejer.com)
 
-Visit [Treejer Blog](http://blog.treejer.com) for more details into the treejer and how it works. 
+Visit [Treejer Blog](http://blog.treejer.com) for more details into the treejer and how it works.
 
 ## Local Development
+
 The following assumes the use of `node@>=13`.
 
 ### Install Dependencies
+
 `npm install`
 
 ### Start Ganache
+
 `npm ganache`
 
 ### Test
+
 `npm test`
 
 ### Deploy on local ganache
+
 `truffle deploy`
 
 ## How to Contribute
+
 To chat with us & stay up to date, join our [Telegram](https://t.me/joinchat/wECs8qIsryw1YzU5).
 
 Join us on [Discord](https://discord.gg/8WuVd2ERC2)

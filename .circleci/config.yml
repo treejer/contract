@@ -1,0 +1,40 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.0.0
+  coveralls: coveralls/coveralls@1.0.6
+jobs:
+  executor: node/default
+  build:
+    docker:
+      - image: circleci/node:16.13.1
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json"}}
+
+      - run:
+          name: run build-serve
+          command: node --max-old-space-size=4096 `which npm` install
+
+      - run:
+          name: install-npm
+          command: sudo npm install
+
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json"}}
+          paths:
+            - ./node_modules
+      - run:
+          name: test
+          command: npm test
+      - run:
+          name: coverage
+          command: npm run coverage
+      - coveralls/upload:
+          path_to_lcov: ./final-coverage/lcov.info
+
+# Orchestrate our job run sequence
+workflows:
+  build_and_test:
+    jobs:
+      - build

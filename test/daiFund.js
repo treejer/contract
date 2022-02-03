@@ -15,6 +15,8 @@ const { CommonErrorMsg, DaiFundErrorMsg } = require("./enumes");
 
 const Common = require("./common");
 
+const FakeToken = artifacts.require("FakeToken");
+
 contract("DaiFund", (accounts) => {
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -33,6 +35,8 @@ contract("DaiFund", (accounts) => {
 
   let daiInstance;
   let planterFundsInstnce;
+
+  let fakeTokenInstance;
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
   const withdrawReason = "reason to withdraw";
@@ -68,6 +72,10 @@ contract("DaiFund", (accounts) => {
         from: deployerAccount,
       });
 
+      await daiFundInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await daiFundInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
@@ -81,6 +89,8 @@ contract("DaiFund", (accounts) => {
       });
 
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
+
+      fakeTokenInstance = await FakeToken.new({ from: accounts[0] });
     });
 
     it("set daiFundInstance address and fail in invalid situation", async () => {
@@ -108,6 +118,10 @@ contract("DaiFund", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await daiFundInstance.setPlanterFundContractAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
@@ -324,6 +338,8 @@ contract("DaiFund", (accounts) => {
 
       daiInstance = await Dai.new("DAI", "dai", { from: accounts[0] });
 
+      fakeTokenInstance = await FakeToken.new({ from: accounts[0] });
+
       /////////////---------------------- set address ------------------- //////////////
       await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
@@ -386,6 +402,31 @@ contract("DaiFund", (accounts) => {
       await daiInstance.setMint(daiFundInstance.address, amount);
 
       ////--------------------call fund tree by auction----------------
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .fundTree(
+          treeId,
+          amount,
+          planterShare,
+          ambassadorShare,
+          researchShare,
+          localDevelopmentShare,
+          insuranceShare,
+          treasuryShare,
+          reserve1Share,
+          reserve2Share,
+          { from: userAccount3 }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       const eventTx = await daiFundInstance.fundTree(
         treeId,
         amount,
@@ -918,6 +959,24 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawResearchBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawResearchBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -977,6 +1036,25 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawLocalDevelopmentBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawLocalDevelopmentBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -1028,6 +1106,25 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawInsuranceBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawInsuranceBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -1079,6 +1176,25 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawTreasuryBalance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawTreasuryBalance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -1130,6 +1246,25 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawReserve1Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawReserve1Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -1180,6 +1315,25 @@ contract("DaiFund", (accounts) => {
         .should.be.rejectedWith(DaiFundErrorMsg.INSUFFICIENT_AMOUNT);
 
       //////////////// ------------------ withdraw  some balance and then try to withdraw
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .withdrawReserve2Balance(
+          web3.utils.toWei("0.2"),
+          "reason to withdraw",
+          {
+            from: deployerAccount,
+          }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       await daiFundInstance.withdrawReserve2Balance(
         web3.utils.toWei("0.2"),
         "reason to withdraw",
@@ -2912,6 +3066,28 @@ contract("DaiFund", (accounts) => {
 
       ////--------------------call fund tree by auction----------------
 
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .fundTreeBatch(
+          totalPlanterAmount1,
+          totalAmbassadorAmount1,
+          totalResearch1,
+          totalLocalDevelopment1,
+          totalInsurance1,
+          totalTreasury1,
+          totalReserve1_1,
+          totalReserve2_1,
+          { from: userAccount3 }
+        )
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
       const eventTx1 = await daiFundInstance.fundTreeBatch(
         totalPlanterAmount1,
         totalAmbassadorAmount1,
@@ -3093,6 +3269,20 @@ contract("DaiFund", (accounts) => {
       await daiFundInstance
         .transferReferrerDai(transferAmount1, { from: dataManager })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await daiFundInstance.setDaiTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance
+        .transferReferrerDai(transferAmount1, {
+          from: userAccount6,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
 
       await daiFundInstance.transferReferrerDai(transferAmount1, {
         from: userAccount6,

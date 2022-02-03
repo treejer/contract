@@ -25,12 +25,13 @@ const {
 } = require("./enumes");
 
 const Math = require("./math");
+const { should } = require("chai");
 
 //gsn
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
-const Gsn = require("@opengsn/provider");
-const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
-const ethers = require("ethers");
+// const WhitelistPaymaster = artifacts.require("WhitelistPaymaster");
+// const Gsn = require("@opengsn/provider");
+// const { GsnTestEnvironment } = require("@opengsn/cli/dist/GsnTestEnvironment");
+// const ethers = require("ethers");
 
 contract("TreeFactory", (accounts) => {
   let treeFactoryInstance;
@@ -78,6 +79,10 @@ contract("TreeFactory", (accounts) => {
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
       });
+
+      await treeFactoryInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await treeFactoryInstance.initialize(arInstance.address, {
         from: deployerAccount,
@@ -148,6 +153,10 @@ contract("TreeFactory", (accounts) => {
 
       /////////////------------------------------------ setPlanterFund address ----------------------------------------//
 
+      await treeFactoryInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await treeFactoryInstance.setPlanterFundAddress(
         planterFundInstnce.address,
         {
@@ -163,6 +172,10 @@ contract("TreeFactory", (accounts) => {
 
       ////////////------------------------------------ set planter address ----------------------------------------//
 
+      await treeFactoryInstance.setPlanterContractAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await treeFactoryInstance.setPlanterContractAddress(
         planterInstance.address,
         {
@@ -177,6 +190,10 @@ contract("TreeFactory", (accounts) => {
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await treeFactoryInstance.setTreeTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
         from: deployerAccount,
       });
@@ -2216,6 +2233,10 @@ contract("TreeFactory", (accounts) => {
       );
 
       assert.equal(result3, false, "result3 not true");
+
+      await treeFactoryInstance.resetSaleTypeBatch(103, 104, 3, {
+        from: deployerAccount,
+      });
     });
   });
 

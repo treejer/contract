@@ -33,6 +33,9 @@ const {
   TreasuryManagerErrorMsg,
 } = require("./enumes");
 
+const FakeToken = artifacts.require("FakeToken");
+const FakeAttribute = artifacts.require("FakeAttribute");
+
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 contract("IncrementalSale", (accounts) => {
@@ -73,6 +76,12 @@ contract("IncrementalSale", (accounts) => {
       from: deployerAccount,
     });
 
+    fakeTokenInstance = await FakeToken.new({ from: deployerAccount });
+
+    fakeAttributeInstance = await FakeAttribute.new({
+      from: deployerAccount,
+    });
+
     ////--------------------------uniswap deploy
 
     wethInstance = await Token.new("WETH", "weth", {
@@ -107,6 +116,10 @@ contract("IncrementalSale", (accounts) => {
       iSaleInstance = await IncrementalSale.new({
         from: deployerAccount,
       });
+
+      await iSaleInstance.initialize(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await iSaleInstance.initialize(arInstance.address, {
         from: deployerAccount,
@@ -265,6 +278,10 @@ contract("IncrementalSale", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
+      await iSaleInstance.setRegularSaleAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await iSaleInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
@@ -330,6 +347,10 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
+
+      await iSaleInstance.setTreeFactoryAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await iSaleInstance.setWethTokenAddress(WETHAddress, {
         from: deployerAccount,
@@ -666,6 +687,12 @@ contract("IncrementalSale", (accounts) => {
         .should.be.rejectedWith(
           IncrementalSaleErrorMsg.CANT_CREATE_NEW_INCREMENTALSALE
         );
+
+      await iSaleInstance
+        .removeIncrementalSale(700, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
 
       await iSaleInstance.removeIncrementalSale(150, {
         from: dataManager,
@@ -1060,6 +1087,12 @@ contract("IncrementalSale", (accounts) => {
 
       assert.equal(Number(tree250_1.saleType), 0, "sale type is not correct");
 
+      await iSaleInstance
+        .updateEndTreeId(700, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(IncrementalSaleErrorMsg.INVALID_COUNT);
+
       const eventTx = await iSaleInstance.updateEndTreeId(100, {
         from: dataManager,
       });
@@ -1364,6 +1397,11 @@ contract("IncrementalSale", (accounts) => {
       await iSaleInstance.setTreeFactoryAddress(treeFactoryInstance.address, {
         from: deployerAccount,
       });
+
+      await iSaleInstance.setWethFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await iSaleInstance.setWethFundAddress(wethFundInstance.address, {
         from: deployerAccount,
       });
@@ -1372,15 +1410,28 @@ contract("IncrementalSale", (accounts) => {
       //   from: deployerAccount,
       // });
 
+      await iSaleInstance.setAllocationAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await iSaleInstance.setAllocationAddress(allocationInstance.address, {
         from: deployerAccount,
       });
       await iSaleInstance.setRegularSaleAddress(regularSaleInstance.address, {
         from: deployerAccount,
       });
+
+      await iSaleInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
       await iSaleInstance.setPlanterFundAddress(planterFundsInstnce.address, {
         from: deployerAccount,
       });
+
+      await iSaleInstance.setAttributesAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
 
       await iSaleInstance.setAttributesAddress(attributeInstance.address, {
         from: deployerAccount,
@@ -1991,6 +2042,34 @@ contract("IncrementalSale", (accounts) => {
       )
         .times(0.00462)
         .div(0.08442);
+
+      await iSaleInstance.setWethTokenAddress(fakeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await iSaleInstance
+        .fundTree(15, userAccount6, zeroAddress, 0, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith("Unsuccessful transfer");
+
+      await iSaleInstance.setWethTokenAddress(wethInstance.address, {
+        from: deployerAccount,
+      });
+
+      await iSaleInstance.setAttributesAddress(fakeAttributeInstance.address, {
+        from: deployerAccount,
+      });
+
+      await iSaleInstance
+        .fundTree(15, userAccount6, zeroAddress, 0, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith("Symbol not generated");
+
+      await iSaleInstance.setAttributesAddress(attributeInstance.address, {
+        from: deployerAccount,
+      });
 
       let tx = await iSaleInstance.fundTree(15, userAccount6, zeroAddress, 0, {
         from: userAccount3,

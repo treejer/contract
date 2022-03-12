@@ -104,7 +104,10 @@ run_test() {
 
     done
 
-
+    #backup-migrations config
+    mv "$path"/backup-migrations/* "$path"/migrations
+    rm -r backup-migrations
+    
     if [[ $isERROR == "TRUE" ]]; 
     then
     printf "\n\n /************** TEST FAILED **********************/ \n\n"
@@ -114,9 +117,7 @@ run_test() {
     exit 0
     fi
 
-    #backup-migrations config
-    mv "$path"/backup-migrations/* "$path"/migrations
-    rm -r backup-migrations
+
 }
 
 npx truffle version

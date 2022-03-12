@@ -3,8 +3,8 @@
 ![Background Image](./assets/treejerStory.png)
 [![Twitter Follow](https://img.shields.io/twitter/follow/TreejerTalks?label=Follow)](https://twitter.com/TreejerTalks)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![CircleCI](https://circleci.com/gh/treejer/contract/tree/develop.svg?style=shield)](https://app.circleci.com/pipelines/github/treejer/contract?branch=develop&filter=all)
-[![Coverage Status](https://coveralls.io/repos/github/treejer/contract/badge.svg?branch=develop)](https://coveralls.io/github/treejer/contract?branch=develop)
+[![CircleCI](https://circleci.com/gh/treejer/contract/tree/main.svg?style=shield)](https://app.circleci.com/pipelines/github/treejer/contract?branch=main&filter=all)
+[![Coverage Status](https://coveralls.io/repos/github/treejer/contract/badge.svg?branch=main)](https://coveralls.io/github/treejer/contract?branch=main)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://docs.treejer.com/project-charter#da-contributor-covenant-code-of-conduct)
 
 Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum.

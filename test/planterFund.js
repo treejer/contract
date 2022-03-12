@@ -142,37 +142,46 @@ contract("PlanterFund", (accounts) => {
       );
 
       ///////////////---------------------------------set planter contract address--------------------------------------------------------
-      planterFundInstance
+      await planterFundInstance
         .setPlanterContractAddress(planterInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      planterFundInstance.setPlanterContractAddress(zeroAddress, {
+      await planterFundInstance.setPlanterContractAddress(zeroAddress, {
         from: deployerAccount,
       }).should.be.rejected;
 
-      planterFundInstance.setPlanterContractAddress(planterInstance.address, {
-        from: deployerAccount,
-      });
+      await planterFundInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
       ///////////////---------------------------------set dai token address--------------------------------------------------------
-      planterFundInstance
+      await planterFundInstance
         .setDaiTokenAddress(daiInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      planterFundInstance
+      await planterFundInstance
         .setDaiTokenAddress(zeroAddress, {
           from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
-      planterFundInstance.setDaiTokenAddress(daiInstance.address, {
+      console.log("daiInstance.address", daiInstance.address);
+
+      await planterFundInstance.setDaiTokenAddress(daiInstance.address, {
         from: deployerAccount,
       });
 
+      console.log(
+        "await planterFundInstance.daiToken.call()",
+        await planterFundInstance.daiToken.call()
+      );
       assert.equal(
         daiInstance.address,
         await planterFundInstance.daiToken.call(),

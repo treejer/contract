@@ -334,7 +334,7 @@ contract("regularSale", (accounts) => {
     /////////////////---------------------------------update lastFundedTreeId--------------------------------------------------------
 
     it("update lastFundedTreeId", async () => {
-      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+      await Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
       await regularSaleInstance
         .updateLastFundedTreeId(500, {
@@ -396,7 +396,7 @@ contract("regularSale", (accounts) => {
     /////////////////---------------------------------update maxTreeSupply--------------------------------------------------------
 
     it("update maxTreeSupply", async () => {
-      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+      await Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
       await regularSaleInstance
         .updateMaxTreeSupply(9900, {
@@ -1381,7 +1381,7 @@ contract("regularSale", (accounts) => {
         "lastFundedTreeId not true"
       );
 
-      Common.addDataManager(arInstance, userAccount1, deployerAccount);
+      await Common.addDataManager(arInstance, userAccount1, deployerAccount);
 
       let tx = await regularSaleInstance.updateLastFundedTreeId(13333, {
         from: userAccount1,

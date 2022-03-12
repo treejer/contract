@@ -350,7 +350,7 @@ contract("Planter", (accounts) => {
 
   it("join should be fail", async () => {
     ///////////// fail user not planter
-    planterInstance
+    await planterInstance
       .join(1, 12, 24, 12, zeroAddress, zeroAddress, {
         from: userAccount2,
       })

@@ -625,16 +625,16 @@ contract("TreeFactory", (accounts) => {
 
       /////////////////// --------------------------- add planters
 
-      Common.addPlanter(arInstance, userAccount1, deployerAccount);
-      Common.addPlanter(arInstance, userAccount2, deployerAccount);
-      Common.addPlanter(arInstance, userAccount3, deployerAccount);
-      Common.addPlanter(arInstance, userAccount4, deployerAccount);
-      Common.addPlanter(arInstance, userAccount5, deployerAccount);
-      Common.addPlanter(arInstance, userAccount6, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount3, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount5, deployerAccount);
+      await Common.addPlanter(arInstance, userAccount6, deployerAccount);
 
       ///////////////////------------------------------ join planters
 
-      Common.joinSimplePlanter(
+      await Common.joinSimplePlanter(
         planterInstance,
         1,
         userAccount1,
@@ -642,14 +642,14 @@ contract("TreeFactory", (accounts) => {
         zeroAddress
       );
 
-      Common.joinOrganizationPlanter(
+      await Common.joinOrganizationPlanter(
         planterInstance,
         userAccount2,
         zeroAddress,
         dataManager
       );
 
-      Common.joinSimplePlanter(
+      await Common.joinSimplePlanter(
         planterInstance,
         3,
         userAccount3,

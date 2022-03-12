@@ -18,8 +18,7 @@
  *
  */
 require("dotenv").config();
-const HDWalletProvider = require("@truffle/hdwallet-provider");
-const wrapProvider = require("arb-ethers-web3-bridge").wrapProvider;
+// const HDWalletProvider = require("@truffle/hdwallet-provider");
 // const infuraKey = "fj4jll3k.....";
 
 const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
@@ -98,27 +97,30 @@ module.exports = {
       gasPrice: 10000000000,
     },
 
-    arbitrum: {
-      provider: () => {
-        // return wrapped provider:
-        return wrapProvider(
-          new HDWalletProvider(privateKeys, process.env.ARB_PROVIDER_URL)
-        );
-      },
-      network_id: "*",
-      gasPrice: 0,
-      chainId: 215728282823301,
-    },
+    // arbitrum: {
+    //   provider: () => {
+    //     // return wrapped provider:
+    //     return wrapProvider(
+    //       new HDWalletProvider(privateKeys, process.env.ARB_PROVIDER_URL)
+    //     );
+    //   },
+    //   network_id: "*",
+    //   gasPrice: 0,
+    //   chainId: 215728282823301,
+    // },
 
     matic: {
       provider: () =>
-        new HDWalletProvider(privateKeys, `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`),
+        new HDWalletProvider(
+          privateKeys,
+          `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+        ),
       network_id: 137,
       confirmations: 2,
       timeoutBlocks: 200,
       gas: 8500000,
       gasPrice: 101000000000,
-      skipDryRun: false
+      skipDryRun: false,
     },
 
     mumbai: {

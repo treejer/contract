@@ -29,7 +29,7 @@ gsn_running() {
 }
 
 start_ganache() {
-  ganache-cli ganache-cli --networkId 1337 --chainId 1337 -l 20000000  --port "$ganache_port" --accounts 20 > /dev/null &
+  node_modules/.bin/ganache --networkId 1337 -l 20000000  --port "$ganache_port" --accounts 20 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."
@@ -104,7 +104,10 @@ run_test() {
 
     done
 
-
+    #backup-migrations config
+    mv "$path"/backup-migrations/* "$path"/migrations
+    rm -r backup-migrations
+    
     if [[ $isERROR == "TRUE" ]]; 
     then
     printf "\n\n /************** TEST FAILED **********************/ \n\n"
@@ -114,9 +117,7 @@ run_test() {
     exit 0
     fi
 
-    #backup-migrations config
-    mv "$path"/backup-migrations/* "$path"/migrations
-    rm -r backup-migrations
+
 }
 
 npx truffle version

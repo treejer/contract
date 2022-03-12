@@ -29,7 +29,7 @@ gsn_running() {
 }
 
 start_ganache() {
-  ganache --networkId 1337 -l 20000000  --port "$ganache_port" --accounts 20 > /dev/null &
+  node_modules/.bin/ganache --networkId 1337 -l 20000000  --port "$ganache_port" --accounts 20 > /dev/null &
   ganache_pid=$!
 
   echo "Waiting for ganache to launch on port "$ganache_port"..."

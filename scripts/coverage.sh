@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# npm install -g istanbul-combine
 
 run_coverage() {
     path=$(pwd)
@@ -37,7 +36,7 @@ run_coverage() {
     rm -r backup-migrations
 
     #istanbul-combine config
-    istanbul-combine -d final-coverage -p both -r lcov -r html -r json "$path"/final-coverage-json/*.json
+    ./node_modules/.bin/istanbul report --dir final-coverage --include "$path"/final-coverage-json/*.json
     rm -r final-coverage-json
 
 }

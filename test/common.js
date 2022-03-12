@@ -101,18 +101,28 @@ Common.successPlant = async (
     deployerAccount
   );
 
-  await planterList.map(async (item) => {
-    await Common.addPlanter(arInstance, item, deployerAccount);
+  await new Promise((resolve, reject) => {
+    planterList.map(async (item) => {
+      await Common.addPlanter(arInstance, item, deployerAccount);
+      if (planterList[planterList.length - 1] == item) {
+        resolve();
+      }
+    });
   });
 
-  await planterList.map(async (item) => {
-    await Common.joinSimplePlanter(
-      planterInstance,
-      1,
-      item,
-      zeroAddress,
-      zeroAddress
-    );
+  await new Promise((resolve, reject) => {
+    planterList.map(async (item) => {
+      await Common.joinSimplePlanter(
+        planterInstance,
+        1,
+        item,
+        zeroAddress,
+        zeroAddress
+      );
+      if (planterList[planterList.length - 1] == item) {
+        resolve();
+      }
+    });
   });
 
   await treeFactoryInstance.listTree(treeId, ipfsHash, {
@@ -135,6 +145,9 @@ Common.successPlant = async (
   await treeFactoryInstance.verifyAssignedTree(treeId, true, {
     from: dataManager,
   });
+};
+Common.sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 Common.joinSimplePlanter = async (
   planterInstance,

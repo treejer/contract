@@ -116,9 +116,7 @@ contract("AccessRestriction", (accounts) => {
       .ifPaused()
       .should.be.rejectedWith(CommonErrorMsg.CHECK_IF_PAUSED);
     await arInstance.ifNotPaused();
-    await arInstance
-      .pause({ from: userAccount1 })
-      .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    await arInstance.pause({ from: userAccount1 }).should.be.rejected;
     await arInstance.pause({ from: deployerAccount });
     await arInstance
       .pause({ from: deployerAccount })

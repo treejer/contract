@@ -36,7 +36,7 @@ run_coverage() {
     rm -r backup-migrations
 
     #istanbul-combine config
-    ./node_modules/.bin/istanbul report --dir final-coverage --include "$path"/final-coverage-json/*.json
+    ./node_modules/.bin/istanbul report --include="$path"/final-coverage-json/*.json -d final-coverage lcov
     rm -r final-coverage-json
 
 }

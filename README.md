@@ -7,13 +7,11 @@
 [![Coverage Status](https://coveralls.io/repos/github/treejer/contract/badge.svg?branch=develop)](https://coveralls.io/github/treejer/contract?branch=develop)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://docs.treejer.com/project-charter#da-contributor-covenant-code-of-conduct)
 
-Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Ethereum.
+Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Polygon
 
-In-depth documentation on Treejer protocol is available at [Treejer Docs](http://docs.treejer.com)
+In-depth documentation on Treejer protocol and the latest deployed contracts addresses is available at [Treejer Docs](https://docs.treejer.com/smart-contracts)
 
-Visit [Treejer Blog](http://blog.treejer.com) for more details into the treejer and how it works.
-
-Also, you can check the latest deployed contracts addresses on [Treejer docs](https://docs.treejer.com/smart-contracts).
+Visit [Treejer Blog](http://blog.treejer.com) for more details into the |Treejer and how it works
 
 ## Local Development
 

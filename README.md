@@ -13,6 +13,8 @@ In-depth documentation on Treejer protocol is available at [Treejer Docs](http:/
 
 Visit [Treejer Blog](http://blog.treejer.com) for more details into the treejer and how it works.
 
+Also, you can check the latest deployed contracts addresses on [Treejer docs](https://docs.treejer.com/smart-contracts).
+
 ## Local Development
 
 The following assumes the use of `node@>=13`.

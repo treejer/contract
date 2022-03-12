@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": ">=13.0.0"
+  },
   "devDependencies": {
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.4.2",

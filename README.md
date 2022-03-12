@@ -9,7 +9,7 @@
 
 Treejer Protocol Smart Contracts is a lightweight implementation of the [Treejer Protocol](treejer.com) on Polygon
 
-In-depth documentation on Treejer protocol and the latest deployed contracts addresses is available at [Treejer Docs](https://docs.treejer.com/smart-contracts)
+In-depth documentation on Treejer protocol and the latest deployed contracts addresses are available at [Treejer Docs](https://docs.treejer.com/smart-contracts)
 
 Visit [Treejer Blog](http://blog.treejer.com) for more details into the |Treejer and how it works
 

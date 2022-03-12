@@ -1,15 +1,13 @@
 // const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 const AccessRestriction = artifacts.require("AccessRestriction");
 const assert = require("chai").assert;
-require("chai")
-  .use(require("chai-as-promised"))
-  .should();
+require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const { CommonErrorMsg } = require("./enumes");
 
-contract("AccessRestriction", accounts => {
+contract("AccessRestriction", (accounts) => {
   let arInstance;
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -25,11 +23,11 @@ contract("AccessRestriction", accounts => {
     "0x0000000000000000000000000000000000000000000000000000000000000000";
   beforeEach(async () => {
     arInstance = await AccessRestriction.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await arInstance.initialize(deployerAccount, {
-      from: deployerAccount
+      from: deployerAccount,
     });
   });
   it("should add admin", async () => {
@@ -38,19 +36,19 @@ contract("AccessRestriction", accounts => {
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
     const before = await arInstance.isAdmin(adminAccount);
     let tx = await arInstance.grantRole(DEFAULT_ADMIN_ROLE, adminAccount, {
-      from: deployerAccount
+      from: deployerAccount,
     });
     await arInstance.ifAdmin(adminAccount);
     const after = await arInstance.isAdmin(adminAccount);
     assert.equal(before, false, "admin role is not correct");
     assert.equal(after, true, "admin role is not correct");
-    truffleAssert.eventEmitted(tx, "RoleGranted", ev => {
+    truffleAssert.eventEmitted(tx, "RoleGranted", (ev) => {
       return (
         ev.account.toString() === adminAccount && ev.role === DEFAULT_ADMIN_ROLE
       );
     });
   });
-  it("should addplanter and check data", async () => {
+  it("should add planter and check data", async () => {
     await arInstance
       .ifPlanter(userAccount1)
       .should.be.rejectedWith(CommonErrorMsg.CHECK_PLANTER);

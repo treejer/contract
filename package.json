@@ -21,8 +21,12 @@
     "eth-gas-reporter": "0.2.24",
     "ethereumjs-units": "0.2.0",
     "ganache": "7.0.3",
+    "husky": "7.0.4",
     "istanbul-combine": "0.3.0",
+    "lint-staged": "12.3.5",
     "mocha": "9.2.1",
+    "prettier": "2.5.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "3.3.7",
     "solidity-coverage": "0.7.17",
     "truffle": "5.5.4",
@@ -34,7 +38,12 @@
     "ganache": "node_modules/.bin/ganache --networkId 1337 -l 20000000",
     "gsn": "node_modules/.bin/gsn start",
     "coverage": "bash scripts/coverage.sh",
-    "deploy": "npx truffle deploy"
+    "deploy": "npx truffle deploy",
+    "prettier": "prettier --write .",
+    "lint:prettier": "prettier --check ."
+  },
+  "lint-staged": {
+    "**/*": "prettier --check ."
   },
   "keywords": [
     "Treejer",

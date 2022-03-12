@@ -1,0 +1,8 @@
+# Ignore artifacts:
+build
+coverage
+.*
+final-coverage
+slither.json
+contracts/external/*
+init.json

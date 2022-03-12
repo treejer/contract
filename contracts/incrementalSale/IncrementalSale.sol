@@ -278,10 +278,7 @@ contract IncrementalSale is Initializable, IIncrementalSale {
 
         IncrementalSaleData storage incSaleData = incrementalSaleData;
 
-        require(
-            lastSold + _count < incSaleData.endTreeId,
-            "Insufficient tree"
-        );
+        require(lastSold + _count < incSaleData.endTreeId, "Insufficient tree");
 
         address recipient = _recipient == address(0) ? msg.sender : _recipient;
 

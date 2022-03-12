@@ -52,10 +52,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
         override
         onlyAdmin
     {
-        require(
-            planterTargetWhitelist[_target],
-            "Target not exists"
-        );
+        require(planterTargetWhitelist[_target], "Target not exists");
 
         planterTargetWhitelist[_target] = false;
     }
@@ -74,10 +71,7 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
         override
         onlyAdmin
     {
-        require(
-            funderTargetWhitelist[_target],
-            "Target not exists"
-        );
+        require(funderTargetWhitelist[_target], "Target not exists");
 
         funderTargetWhitelist[_target] = false;
     }

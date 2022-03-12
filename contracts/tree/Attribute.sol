@@ -155,10 +155,7 @@ contract Attribute is Initializable, IAttribute {
         ifNotPaused
         onlyDataManagerOrTreejerContract
     {
-        require(
-            _checkValidSymbol(_uniquenessFactor),
-            "Invalid symbol"
-        );
+        require(_checkValidSymbol(_uniquenessFactor), "Invalid symbol");
         require(
             uniquenessFactorToSymbolStatus[_uniquenessFactor].status == 0,
             "Duplicate symbol"
@@ -205,10 +202,7 @@ contract Attribute is Initializable, IAttribute {
         uint8 _generationType,
         uint64 _coefficient
     ) external override ifNotPaused onlyDataManagerOrTreejerContract {
-        require(
-            _checkValidSymbol(_symbolUniquenessFactor),
-            "Invalid symbol"
-        );
+        require(_checkValidSymbol(_symbolUniquenessFactor), "Invalid symbol");
         require(
             uniquenessFactorToSymbolStatus[_symbolUniquenessFactor].status < 2,
             "Duplicate symbol"

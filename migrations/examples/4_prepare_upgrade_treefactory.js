@@ -7,7 +7,7 @@
 
 // module.exports = async function (deployer) {
 //     const treeFactory = await TreeFactory.deployed();
-    
+
 //     // upgrade direct
 //     await upgradeProxy(treeFactory.address, TreeFactoryV2, { deployer, unsafeAllowCustomTypes:true });
 

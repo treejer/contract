@@ -280,7 +280,10 @@ contract WethFund is Initializable, IWethFund {
         uint256 _wethMaxUse,
         uint256 _daiAmountToSwap
     ) external override ifNotPaused onlyScript {
-        require(_wethMaxUse <= totalBalances.treasury, "Insufficient Liquidity");
+        require(
+            _wethMaxUse <= totalBalances.treasury,
+            "Insufficient Liquidity"
+        );
 
         require(
             _daiAmountToSwap > 0 &&

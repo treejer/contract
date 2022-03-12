@@ -232,10 +232,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
 
         require(treeData.treeStatus == 2, "Invalid tree");
 
-        require(
-            planterContract.canAssignTree(_planter),
-            "Not allowed planter"
-        );
+        require(planterContract.canAssignTree(_planter), "Not allowed planter");
 
         treeData.planter = _planter;
 
@@ -311,17 +308,11 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         override
         ifNotPaused
     {
-        require(
-            trees[_treeId].planter == _msgSender(),
-            "Not owned tree"
-        );
+        require(trees[_treeId].planter == _msgSender(), "Not owned tree");
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
 
-        require(
-            treeUpdates[_treeId].updateStatus != 1,
-            "Pending update"
-        );
+        require(treeUpdates[_treeId].updateStatus != 1, "Pending update");
 
         require(
             block.timestamp >=
@@ -345,10 +336,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
         ifNotPaused
         onlyVerifier
     {
-        require(
-            treeUpdates[_treeId].updateStatus == 1,
-            "Not pending update"
-        );
+        require(treeUpdates[_treeId].updateStatus == 1, "Not pending update");
 
         require(trees[_treeId].treeStatus > 3, "Tree not planted");
 

@@ -142,10 +142,7 @@ contract Auction is Initializable, IAuction {
         uint256 _intialPrice,
         uint64 _bidInterval
     ) external override ifNotPaused onlyDataManager {
-        require(
-            allocation.allocationExists(_treeId),
-            "Allocation not exists"
-        );
+        require(allocation.allocationExists(_treeId), "Allocation not exists");
 
         require(
             0 < _bidInterval && _bidInterval < 10001,
@@ -179,10 +176,7 @@ contract Auction is Initializable, IAuction {
 
         AuctionData storage auctionData = auctions[auctionId_];
 
-        require(
-            block.timestamp <= auctionData.endDate,
-            "Auction ended"
-        );
+        require(block.timestamp <= auctionData.endDate, "Auction ended");
 
         require(
             block.timestamp >= auctionData.startDate,
@@ -252,10 +246,7 @@ contract Auction is Initializable, IAuction {
 
         require(auctionData.endDate > 0, "Auction unavailable");
 
-        require(
-            block.timestamp >= auctionData.endDate,
-            "Auction not ended"
-        );
+        require(block.timestamp >= auctionData.endDate, "Auction not ended");
 
         if (auctionData.bidder != address(0)) {
             bool success = wethToken.transfer(

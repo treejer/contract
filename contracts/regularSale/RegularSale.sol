@@ -236,10 +236,7 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         ifNotPaused
         onlyDataManager
     {
-        require(
-            lastFundedTreeId < _maxTreeSupply,
-            "Invalid maxTreeSupply"
-        );
+        require(lastFundedTreeId < _maxTreeSupply, "Invalid maxTreeSupply");
 
         maxTreeSupply = _maxTreeSupply;
 
@@ -252,7 +249,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
         address _referrer,
         address _recipient
     ) external override ifNotPaused {
-        require(lastFundedTreeId + _count < maxTreeSupply, "Max supply reached");
+        require(
+            lastFundedTreeId + _count < maxTreeSupply,
+            "Max supply reached"
+        );
 
         require(_count > 0 && _count < 101, "Invalid count");
 
@@ -356,7 +356,10 @@ contract RegularSale is Initializable, RelayRecipient, IRegularSale {
             "Invalid treeId"
         );
 
-        require(daiToken.balanceOf(_msgSender()) >= price, "Insufficient balance");
+        require(
+            daiToken.balanceOf(_msgSender()) >= price,
+            "Insufficient balance"
+        );
 
         address recipient = _recipient == address(0)
             ? _msgSender()

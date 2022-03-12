@@ -127,10 +127,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
             "Exist or not planter"
         );
 
-        require(
-            _planterType == 1 || _planterType == 3,
-            "Invalid planterType"
-        );
+        require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
         if (_planterType == 3) {
             require(
@@ -184,10 +181,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
             "Exist or not planter"
         );
 
-        require(
-            _planterType == 1 || _planterType == 3,
-            "Invalid planterType"
-        );
+        require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
         if (_planterType == 3) {
             require(
@@ -264,10 +258,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
         ifNotPaused
         existPlanter(_msgSender())
     {
-        require(
-            _planterType == 1 || _planterType == 3,
-            "Invalid planterType"
-        );
+        require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
         PlanterData storage planterData = planters[_msgSender()];
 
@@ -288,10 +279,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
 
             planterData.status = 0;
         } else {
-            require(
-                planterData.planterType == 3,
-                "Planter type same"
-            );
+            require(planterData.planterType == 3, "Planter type same");
 
             memberOf[_msgSender()] = address(0);
 
@@ -382,10 +370,7 @@ contract Planter is Initializable, RelayRecipient, IPlanter {
     ) external override ifNotPaused onlyOrganization {
         require(planters[_planter].status > 0, "Invalid planter status");
         require(memberOf[_planter] == _msgSender(), "Not memberOf");
-        require(
-            _organizationMemberShareAmount < 10001,
-            "Invalid share"
-        );
+        require(_organizationMemberShareAmount < 10001, "Invalid share");
 
         organizationMemberShare[_msgSender()][
             _planter

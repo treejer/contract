@@ -37,6 +37,6 @@ The following assumes the use of `node@>=13`.
 
 To chat with us & stay up to date, join our [Discord](https://discord.gg/8WuVd2ERC2).
 
-Vulnerabilities should be disclosed directly to the Treejer team by emailing [here](https://security@treejer.com).
+Vulnerabilities should be disclosed directly to the Treejer team by emailing security@treejer.com.
 
 _© Copyright 2021, Treejer_

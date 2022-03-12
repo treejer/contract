@@ -33,7 +33,8 @@
     "gas_reporter": "bash scripts/run_test_w_gas_reporter.sh",
     "ganache": "node_modules/.bin/ganache --networkId 1337 -l 20000000",
     "gsn": "node_modules/.bin/gsn start",
-    "coverage": "bash scripts/coverage.sh"
+    "coverage": "bash scripts/coverage.sh",
+    "deploy": "npx truffle deploy"
   },
   "keywords": [
     "Treejer",

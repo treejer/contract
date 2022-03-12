@@ -23,22 +23,20 @@ The following assumes the use of `node@>=13`.
 
 ### Start Ganache
 
-`npm ganache`
+`npm run ganache`
 
 ### Test
 
-`npm test`
+`npm run test`
 
 ### Deploy on local ganache
 
-`truffle deploy`
+`npm run deploy`
 
 ## How to Contribute
 
-To chat with us & stay up to date, join our [Telegram](https://t.me/joinchat/wECs8qIsryw1YzU5).
+To chat with us & stay up to date, join our [Discord](https://discord.gg/8WuVd2ERC2).
 
-Join us on [Discord](https://discord.gg/8WuVd2ERC2)
-
-For security concerns, please submit an issue [here](https://github.com/treejer/contract/issues).
+Vulnerabilities should be disclosed directly to the Treejer team by emailing security@treejer.com.
 
 _© Copyright 2021, Treejer_

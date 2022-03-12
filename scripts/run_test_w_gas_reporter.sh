@@ -21,7 +21,7 @@ cleanup() {
 ganache_port=8545
 
 ganache_running() {
-  nc -z localhost "$ganache_port"
+  node_modules/.bin/nc -z localhost "$ganache_port"  | grep "open"
 }
 
 gsn_running() {

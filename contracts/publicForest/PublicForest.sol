@@ -7,9 +7,27 @@ import "./IPublicForest.sol";
 // import "@openzeppelin/contracts/utils/introspection/ERC165CheckerUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "./../regularSale/IRegularSale.sol";
 
 /** @title PublicForest contract */
-contract PublicForest is IPublicForest, IERC721Receiver, IERC1155Receiver {
+contract PublicForest is
+    Initializable,
+    IPublicForest,
+    IERC721Receiver,
+    IERC1155Receiver
+{
+    string public ipfsHash;
+    address public factoryAddress;
+
+    IRegularSale public regularSale;
+
+    /** NOTE modifier to check msg.sender is factoryAddress */
+    modifier onlyFactoryAddress() {
+        require(msg.sender == factoryAddress, "Caller not factoryAddress");
+        _;
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -53,4 +71,60 @@ contract PublicForest is IPublicForest, IERC721Receiver, IERC1155Receiver {
     }
 
     receive() external payable {}
+
+    function initialize(string memory _ipfsHash, address _factoryAddress)
+        external
+        initializer
+        onlyFactoryAddress
+    {
+        ipfsHash = _ipfsHash;
+        factoryAddress = _factoryAddress;
+    }
+
+    function updateFactoryAddress(address _factoryAddress)
+        external
+        override
+        onlyFactoryAddress
+    {
+        factoryAddress = _factoryAddress;
+    }
+
+    function updateIpfsHash(string memory _ipfsHash)
+        external
+        override
+        onlyFactoryAddress
+    {
+        ipfsHash = _ipfsHash;
+    }
+
+    function setRegularSaleAddress(address _address)
+        external
+        override
+        onlyFactoryAddress
+    {
+        IRegularSale candidateContract = IRegularSale(_address);
+        require(candidateContract.isRegularSale());
+        regularSale = candidateContract;
+    }
+
+    function swapTokenToDAI(address _tokenAddress, uint256 _leastDai)
+        external
+        override
+        onlyFactoryAddress
+    {}
+
+    function swapMainCoinToDAI(uint256 _leastDai)
+        external
+        override
+        onlyFactoryAddress
+    {}
+
+    function fundTrees() external override onlyFactoryAddress {}
+
+    function externalNFTApprove(
+        uint8 _nftType,
+        address _nftTokenAddress,
+        uint256 _nftTokenId,
+        address _destinationAddress
+    ) external override onlyFactoryAddress {}
 }

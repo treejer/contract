@@ -13,4 +13,15 @@ interface IPublicForestFactory {
      * @return true in case of PublicForestFactory contract has been initialized
      */
     function isPublicForestFactory() external view returns (bool);
+
+    function externalTokenERC721Approve(
+        address _contractAddress,
+        address nftContractAddress,
+        uint256 _tokenId
+    ) external;
+
+    function externalTokenERC1155Approve(
+        address _contractAddress,
+        address nftContractAddress
+    ) external;
 }

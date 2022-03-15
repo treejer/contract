@@ -112,14 +112,28 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         IPublicForest(_contractAddress).fundTrees();
     }
 
-    function externalNFTApprove(
+    function externalTokenERC721Approve(
         address _contractAddress,
-        uint8 _nftType,
         address nftContractAddress,
-        uint256 _tokenId,
-        uint256 _amount,
-        address _destinationAddress
-    ) external {}
+        uint256 _tokenId
+    ) external override {
+        IPublicForest(_contractAddress).externalTokenERC721Approve(
+            nftContractAddress,
+            _tokenId,
+            address(this)
+        );
+    }
+
+    function externalTokenERC1155Approve(
+        address _contractAddress,
+        address nftContractAddress
+    ) external override {
+        IPublicForest(_contractAddress).externalTokenERC1155Approve(
+            nftContractAddress,
+            true,
+            address(this)
+        );
+    }
 
     function createPublicForest(string memory _ipfsHash) external {
         address cloneAddress = ClonesUpgradeable.clone(

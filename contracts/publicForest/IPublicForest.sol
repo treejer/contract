@@ -10,13 +10,21 @@ interface IPublicForest {
 
     function updateIpfsHash(string memory _ipfsHash) external;
 
-    function setRegularSaleAddress(address _address) external;
+    function swapTokenToDAI(
+        address _tokenAddress,
+        uint256 _leastDai,
+        address _daiAddress,
+        address _dexRouter
+    ) external;
 
-    function swapTokenToDAI(address _tokenAddress, uint256 _leastDai) external;
+    function swapMainCoinToDAI(
+        uint256 _leastDai,
+        address _daiAddress,
+        address _wmaticAddress,
+        address _dexRouter
+    ) external;
 
-    function swapMainCoinToDAI(uint256 _leastDai) external;
-
-    function fundTrees() external;
+    function fundTrees(address _daiAddress, address _regularSale) external;
 
     function externalTokenERC721Approve(
         address _nftTokenAddress,
@@ -39,14 +47,4 @@ interface IPublicForest {
      * @return true in case of PublicForestFactory contract has been initialized
      */
     function factoryAddress() external view returns (address);
-
-    /**
-     * @return true in case of PublicForestFactory contract has been initialized
-     */
-    function daiAddress() external view returns (address);
-
-    /**
-     * @return true in case of PublicForestFactory contract has been initialized
-     */
-    function wmaticAddress() external view returns (address);
 }

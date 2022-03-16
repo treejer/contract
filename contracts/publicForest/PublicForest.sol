@@ -11,8 +11,8 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./../regularSale/IRegularSale.sol";
-import "../treasury/interfaces/IUniswapV2Router02New.sol";
+import "./interfaces/ITreejerContract.sol";
+import "./interfaces/IdexRouter.sol";
 
 /** @title PublicForest contract */
 contract PublicForest is
@@ -23,12 +23,6 @@ contract PublicForest is
 {
     string public override ipfsHash;
     address public override factoryAddress;
-    address public override daiAddress;
-    address public override wmaticAddress;
-
-    IUniswapV2Router02New public dexRouter;
-
-    IRegularSale public regularSale;
 
     /** NOTE modifier to check msg.sender is factoryAddress */
     modifier onlyFactoryAddress() {
@@ -78,24 +72,6 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    ) external {}
-
-    function tokensToSend(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    ) external {}
-
     receive() external payable {}
 
     function initialize(string memory _ipfsHash, address _factoryAddress)
@@ -124,45 +100,55 @@ contract PublicForest is
         ipfsHash = _ipfsHash;
     }
 
-    function setRegularSaleAddress(address _address)
+    function swapTokenToDAI(
+        address _tokenAddress,
+        uint256 _leastDai,
+        address _daiAddress,
+        address _dexRouter
+    ) external override onlyFactoryAddress {
+        _swapExactTokensForTokens(
+            _tokenAddress,
+            _leastDai,
+            _daiAddress,
+            _dexRouter
+        );
+    }
+
+    function swapMainCoinToDAI(
+        uint256 _leastDai,
+        address _daiAddress,
+        address _wmaticAddress,
+        address _dexRouter
+    ) external override onlyFactoryAddress {
+        _swapExactETHForTokens(
+            _leastDai,
+            _daiAddress,
+            _wmaticAddress,
+            _dexRouter
+        );
+    }
+
+    function fundTrees(address _daiAddress, address _regularSale)
         external
         override
         onlyFactoryAddress
     {
-        IRegularSale candidateContract = IRegularSale(_address);
-        require(candidateContract.isRegularSale());
-        regularSale = candidateContract;
-    }
-
-    function swapTokenToDAI(address _tokenAddress, uint256 _leastDai)
-        external
-        override
-        onlyFactoryAddress
-    {
-        _swapExactTokensForTokens(_tokenAddress, _leastDai);
-    }
-
-    function swapMainCoinToDAI(uint256 _leastDai)
-        external
-        override
-        onlyFactoryAddress
-    {
-        _swapExactETHForTokens(_leastDai);
-    }
-
-    function fundTrees() external override onlyFactoryAddress {
-        uint256 regularSalePrice = regularSale.price();
-        uint256 treeCount = IERC20(daiAddress).balanceOf(address(this)) /
+        uint256 regularSalePrice = ITreejerContract(_regularSale).price();
+        uint256 treeCount = IERC20(_daiAddress).balanceOf(address(this)) /
             regularSalePrice;
 
         treeCount = treeCount > 50 ? 50 : treeCount;
 
-        IERC721(daiAddress).approve(
-            address(regularSale),
+        IERC721(_daiAddress).approve(
+            _regularSale,
             treeCount * regularSalePrice
         );
 
-        regularSale.fundTree(treeCount, address(0), address(0));
+        ITreejerContract(_regularSale).fundTree(
+            treeCount,
+            address(0),
+            address(0)
+        );
     }
 
     function externalTokenERC721Approve(
@@ -189,24 +175,23 @@ contract PublicForest is
      */
     function _swapExactTokensForTokens(
         address _tokenAddress,
-        uint256 _minDaiOut
+        uint256 _minDaiOut,
+        address _daiAddress,
+        address _dexRouter
     ) private {
         address[] memory path;
         path = new address[](2);
 
         path[0] = _tokenAddress;
-        path[1] = daiAddress;
+        path[1] = _daiAddress;
 
         uint256 amount = IERC20(_tokenAddress).balanceOf(_tokenAddress);
 
-        bool success = IERC20(_tokenAddress).approve(
-            address(dexRouter),
-            amount
-        );
+        bool success = IERC20(_tokenAddress).approve(_dexRouter, amount);
 
         require(success, "Unsuccessful approve");
 
-        dexRouter.swapExactTokensForTokens(
+        IdexRouter(_dexRouter).swapExactTokensForTokens(
             amount,
             _minDaiOut,
             path,
@@ -218,14 +203,21 @@ contract PublicForest is
     /**
      * @dev swap main token to dai token
      */
-    function _swapExactETHForTokens(uint256 _minDaiOut) private {
+    function _swapExactETHForTokens(
+        uint256 _minDaiOut,
+        address _daiAddress,
+        address _wmaticAddress,
+        address _dexRouter
+    ) private {
         address[] memory path;
         path = new address[](2);
 
-        path[0] = wmaticAddress;
-        path[1] = daiAddress;
+        path[0] = _wmaticAddress;
+        path[1] = _daiAddress;
 
-        dexRouter.swapExactETHForTokens{value: address(this).balance}(
+        IdexRouter(_dexRouter).swapExactETHForTokens{
+            value: address(this).balance
+        }(
             _minDaiOut,
             path,
             address(this),

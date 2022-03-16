@@ -7,14 +7,19 @@ import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPublicForestFactory.sol";
 import "./IPublicForest.sol";
+import "./interfaces/ITreejerContract.sol";
 
 /** @title Planter contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
-    address[] public forests;
-    mapping(address => address) public forestToOwners;
-    mapping(address => uint256) public indexOf;
-    mapping(address => bool) public validTokens;
-    mapping(address => address) public forestCreators;
+    address[] public override forests;
+    mapping(address => address) public override forestToOwners;
+    mapping(address => uint256) public override indexOf;
+    mapping(address => bool) public override validTokens;
+
+    address public override daiAddress;
+    address public override wmaticAddress;
+    address public override treejerContract;
+    address public override dexRouter;
 
     /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
     bool public override isPublicForestFactory;
@@ -68,18 +73,30 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress
-    ) external onlyDataManager {
+    ) external override onlyDataManager {
         IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
+    }
+
+    function setTreejerContractAddress(address _address)
+        external
+        override
+        onlyDataManager
+    {
+        ITreejerContract candidateContract = ITreejerContract(_address);
+        require(candidateContract.isRegularSale());
+        treejerContract = address(candidateContract);
     }
 
     function updateIpfsHash(address _contractAddress, string memory _ipfs)
         external
+        override
     {
         IPublicForest(_contractAddress).updateIpfsHash(_ipfs);
     }
 
     function updateValidTokens(address _tokenAddress, bool _isValid)
         external
+        override
         onlyDataManager
     {
         validTokens[_tokenAddress] = _isValid;
@@ -89,27 +106,31 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _contractAddress,
         address _tokenAddress,
         uint256 _leastDai
-    ) external {
+    ) external override {
         require(validTokens[_tokenAddress], "Invalid token");
 
         IPublicForest(_contractAddress).swapTokenToDAI(
             _tokenAddress,
-            _leastDai > 2 ? _leastDai : 2
+            _leastDai > 2 ? _leastDai : 2,
+            daiAddress,
+            treejerContract
         );
     }
 
-    function swapMainCoinToDai(
-        address _contractAddress,
-        uint256 _amount,
-        uint256 _leastDai
-    ) external {
+    function swapMainCoinToDai(address _contractAddress, uint256 _leastDai)
+        external
+        override
+    {
         IPublicForest(_contractAddress).swapMainCoinToDAI(
-            _leastDai > 2 ? _leastDai : 2
+            _leastDai > 2 ? _leastDai : 2,
+            daiAddress,
+            wmaticAddress,
+            treejerContract
         );
     }
 
-    function fundTrees(address _contractAddress) external {
-        IPublicForest(_contractAddress).fundTrees();
+    function fundTrees(address _contractAddress) external override {
+        IPublicForest(_contractAddress).fundTrees(daiAddress, treejerContract);
     }
 
     function externalTokenERC721Approve(
@@ -135,7 +156,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
-    function createPublicForest(string memory _ipfsHash) external {
+    function createPublicForest(string memory _ipfsHash) external override {
         address cloneAddress = ClonesUpgradeable.clone(
             address(accessRestriction)
         );

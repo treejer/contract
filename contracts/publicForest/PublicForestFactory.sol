@@ -15,6 +15,8 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     mapping(address => uint256) public indexOf;
     mapping(address => bool) public validTokens;
     mapping(address => address) public forestCreators;
+    address public implementation;
+    address public treejerNftContractAddress;
 
     /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
     bool public override isPublicForestFactory;
@@ -63,6 +65,8 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         require(candidateContract.isAccessRestriction());
         isPublicForestFactory = true;
         accessRestriction = candidateContract;
+
+        treejerNftContractAddress = 0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9;
     }
 
     function updateFactoryAddress(
@@ -70,6 +74,13 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _proxyAddress
     ) external onlyDataManager {
         IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
+    }
+
+    function updateImplementationAddress(address _implementation)
+        external
+        onlyDataManager
+    {
+        implementation = _implementation;
     }
 
     function updateIpfsHash(address _contractAddress, string memory _ipfs)
@@ -115,16 +126,26 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function externalNFTApprove(
         address _contractAddress,
         uint8 _nftType,
-        address nftContractAddress,
+        address _nftTokenAddress,
         uint256 _tokenId,
         uint256 _amount,
         address _destinationAddress
-    ) external {}
+    ) external {
+        require(
+            _nftTokenAddress != treejerNftContractAddress,
+            "Treejer contract"
+        );
+
+        // IPublicForest.externalNFTApprove(
+        //     _nftType,
+        //     _nftTokenAddress,
+        //     _nftTokenId,
+        //     _destinationAddress
+        // );
+    }
 
     function createPublicForest(string memory _ipfsHash) external {
-        address cloneAddress = ClonesUpgradeable.clone(
-            address(accessRestriction)
-        );
+        address cloneAddress = ClonesUpgradeable.clone(implementation);
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
         _set(cloneAddress);
     }

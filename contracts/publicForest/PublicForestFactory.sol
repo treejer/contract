@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPublicForestFactory.sol";
 import "./IPublicForest.sol";
+import "./interfaces/ITreejerContract.sol";
 
 /** @title Planter contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
@@ -17,6 +18,10 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     mapping(address => address) public forestCreators;
     address public implementation;
     address public treejerNftContractAddress;
+    address public override daiAddress;
+    address public override wmaticAddress;
+    address public override treejerContract;
+    address public override dexRouter;
 
     /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
     bool public override isPublicForestFactory;
@@ -72,7 +77,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress
-    ) external onlyDataManager {
+    ) external override onlyDataManager {
         IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
     }
 
@@ -83,14 +88,26 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         implementation = _implementation;
     }
 
+    function setTreejerContractAddress(address _address)
+        external
+        override
+        onlyDataManager
+    {
+        ITreejerContract candidateContract = ITreejerContract(_address);
+        require(candidateContract.isRegularSale());
+        treejerContract = address(candidateContract);
+    }
+
     function updateIpfsHash(address _contractAddress, string memory _ipfs)
         external
+        override
     {
         IPublicForest(_contractAddress).updateIpfsHash(_ipfs);
     }
 
     function updateValidTokens(address _tokenAddress, bool _isValid)
         external
+        override
         onlyDataManager
     {
         validTokens[_tokenAddress] = _isValid;
@@ -100,52 +117,60 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _contractAddress,
         address _tokenAddress,
         uint256 _leastDai
-    ) external {
+    ) external override {
         require(validTokens[_tokenAddress], "Invalid token");
 
         IPublicForest(_contractAddress).swapTokenToDAI(
             _tokenAddress,
-            _leastDai > 2 ? _leastDai : 2
+            _leastDai > 2 ? _leastDai : 2,
+            daiAddress,
+            treejerContract
         );
     }
 
-    function swapMainCoinToDai(
-        address _contractAddress,
-        uint256 _amount,
-        uint256 _leastDai
-    ) external {
+    function swapMainCoinToDai(address _contractAddress, uint256 _leastDai)
+        external
+        override
+    {
         IPublicForest(_contractAddress).swapMainCoinToDAI(
-            _leastDai > 2 ? _leastDai : 2
+            _leastDai > 2 ? _leastDai : 2,
+            daiAddress,
+            wmaticAddress,
+            treejerContract
         );
     }
 
-    function fundTrees(address _contractAddress) external {
-        IPublicForest(_contractAddress).fundTrees();
+    function fundTrees(address _contractAddress) external override {
+        IPublicForest(_contractAddress).fundTrees(daiAddress, treejerContract);
     }
 
-    function externalNFTApprove(
+    function externalTokenERC721Approve(
         address _contractAddress,
-        uint8 _nftType,
-        address _nftTokenAddress,
-        uint256 _tokenId,
-        uint256 _amount,
-        address _destinationAddress
-    ) external {
-        require(
-            _nftTokenAddress != treejerNftContractAddress,
-            "Treejer contract"
+        address nftContractAddress,
+        uint256 _tokenId
+    ) external override {
+        IPublicForest(_contractAddress).externalTokenERC721Approve(
+            nftContractAddress,
+            _tokenId,
+            address(this)
         );
-
-        // IPublicForest.externalNFTApprove(
-        //     _nftType,
-        //     _nftTokenAddress,
-        //     _nftTokenId,
-        //     _destinationAddress
-        // );
     }
 
-    function createPublicForest(string memory _ipfsHash) external {
-        address cloneAddress = ClonesUpgradeable.clone(implementation);
+    function externalTokenERC1155Approve(
+        address _contractAddress,
+        address nftContractAddress
+    ) external override {
+        IPublicForest(_contractAddress).externalTokenERC1155Approve(
+            nftContractAddress,
+            true,
+            address(this)
+        );
+    }
+
+    function createPublicForest(string memory _ipfsHash) external override {
+        address cloneAddress = ClonesUpgradeable.clone(
+            address(accessRestriction)
+        );
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
         _set(cloneAddress);
     }

@@ -9,8 +9,69 @@ interface IPublicForestFactory {
      */
     function initialize(address _accessRestrictionAddress) external;
 
+    function setTreejerContractAddress(address _address) external;
+
+    function updateFactoryAddress(
+        address _contractAddress,
+        address _proxyAddress
+    ) external;
+
+    function updateIpfsHash(address _contractAddress, string memory _ipfs)
+        external;
+
+    function updateValidTokens(address _tokenAddress, bool _isValid) external;
+
+    function swapTokenToDai(
+        address _contractAddress,
+        address _tokenAddress,
+        uint256 _leastDai
+    ) external;
+
+    function swapMainCoinToDai(address _contractAddress, uint256 _leastDai)
+        external;
+
+    function fundTrees(address _contractAddress) external;
+
+    function createPublicForest(string memory _ipfsHash) external;
+
+    function externalTokenERC721Approve(
+        address _contractAddress,
+        address nftContractAddress,
+        uint256 _tokenId
+    ) external;
+
+    function externalTokenERC1155Approve(
+        address _contractAddress,
+        address nftContractAddress
+    ) external;
+
     /**
      * @return true in case of PublicForestFactory contract has been initialized
      */
     function isPublicForestFactory() external view returns (bool);
+
+    function forests(uint256 _index) external returns (address);
+
+    function forestToOwners(address _forest)
+        external
+        view
+        returns (address owner);
+
+    function indexOf(address _forest) external view returns (uint256 index);
+
+    function validTokens(address _token) external view returns (bool);
+
+    /**
+     * @return true in case of PublicForestFactory contract has been initialized
+     */
+    function daiAddress() external view returns (address);
+
+    /**
+     * @return true in case of PublicForestFactory contract has been initialized
+     */
+    function wmaticAddress() external view returns (address);
+
+    function treejerContract() external view returns (address);
+
+    function dexRouter() external view returns (address);
 }

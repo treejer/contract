@@ -11,13 +11,13 @@ import "./interfaces/ITreejerContract.sol";
 
 /** @title Planter contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
-    address[] public forests;
-    mapping(address => address) public forestToOwners;
-    mapping(address => uint256) public indexOf;
-    mapping(address => bool) public validTokens;
-    mapping(address => address) public forestCreators;
-    address public implementation;
-    address public treejerNftContractAddress;
+    address[] public override forests;
+    mapping(address => address) public override forestToOwners;
+    mapping(address => uint256) public override indexOf;
+    mapping(address => bool) public override validTokens;
+    mapping(address => address) public override forestCreators;
+    address public override implementation;
+    address public override treejerNftContractAddress;
     address public override daiAddress;
     address public override wmaticAddress;
     address public override treejerContract;
@@ -74,6 +74,16 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         treejerNftContractAddress = 0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9;
     }
 
+    function setTreejerContractAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        ITreejerContract candidateContract = ITreejerContract(_address);
+        require(candidateContract.isRegularSale());
+        treejerContract = address(candidateContract);
+    }
+
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress
@@ -88,16 +98,6 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         implementation = _implementation;
     }
 
-    function setTreejerContractAddress(address _address)
-        external
-        override
-        onlyDataManager
-    {
-        ITreejerContract candidateContract = ITreejerContract(_address);
-        require(candidateContract.isRegularSale());
-        treejerContract = address(candidateContract);
-    }
-
     function updateIpfsHash(address _contractAddress, string memory _ipfs)
         external
         override
@@ -109,6 +109,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         onlyDataManager
+        validAddress(_tokenAddress)
     {
         validTokens[_tokenAddress] = _isValid;
     }
@@ -146,11 +147,16 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
     function externalTokenERC721Approve(
         address _contractAddress,
-        address nftContractAddress,
+        address _nftContractAddress,
         uint256 _tokenId
     ) external override {
+        require(
+            _nftContractAddress != treejerNftContractAddress,
+            "Treejer contract"
+        );
+
         IPublicForest(_contractAddress).externalTokenERC721Approve(
-            nftContractAddress,
+            _nftContractAddress,
             _tokenId,
             address(this)
         );
@@ -158,10 +164,10 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
     function externalTokenERC1155Approve(
         address _contractAddress,
-        address nftContractAddress
+        address _nftContractAddress
     ) external override {
         IPublicForest(_contractAddress).externalTokenERC1155Approve(
-            nftContractAddress,
+            _nftContractAddress,
             true,
             address(this)
         );

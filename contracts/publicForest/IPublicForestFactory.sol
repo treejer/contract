@@ -61,6 +61,12 @@ interface IPublicForestFactory {
 
     function validTokens(address _token) external view returns (bool);
 
+    function forestCreators(address _token) external view returns (address);
+
+    function implementation() external view returns (address);
+
+    function treejerNftContractAddress() external view returns (address);
+
     /**
      * @return true in case of PublicForestFactory contract has been initialized
      */

@@ -172,6 +172,10 @@ const WethFundErrorMsg = {
   TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract ",
 };
 
+const contractAddress = {
+  TREE: "0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -189,4 +193,5 @@ module.exports = {
   GsnErrorMsg,
   erc721ErrorMsg,
   WethFundErrorMsg,
+  contractAddress,
 };

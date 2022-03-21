@@ -76,6 +76,15 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    ) external override {}
+
     receive() external payable {}
 
     function initialize(string memory _ipfsHash, address _factoryAddress)
@@ -184,15 +193,6 @@ contract PublicForest is
             _approved
         );
     }
-
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    ) external override {}
 
     /**
      * @dev swap weth token to dai token

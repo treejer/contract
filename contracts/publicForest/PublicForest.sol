@@ -15,6 +15,7 @@ import "./interfaces/ITreejerContract.sol";
 import "./interfaces/IdexRouter.sol";
 
 import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
 
 /** @title PublicForest contract */
 contract PublicForest is
@@ -84,6 +85,18 @@ contract PublicForest is
     {
         ipfsHash = _ipfsHash;
         factoryAddress = _factoryAddress;
+
+        IERC1820Registry erc1820 = IERC1820Registry(
+            0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24
+        );
+
+        bytes32 TOKENS_RECIPIENT_INTERFACE_HASH = 0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b; //keccak256("ERC777TokensRecipient");
+
+        erc1820.setInterfaceImplementer(
+            address(this),
+            TOKENS_RECIPIENT_INTERFACE_HASH,
+            address(this)
+        );
     }
 
     function updateFactoryAddress(address _factoryAddress)
@@ -171,6 +184,15 @@ contract PublicForest is
             _approved
         );
     }
+
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData,
+        bytes calldata operatorData
+    ) external override {}
 
     /**
      * @dev swap weth token to dai token

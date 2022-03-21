@@ -84,18 +84,19 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         treejerContract = address(candidateContract);
     }
 
+    function setImplementationAddress(address _implementation)
+        external
+        override
+        onlyAdmin
+    {
+        implementation = _implementation;
+    }
+
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress
     ) external override onlyDataManager {
         IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
-    }
-
-    function updateImplementationAddress(address _implementation)
-        external
-        onlyDataManager
-    {
-        implementation = _implementation;
     }
 
     function updateIpfsHash(address _contractAddress, string memory _ipfs)
@@ -174,9 +175,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     }
 
     function createPublicForest(string memory _ipfsHash) external override {
-        address cloneAddress = ClonesUpgradeable.clone(
-            address(accessRestriction)
-        );
+        address cloneAddress = ClonesUpgradeable.clone(implementation);
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
         _set(cloneAddress);
     }

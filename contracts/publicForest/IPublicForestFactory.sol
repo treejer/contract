@@ -11,6 +11,8 @@ interface IPublicForestFactory {
 
     function setTreejerContractAddress(address _address) external;
 
+    function setImplementationAddress(address _implementation) external;
+
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress

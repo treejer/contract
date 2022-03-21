@@ -74,11 +74,11 @@ contract PublicForest is
 
     receive() external payable {}
 
+    //TODO:check allowed caller
     function initialize(string memory _ipfsHash, address _factoryAddress)
         external
         override
         initializer
-        onlyFactoryAddress
     {
         ipfsHash = _ipfsHash;
         factoryAddress = _factoryAddress;

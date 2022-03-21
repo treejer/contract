@@ -2,6 +2,7 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const PublicForestFactory = artifacts.require("PublicForestFactory");
 const RegularSale = artifacts.require("RegularSale");
+const PublicForest = artifacts.require("PublicForest");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -15,6 +16,7 @@ contract("PublicForestFactory", (accounts) => {
   let arInstance;
   let publicForestFactory;
   let regularSaleInstance;
+  let publicForest;
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -109,10 +111,6 @@ contract("PublicForestFactory", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await publicForestFactory.setTreejerContractAddress(zeroAddress, {
-        from: deployerAccount,
-      }).should.be.rejected;
-
       await publicForestFactory.setTreejerContractAddress(
         regularSaleInstance.address,
         {
@@ -124,6 +122,24 @@ contract("PublicForestFactory", (accounts) => {
         regularSaleInstance.address,
         await publicForestFactory.treejerContract(),
         "address set incorect"
+      );
+
+      ///////////////---------------------------------set implementation address--------------------------------------------------------
+
+      await publicForestFactory
+        .setImplementationAddress(userAccount2, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setImplementationAddress(userAccount2, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        userAccount2,
+        await publicForestFactory.implementation(),
+        "implementation address set incorect"
       );
     });
 
@@ -165,6 +181,86 @@ contract("PublicForestFactory", (accounts) => {
         await publicForestFactory.validTokens(userAccount1),
         false,
         "incorrect valid token"
+      );
+    });
+  });
+
+  describe("deployment and set addresses and set valid tokens", () => {
+    beforeEach(async () => {
+      publicForestFactory = await PublicForestFactory.new({
+        from: deployerAccount,
+      });
+
+      await publicForestFactory.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      publicForest = await PublicForest.new({
+        from: deployerAccount,
+      });
+
+      await publicForest.initialize("treejer", publicForestFactory.address, {
+        from: deployerAccount,
+      });
+
+      await publicForestFactory.setImplementationAddress(publicForest.address);
+    });
+
+    it("create public forest and update ipfsHash and factoryAddress", async () => {
+      const ipfsHash = "ipfs hash 1";
+      const newIpfsHash = "new ipfs";
+      await publicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1,
+      });
+
+      let forest = await publicForestFactory.forests(0);
+
+      assert.equal(
+        await publicForestFactory.forestToOwners(forest),
+        userAccount1,
+        "owner is not correct"
+      );
+
+      ///////---------------- check forest data
+      let tempPublicForest = await PublicForest.at(forest);
+
+      assert.equal(
+        await tempPublicForest.ipfsHash(),
+        ipfsHash,
+        "ipfsHash is not correct"
+      );
+
+      assert.equal(
+        await tempPublicForest.factoryAddress(),
+        publicForestFactory.address,
+        "factoryAddress is not correct"
+      );
+
+      ///////// ------------------- update ipfs and factory
+      await publicForestFactory.updateIpfsHash(
+        tempPublicForest.address,
+        newIpfsHash,
+        { from: userAccount3 }
+      );
+
+      await publicForestFactory.updateFactoryAddress(
+        tempPublicForest.address,
+        userAccount5,
+        { from: dataManager }
+      );
+
+      ///////---------------- check forest data after update
+
+      assert.equal(
+        await tempPublicForest.ipfsHash(),
+        newIpfsHash,
+        "ipfsHash is not correct"
+      );
+
+      assert.equal(
+        await tempPublicForest.factoryAddress(),
+        userAccount5,
+        "factoryAddress is not correct"
       );
     });
   });

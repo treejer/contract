@@ -13,6 +13,10 @@ interface IPublicForestFactory {
 
     function setImplementationAddress(address _implementation) external;
 
+    function setDexRouterAddress(address _dexRouter) external;
+
+    function setDaiTokenAddress(address _daiTokenAddress) external;
+
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress

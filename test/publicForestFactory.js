@@ -3,6 +3,10 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const PublicForestFactory = artifacts.require("PublicForestFactory");
 const RegularSale = artifacts.require("RegularSale");
 const PublicForest = artifacts.require("PublicForest");
+const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
+const TestUniswap = artifacts.require("TestUniswap.sol");
+const Factory = artifacts.require("Factory.sol");
+const Token = artifacts.require("Weth");
 
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -17,6 +21,14 @@ contract("PublicForestFactory", (accounts) => {
   let publicForestFactory;
   let regularSaleInstance;
   let publicForest;
+  let uniswapV2Router02NewAddress;
+  let testUniswapInstance;
+  let wethDexInstance;
+  let daiDexInstance;
+  let bnbDexInstance;
+  let adaDexInstance;
+  let factoryInstance;
+
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
   const userAccount1 = accounts[2];
@@ -141,6 +153,41 @@ contract("PublicForestFactory", (accounts) => {
         await publicForestFactory.implementation(),
         "implementation address set incorect"
       );
+
+      ///////////////---------------------------------set dexRouter address--------------------------------------------------------
+
+      await publicForestFactory
+        .setDexRouterAddress(userAccount2, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setDexRouterAddress(userAccount2, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        userAccount2,
+        await publicForestFactory.dexRouter(),
+        "dexRouter address set incorect"
+      );
+      ///////////////---------------------------------set daiToken address--------------------------------------------------------
+
+      await publicForestFactory
+        .setDaiTokenAddress(userAccount2, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setDaiTokenAddress(userAccount2, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        userAccount2,
+        await publicForestFactory.daiAddress(),
+        "daiToken address set incorect"
+      );
     });
 
     it("set valid tokens", async () => {
@@ -261,6 +308,200 @@ contract("PublicForestFactory", (accounts) => {
         await tempPublicForest.factoryAddress(),
         userAccount5,
         "factoryAddress is not correct"
+      );
+    });
+  });
+
+  describe("deployment and set addresses and set valid tokens", () => {
+    beforeEach(async () => {
+      ////////////////////// deploy contracts
+      publicForestFactory = await PublicForestFactory.new({
+        from: deployerAccount,
+      });
+
+      await publicForestFactory.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      publicForest = await PublicForest.new({
+        from: deployerAccount,
+      });
+
+      await publicForest.initialize("treejer", publicForestFactory.address, {
+        from: deployerAccount,
+      });
+
+      await publicForestFactory.setImplementationAddress(publicForest.address);
+      ////////////////////// deploy uniswap
+
+      factoryInstance = await Factory.new(accounts[2], {
+        from: deployerAccount,
+      });
+      const factoryAddress = factoryInstance.address;
+
+      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
+
+      daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
+
+      bnbDexInstance = await Token.new("BNB", "bnb", {
+        from: accounts[0],
+      });
+
+      adaDexInstance = await Token.new("ADA", "ada", {
+        from: accounts[0],
+      });
+
+      unsafeTokenDexInstance = await Token.new("UNSAFE", "unsafe", {
+        from: accounts[0],
+      });
+
+      dexRouterInstance = await UniswapV2Router02New.new(
+        factoryAddress,
+        wethDexInstance.address,
+        { from: deployerAccount }
+      );
+      const dexRouterAddress = dexRouterInstance.address;
+
+      testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
+        from: deployerAccount,
+      });
+
+      /////---------------------------addLiquidity-------------------------
+
+      const testUniswapAddress = testUniswapInstance.address;
+
+      await wethDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await daiDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("1000000000", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wethDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        bnbDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("500000", "Ether")
+      );
+
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        adaDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
+      );
+
+      console.log(
+        "dddd",
+        (
+          await dexRouterInstance.getAmountsOut(
+            web3.utils.toWei("250", "Ether"),
+            [daiDexInstance.address, adaDexInstance.address]
+          )
+        ).toString()
+      );
+    });
+    it("test swapTokenToDai", async () => {
+      await publicForestFactory.updateValidTokens(
+        bnbDexInstance.address,
+        true,
+        { from: dataManager }
+      );
+
+      await publicForestFactory.updateValidTokens(
+        adaDexInstance.address,
+        true,
+        { from: dataManager }
+      );
+      await publicForestFactory.updateValidTokens(
+        wethDexInstance.address,
+        true,
+        { from: dataManager }
+      );
+
+      const ipfsHash = "ipfs hash 1";
+      const newIpfsHash = "new ipfs";
+      await publicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1,
+      });
+
+      let forestAddress = await publicForestFactory.forests(0);
+
+      assert.equal(
+        await publicForestFactory.forestToOwners(forestAddress),
+        userAccount1,
+        "owner is not correct"
+      );
+
+      ///////---------------- check forest data
+      let tempPublicForest = await PublicForest.at(forestAddress);
+
+      await wethDexInstance.setMint(
+        forestAddress,
+        web3.utils.toWei("10", "Ether")
+      );
+
+      await adaDexInstance.setMint(
+        forestAddress,
+        web3.utils.toWei("10", "Ether")
+      );
+
+      await bnbDexInstance.setMint(
+        forestAddress,
+        web3.utils.toWei("10", "Ether")
+      );
+
+      console.log(
+        "bnb1",
+        (await bnbDexInstance.balanceOf(forestAddress)).toString()
+      );
+
+      console.log(
+        "dai1",
+        (await daiDexInstance.balanceOf(forestAddress)).toString()
+      );
+
+      await publicForestFactory.setDexRouterAddress(dexRouterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await publicForestFactory.setDaiTokenAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      // await publicForestFactory.swapTokenToDai(
+      //   forestAddress,
+      //   bnbDexInstance.address,
+      //   0
+      // );
+
+      console.log(
+        "dai2",
+        (await daiDexInstance.balanceOf(forestAddress)).toString()
+      );
+      console.log(
+        "bnb2",
+        (await bnbDexInstance.balanceOf(forestAddress)).toString()
       );
     });
   });

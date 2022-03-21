@@ -92,6 +92,22 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         implementation = _implementation;
     }
 
+    function setDexRouterAddress(address _dexRouter)
+        external
+        override
+        onlyAdmin
+    {
+        dexRouter = _dexRouter;
+    }
+
+    function setDaiTokenAddress(address _daiTokenAddress)
+        external
+        override
+        onlyAdmin
+    {
+        daiAddress = _daiTokenAddress;
+    }
+
     function updateFactoryAddress(
         address _contractAddress,
         address _proxyAddress
@@ -126,7 +142,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
             _tokenAddress,
             _leastDai > 2 ? _leastDai : 2,
             daiAddress,
-            treejerContract
+            dexRouter
         );
     }
 
@@ -138,7 +154,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
             _leastDai > 2 ? _leastDai : 2,
             daiAddress,
             wmaticAddress,
-            treejerContract
+            dexRouter
         );
     }
 
@@ -176,6 +192,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
     function createPublicForest(string memory _ipfsHash) external override {
         address cloneAddress = ClonesUpgradeable.clone(implementation);
+
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
         _set(cloneAddress);
     }

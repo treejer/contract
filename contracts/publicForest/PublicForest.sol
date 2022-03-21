@@ -14,12 +14,15 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/ITreejerContract.sol";
 import "./interfaces/IdexRouter.sol";
 
+import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
+
 /** @title PublicForest contract */
 contract PublicForest is
     Initializable,
     IPublicForest,
     IERC721Receiver,
-    IERC1155Receiver
+    IERC1155Receiver,
+    IERC777Recipient
 {
     string public override ipfsHash;
     address public override factoryAddress;

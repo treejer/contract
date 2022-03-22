@@ -140,7 +140,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
         IPublicForest(_contractAddress).swapTokenToDAI(
             _tokenAddress,
-            _leastDai > 2 ? _leastDai : 2,
+            _leastDai > 2 ether ? _leastDai : 2 ether,
             daiAddress,
             dexRouter
         );
@@ -151,7 +151,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
     {
         IPublicForest(_contractAddress).swapMainCoinToDAI(
-            _leastDai > 2 ? _leastDai : 2,
+            _leastDai > 2 ether ? _leastDai : 2 ether,
             daiAddress,
             wmaticAddress,
             dexRouter

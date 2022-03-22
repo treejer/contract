@@ -17,7 +17,11 @@ require("chai")
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-const { CommonErrorMsg, contractAddress } = require("./enumes");
+const {
+  CommonErrorMsg,
+  contractAddress,
+  PublicForestErrors
+} = require("./enumes");
 const common = require("mocha/lib/interfaces/common");
 
 contract("PublicForestFactory", accounts => {
@@ -434,6 +438,8 @@ contract("PublicForestFactory", accounts => {
 
       let forestAddress = await publicForestFactory.forests(0);
 
+      forestInstance1 = await PublicForest.at(forestAddress);
+
       assert.equal(
         await publicForestFactory.forestToOwners(forestAddress),
         userAccount1,
@@ -490,11 +496,9 @@ contract("PublicForestFactory", accounts => {
 
       ///------------------ reject(bnb not valid token)
 
-      // await publicForestFactory.swapTokenToDai(
-      //   forestAddress,
-      //   bnbDexInstance.address,
-      //   0
-      // ).should.be.rejectedWith();
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .should.be.rejectedWith(PublicForestErrors.INVALID_TOKEN);
 
       ///----------------- set bnb to valid address
 
@@ -594,6 +598,98 @@ contract("PublicForestFactory", accounts => {
       );
 
       //-------------- balance not enough
+
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_INPUT_AMOUNT);
+
+      //-------------- balance swap lt 2 Dai
+      let expectedSwapTokenAmountWeth2 = await dexRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1.5", "Ether"),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      await wethDexInstance.setMint(
+        forestAddress,
+        expectedSwapTokenAmountWeth2[0]
+      );
+
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, wethDexInstance.address, 0)
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      let expectedSwapTokenAmountWeth3 = await dexRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1.5", "Ether"),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      await wethDexInstance.setMint(
+        forestAddress,
+        expectedSwapTokenAmountWeth3[0]
+      );
+
+      await publicForestFactory
+        .swapTokenToDai(
+          forestAddress,
+          wethDexInstance.address,
+          web3.utils.toWei("3", "Ether")
+        )
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      assert.equal(
+        Number(await wethDexInstance.balanceOf(forestAddress)),
+        Number(
+          Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
+            expectedSwapTokenAmountWeth3[0]
+          )
+        ),
+        "3-weth balance is not correct"
+      );
+
+      let expectedSwapTokenAmountWeth5 = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei(
+          Number(
+            Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
+              expectedSwapTokenAmountWeth3[0]
+            )
+          ).toString(),
+          "wei"
+        ),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      await publicForestFactory.swapTokenToDai(
+        forestAddress,
+        wethDexInstance.address,
+        0
+      );
+
+      assert.equal(
+        Number(await wethDexInstance.balanceOf(forestAddress)),
+        0,
+        "4-weth balance is not correct"
+      );
+
+      assert.equal(
+        Number(
+          Math.Big(expectedSwapTokenAmountBnb1[1])
+            .plus(expectedSwapTokenAmountWeth1[1])
+            .plus(expectedSwapTokenAmountAda1[1])
+            .plus(expectedSwapTokenAmountWeth5[1])
+        ),
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        "4-dai balance is not correct"
+      );
+
+      //-----------should be rejecte (invalid access)
+      await forestInstance1
+        .swapTokenToDAI(
+          wethDexInstance.address,
+          0,
+          daiDexInstance.address,
+          dexRouterInstance.address
+        )
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
   });
 });

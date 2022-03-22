@@ -14,16 +14,12 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/ITreejerContract.sol";
 import "./interfaces/IdexRouter.sol";
 
-import "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC1820Registry.sol";
-
 /** @title PublicForest contract */
 contract PublicForest is
     Initializable,
     IPublicForest,
     IERC721Receiver,
-    IERC1155Receiver,
-    IERC777Recipient
+    IERC1155Receiver
 {
     string public override ipfsHash;
     address public override factoryAddress;
@@ -76,15 +72,6 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata userData,
-        bytes calldata operatorData
-    ) external override {}
-
     receive() external payable {}
 
     function initialize(string memory _ipfsHash, address _factoryAddress)
@@ -94,18 +81,6 @@ contract PublicForest is
     {
         ipfsHash = _ipfsHash;
         factoryAddress = _factoryAddress;
-
-        IERC1820Registry erc1820 = IERC1820Registry(
-            0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24
-        );
-
-        bytes32 TOKENS_RECIPIENT_INTERFACE_HASH = 0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b; //keccak256("ERC777TokensRecipient");
-
-        erc1820.setInterfaceImplementer(
-            address(this),
-            TOKENS_RECIPIENT_INTERFACE_HASH,
-            address(this)
-        );
     }
 
     function updateFactoryAddress(address _factoryAddress)
@@ -209,7 +184,7 @@ contract PublicForest is
         path[0] = _tokenAddress;
         path[1] = _daiAddress;
 
-        uint256 amount = IERC20(_tokenAddress).balanceOf(_tokenAddress);
+        uint256 amount = IERC20(_tokenAddress).balanceOf(address(this));
 
         bool success = IERC20(_tokenAddress).approve(_dexRouter, amount);
 

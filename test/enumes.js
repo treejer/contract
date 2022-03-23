@@ -180,7 +180,8 @@ const contractAddress = {
 
 const PublicForestErrors = {
   INVALID_TOKEN: "Invalid token",
-  NOT_FACTORY_ADDRESS: "Caller not factoryAddress"
+  NOT_FACTORY_ADDRESS: "Caller not factoryAddress",
+  INVALID_FOREST_ADDRESS: "Invalid forest address"
 };
 
 module.exports = {

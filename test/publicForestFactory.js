@@ -330,7 +330,7 @@ contract("PublicForestFactory", accounts => {
     });
   });
 
-  describe("deployment and set addresses and set valid tokens", () => {
+  describe.only("deployment and set addresses and set valid tokens", () => {
     beforeEach(async () => {
       wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
       ////////////////////// deploy contracts
@@ -711,6 +711,13 @@ contract("PublicForestFactory", accounts => {
         "4-dai balance is not correct"
       );
 
+      // ------------ reject (invalid forest address)
+      await publicForestFactory
+        .swapTokenToDai(userAccount5, wethDexInstance.address, 0, {
+          from: userAccount1
+        })
+        .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
+
       //-----------should be rejecte (invalid access)
       await forestInstance1
         .swapTokenToDAI(
@@ -722,7 +729,7 @@ contract("PublicForestFactory", accounts => {
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
 
-    it.only("test swapMainCoinToDai", async () => {
+    it("test swapMainCoinToDai", async () => {
       const ipfsHash = "ipfs hash 1";
 
       await publicForestFactory.createPublicForest(ipfsHash, {
@@ -783,11 +790,155 @@ contract("PublicForestFactory", accounts => {
         value: web3.utils.toWei("25", "Ether")
       });
 
+      await web3.eth.sendTransaction({
+        from: userAccount4,
+        to: forestAddress2,
+        value: web3.utils.toWei("25", "Ether")
+      });
+
       //------call swapMainCoinToDai function
+
+      let expectedSwapTokenAmountWeth1 = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei("25", "Ether"),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
 
       await publicForestFactory.swapMainCoinToDai(forestAddress1, 0, {
         from: userAccount1
       });
+
+      //-------------- check data
+      assert.equal(
+        await web3.eth.getBalance(forestAddress1),
+        0,
+        "forestAddress1 balance is incorrect"
+      );
+
+      assert.equal(
+        await web3.eth.getBalance(forestAddress2),
+        web3.utils.toWei("25", "Ether"),
+        "forestAddress2 balance is incorrect"
+      );
+
+      assert.equal(
+        Number(expectedSwapTokenAmountWeth1[1]),
+        Number(await daiDexInstance.balanceOf(forestAddress1)),
+        "after dai balance is not correct"
+      );
+
+      //-------------------reject (INSUFFICIENT_OUTPUT_AMOUNT)
+
+      let expectedSwapTokenAmountWeth2 = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei("7.5", "Ether"),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      let expectedSwapTokenAmountWeth3 = await dexRouterInstance.getAmountsIn.call(
+        web3.utils.toWei("1.5", "Ether"),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      let expectedSwapTokenAmountWeth4 = await dexRouterInstance.getAmountsOut.call(
+        web3.utils.toWei(
+          Math.Big(web3.utils.toWei("5", "Ether"))
+            .plus(expectedSwapTokenAmountWeth3[0])
+            .toString(),
+          "wei"
+        ),
+        [wethDexInstance.address, daiDexInstance.address]
+      );
+
+      await web3.eth.sendTransaction({
+        from: userAccount4,
+        to: forestAddress1,
+        value: expectedSwapTokenAmountWeth3[0]
+      });
+
+      await publicForestFactory
+        .swapMainCoinToDai(forestAddress1, 0, {
+          from: userAccount1
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      await web3.eth.sendTransaction({
+        from: userAccount4,
+        to: forestAddress1,
+        value: web3.utils.toWei("5", "Ether")
+      });
+
+      await publicForestFactory
+        .swapMainCoinToDai(forestAddress1, expectedSwapTokenAmountWeth2[1], {
+          from: userAccount1
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      //------------------------------------check balance
+      assert.equal(
+        await web3.eth.getBalance(forestAddress2),
+        web3.utils.toWei("25", "Ether"),
+        "2-forestAddress2 balance is incorrect"
+      );
+
+      assert.equal(
+        await web3.eth.getBalance(forestAddress1),
+        Math.Big(web3.utils.toWei("5", "Ether")).plus(
+          expectedSwapTokenAmountWeth3[0]
+        ),
+        "2-forestAddress1 balance is incorrect"
+      );
+
+      //---------swap
+
+      await publicForestFactory.swapMainCoinToDai(
+        forestAddress1,
+        expectedSwapTokenAmountWeth4[1],
+        {
+          from: userAccount1
+        }
+      );
+
+      //---------------check data
+
+      assert.equal(
+        await web3.eth.getBalance(forestAddress2),
+        web3.utils.toWei("25", "Ether"),
+        "3-forestAddress2 balance is incorrect"
+      );
+
+      assert.equal(
+        await web3.eth.getBalance(forestAddress1),
+        0,
+        "3-forestAddress1 balance is incorrect"
+      );
+
+      assert.equal(
+        Number(
+          Math.Big(expectedSwapTokenAmountWeth1[1]).plus(
+            expectedSwapTokenAmountWeth4[1]
+          )
+        ),
+        Number(await daiDexInstance.balanceOf(forestAddress1)),
+        "after dai balance is not correct"
+      );
+
+      // ------------ reject (invalid forest address)
+      await publicForestFactory
+        .swapMainCoinToDai(userAccount5, 0, {
+          from: userAccount1
+        })
+        .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
+
+      //-----------should be rejecte (invalid access)
+      await forestInstance1
+        .swapMainCoinToDAI(
+          0,
+          daiDexInstance.address,
+          wethDexInstance.address,
+          dexRouterInstance.address
+        )
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
   });
+
+  // describe.only("deployment and set addresses and set valid tokens", () => {});
 });

@@ -11,12 +11,19 @@ contract Weth is ERC20 {
         _mint(msg.sender, 10000 * (10**18));
     }
 
+    event  Deposit(address indexed dst, uint wad);
+
     function getApprove(address _address) external {
         approve(_address, 10000 * (10**18));
     }
 
     function setMint(address _address, uint256 _amount) external {
         _mint(_address, _amount);
+    }
+
+    function deposit() public payable {
+        _mint(msg.sender, msg.value);
+        emit Deposit(msg.sender, msg.value);
     }
 
     function setApprove(

@@ -40,6 +40,14 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         _;
     }
 
+    modifier validForestContract(address _forestContractAddress) {
+        require(
+            forestToOwners[_forestContractAddress] != address(0),
+            "Invalid forest address"
+        );
+        _;
+    }
+
     /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -138,7 +146,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _contractAddress,
         address _tokenAddress,
         uint256 _leastDai
-    ) external override {
+    ) external override validForestContract(_contractAddress) {
         require(validTokens[_tokenAddress], "Invalid token");
 
         IPublicForest(_contractAddress).swapTokenToDAI(
@@ -152,6 +160,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function swapMainCoinToDai(address _contractAddress, uint256 _leastDai)
         external
         override
+        validForestContract(_contractAddress)
     {
         IPublicForest(_contractAddress).swapMainCoinToDAI(
             _leastDai > 2 ether ? _leastDai : 2 ether,
@@ -161,7 +170,11 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
-    function fundTrees(address _contractAddress) external override {
+    function fundTrees(address _contractAddress)
+        external
+        override
+        validForestContract(_contractAddress)
+    {
         IPublicForest(_contractAddress).fundTrees(daiAddress, treejerContract);
     }
 
@@ -169,7 +182,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _contractAddress,
         address _nftContractAddress,
         uint256 _tokenId
-    ) external override {
+    ) external override validForestContract(_contractAddress) {
         require(
             _nftContractAddress != treejerNftContractAddress,
             "Treejer contract"
@@ -185,7 +198,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function externalTokenERC1155Approve(
         address _contractAddress,
         address _nftContractAddress
-    ) external override {
+    ) external override validForestContract(_contractAddress) {
         IPublicForest(_contractAddress).externalTokenERC1155Approve(
             _nftContractAddress,
             true,

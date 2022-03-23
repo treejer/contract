@@ -59,17 +59,20 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     }
 
     /// @inheritdoc IPublicForestFactory
-    function initialize(address _accessRestrictionAddress)
-        external
-        override
-        initializer
-    {
+    function initialize(
+        address _accessRestrictionAddress,
+        address _wmaticAddress,
+        address _daiAddress
+    ) external override initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
         require(candidateContract.isAccessRestriction());
         isPublicForestFactory = true;
         accessRestriction = candidateContract;
+
+        wmaticAddress = _wmaticAddress;
+        daiAddress = _daiAddress;
 
         treejerNftContractAddress = 0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9;
     }

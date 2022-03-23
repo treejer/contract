@@ -7,7 +7,11 @@ interface IPublicForestFactory {
      * @dev initialize AccessRestriction contract and set true for isPublicForestFactory
      * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      */
-    function initialize(address _accessRestrictionAddress) external;
+    function initialize(
+        address _accessRestrictionAddress,
+        address _wmaticAddress,
+        address _daiAddress
+    ) external;
 
     function setTreejerContractAddress(address _address) external;
 

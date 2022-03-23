@@ -551,6 +551,8 @@ contract("PublicForestFactory", (accounts) => {
           from: dataManager,
         }
       );
+      const daiFundShare = 0.48;
+      const planterFundShare = 0.52;
 
       await allocationInstance.assignAllocationToTree(1, 1000000, 0, {
         from: dataManager,
@@ -569,11 +571,6 @@ contract("PublicForestFactory", (accounts) => {
         forestAddress,
         web3.utils.toWei(Math.mul(treePrice, 2).toString())
       );
-
-      // await daiDexInstance.setMint(
-      //   forestAddress,
-      //   web3.utils.toWei(Math.mul(treePrice, 2).toString())
-      // );
 
       ////----------- fail to fund tree because no main dai exists
       await publicForestFactory
@@ -600,10 +597,20 @@ contract("PublicForestFactory", (accounts) => {
       await publicForestFactory
         .fundTrees(forestAddress)
         .should.be.rejectedWith(RegularSaleErrors.INVALID_COUNT);
+
       await daiDexInstance.setMint(
         forestAddress,
         web3.utils.toWei(Math.divide(treePrice, 2).toString())
       );
+
+      //-------------- fail because mint directly from publicForest
+      await tempPublicForest
+        .fundTrees(daiDexInstance.address, regularSaleInstance.address, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
+
+      //------------------- fail because invalid count
 
       await publicForestFactory
         .fundTrees(forestAddress)
@@ -614,17 +621,140 @@ contract("PublicForestFactory", (accounts) => {
         web3.utils.toWei(Math.divide(treePrice, 2).toString())
       );
 
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        Number(web3.utils.toWei(treePrice.toString())),
+        "incorrect balance"
+      );
+
       await publicForestFactory.fundTrees(forestAddress);
 
-      // .should.be.rejectedWith(RegularSaleErrors.INSUFFICIENT_AMOUNT);
+      //check public forest balance
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        0,
+        "incorrect balance"
+      );
 
-      tokentOwner1 = await treeTokenInstance.ownerOf(10001);
-      // tokentOwner2 = await treeTokenInstance.ownerOf(10002);
-      console.log("token owner1", tokentOwner1);
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(daiFundInstance.address)),
+        Math.mul(
+          daiFundShare,
+          Number(web3.utils.toWei(Math.mul(1, treePrice).toString()))
+        )
+      );
 
-      // console.log("token owner2", tokentOwner2);
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(planterFundsInstnce.address)),
+        Math.mul(
+          planterFundShare,
+          Number(web3.utils.toWei(Math.mul(1, treePrice).toString()))
+        )
+      );
 
-      // assert.equal(tokentOwner, forestAddress, "token owner is not correct");
+      assert.equal(
+        await treeTokenInstance.ownerOf(10001),
+        forestAddress,
+        "token owner is not correct"
+      );
+      ///////------------------ mint 3 tree
+      await daiDexInstance.setMint(
+        forestAddress,
+        web3.utils.toWei(Math.mul(treePrice, 3).toString())
+      );
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        Number(web3.utils.toWei(Math.mul(treePrice, 3).toString())),
+        "incorrect balance"
+      );
+
+      await publicForestFactory.fundTrees(forestAddress);
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        0,
+        "incorrect balance"
+      );
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(daiFundInstance.address)),
+        Math.mul(
+          daiFundShare,
+          Number(web3.utils.toWei(Math.mul(4, treePrice).toString()))
+        )
+      );
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(planterFundsInstnce.address)),
+        Math.mul(
+          planterFundShare,
+          Number(web3.utils.toWei(Math.mul(4, treePrice).toString()))
+        )
+      );
+
+      for (let i = 10002; i < 10005; i++) {
+        assert.equal(
+          await treeTokenInstance.ownerOf(i),
+          forestAddress,
+          "token owner is not correct"
+        );
+
+        assert.equal(
+          Number((await treeTokenInstance.attributes.call(i)).generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
+      }
+
+      await treeTokenInstance.ownerOf(10005).should.be.rejected;
+
+      /////////////--------------balance is more than 50 tree
+
+      await daiDexInstance.setMint(
+        forestAddress,
+        web3.utils.toWei(Math.mul(treePrice, 60).toString())
+      );
+
+      await publicForestFactory.fundTrees(forestAddress);
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        Number(web3.utils.toWei(Math.mul(10, treePrice).toString())),
+        "incorrect balance"
+      );
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(daiFundInstance.address)),
+        Math.mul(
+          daiFundShare,
+          Number(web3.utils.toWei(Math.mul(54, treePrice).toString()))
+        )
+      );
+
+      assert.equal(
+        Number(await daiDexInstance.balanceOf(planterFundsInstnce.address)),
+        Math.mul(
+          planterFundShare,
+          Number(web3.utils.toWei(Math.mul(54, treePrice).toString()))
+        )
+      );
+
+      for (let i = 10005; i < 10055; i++) {
+        assert.equal(
+          await treeTokenInstance.ownerOf(i),
+          forestAddress,
+          "token owner is not correct"
+        );
+
+        assert.equal(
+          Number((await treeTokenInstance.attributes.call(i)).generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
+      }
+
+      await treeTokenInstance.ownerOf(10055).should.be.rejected;
     });
   });
 
@@ -1026,7 +1156,7 @@ contract("PublicForestFactory", (accounts) => {
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
 
-    it.skip("test swapMainCoinToDai", async () => {
+    it("test swapMainCoinToDai", async () => {
       const ipfsHash = "ipfs hash 1";
 
       await publicForestFactory.createPublicForest(ipfsHash, {

@@ -17,27 +17,23 @@ const DaiFund = artifacts.require("DaiFund");
 const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
 
+const Math = require("./math");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
-const Math = require("./math");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 const {
   CommonErrorMsg,
   contractAddress,
+  PublicForestErrors,
   RegularSaleErrors,
   erc20ErrorMsg,
 } = require("./enumes");
+const common = require("mocha/lib/interfaces/common");
 
 contract("PublicForestFactory", (accounts) => {
-  let treeFactoryInstance;
-  let daiFundInstance;
-  let allocationInstance;
-  let attributeInstance;
-  let treeTokenInstance;
-  let planterFundsInstnce;
-  let planterInstance;
   let arInstance;
   let publicForestFactory;
   let regularSaleInstance;
@@ -49,6 +45,13 @@ contract("PublicForestFactory", (accounts) => {
   let bnbDexInstance;
   let adaDexInstance;
   let factoryInstance;
+  let treeFactoryInstance;
+  let daiFundInstance;
+  let allocationInstance;
+  let attributeInstance;
+  let treeTokenInstance;
+  let planterFundsInstnce;
+  let planterInstance;
 
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -81,9 +84,14 @@ contract("PublicForestFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      await publicForestFactory.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+      await publicForestFactory.initialize(
+        arInstance.address,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     it("deploys successfully and set addresses", async () => {
@@ -253,15 +261,20 @@ contract("PublicForestFactory", (accounts) => {
     });
   });
 
-  describe.only("deployment and set addresses and set valid tokens", () => {
+  describe("deployment and set addresses and set valid tokens", () => {
     beforeEach(async () => {
       publicForestFactory = await PublicForestFactory.new({
         from: deployerAccount,
       });
 
-      await publicForestFactory.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+      await publicForestFactory.initialize(
+        arInstance.address,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: deployerAccount,
+        }
+      );
 
       publicForest = await PublicForest.new({
         from: deployerAccount,
@@ -617,14 +630,20 @@ contract("PublicForestFactory", (accounts) => {
 
   describe("deployment and set addresses and set valid tokens", () => {
     beforeEach(async () => {
+      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
       ////////////////////// deploy contracts
       publicForestFactory = await PublicForestFactory.new({
         from: deployerAccount,
       });
 
-      await publicForestFactory.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+      await publicForestFactory.initialize(
+        arInstance.address,
+        wethDexInstance.address,
+        zeroAddress,
+        {
+          from: deployerAccount,
+        }
+      );
 
       publicForest = await PublicForest.new({
         from: deployerAccount,
@@ -642,8 +661,6 @@ contract("PublicForestFactory", (accounts) => {
       });
       const factoryAddress = factoryInstance.address;
 
-      wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
-
       daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
 
       bnbDexInstance = await Token.new("BNB", "bnb", {
@@ -654,7 +671,7 @@ contract("PublicForestFactory", (accounts) => {
         from: accounts[0],
       });
 
-      unsafeTokenDexInstance = await Token.new("UNSAFE", "unsafe", {
+      wmaticDexInstance = await Token.new("WMATIC", "wmatic", {
         from: accounts[0],
       });
 
@@ -693,6 +710,11 @@ contract("PublicForestFactory", (accounts) => {
         web3.utils.toWei("125000000", "Ether")
       );
 
+      await wmaticDexInstance.setMint(
+        testUniswapAddress,
+        web3.utils.toWei("125000000", "Ether")
+      );
+
       await testUniswapInstance.addLiquidity(
         daiDexInstance.address,
         wethDexInstance.address,
@@ -701,10 +723,10 @@ contract("PublicForestFactory", (accounts) => {
       );
 
       await testUniswapInstance.addLiquidity(
-        bnbDexInstance.address,
         daiDexInstance.address,
+        bnbDexInstance.address,
         web3.utils.toWei("250000000", "Ether"),
-        web3.utils.toWei("250000000", "Ether")
+        web3.utils.toWei("500000", "Ether")
       );
 
       await testUniswapInstance.addLiquidity(
@@ -714,28 +736,21 @@ contract("PublicForestFactory", (accounts) => {
         web3.utils.toWei("125000000", "Ether")
       );
 
-      console.log(
-        "dddd",
-        (
-          await dexRouterInstance.getAmountsOut(
-            web3.utils.toWei("250", "Ether"),
-            [daiDexInstance.address, adaDexInstance.address]
-          )
-        ).toString()
+      await testUniswapInstance.addLiquidity(
+        daiDexInstance.address,
+        wmaticDexInstance.address,
+        web3.utils.toWei("250000000", "Ether"),
+        web3.utils.toWei("125000000", "Ether")
       );
     });
-    it("test swapTokenToDai", async () => {
-      await publicForestFactory.updateValidTokens(
-        bnbDexInstance.address,
-        true,
-        { from: dataManager }
-      );
 
+    it("test swapTokenToDai", async () => {
       await publicForestFactory.updateValidTokens(
         adaDexInstance.address,
         true,
         { from: dataManager }
       );
+
       await publicForestFactory.updateValidTokens(
         wethDexInstance.address,
         true,
@@ -744,11 +759,14 @@ contract("PublicForestFactory", (accounts) => {
 
       const ipfsHash = "ipfs hash 1";
       const newIpfsHash = "new ipfs";
+
       await publicForestFactory.createPublicForest(ipfsHash, {
         from: userAccount1,
       });
 
       let forestAddress = await publicForestFactory.forests(0);
+
+      forestInstance1 = await PublicForest.at(forestAddress);
 
       assert.equal(
         await publicForestFactory.forestToOwners(forestAddress),
@@ -771,17 +789,29 @@ contract("PublicForestFactory", (accounts) => {
 
       await bnbDexInstance.setMint(
         forestAddress,
-        web3.utils.toWei("0.1", "Ether")
+        web3.utils.toWei("10", "Ether")
       );
 
-      console.log(
-        "bnb1",
-        (await bnbDexInstance.balanceOf(forestAddress)).toString()
+      assert.equal(
+        await daiDexInstance.balanceOf(forestAddress),
+        0,
+        "before dai balance is not correct"
       );
 
-      console.log(
-        "dai1",
-        (await daiDexInstance.balanceOf(forestAddress)).toString()
+      assert.equal(
+        await bnbDexInstance.balanceOf(forestAddress),
+        web3.utils.toWei("10", "Ether"),
+        "before bnb balance is not correct"
+      );
+      assert.equal(
+        await adaDexInstance.balanceOf(forestAddress),
+        web3.utils.toWei("10", "Ether"),
+        "before ada balance is not correct"
+      );
+      assert.equal(
+        await wethDexInstance.balanceOf(forestAddress),
+        web3.utils.toWei("10", "Ether"),
+        "before weth balance is not correct"
       );
 
       await publicForestFactory.setDexRouterAddress(dexRouterInstance.address, {
@@ -792,30 +822,276 @@ contract("PublicForestFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      console.log(
-        "222222222",
-        (
-          await dexRouterInstance.getAmountsOut(
-            web3.utils.toWei("250", "Ether"),
-            [daiDexInstance.address, bnbDexInstance.address]
-          )
-        ).toString()
+      ///------------------ reject(bnb not valid token)
+
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .should.be.rejectedWith(PublicForestErrors.INVALID_TOKEN);
+
+      ///----------------- set bnb to valid address
+
+      await publicForestFactory.updateValidTokens(
+        bnbDexInstance.address,
+        true,
+        { from: dataManager }
       );
+
+      //--------------------------- swap bnb balance to dai
+
+      let expectedSwapTokenAmountBnb1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [bnbDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapTokenToDai(
         forestAddress,
         bnbDexInstance.address,
+        expectedSwapTokenAmountBnb1[1]
+      );
+
+      assert.equal(
+        Number(expectedSwapTokenAmountBnb1[1]),
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        "after dai balance is not correct"
+      );
+
+      assert.equal(
+        await bnbDexInstance.balanceOf(forestAddress),
+        0,
+        "after bnb balance is not correct"
+      );
+
+      assert.equal(
+        await wethDexInstance.balanceOf(forestAddress),
+        web3.utils.toWei("10", "Ether"),
+        "before weth balance is not correct"
+      );
+
+      //--------------------------- swap weth balance to dai
+
+      let expectedSwapTokenAmountWeth1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
+
+      await publicForestFactory.swapTokenToDai(
+        forestAddress,
+        wethDexInstance.address,
         0
       );
 
-      console.log(
-        "dai2",
-        (await daiDexInstance.balanceOf(forestAddress)).toString()
+      assert.equal(
+        Number(
+          Math.Big(expectedSwapTokenAmountBnb1[1]).plus(
+            expectedSwapTokenAmountWeth1[1]
+          )
+        ),
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        "after dai balance is not correct"
       );
-      console.log(
-        "bnb2",
-        (await bnbDexInstance.balanceOf(forestAddress)).toString()
+
+      assert.equal(
+        await wethDexInstance.balanceOf(forestAddress),
+        0,
+        "after weth balance is not correct"
       );
+
+      //--------------------------- swap ada balance to dai
+
+      let expectedSwapTokenAmountAda1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [adaDexInstance.address, daiDexInstance.address]
+        );
+
+      await publicForestFactory.swapTokenToDai(
+        forestAddress,
+        adaDexInstance.address,
+        0
+      );
+
+      assert.equal(
+        Number(
+          Math.Big(expectedSwapTokenAmountBnb1[1])
+            .plus(expectedSwapTokenAmountWeth1[1])
+            .plus(expectedSwapTokenAmountAda1[1])
+        ),
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        "after dai balance is not correct"
+      );
+
+      assert.equal(
+        await adaDexInstance.balanceOf(forestAddress),
+        0,
+        "after ada balance is not correct"
+      );
+
+      //-------------- balance not enough
+
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_INPUT_AMOUNT);
+
+      //-------------- balance swap lt 2 Dai
+      let expectedSwapTokenAmountWeth2 =
+        await dexRouterInstance.getAmountsIn.call(
+          web3.utils.toWei("1.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
+
+      await wethDexInstance.setMint(
+        forestAddress,
+        expectedSwapTokenAmountWeth2[0]
+      );
+
+      await publicForestFactory
+        .swapTokenToDai(forestAddress, wethDexInstance.address, 0)
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      let expectedSwapTokenAmountWeth3 =
+        await dexRouterInstance.getAmountsIn.call(
+          web3.utils.toWei("1.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
+
+      await wethDexInstance.setMint(
+        forestAddress,
+        expectedSwapTokenAmountWeth3[0]
+      );
+
+      await publicForestFactory
+        .swapTokenToDai(
+          forestAddress,
+          wethDexInstance.address,
+          web3.utils.toWei("3", "Ether")
+        )
+        .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
+
+      assert.equal(
+        Number(await wethDexInstance.balanceOf(forestAddress)),
+        Number(
+          Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
+            expectedSwapTokenAmountWeth3[0]
+          )
+        ),
+        "3-weth balance is not correct"
+      );
+
+      let expectedSwapTokenAmountWeth5 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei(
+            Number(
+              Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
+                expectedSwapTokenAmountWeth3[0]
+              )
+            ).toString(),
+            "wei"
+          ),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
+
+      await publicForestFactory.swapTokenToDai(
+        forestAddress,
+        wethDexInstance.address,
+        0
+      );
+
+      assert.equal(
+        Number(await wethDexInstance.balanceOf(forestAddress)),
+        0,
+        "4-weth balance is not correct"
+      );
+
+      assert.equal(
+        Number(
+          Math.Big(expectedSwapTokenAmountBnb1[1])
+            .plus(expectedSwapTokenAmountWeth1[1])
+            .plus(expectedSwapTokenAmountAda1[1])
+            .plus(expectedSwapTokenAmountWeth5[1])
+        ),
+        Number(await daiDexInstance.balanceOf(forestAddress)),
+        "4-dai balance is not correct"
+      );
+
+      //-----------should be rejecte (invalid access)
+      await forestInstance1
+        .swapTokenToDAI(
+          wethDexInstance.address,
+          0,
+          daiDexInstance.address,
+          dexRouterInstance.address
+        )
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
+    });
+
+    it.skip("test swapMainCoinToDai", async () => {
+      const ipfsHash = "ipfs hash 1";
+
+      await publicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1,
+      });
+
+      await publicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount2,
+      });
+
+      let forestAddress1 = await publicForestFactory.forests(0);
+
+      let forestInstance1 = await PublicForest.at(forestAddress1);
+
+      let forestAddress2 = await publicForestFactory.forests(1);
+
+      let forestInstance2 = await PublicForest.at(forestAddress2);
+
+      assert.equal(
+        await publicForestFactory.forestToOwners(forestAddress1),
+        userAccount1,
+        "owner forest1 is not correct"
+      );
+
+      assert.equal(
+        await publicForestFactory.forestToOwners(forestAddress2),
+        userAccount2,
+        "owner forest2 is not correct"
+      );
+
+      //---------------set intial data
+
+      await publicForestFactory
+        .setDexRouterAddress(dexRouterInstance.address, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setDexRouterAddress(dexRouterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await publicForestFactory
+        .setDaiTokenAddress(daiDexInstance.address, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setDaiTokenAddress(daiDexInstance.address, {
+        from: deployerAccount,
+      });
+
+      //------transfer ether to forest
+
+      await web3.eth.sendTransaction({
+        from: userAccount1,
+        to: forestAddress1,
+        value: web3.utils.toWei("25", "Ether"),
+      });
+
+      //------call swapMainCoinToDai function
+
+      await publicForestFactory.swapMainCoinToDai(forestAddress1, 0, {
+        from: userAccount1,
+      });
     });
   });
 });

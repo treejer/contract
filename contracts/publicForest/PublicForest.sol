@@ -184,7 +184,7 @@ contract PublicForest is
         path[0] = _tokenAddress;
         path[1] = _daiAddress;
 
-        uint256 amount = IERC20(_tokenAddress).balanceOf(_tokenAddress);
+        uint256 amount = IERC20(_tokenAddress).balanceOf(address(this));
 
         bool success = IERC20(_tokenAddress).approve(_dexRouter, amount);
 

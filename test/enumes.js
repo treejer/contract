@@ -36,6 +36,8 @@ const CommonErrorMsg = {
   CHECK_IF_PAUSED: "Pausable: not paused",
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
   UNISWAP_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
+  INSUFFICIENT_INPUT_AMOUNT: "INSUFFICIENT_INPUT_AMOUNT",
+  INSUFFICIENT_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
 };
 
 const AuctionErrorMsg = {
@@ -176,6 +178,11 @@ const contractAddress = {
   TREE: "0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9",
 };
 
+const PublicForestErrors = {
+  INVALID_TOKEN: "Invalid token",
+  NOT_FACTORY_ADDRESS: "Caller not factoryAddress",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -194,4 +201,5 @@ module.exports = {
   erc721ErrorMsg,
   WethFundErrorMsg,
   contractAddress,
+  PublicForestErrors,
 };

@@ -10,7 +10,7 @@ interface IPublicForestFactory {
     function initialize(
         address _accessRestrictionAddress,
         address _wmaticAddress,
-        address _daiAddress,
+        address _baseTokenAddress,
         address _treejerNftContractAddress
     ) external;
 
@@ -20,7 +20,7 @@ interface IPublicForestFactory {
 
     function setDexRouterAddress(address _dexRouter) external;
 
-    function setDaiTokenAddress(address _daiTokenAddress) external;
+    function setBaseTokenAddress(address _baseTokenAddress) external;
 
     function updateFactoryAddress(
         address _contractAddress,
@@ -32,29 +32,29 @@ interface IPublicForestFactory {
 
     function updateValidTokens(address _tokenAddress, bool _isValid) external;
 
-    function swapTokenToDai(
+    function swapTokenToBaseToken(
         address _contractAddress,
         address _tokenAddress,
-        uint256 _leastDai
+        uint256 _minBaseTokenOut
     ) external;
 
-    function swapMainCoinToDai(address _contractAddress, uint256 _leastDai)
-        external;
+    function swapMainCoinToBaseToken(
+        address _contractAddress,
+        uint256 _minBaseTokenOut
+    ) external;
 
     function fundTrees(address _contractAddress) external;
 
     function createPublicForest(string memory _ipfsHash) external;
 
     function externalTokenERC721Approve(
-        address _contractAddress,
-        address nftContractAddress,
+        address _forest,
+        address _tokenAddress,
         uint256 _tokenId
     ) external;
 
-    function externalTokenERC1155Approve(
-        address _contractAddress,
-        address nftContractAddress
-    ) external;
+    function externalTokenERC1155Approve(address _forest, address _tokenAddress)
+        external;
 
     /**
      * @return true in case of PublicForestFactory contract has been initialized
@@ -72,8 +72,6 @@ interface IPublicForestFactory {
 
     function validTokens(address _token) external view returns (bool);
 
-    function forestCreators(address _token) external view returns (address);
-
     function implementation() external view returns (address);
 
     function treejerNftContractAddress() external view returns (address);
@@ -81,7 +79,7 @@ interface IPublicForestFactory {
     /**
      * @return true in case of PublicForestFactory contract has been initialized
      */
-    function daiAddress() external view returns (address);
+    function baseTokenAddress() external view returns (address);
 
     /**
      * @return true in case of PublicForestFactory contract has been initialized

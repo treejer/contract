@@ -10,32 +10,35 @@ interface IPublicForest {
 
     function updateIpfsHash(string memory _ipfsHash) external;
 
-    function swapTokenToDAI(
+    function swapTokenToBaseToken(
+        address _dexRouter,
         address _tokenAddress,
-        uint256 _leastDai,
-        address _daiAddress,
-        address _dexRouter
+        address _baseTokenAddress,
+        uint256 _minBaseTokenOut
     ) external;
 
-    function swapMainCoinToDAI(
-        uint256 _leastDai,
-        address _daiAddress,
+    function swapMainCoinToBaseToken(
+        address _dexRouter,
         address _wmaticAddress,
-        address _dexRouter
+        address _baseTokenAddress,
+        uint256 _minBaseTokenOut
     ) external;
 
-    function fundTrees(address _daiAddress, address _regularSale) external;
+    function fundTrees(
+        address _baseTokenAddress,
+        address _treejerContractAddress
+    ) external;
 
     function externalTokenERC721Approve(
-        address _nftTokenAddress,
-        uint256 _nftTokenId,
-        address _destinationAddress
+        address _tokenAddress,
+        address _to,
+        uint256 _tokenId
     ) external;
 
     function externalTokenERC1155Approve(
-        address _nftTokenAddress,
-        bool _approved,
-        address _destinationAddress
+        address _tokenAddress,
+        address _to,
+        bool _approved
     ) external;
 
     /**

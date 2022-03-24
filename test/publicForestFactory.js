@@ -211,18 +211,18 @@ contract("PublicForestFactory", accounts => {
       ///////////////---------------------------------set daiToken address--------------------------------------------------------
 
       await publicForestFactory
-        .setDaiTokenAddress(userAccount2, {
+        .setBaseTokenAddress(userAccount2, {
           from: userAccount1
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await publicForestFactory.setDaiTokenAddress(userAccount2, {
+      await publicForestFactory.setBaseTokenAddress(userAccount2, {
         from: deployerAccount
       });
 
       assert.equal(
         userAccount2,
-        await publicForestFactory.daiAddress(),
+        await publicForestFactory.baseTokenAddress(),
         "daiToken address set incorect"
       );
     });
@@ -490,7 +490,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       //set fake dai token address
-      await publicForestFactory.setDaiTokenAddress(fakeDaiInstance.address, {
+      await publicForestFactory.setBaseTokenAddress(fakeDaiInstance.address, {
         from: deployerAccount
       });
 
@@ -607,7 +607,7 @@ contract("PublicForestFactory", accounts => {
       await daiDexInstance.resetAcc(forestAddress);
 
       ///////----------- set main dai address in forest
-      await publicForestFactory.setDaiTokenAddress(daiDexInstance.address, {
+      await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount
       });
       await publicForestFactory
@@ -891,7 +891,7 @@ contract("PublicForestFactory", accounts => {
       );
     });
 
-    it("test swapTokenToDai", async () => {
+    it("test swapTokenToBaseToken", async () => {
       await publicForestFactory.updateValidTokens(
         adaDexInstance.address,
         true,
@@ -965,14 +965,14 @@ contract("PublicForestFactory", accounts => {
         from: deployerAccount
       });
 
-      await publicForestFactory.setDaiTokenAddress(daiDexInstance.address, {
+      await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount
       });
 
       ///------------------ reject(bnb not valid token)
 
       await publicForestFactory
-        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .swapTokenToBaseToken(forestAddress, bnbDexInstance.address, 0)
         .should.be.rejectedWith(PublicForestErrors.INVALID_TOKEN);
 
       ///----------------- set bnb to valid address
@@ -990,7 +990,7 @@ contract("PublicForestFactory", accounts => {
         [bnbDexInstance.address, daiDexInstance.address]
       );
 
-      await publicForestFactory.swapTokenToDai(
+      await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
         bnbDexInstance.address,
         expectedSwapTokenAmountBnb1[1]
@@ -1021,7 +1021,7 @@ contract("PublicForestFactory", accounts => {
         [wethDexInstance.address, daiDexInstance.address]
       );
 
-      await publicForestFactory.swapTokenToDai(
+      await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
         wethDexInstance.address,
         0
@@ -1050,7 +1050,7 @@ contract("PublicForestFactory", accounts => {
         [adaDexInstance.address, daiDexInstance.address]
       );
 
-      await publicForestFactory.swapTokenToDai(
+      await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
         adaDexInstance.address,
         0
@@ -1075,7 +1075,7 @@ contract("PublicForestFactory", accounts => {
       //-------------- balance not enough
 
       await publicForestFactory
-        .swapTokenToDai(forestAddress, bnbDexInstance.address, 0)
+        .swapTokenToBaseToken(forestAddress, bnbDexInstance.address, 0)
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_INPUT_AMOUNT);
 
       //-------------- balance swap lt 2 Dai
@@ -1090,7 +1090,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       await publicForestFactory
-        .swapTokenToDai(forestAddress, wethDexInstance.address, 0)
+        .swapTokenToBaseToken(forestAddress, wethDexInstance.address, 0)
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
 
       let expectedSwapTokenAmountWeth3 = await dexRouterInstance.getAmountsIn.call(
@@ -1104,7 +1104,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       await publicForestFactory
-        .swapTokenToDai(
+        .swapTokenToBaseToken(
           forestAddress,
           wethDexInstance.address,
           web3.utils.toWei("3", "Ether")
@@ -1133,7 +1133,7 @@ contract("PublicForestFactory", accounts => {
         [wethDexInstance.address, daiDexInstance.address]
       );
 
-      await publicForestFactory.swapTokenToDai(
+      await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
         wethDexInstance.address,
         0
@@ -1158,23 +1158,23 @@ contract("PublicForestFactory", accounts => {
 
       // ------------ reject (invalid forest address)
       await publicForestFactory
-        .swapTokenToDai(userAccount5, wethDexInstance.address, 0, {
+        .swapTokenToBaseToken(userAccount5, wethDexInstance.address, 0, {
           from: userAccount1
         })
         .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
 
       //-----------should be rejecte (invalid access)
       await forestInstance1
-        .swapTokenToDAI(
+        .swapTokenToBaseToken(
+          dexRouterInstance.address,
           wethDexInstance.address,
-          0,
           daiDexInstance.address,
-          dexRouterInstance.address
+          0
         )
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
 
-    it("test swapMainCoinToDai", async () => {
+    it("test swapMainCoinToBaseToken", async () => {
       const ipfsHash = "ipfs hash 1";
 
       await publicForestFactory.createPublicForest(ipfsHash, {
@@ -1218,12 +1218,12 @@ contract("PublicForestFactory", accounts => {
       });
 
       await publicForestFactory
-        .setDaiTokenAddress(daiDexInstance.address, {
+        .setBaseTokenAddress(daiDexInstance.address, {
           from: userAccount3
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await publicForestFactory.setDaiTokenAddress(daiDexInstance.address, {
+      await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
         from: deployerAccount
       });
 
@@ -1241,14 +1241,14 @@ contract("PublicForestFactory", accounts => {
         value: web3.utils.toWei("25", "Ether")
       });
 
-      //------call swapMainCoinToDai function
+      //------call swapMainCoinToBaseToken function
 
       let expectedSwapTokenAmountWeth1 = await dexRouterInstance.getAmountsOut.call(
         web3.utils.toWei("25", "Ether"),
         [wethDexInstance.address, daiDexInstance.address]
       );
 
-      await publicForestFactory.swapMainCoinToDai(forestAddress1, 0, {
+      await publicForestFactory.swapMainCoinToBaseToken(forestAddress1, 0, {
         from: userAccount1
       });
 
@@ -1300,7 +1300,7 @@ contract("PublicForestFactory", accounts => {
       });
 
       await publicForestFactory
-        .swapMainCoinToDai(forestAddress1, 0, {
+        .swapMainCoinToBaseToken(forestAddress1, 0, {
           from: userAccount1
         })
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
@@ -1312,9 +1312,13 @@ contract("PublicForestFactory", accounts => {
       });
 
       await publicForestFactory
-        .swapMainCoinToDai(forestAddress1, expectedSwapTokenAmountWeth2[1], {
-          from: userAccount1
-        })
+        .swapMainCoinToBaseToken(
+          forestAddress1,
+          expectedSwapTokenAmountWeth2[1],
+          {
+            from: userAccount1
+          }
+        )
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
 
       //------------------------------------check balance
@@ -1334,7 +1338,7 @@ contract("PublicForestFactory", accounts => {
 
       //---------swap
 
-      await publicForestFactory.swapMainCoinToDai(
+      await publicForestFactory.swapMainCoinToBaseToken(
         forestAddress1,
         expectedSwapTokenAmountWeth4[1],
         {
@@ -1368,18 +1372,18 @@ contract("PublicForestFactory", accounts => {
 
       // ------------ reject (invalid forest address)
       await publicForestFactory
-        .swapMainCoinToDai(userAccount5, 0, {
+        .swapMainCoinToBaseToken(userAccount5, 0, {
           from: userAccount1
         })
         .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
 
       //-----------should be rejecte (invalid access)
       await forestInstance1
-        .swapMainCoinToDAI(
-          0,
-          daiDexInstance.address,
+        .swapMainCoinToBaseToken(
+          dexRouterInstance.address,
           wethDexInstance.address,
-          dexRouterInstance.address
+          daiDexInstance.address,
+          0
         )
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
@@ -1461,6 +1465,8 @@ contract("PublicForestFactory", accounts => {
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
 
+      let forestInstance1 = await PublicForest.at(forestAddress1);
+
       await erc1155TokenInstance.safeMint(forestAddress1, 4, 1);
 
       await testPublicForestFactory.transferFromErc1155(
@@ -1525,6 +1531,17 @@ contract("PublicForestFactory", accounts => {
         1,
         "4-balance is not correct"
       );
+
+      await forestInstance1
+        .externalTokenERC1155Approve(
+          erc1155TokenInstance.address,
+          userAccount8,
+          true,
+          {
+            from: userAccount4
+          }
+        )
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
   });
 
@@ -1607,6 +1624,8 @@ contract("PublicForestFactory", accounts => {
       });
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      let forestInstance1 = await PublicForest.at(forestAddress1);
 
       await testPublicForestFactory
         .externalTokenERC721Approve(
@@ -1707,6 +1726,17 @@ contract("PublicForestFactory", accounts => {
         erc721TokenInstance.address,
         4
       );
+
+      await forestInstance1
+        .externalTokenERC721Approve(
+          erc721TokenInstance.address,
+          userAccount8,
+          10,
+          {
+            from: userAccount4
+          }
+        )
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
     });
   });
 });

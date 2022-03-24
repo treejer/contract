@@ -137,10 +137,7 @@ contract PublicForest is
 
         treeCount = treeCount > 50 ? 50 : treeCount;
 
-        IERC721(_daiAddress).approve(
-            _regularSale,
-            treeCount * regularSalePrice
-        );
+        IERC20(_daiAddress).approve(_regularSale, treeCount * regularSalePrice);
 
         ITreejerContract(_regularSale).fundTree(
             treeCount,

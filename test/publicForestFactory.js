@@ -340,6 +340,12 @@ contract("PublicForestFactory", accounts => {
         { from: userAccount3 }
       );
 
+      await tempPublicForest
+        .updateFactoryAddress(userAccount5, {
+          from: dataManager
+        })
+        .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
+
       await publicForestFactory.updateFactoryAddress(
         tempPublicForest.address,
         userAccount5,
@@ -576,6 +582,16 @@ contract("PublicForestFactory", accounts => {
 
       /////////////////------------ create forest
       const ipfsHash = "ipfs hash 1";
+
+      publicForest = await PublicForest.new({
+        from: deployerAccount
+      });
+
+      await publicForest.initialize("treejer", publicForestFactory.address, {
+        from: deployerAccount
+      });
+
+      await publicForestFactory.setImplementationAddress(publicForest.address);
 
       await publicForestFactory.createPublicForest(ipfsHash, {
         from: userAccount1

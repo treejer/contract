@@ -11,6 +11,9 @@ import "./interfaces/ITreejerContract.sol";
 
 /** @title Planter contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
+    /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
+    bool public override isPublicForestFactory;
+
     address[] public override forests;
     mapping(address => address) public override forestToOwners;
     mapping(address => uint256) public override indexOf;
@@ -21,9 +24,6 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     address public override wmaticAddress;
     address public override treejerContract;
     address public override dexRouter;
-
-    /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
-    bool public override isPublicForestFactory;
 
     IAccessRestriction public accessRestriction;
 
@@ -134,13 +134,6 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
     }
 
-    function updateIpfsHash(address _contractAddress, string memory _ipfs)
-        external
-        override
-    {
-        IPublicForest(_contractAddress).updateIpfsHash(_ipfs);
-    }
-
     function updateValidTokens(address _tokenAddress, bool _isValid)
         external
         override
@@ -227,6 +220,13 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
         _set(cloneAddress);
+    }
+
+    function updateIpfsHash(address _contractAddress, string memory _ipfs)
+        external
+        override
+    {
+        IPublicForest(_contractAddress).updateIpfsHash(_ipfs);
     }
 
     function _set(address _value) internal {

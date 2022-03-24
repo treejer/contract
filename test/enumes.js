@@ -18,7 +18,9 @@ const erc20ErrorMsg = {
 };
 
 const erc721ErrorMsg = {
-  MINTED_BEFORE: "token already minted."
+  MINTED_BEFORE: "token already minted.",
+  QUERY_FOR_NOTEXIST_TOKEN: "ERC721: owner query for nonexistent token",
+  CALLER_NOT_OWNER: "ERC721: approve caller is not owner nor approved for all"
 };
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
@@ -181,7 +183,8 @@ const contractAddress = {
 const PublicForestErrors = {
   INVALID_TOKEN: "Invalid token",
   NOT_FACTORY_ADDRESS: "Caller not factoryAddress",
-  INVALID_FOREST_ADDRESS: "Invalid forest address"
+  INVALID_FOREST_ADDRESS: "Invalid forest address",
+  TREEJER_CONTRACT: "Treejer contract"
 };
 
 module.exports = {

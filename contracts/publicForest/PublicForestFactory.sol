@@ -70,7 +70,8 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function initialize(
         address _accessRestrictionAddress,
         address _wmaticAddress,
-        address _daiAddress
+        address _daiAddress,
+        address _treejerNftContractAddress
     ) external override initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -81,8 +82,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
         wmaticAddress = _wmaticAddress;
         daiAddress = _daiAddress;
-
-        treejerNftContractAddress = 0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9;
+        treejerNftContractAddress = _treejerNftContractAddress;
     }
 
     function setTreejerContractAddress(address _address)
@@ -199,6 +199,11 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _contractAddress,
         address _nftContractAddress
     ) external override validForestContract(_contractAddress) {
+        require(
+            _nftContractAddress != treejerNftContractAddress,
+            "Treejer contract"
+        );
+
         IPublicForest(_contractAddress).externalTokenERC1155Approve(
             _nftContractAddress,
             true,

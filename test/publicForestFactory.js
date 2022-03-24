@@ -7,6 +7,8 @@ const UniswapV2Router02New = artifacts.require("UniswapV2Router02New.sol");
 const TestUniswap = artifacts.require("TestUniswap.sol");
 const Factory = artifacts.require("Factory.sol");
 const Token = artifacts.require("Weth");
+const Erc721Token = artifacts.require("Erc721Token");
+const Erc1155Token = artifacts.require("Erc1155Token");
 
 const TreeFactory = artifacts.require("TreeFactory");
 const Tree = artifacts.require("Tree");
@@ -16,6 +18,7 @@ const Attribute = artifacts.require("Attribute");
 const DaiFund = artifacts.require("DaiFund");
 const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
+const TestPublicForestFactory = artifacts.require("TestPublicForestFactory");
 
 const Math = require("./math");
 
@@ -31,7 +34,8 @@ const {
   contractAddress,
   PublicForestErrors,
   RegularSaleErrors,
-  erc20ErrorMsg
+  erc20ErrorMsg,
+  erc721ErrorMsg
 } = require("./enumes");
 const common = require("mocha/lib/interfaces/common");
 
@@ -54,6 +58,7 @@ contract("PublicForestFactory", accounts => {
   let treeTokenInstance;
   let planterFundsInstnce;
   let planterInstance;
+  let erc721TokenInstance;
 
   const deployerAccount = accounts[0];
   const dataManager = accounts[1];
@@ -90,6 +95,7 @@ contract("PublicForestFactory", accounts => {
         arInstance.address,
         zeroAddress,
         zeroAddress,
+        "0x3abbc23f3303ef36fd9f6cec0e585b2c23e47fd9",
         {
           from: deployerAccount
         }
@@ -271,6 +277,7 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory.initialize(
         arInstance.address,
+        zeroAddress,
         zeroAddress,
         zeroAddress,
         {
@@ -630,7 +637,7 @@ contract("PublicForestFactory", accounts => {
     });
   });
 
-  describe.only("deployment and set addresses and set valid tokens", () => {
+  describe("deployment and set addresses and set valid tokens", () => {
     beforeEach(async () => {
       wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
       ////////////////////// deploy contracts
@@ -641,6 +648,7 @@ contract("PublicForestFactory", accounts => {
       await publicForestFactory.initialize(
         arInstance.address,
         wethDexInstance.address,
+        zeroAddress,
         zeroAddress,
         {
           from: deployerAccount
@@ -1240,5 +1248,328 @@ contract("PublicForestFactory", accounts => {
     });
   });
 
-  // describe.only("deployment and set addresses and set valid tokens", () => {});
+  describe("Check approve external erc1155", () => {
+    beforeEach(async () => {
+      treeInstance = await Tree.new({
+        from: deployerAccount
+      });
+
+      await treeInstance.initialize(arInstance.address, "", {
+        from: deployerAccount
+      });
+
+      testPublicForestFactory = await TestPublicForestFactory.new({
+        from: deployerAccount
+      });
+
+      await testPublicForestFactory.initialize(
+        arInstance.address,
+        zeroAddress,
+        zeroAddress,
+        treeInstance.address,
+        {
+          from: deployerAccount
+        }
+      );
+
+      publicForest = await PublicForest.new({
+        from: deployerAccount
+      });
+
+      await publicForest.initialize(
+        "treejer",
+        testPublicForestFactory.address,
+        {
+          from: deployerAccount
+        }
+      );
+
+      await testPublicForestFactory.setImplementationAddress(
+        publicForest.address
+      );
+
+      erc1155TokenInstance = await Erc1155Token.new({
+        from: deployerAccount
+      });
+    });
+
+    it("factory address must be valid", async () => {
+      await testPublicForestFactory
+        .externalTokenERC1155Approve(userAccount5, erc1155TokenInstance.address)
+        .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
+    });
+
+    it("proxy can't get approve for treejer tree's", async () => {
+      //---------deploy forest
+
+      const ipfsHash = "ipfs hash 1";
+
+      await testPublicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1
+      });
+
+      let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      await testPublicForestFactory
+        .externalTokenERC1155Approve(forestAddress1, treeInstance.address)
+        .should.be.rejectedWith(PublicForestErrors.TREEJER_CONTRACT);
+    });
+
+    it("check erc1155 approve", async () => {
+      const ipfsHash = "ipfs hash 1";
+
+      await testPublicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1
+      });
+
+      let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      await erc1155TokenInstance.safeMint(forestAddress1, 4, 1);
+
+      await testPublicForestFactory.transferFromErc1155(
+        userAccount6,
+        forestAddress1,
+        erc1155TokenInstance.address,
+        4,
+        1
+      ).should.be.rejected;
+
+      assert.equal(
+        await erc1155TokenInstance.isApprovedForAll(
+          forestAddress1,
+          testPublicForestFactory.address
+        ),
+        false,
+        "1-result is not correct"
+      );
+
+      await testPublicForestFactory.externalTokenERC1155Approve(
+        forestAddress1,
+        erc1155TokenInstance.address
+      );
+
+      assert.equal(
+        await erc1155TokenInstance.isApprovedForAll(
+          forestAddress1,
+          testPublicForestFactory.address
+        ),
+        true,
+        "2-result is not correct"
+      );
+
+      assert.equal(
+        await erc1155TokenInstance.balanceOf(forestAddress1, 4),
+        1,
+        "balance is not correct"
+      );
+
+      assert.equal(
+        await erc1155TokenInstance.balanceOf(userAccount6, 4),
+        0,
+        "2-balance is not correct"
+      );
+
+      await testPublicForestFactory.transferFromErc1155(
+        userAccount6,
+        forestAddress1,
+        erc1155TokenInstance.address,
+        4,
+        1
+      );
+
+      assert.equal(
+        await erc1155TokenInstance.balanceOf(forestAddress1, 4),
+        0,
+        "3-balance is not correct"
+      );
+
+      assert.equal(
+        await erc1155TokenInstance.balanceOf(userAccount6, 4),
+        1,
+        "4-balance is not correct"
+      );
+    });
+  });
+
+  describe("Check approve external erc721", () => {
+    beforeEach(async () => {
+      treeInstance = await Tree.new({
+        from: deployerAccount
+      });
+
+      await treeInstance.initialize(arInstance.address, "", {
+        from: deployerAccount
+      });
+
+      testPublicForestFactory = await TestPublicForestFactory.new({
+        from: deployerAccount
+      });
+
+      await testPublicForestFactory.initialize(
+        arInstance.address,
+        zeroAddress,
+        zeroAddress,
+        treeInstance.address,
+        {
+          from: deployerAccount
+        }
+      );
+
+      publicForest = await PublicForest.new({
+        from: deployerAccount
+      });
+
+      await publicForest.initialize(
+        "treejer",
+        testPublicForestFactory.address,
+        {
+          from: deployerAccount
+        }
+      );
+
+      await testPublicForestFactory.setImplementationAddress(
+        publicForest.address
+      );
+
+      erc721TokenInstance = await Erc721Token.new("EXAMPLE", "example", {
+        from: deployerAccount
+      });
+    });
+
+    it("factory address must be valid", async () => {
+      await testPublicForestFactory
+        .externalTokenERC721Approve(
+          userAccount5,
+          erc721TokenInstance.address,
+          0
+        )
+        .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
+    });
+
+    it("proxy can't get approve for treejer tree's", async () => {
+      //---------deploy forest
+
+      const ipfsHash = "ipfs hash 1";
+
+      await testPublicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1
+      });
+
+      let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      await testPublicForestFactory
+        .externalTokenERC721Approve(forestAddress1, treeInstance.address, 0)
+        .should.be.rejectedWith(PublicForestErrors.TREEJER_CONTRACT);
+    });
+
+    it("check erc721 approve", async () => {
+      const ipfsHash = "ipfs hash 1";
+
+      await testPublicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1
+      });
+
+      let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      await testPublicForestFactory
+        .externalTokenERC721Approve(
+          forestAddress1,
+          erc721TokenInstance.address,
+          1
+        )
+        .should.be.rejectedWith(erc721ErrorMsg.QUERY_FOR_NOTEXIST_TOKEN);
+
+      await erc721TokenInstance.safeMint(userAccount4, 1);
+
+      await testPublicForestFactory
+        .externalTokenERC721Approve(
+          forestAddress1,
+          erc721TokenInstance.address,
+          1
+        )
+        .should.be.rejectedWith(erc721ErrorMsg.CALLER_NOT_OWNER);
+
+      await erc721TokenInstance.safeMint(forestAddress1, 2);
+
+      await testPublicForestFactory.externalTokenERC721Approve(
+        forestAddress1,
+        erc721TokenInstance.address,
+        2
+      );
+
+      assert.equal(
+        await erc721TokenInstance.getApproved(2),
+        testPublicForestFactory.address,
+        "approve is not correct"
+      );
+
+      await erc721TokenInstance.safeTransferFrom(
+        userAccount4,
+        forestAddress1,
+        1,
+        { from: userAccount4 }
+      );
+
+      assert.equal(
+        await erc721TokenInstance.getApproved(1),
+        zeroAddress,
+        "approve is not correct"
+      );
+
+      await testPublicForestFactory.externalTokenERC721Approve(
+        forestAddress1,
+        erc721TokenInstance.address,
+        1
+      );
+
+      assert.equal(
+        await erc721TokenInstance.getApproved(1),
+        testPublicForestFactory.address,
+        "approve is not correct"
+      );
+
+      //---transfer from
+
+      assert.equal(
+        await erc721TokenInstance.ownerOf(1),
+        forestAddress1,
+        "1-owner is not correct"
+      );
+
+      await testPublicForestFactory.transferFromErc721(
+        userAccount6,
+        forestAddress1,
+        erc721TokenInstance.address,
+        1
+      );
+
+      assert.equal(
+        await erc721TokenInstance.ownerOf(1),
+        userAccount6,
+        "2-owner is not correct"
+      );
+
+      await erc721TokenInstance.safeMint(forestAddress1, 4);
+
+      await testPublicForestFactory.transferFromErc721(
+        userAccount6,
+        forestAddress1,
+        erc721TokenInstance.address,
+        4
+      ).should.be.rejected;
+
+      await testPublicForestFactory.externalTokenERC721Approve(
+        forestAddress1,
+        erc721TokenInstance.address,
+        4
+      );
+
+      await testPublicForestFactory.transferFromErc721(
+        userAccount6,
+        forestAddress1,
+        erc721TokenInstance.address,
+        4
+      );
+    });
+  });
 });

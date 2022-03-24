@@ -10,7 +10,8 @@ interface IPublicForestFactory {
     function initialize(
         address _accessRestrictionAddress,
         address _wmaticAddress,
-        address _daiAddress
+        address _daiAddress,
+        address _treejerNftContractAddress
     ) external;
 
     function setTreejerContractAddress(address _address) external;

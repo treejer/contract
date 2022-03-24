@@ -39,8 +39,7 @@ contract PublicForest is
     {
         return
             interfaceId == type(IERC721Receiver).interfaceId ||
-            interfaceId == type(IERC1155Receiver).interfaceId ||
-            interfaceId == type(IERC721Receiver).interfaceId;
+            interfaceId == type(IERC1155Receiver).interfaceId;
     }
 
     function onERC1155Received(

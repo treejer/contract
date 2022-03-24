@@ -206,7 +206,11 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
-    function createPublicForest(string memory _ipfsHash) external override {
+    function createPublicForest(string memory _ipfsHash)
+        external
+        override
+        validAddress(implementation)
+    {
         address cloneAddress = ClonesUpgradeable.clone(implementation);
 
         IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));

@@ -14,10 +14,13 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
     bool public override isPublicForestFactory;
 
+    /** NOTE forest address */
     address[] public override forests;
-
+    /** NOTE mapping of forest address to forest owner */
     mapping(address => address) public override forestToOwners;
+    /** NOTE mapping of forest address to its index in forests array */
     mapping(address => uint256) public override indexOf;
+    /** NOTE mapping of token address to if it's valid or not*/
     mapping(address => bool) public override validTokens;
 
     address public override implementation;
@@ -41,6 +44,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         _;
     }
 
+    /** NOTE modifier to check given address is a valid forest address*/
     modifier validForestContract(address _forestContractAddress) {
         require(
             forestToOwners[_forestContractAddress] != address(0),
@@ -49,19 +53,19 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         _;
     }
 
-    /** NOTE modifier for check if function is not paused */
+    /** NOTE modifier to check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
-    /** NOTE modifier for check valid address */
+    /** NOTE modifier to check given address is a valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "Invalid address");
         _;
     }
 
-    /** NOTE modifier for check msg.sender has TreejerContract role*/
+    /** NOTE modifier to check given address is not treejerContraact address*/
     modifier checkTreejerContractAddress(address _nftContractAddress) {
         require(
             _nftContractAddress != treejerNftContractAddress,

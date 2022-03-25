@@ -9,7 +9,7 @@ import "./IPublicForestFactory.sol";
 import "./IPublicForest.sol";
 import "./interfaces/ITreejerContract.sol";
 
-/** @title Planter contract */
+/** @title PublicForestFactory contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
     /** NOTE {isPublicForestFactory} set inside the initialize to {true} */
     bool public override isPublicForestFactory;

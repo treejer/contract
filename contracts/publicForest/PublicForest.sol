@@ -4,7 +4,6 @@ pragma solidity ^0.8.6;
 
 import "./IPublicForest.sol";
 
-// import "@openzeppelin/contracts/utils/introspection/ERC165CheckerUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -74,6 +73,7 @@ contract PublicForest is
 
     receive() external payable {}
 
+    /// @inheritdoc IPublicForest
     function initialize(string memory _ipfsHash, address _factory)
         external
         override
@@ -83,6 +83,7 @@ contract PublicForest is
         factory = _factory;
     }
 
+    /// @inheritdoc IPublicForest
     function updateFactoryAddress(address _factory)
         external
         override
@@ -91,6 +92,7 @@ contract PublicForest is
         factory = _factory;
     }
 
+    /// @inheritdoc IPublicForest
     function updateIpfsHash(string memory _ipfsHash)
         external
         override
@@ -99,6 +101,7 @@ contract PublicForest is
         ipfsHash = _ipfsHash;
     }
 
+    /// @inheritdoc IPublicForest
     function swapTokenToBaseToken(
         address[] calldata _path,
         address _dexRouter,
@@ -119,6 +122,7 @@ contract PublicForest is
         );
     }
 
+    /// @inheritdoc IPublicForest
     function swapMainCoinToBaseToken(
         address[] calldata _path,
         address _dexRouter,
@@ -134,6 +138,7 @@ contract PublicForest is
         );
     }
 
+    /// @inheritdoc IPublicForest
     function fundTrees(address _baseTokenAddress, address _treejerContract)
         external
         override
@@ -157,6 +162,7 @@ contract PublicForest is
         );
     }
 
+    /// @inheritdoc IPublicForest
     function externalTokenERC721Approve(
         address _token,
         address _to,
@@ -165,6 +171,7 @@ contract PublicForest is
         IERC721(_token).approve(_to, _tokenId);
     }
 
+    /// @inheritdoc IPublicForest
     function externalTokenERC1155Approve(
         address _token,
         address _to,

@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.6;
 
+/** @title PublicForestFactory interface */
 interface IPublicForestFactory {
     /**
      * @dev initialize AccessRestriction contract and set true for isPublicForestFactory
@@ -75,7 +76,7 @@ interface IPublicForestFactory {
     function fundTrees(address _forest) external;
 
     /**
-     * @dev give approve to factory contract for a erc721 token with id of {_tokenId} in a
+     * @dev give approve to factory contract for an erc721 token with id of {_tokenId} in a
      * specific forest
      * @param _forest address of PublicForest contract
      * @param _token address of token
@@ -88,7 +89,7 @@ interface IPublicForestFactory {
     ) external;
 
     /**
-     * @dev give approve to factory contract for a erc1155 token in a specific forest
+     * @dev give approve to factory contract for an erc1155 token in a specific forest
      * @param _forest address of PublicForest contract
      * @param _token address of token
      */

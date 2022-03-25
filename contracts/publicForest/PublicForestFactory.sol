@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPublicForestFactory.sol";
 import "./IPublicForest.sol";
-import "./interfaces/ITreejerContract.sol";
+import "./interfaces/IRegularSale.sol";
 
 /** @title PublicForestFactory contract */
 contract PublicForestFactory is Initializable, IPublicForestFactory {
@@ -16,18 +16,20 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
     /** NOTE forest address */
     address[] public override forests;
-    /** NOTE mapping of forest address to forest owner */
-    mapping(address => address) public override forestToOwners;
+
+    /** NOTE mapping of forest address to forest creator */
+    mapping(address => address) public override forestToCreators;
     /** NOTE mapping of forest address to its index in forests array */
     mapping(address => uint256) public override indexOf;
     /** NOTE mapping of token address to if it's valid or not*/
     mapping(address => bool) public override validTokens;
 
     address public override implementation;
-    address public override treejerNftContractAddress;
+
+    address public override treeTokenAddress;
     address public override baseTokenAddress;
     address public override wmaticAddress;
-    address public override treejerContract;
+    address public override regularSaleAddress;
     address public override dexRouter;
 
     IAccessRestriction public accessRestriction;
@@ -44,15 +46,6 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         _;
     }
 
-    /** NOTE modifier to check given address is a valid forest address*/
-    modifier validForestContract(address _forestContractAddress) {
-        require(
-            forestToOwners[_forestContractAddress] != address(0),
-            "Invalid forest address"
-        );
-        _;
-    }
-
     /** NOTE modifier to check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
@@ -65,12 +58,18 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         _;
     }
 
-    /** NOTE modifier to check given address is not treejerContraact address*/
-    modifier checkTreejerContractAddress(address _nftContractAddress) {
+    /** NOTE modifier to check given address is a valid forest address*/
+    modifier validForestContract(address _forest) {
         require(
-            _nftContractAddress != treejerNftContractAddress,
-            "Treejer contract"
+            forestToCreators[_forest] != address(0),
+            "Invalid forest address"
         );
+        _;
+    }
+
+    /** NOTE modifier to check given address is not treejerContraact address*/
+    modifier checkTreeTokenAddress(address _token) {
+        require(_token != treeTokenAddress, "Treejer contract");
         _;
     }
 
@@ -79,7 +78,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _accessRestrictionAddress,
         address _wmaticAddress,
         address _baseTokenAddress,
-        address _treejerNftContractAddress
+        address _treeTokenAddress
     ) external override initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
@@ -90,7 +89,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
 
         wmaticAddress = _wmaticAddress;
         baseTokenAddress = _baseTokenAddress;
-        treejerNftContractAddress = _treejerNftContractAddress;
+        treeTokenAddress = _treeTokenAddress;
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -100,6 +99,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         onlyAdmin
     {
         implementation = _implementation;
+        emit ImplementationAddressUpdated(_implementation);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -109,17 +109,19 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         onlyAdmin
     {
         baseTokenAddress = _baseTokenAddress;
+
+        emit BaseTokenAddressUpdated(_baseTokenAddress);
     }
 
     /// @inheritdoc IPublicForestFactory
-    function setTreejerContractAddress(address _treejerContract)
+    function setRegularSaleAddress(address _regularSaleAddress)
         external
         override
         onlyAdmin
     {
-        ITreejerContract candidateContract = ITreejerContract(_treejerContract);
+        IRegularSale candidateContract = IRegularSale(_regularSaleAddress);
         require(candidateContract.isRegularSale());
-        treejerContract = address(candidateContract);
+        regularSaleAddress = address(candidateContract);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -129,15 +131,18 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         onlyAdmin
     {
         dexRouter = _dexRouter;
+        emit DexRouterAddressUpdated(_dexRouter);
     }
 
     /// @inheritdoc IPublicForestFactory
     function updateFactoryAddress(address _forest, address _factory)
         external
         override
-        onlyDataManager
+        onlyAdmin
+        validForestContract(_forest)
     {
         IPublicForest(_forest).updateFactoryAddress(_factory);
+        emit FactoryAddressUpdated(_forest, _factory);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -148,6 +153,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         validAddress(_token)
     {
         validTokens[_token] = _isValid;
+        emit ValidTokensUpdated(_token, _isValid);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -196,7 +202,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
         validForestContract(_forest)
     {
-        IPublicForest(_forest).fundTrees(baseTokenAddress, treejerContract);
+        IPublicForest(_forest).fundTrees(baseTokenAddress, regularSaleAddress);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -208,13 +214,14 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         validForestContract(_forest)
-        checkTreejerContractAddress(_token)
+        checkTreeTokenAddress(_token)
     {
         IPublicForest(_forest).externalTokenERC721Approve(
             _token,
             address(this),
             _tokenId
         );
+        emit ERC721Approved(_forest, _token, _tokenId);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -222,13 +229,14 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         validForestContract(_forest)
-        checkTreejerContractAddress(_token)
+        checkTreeTokenAddress(_token)
     {
         IPublicForest(_forest).externalTokenERC1155Approve(
             _token,
             address(this),
             true
         );
+        emit ERC1155Approved(_forest, _token);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -239,11 +247,12 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     {
         address clone = ClonesUpgradeable.clone(implementation);
 
-        forestToOwners[clone] = msg.sender;
+        forestToCreators[clone] = msg.sender;
         indexOf[clone] = forests.length;
         forests.push(clone);
 
         IPublicForest(clone).initialize(_ipfsHash, address(this));
+        emit PublicForestCreated(clone, _ipfsHash);
     }
 
     /// @inheritdoc IPublicForestFactory
@@ -251,8 +260,9 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
     {
-        require(forestToOwners[_forest] == msg.sender, "Not forest owner");
+        require(forestToCreators[_forest] == msg.sender, "Not forest owner");
 
         IPublicForest(_forest).updateIpfsHash(_ipfsHash);
+        emit IpfsHashUpdated(_forest, _ipfsHash);
     }
 }

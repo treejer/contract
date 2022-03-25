@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./interfaces/ITreejerContract.sol";
+import "./interfaces/IRegularSale.sol";
 import "./interfaces/IdexRouter.sol";
 
 /** @title PublicForest contract */
@@ -42,6 +42,8 @@ contract PublicForest is
             interfaceId == type(IERC1155Receiver).interfaceId;
     }
 
+    //TODO://sender is mg.sender
+    //TODO add  ERC1155Received(address sender,address operator,address from,uint256 id, uint256 value,bytes calldata data)
     function onERC1155Received(
         address operator,
         address from,
@@ -52,6 +54,8 @@ contract PublicForest is
         return this.onERC1155Received.selector;
     }
 
+    //TODO://sender is mg.sender
+    //TODO add  ERC1155BatchReceived(address sender,address operator,address from,uint256[] calldata ids,uint256[] calldata values ,bytes calldata data)
     function onERC1155BatchReceived(
         address operator,
         address from,
@@ -62,6 +66,8 @@ contract PublicForest is
         return this.onERC1155BatchReceived.selector;
     }
 
+    //TODO://sender is mg.sender
+    //TODO add  ERC721Received(address sender,address operator,address from,uint256 tokenId,bytes calldata data)
     function onERC721Received(
         address operator,
         address from,
@@ -71,6 +77,8 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
+    //TODO://sender is mg.sender and value is msg.value
+    //TODO add  Received(address sender,address value)
     receive() external payable {}
 
     /// @inheritdoc IPublicForest
@@ -138,13 +146,14 @@ contract PublicForest is
         );
     }
 
+    //TODO: get referral as input and move calculation to factory
     /// @inheritdoc IPublicForest
     function fundTrees(address _baseTokenAddress, address _treejerContract)
         external
         override
         onlyFactoryAddress
     {
-        uint256 regularSalePrice = ITreejerContract(_treejerContract).price();
+        uint256 regularSalePrice = IRegularSale(_treejerContract).price();
         uint256 treeCount = IERC20(_baseTokenAddress).balanceOf(address(this)) /
             regularSalePrice;
 
@@ -155,7 +164,7 @@ contract PublicForest is
             treeCount * regularSalePrice
         );
 
-        ITreejerContract(_treejerContract).fundTree(
+        IRegularSale(_treejerContract).fundTree(
             treeCount,
             address(0),
             address(0)

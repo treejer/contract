@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.6;
 
-interface ITreejerContract {
+interface IRegularSale {
     /**
      * @return true if RegularSale contract has been initialized
      */

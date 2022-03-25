@@ -4,19 +4,29 @@ pragma solidity ^0.8.6;
 
 /** @title PublicForestFactory interface */
 interface IPublicForestFactory {
+    event ImplementationAddressUpdated(address implementation);
+    event BaseTokenAddressUpdated(address baseTokenAddress);
+    event DexRouterAddressUpdated(address dexRouter);
+    event FactoryAddressUpdated(address forest, address factory);
+    event ValidTokensUpdated(address token, bool isValid);
+    event ERC721Approved(address forest, address token, uint256 tokenId);
+    event ERC1155Approved(address forest, address token);
+    event PublicForestCreated(address forest, string ipfsHash);
+    event IpfsHashUpdated(address forest, string ipfsHash);
+
     /**
      * @dev initialize AccessRestriction contract and set true for isPublicForestFactory
-     * and set wmaticAddress and baseTokenAddress and treejerNftContractAddress
+     * and set wmaticAddress and baseTokenAddress and treeTokenAddress
      * @param _accessRestrictionAddress set to the address of AccessRestriction contract
      * @param _wmaticAddress wmatic address
      * @param _baseTokenAddress base token address
-     * @param _treejerNftContractAddress address of Tree.sol
+     * @param _treeTokenAddress address of Tree contract
      */
     function initialize(
         address _accessRestrictionAddress,
         address _wmaticAddress,
         address _baseTokenAddress,
-        address _treejerNftContractAddress
+        address _treeTokenAddress
     ) external;
 
     /** @dev set {_implementation} to implementation */
@@ -25,8 +35,8 @@ interface IPublicForestFactory {
     /** @dev set {_baseTokenAddress} to baseTokenAddress */
     function setBaseTokenAddress(address _baseTokenAddress) external;
 
-    /** @dev set {_treejerContract} to treejerContract */
-    function setTreejerContractAddress(address _treejerContract) external;
+    /** @dev set {_regularSaleAddress} to regularSaleAddress */
+    function setRegularSaleAddress(address _regularSaleAddress) external;
 
     /** @dev set {_dexRouter} to dexRouter */
     function setDexRouterAddress(address _dexRouter) external;
@@ -115,8 +125,8 @@ interface IPublicForestFactory {
     /** @return forest address of given index */
     function forests(uint256 _index) external returns (address);
 
-    /** @return owner of given forest */
-    function forestToOwners(address _forest) external view returns (address);
+    /** @return creator of given forest */
+    function forestToCreators(address _forest) external view returns (address);
 
     /** @return index of given forest */
     function indexOf(address _forest) external view returns (uint256);
@@ -127,8 +137,8 @@ interface IPublicForestFactory {
     /** @return implementation address */
     function implementation() external view returns (address);
 
-    /** @return treejerNftContractAddress address */
-    function treejerNftContractAddress() external view returns (address);
+    /** @return treeTokenAddress address */
+    function treeTokenAddress() external view returns (address);
 
     /** @return baseTokenAddress address */
     function baseTokenAddress() external view returns (address);
@@ -136,8 +146,8 @@ interface IPublicForestFactory {
     /** @return wmatic address */
     function wmaticAddress() external view returns (address);
 
-    /** @return treejerContract address */
-    function treejerContract() external view returns (address);
+    /** @return regularSaleAddress address */
+    function regularSaleAddress() external view returns (address);
 
     /** @return dexRouter address */
     function dexRouter() external view returns (address);

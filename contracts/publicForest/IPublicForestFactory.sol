@@ -14,7 +14,7 @@ interface IPublicForestFactory {
         address _treejerNftContractAddress
     ) external;
 
-    function setTreejerContractAddress(address _address) external;
+    function setTreejerContractAddress(address _treejerContract) external;
 
     function setImplementationAddress(address _implementation) external;
 
@@ -22,38 +22,32 @@ interface IPublicForestFactory {
 
     function setBaseTokenAddress(address _baseTokenAddress) external;
 
-    function updateFactoryAddress(
-        address _contractAddress,
-        address _proxyAddress
-    ) external;
+    function updateFactoryAddress(address _forest, address _factory) external;
 
-    function updateIpfsHash(address _contractAddress, string memory _ipfs)
-        external;
+    function updateIpfsHash(address _forest, string memory _ipfsHash) external;
 
-    function updateValidTokens(address _tokenAddress, bool _isValid) external;
+    function updateValidTokens(address _token, bool _isValid) external;
 
     function swapTokenToBaseToken(
-        address _contractAddress,
-        address _tokenAddress,
+        address _forest,
+        address _token,
         uint256 _minBaseTokenOut
     ) external;
 
-    function swapMainCoinToBaseToken(
-        address _contractAddress,
-        uint256 _minBaseTokenOut
-    ) external;
+    function swapMainCoinToBaseToken(address _forest, uint256 _minBaseTokenOut)
+        external;
 
-    function fundTrees(address _contractAddress) external;
+    function fundTrees(address _forest) external;
 
     function createPublicForest(string memory _ipfsHash) external;
 
     function externalTokenERC721Approve(
         address _forest,
-        address _tokenAddress,
+        address _token,
         uint256 _tokenId
     ) external;
 
-    function externalTokenERC1155Approve(address _forest, address _tokenAddress)
+    function externalTokenERC1155Approve(address _forest, address _token)
         external;
 
     /**

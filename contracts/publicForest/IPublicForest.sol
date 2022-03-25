@@ -3,8 +3,7 @@
 pragma solidity ^0.8.6;
 
 interface IPublicForest {
-    function initialize(string memory _ipfsHash, address _factoryAddress)
-        external;
+    function initialize(string memory _ipfsHash, address _factory) external;
 
     function updateFactoryAddress(address _factoryAddress) external;
 
@@ -12,7 +11,7 @@ interface IPublicForest {
 
     function swapTokenToBaseToken(
         address _dexRouter,
-        address _tokenAddress,
+        address _token,
         address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external;
@@ -24,19 +23,17 @@ interface IPublicForest {
         uint256 _minBaseTokenOut
     ) external;
 
-    function fundTrees(
-        address _baseTokenAddress,
-        address _treejerContractAddress
-    ) external;
+    function fundTrees(address _baseTokenAddress, address _treejerContract)
+        external;
 
     function externalTokenERC721Approve(
-        address _tokenAddress,
+        address _token,
         address _to,
         uint256 _tokenId
     ) external;
 
     function externalTokenERC1155Approve(
-        address _tokenAddress,
+        address _token,
         address _to,
         bool _approved
     ) external;
@@ -49,5 +46,5 @@ interface IPublicForest {
     /**
      * @return true in case of PublicForestFactory contract has been initialized
      */
-    function factoryAddress() external view returns (address);
+    function factory() external view returns (address);
 }

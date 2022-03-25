@@ -15,9 +15,11 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     bool public override isPublicForestFactory;
 
     address[] public override forests;
+
     mapping(address => address) public override forestToOwners;
     mapping(address => uint256) public override indexOf;
     mapping(address => bool) public override validTokens;
+
     address public override implementation;
     address public override treejerNftContractAddress;
     address public override baseTokenAddress;
@@ -60,12 +62,6 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     }
 
     /** NOTE modifier for check msg.sender has TreejerContract role*/
-    modifier onlyTreejerContract() {
-        accessRestriction.ifTreejerContract(msg.sender);
-        _;
-    }
-
-    /** NOTE modifier for check msg.sender has TreejerContract role*/
     modifier checkTreejerContractAddress(address _nftContractAddress) {
         require(
             _nftContractAddress != treejerNftContractAddress,
@@ -93,30 +89,12 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         treejerNftContractAddress = _treejerNftContractAddress;
     }
 
-    function setTreejerContractAddress(address _address)
-        external
-        override
-        onlyAdmin
-    {
-        ITreejerContract candidateContract = ITreejerContract(_address);
-        require(candidateContract.isRegularSale());
-        treejerContract = address(candidateContract);
-    }
-
     function setImplementationAddress(address _implementation)
         external
         override
         onlyAdmin
     {
         implementation = _implementation;
-    }
-
-    function setDexRouterAddress(address _dexRouter)
-        external
-        override
-        onlyAdmin
-    {
-        dexRouter = _dexRouter;
     }
 
     function setBaseTokenAddress(address _baseTokenAddress)
@@ -127,42 +105,62 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         baseTokenAddress = _baseTokenAddress;
     }
 
-    function updateFactoryAddress(
-        address _contractAddress,
-        address _proxyAddress
-    ) external override onlyDataManager {
-        IPublicForest(_contractAddress).updateFactoryAddress(_proxyAddress);
+    function setTreejerContractAddress(address _treejerContract)
+        external
+        override
+        onlyAdmin
+    {
+        ITreejerContract candidateContract = ITreejerContract(_treejerContract);
+        require(candidateContract.isRegularSale());
+        treejerContract = address(candidateContract);
     }
 
-    function updateValidTokens(address _tokenAddress, bool _isValid)
+    function setDexRouterAddress(address _dexRouter)
+        external
+        override
+        onlyAdmin
+    {
+        dexRouter = _dexRouter;
+    }
+
+    function updateFactoryAddress(address _forest, address _factory)
         external
         override
         onlyDataManager
-        validAddress(_tokenAddress)
     {
-        validTokens[_tokenAddress] = _isValid;
+        IPublicForest(_forest).updateFactoryAddress(_factory);
+    }
+
+    function updateValidTokens(address _token, bool _isValid)
+        external
+        override
+        onlyDataManager
+        validAddress(_token)
+    {
+        validTokens[_token] = _isValid;
     }
 
     function swapTokenToBaseToken(
-        address _contractAddress,
-        address _tokenAddress,
+        address _forest,
+        address _token,
         uint256 _minBaseTokenOut
-    ) external override validForestContract(_contractAddress) {
-        require(validTokens[_tokenAddress], "Invalid token");
+    ) external override validForestContract(_forest) {
+        require(validTokens[_token], "Invalid token");
 
-        IPublicForest(_contractAddress).swapTokenToBaseToken(
+        IPublicForest(_forest).swapTokenToBaseToken(
             dexRouter,
-            _tokenAddress,
+            _token,
             baseTokenAddress,
             _minBaseTokenOut > 2 ether ? _minBaseTokenOut : 2 ether
         );
     }
 
-    function swapMainCoinToBaseToken(
-        address _contractAddress,
-        uint256 _minBaseTokenOut
-    ) external override validForestContract(_contractAddress) {
-        IPublicForest(_contractAddress).swapMainCoinToBaseToken(
+    function swapMainCoinToBaseToken(address _forest, uint256 _minBaseTokenOut)
+        external
+        override
+        validForestContract(_forest)
+    {
+        IPublicForest(_forest).swapMainCoinToBaseToken(
             dexRouter,
             wmaticAddress,
             baseTokenAddress,
@@ -170,42 +168,39 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
-    function fundTrees(address _contractAddress)
+    function fundTrees(address _forest)
         external
         override
-        validForestContract(_contractAddress)
+        validForestContract(_forest)
     {
-        IPublicForest(_contractAddress).fundTrees(
-            baseTokenAddress,
-            treejerContract
-        );
+        IPublicForest(_forest).fundTrees(baseTokenAddress, treejerContract);
     }
 
     function externalTokenERC721Approve(
         address _forest,
-        address _tokenAddress,
+        address _token,
         uint256 _tokenId
     )
         external
         override
         validForestContract(_forest)
-        checkTreejerContractAddress(_tokenAddress)
+        checkTreejerContractAddress(_token)
     {
         IPublicForest(_forest).externalTokenERC721Approve(
-            _tokenAddress,
+            _token,
             address(this),
             _tokenId
         );
     }
 
-    function externalTokenERC1155Approve(address _forest, address _tokenAddress)
+    function externalTokenERC1155Approve(address _forest, address _token)
         external
         override
         validForestContract(_forest)
-        checkTreejerContractAddress(_tokenAddress)
+        checkTreejerContractAddress(_token)
     {
         IPublicForest(_forest).externalTokenERC1155Approve(
-            _tokenAddress,
+            _token,
             address(this),
             true
         );
@@ -216,22 +211,21 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
         validAddress(implementation)
     {
-        address cloneAddress = ClonesUpgradeable.clone(implementation);
+        address clone = ClonesUpgradeable.clone(implementation);
 
-        IPublicForest(cloneAddress).initialize(_ipfsHash, address(this));
-        _set(cloneAddress);
+        forestToOwners[clone] = msg.sender;
+        indexOf[clone] = forests.length;
+        forests.push(clone);
+
+        IPublicForest(clone).initialize(_ipfsHash, address(this));
     }
 
-    function updateIpfsHash(address _contractAddress, string memory _ipfs)
+    function updateIpfsHash(address _forest, string memory _ipfsHash)
         external
         override
     {
-        IPublicForest(_contractAddress).updateIpfsHash(_ipfs);
-    }
+        require(forestToOwners[_forest] == msg.sender, "Not forest owner");
 
-    function _set(address _value) internal {
-        forestToOwners[_value] = msg.sender;
-        indexOf[_value] = forests.length;
-        forests.push(_value);
+        IPublicForest(_forest).updateIpfsHash(_ipfsHash);
     }
 }

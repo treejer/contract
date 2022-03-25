@@ -23,9 +23,7 @@ const TestPublicForestFactory = artifacts.require("TestPublicForestFactory");
 const Math = require("./math");
 
 const assert = require("chai").assert;
-require("chai")
-  .use(require("chai-as-promised"))
-  .should();
+require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const { deployProxy } = require("@openzeppelin/truffle-upgrades");
@@ -35,11 +33,11 @@ const {
   PublicForestErrors,
   RegularSaleErrors,
   erc20ErrorMsg,
-  erc721ErrorMsg
+  erc721ErrorMsg,
 } = require("./enumes");
 const common = require("mocha/lib/interfaces/common");
 
-contract("PublicForestFactory", accounts => {
+contract("PublicForestFactory", (accounts) => {
   let arInstance;
   let publicForestFactory;
   let regularSaleInstance;
@@ -75,11 +73,11 @@ contract("PublicForestFactory", accounts => {
 
   before(async () => {
     arInstance = await AccessRestriction.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await arInstance.initialize(deployerAccount, {
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await Common.addDataManager(arInstance, dataManager, deployerAccount);
@@ -88,7 +86,7 @@ contract("PublicForestFactory", accounts => {
   describe("deployment and set addresses and set valid tokens", () => {
     beforeEach(async () => {
       publicForestFactory = await PublicForestFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.initialize(
@@ -97,7 +95,7 @@ contract("PublicForestFactory", accounts => {
         zeroAddress,
         "0x3abbc23f3303ef36fd9f6cec0e585b2c23e47fd9",
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
     });
@@ -105,14 +103,14 @@ contract("PublicForestFactory", accounts => {
     it("deploys successfully and set addresses", async () => {
       //--------------- deploy regularSale contract
       regularSaleInstance = await RegularSale.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await regularSaleInstance.initialize(
         arInstance.address,
         web3.utils.toWei("7"),
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -156,14 +154,14 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .setTreejerContractAddress(regularSaleInstance.address, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setTreejerContractAddress(
         regularSaleInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -177,12 +175,12 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .setImplementationAddress(userAccount2, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setImplementationAddress(userAccount2, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       assert.equal(
@@ -195,12 +193,12 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .setDexRouterAddress(userAccount2, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setDexRouterAddress(userAccount2, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       assert.equal(
@@ -212,12 +210,12 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .setBaseTokenAddress(userAccount2, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setBaseTokenAddress(userAccount2, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       assert.equal(
@@ -235,7 +233,7 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .updateValidTokens(zeroAddress, true, {
-          from: dataManager
+          from: dataManager,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
@@ -247,7 +245,7 @@ contract("PublicForestFactory", accounts => {
 
       /////////////////////// set true
       await publicForestFactory.updateValidTokens(userAccount1, true, {
-        from: dataManager
+        from: dataManager,
       });
 
       assert.equal(
@@ -258,7 +256,7 @@ contract("PublicForestFactory", accounts => {
 
       ////////////////////// set false
       await publicForestFactory.updateValidTokens(userAccount1, false, {
-        from: dataManager
+        from: dataManager,
       });
 
       assert.equal(
@@ -269,10 +267,10 @@ contract("PublicForestFactory", accounts => {
     });
   });
 
-  describe("deployment and set addresses and set valid tokens", () => {
+  describe("createForest,update factory,update ipfsHash,fund tree", () => {
     beforeEach(async () => {
       publicForestFactory = await PublicForestFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.initialize(
@@ -281,33 +279,33 @@ contract("PublicForestFactory", accounts => {
         zeroAddress,
         zeroAddress,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       publicForest = await PublicForest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForest.initialize("treejer", publicForestFactory.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
-    it("create public forest and update ipfsHash and factoryAddress", async () => {
+    it("create public forest and update ipfsHash and factory", async () => {
       const ipfsHash = "ipfs hash 1";
       const newIpfsHash = "new ipfs";
       //------------- fail because implementation address not set
       await publicForestFactory
         .createPublicForest(ipfsHash, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
       await publicForestFactory.setImplementationAddress(publicForest.address);
 
       await publicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forest = await publicForestFactory.forests(0);
@@ -328,21 +326,30 @@ contract("PublicForestFactory", accounts => {
       );
 
       assert.equal(
-        await tempPublicForest.factoryAddress(),
+        await tempPublicForest.factory(),
         publicForestFactory.address,
-        "factoryAddress is not correct"
+        "factory is not correct"
       );
+
+      ///////// ------------------- fail to update becuase caller is not owner
+      await publicForestFactory
+        .updateIpfsHash(tempPublicForest.address, newIpfsHash, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(PublicForestErrors.NOT_FOREST_OWNER);
 
       ///////// ------------------- update ipfs and factory
       await publicForestFactory.updateIpfsHash(
         tempPublicForest.address,
         newIpfsHash,
-        { from: userAccount3 }
+        {
+          from: userAccount1,
+        }
       );
 
       await tempPublicForest
         .updateFactoryAddress(userAccount5, {
-          from: dataManager
+          from: dataManager,
         })
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
 
@@ -361,9 +368,9 @@ contract("PublicForestFactory", accounts => {
       );
 
       assert.equal(
-        await tempPublicForest.factoryAddress(),
+        await tempPublicForest.factory(),
         userAccount5,
-        "factoryAddress is not correct"
+        "factory is not correct"
       );
     });
 
@@ -373,83 +380,83 @@ contract("PublicForestFactory", accounts => {
       //////////// deploy regular contract
 
       regularSaleInstance = await RegularSale.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await regularSaleInstance.initialize(
         arInstance.address,
         web3.utils.toWei(treePrice.toString()),
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
       const fakeDaiInstance = await Token.new("DAI", "dai", {
-        from: accounts[0]
+        from: accounts[0],
       });
 
       treeFactoryInstance = await TreeFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       planterInstance = await Planter.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await planterInstance.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.setPlanterContractAddress(
         planterInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       treeTokenInstance = await Tree.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeTokenInstance.initialize(arInstance.address, "", {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       daiFundInstance = await DaiFund.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await daiFundInstance.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       allocationInstance = await Allocation.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await allocationInstance.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       planterFundsInstnce = await PlanterFund.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await planterFundsInstnce.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       attributeInstance = await Attribute.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await attributeInstance.initialize(arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       ////////////------------------ set regualr sale address
@@ -457,12 +464,12 @@ contract("PublicForestFactory", accounts => {
       await regularSaleInstance.setPlanterFundAddress(
         planterFundsInstnce.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       await regularSaleInstance.setDaiTokenAddress(daiDexInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await regularSaleInstance.setTreeFactoryAddress(
@@ -471,13 +478,13 @@ contract("PublicForestFactory", accounts => {
       );
 
       await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await regularSaleInstance.setAllocationAddress(
         allocationInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -487,7 +494,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
       //--------------- set public forest address
       await publicForestFactory.setTreejerContractAddress(
@@ -497,32 +504,32 @@ contract("PublicForestFactory", accounts => {
 
       //set fake dai token address
       await publicForestFactory.setBaseTokenAddress(fakeDaiInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       //-------------set daiFund address
 
       await daiFundInstance.setDaiTokenAddress(daiDexInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await daiFundInstance.setPlanterFundContractAddress(
         planterFundsInstnce.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       //-------------set treeFactory address
 
       await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeFactoryInstance.setPlanterContractAddress(
         planterInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -570,31 +577,31 @@ contract("PublicForestFactory", accounts => {
         0,
         0,
         {
-          from: dataManager
+          from: dataManager,
         }
       );
       const daiFundShare = 0.48;
       const planterFundShare = 0.52;
 
       await allocationInstance.assignAllocationToTree(1, 1000000, 0, {
-        from: dataManager
+        from: dataManager,
       });
 
       /////////////////------------ create forest
       const ipfsHash = "ipfs hash 1";
 
       publicForest = await PublicForest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForest.initialize("treejer", publicForestFactory.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.setImplementationAddress(publicForest.address);
 
       await publicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress = await publicForestFactory.forests(0);
@@ -624,7 +631,7 @@ contract("PublicForestFactory", accounts => {
 
       ///////----------- set main dai address in forest
       await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
       await publicForestFactory
         .fundTrees(forestAddress)
@@ -638,7 +645,7 @@ contract("PublicForestFactory", accounts => {
       //-------------- fail because mint directly from publicForest
       await tempPublicForest
         .fundTrees(daiDexInstance.address, regularSaleInstance.address, {
-          from: userAccount4
+          from: userAccount4,
         })
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
 
@@ -790,12 +797,12 @@ contract("PublicForestFactory", accounts => {
     });
   });
 
-  describe("deployment and set addresses and set valid tokens", () => {
+  describe("swap tokens", () => {
     beforeEach(async () => {
       wethDexInstance = await Token.new("WETH", "weth", { from: accounts[0] });
       ////////////////////// deploy contracts
       publicForestFactory = await PublicForestFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.initialize(
@@ -804,38 +811,38 @@ contract("PublicForestFactory", accounts => {
         zeroAddress,
         zeroAddress,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       publicForest = await PublicForest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForest.initialize("treejer", publicForestFactory.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.setImplementationAddress(publicForest.address);
       ////////////////////// deploy uniswap
 
       factoryInstance = await Factory.new(accounts[2], {
-        from: deployerAccount
+        from: deployerAccount,
       });
       const factoryAddress = factoryInstance.address;
 
       daiDexInstance = await Token.new("DAI", "dai", { from: accounts[0] });
 
       bnbDexInstance = await Token.new("BNB", "bnb", {
-        from: accounts[0]
+        from: accounts[0],
       });
 
       adaDexInstance = await Token.new("ADA", "ada", {
-        from: accounts[0]
+        from: accounts[0],
       });
 
       wmaticDexInstance = await Token.new("WMATIC", "wmatic", {
-        from: accounts[0]
+        from: accounts[0],
       });
 
       dexRouterInstance = await UniswapV2Router02New.new(
@@ -846,7 +853,7 @@ contract("PublicForestFactory", accounts => {
       const dexRouterAddress = dexRouterInstance.address;
 
       testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       /////---------------------------addLiquidity-------------------------
@@ -924,7 +931,7 @@ contract("PublicForestFactory", accounts => {
       const newIpfsHash = "new ipfs";
 
       await publicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress = await publicForestFactory.forests(0);
@@ -978,11 +985,11 @@ contract("PublicForestFactory", accounts => {
       );
 
       await publicForestFactory.setDexRouterAddress(dexRouterInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       ///------------------ reject(bnb not valid token)
@@ -1001,10 +1008,11 @@ contract("PublicForestFactory", accounts => {
 
       //--------------------------- swap bnb balance to dai
 
-      let expectedSwapTokenAmountBnb1 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei("10", "Ether"),
-        [bnbDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountBnb1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [bnbDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
@@ -1032,10 +1040,11 @@ contract("PublicForestFactory", accounts => {
 
       //--------------------------- swap weth balance to dai
 
-      let expectedSwapTokenAmountWeth1 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei("10", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
@@ -1061,10 +1070,11 @@ contract("PublicForestFactory", accounts => {
 
       //--------------------------- swap ada balance to dai
 
-      let expectedSwapTokenAmountAda1 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei("10", "Ether"),
-        [adaDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountAda1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("10", "Ether"),
+          [adaDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
@@ -1095,10 +1105,11 @@ contract("PublicForestFactory", accounts => {
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_INPUT_AMOUNT);
 
       //-------------- balance swap lt 2 Dai
-      let expectedSwapTokenAmountWeth2 = await dexRouterInstance.getAmountsIn.call(
-        web3.utils.toWei("1.5", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth2 =
+        await dexRouterInstance.getAmountsIn.call(
+          web3.utils.toWei("1.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await wethDexInstance.setMint(
         forestAddress,
@@ -1109,10 +1120,11 @@ contract("PublicForestFactory", accounts => {
         .swapTokenToBaseToken(forestAddress, wethDexInstance.address, 0)
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
 
-      let expectedSwapTokenAmountWeth3 = await dexRouterInstance.getAmountsIn.call(
-        web3.utils.toWei("1.5", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth3 =
+        await dexRouterInstance.getAmountsIn.call(
+          web3.utils.toWei("1.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await wethDexInstance.setMint(
         forestAddress,
@@ -1137,17 +1149,18 @@ contract("PublicForestFactory", accounts => {
         "3-weth balance is not correct"
       );
 
-      let expectedSwapTokenAmountWeth5 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei(
-          Number(
-            Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
-              expectedSwapTokenAmountWeth3[0]
-            )
-          ).toString(),
-          "wei"
-        ),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth5 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei(
+            Number(
+              Math.Big(expectedSwapTokenAmountWeth2[0]).plus(
+                expectedSwapTokenAmountWeth3[0]
+              )
+            ).toString(),
+            "wei"
+          ),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
@@ -1175,7 +1188,7 @@ contract("PublicForestFactory", accounts => {
       // ------------ reject (invalid forest address)
       await publicForestFactory
         .swapTokenToBaseToken(userAccount5, wethDexInstance.address, 0, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
 
@@ -1194,11 +1207,11 @@ contract("PublicForestFactory", accounts => {
       const ipfsHash = "ipfs hash 1";
 
       await publicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       await publicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount2
+        from: userAccount2,
       });
 
       let forestAddress1 = await publicForestFactory.forests(0);
@@ -1225,22 +1238,22 @@ contract("PublicForestFactory", accounts => {
 
       await publicForestFactory
         .setDexRouterAddress(dexRouterInstance.address, {
-          from: userAccount3
+          from: userAccount3,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setDexRouterAddress(dexRouterInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForestFactory
         .setBaseTokenAddress(daiDexInstance.address, {
-          from: userAccount3
+          from: userAccount3,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await publicForestFactory.setBaseTokenAddress(daiDexInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       //------transfer ether to forest
@@ -1248,24 +1261,25 @@ contract("PublicForestFactory", accounts => {
       await web3.eth.sendTransaction({
         from: userAccount1,
         to: forestAddress1,
-        value: web3.utils.toWei("25", "Ether")
+        value: web3.utils.toWei("25", "Ether"),
       });
 
       await web3.eth.sendTransaction({
         from: userAccount4,
         to: forestAddress2,
-        value: web3.utils.toWei("25", "Ether")
+        value: web3.utils.toWei("25", "Ether"),
       });
 
       //------call swapMainCoinToBaseToken function
 
-      let expectedSwapTokenAmountWeth1 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei("25", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth1 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("25", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await publicForestFactory.swapMainCoinToBaseToken(forestAddress1, 0, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       //-------------- check data
@@ -1289,42 +1303,45 @@ contract("PublicForestFactory", accounts => {
 
       //-------------------reject (INSUFFICIENT_OUTPUT_AMOUNT)
 
-      let expectedSwapTokenAmountWeth2 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei("7.5", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth2 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei("7.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
-      let expectedSwapTokenAmountWeth3 = await dexRouterInstance.getAmountsIn.call(
-        web3.utils.toWei("1.5", "Ether"),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth3 =
+        await dexRouterInstance.getAmountsIn.call(
+          web3.utils.toWei("1.5", "Ether"),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
-      let expectedSwapTokenAmountWeth4 = await dexRouterInstance.getAmountsOut.call(
-        web3.utils.toWei(
-          Math.Big(web3.utils.toWei("5", "Ether"))
-            .plus(expectedSwapTokenAmountWeth3[0])
-            .toString(),
-          "wei"
-        ),
-        [wethDexInstance.address, daiDexInstance.address]
-      );
+      let expectedSwapTokenAmountWeth4 =
+        await dexRouterInstance.getAmountsOut.call(
+          web3.utils.toWei(
+            Math.Big(web3.utils.toWei("5", "Ether"))
+              .plus(expectedSwapTokenAmountWeth3[0])
+              .toString(),
+            "wei"
+          ),
+          [wethDexInstance.address, daiDexInstance.address]
+        );
 
       await web3.eth.sendTransaction({
         from: userAccount4,
         to: forestAddress1,
-        value: expectedSwapTokenAmountWeth3[0]
+        value: expectedSwapTokenAmountWeth3[0],
       });
 
       await publicForestFactory
         .swapMainCoinToBaseToken(forestAddress1, 0, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
 
       await web3.eth.sendTransaction({
         from: userAccount4,
         to: forestAddress1,
-        value: web3.utils.toWei("5", "Ether")
+        value: web3.utils.toWei("5", "Ether"),
       });
 
       await publicForestFactory
@@ -1332,7 +1349,7 @@ contract("PublicForestFactory", accounts => {
           forestAddress1,
           expectedSwapTokenAmountWeth2[1],
           {
-            from: userAccount1
+            from: userAccount1,
           }
         )
         .should.be.rejectedWith(CommonErrorMsg.INSUFFICIENT_OUTPUT_AMOUNT);
@@ -1358,7 +1375,7 @@ contract("PublicForestFactory", accounts => {
         forestAddress1,
         expectedSwapTokenAmountWeth4[1],
         {
-          from: userAccount1
+          from: userAccount1,
         }
       );
 
@@ -1389,7 +1406,7 @@ contract("PublicForestFactory", accounts => {
       // ------------ reject (invalid forest address)
       await publicForestFactory
         .swapMainCoinToBaseToken(userAccount5, 0, {
-          from: userAccount1
+          from: userAccount1,
         })
         .should.be.rejectedWith(PublicForestErrors.INVALID_FOREST_ADDRESS);
 
@@ -1408,15 +1425,15 @@ contract("PublicForestFactory", accounts => {
   describe("Check approve external erc1155", () => {
     beforeEach(async () => {
       treeInstance = await Tree.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.initialize(arInstance.address, "", {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       testPublicForestFactory = await TestPublicForestFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await testPublicForestFactory.initialize(
@@ -1425,19 +1442,19 @@ contract("PublicForestFactory", accounts => {
         zeroAddress,
         treeInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       publicForest = await PublicForest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForest.initialize(
         "treejer",
         testPublicForestFactory.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -1446,7 +1463,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       erc1155TokenInstance = await Erc1155Token.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
@@ -1462,7 +1479,7 @@ contract("PublicForestFactory", accounts => {
       const ipfsHash = "ipfs hash 1";
 
       await testPublicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
@@ -1476,7 +1493,7 @@ contract("PublicForestFactory", accounts => {
       const ipfsHash = "ipfs hash 1";
 
       await testPublicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
@@ -1554,7 +1571,7 @@ contract("PublicForestFactory", accounts => {
           userAccount8,
           true,
           {
-            from: userAccount4
+            from: userAccount4,
           }
         )
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
@@ -1564,15 +1581,15 @@ contract("PublicForestFactory", accounts => {
   describe("Check approve external erc721", () => {
     beforeEach(async () => {
       treeInstance = await Tree.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.initialize(arInstance.address, "", {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       testPublicForestFactory = await TestPublicForestFactory.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await testPublicForestFactory.initialize(
@@ -1581,19 +1598,19 @@ contract("PublicForestFactory", accounts => {
         zeroAddress,
         treeInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
       publicForest = await PublicForest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await publicForest.initialize(
         "treejer",
         testPublicForestFactory.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
 
@@ -1602,7 +1619,7 @@ contract("PublicForestFactory", accounts => {
       );
 
       erc721TokenInstance = await Erc721Token.new("EXAMPLE", "example", {
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
@@ -1622,7 +1639,7 @@ contract("PublicForestFactory", accounts => {
       const ipfsHash = "ipfs hash 1";
 
       await testPublicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
@@ -1636,7 +1653,7 @@ contract("PublicForestFactory", accounts => {
       const ipfsHash = "ipfs hash 1";
 
       await testPublicForestFactory.createPublicForest(ipfsHash, {
-        from: userAccount1
+        from: userAccount1,
       });
 
       let forestAddress1 = await testPublicForestFactory.forests(0);
@@ -1749,7 +1766,7 @@ contract("PublicForestFactory", accounts => {
           userAccount8,
           10,
           {
-            from: userAccount4
+            from: userAccount4,
           }
         )
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);

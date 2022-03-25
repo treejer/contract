@@ -22,11 +22,11 @@ contract PublicForest is
     IERC1155Receiver
 {
     string public override ipfsHash;
-    address public override factoryAddress;
+    address public override factory;
 
-    /** NOTE modifier to check msg.sender is factoryAddress */
+    /** NOTE modifier to check msg.sender is factory */
     modifier onlyFactoryAddress() {
-        require(msg.sender == factoryAddress, "Caller not factoryAddress");
+        require(msg.sender == factory, "Caller not factoryAddress");
         _;
     }
 
@@ -74,21 +74,21 @@ contract PublicForest is
 
     receive() external payable {}
 
-    function initialize(string memory _ipfsHash, address _factoryAddress)
+    function initialize(string memory _ipfsHash, address _factory)
         external
         override
         initializer
     {
         ipfsHash = _ipfsHash;
-        factoryAddress = _factoryAddress;
+        factory = _factory;
     }
 
-    function updateFactoryAddress(address _factoryAddress)
+    function updateFactoryAddress(address _factory)
         external
         override
         onlyFactoryAddress
     {
-        factoryAddress = _factoryAddress;
+        factory = _factory;
     }
 
     function updateIpfsHash(string memory _ipfsHash)
@@ -101,89 +101,19 @@ contract PublicForest is
 
     function swapTokenToBaseToken(
         address _dexRouter,
-        address _tokenAddress,
+        address _token,
         address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external override onlyFactoryAddress {
-        _swapExactTokensForTokens(
-            _dexRouter,
-            _tokenAddress,
-            _baseTokenAddress,
-            _minBaseTokenOut
-        );
-    }
-
-    function swapMainCoinToBaseToken(
-        address _dexRouter,
-        address _wmaticAddress,
-        address _baseTokenAddress,
-        uint256 _minBaseTokenOut
-    ) external override onlyFactoryAddress {
-        _swapExactETHForTokens(
-            _dexRouter,
-            _wmaticAddress,
-            _baseTokenAddress,
-            _minBaseTokenOut
-        );
-    }
-
-    function fundTrees(
-        address _baseTokenAddress,
-        address _treejerContractAddress
-    ) external override onlyFactoryAddress {
-        uint256 regularSalePrice = ITreejerContract(_treejerContractAddress)
-            .price();
-        uint256 treeCount = IERC20(_baseTokenAddress).balanceOf(address(this)) /
-            regularSalePrice;
-
-        treeCount = treeCount > 50 ? 50 : treeCount;
-
-        IERC20(_baseTokenAddress).approve(
-            _treejerContractAddress,
-            treeCount * regularSalePrice
-        );
-
-        ITreejerContract(_treejerContractAddress).fundTree(
-            treeCount,
-            address(0),
-            address(0)
-        );
-    }
-
-    function externalTokenERC721Approve(
-        address _tokenAddress,
-        address _to,
-        uint256 _tokenId
-    ) external override onlyFactoryAddress {
-        IERC721(_tokenAddress).approve(_to, _tokenId);
-    }
-
-    function externalTokenERC1155Approve(
-        address _tokenAddress,
-        address _to,
-        bool _approved
-    ) external override onlyFactoryAddress {
-        IERC1155(_tokenAddress).setApprovalForAll(_to, _approved);
-    }
-
-    /**
-     * @dev swap weth token to dai token
-     */
-    function _swapExactTokensForTokens(
-        address _dexRouter,
-        address _tokenAddress,
-        address _baseTokenAddress,
-        uint256 _minBaseTokenOut
-    ) private {
         address[] memory path;
         path = new address[](2);
 
-        path[0] = _tokenAddress;
+        path[0] = _token;
         path[1] = _baseTokenAddress;
 
-        uint256 amount = IERC20(_tokenAddress).balanceOf(address(this));
+        uint256 amount = IERC20(_token).balanceOf(address(this));
 
-        bool success = IERC20(_tokenAddress).approve(_dexRouter, amount);
+        bool success = IERC20(_token).approve(_dexRouter, amount);
 
         require(success, "Unsuccessful approve");
 
@@ -196,15 +126,12 @@ contract PublicForest is
         );
     }
 
-    /**
-     * @dev swap main token to dai token
-     */
-    function _swapExactETHForTokens(
+    function swapMainCoinToBaseToken(
         address _dexRouter,
         address _wmaticAddress,
         address _baseTokenAddress,
         uint256 _minBaseTokenOut
-    ) private {
+    ) external override onlyFactoryAddress {
         address[] memory path;
         path = new address[](2);
 
@@ -219,5 +146,44 @@ contract PublicForest is
             address(this),
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
+    }
+
+    function fundTrees(address _baseTokenAddress, address _treejerContract)
+        external
+        override
+        onlyFactoryAddress
+    {
+        uint256 regularSalePrice = ITreejerContract(_treejerContract).price();
+        uint256 treeCount = IERC20(_baseTokenAddress).balanceOf(address(this)) /
+            regularSalePrice;
+
+        treeCount = treeCount > 50 ? 50 : treeCount;
+
+        IERC20(_baseTokenAddress).approve(
+            _treejerContract,
+            treeCount * regularSalePrice
+        );
+
+        ITreejerContract(_treejerContract).fundTree(
+            treeCount,
+            address(0),
+            address(0)
+        );
+    }
+
+    function externalTokenERC721Approve(
+        address _token,
+        address _to,
+        uint256 _tokenId
+    ) external override onlyFactoryAddress {
+        IERC721(_token).approve(_to, _tokenId);
+    }
+
+    function externalTokenERC1155Approve(
+        address _token,
+        address _to,
+        bool _approved
+    ) external override onlyFactoryAddress {
+        IERC1155(_token).setApprovalForAll(_to, _approved);
     }
 }

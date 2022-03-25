@@ -89,6 +89,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         treejerNftContractAddress = _treejerNftContractAddress;
     }
 
+    /// @inheritdoc IPublicForestFactory
     function setImplementationAddress(address _implementation)
         external
         override
@@ -97,6 +98,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         implementation = _implementation;
     }
 
+    /// @inheritdoc IPublicForestFactory
     function setBaseTokenAddress(address _baseTokenAddress)
         external
         override
@@ -105,6 +107,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         baseTokenAddress = _baseTokenAddress;
     }
 
+    /// @inheritdoc IPublicForestFactory
     function setTreejerContractAddress(address _treejerContract)
         external
         override
@@ -115,6 +118,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         treejerContract = address(candidateContract);
     }
 
+    /// @inheritdoc IPublicForestFactory
     function setDexRouterAddress(address _dexRouter)
         external
         override
@@ -123,6 +127,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         dexRouter = _dexRouter;
     }
 
+    /// @inheritdoc IPublicForestFactory
     function updateFactoryAddress(address _forest, address _factory)
         external
         override
@@ -131,6 +136,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         IPublicForest(_forest).updateFactoryAddress(_factory);
     }
 
+    /// @inheritdoc IPublicForestFactory
     function updateValidTokens(address _token, bool _isValid)
         external
         override
@@ -140,6 +146,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         validTokens[_token] = _isValid;
     }
 
+    /// @inheritdoc IPublicForestFactory
     function swapTokenToBaseToken(
         address _forest,
         address _token,
@@ -160,6 +167,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
+    /// @inheritdoc IPublicForestFactory
     function swapMainCoinToBaseToken(address _forest, uint256 _minBaseTokenOut)
         external
         override
@@ -178,6 +186,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
+    /// @inheritdoc IPublicForestFactory
     function fundTrees(address _forest)
         external
         override
@@ -186,6 +195,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         IPublicForest(_forest).fundTrees(baseTokenAddress, treejerContract);
     }
 
+    /// @inheritdoc IPublicForestFactory
     function externalTokenERC721Approve(
         address _forest,
         address _token,
@@ -203,6 +213,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
+    /// @inheritdoc IPublicForestFactory
     function externalTokenERC1155Approve(address _forest, address _token)
         external
         override
@@ -216,6 +227,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         );
     }
 
+    /// @inheritdoc IPublicForestFactory
     function createPublicForest(string memory _ipfsHash)
         external
         override
@@ -230,6 +242,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         IPublicForest(clone).initialize(_ipfsHash, address(this));
     }
 
+    /// @inheritdoc IPublicForestFactory
     function updateIpfsHash(address _forest, string memory _ipfsHash)
         external
         override

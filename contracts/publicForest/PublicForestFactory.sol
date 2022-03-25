@@ -147,10 +147,15 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     ) external override validForestContract(_forest) {
         require(validTokens[_token], "Invalid token");
 
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = _token;
+        path[1] = baseTokenAddress;
+
         IPublicForest(_forest).swapTokenToBaseToken(
+            path,
             dexRouter,
-            _token,
-            baseTokenAddress,
             _minBaseTokenOut > 2 ether ? _minBaseTokenOut : 2 ether
         );
     }
@@ -160,10 +165,15 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
         validForestContract(_forest)
     {
+        address[] memory path;
+        path = new address[](2);
+
+        path[0] = wmaticAddress;
+        path[1] = baseTokenAddress;
+
         IPublicForest(_forest).swapMainCoinToBaseToken(
+            path,
             dexRouter,
-            wmaticAddress,
-            baseTokenAddress,
             _minBaseTokenOut > 2 ether ? _minBaseTokenOut : 2 ether
         );
     }

@@ -10,16 +10,14 @@ interface IPublicForest {
     function updateIpfsHash(string memory _ipfsHash) external;
 
     function swapTokenToBaseToken(
+        address[] calldata path,
         address _dexRouter,
-        address _token,
-        address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external;
 
     function swapMainCoinToBaseToken(
+        address[] calldata path,
         address _dexRouter,
-        address _wmaticAddress,
-        address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external;
 

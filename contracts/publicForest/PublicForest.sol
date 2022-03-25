@@ -100,49 +100,35 @@ contract PublicForest is
     }
 
     function swapTokenToBaseToken(
+        address[] calldata _path,
         address _dexRouter,
-        address _token,
-        address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external override onlyFactoryAddress {
-        address[] memory path;
-        path = new address[](2);
+        uint256 amount = IERC20(_path[0]).balanceOf(address(this));
 
-        path[0] = _token;
-        path[1] = _baseTokenAddress;
-
-        uint256 amount = IERC20(_token).balanceOf(address(this));
-
-        bool success = IERC20(_token).approve(_dexRouter, amount);
+        bool success = IERC20(_path[0]).approve(_dexRouter, amount);
 
         require(success, "Unsuccessful approve");
 
         IdexRouter(_dexRouter).swapExactTokensForTokens(
             amount,
             _minBaseTokenOut,
-            path,
+            _path,
             address(this),
             block.timestamp + 1800 // 30 * 60 (30 min)
         );
     }
 
     function swapMainCoinToBaseToken(
+        address[] calldata _path,
         address _dexRouter,
-        address _wmaticAddress,
-        address _baseTokenAddress,
         uint256 _minBaseTokenOut
     ) external override onlyFactoryAddress {
-        address[] memory path;
-        path = new address[](2);
-
-        path[0] = _wmaticAddress;
-        path[1] = _baseTokenAddress;
-
         IdexRouter(_dexRouter).swapExactETHForTokens{
             value: address(this).balance
         }(
             _minBaseTokenOut,
-            path,
+            _path,
             address(this),
             block.timestamp + 1800 // 30 * 60 (30 min)
         );

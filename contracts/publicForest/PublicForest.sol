@@ -84,9 +84,9 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
-    //TODO://sender is mg.sender and value is msg.value
-    //TODO add  Received(address sender,address value)
-    receive() external payable {}
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
 
     /// @inheritdoc IPublicForest
     function initialize(string memory _ipfsHash, address _factory)
@@ -161,10 +161,12 @@ contract PublicForest is
         uint256 _regularSalePrice,
         address _referrer
     ) external override onlyFactoryAddress {
-        IERC20(_baseTokenAddress).approve(
+        bool success = IERC20(_baseTokenAddress).approve(
             _regularSaleAddress,
             _treeCount * _regularSalePrice
         );
+
+        require(success, "Unsuccessful approve");
 
         IRegularSale(_regularSaleAddress).fundTree(
             _treeCount,

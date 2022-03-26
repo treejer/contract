@@ -36,6 +36,7 @@ const {
   erc721ErrorMsg,
 } = require("./enumes");
 const common = require("mocha/lib/interfaces/common");
+const FakeToken = artifacts.require("FakeToken");
 
 contract("PublicForestFactory", (accounts) => {
   let arInstance;
@@ -129,6 +130,16 @@ contract("PublicForestFactory", (accounts) => {
 
       ////////------------------ call initialize
       await publicForestFactory.initialize(
+        userAccount3,
+        zeroAddress,
+        zeroAddress,
+        zeroAddress,
+        {
+          from: deployerAccount
+        }
+      ).should.be.rejected;
+
+      await publicForestFactory.initialize(
         arInstance.address,
         contractAddress.WETH,
         contractAddress.DAI,
@@ -194,6 +205,10 @@ contract("PublicForestFactory", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await publicForestFactory.setRegularSaleAddress(userAccount5, {
+        from: deployerAccount
+      }).should.be.rejected;
 
       await publicForestFactory.setRegularSaleAddress(
         regularSaleInstance.address,
@@ -813,6 +828,24 @@ contract("PublicForestFactory", (accounts) => {
         "incorrect balance"
       );
 
+      ////-----------------error Unsuccessful approve
+
+      let fakeTokenInstance = await FakeToken.new({ from: accounts[0] });
+
+      await await publicForestFactory.setBaseTokenAddress(
+        fakeTokenInstance.address
+      );
+
+      await await publicForestFactory
+        .fundTrees(forestAddress)
+        .should.be.rejectedWith("Unsuccessful approve");
+
+      await await publicForestFactory.setBaseTokenAddress(
+        daiDexInstance.address
+      );
+
+      ////--------------------------------------------------
+
       await publicForestFactory.fundTrees(forestAddress);
 
       //check public forest balance
@@ -1161,6 +1194,24 @@ contract("PublicForestFactory", (accounts) => {
           [bnbDexInstance.address, daiDexInstance.address]
         );
 
+      //-----------------error Unsuccessful approve
+
+      let fakeTokenInstance = await FakeToken.new({ from: accounts[0] });
+
+      await publicForestFactory.updateValidTokens(
+        fakeTokenInstance.address,
+        true,
+        {
+          from: dataManager
+        }
+      );
+
+      await publicForestFactory
+        .swapTokenToBaseToken(forestAddress, fakeTokenInstance.address, 0)
+        .should.be.rejectedWith("Unsuccessful approve");
+
+      ///////////-----------------------------
+
       await publicForestFactory.swapTokenToBaseToken(
         forestAddress,
         bnbDexInstance.address,
@@ -1392,11 +1443,26 @@ contract("PublicForestFactory", (accounts) => {
 
       //------transfer ether to forest
 
-      await web3.eth.sendTransaction({
+      let txSend1 = await web3.eth.sendTransaction({
         from: userAccount1,
         to: forestAddress1,
         value: web3.utils.toWei("25", "Ether"),
       });
+
+      let resultTx1 = (
+        await truffleAssert.createTransactionResult(
+          forestInstance1,
+          txSend1.transactionHash
+        )
+      ).logs[0].returnValues;
+
+      assert.equal(resultTx1.sender, userAccount1, "1-sender is not correct");
+
+      assert.equal(
+        resultTx1.amount,
+        web3.utils.toWei("25", "Ether"),
+        "1-amount is not correct"
+      );
 
       await web3.eth.sendTransaction({
         from: userAccount4,
@@ -1620,6 +1686,36 @@ contract("PublicForestFactory", (accounts) => {
       await testPublicForestFactory
         .externalTokenERC1155Approve(forestAddress1, treeInstance.address)
         .should.be.rejectedWith(PublicForestErrors.TREEJER_CONTRACT);
+    });
+
+    it("check supportsInterface", async () => {
+      const ipfsHash = "ipfs hash 1";
+
+      await testPublicForestFactory.createPublicForest(ipfsHash, {
+        from: userAccount1
+      });
+
+      let forestAddress1 = await testPublicForestFactory.forests(0);
+
+      let forestInstance1 = await PublicForest.at(forestAddress1);
+
+      assert.equal(
+        await forestInstance1.supportsInterface("0x01ffc9a7"),
+        true,
+        "result is not correct"
+      );
+
+      assert.equal(
+        await forestInstance1.supportsInterface("0x4e2312e0"),
+        true,
+        "result is not correct"
+      );
+
+      assert.equal(
+        await forestInstance1.supportsInterface("0x4e2312e1"),
+        false,
+        "result is not correct"
+      );
     });
 
     it("check erc1155 approve", async () => {

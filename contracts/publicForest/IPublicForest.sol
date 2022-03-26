@@ -30,6 +30,8 @@ interface IPublicForest {
         bytes data
     );
 
+    event Received(address sender, uint256 amount);
+
     /**
      * @dev set ipfsHash and factory address of a forest
      * @param _ipfsHash ipfs hash

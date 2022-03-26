@@ -161,6 +161,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function updateValidTokens(address _token, bool _isValid)
         external
         override
+        ifNotPaused
         onlyDataManager
         validAddress(_token)
     {
@@ -173,7 +174,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _forest,
         address _token,
         uint256 _minBaseTokenOut
-    ) external override validForestContract(_forest) {
+    ) external override ifNotPaused validForestContract(_forest) {
         require(validTokens[_token], "Invalid token");
 
         address[] memory path;
@@ -193,6 +194,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function swapMainCoinToBaseToken(address _forest, uint256 _minBaseTokenOut)
         external
         override
+        ifNotPaused
         validForestContract(_forest)
     {
         address[] memory path;
@@ -212,6 +214,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function fundTrees(address _forest)
         external
         override
+        ifNotPaused
         validForestContract(_forest)
     {
         uint256 regularSalePrice = IRegularSale(regularSaleAddress).price();
@@ -237,6 +240,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     )
         external
         override
+        ifNotPaused
         validForestContract(_forest)
         checkTreeTokenAddress(_token)
     {
@@ -252,6 +256,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function externalTokenERC1155Approve(address _forest, address _token)
         external
         override
+        ifNotPaused
         validForestContract(_forest)
         checkTreeTokenAddress(_token)
     {
@@ -267,6 +272,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function createPublicForest(string memory _ipfsHash)
         external
         override
+        ifNotPaused
         validAddress(implementation)
     {
         address clone = ClonesUpgradeable.clone(implementation);
@@ -283,6 +289,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
     function updateIpfsHash(address _forest, string memory _ipfsHash)
         external
         override
+        ifNotPaused
     {
         require(forestToCreators[_forest] == msg.sender, "Not forest owner");
 

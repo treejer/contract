@@ -84,9 +84,9 @@ contract PublicForest is
         return this.onERC721Received.selector;
     }
 
-    //TODO://sender is mg.sender and value is msg.value
-    //TODO add  Received(address sender,address value)
-    receive() external payable {}
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
 
     /// @inheritdoc IPublicForest
     function initialize(string memory _ipfsHash, address _factory)

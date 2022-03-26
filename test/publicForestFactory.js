@@ -1384,11 +1384,26 @@ contract("PublicForestFactory", accounts => {
 
       //------transfer ether to forest
 
-      await web3.eth.sendTransaction({
+      let txSend1 = await web3.eth.sendTransaction({
         from: userAccount1,
         to: forestAddress1,
         value: web3.utils.toWei("25", "Ether")
       });
+
+      let resultTx1 = (
+        await truffleAssert.createTransactionResult(
+          forestInstance1,
+          txSend1.transactionHash
+        )
+      ).logs[0].returnValues;
+
+      assert.equal(resultTx1.sender, userAccount1, "1-sender is not correct");
+
+      assert.equal(
+        resultTx1.amount,
+        web3.utils.toWei("25", "Ether"),
+        "1-amount is not correct"
+      );
 
       await web3.eth.sendTransaction({
         from: userAccount4,

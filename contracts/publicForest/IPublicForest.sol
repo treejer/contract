@@ -4,6 +4,32 @@ pragma solidity ^0.8.6;
 
 /** @title PublicForest interface */
 interface IPublicForest {
+    event ERC721Received(
+        address token,
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes data
+    );
+
+    event ERC1155BatchReceived(
+        address token,
+        address operator,
+        address from,
+        uint256[] ids,
+        uint256[] values,
+        bytes data
+    );
+
+    event ERC1155Received(
+        address token,
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes data
+    );
+
     /**
      * @dev set ipfsHash and factory address of a forest
      * @param _ipfsHash ipfs hash

@@ -42,8 +42,6 @@ contract PublicForest is
             interfaceId == type(IERC1155Receiver).interfaceId;
     }
 
-    //TODO://sender is mg.sender
-    //TODO add  ERC1155Received(address sender,address operator,address from,uint256 id, uint256 value,bytes calldata data)
     function onERC1155Received(
         address operator,
         address from,
@@ -51,11 +49,11 @@ contract PublicForest is
         uint256 value,
         bytes calldata data
     ) external override returns (bytes4) {
+        emit ERC1155Received(msg.sender, operator, from, id, value, data);
+
         return this.onERC1155Received.selector;
     }
 
-    //TODO://sender is mg.sender
-    //TODO add  ERC1155BatchReceived(address sender,address operator,address from,uint256[] calldata ids,uint256[] calldata values ,bytes calldata data)
     function onERC1155BatchReceived(
         address operator,
         address from,
@@ -63,17 +61,26 @@ contract PublicForest is
         uint256[] calldata values,
         bytes calldata data
     ) external override returns (bytes4) {
+        emit ERC1155BatchReceived(
+            msg.sender,
+            operator,
+            from,
+            ids,
+            values,
+            data
+        );
+
         return this.onERC1155BatchReceived.selector;
     }
 
-    //TODO://sender is mg.sender
-    //TODO add  ERC721Received(address sender,address operator,address from,uint256 tokenId,bytes calldata data)
     function onERC721Received(
         address operator,
         address from,
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
+        emit ERC721Received(msg.sender, operator, from, tokenId, data);
+
         return this.onERC721Received.selector;
     }
 

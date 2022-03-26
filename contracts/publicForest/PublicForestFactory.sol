@@ -80,7 +80,14 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         address _wmaticAddress,
         address _baseTokenAddress,
         address _treeTokenAddress
-    ) external override initializer {
+    )
+        external
+        override
+        initializer
+        validAddress(_wmaticAddress)
+        validAddress(_baseTokenAddress)
+        validAddress(_treeTokenAddress)
+    {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -98,6 +105,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         onlyAdmin
+        validAddress(_implementation)
     {
         implementation = _implementation;
         emit ImplementationAddressUpdated(_implementation);
@@ -108,6 +116,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         onlyAdmin
+        validAddress(_baseTokenAddress)
     {
         baseTokenAddress = _baseTokenAddress;
 
@@ -130,6 +139,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         external
         override
         onlyAdmin
+        validAddress(_dexRouter)
     {
         dexRouter = _dexRouter;
         emit DexRouterAddressUpdated(_dexRouter);
@@ -141,6 +151,7 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
         onlyAdmin
         validForestContract(_forest)
+        validAddress(_factory)
     {
         IPublicForest(_forest).updateFactoryAddress(_factory);
         emit FactoryAddressUpdated(_forest, _factory);

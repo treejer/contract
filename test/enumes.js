@@ -178,6 +178,8 @@ const WethFundErrorMsg = {
 
 const contractAddress = {
   TREE: "0x3aBbc23F3303EF36fd9f6CEC0e585b2C23e47FD9",
+  WETH: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+  DAI: "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
 };
 
 const PublicForestErrors = {

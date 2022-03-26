@@ -153,27 +153,22 @@ contract PublicForest is
         );
     }
 
-    //TODO: get referral as input and move calculation to factory
     /// @inheritdoc IPublicForest
-    function fundTrees(address _baseTokenAddress, address _treejerContract)
-        external
-        override
-        onlyFactoryAddress
-    {
-        uint256 regularSalePrice = IRegularSale(_treejerContract).price();
-        uint256 treeCount = IERC20(_baseTokenAddress).balanceOf(address(this)) /
-            regularSalePrice;
-
-        treeCount = treeCount > 50 ? 50 : treeCount;
-
+    function fundTrees(
+        address _baseTokenAddress,
+        address _regularSaleAddress,
+        uint256 _treeCount,
+        uint256 _regularSalePrice,
+        address _referrer
+    ) external override onlyFactoryAddress {
         IERC20(_baseTokenAddress).approve(
-            _treejerContract,
-            treeCount * regularSalePrice
+            _regularSaleAddress,
+            _treeCount * _regularSalePrice
         );
 
-        IRegularSale(_treejerContract).fundTree(
-            treeCount,
-            address(0),
+        IRegularSale(_regularSaleAddress).fundTree(
+            _treeCount,
+            _referrer,
             address(0)
         );
     }

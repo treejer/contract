@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "../access/IAccessRestriction.sol";
 import "./IPublicForestFactory.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IPublicForest.sol";
 import "./interfaces/IRegularSale.sol";
 
@@ -202,7 +203,19 @@ contract PublicForestFactory is Initializable, IPublicForestFactory {
         override
         validForestContract(_forest)
     {
-        IPublicForest(_forest).fundTrees(baseTokenAddress, regularSaleAddress);
+        uint256 regularSalePrice = IRegularSale(regularSaleAddress).price();
+        uint256 treeCount = IERC20(baseTokenAddress).balanceOf(_forest) /
+            regularSalePrice;
+
+        treeCount = treeCount > 50 ? 50 : treeCount;
+
+        IPublicForest(_forest).fundTrees(
+            baseTokenAddress,
+            regularSaleAddress,
+            treeCount,
+            regularSalePrice,
+            address(0)
+        );
     }
 
     /// @inheritdoc IPublicForestFactory

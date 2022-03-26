@@ -717,10 +717,18 @@ contract("PublicForestFactory", accounts => {
       );
 
       //-------------- fail because mint directly from publicForest
+
       await tempPublicForest
-        .fundTrees(daiDexInstance.address, regularSaleInstance.address, {
-          from: userAccount4
-        })
+        .fundTrees(
+          daiDexInstance.address,
+          regularSaleInstance.address,
+          20,
+          web3.utils.toWei("7"),
+          zeroAddress,
+          {
+            from: userAccount4
+          }
+        )
         .should.be.rejectedWith(PublicForestErrors.NOT_FACTORY_ADDRESS);
 
       //------------------- fail because invalid count

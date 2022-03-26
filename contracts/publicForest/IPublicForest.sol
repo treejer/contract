@@ -74,12 +74,20 @@ interface IPublicForest {
     ) external;
 
     /**
-     * @dev calculate tree amount to fund and fund tree
+     * @dev fund tree to forest
      * @param _baseTokenAddress address of base token
-     * @param _treejerContract address of RegularSale contract to fund tree
+     * @param _regularSaleAddress address of RegularSale contract to fund tree
+     * @param _treeCount number of tree to fund
+     * @param _regularSalePrice price of tree's in regular sale
+     * @param _referrer address of referrer
      */
-    function fundTrees(address _baseTokenAddress, address _treejerContract)
-        external;
+    function fundTrees(
+        address _baseTokenAddress,
+        address _regularSaleAddress,
+        uint256 _treeCount,
+        uint256 _regularSalePrice,
+        address _referrer
+    ) external;
 
     /**
      * @dev give approve to given address {_to} for an erc721 token {_token} with id

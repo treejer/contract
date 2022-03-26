@@ -161,10 +161,12 @@ contract PublicForest is
         uint256 _regularSalePrice,
         address _referrer
     ) external override onlyFactoryAddress {
-        IERC20(_baseTokenAddress).approve(
+        bool success = IERC20(_baseTokenAddress).approve(
             _regularSaleAddress,
             _treeCount * _regularSalePrice
         );
+
+        require(success, "Unsuccessful approve");
 
         IRegularSale(_regularSaleAddress).fundTree(
             _treeCount,

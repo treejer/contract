@@ -5,8 +5,8 @@ module.exports = async function (deployer, network, accounts) {
   const gnosisSafe = process.env.SAFE_ADDRESS;
 
   // Don't change ProxyAdmin ownership for our test network
-  if (network === "matic") {
-    // The owner of the ProxyAdmin can upgrade our contracts
-    await admin.transferProxyAdminOwnership(gnosisSafe);
-  }
+  // if (network === "matic") {
+  // The owner of the ProxyAdmin can upgrade our contracts
+  // await admin.transferProxyAdminOwnership(gnosisSafe);
+  // }
 };

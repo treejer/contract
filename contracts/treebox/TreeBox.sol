@@ -26,7 +26,7 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
     }
 
     modifier onlyTreeBoxScript() {
-        require(isTreeBoxScipt(msg.sender), "Pausable: paused");
+        require(isTreeBoxScipt(msg.sender), "Caller not TreeBox script");
         _;
     }
 

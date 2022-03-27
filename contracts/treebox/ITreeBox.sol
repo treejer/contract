@@ -20,4 +20,6 @@ interface ITreeBox {
     function isTreeBox() external view returns (bool);
 
     function isTreeBoxScipt(address _address) external view returns (bool);
+
+    function ownerToCount(address _owner) external view returns (uint256);
 }

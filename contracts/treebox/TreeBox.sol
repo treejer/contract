@@ -12,7 +12,7 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
     bool public override isTreeBox;
     ITree public treeToken;
     bytes32 public constant TREEBOX_SCRIPT = keccak256("TREEBOX_SCRIPT");
-    mapping(address => uint256) private ownerToCount;
+    mapping(address => uint256) public override ownerToCount;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {

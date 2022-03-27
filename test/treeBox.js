@@ -2,9 +2,11 @@
 
 const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeBox = artifacts.require("TreeBox");
-const Tree = artifacts.require("Tree");
+const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
-require("chai").use(require("chai-as-promised")).should();
+require("chai")
+  .use(require("chai-as-promised"))
+  .should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
@@ -12,10 +14,10 @@ const {
   CommonErrorMsg,
 
   PlanterErrorMsg,
-  erc721ErrorMsg,
+  erc721ErrorMsg
 } = require("./enumes");
 
-contract("TreeBox", (accounts) => {
+contract("TreeBox", accounts => {
   let treeBoxInstance;
   let treeInstance;
   let arInstance;
@@ -41,27 +43,23 @@ contract("TreeBox", (accounts) => {
   describe("deployment, set address, check access", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
 
-      treeInstance = await Tree.new({
-        from: deployerAccount,
-      });
-
-      await treeInstance.initialize(arInstance.address, "", {
-        from: deployerAccount,
+      treeInstance = await TreeNftTest.new({
+        from: deployerAccount
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
     });
 

@@ -12,7 +12,7 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
     bool public override isTreeBox;
     ITree public treeToken;
     bytes32 public constant TREEBOX_SCRIPT = keccak256("TREEBOX_SCRIPT");
-    mapping(address => uint256) private ownerToCount;
+    mapping(address => uint256) public override ownerToCount;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -71,7 +71,6 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
         address _to,
         uint256 _tokenId
     ) external override ifNotPaused onlyTreeBoxScript {
-        require(_from != address(0) && _to != address(0), "Invalid address");
         ownerToCount[msg.sender] -= 1;
         treeToken.safeTransferFrom(_from, _to, _tokenId);
     }

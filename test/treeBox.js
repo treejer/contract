@@ -5,21 +5,19 @@ const TreeBox = artifacts.require("TreeBox");
 const TestTreeBox = artifacts.require("TestTreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
-require("chai")
-  .use(require("chai-as-promised"))
-  .should();
+require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
 
 const {
   CommonErrorMsg,
-
+  TreeBoxErrorMsg,
   SafeMathErrorMsg,
-  erc721ErrorMsg
+  erc721ErrorMsg,
 } = require("./enumes");
 
-contract("TreeBox", accounts => {
+contract("TreeBox", (accounts) => {
   let treeBoxInstance;
   let treeInstance;
   let arInstance;
@@ -45,23 +43,23 @@ contract("TreeBox", accounts => {
   describe("deployment, set address, check access", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
@@ -75,23 +73,23 @@ contract("TreeBox", accounts => {
 
     it("test deploy", async () => {
       let treeBoxInstance3 = await TestTreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance3.set(deployerAccount);
 
       await treeBoxInstance3.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.setIsTree();
 
       let treeBoxInstance2 = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance2.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       }).should.be.rejected;
     });
 
@@ -155,15 +153,15 @@ contract("TreeBox", accounts => {
   describe("claim", () => {
     before(async () => {
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
@@ -198,17 +196,32 @@ contract("TreeBox", accounts => {
 
     it("claim", async () => {
       /////// mint some tokens to an account
-      for (let i = 0; i < 40; i++) {
+
+      const treeOwner1TreesStart = 10001;
+      const treeOwner1TreesEnd = 10041;
+      const treeOwner2Tree1 = 10041;
+      const treeOwner2Tree2 = 10042;
+      const owner1Count = 40;
+      const owner2Count = 1;
+
+      await treeInstance.safeMint(treeOwner1, 1, { from: deployerAccount });
+      await treeInstance.safeMint(treeOwner1, 0, { from: deployerAccount });
+
+      for (let i = treeOwner1TreesStart; i < treeOwner1TreesEnd; i++) {
         await treeInstance.safeMint(treeOwner1, i, { from: deployerAccount });
       }
 
-      await treeInstance.safeMint(treeOwner2, 40, { from: deployerAccount });
-      await treeInstance.safeMint(treeOwner2, 41, { from: deployerAccount });
+      await treeInstance.safeMint(treeOwner2, treeOwner2Tree1, {
+        from: deployerAccount,
+      });
+      await treeInstance.safeMint(treeOwner2, treeOwner2Tree2, {
+        from: deployerAccount,
+      });
 
       //////////------------------- fail to claim because caller is not TreejerScript Role
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 0, {
-          from: treeOwner1
+        .claim(treeOwner1, userAccount2, 10001, {
+          from: treeOwner1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
       /////------------------ give script role
@@ -219,116 +232,128 @@ contract("TreeBox", accounts => {
       );
       //////// fail because didn't call updateCount
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 0, {
-          from: scriptRole
+        .claim(treeOwner1, userAccount2, 10001, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
 
       ////////-------------- updateCount
-      await treeBoxInstance.updateCount(40, { from: treeOwner1 });
+      await treeBoxInstance.updateCount(owner1Count, { from: treeOwner1 });
 
       /////// -------------- give approve to treeBox
 
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 0, {
-          from: scriptRole
+        .claim(treeOwner1, userAccount2, 10001, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(
           erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
         );
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1
+        from: treeOwner1,
       });
 
       ///////----------------- fail with overFlow because count of zero address is 0
       await treeBoxInstance
-        .claim(zeroAddress, userAccount2, 0, {
-          from: scriptRole
+        .claim(zeroAddress, userAccount2, 10001, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
 
       //////////----------------------- fail becuase trransfer to zero address
       await treeBoxInstance
-        .claim(treeOwner1, zeroAddress, 0, {
-          from: scriptRole
+        .claim(treeOwner1, zeroAddress, 10001, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TO_ZERO_ADDRESS);
 
+      /////////----------------- fail becuase claim genesis
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.NOT_REGULAR);
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 1, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.NOT_REGULAR);
+
       ///////////-------------------- claim successfully
-      await treeBoxInstance.claim(treeOwner1, userAccount2, 0, {
-        from: scriptRole
+      await treeBoxInstance.claim(treeOwner1, userAccount2, 10001, {
+        from: scriptRole,
       });
 
       assert.equal(
         Number(await treeBoxInstance.ownerToCount(treeOwner1)),
-        39,
+        owner1Count - 1,
         "owner to count is not correct"
       );
 
       //////-------------------------- fail because token claimed by user2
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 0, {
-          from: scriptRole
+        .claim(treeOwner1, userAccount2, 10001, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(
           erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
         );
 
-      await treeBoxInstance.claim(treeOwner1, userAccount2, 1, {
-        from: scriptRole
+      await treeBoxInstance.claim(treeOwner1, userAccount2, 10002, {
+        from: scriptRole,
       });
 
       assert.equal(
         Number(await treeBoxInstance.ownerToCount(treeOwner1)),
-        38,
+        owner1Count - 2,
         "owner to count is not correct"
       );
 
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 50, {
-          from: scriptRole
+        .claim(treeOwner1, userAccount2, 10050, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_NON_EXISTENT_TOKEN);
 
       assert.equal(
-        await treeInstance.ownerOf(0),
+        await treeInstance.ownerOf(10001),
         userAccount2,
         "owner is incorrect"
       );
       assert.equal(
-        await treeInstance.ownerOf(1),
+        await treeInstance.ownerOf(10002),
         userAccount2,
         "owner is incorrect"
       );
 
       assert.equal(
-        await treeInstance.ownerOf(2),
+        await treeInstance.ownerOf(10003),
         treeOwner1,
         "owner is incorrect"
       );
 
       ///////////// update count for treeOwner2
-      await treeBoxInstance.updateCount(1, { from: treeOwner2 });
+      await treeBoxInstance.updateCount(owner2Count, { from: treeOwner2 });
 
       /////------------- fail becuase caller has approve but owner of token is not correct
       await treeBoxInstance
-        .claim(treeOwner2, userAccount2, 3, {
-          from: scriptRole
+        .claim(treeOwner2, userAccount2, 10004, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner2
+        from: treeOwner2,
       });
 
-      await treeBoxInstance.claim(treeOwner2, userAccount2, 41, {
-        from: scriptRole
+      await treeBoxInstance.claim(treeOwner2, userAccount2, 10042, {
+        from: scriptRole,
       });
 
       await treeBoxInstance
-        .claim(treeOwner2, userAccount2, 40, {
-          from: scriptRole
+        .claim(treeOwner2, userAccount2, 10041, {
+          from: scriptRole,
         })
         .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
     });

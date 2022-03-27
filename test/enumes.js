@@ -181,6 +181,9 @@ const WethFundErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
   TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract ",
 };
+const TreeBoxErrorMsg = {
+  NOT_REGULAR: "Not Regular Tree",
+};
 
 module.exports = {
   TimeEnumes,
@@ -200,4 +203,5 @@ module.exports = {
   erc721ErrorMsg,
   WethFundErrorMsg,
   SafeMathErrorMsg,
+  TreeBoxErrorMsg,
 };

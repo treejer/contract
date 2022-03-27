@@ -4,7 +4,9 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeBox = artifacts.require("TreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
-require("chai").use(require("chai-as-promised")).should();
+require("chai")
+  .use(require("chai-as-promised"))
+  .should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
@@ -13,10 +15,10 @@ const {
   CommonErrorMsg,
 
   PlanterErrorMsg,
-  erc721ErrorMsg,
+  erc721ErrorMsg
 } = require("./enumes");
 
-contract("TreeBox", (accounts) => {
+contract("TreeBox", accounts => {
   let treeBoxInstance;
   let treeInstance;
   let arInstance;
@@ -42,23 +44,23 @@ contract("TreeBox", (accounts) => {
   describe("deployment, set address, check access", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
     });
 
@@ -124,15 +126,15 @@ contract("TreeBox", (accounts) => {
   describe.only("claim", () => {
     before(async () => {
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
     });
 
@@ -173,13 +175,13 @@ contract("TreeBox", (accounts) => {
 
       /////// -------------- give approve to treeBox
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1,
+        from: treeOwner1
       });
 
       //////////------------------- fail to claim because caller is not TreejerScript Role
       await treeBoxInstance
         .claim(treeOwner1, userAccount2, 0, {
-          from: treeOwner1,
+          from: treeOwner1
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
       /////------------------ await

@@ -71,7 +71,8 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
         address _to,
         uint256 _tokenId
     ) external override ifNotPaused onlyTreeBoxScript {
-        ownerToCount[msg.sender] -= 1;
+        // ownerToCount[msg.sender] -= 1;
+        ownerToCount[_from] -= 1;
         treeToken.safeTransferFrom(_from, _to, _tokenId);
     }
 

@@ -12,7 +12,7 @@ const Math = require("./math");
 const {
   CommonErrorMsg,
 
-  PlanterErrorMsg,
+  SafeMathErrorMsg,
   erc721ErrorMsg,
 } = require("./enumes");
 
@@ -149,10 +149,8 @@ contract("TreeBox", (accounts) => {
         await treeInstance.safeMint(treeOwner1, i, { from: deployerAccount });
       }
 
-      /////// -------------- give approve to treeBox
-      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1,
-      });
+      await treeInstance.safeMint(treeOwner2, 40, { from: deployerAccount });
+      await treeInstance.safeMint(treeOwner2, 41, { from: deployerAccount });
 
       //////////------------------- fail to claim because caller is not TreejerScript Role
       await treeBoxInstance
@@ -160,7 +158,126 @@ contract("TreeBox", (accounts) => {
           from: treeOwner1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
-      /////------------------ await
+      /////------------------ give script role
+      await Common.addTreeBoxScript(
+        treeBoxInstance,
+        scriptRole,
+        deployerAccount
+      );
+      //////// fail because didn't call updateCount
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+
+      ////////-------------- updateCount
+      await treeBoxInstance.updateCount(40, { from: treeOwner1 });
+
+      /////// -------------- give approve to treeBox
+
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner1,
+      });
+
+      ///////----------------- fail with overFlow because count of zero address is 0
+      await treeBoxInstance
+        .claim(zeroAddress, userAccount2, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+
+      //////////----------------------- fail becuase trransfer to zero address
+      await treeBoxInstance
+        .claim(treeOwner1, zeroAddress, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TO_ZERO_ADDRESS);
+
+      ///////////-------------------- claim successfully
+      await treeBoxInstance.claim(treeOwner1, userAccount2, 0, {
+        from: scriptRole,
+      });
+
+      assert.equal(
+        Number(await treeBoxInstance.ownerToCount(treeOwner1)),
+        39,
+        "owner to count is not correct"
+      );
+
+      //////-------------------------- fail because token claimed by user2
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 0, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+
+      await treeBoxInstance.claim(treeOwner1, userAccount2, 1, {
+        from: scriptRole,
+      });
+
+      assert.equal(
+        Number(await treeBoxInstance.ownerToCount(treeOwner1)),
+        38,
+        "owner to count is not correct"
+      );
+
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 50, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_NON_EXISTENT_TOKEN);
+
+      assert.equal(
+        await treeInstance.ownerOf(0),
+        userAccount2,
+        "owner is incorrect"
+      );
+      assert.equal(
+        await treeInstance.ownerOf(1),
+        userAccount2,
+        "owner is incorrect"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(2),
+        treeOwner1,
+        "owner is incorrect"
+      );
+
+      ///////////// update count for treeOwner2
+      await treeBoxInstance.updateCount(1, { from: treeOwner2 });
+
+      /////------------- fail becuase caller has approve but owner of token is not correct
+      await treeBoxInstance
+        .claim(treeOwner2, userAccount2, 3, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner2,
+      });
+
+      await treeBoxInstance.claim(treeOwner2, userAccount2, 41, {
+        from: scriptRole,
+      });
+
+      await treeBoxInstance
+        .claim(treeOwner2, userAccount2, 40, {
+          from: scriptRole,
+        })
+        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
     });
   });
 });

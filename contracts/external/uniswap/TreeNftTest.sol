@@ -16,4 +16,11 @@ contract TreeNftTest is ERC721 {
     {
         _safeMint(_to, _tokenId);
     }
+
+    function setIsTree()
+        external
+    {
+        isTree = false;
+    }
+
 }

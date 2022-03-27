@@ -30,15 +30,6 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
         _;
     }
 
-    function isTreeBoxScipt(address _address)
-        public
-        view
-        override
-        returns (bool)
-    {
-        return hasRole(TREEBOX_SCRIPT, _address);
-    }
-
     function initialize(address _token, address _admin)
         external
         override
@@ -49,13 +40,26 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
 
         ITree candidateContractTree = ITree(_token);
 
-        require(candidateContractTree.isTree());
-
         if (!hasRole(DEFAULT_ADMIN_ROLE, _admin)) {
             _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         }
 
         treeToken = candidateContractTree;
+
+        require(candidateContractTree.isTree());
+    }
+
+    function claim(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external override ifNotPaused onlyTreeBoxScript {
+        ownerToCount[_from] -= 1;
+        treeToken.safeTransferFrom(_from, _to, _tokenId);
+    }
+
+    function updateCount(uint256 _amount) external override ifNotPaused {
+        ownerToCount[msg.sender] += _amount;
     }
 
     function pause() external override onlyAdmin {
@@ -66,17 +70,12 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
         _unpause();
     }
 
-    function claim(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external override ifNotPaused onlyTreeBoxScript {
-        // ownerToCount[msg.sender] -= 1;
-        ownerToCount[_from] -= 1;
-        treeToken.safeTransferFrom(_from, _to, _tokenId);
-    }
-
-    function updateCount(uint256 _amount) external override {
-        ownerToCount[msg.sender] += _amount;
+    function isTreeBoxScipt(address _address)
+        public
+        view
+        override
+        returns (bool)
+    {
+        return hasRole(TREEBOX_SCRIPT, _address);
     }
 }

@@ -71,7 +71,6 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
         address _to,
         uint256 _tokenId
     ) external override ifNotPaused onlyTreeBoxScript {
-        require(_from != address(0) && _to != address(0), "Invalid address");
         ownerToCount[msg.sender] -= 1;
         treeToken.safeTransferFrom(_from, _to, _tokenId);
     }

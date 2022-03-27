@@ -23,7 +23,7 @@ contract("TreeBox", (accounts) => {
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
-  const userAccount1 = accounts[2];
+  const scriptRole = accounts[2];
   const userAccount2 = accounts[3];
   const userAccount3 = accounts[4];
   const userAccount4 = accounts[5];
@@ -99,7 +99,7 @@ contract("TreeBox", (accounts) => {
   });
   ////////////////////////////////////////////////////////////////////////////////// ali
 
-  describe("claim", () => {
+  describe.only("claim", () => {
     before(async () => {
       treeInstance = await TreeNftTest.new({
         from: deployerAccount,
@@ -145,7 +145,22 @@ contract("TreeBox", (accounts) => {
 
     it("claim", async () => {
       /////// mint some tokens to an account
-      //   await treeInstance.safeMint(userAccount1);
+      for (let i = 0; i < 40; i++) {
+        await treeInstance.safeMint(treeOwner1, i, { from: deployerAccount });
+      }
+
+      /////// -------------- give approve to treeBox
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner1,
+      });
+
+      //////////------------------- fail to claim because caller is not TreejerScript Role
+      await treeBoxInstance
+        .claim(treeOwner1, userAccount2, 0, {
+          from: treeOwner1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
+      /////------------------ await
     });
   });
 });

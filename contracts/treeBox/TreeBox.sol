@@ -26,7 +26,10 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
     }
 
     modifier onlyTreeBoxScript() {
-        require(isTreeBoxScipt(msg.sender), "Caller not TreeBox script");
+        require(
+            hasRole(TREEBOX_SCRIPT, msg.sender),
+            "Caller not TreeBox script"
+        );
         _;
     }
 
@@ -68,14 +71,5 @@ contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
 
     function unpause() external override onlyAdmin {
         _unpause();
-    }
-
-    function isTreeBoxScipt(address _address)
-        public
-        view
-        override
-        returns (bool)
-    {
-        return hasRole(TREEBOX_SCRIPT, _address);
     }
 }

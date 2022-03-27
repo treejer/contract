@@ -70,6 +70,33 @@ contract("TreeBox", accounts => {
       assert.notEqual(address, null);
       assert.notEqual(address, undefined);
     });
+
+    it("test admin", async () => {
+      await Common.addTreeBoxScript(treeBoxInstance, userAccount3, userAccount6)
+        .should.be.rejected;
+
+      assert.equal(
+        await treeBoxInstance.hasRole(Common.TREEBOX_SCRIPT, userAccount3),
+        false,
+        "access is not correct"
+      );
+
+      await treeBoxInstance
+        .claim(userAccount4, userAccount5, 4)
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
+
+      await Common.addTreeBoxScript(
+        treeBoxInstance,
+        userAccount3,
+        deployerAccount
+      );
+
+      assert.equal(
+        await treeBoxInstance.hasRole(Common.TREEBOX_SCRIPT, userAccount3),
+        true,
+        "access is not correct"
+      );
+    });
   });
   ////////////////////////////////////////////////////////////////////////////////// ali
 

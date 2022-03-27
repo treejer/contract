@@ -4,21 +4,21 @@ const TimeEnumes = {
   minutes: "minutes",
   seconds: "seconds",
   weeks: "weeks",
-  years: "years",
+  years: "years"
 };
 
 const GsnErrorMsg = {
-  ADDRESS_NOT_EXISTS: "Target not exists",
+  ADDRESS_NOT_EXISTS: "Target not exists"
 };
 
 const erc20ErrorMsg = {
   ZERO_ADDRESS: "ERC20: transfer from the zero address",
   INSUFFICIENT_BALANCE: "ERC20: transfer amount exceeds balance",
-  APPROVAL_ISSUE: "ERC20: transfer amount exceeds allowance",
+  APPROVAL_ISSUE: "ERC20: transfer amount exceeds allowance"
 };
 
 const erc721ErrorMsg = {
-  MINTED_BEFORE: "token already minted.",
+  MINTED_BEFORE: "token already minted."
 };
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
@@ -36,6 +36,7 @@ const CommonErrorMsg = {
   CHECK_IF_PAUSED: "Pausable: not paused",
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
   UNISWAP_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
+  CHECK_TREEBOX_SCRIPT: "Caller not TreeBox script"
 };
 
 const AuctionErrorMsg = {
@@ -49,7 +50,7 @@ const AuctionErrorMsg = {
   BID_AFTER_END: "Auction ended",
   END_AUCTION_BEFORE_END_TIME: "Auction not ended",
   END_AUCTION_WHEN_IT_HAS_BEEN_ENDED: "endAuction has already been called",
-  AUCTION_IS_UNAVAILABLE: "Auction unavailable",
+  AUCTION_IS_UNAVAILABLE: "Auction unavailable"
 };
 
 const TreeFactoryErrorMsg = {
@@ -77,7 +78,7 @@ const TreeFactoryErrorMsg = {
   TREE_MUST_BE_PLANTED: "Tree not planted",
   REGULAR_TREE_NOT_EXIST: "Regular Tree not exists",
   TREE_HAS_PENDING_UPDATE: "Pending update exists",
-  INVALID_SET_LAST_REGULAR_TREE_INPUT: "Invalid lastRegualarTreeId",
+  INVALID_SET_LAST_REGULAR_TREE_INPUT: "Invalid lastRegualarTreeId"
 };
 const TreasuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "Invalid amount",
@@ -85,17 +86,17 @@ const TreasuryManagerErrorMsg = {
   SUM_INVALID: "Invalid sum",
   INVALID_FUND_MODEL: "Allocation not exists",
   INVALID_ASSIGN_MODEL: "Allocation not exists",
-  ALLOCATION_MODEL_NOT_FOUND: "Allocation not exists",
+  ALLOCATION_MODEL_NOT_FOUND: "Allocation not exists"
 };
 
 const DaiFundErrorMsg = {
   INSUFFICIENT_AMOUNT: "Invalid amount",
-  LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
+  LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity"
 };
 const AllocationErrorMsg = {
   SUM_INVALID: "Invalid sum",
   ALLOCATION_MODEL_NOT_FOUND: "Allocation not exists",
-  INVALID_FUND_MODEL: "Allocation not exists",
+  INVALID_FUND_MODEL: "Allocation not exists"
 };
 
 const PlanterErrorMsg = {
@@ -111,7 +112,7 @@ const PlanterErrorMsg = {
   INVALID_PLANTER: "Not memberOf",
   INVALID_PLANTER_STATUS: "Invalid planter status",
   INVALID_PAYMENT_PORTION: "Invalid share",
-  ACCEPT_PLANTER_ACCESS_ERROR: "Request not exists",
+  ACCEPT_PLANTER_ACCESS_ERROR: "Request not exists"
 };
 
 const RegularSaleErrors = {
@@ -123,7 +124,7 @@ const RegularSaleErrors = {
   MAX_SUPPLY: "Max supply reached",
   MAX_SUPPLY_MUST_GT_LAST_FUNDED_TREE: "Invalid maxTreeSupply",
   COUNT_MUST_BE_GT_ZERO: "Invalid count",
-  INVALID_REFERAL: "Invalid referrer",
+  INVALID_REFERAL: "Invalid referrer"
 };
 
 const IncrementalSaleErrorMsg = {
@@ -139,7 +140,7 @@ const IncrementalSaleErrorMsg = {
   // INVALID_TREE: "tree is not in incremental sell",
   LOW_PRICE_PAID: "Insufficient balance",
   FREE_INCREMENTALSALE_FAIL: "Cant remove",
-  CANT_CREATE_NEW_INCREMENTALSALE: "Cant create",
+  CANT_CREATE_NEW_INCREMENTALSALE: "Cant create"
 };
 
 const AttributeErrorMsg = {
@@ -149,7 +150,7 @@ const AttributeErrorMsg = {
   SYMBOL_IS_TAKEN: "Duplicate symbol",
   EMPTY_TOKEN_LIST: "Invalid tokens",
   UNISWAP_INSUFFICIENT_LIQUIDITY: "UniswapV2Library: INSUFFICIENT_LIQUIDITY",
-  INVALID_SYMBOL: "Invalid symbol",
+  INVALID_SYMBOL: "Invalid symbol"
 };
 
 const HonoraryTreeErrorMsg = {
@@ -164,12 +165,12 @@ const HonoraryTreeErrorMsg = {
   RECIPIENT_NOT_EXIST: "Recipient not exist",
   CANT_SET_RANGE: "Cant set range",
   CANT_CLAIM: "Cant claim",
-  SYMBOL_NOT_EXIST: "Insufficient symbol",
+  SYMBOL_NOT_EXIST: "Insufficient symbol"
 };
 
 const WethFundErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
-  TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract ",
+  TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract "
 };
 
 module.exports = {
@@ -188,5 +189,5 @@ module.exports = {
   erc20ErrorMsg,
   GsnErrorMsg,
   erc721ErrorMsg,
-  WethFundErrorMsg,
+  WethFundErrorMsg
 };

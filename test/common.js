@@ -12,17 +12,26 @@ const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
 const VERIFIER_ROLE = web3.utils.soliditySha3("VERIFIER_ROLE");
 const SCRIPT_ROLE = web3.utils.soliditySha3("SCRIPT_ROLE");
 
+const TREEBOX_SCRIPT = web3.utils.soliditySha3("TREEBOX_SCRIPT");
+
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
+
+Common.TREEBOX_SCRIPT = TREEBOX_SCRIPT;
 
 const Math = require("./math");
 
-Common.sleep = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+Common.sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 Common.addPlanter = async (instance, account, adminAccount) => {
   await instance.grantRole(PLANTER_ROLE, account, { from: adminAccount });
 };
+
+Common.addTreeBoxScript = async (instance, account, adminAccount) => {
+  await instance.grantRole(TREEBOX_SCRIPT, account, { from: adminAccount });
+};
+
 Common.getNewAccountPublicKey = async () => {
   const account = web3.eth.accounts.create();
   return account.address;
@@ -30,13 +39,13 @@ Common.getNewAccountPublicKey = async () => {
 
 Common.addTreejerContractRole = async (instance, account, adminAccount) => {
   await instance.grantRole(TREEJER_CONTRACT_ROLE, account, {
-    from: adminAccount,
+    from: adminAccount
   });
 };
 
 Common.addVerifierRole = async (instance, account, adminAccount) => {
   await instance.grantRole(VERIFIER_ROLE, account, {
-    from: adminAccount,
+    from: adminAccount
   });
 };
 
@@ -60,7 +69,7 @@ Common.approveAndTransfer = async (
   amount = "1000"
 ) => {
   await instance.transfer(account, Units.convert(amount, "eth", "wei"), {
-    from: from,
+    from: from
   });
 
   // await instance.approve(
@@ -102,7 +111,7 @@ Common.successPlant = async (
   );
 
   await new Promise((resolve, reject) => {
-    planterList.map(async (item) => {
+    planterList.map(async item => {
       await Common.addPlanter(arInstance, item, deployerAccount);
       if (planterList[planterList.length - 1] == item) {
         resolve();
@@ -111,7 +120,7 @@ Common.successPlant = async (
   });
 
   await new Promise((resolve, reject) => {
-    planterList.map(async (item) => {
+    planterList.map(async item => {
       await Common.joinSimplePlanter(
         planterInstance,
         1,
@@ -126,11 +135,11 @@ Common.successPlant = async (
   });
 
   await treeFactoryInstance.listTree(treeId, ipfsHash, {
-    from: dataManager,
+    from: dataManager
   });
 
   await treeFactoryInstance.assignTree(treeId, planterAddress, {
-    from: dataManager,
+    from: dataManager
   });
 
   await treeFactoryInstance.plantAssignedTree(
@@ -139,15 +148,15 @@ Common.successPlant = async (
     birthDate,
     countryCode,
     {
-      from: planterAddress,
+      from: planterAddress
     }
   );
   await treeFactoryInstance.verifyAssignedTree(treeId, true, {
-    from: dataManager,
+    from: dataManager
   });
 };
-Common.sleep = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+Common.sleep = ms => {
+  return new Promise(resolve => setTimeout(resolve, ms));
 };
 Common.joinSimplePlanter = async (
   planterInstance,
@@ -217,7 +226,7 @@ Common.joinSimplePlanterFromTreeFactory = async (
   );
 };
 
-Common.getTransactionFee = async (tx) => {
+Common.getTransactionFee = async tx => {
   const gasUsed = tx.receipt.gasUsed;
   const gasPrice = (await web3.eth.getTransaction(tx.tx)).gasPrice;
 
@@ -316,11 +325,11 @@ Common.successFundTree = async (
     fundsPercent.reserve1,
     fundsPercent.reserve2,
     {
-      from: dataManager,
+      from: dataManager
     }
   );
   await allocationInstance.assignAllocationToTree(0, 10, 0, {
-    from: dataManager,
+    from: dataManager
   });
 
   await Common.addTreejerContractRole(
@@ -330,17 +339,17 @@ Common.successFundTree = async (
   );
 
   await treeFactoryInstance.manageSaleType(treeId, 1, {
-    from: auctionAddress,
+    from: auctionAddress
   });
 
   await treeFactoryInstance.mintAssignedTree(treeId, tokenOwner, {
-    from: auctionAddress,
+    from: auctionAddress
   });
 
   await daiInstance.setMint(daiFundInstance.address, fundAmount);
 
   await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   await daiFundInstance.setPlanterFundContractAddress(
@@ -378,7 +387,7 @@ Common.successFundTree = async (
     fundsPercent.reserve1,
     fundsPercent.reserve2,
     {
-      from: auctionAddress,
+      from: auctionAddress
     }
   );
 };
@@ -390,14 +399,14 @@ Common.acceptPlanterByOrganization = async (
   planterProtion
 ) => {
   await planterInstance.acceptPlanterByOrganization(planterAddress, true, {
-    from: organizationAddress,
+    from: organizationAddress
   });
 
   await planterInstance.updateOrganizationMemberShare(
     planterAddress,
     planterProtion,
     {
-      from: organizationAddress,
+      from: organizationAddress
     }
   );
 };
@@ -423,7 +432,7 @@ Common.plantTreeSuccess = async (
   );
 
   await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
-    from: planter,
+    from: planter
   });
 };
 
@@ -455,11 +464,11 @@ Common.plantTreeSuccessOrganization = async (
     organizationAdmin
   );
   await planterInstance.acceptPlanterByOrganization(planter, true, {
-    from: organizationAdmin,
+    from: organizationAdmin
   });
 
   await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
-    from: planter,
+    from: planter
   });
 };
 
@@ -474,7 +483,7 @@ Common.prepareAttributeDex = async (
   ////--------------------------uniswap deploy
 
   factoryInstance = await Factory.new(deployerAccount, {
-    from: deployerAccount,
+    from: deployerAccount
   });
   const factoryAddress = factoryInstance.address;
 
@@ -483,11 +492,11 @@ Common.prepareAttributeDex = async (
   daiDexInstance = await Token.new("DAI", "dai", { from: deployerAccount });
 
   bnbDexInstance = await Token.new("BNB", "bnb", {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   adaDexInstance = await Token.new("ADA", "ada", {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   dexRouterInstance = await UniswapV2Router02New.new(
@@ -498,7 +507,7 @@ Common.prepareAttributeDex = async (
   const dexRouterAddress = dexRouterInstance.address;
 
   testUniswapInstance = await TestUniswap.new(dexRouterAddress, {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   /////---------------------------addLiquidity-------------------------
@@ -549,21 +558,21 @@ Common.prepareAttributeDex = async (
   //-------------------set address
 
   await attributeInstance.setDexRouterAddress(dexRouterInstance.address, {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   await attributeInstance.setBaseTokenAddress(daiDexInstance.address, {
-    from: deployerAccount,
+    from: deployerAccount
   });
 
   let list = [
     wethDexInstance.address,
     bnbDexInstance.address,
-    adaDexInstance.address,
+    adaDexInstance.address
   ];
 
   await attributeInstance.setDexTokens(list, {
-    from: deployerAccount,
+    from: deployerAccount
   });
 };
 

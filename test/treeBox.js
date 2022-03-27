@@ -96,10 +96,32 @@ contract("TreeBox", (accounts) => {
         "access is not correct"
       );
     });
+
+    it("test pause", async () => {
+      await treeBoxInstance
+        .pause({ from: userAccount5 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await treeBoxInstance
+        .unpause({ from: userAccount5 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await treeBoxInstance.pause({ from: deployerAccount });
+
+      await treeBoxInstance
+        .claim(userAccount4, userAccount5, 4)
+        .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+
+      await treeBoxInstance.unpause({ from: deployerAccount });
+
+      await treeBoxInstance
+        .claim(userAccount4, userAccount5, 4)
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
+    });
   });
   ////////////////////////////////////////////////////////////////////////////////// ali
 
-  describe.only("claim", () => {
+  describe("claim", () => {
     before(async () => {
       treeInstance = await TreeNftTest.new({
         from: deployerAccount,

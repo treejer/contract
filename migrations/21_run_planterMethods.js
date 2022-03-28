@@ -11,7 +11,9 @@ module.exports = async function (deployer, network, accounts) {
   if (isLocal) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
   } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
+    trustedForwarder = eval(
+      `process.env.GSN_FORWARDER_${network.toUpperCase()}`
+    );
   }
 
   console.log("Call Planter Methods...");

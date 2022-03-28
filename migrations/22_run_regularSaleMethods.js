@@ -27,10 +27,14 @@ module.exports = async function (deployer, network, accounts) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
     daiTokenAddress = Dai.address;
   } else if (network == "mumbai") {
-    trustedForwarder = process.env.GSN_FORWARDER;
+    trustedForwarder = eval(
+      `process.env.GSN_FORWARDER_${network.toUpperCase()}`
+    );
     daiTokenAddress = Dai.address;
   } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
+    trustedForwarder = eval(
+      `process.env.GSN_FORWARDER_${network.toUpperCase()}`
+    );
     daiTokenAddress = eval(
       `process.env.DAI_TOKEN_ADDRESS_${network.toUpperCase()}`
     );

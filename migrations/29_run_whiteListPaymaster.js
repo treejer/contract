@@ -28,8 +28,10 @@ module.exports = async function (deployer, network, accounts) {
     trustedForwarder = require("../build/gsn/Forwarder.json").address;
     relayHub = require("../build/gsn/RelayHub.json").address;
   } else {
-    trustedForwarder = process.env.GSN_FORWARDER;
-    relayHub = process.env.GSN_RELAY_HUB;
+    trustedForwarder = eval(
+      `process.env.GSN_FORWARDER_${network.toUpperCase()}`
+    );
+    relayHub = eval(`process.env.GSN_RELAY_HUB_${network.toUpperCase()}`);
   }
 
   console.log("Call WhitelistPaymaster Methods...");

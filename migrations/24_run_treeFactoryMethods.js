@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, accounts) {
   //gsn
   const trustedForwarder = isLocal
     ? require("../build/gsn/Forwarder.json").address
-    : process.env.GSN_FORWARDER;
+    : eval(`process.env.GSN_FORWARDER_${network.toUpperCase()}`);
 
   console.log("Call Tree Factory Methods...");
   await TreeFactory.deployed().then(async (instance) => {

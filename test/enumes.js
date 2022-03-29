@@ -183,12 +183,9 @@ const WethFundErrorMsg = {
 };
 const TreeBoxErrorMsg = {
   NOT_REGULAR: "Not Regular Tree",
-<<<<<<< HEAD
   RECIEVER_INCORRECT: "public key is not exists",
-  CANT_TRANSFER_TO_THIS_ADDRESS: "can't transfer to msg.sender"
-=======
-  PUBLIC_KEY_EXISTS: "public key is exists",
->>>>>>> 8a17fdd6db7c8ed8de3429e665a74c64db9a9f2a
+  CANT_TRANSFER_TO_THIS_ADDRESS: "can't transfer to msg.sender",
+  PUBLIC_KEY_EXISTS: "public key is exists"
 };
 
 module.exports = {

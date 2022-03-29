@@ -2,12 +2,19 @@
 
 pragma solidity ^0.8.6;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+
 import "../gsn/RelayRecipient.sol";
 import "./ITreeBoxV2.sol";
 import "../access/IAccessRestriction.sol";
 import "./../tree/ITree.sol";
 
-contract TreeBoxV2 is Initializable, RelayRecipient, ITreeBoxV2 {
+contract TreeBoxV2 is
+    Initializable,
+    RelayRecipient,
+    IERC721ReceiverUpgradeable,
+    ITreeBoxV2
+{
     struct Box {
         address sender;
         bytes32 ipfsHash;
@@ -62,6 +69,15 @@ contract TreeBoxV2 is Initializable, RelayRecipient, ITreeBoxV2 {
         validAddress(_address)
     {
         trustedForwarder = _address;
+    }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     function create(Input[] calldata _input) external override ifNotPaused {

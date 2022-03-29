@@ -38,7 +38,7 @@ contract("TreeBox", (accounts) => {
   afterEach(async () => {});
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
 
-  describe("deployment, set address, check access", () => {
+  describe("deployment, set address, check access, create,withdraw", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,

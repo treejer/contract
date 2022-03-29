@@ -26,7 +26,7 @@ contract TreeBoxV2 is
     ITree public treeToken;
     IAccessRestriction public accessRestriction;
 
-    mapping(address => Box) public override boxes;
+    mapping(address => Box) public override boxes; //recipient->Box
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -76,6 +76,7 @@ contract TreeBoxV2 is
         return this.onERC721Received.selector;
     }
 
+    // TreeBoxCreated(sender,recepient)
     function create(Input[] calldata _input) external override ifNotPaused {
         for (uint256 i = 0; i < _input.length; i++) {
             require(
@@ -103,9 +104,9 @@ contract TreeBoxV2 is
         require(
             boxes[_msgSender()].sender != address(0),
             "public key is not exists"
-        );
+        ); //recipient key exists
 
-        require(_reciever != _msgSender(), "can't transfer to msg.sender");
+        require(_reciever != _msgSender(), "can't transfer to msg.sender"); //recipient is msg.sender
 
         uint256[] memory treeIds = boxes[_msgSender()].treeIds;
 
@@ -145,5 +146,14 @@ contract TreeBoxV2 is
         returns (uint256)
     {
         return boxes[_reciever].treeIds[_index];
+    }
+
+    function getTreeOfRecivierLength(address _reciever)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return boxes[_reciever].treeIds.length;
     }
 }

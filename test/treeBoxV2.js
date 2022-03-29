@@ -334,7 +334,7 @@ contract("TreeBox", accounts => {
       );
     });
 
-    it.only("check Claim function", async () => {
+    it("check Claim function", async () => {
       let sender = treeOwner1;
 
       const data = [[userAccount2, "ipfs 1", [0, 1, 2]]];

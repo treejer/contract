@@ -10,6 +10,7 @@ import "./../tree/ITree.sol";
 contract TreeBoxV2 is Initializable, RelayRecipient, ITreeBoxV2 {
     struct Box {
         address sender;
+        bytes32 ipfsHash;
         uint256[] treeIds;
     }
 
@@ -72,6 +73,7 @@ contract TreeBoxV2 is Initializable, RelayRecipient, ITreeBoxV2 {
             );
 
             boxes[_input[i].reciever].sender = _msgSender();
+            boxes[_input[i].reciever].ipfsHash = _input[i].ipfsHash;
 
             for (uint256 j = 0; j < _input[i].treeIds.length; j++) {
                 boxes[_input[i].reciever].treeIds.push(_input[i].treeIds[j]);

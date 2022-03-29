@@ -17,7 +17,7 @@ contract TreeBoxV2 is
 {
     struct Box {
         address sender;
-        bytes32 ipfsHash;
+        string ipfsHash;
         uint256[] treeIds;
     }
 
@@ -48,18 +48,14 @@ contract TreeBoxV2 is
         override
         initializer
     {
-        IAccessRestriction candidateContract = IAccessRestriction(
-            _accessRestrictionAddress
-        );
+        accessRestriction = IAccessRestriction(_accessRestrictionAddress);
+
+        treeToken = ITree(_token);
 
         isTreeBox = true;
 
-        ITree candidateContractTree = ITree(_token);
-
-        treeToken = candidateContractTree;
-
-        require(candidateContract.isAccessRestriction());
-        require(candidateContractTree.isTree());
+        require(accessRestriction.isAccessRestriction());
+        require(treeToken.isTree());
     }
 
     function setTrustedForwarder(address _address)
@@ -139,5 +135,14 @@ contract TreeBoxV2 is
                 }
             }
         }
+    }
+
+    function getTreeOfRecivierByIndex(address _reciever, uint256 _index)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return boxes[_reciever].treeIds[_index];
     }
 }

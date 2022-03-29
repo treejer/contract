@@ -123,7 +123,8 @@ contract TreeBoxV2 is
     {
         for (uint256 i = 0; i < _recievers.length; i++) {
             if (boxes[_recievers[i]].sender == _msgSender()) {
-                uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+                // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+                uint256[] memory treeIds = boxes[_recievers[i]].treeIds;
                 delete boxes[_msgSender()];
 
                 for (uint256 j = 0; j < treeIds.length; j++) {

@@ -303,13 +303,16 @@ contract("TreeBox", (accounts) => {
       await treeBoxInstance.create(valid_data4, { from: treeOwner4 });
     });
 
-    it.only("withdraw", async () => {
-      const data1 = [[userAccount2, "ipfs 1", [0, 1]]];
+    it("withdraw", async () => {
+      const data1 = [
+        [userAccount2, "ipfs 1", [0, 1]],
+        [userAccount3, "ipfs 2", [2, 3]],
+      ];
 
       const data2 = [
-        [userAccount3, "ipfs 2", [2, 3]],
         [userAccount4, "ipfs 3", [4, 5, 6]],
-        [userAccount5, "ipfs 3", [4, 5, 6]],
+        [userAccount5, "ipfs 4", [7, 8, 9]],
+        [dataManager, "ipfs 5", [10, 11]],
       ];
 
       //mint tokens to treeOwner1
@@ -328,6 +331,101 @@ contract("TreeBox", (accounts) => {
             from: deployerAccount,
           });
         }
+      }
+
+      /// ----------------- set approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner1,
+      });
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner2,
+      });
+
+      //--------- create gift
+      await treeBoxInstance.create(data1, { from: treeOwner1 });
+      await treeBoxInstance.create(data2, { from: treeOwner2 });
+
+      //// -------------------- check tree owner (must be TreeBox)
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      for (let i = 0; i < data2.length; i++) {
+        for (let j = 0; j < data2[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data2[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      //////////// --------------- treeOwner2 want to withdraw treeOwner1 trees
+
+      await treeBoxInstance.withdraw([userAccount2, userAccount3], {
+        from: treeOwner2,
+      });
+
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      /// ------------------------ treeOwner1 withdraw all trees (no one claimed)
+      await treeBoxInstance.withdraw([userAccount2, userAccount3], {
+        from: treeOwner1,
+      });
+
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeOwner1,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+      //---- treeOwner2 withdraw trees (only userAccount4 claimed)
+      //---- treeOnwer2 want wo withdraw all gifted trees but some claime by user4
+
+      await treeBoxInstance.claim(deployerAccount, { from: userAccount4 });
+
+      const user4ClaimedTrees = [4, 5, 6];
+      const treeOnwer2WithdrawTrees = [7, 8, 9, 10, 11];
+
+      await treeBoxInstance.withdraw(
+        [userAccount4, userAccount5, dataManager],
+        {
+          from: treeOwner2,
+        }
+      );
+
+      for (let i = 0; i < user4ClaimedTrees.length; i++) {
+        assert.equal(
+          await treeInstance.ownerOf(user4ClaimedTrees[i]),
+          deployerAccount,
+          "trees didn't transfer to contract"
+        );
+      }
+
+      for (let i = 0; i < treeOnwer2WithdrawTrees.length; i++) {
+        assert.equal(
+          await treeInstance.ownerOf(treeOnwer2WithdrawTrees[i]),
+          treeOwner2,
+          "trees didn't transfer to contract"
+        );
       }
     });
   });

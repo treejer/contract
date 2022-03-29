@@ -24,14 +24,14 @@ contract("TreeBox", (accounts) => {
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
-  const scriptRole = accounts[2];
-  const userAccount2 = accounts[3];
-  const userAccount3 = accounts[4];
-  const userAccount4 = accounts[5];
-  const userAccount5 = accounts[6];
-  const userAccount6 = accounts[7];
+  const userAccount2 = accounts[2];
+  const userAccount3 = accounts[3];
+  const userAccount4 = accounts[4];
+  const userAccount5 = accounts[5];
+  const treeOwner1 = accounts[6];
+  const treeOwner3 = accounts[7];
   const treeOwner2 = accounts[8];
-  const treeOwner1 = accounts[9];
+  const treeOwner4 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -112,16 +112,38 @@ contract("TreeBox", (accounts) => {
     });
 
     it("create", async () => {
-      const data = [
+      const data1 = [
         [userAccount2, "ipfs 1", [0, 1]],
         [userAccount3, "ipfs 2", [2, 3]],
         [userAccount2, "ipfs 1", [4, 5]],
       ];
 
+      const data2 = [[userAccount4, "ipfs 3", [6]]];
+
+      const data3 = [[userAccount2, "ipfs 4", [7, 8]]];
+
       //mint tokens to treeOwner1
-      for (let i = 0; i < data.length; i++) {
-        for (j = 0; j < data[i][2].length; j++) {
-          await treeInstance.safeMint(treeOwner1, data[i][2][j], {
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner1, data1[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      //mint tokens to treeOwner2
+      for (let i = 0; i < data2.length; i++) {
+        for (let j = 0; j < data2[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner2, data2[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      //mint tokens to treeOwner3
+      for (let i = 0; i < data3.length; i++) {
+        for (let j = 0; j < data3[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner3, data3[i][2][j], {
             from: deployerAccount,
           });
         }
@@ -131,28 +153,154 @@ contract("TreeBox", (accounts) => {
         from: treeOwner1,
       });
 
-      await treeBoxInstance.create(data, { from: treeOwner1 });
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner2,
+      });
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner3,
+      });
 
-      for (i = 0; i < data.length; i++) {
-        const box = await treeBoxInstance.boxes(data[i][0]);
-        assert.equal(box.ipfsHash, data[i][1], "ipfs is incorrect");
+      await treeBoxInstance.create(data1, { from: treeOwner1 });
+
+      for (let i = 0; i < data1.length; i++) {
+        const box = await treeBoxInstance.boxes(data1[i][0]);
+        assert.equal(box.ipfsHash, data1[i][1], "ipfs is incorrect");
         assert.equal(box.sender, treeOwner1, "sender is incorrect");
 
-        for (let j = 0; j < data[i][2].length; j++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
           assert.equal(
-            await treeInstance.ownerOf(data[i][2][j]),
+            await treeInstance.ownerOf(data1[i][2][j]),
             treeBoxInstance.address,
             "trees didn't transfer to contract"
           );
         }
+      }
 
-        for (let i = 0; i < 4; i++) {
-          console.log(
-            "await treeBoxInstance.getTreeOfRecivierByIndex(i)",
-            await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, i)
+      ///////----------------- user 2 trees
+
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, 0)),
+        0,
+        "tree index is incorrect"
+      );
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, 1)),
+        1,
+        "tree index is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, 2)),
+        4,
+        "tree index is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, 3)),
+        5,
+        "tree index is incorrect"
+      );
+
+      ///////----------------- user 3 trees
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount3, 0)),
+        2,
+        "tree index is incorrect"
+      );
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount3, 1)),
+        3,
+        "tree index is incorrect"
+      );
+
+      ////////////////////// create treeOwner2
+      await treeBoxInstance.create(data2, { from: treeOwner2 });
+
+      for (let i = 0; i < data2.length; i++) {
+        const box = await treeBoxInstance.boxes(data2[i][0]);
+        assert.equal(box.ipfsHash, data2[i][1], "ipfs is incorrect");
+        assert.equal(box.sender, treeOwner2, "sender is incorrect");
+
+        for (let j = 0; j < data2[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data2[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
           );
         }
       }
+      ///////----------------- user 4 trees
+      assert.equal(
+        Number(await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 0)),
+        6,
+        "tree index is incorrect"
+      );
+
+      ////////////////////// fail to create  with treeOwner3 because public key is exists
+      await treeBoxInstance
+        .create(data3, { from: treeOwner3 })
+
+        .should.be.rejectedWith(TreeBoxErrorMsg.PUBLIC_KEY_EXISTS);
+
+      /////////// ------------------- check approvments and access to token
+      const valid_data4 = [[userAccount5, "ipfs 5", [9, 10]]];
+      const not_own_data4 = [[userAccount5, "ipfs 5", [11, 12]]];
+      const not_exists_data4 = [[userAccount5, "ipfs 5", [200, 255]]];
+      const locked_as_gift_data4 = [[userAccount5, "ipfs 5", [0, 1]]];
+
+      ///// mint trees to treeOwner4
+      await treeInstance.safeMint(treeOwner4, 9, {
+        from: deployerAccount,
+      });
+      await treeInstance.safeMint(treeOwner4, 10, {
+        from: deployerAccount,
+      });
+
+      ///// mint trees to dataManager
+      await treeInstance.safeMint(dataManager, 11, {
+        from: deployerAccount,
+      });
+      await treeInstance.safeMint(dataManager, 12, {
+        from: deployerAccount,
+      });
+
+      // create tokens that not exists0
+      await treeBoxInstance
+        .create(not_exists_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_NON_EXISTENT_TOKEN);
+      //create with tokens that not own and owner also didnt give approve
+      await treeBoxInstance
+        .create(not_own_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+      //------------ create with tokens that not own but owner of tokens give approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: dataManager,
+      });
+
+      await treeBoxInstance
+        .create(not_own_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+      //create with tokens that are locked in contract as gift
+      await treeBoxInstance
+        .create(locked_as_gift_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+
+      //no approve
+      await treeBoxInstance
+        .create(valid_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+
+      //give approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner4,
+      });
+
+      /// call successfully
+      await treeBoxInstance.create(valid_data4, { from: treeOwner4 });
     });
   });
   ////////////////////////////////////////////////////////////////////////////////// ali

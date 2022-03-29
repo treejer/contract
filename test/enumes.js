@@ -183,6 +183,7 @@ const WethFundErrorMsg = {
 };
 const TreeBoxErrorMsg = {
   NOT_REGULAR: "Not Regular Tree",
+  PUBLIC_KEY_EXISTS: "public key is exists",
 };
 
 module.exports = {

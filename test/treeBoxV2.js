@@ -360,8 +360,8 @@ contract("TreeBox", (accounts) => {
       );
     });
 
-    it.only("check Claim function", async () => {
-      let sender = userAccount6;
+    it("check Claim function", async () => {
+      let sender = treeOwner1;
 
       const data = [[userAccount2, "ipfs 1", [0, 1, 2]]];
 
@@ -415,6 +415,13 @@ contract("TreeBox", (accounts) => {
         .claim(userAccount2, { from: userAccount2 })
         .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
 
+      await arInstance.pause({ from: deployerAccount });
+
+      await treeBoxInstance
+        .claim(userAccount2, { from: userAccount2 })
+        .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+
+      await arInstance.unpause({ from: deployerAccount });
       //----------success claim
       await treeBoxInstance.claim(userAccount3, { from: userAccount2 });
 
@@ -586,6 +593,13 @@ contract("TreeBox", (accounts) => {
       await treeBoxInstance
         .claim(userAccount4, { from: userAccount4 })
         .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
+
+      //----------success claim
+      await treeBoxInstance
+        .claim(arInstance.address, { from: userAccount4 })
+        .should.be.rejectedWith(
+          "Reason given: ERC721: transfer to non ERC721Receiver implementer"
+        );
 
       //----------success claim
       await treeBoxInstance.claim(treeOwner2, { from: userAccount4 });

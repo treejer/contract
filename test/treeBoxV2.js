@@ -5,7 +5,9 @@ const TreeBoxV2 = artifacts.require("TreeBoxV2");
 const TestTreeBox = artifacts.require("TestTreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
-require("chai").use(require("chai-as-promised")).should();
+require("chai")
+  .use(require("chai-as-promised"))
+  .should();
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 const Math = require("./math");
@@ -14,10 +16,10 @@ const {
   CommonErrorMsg,
   TreeBoxErrorMsg,
   SafeMathErrorMsg,
-  erc721ErrorMsg,
+  erc721ErrorMsg
 } = require("./enumes");
 
-contract("TreeBox", (accounts) => {
+contract("TreeBox", accounts => {
   let treeBoxInstance;
   let treeInstance;
   let arInstance;
@@ -43,26 +45,26 @@ contract("TreeBox", (accounts) => {
   describe("deployment, set address, check access", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       treeBoxInstance = await TreeBoxV2.new({
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       await treeBoxInstance.initialize(
         treeInstance.address,
         arInstance.address,
         {
-          from: deployerAccount,
+          from: deployerAccount
         }
       );
     });
@@ -77,19 +79,19 @@ contract("TreeBox", (accounts) => {
       //-------------- fail to set setTrustedForwarder
       await treeBoxInstance
         .setTrustedForwarder(userAccount2, {
-          from: userAccount3,
+          from: userAccount3
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await treeBoxInstance
         .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount,
+          from: deployerAccount
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
       //-------------- set setTrustedForwarder
       await treeBoxInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount,
+        from: deployerAccount
       });
 
       assert.equal(
@@ -115,20 +117,20 @@ contract("TreeBox", (accounts) => {
       const data = [
         [userAccount2, "ipfs 1", [0, 1]],
         [userAccount3, "ipfs 2", [2, 3]],
-        [userAccount2, "ipfs 1", [4, 5]],
+        [userAccount2, "ipfs 1", [4, 5]]
       ];
 
       //mint tokens to treeOwner1
       for (let i = 0; i < data.length; i++) {
         for (j = 0; j < data[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner1, data[i][2][j], {
-            from: deployerAccount,
+            from: deployerAccount
           });
         }
       }
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1,
+        from: treeOwner1
       });
 
       await treeBoxInstance.create(data, { from: treeOwner1 });
@@ -158,8 +160,306 @@ contract("TreeBox", (accounts) => {
   ////////////////////////////////////////////////////////////////////////////////// ali
 
   describe("create, claim", () => {
-    before(async () => {});
+    before(async () => {
+      arInstance = await AccessRestriction.new({
+        from: deployerAccount
+      });
 
-    it("claim", async () => {});
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount
+      });
+
+      treeInstance = await TreeNftTest.new({
+        from: deployerAccount
+      });
+
+      treeBoxInstance = await TreeBoxV2.new({
+        from: deployerAccount
+      });
+
+      await treeBoxInstance.initialize(
+        treeInstance.address,
+        arInstance.address,
+        {
+          from: deployerAccount
+        }
+      );
+    });
+
+    it.only("check Claim function", async () => {
+      let sender = userAccount6;
+
+      const data = [[userAccount2, "ipfs 1", [0, 1, 2]]];
+
+      ///-------------mint tree to sender
+      for (let i = 0; i < data.length; i++) {
+        for (j = 0; j < data[i][2].length; j++) {
+          await treeInstance.safeMint(sender, data[i][2][j], {
+            from: deployerAccount
+          });
+        }
+      }
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: sender
+      });
+
+      await treeBoxInstance.create(data, { from: sender });
+
+      for (let i = 0; i < data.length; i++) {
+        const box = await treeBoxInstance.boxes(data[i][0]);
+        assert.equal(box.ipfsHash, data[i][1], "ipfs is incorrect");
+        assert.equal(box.sender, sender, "sender is incorrect");
+
+        for (let j = 0; j < data[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+
+        for (let j = 0; j < data[i][2].length; j++) {
+          assert.equal(
+            await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, j),
+            data[i][2][j],
+            "list tree is not correct"
+          );
+        }
+      }
+
+      //-------reject (reciever is not correct)
+      await treeBoxInstance
+        .claim(userAccount3, {
+          from: userAccount4
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //-------reject (can't transfer to this address)
+
+      await treeBoxInstance
+        .claim(userAccount2, { from: userAccount2 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
+
+      //----------success claim
+      await treeBoxInstance.claim(userAccount3, { from: userAccount2 });
+
+      //----check data
+      const box = await treeBoxInstance.boxes(data[0][0]);
+
+      assert.equal(box.sender, zeroAddress, "sender is incorrect");
+      assert.equal(box.ipfsHash, "", "ipfsHash is incorrect");
+
+      for (let j = 0; j < data[0][2].length; j++) {
+        assert.equal(
+          await treeInstance.ownerOf(data[0][2][j]),
+          userAccount3,
+          "trees didn't transfer to user account"
+        );
+      }
+
+      await treeBoxInstance.getTreeOfRecivierByIndex(userAccount2, 0).should.be
+        .rejected;
+
+      ///----------------test 2
+
+      let sender2 = userAccount5;
+
+      const data2 = [[userAccount4, "ipfs 2 test", [10, 20, 30]]];
+
+      await treeInstance.safeMint(sender2, 10, {
+        from: deployerAccount
+      });
+
+      await treeInstance.safeMint(sender2, 20, {
+        from: deployerAccount
+      });
+
+      await treeInstance.safeMint(sender2, 30, {
+        from: deployerAccount
+      });
+
+      await treeInstance.safeMint(sender2, 40, {
+        from: deployerAccount
+      });
+
+      await treeInstance.safeMint(sender2, 50, {
+        from: deployerAccount
+      });
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: sender2
+      });
+
+      await treeBoxInstance.create(data2, { from: sender2 });
+
+      const box2 = await treeBoxInstance.boxes(userAccount4);
+
+      assert.equal(box2.ipfsHash, "ipfs 2 test", "ipfs is incorrect");
+      assert.equal(box2.sender, sender2, "sender is incorrect");
+
+      assert.equal(
+        await treeInstance.ownerOf(10),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(20),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(30),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        sender2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        sender2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 0),
+        10,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 1),
+        20,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 2),
+        30,
+        "list tree is not correct"
+      );
+
+      await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 3).should.be
+        .rejected;
+
+      const data3 = [[userAccount4, "ipfs 3 test", [40, 50]]];
+
+      await treeBoxInstance.create(data3, { from: sender2 });
+
+      const box3 = await treeBoxInstance.boxes(userAccount4);
+
+      assert.equal(box3.ipfsHash, "ipfs 3 test", "ipfs is incorrect");
+      assert.equal(box3.sender, sender2, "sender is incorrect");
+
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 0),
+        10,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 1),
+        20,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 2),
+        30,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 3),
+        40,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 4),
+        50,
+        "list tree is not correct"
+      );
+
+      //-------reject (reciever is not correct)
+      await treeBoxInstance
+        .claim(userAccount3, {
+          from: userAccount2
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //-------reject (can't transfer to this address)
+
+      await treeBoxInstance
+        .claim(userAccount4, { from: userAccount4 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
+
+      //----------success claim
+      await treeBoxInstance.claim(treeOwner2, { from: userAccount4 });
+
+      //-------reject (reciever is not correct)
+      await treeBoxInstance
+        .claim(treeOwner2, { from: userAccount4 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //--------------check data
+
+      const box4 = await treeBoxInstance.boxes(userAccount4);
+
+      assert.equal(box4.ipfsHash, "", "ipfs is incorrect");
+      assert.equal(box4.sender, zeroAddress, "sender is incorrect");
+
+      assert.equal(
+        await treeInstance.ownerOf(10),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(20),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(30),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
+
+      await treeBoxInstance.getTreeOfRecivierByIndex(userAccount4, 0).should.be
+        .rejected;
+    });
   });
 });

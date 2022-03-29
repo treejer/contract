@@ -100,12 +100,12 @@ contract TreeBoxV2 is
     }
 
     function claim(address _reciever) external override ifNotPaused {
-        require(_reciever != _msgSender(), "can't transfer to msg.sender");
-
         require(
             boxes[_msgSender()].sender != address(0),
             "public key is not exists"
         );
+
+        require(_reciever != _msgSender(), "can't transfer to msg.sender");
 
         uint256[] memory treeIds = boxes[_msgSender()].treeIds;
 

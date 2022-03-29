@@ -24,23 +24,479 @@ contract("TreeBox", (accounts) => {
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
-  const scriptRole = accounts[2];
-  const userAccount2 = accounts[3];
-  const userAccount3 = accounts[4];
-  const userAccount4 = accounts[5];
-  const userAccount5 = accounts[6];
-  const userAccount6 = accounts[7];
+  const userAccount2 = accounts[2];
+  const userAccount3 = accounts[3];
+  const userAccount4 = accounts[4];
+  const userAccount5 = accounts[5];
+  const treeOwner1 = accounts[6];
+  const treeOwner3 = accounts[7];
   const treeOwner2 = accounts[8];
-  const treeOwner1 = accounts[9];
+  const treeOwner4 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
-  beforeEach(async () => {});
 
   afterEach(async () => {});
   //////////////////------------------------------------ deploy successfully ----------------------------------------//
 
-  describe("deployment, set address, check access", () => {
+  describe("deployment, set address, check access, create,withdraw", () => {
+    before(async () => {
+      arInstance = await AccessRestriction.new({
+        from: deployerAccount,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
+      });
+    });
+
+    beforeEach(async () => {
+      treeInstance = await TreeNftTest.new({
+        from: deployerAccount,
+      });
+
+      treeBoxInstance = await TreeBox.new({
+        from: deployerAccount,
+      });
+
+      await treeBoxInstance.initialize(
+        treeInstance.address,
+        arInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+    });
+
+    it("deploys successfully and check addresses", async () => {
+      const address = treeBoxInstance.address;
+      assert.notEqual(address, 0x0);
+      assert.notEqual(address, "");
+      assert.notEqual(address, null);
+      assert.notEqual(address, undefined);
+
+      //-------------- fail to set setTrustedForwarder
+      await treeBoxInstance
+        .setTrustedForwarder(userAccount2, {
+          from: userAccount3,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await treeBoxInstance
+        .setTrustedForwarder(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      //-------------- set setTrustedForwarder
+      await treeBoxInstance.setTrustedForwarder(userAccount2, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        arInstance.address,
+        await treeBoxInstance.accessRestriction.call(),
+        "ar address is incorrect"
+      );
+
+      assert.equal(
+        treeInstance.address,
+        await treeBoxInstance.treeToken.call(),
+        "tree token is incorrect"
+      );
+
+      assert.equal(
+        userAccount2,
+        await treeBoxInstance.trustedForwarder.call(),
+        "trustedForwarder is incorrect"
+      );
+    });
+
+    it("create", async () => {
+      const data1 = [
+        [userAccount2, "ipfs 1", [0, 1]],
+        [userAccount3, "ipfs 2", [2, 3]],
+        [userAccount2, "ipfs 1", [4, 5]],
+      ];
+
+      const data2 = [[userAccount4, "ipfs 3", [6]]];
+
+      const data3 = [[userAccount2, "ipfs 4", [7, 8]]];
+
+      //mint tokens to treeOwner1
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner1, data1[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      //mint tokens to treeOwner2
+      for (let i = 0; i < data2.length; i++) {
+        for (let j = 0; j < data2[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner2, data2[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      //mint tokens to treeOwner3
+      for (let i = 0; i < data3.length; i++) {
+        for (let j = 0; j < data3[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner3, data3[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner1,
+      });
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner2,
+      });
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner3,
+      });
+
+      const eventTx1 = await treeBoxInstance.create(data1, {
+        from: treeOwner1,
+      });
+
+      for (let i = 0; i < data1.length; i++) {
+        const box = await treeBoxInstance.boxes(data1[i][0]);
+
+        assert.equal(box.ipfsHash, data1[i][1], "ipfs is incorrect");
+        assert.equal(box.sender, treeOwner1, "sender is incorrect");
+
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      //------------------------- check userAccount2 treeCount
+      const user2TreeCount = await treeBoxInstance.getReceiverTreesLength(
+        userAccount2
+      );
+      assert.equal(Number(user2TreeCount), 4, "user2 tree count is incorrect");
+
+      //------------------------- check userAccount3 treeCount
+      const user3TreeCount = await treeBoxInstance.getReceiverTreesLength(
+        userAccount3
+      );
+      assert.equal(Number(user3TreeCount), 2, "user3 tree count is incorrect");
+
+      ///////----------------- user 2 trees
+
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 0)),
+        0,
+        "tree index is incorrect"
+      );
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 1)),
+        1,
+        "tree index is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 2)),
+        4,
+        "tree index is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 3)),
+        5,
+        "tree index is incorrect"
+      );
+
+      ///////----------------- user 3 trees
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount3, 0)),
+        2,
+        "tree index is incorrect"
+      );
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount3, 1)),
+        3,
+        "tree index is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx1, "Created", (ev, i) => {
+        return ev.sender == treeOwner1 && ev.recipient == data1[i][0];
+      });
+      ////////////////////// create treeOwner2
+      const eventTx2 = await treeBoxInstance.create(data2, {
+        from: treeOwner2,
+      });
+
+      for (let i = 0; i < data2.length; i++) {
+        const box = await treeBoxInstance.boxes(data2[i][0]);
+        assert.equal(box.ipfsHash, data2[i][1], "ipfs is incorrect");
+        assert.equal(box.sender, treeOwner2, "sender is incorrect");
+
+        for (let j = 0; j < data2[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data2[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      //------------------------- check userAccount3 treeCount
+      const user4TreeCount = await treeBoxInstance.getReceiverTreesLength(
+        userAccount4
+      );
+      assert.equal(Number(user4TreeCount), 1, "user4 tree count is incorrect");
+
+      ///////----------------- user 4 trees
+      assert.equal(
+        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0)),
+        6,
+        "tree index is incorrect"
+      );
+
+      truffleAssert.eventEmitted(eventTx2, "Created", (ev, i) => {
+        return ev.sender == treeOwner2 && ev.recipient == data2[i][0];
+      });
+
+      ////////////////////// fail to create  with treeOwner3 because public key is exists
+      await treeBoxInstance
+        .create(data3, { from: treeOwner3 })
+
+        .should.be.rejectedWith(TreeBoxErrorMsg.PUBLIC_KEY_EXISTS);
+
+      /////////// ------------------- check approvments and access to token
+      const valid_data4 = [[userAccount5, "ipfs 5", [9, 10]]];
+      const not_own_data4 = [[userAccount5, "ipfs 5", [11, 12]]];
+      const not_exists_data4 = [[userAccount5, "ipfs 5", [200, 255]]];
+      const locked_as_gift_data4 = [[userAccount5, "ipfs 5", [0, 1]]];
+
+      ///// mint trees to treeOwner4
+      await treeInstance.safeMint(treeOwner4, 9, {
+        from: deployerAccount,
+      });
+      await treeInstance.safeMint(treeOwner4, 10, {
+        from: deployerAccount,
+      });
+
+      ///// mint trees to dataManager
+      await treeInstance.safeMint(dataManager, 11, {
+        from: deployerAccount,
+      });
+      await treeInstance.safeMint(dataManager, 12, {
+        from: deployerAccount,
+      });
+
+      // create tokens that not exists0
+      await treeBoxInstance
+        .create(not_exists_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_NON_EXISTENT_TOKEN);
+      //create with tokens that not own and owner also didnt give approve
+      await treeBoxInstance
+        .create(not_own_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+      //------------ create with tokens that not own but owner of tokens give approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: dataManager,
+      });
+
+      await treeBoxInstance
+        .create(not_own_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+      //create with tokens that are locked in contract as gift
+      await treeBoxInstance
+        .create(locked_as_gift_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+
+      //no approve
+      await treeBoxInstance
+        .create(valid_data4, { from: treeOwner4 })
+        .should.be.rejectedWith(
+          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+        );
+
+      //give approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner4,
+      });
+
+      /// call successfully
+      await treeBoxInstance.create(valid_data4, { from: treeOwner4 });
+    });
+
+    it("withdraw", async () => {
+      const data1 = [
+        [userAccount2, "ipfs 1", [0, 1]],
+        [userAccount3, "ipfs 2", [2, 3]],
+      ];
+
+      const data2 = [
+        [userAccount4, "ipfs 3", [4, 5, 6]],
+        [userAccount5, "ipfs 4", [7, 8, 9]],
+        [dataManager, "ipfs 5", [10, 11]],
+      ];
+
+      //mint tokens to treeOwner1
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner1, data1[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      //mint tokens to treeOwner2
+      for (let i = 0; i < data2.length; i++) {
+        for (let j = 0; j < data2[i][2].length; j++) {
+          await treeInstance.safeMint(treeOwner2, data2[i][2][j], {
+            from: deployerAccount,
+          });
+        }
+      }
+
+      /// ----------------- set approve
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner1,
+      });
+
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: treeOwner2,
+      });
+
+      //--------- create gift
+      await treeBoxInstance.create(data1, { from: treeOwner1 });
+      await treeBoxInstance.create(data2, { from: treeOwner2 });
+
+      //// -------------------- check tree owner (must be TreeBox)
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      for (let i = 0; i < data2.length; i++) {
+        for (let j = 0; j < data2[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data2[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      //////////// --------------- treeOwner2 want to withdraw treeOwner1 trees
+
+      await treeBoxInstance
+        .withdraw([userAccount2, userAccount3], {
+          from: treeOwner2,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.INVALID_RECIPIENTS);
+
+      /// ------------------------ treeOwner1 withdraw all trees (no one claimed)
+      const eventTx1 = await treeBoxInstance.withdraw(
+        [userAccount2, userAccount3],
+        {
+          from: treeOwner1,
+        }
+      );
+
+      for (let i = 0; i < data1.length; i++) {
+        for (let j = 0; j < data1[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data1[i][2][j]),
+            treeOwner1,
+            "trees didn't transfer to contract"
+          );
+        }
+      }
+
+      truffleAssert.eventEmitted(eventTx1, "Withdrew", (ev, i) => {
+        let isIdsOk = true;
+        data1[i][2].map((it, index) => {
+          if (it != Number(ev.treeIds[index])) {
+            isIdsOk = false;
+          }
+        });
+
+        return (
+          ev.sender == treeOwner1 && ev.recipient == data1[i][0] && isIdsOk
+        );
+      });
+
+      //---- treeOwner2 withdraw trees (only userAccount4 claimed)
+      //---- treeOnwer2 want wo withdraw all gifted trees but some claime by user4
+
+      await treeBoxInstance.claim(deployerAccount, { from: userAccount4 });
+
+      const user4ClaimedTrees = [4, 5, 6];
+      const treeOnwer2WithdrawTrees = [7, 8, 9, 10, 11];
+      const data2AfterClaim = [
+        [userAccount5, "ipfs 4", [7, 8, 9]],
+        [dataManager, "ipfs 5", [10, 11]],
+      ];
+
+      await treeBoxInstance
+        .withdraw([userAccount4, userAccount5, dataManager], {
+          from: treeOwner2,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.INVALID_RECIPIENTS);
+
+      const eventTx2 = await treeBoxInstance.withdraw(
+        [userAccount5, dataManager],
+        {
+          from: treeOwner2,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx2, "Withdrew", (ev, i) => {
+        let isIdsOk = true;
+        data2AfterClaim[i][2].map((it, index) => {
+          if (it != Number(ev.treeIds[index])) {
+            isIdsOk = false;
+          }
+        });
+
+        return (
+          ev.sender == treeOwner2 &&
+          ev.recipient == data2AfterClaim[i][0] &&
+          isIdsOk
+        );
+      });
+
+      for (let i = 0; i < user4ClaimedTrees.length; i++) {
+        assert.equal(
+          await treeInstance.ownerOf(user4ClaimedTrees[i]),
+          deployerAccount,
+          "trees didn't transfer to contract"
+        );
+      }
+
+      for (let i = 0; i < treeOnwer2WithdrawTrees.length; i++) {
+        assert.equal(
+          await treeInstance.ownerOf(treeOnwer2WithdrawTrees[i]),
+          treeOwner2,
+          "trees didn't transfer to contract"
+        );
+      }
+    });
+  });
+  ////////////////////////////////////////////////////////////////////////////////// ali
+
+  describe("claim", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,
@@ -58,304 +514,318 @@ contract("TreeBox", (accounts) => {
         from: deployerAccount,
       });
 
-      await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
-      });
-    });
-
-    it("deploys successfully", async () => {
-      const address = treeBoxInstance.address;
-      assert.notEqual(address, 0x0);
-      assert.notEqual(address, "");
-      assert.notEqual(address, null);
-      assert.notEqual(address, undefined);
-    });
-
-    it("test deploy", async () => {
-      let treeBoxInstance3 = await TestTreeBox.new({
-        from: deployerAccount,
-      });
-
-      await treeBoxInstance3.set(deployerAccount);
-
-      await treeBoxInstance3.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
-      });
-
-      await treeInstance.setIsTree();
-
-      let treeBoxInstance2 = await TreeBox.new({
-        from: deployerAccount,
-      });
-
-      await treeBoxInstance2.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
-      }).should.be.rejected;
-    });
-
-    it("test admin", async () => {
-      await Common.addTreeBoxScript(treeBoxInstance, userAccount3, userAccount6)
-        .should.be.rejected;
-
-      assert.equal(
-        await treeBoxInstance.hasRole(Common.TREEBOX_SCRIPT, userAccount3),
-        false,
-        "access is not correct"
-      );
-
-      await treeBoxInstance
-        .claim(userAccount4, userAccount5, 4)
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
-
-      await Common.addTreeBoxScript(
-        treeBoxInstance,
-        userAccount3,
-        deployerAccount
-      );
-
-      assert.equal(
-        await treeBoxInstance.hasRole(Common.TREEBOX_SCRIPT, userAccount3),
-        true,
-        "access is not correct"
+      await treeBoxInstance.initialize(
+        treeInstance.address,
+        arInstance.address,
+        {
+          from: deployerAccount,
+        }
       );
     });
 
-    it("test pause", async () => {
-      await treeBoxInstance
-        .pause({ from: userAccount5 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+    it("check Claim function", async () => {
+      let sender = treeOwner1;
 
-      await treeBoxInstance
-        .unpause({ from: userAccount5 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      const data = [[userAccount2, "ipfs 1", [0, 1, 2]]];
 
-      await treeBoxInstance.pause({ from: deployerAccount });
-
-      await treeBoxInstance
-        .claim(userAccount4, userAccount5, 4)
-        .should.be.rejectedWith(CommonErrorMsg.PAUSE);
-
-      await treeBoxInstance
-        .updateCount(30)
-        .should.be.rejectedWith(CommonErrorMsg.PAUSE);
-
-      await treeBoxInstance.unpause({ from: deployerAccount });
-
-      await treeBoxInstance.updateCount(30);
-
-      await treeBoxInstance
-        .claim(userAccount4, userAccount5, 4)
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
-    });
-  });
-  ////////////////////////////////////////////////////////////////////////////////// ali
-
-  describe("claim", () => {
-    before(async () => {
-      treeInstance = await TreeNftTest.new({
-        from: deployerAccount,
-      });
-
-      treeBoxInstance = await TreeBox.new({
-        from: deployerAccount,
-      });
-
-      await treeBoxInstance.initialize(treeInstance.address, deployerAccount, {
-        from: deployerAccount,
-      });
-    });
-
-    it("update count", async () => {
-      const count1 = 10;
-      const count2 = 15;
-
-      await treeBoxInstance.updateCount(count1, { from: userAccount2 });
-
-      assert.equal(
-        count1,
-        Number(await treeBoxInstance.ownerToCount(userAccount2)),
-        "user2 count is incorrect"
-      );
-
-      await treeBoxInstance.updateCount(count2, { from: userAccount2 });
-
-      assert.equal(
-        Math.add(count1, count2),
-        Number(await treeBoxInstance.ownerToCount(userAccount2)),
-        "user2 count is incorrect"
-      );
-
-      await treeBoxInstance.updateCount(count1, { from: userAccount3 });
-
-      assert.equal(
-        count1,
-        Number(await treeBoxInstance.ownerToCount(userAccount3)),
-        "user3 count is incorrect"
-      );
-    });
-
-    it("claim", async () => {
-      /////// mint some tokens to an account
-
-      const treeOwner1TreesStart = 10001;
-      const treeOwner1TreesEnd = 10041;
-      const treeOwner2Tree1 = 10041;
-      const treeOwner2Tree2 = 10042;
-      const owner1Count = 40;
-      const owner2Count = 1;
-
-      await treeInstance.safeMint(treeOwner1, 1, { from: deployerAccount });
-      await treeInstance.safeMint(treeOwner1, 0, { from: deployerAccount });
-
-      for (let i = treeOwner1TreesStart; i < treeOwner1TreesEnd; i++) {
-        await treeInstance.safeMint(treeOwner1, i, { from: deployerAccount });
+      ///-------------mint tree to sender
+      for (let i = 0; i < data.length; i++) {
+        for (j = 0; j < data[i][2].length; j++) {
+          await treeInstance.safeMint(sender, data[i][2][j], {
+            from: deployerAccount,
+          });
+        }
       }
 
-      await treeInstance.safeMint(treeOwner2, treeOwner2Tree1, {
+      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
+        from: sender,
+      });
+
+      await treeBoxInstance.create(data, { from: sender });
+
+      for (let i = 0; i < data.length; i++) {
+        const box = await treeBoxInstance.boxes(data[i][0]);
+        assert.equal(box.ipfsHash, data[i][1], "ipfs is incorrect");
+        assert.equal(box.sender, sender, "sender is incorrect");
+
+        for (let j = 0; j < data[i][2].length; j++) {
+          assert.equal(
+            await treeInstance.ownerOf(data[i][2][j]),
+            treeBoxInstance.address,
+            "trees didn't transfer to contract"
+          );
+        }
+
+        for (let j = 0; j < data[i][2].length; j++) {
+          assert.equal(
+            await treeBoxInstance.getReceiverTreeByIndex(userAccount2, j),
+            data[i][2][j],
+            "list tree is not correct"
+          );
+        }
+      }
+
+      //-------reject (reciever is not correct)
+      await treeBoxInstance
+        .claim(userAccount3, {
+          from: userAccount4,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //-------reject (can't transfer to this address)
+
+      await treeBoxInstance
+        .claim(userAccount2, { from: userAccount2 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
+
+      await arInstance.pause({ from: deployerAccount });
+
+      await treeBoxInstance
+        .claim(userAccount2, { from: userAccount2 })
+        .should.be.rejectedWith(CommonErrorMsg.PAUSE);
+
+      await arInstance.unpause({ from: deployerAccount });
+      //----------success claim
+      const eventTx1 = await treeBoxInstance.claim(userAccount3, {
+        from: userAccount2,
+      });
+
+      truffleAssert.eventEmitted(eventTx1, "Claimed", (ev, i) => {
+        let isIdsOk = true;
+        data[i][2].map((it, index) => {
+          if (it != Number(ev.treeIds[index])) {
+            isIdsOk = false;
+          }
+        });
+
+        return (
+          ev.claimer == data[i][0] && ev.recipient == userAccount3 && isIdsOk
+        );
+      });
+
+      //----check data
+      const box = await treeBoxInstance.boxes(data[0][0]);
+
+      assert.equal(box.sender, zeroAddress, "sender is incorrect");
+      assert.equal(box.ipfsHash, "", "ipfsHash is incorrect");
+
+      for (let j = 0; j < data[0][2].length; j++) {
+        assert.equal(
+          await treeInstance.ownerOf(data[0][2][j]),
+          userAccount3,
+          "trees didn't transfer to user account"
+        );
+      }
+
+      await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 0).should.be
+        .rejected;
+
+      ///----------------test 2
+
+      let sender2 = userAccount5;
+
+      const data2 = [[userAccount4, "ipfs 2 test", [10, 20, 30]]];
+
+      await treeInstance.safeMint(sender2, 10, {
         from: deployerAccount,
       });
-      await treeInstance.safeMint(treeOwner2, treeOwner2Tree2, {
+
+      await treeInstance.safeMint(sender2, 20, {
         from: deployerAccount,
       });
 
-      //////////------------------- fail to claim because caller is not TreejerScript Role
-      await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 10001, {
-          from: treeOwner1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEBOX_SCRIPT);
-      /////------------------ give script role
-      await Common.addTreeBoxScript(
-        treeBoxInstance,
-        scriptRole,
-        deployerAccount
-      );
-      //////// fail because didn't call updateCount
-      await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 10001, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+      await treeInstance.safeMint(sender2, 30, {
+        from: deployerAccount,
+      });
 
-      ////////-------------- updateCount
-      await treeBoxInstance.updateCount(owner1Count, { from: treeOwner1 });
+      await treeInstance.safeMint(sender2, 40, {
+        from: deployerAccount,
+      });
 
-      /////// -------------- give approve to treeBox
-
-      await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 10001, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(
-          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
-        );
+      await treeInstance.safeMint(sender2, 50, {
+        from: deployerAccount,
+      });
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1,
+        from: sender2,
       });
 
-      ///////----------------- fail with overFlow because count of zero address is 0
-      await treeBoxInstance
-        .claim(zeroAddress, userAccount2, 10001, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+      await treeBoxInstance.create(data2, { from: sender2 });
 
-      //////////----------------------- fail becuase trransfer to zero address
-      await treeBoxInstance
-        .claim(treeOwner1, zeroAddress, 10001, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TO_ZERO_ADDRESS);
+      const box2 = await treeBoxInstance.boxes(userAccount4);
 
-      /////////----------------- fail becuase claim genesis
-      await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 0, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(TreeBoxErrorMsg.NOT_REGULAR);
-      await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 1, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(TreeBoxErrorMsg.NOT_REGULAR);
-
-      ///////////-------------------- claim successfully
-      await treeBoxInstance.claim(treeOwner1, userAccount2, 10001, {
-        from: scriptRole,
-      });
+      assert.equal(box2.ipfsHash, "ipfs 2 test", "ipfs is incorrect");
+      assert.equal(box2.sender, sender2, "sender is incorrect");
 
       assert.equal(
-        Number(await treeBoxInstance.ownerToCount(treeOwner1)),
-        owner1Count - 1,
-        "owner to count is not correct"
+        await treeInstance.ownerOf(10),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
       );
 
-      //////-------------------------- fail because token claimed by user2
+      assert.equal(
+        await treeInstance.ownerOf(20),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(30),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        sender2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        sender2,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0),
+        10,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 1),
+        20,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 2),
+        30,
+        "list tree is not correct"
+      );
+
+      await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 3).should.be
+        .rejected;
+
+      const data3 = [[userAccount4, "ipfs 3 test", [40, 50]]];
+
+      await treeBoxInstance.create(data3, { from: sender2 });
+
+      const box3 = await treeBoxInstance.boxes(userAccount4);
+
+      assert.equal(box3.ipfsHash, "ipfs 3 test", "ipfs is incorrect");
+      assert.equal(box3.sender, sender2, "sender is incorrect");
+
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        treeBoxInstance.address,
+        "trees didn't transfer to contract"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0),
+        10,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 1),
+        20,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 2),
+        30,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 3),
+        40,
+        "list tree is not correct"
+      );
+
+      assert.equal(
+        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 4),
+        50,
+        "list tree is not correct"
+      );
+
+      //-------reject (reciever is not correct)
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 10001, {
-          from: scriptRole,
+        .claim(userAccount3, {
+          from: userAccount2,
         })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //-------reject (can't transfer to this address)
+
+      await treeBoxInstance
+        .claim(userAccount4, { from: userAccount4 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.CANT_TRANSFER_TO_THIS_ADDRESS);
+
+      //----------success claim
+      await treeBoxInstance
+        .claim(arInstance.address, { from: userAccount4 })
         .should.be.rejectedWith(
-          erc721ErrorMsg.TRANSFER_FROM_CALLER_APPROVE_PROBLEM
+          "Reason given: ERC721: transfer to non ERC721Receiver implementer"
         );
 
-      await treeBoxInstance.claim(treeOwner1, userAccount2, 10002, {
-        from: scriptRole,
-      });
+      //----------success claim
+      await treeBoxInstance.claim(treeOwner2, { from: userAccount4 });
 
-      assert.equal(
-        Number(await treeBoxInstance.ownerToCount(treeOwner1)),
-        owner1Count - 2,
-        "owner to count is not correct"
-      );
-
+      //-------reject (reciever is not correct)
       await treeBoxInstance
-        .claim(treeOwner1, userAccount2, 10050, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_NON_EXISTENT_TOKEN);
+        .claim(treeOwner2, { from: userAccount4 })
+        .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
+
+      //--------------check data
+
+      const box4 = await treeBoxInstance.boxes(userAccount4);
+
+      assert.equal(box4.ipfsHash, "", "ipfs is incorrect");
+      assert.equal(box4.sender, zeroAddress, "sender is incorrect");
 
       assert.equal(
-        await treeInstance.ownerOf(10001),
-        userAccount2,
-        "owner is incorrect"
-      );
-      assert.equal(
-        await treeInstance.ownerOf(10002),
-        userAccount2,
-        "owner is incorrect"
+        await treeInstance.ownerOf(10),
+        treeOwner2,
+        "trees didn't transfer to contract"
       );
 
       assert.equal(
-        await treeInstance.ownerOf(10003),
-        treeOwner1,
-        "owner is incorrect"
+        await treeInstance.ownerOf(20),
+        treeOwner2,
+        "trees didn't transfer to contract"
       );
 
-      ///////////// update count for treeOwner2
-      await treeBoxInstance.updateCount(owner2Count, { from: treeOwner2 });
+      assert.equal(
+        await treeInstance.ownerOf(30),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
 
-      /////------------- fail becuase caller has approve but owner of token is not correct
-      await treeBoxInstance
-        .claim(treeOwner2, userAccount2, 10004, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(erc721ErrorMsg.TRANSFER_TOKEN_FROM_NON_OWNER);
+      assert.equal(
+        await treeInstance.ownerOf(40),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
 
-      await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner2,
-      });
+      assert.equal(
+        await treeInstance.ownerOf(50),
+        treeOwner2,
+        "trees didn't transfer to contract"
+      );
 
-      await treeBoxInstance.claim(treeOwner2, userAccount2, 10042, {
-        from: scriptRole,
-      });
-
-      await treeBoxInstance
-        .claim(treeOwner2, userAccount2, 10041, {
-          from: scriptRole,
-        })
-        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+      await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0).should.be
+        .rejected;
     });
   });
 });

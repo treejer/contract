@@ -11,13 +11,13 @@ import "../access/IAccessRestriction.sol";
 
 import "./IWhitelistPaymaster.sol";
 
-import "../treeBoxV2/ITreeBoxV2.sol";
+import "../treeBox/ITreeBox.sol";
 
 contract WhitelistPaymasterTreeBox is BasePaymaster {
-    ITreeBoxV2 public treeBox;
+    ITreeBox public treeBox;
 
     constructor(address _treeBox) {
-        treeBox = ITreeBoxV2(_treeBox);
+        treeBox = ITreeBox(_treeBox);
         require(treeBox.isTreeBox());
     }
 

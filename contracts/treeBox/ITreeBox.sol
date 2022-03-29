@@ -3,21 +3,41 @@
 pragma solidity ^0.8.6;
 
 interface ITreeBox {
-    function initialize(address _token, address _admin) external;
+    event Created(address sender, address recipient);
+    event Claimed(address claimer, address recipient, uint256[] treeIds);
+    event Withdrew(address sender, address recipient, uint256[] treeIds);
 
-    function claim(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external;
+    struct Input {
+        address recipient;
+        string ipfsHash;
+        uint256[] treeIds;
+    }
 
-    function updateCount(uint256 _amount) external;
+    function initialize(address _token, address _accessRestrictionAddress)
+        external;
 
-    function pause() external;
+    function setTrustedForwarder(address _address) external;
 
-    function unpause() external;
+    function create(Input[] calldata _input) external;
+
+    function withdraw(address[] calldata _recipients) external;
 
     function isTreeBox() external view returns (bool);
 
-    function ownerToCount(address _owner) external view returns (uint256);
+    function claim(address _recipient) external;
+
+    function getReceiverTreeByIndex(address _recipient, uint256 _index)
+        external
+        view
+        returns (uint256);
+
+    function getReceiverTreesLength(address _recipient)
+        external
+        view
+        returns (uint256);
+
+    function boxes(address _recipient)
+        external
+        view
+        returns (address sender, string memory ipfsHash);
 }

@@ -1,13 +1,11 @@
 // const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
 const AccessRestriction = artifacts.require("AccessRestriction");
-const TreeBoxV2 = artifacts.require("TreeBoxV2");
+const TreeBox = artifacts.require("TreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 
 const assert = require("chai").assert;
-require("chai")
-  .use(require("chai-as-promised"))
-  .should();
+require("chai").use(require("chai-as-promised")).should();
 const Common = require("./common");
 
 const WhitelistPaymasterTreeBox = artifacts.require(
@@ -22,7 +20,7 @@ const TestRelayRecipient = artifacts.require("TestRelayRecipient");
 
 const { CommonErrorMsg, GsnErrorMsg } = require("./enumes");
 
-contract("WhitelistPaymasterTreeBox", accounts => {
+contract("WhitelistPaymasterTreeBox", (accounts) => {
   let paymasterInstance;
   let arInstance;
 
@@ -36,23 +34,23 @@ contract("WhitelistPaymasterTreeBox", accounts => {
 
   beforeEach(async () => {
     arInstance = await AccessRestriction.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await arInstance.initialize(deployerAccount, {
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     treeInstance = await TreeNftTest.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
-    treeBoxInstance = await TreeBoxV2.new({
-      from: deployerAccount
+    treeBoxInstance = await TreeBox.new({
+      from: deployerAccount,
     });
 
     await treeBoxInstance.initialize(treeInstance.address, arInstance.address, {
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     paymasterInstance = await WhitelistPaymasterTreeBox.new(
@@ -92,11 +90,11 @@ contract("WhitelistPaymasterTreeBox", accounts => {
 
   it("test preRelayedCall funder", async () => {
     let testInstance = await TestWhitelistPaymasterTreeBox.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     let testRelayRecipientInstance = await TestRelayRecipient.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await testInstance
@@ -106,7 +104,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
         userAccount2,
         "0x1e83409a",
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       )
       .should.be.rejectedWith("user is not valid");
@@ -121,13 +119,13 @@ contract("WhitelistPaymasterTreeBox", accounts => {
     for (let i = 0; i < data.length; i++) {
       for (j = 0; j < data[i][2].length; j++) {
         await treeInstance.safeMint(sender, data[i][2][j], {
-          from: deployerAccount
+          from: deployerAccount,
         });
       }
     }
 
     await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-      from: sender
+      from: sender,
     });
 
     await treeBoxInstance.create(data, { from: sender });
@@ -139,7 +137,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
         userAccount2,
         "0x1e83409b",
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       )
       .should.be.rejectedWith("Reason given: calling wrong method");
@@ -150,7 +148,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
       userAccount2,
       "0x1e83409a",
       {
-        from: deployerAccount
+        from: deployerAccount,
       }
     );
 
@@ -163,7 +161,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
         userAccount2,
         "0x1e83409a",
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       )
       .should.be.rejectedWith("user is not valid");
@@ -173,11 +171,11 @@ contract("WhitelistPaymasterTreeBox", accounts => {
     //deploy TestWhitelistPaymaster
 
     testInstance = await TestWhitelistPaymasterTreeBox.new({
-      from: deployerAccount
+      from: deployerAccount,
     });
 
     await testInstance.test(paymasterInstance.address, {
-      from: deployerAccount
+      from: deployerAccount,
     });
   });
 });

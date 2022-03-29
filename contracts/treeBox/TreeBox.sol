@@ -2,75 +2,170 @@
 
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 
+import "../gsn/RelayRecipient.sol";
 import "./ITreeBox.sol";
+import "../access/IAccessRestriction.sol";
 import "./../tree/ITree.sol";
 
-contract TreeBox is AccessControlUpgradeable, PausableUpgradeable, ITreeBox {
-    bool public override isTreeBox;
-    ITree public treeToken;
-    bytes32 public constant TREEBOX_SCRIPT = keccak256("TREEBOX_SCRIPT");
-    mapping(address => uint256) public override ownerToCount;
+contract TreeBox is
+    Initializable,
+    RelayRecipient,
+    IERC721ReceiverUpgradeable,
+    ITreeBox
+{
+    struct Box {
+        address sender;
+        string ipfsHash;
+        uint256[] treeIds;
+    }
 
-    /** NOTE modifier to check msg.sender has admin role */
+    bool public override isTreeBox;
+
+    ITree public treeToken;
+    IAccessRestriction public accessRestriction;
+
+    //NOTE mapping of recipient to Box
+    mapping(address => Box) public override boxes;
+
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller not admin");
+        accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
     modifier ifNotPaused() {
-        require(!paused(), "Pausable: paused");
+        accessRestriction.ifNotPaused();
         _;
     }
 
-    modifier onlyTreeBoxScript() {
-        require(
-            hasRole(TREEBOX_SCRIPT, msg.sender),
-            "Caller not TreeBox script"
-        );
+    modifier validAddress(address _address) {
+        require(_address != address(0), "Invalid address");
         _;
     }
 
-    function initialize(address _token, address _admin)
+    function initialize(address _token, address _accessRestrictionAddress)
         external
         override
         initializer
     {
-        AccessControlUpgradeable.__AccessControl_init();
-        PausableUpgradeable.__Pausable_init();
+        accessRestriction = IAccessRestriction(_accessRestrictionAddress);
 
-        ITree candidateContractTree = ITree(_token);
+        treeToken = ITree(_token);
 
-        if (!hasRole(DEFAULT_ADMIN_ROLE, _admin)) {
-            _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+        isTreeBox = true;
+
+        require(accessRestriction.isAccessRestriction());
+        require(treeToken.isTree());
+    }
+
+    function setTrustedForwarder(address _address)
+        external
+        override
+        onlyAdmin
+        validAddress(_address)
+    {
+        trustedForwarder = _address;
+    }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    function create(Input[] calldata _input) external override ifNotPaused {
+        for (uint256 i = 0; i < _input.length; i++) {
+            require(
+                boxes[_input[i].recipient].sender == address(0) ||
+                    boxes[_input[i].recipient].sender == _msgSender(),
+                "recipient exists"
+            );
+
+            boxes[_input[i].recipient].sender = _msgSender();
+            boxes[_input[i].recipient].ipfsHash = _input[i].ipfsHash;
+
+            emit Created(_msgSender(), _input[i].recipient);
+
+            for (uint256 j = 0; j < _input[i].treeIds.length; j++) {
+                boxes[_input[i].recipient].treeIds.push(_input[i].treeIds[j]);
+
+                treeToken.transferFrom(
+                    _msgSender(),
+                    address(this),
+                    _input[i].treeIds[j]
+                );
+            }
+        }
+    }
+
+    function claim(address _recipient) external override ifNotPaused {
+        require(
+            boxes[_msgSender()].sender != address(0),
+            "recipient not exists"
+        );
+
+        require(_recipient != _msgSender(), "recipient is msg.sender");
+
+        uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+
+        emit Claimed(_msgSender(), _recipient, treeIds);
+
+        delete boxes[_msgSender()];
+
+        for (uint256 i = 0; i < treeIds.length; i++) {
+            treeToken.safeTransferFrom(address(this), _recipient, treeIds[i]);
+        }
+    }
+
+    function withdraw(address[] calldata _recipients)
+        external
+        override
+        ifNotPaused
+    {
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            require(
+                boxes[_recipients[i]].sender == _msgSender(),
+                "invalid recipients"
+            );
         }
 
-        treeToken = candidateContractTree;
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+            uint256[] memory treeIds = boxes[_recipients[i]].treeIds;
 
-        require(candidateContractTree.isTree());
+            delete boxes[_msgSender()];
+
+            emit Withdrew(_msgSender(), _recipients[i], treeIds);
+
+            for (uint256 j = 0; j < treeIds.length; j++) {
+                treeToken.safeTransferFrom(
+                    address(this),
+                    _msgSender(),
+                    treeIds[j]
+                );
+            }
+        }
     }
 
-    function claim(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external override ifNotPaused onlyTreeBoxScript {
-        require(_tokenId > 10000, "Not Regular Tree");
-        ownerToCount[_from] -= 1;
-        treeToken.safeTransferFrom(_from, _to, _tokenId);
+    function getReceiverTreeByIndex(address _recipient, uint256 _index)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return boxes[_recipient].treeIds[_index];
     }
 
-    function updateCount(uint256 _amount) external override ifNotPaused {
-        ownerToCount[msg.sender] += _amount;
-    }
-
-    function pause() external override onlyAdmin {
-        _pause();
-    }
-
-    function unpause() external override onlyAdmin {
-        _unpause();
+    function getReceiverTreesLength(address _recipient)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return boxes[_recipient].treeIds.length;
     }
 }

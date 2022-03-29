@@ -3,8 +3,12 @@
 pragma solidity ^0.8.6;
 
 interface ITreeBoxV2 {
+    event Created(address sender, address recipient);
+    event Claimed(address claimer, address recipient, uint256[] treeIds);
+    event Withdrew(address sender, address recipient, uint256[] treeIds);
+
     struct Input {
-        address reciever; //recipient
+        address recipient;
         string ipfsHash;
         uint256[] treeIds;
     }
@@ -16,23 +20,23 @@ interface ITreeBoxV2 {
 
     function create(Input[] calldata _input) external;
 
-    function withdraw(address[] calldata _recievers) external;
+    function withdraw(address[] calldata _recipients) external;
 
     function isTreeBox() external view returns (bool);
 
-    function claim(address _reciever) external;
+    function claim(address _recipient) external;
 
-    function getTreeOfRecivierByIndex(address _reciever, uint256 _index)
+    function getReceiverTreeByIndex(address _recipient, uint256 _index)
         external
         view
         returns (uint256);
 
-    function getTreeOfRecivierLength(address _reciever)
+    function getReceiverTreesLength(address _recipient)
         external
         view
         returns (uint256);
 
-    function boxes(address _publicKey)
+    function boxes(address _recipient)
         external
         view
         returns (address sender, string memory ipfsHash);

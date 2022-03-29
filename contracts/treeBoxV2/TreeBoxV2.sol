@@ -26,7 +26,8 @@ contract TreeBoxV2 is
     ITree public treeToken;
     IAccessRestriction public accessRestriction;
 
-    mapping(address => Box) public override boxes; //recipient->Box
+    //NOTE mapping of recipient to Box
+    mapping(address => Box) public override boxes;
 
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -76,20 +77,21 @@ contract TreeBoxV2 is
         return this.onERC721Received.selector;
     }
 
-    // TreeBoxCreated(sender,recepient)
     function create(Input[] calldata _input) external override ifNotPaused {
         for (uint256 i = 0; i < _input.length; i++) {
             require(
-                boxes[_input[i].reciever].sender == address(0) ||
-                    boxes[_input[i].reciever].sender == _msgSender(),
-                "public key is exists"
+                boxes[_input[i].recipient].sender == address(0) ||
+                    boxes[_input[i].recipient].sender == _msgSender(),
+                "recipient exists"
             );
 
-            boxes[_input[i].reciever].sender = _msgSender();
-            boxes[_input[i].reciever].ipfsHash = _input[i].ipfsHash;
+            boxes[_input[i].recipient].sender = _msgSender();
+            boxes[_input[i].recipient].ipfsHash = _input[i].ipfsHash;
+
+            emit Created(_msgSender(), _input[i].recipient);
 
             for (uint256 j = 0; j < _input[i].treeIds.length; j++) {
-                boxes[_input[i].reciever].treeIds.push(_input[i].treeIds[j]);
+                boxes[_input[i].recipient].treeIds.push(_input[i].treeIds[j]);
 
                 treeToken.transferFrom(
                     _msgSender(),
@@ -100,60 +102,70 @@ contract TreeBoxV2 is
         }
     }
 
-    function claim(address _reciever) external override ifNotPaused {
+    function claim(address _recipient) external override ifNotPaused {
         require(
             boxes[_msgSender()].sender != address(0),
-            "public key is not exists"
-        ); //recipient key exists
+            "recipient not exists"
+        );
 
-        require(_reciever != _msgSender(), "can't transfer to msg.sender"); //recipient is msg.sender
+        require(_recipient != _msgSender(), "recipient is msg.sender");
 
         uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+
+        emit Claimed(_msgSender(), _recipient, treeIds);
 
         delete boxes[_msgSender()];
 
         for (uint256 i = 0; i < treeIds.length; i++) {
-            treeToken.safeTransferFrom(address(this), _reciever, treeIds[i]);
+            treeToken.safeTransferFrom(address(this), _recipient, treeIds[i]);
         }
     }
 
-    function withdraw(address[] calldata _recievers)
+    function withdraw(address[] calldata _recipients)
         external
         override
         ifNotPaused
     {
-        for (uint256 i = 0; i < _recievers.length; i++) {
-            if (boxes[_recievers[i]].sender == _msgSender()) {
-                // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
-                uint256[] memory treeIds = boxes[_recievers[i]].treeIds;
-                delete boxes[_msgSender()];
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            require(
+                boxes[_recipients[i]].sender == _msgSender(),
+                "invalid recipients"
+            );
+        }
 
-                for (uint256 j = 0; j < treeIds.length; j++) {
-                    treeToken.safeTransferFrom(
-                        address(this),
-                        _msgSender(),
-                        treeIds[j]
-                    );
-                }
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
+            uint256[] memory treeIds = boxes[_recipients[i]].treeIds;
+
+            delete boxes[_msgSender()];
+
+            emit Withdrew(_msgSender(), _recipients[i], treeIds);
+
+            for (uint256 j = 0; j < treeIds.length; j++) {
+                treeToken.safeTransferFrom(
+                    address(this),
+                    _msgSender(),
+                    treeIds[j]
+                );
             }
         }
     }
 
-    function getTreeOfRecivierByIndex(address _reciever, uint256 _index)
+    function getReceiverTreeByIndex(address _recipient, uint256 _index)
         external
         view
         override
         returns (uint256)
     {
-        return boxes[_reciever].treeIds[_index];
+        return boxes[_recipient].treeIds[_index];
     }
 
-    function getTreeOfRecivierLength(address _reciever)
+    function getReceiverTreesLength(address _recipient)
         external
         view
         override
         returns (uint256)
     {
-        return boxes[_reciever].treeIds.length;
+        return boxes[_recipient].treeIds.length;
     }
 }

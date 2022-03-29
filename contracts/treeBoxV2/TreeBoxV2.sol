@@ -8,6 +8,11 @@ import "../access/IAccessRestriction.sol";
 import "./../tree/ITree.sol";
 
 contract TreeBoxV2 is Initializable, RelayRecipient, ITreeBoxV2 {
+    struct Box {
+        address sender;
+        uint256[] treeIds;
+    }
+
     bool public override isTreeBox;
 
     ITree public treeToken;

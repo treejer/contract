@@ -8,11 +8,6 @@ interface ITreeBoxV2 {
         uint256[] treeIds;
     }
 
-    struct Box {
-        address sender;
-        uint256[] treeIds;
-    }
-
     function initialize(address _token, address _accessRestrictionAddress)
         external;
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 
 interface ITreeBoxV2 {
     struct Input {
-        address reciever;
+        address reciever; //recipient
         string ipfsHash;
         uint256[] treeIds;
     }
@@ -23,6 +23,11 @@ interface ITreeBoxV2 {
     function claim(address _reciever) external;
 
     function getTreeOfRecivierByIndex(address _reciever, uint256 _index)
+        external
+        view
+        returns (uint256);
+
+    function getTreeOfRecivierLength(address _reciever)
         external
         view
         returns (uint256);

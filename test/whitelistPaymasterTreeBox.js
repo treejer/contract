@@ -104,6 +104,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
         paymasterInstance.address,
         testRelayRecipientInstance.address,
         userAccount2,
+        "0x1e83409a",
         {
           from: deployerAccount
         }
@@ -131,10 +132,23 @@ contract("WhitelistPaymasterTreeBox", accounts => {
 
     await treeBoxInstance.create(data, { from: sender });
 
+    await testInstance
+      .testPreRelayedCall(
+        paymasterInstance.address,
+        testRelayRecipientInstance.address,
+        userAccount2,
+        "0x1e83409b",
+        {
+          from: deployerAccount
+        }
+      )
+      .should.be.rejectedWith("Reason given: calling wrong method");
+
     await testInstance.testPreRelayedCall(
       paymasterInstance.address,
       testRelayRecipientInstance.address,
       userAccount2,
+      "0x1e83409a",
       {
         from: deployerAccount
       }
@@ -147,6 +161,7 @@ contract("WhitelistPaymasterTreeBox", accounts => {
         paymasterInstance.address,
         testRelayRecipientInstance.address,
         userAccount2,
+        "0x1e83409a",
         {
           from: deployerAccount
         }

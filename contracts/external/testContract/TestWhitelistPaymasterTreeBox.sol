@@ -19,13 +19,16 @@ contract TestWhitelistPaymasterTreeBox is Initializable {
     function testPreRelayedCall(
         address _address,
         address _toAddress,
-        address _fromAddress
+        address _fromAddress,
+        bytes calldata _data
     ) external {
         ITestWhitelistPaymaster test1 = ITestWhitelistPaymaster(_address);
 
         GsnTypes.RelayRequest memory relayRequest;
 
         relayRequest.request.to = _toAddress;
+
+        relayRequest.request.data = _data;
 
         if (_fromAddress != address(0)) {
             relayRequest.request.from = _fromAddress;

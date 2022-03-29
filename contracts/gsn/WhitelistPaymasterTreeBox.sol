@@ -38,6 +38,10 @@ contract WhitelistPaymasterTreeBox is BasePaymaster {
 
         (relayRequest, signature, approvalData, maxPossibleGas);
 
+        bytes4 sig = GsnUtils.getMethodSig(relayRequest.request.data);
+
+        require(sig == treeBox.claim.selector, "calling wrong method");
+
         (address sender, ) = treeBox.boxes(relayRequest.request.from);
 
         require(sender != address(0), "user is not valid");

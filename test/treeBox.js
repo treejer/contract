@@ -2,7 +2,6 @@
 
 const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeBox = artifacts.require("TreeBox");
-const TestTreeBox = artifacts.require("TestTreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
@@ -180,13 +179,13 @@ contract("TreeBox", (accounts) => {
       }
 
       //------------------------- check userAccount2 treeCount
-      const user2TreeCount = await treeBoxInstance.getReceiverTreesLength(
+      const user2TreeCount = await treeBoxInstance.getRecipientTreesLength(
         userAccount2
       );
       assert.equal(Number(user2TreeCount), 4, "user2 tree count is incorrect");
 
       //------------------------- check userAccount3 treeCount
-      const user3TreeCount = await treeBoxInstance.getReceiverTreesLength(
+      const user3TreeCount = await treeBoxInstance.getRecipientTreesLength(
         userAccount3
       );
       assert.equal(Number(user3TreeCount), 2, "user3 tree count is incorrect");
@@ -194,36 +193,36 @@ contract("TreeBox", (accounts) => {
       ///////----------------- user 2 trees
 
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 0)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount2, 0)),
         0,
         "tree index is incorrect"
       );
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 1)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount2, 1)),
         1,
         "tree index is incorrect"
       );
 
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 2)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount2, 2)),
         4,
         "tree index is incorrect"
       );
 
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 3)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount2, 3)),
         5,
         "tree index is incorrect"
       );
 
       ///////----------------- user 3 trees
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount3, 0)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount3, 0)),
         2,
         "tree index is incorrect"
       );
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount3, 1)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount3, 1)),
         3,
         "tree index is incorrect"
       );
@@ -251,14 +250,14 @@ contract("TreeBox", (accounts) => {
       }
 
       //------------------------- check userAccount3 treeCount
-      const user4TreeCount = await treeBoxInstance.getReceiverTreesLength(
+      const user4TreeCount = await treeBoxInstance.getRecipientTreesLength(
         userAccount4
       );
       assert.equal(Number(user4TreeCount), 1, "user4 tree count is incorrect");
 
       ///////----------------- user 4 trees
       assert.equal(
-        Number(await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0)),
+        Number(await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 0)),
         6,
         "tree index is incorrect"
       );
@@ -558,7 +557,7 @@ contract("TreeBox", (accounts) => {
 
         for (let j = 0; j < data[i][2].length; j++) {
           assert.equal(
-            await treeBoxInstance.getReceiverTreeByIndex(userAccount2, j),
+            await treeBoxInstance.getRecipientTreeByIndex(userAccount2, j),
             data[i][2][j],
             "list tree is not correct"
           );
@@ -617,7 +616,7 @@ contract("TreeBox", (accounts) => {
         );
       }
 
-      await treeBoxInstance.getReceiverTreeByIndex(userAccount2, 0).should.be
+      await treeBoxInstance.getRecipientTreeByIndex(userAccount2, 0).should.be
         .rejected;
 
       ///----------------test 2
@@ -688,24 +687,24 @@ contract("TreeBox", (accounts) => {
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 0),
         10,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 1),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 1),
         20,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 2),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 2),
         30,
         "list tree is not correct"
       );
 
-      await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 3).should.be
+      await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 3).should.be
         .rejected;
 
       const data3 = [[userAccount4, "ipfs 3 test", [40, 50]]];
@@ -730,31 +729,31 @@ contract("TreeBox", (accounts) => {
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 0),
         10,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 1),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 1),
         20,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 2),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 2),
         30,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 3),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 3),
         40,
         "list tree is not correct"
       );
 
       assert.equal(
-        await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 4),
+        await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 4),
         50,
         "list tree is not correct"
       );
@@ -776,7 +775,7 @@ contract("TreeBox", (accounts) => {
       await treeBoxInstance
         .claim(arInstance.address, { from: userAccount4 })
         .should.be.rejectedWith(
-          "Reason given: ERC721: transfer to non ERC721Receiver implementer"
+          "Reason given: ERC721: transfer to non ERC721Recipient implementer"
         );
 
       //----------success claim
@@ -824,7 +823,7 @@ contract("TreeBox", (accounts) => {
         "trees didn't transfer to contract"
       );
 
-      await treeBoxInstance.getReceiverTreeByIndex(userAccount4, 0).should.be
+      await treeBoxInstance.getRecipientTreeByIndex(userAccount4, 0).should.be
         .rejected;
     });
   });

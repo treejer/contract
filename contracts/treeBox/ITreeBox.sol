@@ -26,12 +26,12 @@ interface ITreeBox {
 
     function claim(address _recipient) external;
 
-    function getReceiverTreeByIndex(address _recipient, uint256 _index)
+    function getRecipientTreeByIndex(address _recipient, uint256 _index)
         external
         view
         returns (uint256);
 
-    function getReceiverTreesLength(address _recipient)
+    function getRecipientTreesLength(address _recipient)
         external
         view
         returns (uint256);

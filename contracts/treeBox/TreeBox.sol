@@ -151,7 +151,7 @@ contract TreeBox is
         }
     }
 
-    function getReceiverTreeByIndex(address _recipient, uint256 _index)
+    function getRecipientTreeByIndex(address _recipient, uint256 _index)
         external
         view
         override
@@ -160,7 +160,7 @@ contract TreeBox is
         return boxes[_recipient].treeIds[_index];
     }
 
-    function getReceiverTreesLength(address _recipient)
+    function getRecipientTreesLength(address _recipient)
         external
         view
         override

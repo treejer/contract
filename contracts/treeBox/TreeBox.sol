@@ -143,7 +143,6 @@ contract TreeBox is
         }
 
         for (uint256 i = 0; i < _recipients.length; i++) {
-            // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
             uint256[] memory treeIds = boxes[_recipients[i]].treeIds;
 
             delete boxes[_recipients[i]];

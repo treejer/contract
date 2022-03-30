@@ -775,7 +775,7 @@ contract("TreeBox", (accounts) => {
       await treeBoxInstance
         .claim(arInstance.address, { from: userAccount4 })
         .should.be.rejectedWith(
-          "Reason given: ERC721: transfer to non ERC721Recipient implementer"
+          "ERC721: transfer to non ERC721Receiver implementer"
         );
 
       //----------success claim

@@ -4,21 +4,12 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeBox = artifacts.require("TreeBox");
 const TreeNftTest = artifacts.require("TreeNftTest");
 const assert = require("chai").assert;
-require("chai")
-  .use(require("chai-as-promised"))
-  .should();
+require("chai").use(require("chai-as-promised")).should();
 const truffleAssert = require("truffle-assertions");
-const Common = require("./common");
-const Math = require("./math");
 
-const {
-  CommonErrorMsg,
-  TreeBoxErrorMsg,
-  SafeMathErrorMsg,
-  erc721ErrorMsg
-} = require("./enumes");
+const { CommonErrorMsg, TreeBoxErrorMsg, erc721ErrorMsg } = require("./enumes");
 
-contract("TreeBox", accounts => {
+contract("TreeBox", (accounts) => {
   let treeBoxInstance;
   let treeInstance;
   let arInstance;
@@ -42,28 +33,28 @@ contract("TreeBox", accounts => {
   describe("deployment, set address, check access, create,withdraw", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
     });
 
     beforeEach(async () => {
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance.initialize(
         treeInstance.address,
         arInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
     });
@@ -71,15 +62,15 @@ contract("TreeBox", accounts => {
     it("deploys successfully and check addresses", async () => {
       //-------------
       treeBoxInstance2 = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance2.initialize(zeroAddress, arInstance.address, {
-        from: deployerAccount
+        from: deployerAccount,
       }).should.be.rejected;
 
       await treeBoxInstance2.initialize(treeInstance.address, zeroAddress, {
-        from: deployerAccount
+        from: deployerAccount,
       }).should.be.rejected;
 
       //-------------------
@@ -92,19 +83,19 @@ contract("TreeBox", accounts => {
       //-------------- fail to set setTrustedForwarder
       await treeBoxInstance
         .setTrustedForwarder(userAccount2, {
-          from: userAccount3
+          from: userAccount3,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
       await treeBoxInstance
         .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount
+          from: deployerAccount,
         })
         .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
 
       //-------------- set setTrustedForwarder
       await treeBoxInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       assert.equal(
@@ -134,7 +125,7 @@ contract("TreeBox", accounts => {
       const data1 = [
         [userAccount2, "ipfs 1", [0, 1]],
         [userAccount3, "ipfs 2", [2, 3]],
-        [userAccount2, "ipfs 1", [4, 5]]
+        [userAccount2, "ipfs 1", [4, 5]],
       ];
 
       const data2 = [[userAccount4, "ipfs 3", [6]]];
@@ -145,7 +136,7 @@ contract("TreeBox", accounts => {
       for (let i = 0; i < data1.length; i++) {
         for (let j = 0; j < data1[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner1, data1[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
@@ -154,7 +145,7 @@ contract("TreeBox", accounts => {
       for (let i = 0; i < data2.length; i++) {
         for (let j = 0; j < data2[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner2, data2[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
@@ -163,24 +154,24 @@ contract("TreeBox", accounts => {
       for (let i = 0; i < data3.length; i++) {
         for (let j = 0; j < data3[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner3, data3[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1
+        from: treeOwner1,
       });
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner2
+        from: treeOwner2,
       });
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner3
+        from: treeOwner3,
       });
 
       const eventTx1 = await treeBoxInstance.create(data1, {
-        from: treeOwner1
+        from: treeOwner1,
       });
 
       for (let i = 0; i < data1.length; i++) {
@@ -252,7 +243,7 @@ contract("TreeBox", accounts => {
       });
       ////////////////////// create treeOwner2
       const eventTx2 = await treeBoxInstance.create(data2, {
-        from: treeOwner2
+        from: treeOwner2,
       });
 
       for (let i = 0; i < data2.length; i++) {
@@ -300,18 +291,18 @@ contract("TreeBox", accounts => {
 
       ///// mint trees to treeOwner4
       await treeInstance.safeMint(treeOwner4, 9, {
-        from: deployerAccount
+        from: deployerAccount,
       });
       await treeInstance.safeMint(treeOwner4, 10, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       ///// mint trees to dataManager
       await treeInstance.safeMint(dataManager, 11, {
-        from: deployerAccount
+        from: deployerAccount,
       });
       await treeInstance.safeMint(dataManager, 12, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       // create tokens that not exists0
@@ -326,7 +317,7 @@ contract("TreeBox", accounts => {
         );
       //------------ create with tokens that not own but owner of tokens give approve
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: dataManager
+        from: dataManager,
       });
 
       await treeBoxInstance
@@ -346,7 +337,7 @@ contract("TreeBox", accounts => {
 
       //give approve
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner4
+        from: treeOwner4,
       });
 
       /// call successfully
@@ -356,20 +347,20 @@ contract("TreeBox", accounts => {
     it("withdraw", async () => {
       const data1 = [
         [userAccount2, "ipfs 1", [0, 1]],
-        [userAccount3, "ipfs 2", [2, 3]]
+        [userAccount3, "ipfs 2", [2, 3]],
       ];
 
       const data2 = [
         [userAccount4, "ipfs 3", [4, 5, 6]],
         [userAccount5, "ipfs 4", [7, 8, 9]],
-        [dataManager, "ipfs 5", [10, 11]]
+        [dataManager, "ipfs 5", [10, 11]],
       ];
 
       //mint tokens to treeOwner1
       for (let i = 0; i < data1.length; i++) {
         for (let j = 0; j < data1[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner1, data1[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
@@ -378,18 +369,18 @@ contract("TreeBox", accounts => {
       for (let i = 0; i < data2.length; i++) {
         for (let j = 0; j < data2[i][2].length; j++) {
           await treeInstance.safeMint(treeOwner2, data2[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
 
       /// ----------------- set approve
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner1
+        from: treeOwner1,
       });
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: treeOwner2
+        from: treeOwner2,
       });
 
       //--------- create gift
@@ -417,11 +408,25 @@ contract("TreeBox", accounts => {
         }
       }
 
+      const box1BeforeWithdraw = await treeBoxInstance.boxes(userAccount2);
+      assert.equal(
+        box1BeforeWithdraw.sender,
+        treeOwner1,
+        "sender is incorrect"
+      );
+
+      const box2BeforeWithdraw = await treeBoxInstance.boxes(userAccount3);
+      assert.equal(
+        box2BeforeWithdraw.sender,
+        treeOwner1,
+        "sender is incorrect"
+      );
+
       //////////// --------------- treeOwner2 want to withdraw treeOwner1 trees
 
       await treeBoxInstance
         .withdraw([userAccount2, userAccount3], {
-          from: treeOwner2
+          from: treeOwner2,
         })
         .should.be.rejectedWith(TreeBoxErrorMsg.INVALID_RECIPIENTS);
 
@@ -429,7 +434,7 @@ contract("TreeBox", accounts => {
       const eventTx1 = await treeBoxInstance.withdraw(
         [userAccount2, userAccount3],
         {
-          from: treeOwner1
+          from: treeOwner1,
         }
       );
 
@@ -442,6 +447,22 @@ contract("TreeBox", accounts => {
           );
         }
       }
+
+      //------------------ check box data to be deleted
+      const box1AfterWithdraw = await treeBoxInstance.boxes(userAccount2);
+
+      assert.equal(
+        box1AfterWithdraw.sender,
+        zeroAddress,
+        "sender must be zero address because box deleted after withdrew"
+      );
+
+      const box2AfterWithdraw = await treeBoxInstance.boxes(userAccount3);
+      assert.equal(
+        box2AfterWithdraw.sender,
+        zeroAddress,
+        "sender must be zero address because box deleted after withdrew"
+      );
 
       truffleAssert.eventEmitted(eventTx1, "Withdrew", (ev, i) => {
         let isIdsOk = true;
@@ -456,6 +477,13 @@ contract("TreeBox", accounts => {
         );
       });
 
+      ///////////////------------------ fail to withdrew because alredy withdrew
+      await treeBoxInstance
+        .withdraw([userAccount2, userAccount3], {
+          from: treeOwner1,
+        })
+        .should.be.rejectedWith(TreeBoxErrorMsg.INVALID_RECIPIENTS);
+
       //---- treeOwner2 withdraw trees (only userAccount4 claimed)
       //---- treeOnwer2 want wo withdraw all gifted trees but some claime by user4
 
@@ -465,19 +493,19 @@ contract("TreeBox", accounts => {
       const treeOnwer2WithdrawTrees = [7, 8, 9, 10, 11];
       const data2AfterClaim = [
         [userAccount5, "ipfs 4", [7, 8, 9]],
-        [dataManager, "ipfs 5", [10, 11]]
+        [dataManager, "ipfs 5", [10, 11]],
       ];
 
       await treeBoxInstance
         .withdraw([userAccount4, userAccount5, dataManager], {
-          from: treeOwner2
+          from: treeOwner2,
         })
         .should.be.rejectedWith(TreeBoxErrorMsg.INVALID_RECIPIENTS);
 
       const eventTx2 = await treeBoxInstance.withdraw(
         [userAccount5, dataManager],
         {
-          from: treeOwner2
+          from: treeOwner2,
         }
       );
 
@@ -518,26 +546,26 @@ contract("TreeBox", accounts => {
   describe("claim", () => {
     before(async () => {
       arInstance = await AccessRestriction.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await arInstance.initialize(deployerAccount, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeInstance = await TreeNftTest.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       treeBoxInstance = await TreeBox.new({
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeBoxInstance.initialize(
         treeInstance.address,
         arInstance.address,
         {
-          from: deployerAccount
+          from: deployerAccount,
         }
       );
     });
@@ -551,13 +579,13 @@ contract("TreeBox", accounts => {
       for (let i = 0; i < data.length; i++) {
         for (j = 0; j < data[i][2].length; j++) {
           await treeInstance.safeMint(sender, data[i][2][j], {
-            from: deployerAccount
+            from: deployerAccount,
           });
         }
       }
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: sender
+        from: sender,
       });
 
       await treeBoxInstance.create(data, { from: sender });
@@ -587,7 +615,7 @@ contract("TreeBox", accounts => {
       //-------reject (reciever is not correct)
       await treeBoxInstance
         .claim(userAccount3, {
-          from: userAccount4
+          from: userAccount4,
         })
         .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
 
@@ -606,7 +634,7 @@ contract("TreeBox", accounts => {
       await arInstance.unpause({ from: deployerAccount });
       //----------success claim
       const eventTx1 = await treeBoxInstance.claim(userAccount3, {
-        from: userAccount2
+        from: userAccount2,
       });
 
       truffleAssert.eventEmitted(eventTx1, "Claimed", (ev, i) => {
@@ -646,27 +674,27 @@ contract("TreeBox", accounts => {
       const data2 = [[userAccount4, "ipfs 2 test", [10, 20, 30]]];
 
       await treeInstance.safeMint(sender2, 10, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.safeMint(sender2, 20, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.safeMint(sender2, 30, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.safeMint(sender2, 40, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.safeMint(sender2, 50, {
-        from: deployerAccount
+        from: deployerAccount,
       });
 
       await treeInstance.setApprovalForAll(treeBoxInstance.address, true, {
-        from: sender2
+        from: sender2,
       });
 
       await treeBoxInstance.create(data2, { from: sender2 });
@@ -781,7 +809,7 @@ contract("TreeBox", accounts => {
       //-------reject (reciever is not correct)
       await treeBoxInstance
         .claim(userAccount3, {
-          from: userAccount2
+          from: userAccount2,
         })
         .should.be.rejectedWith(TreeBoxErrorMsg.RECIEVER_INCORRECT);
 

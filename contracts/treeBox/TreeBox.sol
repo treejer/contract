@@ -9,6 +9,7 @@ import "./ITreeBox.sol";
 import "../access/IAccessRestriction.sol";
 import "./../tree/ITree.sol";
 
+/** @title TreeBox contract */
 contract TreeBox is
     Initializable,
     RelayRecipient,
@@ -26,24 +27,37 @@ contract TreeBox is
     ITree public treeToken;
     IAccessRestriction public accessRestriction;
 
-    //NOTE mapping of recipient to Box
+    //NOTE mapping of recipient to Box struct
     mapping(address => Box) public override boxes;
 
+    /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
         _;
     }
 
+    /** NOTE modifier for check if function is not paused */
     modifier ifNotPaused() {
         accessRestriction.ifNotPaused();
         _;
     }
 
+    /** NOTE modifier for check valid address */
     modifier validAddress(address _address) {
         require(_address != address(0), "Invalid address");
         _;
     }
 
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    /// @inheritdoc ITreeBox
     function initialize(address _token, address _accessRestrictionAddress)
         external
         override
@@ -59,6 +73,7 @@ contract TreeBox is
         require(treeToken.isTree());
     }
 
+    /// @inheritdoc ITreeBox
     function setTrustedForwarder(address _address)
         external
         override
@@ -68,15 +83,7 @@ contract TreeBox is
         trustedForwarder = _address;
     }
 
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external override returns (bytes4) {
-        return this.onERC721Received.selector;
-    }
-
+    /// @inheritdoc ITreeBox
     function create(Input[] calldata _input) external override ifNotPaused {
         for (uint256 i = 0; i < _input.length; i++) {
             require(
@@ -102,6 +109,7 @@ contract TreeBox is
         }
     }
 
+    /// @inheritdoc ITreeBox
     function claim(address _recipient) external override ifNotPaused {
         require(
             boxes[_msgSender()].sender != address(0),
@@ -121,6 +129,7 @@ contract TreeBox is
         }
     }
 
+    /// @inheritdoc ITreeBox
     function withdraw(address[] calldata _recipients)
         external
         override
@@ -137,7 +146,7 @@ contract TreeBox is
             // uint256[] memory treeIds = boxes[_msgSender()].treeIds;
             uint256[] memory treeIds = boxes[_recipients[i]].treeIds;
 
-            delete boxes[_msgSender()];
+            delete boxes[_recipients[i]];
 
             emit Withdrew(_msgSender(), _recipients[i], treeIds);
 
@@ -151,6 +160,7 @@ contract TreeBox is
         }
     }
 
+    /// @inheritdoc ITreeBox
     function getRecipientTreeByIndex(address _recipient, uint256 _index)
         external
         view
@@ -160,6 +170,7 @@ contract TreeBox is
         return boxes[_recipient].treeIds[_index];
     }
 
+    /// @inheritdoc ITreeBox
     function getRecipientTreesLength(address _recipient)
         external
         view

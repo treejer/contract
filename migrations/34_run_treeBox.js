@@ -17,7 +17,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   console.log("Call TreeBox Methods...");
-  // await TreeBox.deployed().then(async (instance) => {
-  //   await instance.setTrustedForwarder(trustedForwarder);
-  // });
+  await TreeBox.deployed().then(async (instance) => {
+    await instance.setTrustedForwarder(trustedForwarder);
+  });
 };

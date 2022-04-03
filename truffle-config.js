@@ -161,7 +161,7 @@ module.exports = {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 2 ** 32 - 1,
+          runs: 10000,
         },
       },
     },

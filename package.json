@@ -43,11 +43,11 @@
     "gsn": "node_modules/.bin/gsn start",
     "coverage": "bash scripts/coverage.sh",
     "deploy": "npx truffle deploy",
-    "prettier": "prettier --write .",
-    "lint:prettier": "prettier --check ."
+    "prettier": "npx prettier --write .",
+    "lint:prettier": "npx prettier --check ."
   },
   "lint-staged": {
-    "**/*": "prettier --check ."
+    "**/*": "npx prettier --check ."
   },
   "keywords": [
     "Treejer",

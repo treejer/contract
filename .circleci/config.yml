@@ -26,7 +26,11 @@ jobs:
             - ./node_modules
 
       - run:
-          name: prettier
+          name: write-prettier
+          command: npm run prettier
+
+      - run:
+          name: lint:prettier
           command: npm run lint:prettier
       - run:
           name: test

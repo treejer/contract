@@ -12,7 +12,11 @@ const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
 const VERIFIER_ROLE = web3.utils.soliditySha3("VERIFIER_ROLE");
 const SCRIPT_ROLE = web3.utils.soliditySha3("SCRIPT_ROLE");
 
+const TREEBOX_SCRIPT = web3.utils.soliditySha3("TREEBOX_SCRIPT");
+
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
+
+Common.TREEBOX_SCRIPT = TREEBOX_SCRIPT;
 
 const Math = require("./math");
 
@@ -23,6 +27,11 @@ Common.sleep = (ms) => {
 Common.addPlanter = async (instance, account, adminAccount) => {
   await instance.grantRole(PLANTER_ROLE, account, { from: adminAccount });
 };
+
+Common.addTreeBoxScript = async (instance, account, adminAccount) => {
+  await instance.grantRole(TREEBOX_SCRIPT, account, { from: adminAccount });
+};
+
 Common.getNewAccountPublicKey = async () => {
   const account = web3.eth.accounts.create();
   return account.address;

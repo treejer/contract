@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const Planter = artifacts.require("Planter.sol");
+const TreeBox = artifacts.require("TreeBox.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -16,8 +16,8 @@ module.exports = async function (deployer, network, accounts) {
     );
   }
 
-  console.log("Call Planter Methods...");
-  await Planter.deployed().then(async (instance) => {
+  console.log("Call TreeBox Methods...");
+  await TreeBox.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
   });
 };

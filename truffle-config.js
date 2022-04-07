@@ -18,7 +18,7 @@
  *
  */
 require("dotenv").config();
-// const HDWalletProvider = require("@truffle/hdwallet-provider");
+const HDWalletProvider = require("@truffle/hdwallet-provider");
 // const infuraKey = "fj4jll3k.....";
 
 const privateKeys = [process.env.DEPLOYER_PRIVAE_KEY];
@@ -161,7 +161,7 @@ module.exports = {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 2 ** 32 - 1,
+          runs: 9999,
         },
       },
     },

@@ -7,6 +7,10 @@ const TimeEnumes = {
   years: "years",
 };
 
+const SafeMathErrorMsg = {
+  OVER_FLOW: "Panic: Arithmetic overflow",
+};
+
 const GsnErrorMsg = {
   ADDRESS_NOT_EXISTS: "Target not exists",
 };
@@ -19,6 +23,11 @@ const erc20ErrorMsg = {
 
 const erc721ErrorMsg = {
   MINTED_BEFORE: "token already minted.",
+  TRANSFER_TO_ZERO_ADDRESS: "ERC721: transfer to the zero address",
+  TRANSFER_FROM_CALLER_APPROVE_PROBLEM:
+    "ERC721: transfer caller is not owner nor approved",
+  TRANSFER_NON_EXISTENT_TOKEN: "ERC721: operator query for nonexistent token",
+  TRANSFER_TOKEN_FROM_NON_OWNER: "ERC721: transfer of token that is not own",
 };
 const CommonErrorMsg = {
   PAUSE: "Pausable: paused",
@@ -36,6 +45,7 @@ const CommonErrorMsg = {
   CHECK_IF_PAUSED: "Pausable: not paused",
   CHECK_IF_NOT_PAUSED: "Pausable: paused",
   UNISWAP_OUTPUT_AMOUNT: "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT",
+  CHECK_TREEBOX_SCRIPT: "Caller not TreeBox script",
 };
 
 const AuctionErrorMsg = {
@@ -171,6 +181,13 @@ const WethFundErrorMsg = {
   LIQUDITY_NOT_ENOUGH: "Insufficient Liquidity",
   TOTALDAI_INVALID: "Invalid totalDaiDebtToPlanterContract ",
 };
+const TreeBoxErrorMsg = {
+  NOT_REGULAR: "Not Regular Tree",
+  RECIEVER_INCORRECT: "recipient not exists",
+  CANT_TRANSFER_TO_THIS_ADDRESS: "recipient is msg.sender",
+  PUBLIC_KEY_EXISTS: "recipient exists",
+  INVALID_RECIPIENTS: "invalid recipients",
+};
 
 module.exports = {
   TimeEnumes,
@@ -189,4 +206,6 @@ module.exports = {
   GsnErrorMsg,
   erc721ErrorMsg,
   WethFundErrorMsg,
+  SafeMathErrorMsg,
+  TreeBoxErrorMsg,
 };

@@ -1,0 +1,15 @@
+services:
+  develop:
+    container_name: treejer-contract
+    build:
+      context: .
+    # volumes are added to enable live coding
+    volumes:
+      - .:/home/treejer
+      - /home/treejer/node_modules/
+    command: sh -c "npm run ganache"
+  test:
+    container_name: treejer-contract-tests
+    build:
+      context: .
+    command: sh -c "npm run test"

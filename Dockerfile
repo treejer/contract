@@ -7,7 +7,6 @@ RUN apt-get update && \
     rm -fr /var/lib/apt/lists/* && \
     rm -rf /etc/apt/sources.list.d/*
 
-RUN mkdir -p /home/treejer
 WORKDIR /home/treejer
 COPY . .
 RUN npm install --quiet

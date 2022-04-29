@@ -1,0 +1,9 @@
+.git
+.github
+.gitattributes
+.vscode
+node_modules
+npm-debug.log
+bin
+build
+dist

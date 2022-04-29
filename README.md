@@ -33,6 +33,19 @@ The following assumes the use of `node@>=13`.
 
 `npm run deploy`
 
+### Development using Docker
+
+In order to facilitate better development and testing, the project has been integrated with [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). This eliminates the necessity to setup the environment in your local machine. Simply spin up the `container` and start developing and testing in it.
+
+**Requirements**
+- `Docker` - If you don't have Docker installed in your local machine, you can get it by following the steps [here](https://docs.docker.com/get-docker/). This should also install `docker-compose`.
+
+**Setup**
+
+Two modes can be enabled via docker:
+- _Development_: This creates a `container` with the project and all the dependencies installed in it. The project location in your local machine will be linked as a [volume](https://docs.docker.com/storage/volumes/) to the container and any edits you make in your local would be synced to the container. To spin up the development container use: `docker-compose up develop`
+- _Testing_: This brings up a container and runs all the tests in it automatically and can be used purely for testing purposes. To spin up a testing container use: `docker-compose up test`
+
 ## How to Contribute
 
 To chat with us & stay up to date, join our [Discord](https://discord.gg/8WuVd2ERC2).

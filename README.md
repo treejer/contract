@@ -54,4 +54,7 @@ Vulnerabilities should be disclosed directly to the Treejer team by emailing sec
 
 _© Copyright 2021, Treejer_
 
-[Spanish version](./translations/README-es.md)
+### Translations :earth_americas:
+
+- [Spanish version](./translations/README-es.md)
+- [Portuguese version](./translations/README-pt.md)

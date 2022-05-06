@@ -31,7 +31,7 @@ Los siguientes pasos asumen el uso de `node@>=13`.
 
 `npm run test`
 
-### Deploy on local ganache
+### Deploy en local ganache
 
 `npm run deploy`
 

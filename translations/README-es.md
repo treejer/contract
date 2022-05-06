@@ -50,7 +50,6 @@ Dos modos en que se puede adaptar vía docker:
 
 ## Cómo contribuir
 
-To chat with us & stay up to date, join our [Discord](https://discord.gg/8WuVd2ERC2).
 Para chatear con nosotros y mantenerse actualizado, unírsenos a [Discord](https://discord.gg/8WuVd2ERC2).
 
 Vulnerabilidades deberían ser notificadas al equipo de Treejer por correo electrónico security@treejer.com.

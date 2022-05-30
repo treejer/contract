@@ -32,3 +32,8 @@ To chat with us & stay up to date, join our [Discord](https://discord.gg/8WuVd2E
 Vulnerabilities should be disclosed directly to the Treejer team by emailing security@treejer.com.
 
 _© Copyright 2021, Treejer_
+
+### Translations :earth_americas:
+
+- [Spanish version](./translations/README-es.md)
+- [Portuguese version](./translations/README-pt-br.md)

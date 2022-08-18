@@ -12,7 +12,7 @@
   "devDependencies": {
     "@opengsn/contracts": "2.2.6",
     "@openzeppelin/contracts": "4.4.2",
-    "@openzeppelin/contracts-upgradeable": "4.4.2",
+    "@openzeppelin/contracts-upgradeable": "4.7.3",
     "@openzeppelin/test-helpers": "0.5.15",
     "@openzeppelin/truffle-upgrades": "1.14.0",
     "@truffle/hdwallet-provider": "2.0.3",

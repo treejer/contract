@@ -10,7 +10,7 @@ import "../access/IAccessRestriction.sol";
 import "../regularSale/IRegularSale.sol";
 import "./../treasury/interfaces/IUniswapV2Router02New.sol";
 
-import "../aggregator/interfaces/ICarbonRetirementAggregator.sol";
+import "./ICarbonRetirementAggregator.sol";
 
 /** @title FundWithOffset */
 
@@ -168,7 +168,7 @@ contract FundWithOffset is IFundWithOffset, Initializable {
         string memory _retirementMessage,
         string memory _retiringEntityString,
         address[] memory _carbonList
-    ) external {
+    ) external override {
         uint256 sourceAmount = aggregator.getSourceAmountSpecific(
             address(daiToken),
             _poolToken,

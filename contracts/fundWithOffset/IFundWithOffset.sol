@@ -51,6 +51,19 @@ interface IFundWithOffset {
 
     function setAggregatorAddress(address _aggregator) external;
 
+    function fundTreeWithSpecialOffset(
+        uint256 _count,
+        address _referrer,
+        address _poolToken,
+        uint256 _amount,
+        bool _amountInCarbon,
+        address _beneficiaryAddress,
+        string memory _beneficiaryString,
+        string memory _retirementMessage,
+        string memory _retiringEntityString,
+        address[] memory _carbonList
+    ) external;
+
     function fundTreeWithOffset(
         uint256 _count,
         address _referrer,

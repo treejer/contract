@@ -49,7 +49,22 @@ interface IFundWithOffset {
      */
     function setDaiTokenAddress(address _daiTokenAddress) external;
 
+    /** @dev admin set Aggregator contract address
+     *  @param _aggregator is address of DaiToken contract
+     */
     function setAggregatorAddress(address _aggregator) external;
+
+    function fundTreeWithOffset(
+        uint256 _count,
+        address _referrer,
+        address _poolToken,
+        uint256 _amount,
+        bool _amountInCarbon,
+        address _beneficiaryAddress,
+        string memory _beneficiaryString,
+        string memory _retirementMessage,
+        string memory _retiringEntityString
+    ) external;
 
     function fundTreeWithSpecialOffset(
         uint256 _count,
@@ -62,18 +77,6 @@ interface IFundWithOffset {
         string memory _retirementMessage,
         string memory _retiringEntityString,
         address[] memory _carbonList
-    ) external;
-
-    function fundTreeWithOffset(
-        uint256 _count,
-        address _referrer,
-        address _poolToken,
-        uint256 _amount,
-        bool _amountInCarbon,
-        address _beneficiaryAddress,
-        string memory _beneficiaryString,
-        string memory _retirementMessage,
-        string memory _retiringEntityString
     ) external;
 
     /** @return true in case of FundWithOffset contract have been initialized */

@@ -253,6 +253,12 @@ interface ITreeFactoryV2 {
         external
         returns (uint256);
 
+    function mintTreeMarketPlace(
+        uint256 _start,
+        uint256 _count,
+        address _funder
+    ) external;
+
     /**
      * @dev mint an already planted tree with id to funder
      * @param _treeId tree id to mint

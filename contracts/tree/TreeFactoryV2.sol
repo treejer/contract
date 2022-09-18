@@ -613,6 +613,17 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
     }
 
     /// @inheritdoc ITreeFactoryV2
+    function mintTreeMarketPlace(
+        uint256 _start,
+        uint256 _count,
+        address _funder
+    ) external override onlyTreejerContract {
+        for (uint256 i = _start; i < _start + _count; i++) {
+            treeToken.mint(_funder, i);
+        }
+    }
+
+    /// @inheritdoc ITreeFactoryV2
     function mintTreeById(uint256 _treeId, address _funder)
         external
         override

@@ -80,6 +80,8 @@ contract MarketPlace is IMarketPlace {
     function checkOwnerAndLastPlant(address _sender, uint256 _modelMetaDataId)
         external
         view
+        override
+        onlyTreejerContract
     {
         ModelMetaData storage modelMetaData = idToModelMetaData[
             _modelMetaDataId

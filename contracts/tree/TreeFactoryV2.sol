@@ -501,6 +501,8 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
         //------------------->CHANGED
 
         if (_modelMetaDataId > 0) {
+            marketPlace.checkOwnerAndLastPlant(_msgSender(), _modelMetaDataId);
+
             tempTreesModel[_pendingRegularTreeId.current()] = _modelMetaDataId;
         }
 
@@ -543,7 +545,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
             if (tempTreesModel[_tempTreeId] > 0) {
                 tempLastRegularTreeId = marketPlace.updateModel(
                     tempTreeData.planter,
-                    tempTreesModel[_tempTreeId] - 1
+                    tempTreesModel[_tempTreeId]
                 );
             } else {
                 tempLastRegularTreeId = lastRegualarTreeId + 1;

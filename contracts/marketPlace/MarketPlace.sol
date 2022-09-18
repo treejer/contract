@@ -27,7 +27,6 @@ contract MarketPlace is IMarketPlace {
         uint256 modelId;
         uint256 count;
         uint256 start; //⇒ remove
-        uint256 end; //⇒ remove
         uint256 lastFund;
         uint256 lastPlant;
         bool deactivate;
@@ -43,5 +42,38 @@ contract MarketPlace is IMarketPlace {
 
     uint256 public lastTreeAssigned;
 
-    function updateModel() external {}
+    IAccessRestriction public accessRestriction;
+
+    /** NOTE modifier for check msg.sender has TreejerContract role*/
+    modifier onlyTreejerContract() {
+        accessRestriction.ifTreejerContract(msg.sender);
+        _;
+    }
+
+    function updateModel(address _sender, uint256 _modelMetaDataId)
+        external
+        override
+        onlyTreejerContract
+        returns (uint256)
+    {
+        ModelMetaData storage modelMetaData = idToModelMetaData[
+            _modelMetaDataId
+        ];
+
+        require(
+            modelMetaData.planter == _sender,
+            "owner of modelMetaData is incorrect"
+        );
+
+        uint256 lastPlantTemp = modelMetaData.lastPlant + 1;
+
+        require(
+            lastPlantTemp < modelMetaData.start + modelMetaData.count,
+            "All tree planted"
+        );
+
+        modelMetaData.lastPlant = lastPlantTemp;
+
+        return lastPlantTemp;
+    }
 }

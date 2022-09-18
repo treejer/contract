@@ -543,7 +543,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
             if (tempTreesModel[_tempTreeId] > 0) {
                 tempLastRegularTreeId = marketPlace.updateModel(
                     tempTreeData.planter,
-                    tempTreesModel[_tempTreeId] - 1
+                    tempTreesModel[_tempTreeId]
                 );
             } else {
                 tempLastRegularTreeId = lastRegualarTreeId + 1;

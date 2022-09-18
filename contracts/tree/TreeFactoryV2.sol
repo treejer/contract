@@ -501,6 +501,8 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
         //------------------->CHANGED
 
         if (_modelMetaDataId > 0) {
+            marketPlace.checkOwnerAndLastPlant(_msgSender(), _modelMetaDataId);
+
             tempTreesModel[_pendingRegularTreeId.current()] = _modelMetaDataId;
         }
 

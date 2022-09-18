@@ -9,4 +9,7 @@ interface IMarketPlace {
     function updateModel(address _sender, uint256 _modelMetaDataId)
         external
         returns (uint256);
+
+    function checkOwnerAndLastPlant(address _sender, uint256 _modelMetaDataId)
+        external;
 }

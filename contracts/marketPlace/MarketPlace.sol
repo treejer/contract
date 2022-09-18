@@ -76,4 +76,24 @@ contract MarketPlace is IMarketPlace {
 
         return lastPlantTemp;
     }
+
+    function checkOwnerAndLastPlant(address _sender, uint256 _modelMetaDataId)
+        external
+        view
+    {
+        ModelMetaData storage modelMetaData = idToModelMetaData[
+            _modelMetaDataId
+        ];
+
+        require(
+            modelMetaData.planter == _sender,
+            "owner of modelMetaData is incorrect"
+        );
+
+        require(
+            modelMetaData.lastPlant + 1 <
+                modelMetaData.start + modelMetaData.count,
+            "All tree planted"
+        );
+    }
 }

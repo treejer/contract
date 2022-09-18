@@ -96,6 +96,9 @@ interface ITreeFactoryV2 {
     /** @dev set {_address} to TreeToken contract address */
     function setTreeTokenAddress(address _address) external;
 
+    /** @dev set {_address} to MarketPlace contract address */
+    function setMarketPlaceAddress(address _address) external;
+
     /** @dev admin set the minimum time to send next update request
      * NOTE emit an {TreeUpdateIntervalChanged} event
      * @param _seconds time to next update request

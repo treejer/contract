@@ -13,6 +13,8 @@ import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanter.sol";
 import "./ITreeFactoryV2.sol";
 
+import "./../marketPlace/IMarketPlace.sol";
+
 /** @title TreeFactory Contract */
 contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -64,6 +66,8 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
     mapping(uint256 => TempTree) public override tempTrees;
 
     //----->CHANGED
+    IMarketPlace public marketPlace;
+
     mapping(uint256 => uint256) public tempTreesModel; // tempIndex => modelMetaDataId
 
     /** NOTE modifier to check msg.sender has admin role */
@@ -178,6 +182,19 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
         require(candidateContract.isTree());
 
         treeToken = candidateContract;
+    }
+
+    /// @inheritdoc ITreeFactoryV2
+    function setMarketPlaceAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        IMarketPlace candidateContract = IMarketPlace(_address);
+
+        require(candidateContract.isMarketPlace());
+
+        marketPlace = candidateContract;
     }
 
     /// @inheritdoc ITreeFactoryV2

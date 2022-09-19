@@ -195,6 +195,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         regularSale = candidateContract;
     }
 
+    function deleteModal(uint256 _modelId) external {}
+
     function addModel(
         uint256 _modelId,
         uint8 _country,

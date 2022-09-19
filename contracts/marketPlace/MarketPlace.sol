@@ -247,17 +247,19 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
         uint256 totalPrice = 0;
+        uint256 tempModelDataIdOfInput = 0;
         for (uint256 i = 0; i < _input.length; i++) {
+            tempModelDataIdOfInput = _input[i].modelMetaDataId;
             require(
-                idToModelMetaData[_input[i].modelMetaDataId].lastFund +
+                idToModelMetaData[tempModelDataIdOfInput].lastFund +
                     _input[i].count <
-                    idToModelMetaData[_input[i].modelMetaDataId].start +
-                        idToModelMetaData[_input[i].modelMetaDataId].count,
+                    idToModelMetaData[tempModelDataIdOfInput].start +
+                        idToModelMetaData[tempModelDataIdOfInput].count,
                 "MarketPlace:Invalid count."
             );
 
             totalPrice +=
-                models[idToModelMetaData[_input[i].modelMetaDataId].modelId]
+                models[idToModelMetaData[tempModelDataIdOfInput].modelId]
                     .price *
                 _input[i].count;
         }
@@ -278,11 +280,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 totalCount = 0;
 
         for (uint256 i = 0; i < _input.length; i++) {
-            uint256 tempTreeId = idToModelMetaData[_input[i].modelMetaDataId]
+            tempModelDataIdOfInput = _input[i].modelMetaDataId;
+
+            uint256 tempTreeId = idToModelMetaData[tempModelDataIdOfInput]
                 .lastFund;
 
             uint256 treePrice = models[
-                idToModelMetaData[_input[i].modelMetaDataId].modelId
+                idToModelMetaData[tempModelDataIdOfInput].modelId
             ].price;
 
             treeFactory.mintTreeMarketPlace(
@@ -327,7 +331,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
                 );
             }
 
-            idToModelMetaData[_input[i].modelMetaDataId].lastFund += _input[i]
+            idToModelMetaData[tempModelDataIdOfInput].lastFund += _input[i]
                 .count;
 
             totalCount += _input[i].count;

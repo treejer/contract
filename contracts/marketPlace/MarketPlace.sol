@@ -50,12 +50,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 count;
     }
 
-    struct Model {
+    struct ModelMetaData {
         uint8 country;
         uint8 treeType;
-    }
-
-    struct ModelMetaData {
         uint256 price;
         address planter;
         uint256 modelId;
@@ -65,8 +62,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 lastPlant;
         uint8 deactive;
     }
-
-    mapping(uint256 => Model) public models; // modelId shows the number of our models
 
     //⇒ modelId should start from number 1
 
@@ -196,7 +191,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     }
 
     function addModel(
-        uint256 _modelId,
         uint8 _country,
         uint8 _treeType,
         uint256 _price,
@@ -204,30 +198,17 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     ) external onlyPlanter {
         require(_count < 10001, "MarketPlace:invalid count");
 
-        uint256 tempModelId;
-
-        if (_modelId > 0) {
-            tempModelId = _modelId;
-        } else {
-            modelId.increment();
-
-            tempModelId = modelId.current();
-
-            Model storage modelData = models[tempModelId];
-
-            modelData.country = _country;
-            modelData.treeType = _treeType;
-        }
-
-        modelMetaDataId.increment();
+        modelId.increment();
 
         ModelMetaData storage modelMetaData = idToModelMetaData[
-            modelMetaDataId.current()
+            modelId.current()
         ];
 
+        modelMetaData.country = _country;
+        modelMetaData.treeType = _treeType;
         modelMetaData.count = _count;
         modelMetaData.price = _price;
-        modelMetaData.modelId = tempModelId;
+        modelMetaData.modelId = modelId.current();
         modelMetaData.planter = msg.sender;
         modelMetaData.start = lastTreeAssigned;
         modelMetaData.lastFund = lastTreeAssigned - 1;

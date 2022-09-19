@@ -190,7 +190,19 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         regularSale = candidateContract;
     }
 
-    function deleteModal(uint256 _modelId) external {}
+    function deleteModal(uint256 _modelId) external {
+        Model storage model = models[_modelId];
+
+        require(model.planter == msg.sender, "MarketPlace:Access Denied");
+
+        require(
+            model.lastFund == model.lastPlant &&
+                model.lastPlant == model.start - 1,
+            "MarketPlace:Tree Planted or Funded"
+        );
+
+        delete model;
+    }
 
     function addModel(
         uint8 _country,

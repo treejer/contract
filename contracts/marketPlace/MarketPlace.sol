@@ -373,15 +373,29 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     function updatePrice(uint256 _modelId, uint256 _price) external {
         Model storage modelData = models[_modelId];
 
-        require(
-            modelData.planter == msg.sender,
-            "MarketPlace:Not Model Planter"
-        );
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
 
         modelData.price = _price;
     }
 
-    function updateModelData(uint8 _treeType, uint8 _country) external {}
+    function updateModelData(
+        uint256 _modelId,
+        uint8 _treeType,
+        uint8 _country
+    ) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        require(
+            modelData.lastFund == modelData.lastPlant &&
+                modelData.lastPlant == modelData.start - 1,
+            "MarketPlace:Tree Planted or Funded."
+        );
+
+        modelData.country = _country;
+        modelData.treeType = _treeType;
+    }
 
     function checkOwnerAndLastPlant(address _sender, uint256 _modelId)
         external

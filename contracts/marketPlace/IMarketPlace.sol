@@ -14,6 +14,12 @@ interface IMarketPlace {
 
     function setAllocationAddress(address _address) external;
 
+    function setTreeFactoryAddress(address _address) external;
+
+    function setAttributesAddress(address _address) external;
+
+    function setPlanterFundAddress(address _address) external;
+
     function updateModel(address _sender, uint256 _modelMetaDataId)
         external
         returns (uint256);

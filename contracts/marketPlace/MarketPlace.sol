@@ -7,6 +7,10 @@ import "./IMarketPlace.sol";
 import "../treasury/IDaiFund.sol";
 import "../gsn/RelayRecipient.sol";
 import "../treasury/IAllocation.sol";
+import "../tree/ITreeFactoryV2.sol";
+import "../tree/IAttribute.sol";
+import "../treasury/IPlanterFund.sol";
+
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -22,9 +26,23 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     IERC20Upgradeable public daiToken;
     IDaiFund public daiFund;
     IAllocation public allocation;
+    ITreeFactoryV2 public treeFactory;
+    IAttribute public attribute;
+    IPlanterFund public planterFundContract;
 
     CountersUpgradeable.Counter public modelId;
     CountersUpgradeable.Counter public modelMetaDataId;
+
+    struct TotalBalances {
+        uint256 planter;
+        uint256 ambassador;
+        uint256 research;
+        uint256 localDevelopment;
+        uint256 insurance;
+        uint256 treasury;
+        uint256 reserve1;
+        uint256 reserve2;
+    }
 
     struct Input {
         uint256 modelMetaDataId;
@@ -128,6 +146,43 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         allocation = candidateContract;
     }
 
+    /// @inheritdoc IMarketPlace
+    function setTreeFactoryAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        ITreeFactoryV2 candidateContract = ITreeFactoryV2(_address);
+
+        require(candidateContract.isTreeFactory());
+
+        treeFactory = candidateContract;
+    }
+
+    /// @inheritdoc IMarketPlace
+    function setAttributesAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        IAttribute candidateContract = IAttribute(_address);
+        require(candidateContract.isAttribute());
+        attribute = candidateContract;
+    }
+
+    /// @inheritdoc IMarketPlace
+    function setPlanterFundAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        IPlanterFund candidateContract = IPlanterFund(_address);
+
+        require(candidateContract.isPlanterFund());
+
+        planterFundContract = candidateContract;
+    }
+
     function addModel(
         uint256 _modelId,
         uint8 _country,
@@ -173,6 +228,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         address _referrer,
         address _recipient
     ) external {
+        address recipient = _recipient == address(0)
+            ? _msgSender()
+            : _recipient;
+
+        require(recipient != _referrer, "Invalid referrer");
+
         uint256 totalPrice;
         for (uint256 i = 0; i < _input.length; i++) {
             require(
@@ -200,6 +261,73 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             totalPrice
         );
         require(success, "MarketPlace:Unsuccessful transfer.");
+
+        TotalBalances memory totalBalances;
+
+        for (uint256 i = 0; i < _input.length; i++) {
+            uint256 tempTreeId = idToModelMetaData[_input[i].modelMetaDataId]
+                .lastFund;
+
+            uint256 treePrice = models[
+                idToModelMetaData[_input[i].modelMetaDataId].modelId
+            ].price;
+
+            treeFactory.mintTreeMarketPlace(
+                tempTreeId + 1,
+                _input[i].count,
+                recipient
+            );
+
+            for (uint256 j = 1; j <= _input[i].count; j++) {
+                bool successAttr = attribute.createAttribute(tempTreeId + j, 1);
+
+                require(successAttr, "Attribute not generated");
+
+                (
+                    uint16 planterShare,
+                    uint16 ambassadorShare,
+                    uint16 researchShare,
+                    uint16 localDevelopmentShare,
+                    uint16 insuranceShare,
+                    uint16 treasuryShare,
+                    uint16 reserve1Share,
+                    uint16 reserve2Share
+                ) = allocation.findAllocationData(tempTreeId + j);
+
+                totalBalances.planter += (treePrice * planterShare) / 10000;
+                totalBalances.ambassador +=
+                    (treePrice * ambassadorShare) /
+                    10000;
+                totalBalances.research += (treePrice * researchShare) / 10000;
+                totalBalances.localDevelopment +=
+                    (treePrice * localDevelopmentShare) /
+                    10000;
+                totalBalances.insurance += (treePrice * insuranceShare) / 10000;
+                totalBalances.treasury += (treePrice * treasuryShare) / 10000;
+                totalBalances.reserve1 += (treePrice * reserve1Share) / 10000;
+                totalBalances.reserve2 += (treePrice * reserve2Share) / 10000;
+
+                planterFundContract.updateProjectedEarnings(
+                    tempTreeId + j,
+                    (treePrice * planterShare) / 10000,
+                    (treePrice * ambassadorShare) / 10000
+                );
+            }
+
+            idToModelMetaData[_input[i].modelMetaDataId].lastFund += _input[i]
+                .count;
+        }
+
+        daiFund.fundTreeBatch(
+            totalBalances.planter,
+            totalBalances.ambassador,
+            totalBalances.research,
+            totalBalances.localDevelopment,
+            totalBalances.insurance,
+            totalBalances.treasury,
+            totalBalances.reserve1,
+            totalBalances.reserve2
+        );
     }
 
     function updateModel(address _sender, uint256 _modelMetaDataId)

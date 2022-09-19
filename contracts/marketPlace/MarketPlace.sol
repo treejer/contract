@@ -32,7 +32,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     IRegularSaleV2 public regularSale;
 
     CountersUpgradeable.Counter public modelId;
-    CountersUpgradeable.Counter public modelMetaDataId;
 
     struct TotalBalances {
         uint256 planter;
@@ -46,16 +45,15 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     }
 
     struct Input {
-        uint256 modelMetaDataId;
+        uint256 modelId;
         uint256 count;
     }
 
-    struct ModelMetaData {
+    struct Model {
         uint8 country;
         uint8 treeType;
         uint256 price;
         address planter;
-        uint256 modelId;
         uint256 count;
         uint256 start;
         uint256 lastFund;
@@ -65,7 +63,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     //⇒ modelId should start from number 1
 
-    mapping(uint256 => ModelMetaData) public idToModelMetaData;
+    mapping(uint256 => Model) public models;
 
     //⇒ modelMetaDataId should start from number 1
 
@@ -203,16 +201,14 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(_count < 10001, "MarketPlace:invalid count");
 
         modelId.increment();
-
-        ModelMetaData storage modelMetaData = idToModelMetaData[
-            modelId.current()
-        ];
+        uint256 _modelId = modelId.current();
+        Model storage modelMetaData = idToModelMetaData[_modelId];
 
         modelMetaData.country = _country;
         modelMetaData.treeType = _treeType;
         modelMetaData.count = _count;
         modelMetaData.price = _price;
-        modelMetaData.modelId = modelId.current();
+        modelMetaData.modelId = _modelId;
         modelMetaData.planter = msg.sender;
         modelMetaData.start = lastTreeAssigned;
         modelMetaData.lastFund = lastTreeAssigned - 1;
@@ -235,7 +231,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 totalPrice = 0;
         bool success = false;
 
-        ModelMetaData storage tempModelMetaData;
+        Model storage tempModelMetaData;
 
         for (uint256 i = 0; i < _input.length; i++) {
             tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
@@ -340,9 +336,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         onlyTreejerContract
         returns (uint256)
     {
-        ModelMetaData storage modelMetaData = idToModelMetaData[
-            _modelMetaDataId
-        ];
+        Model storage modelMetaData = idToModelMetaData[_modelMetaDataId];
 
         require(
             modelMetaData.planter == _sender,
@@ -367,9 +361,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         override
         onlyTreejerContract
     {
-        ModelMetaData storage modelMetaData = idToModelMetaData[
-            _modelMetaDataId
-        ];
+        Model storage modelMetaData = idToModelMetaData[_modelMetaDataId];
 
         require(
             modelMetaData.planter == _sender,

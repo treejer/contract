@@ -10,7 +10,7 @@ import "../treasury/IAllocation.sol";
 import "../tree/ITreeFactoryV2.sol";
 import "../tree/IAttribute.sol";
 import "../treasury/IPlanterFund.sol";
-
+import "../regularSale/IRegularSaleV2.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -29,6 +29,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     ITreeFactoryV2 public treeFactory;
     IAttribute public attribute;
     IPlanterFund public planterFundContract;
+    IRegularSaleV2 public regularSale;
 
     CountersUpgradeable.Counter public modelId;
     CountersUpgradeable.Counter public modelMetaDataId;
@@ -183,6 +184,17 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         planterFundContract = candidateContract;
     }
 
+    /// @inheritdoc IMarketPlace
+    function setRegularSaleAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        IRegularSaleV2 candidateContract = IRegularSaleV2(_address);
+        require(candidateContract.isRegularSale());
+        regularSale = candidateContract;
+    }
+
     function addModel(
         uint256 _modelId,
         uint8 _country,
@@ -232,9 +244,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             ? _msgSender()
             : _recipient;
 
-        require(recipient != _referrer, "Invalid referrer");
+        require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
-        uint256 totalPrice;
+        uint256 totalPrice = 0;
         for (uint256 i = 0; i < _input.length; i++) {
             require(
                 idToModelMetaData[_input[i].modelMetaDataId].lastFund +
@@ -263,6 +275,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(success, "MarketPlace:Unsuccessful transfer.");
 
         TotalBalances memory totalBalances;
+        uint256 totalCount = 0;
 
         for (uint256 i = 0; i < _input.length; i++) {
             uint256 tempTreeId = idToModelMetaData[_input[i].modelMetaDataId]
@@ -316,6 +329,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
             idToModelMetaData[_input[i].modelMetaDataId].lastFund += _input[i]
                 .count;
+
+            totalCount += _input[i].count;
         }
 
         daiFund.fundTreeBatch(
@@ -328,6 +343,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             totalBalances.reserve1,
             totalBalances.reserve2
         );
+
+        if (_referrer != address(0)) {
+            regularSale.updateReferrerClaimableTreesDai(_referrer, totalCount);
+        }
     }
 
     function updateModel(address _sender, uint256 _modelMetaDataId)

@@ -214,17 +214,17 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         modelId.increment();
         uint256 _modelId = modelId.current();
-        Model storage modelMetaData = idToModelMetaData[_modelId];
 
-        modelMetaData.country = _country;
-        modelMetaData.treeType = _treeType;
-        modelMetaData.count = _count;
-        modelMetaData.price = _price;
-        modelMetaData.modelId = _modelId;
-        modelMetaData.planter = msg.sender;
-        modelMetaData.start = lastTreeAssigned;
-        modelMetaData.lastFund = lastTreeAssigned - 1;
-        modelMetaData.lastPlant = lastTreeAssigned - 1;
+        Model storage modelData = models[_modelId];
+
+        modelData.country = _country;
+        modelData.treeType = _treeType;
+        modelData.count = _count;
+        modelData.price = _price;
+        modelData.planter = msg.sender;
+        modelData.start = lastTreeAssigned;
+        modelData.lastFund = lastTreeAssigned - 1;
+        modelData.lastPlant = lastTreeAssigned - 1;
 
         lastTreeAssigned += _count;
     }
@@ -243,19 +243,19 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 totalPrice = 0;
         bool success = false;
 
-        Model storage tempModelMetaData;
+        Model storage modelData;
 
         for (uint256 i = 0; i < _input.length; i++) {
-            tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
+            modelData = models[_input[i].modelId];
 
             require(
-                tempModelMetaData.lastFund + _input[i].count <
-                    tempModelMetaData.start + tempModelMetaData.count &&
-                    tempModelMetaData.deactive == 0,
+                modelData.lastFund + _input[i].count <
+                    modelData.start + modelData.count &&
+                    modelData.deactive == 0,
                 "MarketPlace:Invalid count."
             );
 
-            totalPrice += tempModelMetaData.price * _input[i].count;
+            totalPrice += modelData.price * _input[i].count;
         }
 
         require(
@@ -274,10 +274,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 totalCount = 0;
 
         for (uint256 i = 0; i < _input.length; i++) {
-            tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
-            uint256 tempTreeId = tempModelMetaData.lastFund;
+            modelData = models[_input[i].modelId];
+            uint256 tempTreeId = modelData.lastFund;
 
-            uint256 treePrice = tempModelMetaData.price;
+            uint256 treePrice = modelData.price;
 
             treeFactory.mintTreeMarketPlace(
                 tempTreeId + 1,
@@ -321,7 +321,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
                 );
             }
 
-            tempModelMetaData.lastFund += _input[i].count;
+            modelData.lastFund += _input[i].count;
 
             totalCount += _input[i].count;
         }
@@ -342,47 +342,40 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
     }
 
-    function updateModel(address _sender, uint256 _modelMetaDataId)
+    function updateModel(address _sender, uint256 _modelId)
         external
         override
         onlyTreejerContract
         returns (uint256)
     {
-        Model storage modelMetaData = idToModelMetaData[_modelMetaDataId];
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == _sender, "owner of model is incorrect");
+
+        uint256 lastPlantTemp = modelData.lastPlant + 1;
 
         require(
-            modelMetaData.planter == _sender,
-            "owner of modelMetaData is incorrect"
-        );
-
-        uint256 lastPlantTemp = modelMetaData.lastPlant + 1;
-
-        require(
-            lastPlantTemp < modelMetaData.start + modelMetaData.count,
+            lastPlantTemp < modelData.start + modelData.count,
             "All tree planted"
         );
 
-        modelMetaData.lastPlant = lastPlantTemp;
+        modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
     }
 
-    function checkOwnerAndLastPlant(address _sender, uint256 _modelMetaDataId)
+    function checkOwnerAndLastPlant(address _sender, uint256 _modelId)
         external
         view
         override
         onlyTreejerContract
     {
-        Model storage modelMetaData = idToModelMetaData[_modelMetaDataId];
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == _sender, "owner of model is incorrect");
 
         require(
-            modelMetaData.planter == _sender,
-            "owner of modelMetaData is incorrect"
-        );
-
-        require(
-            modelMetaData.lastPlant + 1 <
-                modelMetaData.start + modelMetaData.count,
+            modelData.lastPlant + 1 < modelData.start + modelData.count,
             "All tree planted"
         );
     }

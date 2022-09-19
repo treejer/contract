@@ -543,7 +543,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
             uint256 tempLastRegularTreeId = 0;
 
             if (tempTreesModel[_tempTreeId] > 0) {
-                tempLastRegularTreeId = marketPlace.updateModel(
+                tempLastRegularTreeId = marketPlace.updateLastPlantedOfModel(
                     tempTreeData.planter,
                     tempTreesModel[_tempTreeId]
                 );

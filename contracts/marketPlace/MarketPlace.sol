@@ -247,6 +247,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
         uint256 totalPrice = 0;
+        bool success;
 
         ModelMetaData storage tempModelMetaData;
 
@@ -269,7 +270,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             "MarketPlace:Insufficient balance."
         );
 
-        bool success = daiToken.transferFrom(
+        success = daiToken.transferFrom(
             _msgSender(),
             address(daiFund),
             totalPrice
@@ -292,9 +293,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             );
 
             for (uint256 j = 1; j <= _input[i].count; j++) {
-                bool successAttr = attribute.createAttribute(tempTreeId + j, 1);
+                success = attribute.createAttribute(tempTreeId + j, 1);
 
-                require(successAttr, "Attribute not generated");
+                require(success, "Attribute not generated");
 
                 (
                     uint16 planterShare,

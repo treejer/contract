@@ -247,20 +247,20 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
         uint256 totalPrice = 0;
-        uint256 tempModelDataIdOfInput = 0;
+
+        ModelMetaData storage tempModelMetaData;
+
         for (uint256 i = 0; i < _input.length; i++) {
-            tempModelDataIdOfInput = _input[i].modelMetaDataId;
+            tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
+
             require(
-                idToModelMetaData[tempModelDataIdOfInput].lastFund +
-                    _input[i].count <
-                    idToModelMetaData[tempModelDataIdOfInput].start +
-                        idToModelMetaData[tempModelDataIdOfInput].count,
+                tempModelMetaData.lastFund + _input[i].count <
+                    tempModelMetaData.start + tempModelMetaData.count,
                 "MarketPlace:Invalid count."
             );
 
             totalPrice +=
-                models[idToModelMetaData[tempModelDataIdOfInput].modelId]
-                    .price *
+                models[tempModelMetaData.modelId].price *
                 _input[i].count;
         }
 
@@ -280,14 +280,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 totalCount = 0;
 
         for (uint256 i = 0; i < _input.length; i++) {
-            tempModelDataIdOfInput = _input[i].modelMetaDataId;
+            tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
+            uint256 tempTreeId = tempModelMetaData.lastFund;
 
-            uint256 tempTreeId = idToModelMetaData[tempModelDataIdOfInput]
-                .lastFund;
-
-            uint256 treePrice = models[
-                idToModelMetaData[tempModelDataIdOfInput].modelId
-            ].price;
+            uint256 treePrice = models[tempModelMetaData.modelId].price;
 
             treeFactory.mintTreeMarketPlace(
                 tempTreeId + 1,
@@ -331,8 +327,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
                 );
             }
 
-            idToModelMetaData[tempModelDataIdOfInput].lastFund += _input[i]
-                .count;
+            tempModelMetaData.lastFund += _input[i].count;
 
             totalCount += _input[i].count;
         }

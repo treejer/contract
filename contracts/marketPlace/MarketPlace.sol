@@ -112,7 +112,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         require(candidateContract.isAccessRestriction());
 
-        modelId.increment();
         accessRestriction = candidateContract;
     }
 
@@ -204,35 +203,36 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     ) external onlyPlanter {
         require(_count < 10000, "MarketPlace:invalid count");
 
-        if (_modelId > 0) {
-            ModelMetaData storage modelMetaData = idToModelMetaData[_modelId];
+        uint256 tempModelId;
 
-            modelMetaData.count = _count;
-            modelMetaData.modelId = _modelId;
-            modelMetaData.planter = msg.sender;
-            modelMetaData.start = lastTreeAssigned;
-            modelMetaData.lastFund = lastTreeAssigned - 1;
-            modelMetaData.lastPlant = lastTreeAssigned - 1;
+        if (_modelId > 0) {
+            tempModelId = _modelId;
         } else {
+            modelId.increment();
+
             Model storage modelData = models[modelId.current()];
 
             modelData.country = _country;
             modelData.price = _price;
             modelData.treeType = _treeType;
 
-            ModelMetaData storage modelMetaData = idToModelMetaData[
-                modelMetaDataId.current()
-            ];
-
-            modelMetaData.count = _count;
-            modelMetaData.modelId = modelId.current();
-            modelMetaData.planter = msg.sender;
-            modelMetaData.start = lastTreeAssigned;
-            modelMetaData.lastFund = lastTreeAssigned - 1;
-            modelMetaData.lastPlant = lastTreeAssigned - 1;
-
-            lastTreeAssigned += _count;
+            tempModelId = modelId.current();
         }
+
+        modelMetaDataId.increment();
+
+        ModelMetaData storage modelMetaData = idToModelMetaData[
+            modelMetaDataId.current()
+        ];
+
+        modelMetaData.count = _count;
+        modelMetaData.modelId = tempModelId;
+        modelMetaData.planter = msg.sender;
+        modelMetaData.start = lastTreeAssigned;
+        modelMetaData.lastFund = lastTreeAssigned - 1;
+        modelMetaData.lastPlant = lastTreeAssigned - 1;
+
+        lastTreeAssigned += _count;
     }
 
     function fundTree(

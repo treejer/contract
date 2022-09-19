@@ -52,13 +52,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     struct Model {
         uint8 country;
         uint8 treeType;
-        uint256 price;
+        uint8 deactive;
         address planter;
+        uint256 price;
         uint256 count;
         uint256 start;
         uint256 lastFund;
         uint256 lastPlant;
-        uint8 deactive;
     }
 
     //⇒ modelId should start from number 1
@@ -190,7 +190,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         regularSale = candidateContract;
     }
 
-    function deleteModal(uint256 _modelId) external {
+    function deleteModel(uint256 _modelId) external {
         Model storage model = models[_modelId];
 
         require(model.planter == msg.sender, "MarketPlace:Access Denied");
@@ -201,7 +201,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             "MarketPlace:Tree Planted or Funded"
         );
 
-        delete model;
+        if (_modelId == modelId.current()) {
+            modelId.decrement();
+            lastTreeAssigned -= model.count;
+        }
+
+        delete models[_modelId];
     }
 
     function addModel(

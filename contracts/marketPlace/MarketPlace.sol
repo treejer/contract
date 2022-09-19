@@ -109,6 +109,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         lastTreeAssigned = 1000000001;
 
         accessRestriction = candidateContract;
+
+        isMarketPlace = true;
     }
 
     /// @inheritdoc IMarketPlace

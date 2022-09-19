@@ -65,7 +65,8 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
     /** NOTE mapping of treeId to TempTree struct */
     mapping(uint256 => TempTree) public override tempTrees;
 
-    //----->CHANGED
+    //----->CHANGED  Version 2 data
+
     IMarketPlace public marketPlace;
 
     mapping(uint256 => uint256) public tempTreesModel; // tempIndex => modelMetaDataId

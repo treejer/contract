@@ -53,17 +53,17 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     struct Model {
         uint8 country;
         uint8 treeType;
-        uint256 price;
     }
 
     struct ModelMetaData {
+        uint256 price;
         address planter;
         uint256 modelId;
         uint256 count;
         uint256 start;
         uint256 lastFund;
         uint256 lastPlant;
-        bool deactivate;
+        uint8 deactive;
     }
 
     mapping(uint256 => Model) public models; // modelId shows the number of our models
@@ -111,6 +111,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         );
 
         require(candidateContract.isAccessRestriction());
+        lastTreeAssigned = 1000000001;
 
         accessRestriction = candidateContract;
     }
@@ -201,7 +202,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 _price,
         uint256 _count
     ) external onlyPlanter {
-        require(_count < 10000, "MarketPlace:invalid count");
+        require(_count < 10001, "MarketPlace:invalid count");
 
         uint256 tempModelId;
 
@@ -210,13 +211,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         } else {
             modelId.increment();
 
-            Model storage modelData = models[modelId.current()];
+            tempModelId = modelId.current();
+
+            Model storage modelData = models[tempModelId];
 
             modelData.country = _country;
-            modelData.price = _price;
             modelData.treeType = _treeType;
-
-            tempModelId = modelId.current();
         }
 
         modelMetaDataId.increment();
@@ -226,6 +226,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         ];
 
         modelMetaData.count = _count;
+        modelMetaData.price = _price;
         modelMetaData.modelId = tempModelId;
         modelMetaData.planter = msg.sender;
         modelMetaData.start = lastTreeAssigned;
@@ -247,7 +248,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
         uint256 totalPrice = 0;
-        bool success;
+        bool success = false;
 
         ModelMetaData storage tempModelMetaData;
 
@@ -256,13 +257,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
             require(
                 tempModelMetaData.lastFund + _input[i].count <
-                    tempModelMetaData.start + tempModelMetaData.count,
+                    tempModelMetaData.start + tempModelMetaData.count &&
+                    tempModelMetaData.deactive == 0,
                 "MarketPlace:Invalid count."
             );
 
-            totalPrice +=
-                models[tempModelMetaData.modelId].price *
-                _input[i].count;
+            totalPrice += tempModelMetaData.price * _input[i].count;
         }
 
         require(
@@ -284,7 +284,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             tempModelMetaData = idToModelMetaData[_input[i].modelMetaDataId];
             uint256 tempTreeId = tempModelMetaData.lastFund;
 
-            uint256 treePrice = models[tempModelMetaData.modelId].price;
+            uint256 treePrice = tempModelMetaData.price;
 
             treeFactory.mintTreeMarketPlace(
                 tempTreeId + 1,

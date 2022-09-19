@@ -246,6 +246,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(recipient != _referrer, "MarketPlace:Invalid referrer.");
 
         uint256 totalPrice = 0;
+        uint256 totalCount = 0;
         bool success = false;
 
         Model storage modelData;
@@ -261,7 +262,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             );
 
             totalPrice += modelData.price * _input[i].count;
+            totalCount += _input[i].count;
         }
+
+        require(totalCount < 101, "MarketPlace:total count exceeded 100.");
 
         require(
             daiToken.balanceOf(_msgSender()) >= totalPrice,
@@ -276,7 +280,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(success, "MarketPlace:Unsuccessful transfer.");
 
         TotalBalances memory totalBalances;
-        uint256 totalCount = 0;
 
         for (uint256 i = 0; i < _input.length; i++) {
             modelData = models[_input[i].modelId];
@@ -327,8 +330,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             }
 
             modelData.lastFund += _input[i].count;
-
-            totalCount += _input[i].count;
         }
 
         daiFund.fundTreeBatch(
@@ -347,7 +348,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
     }
 
-    function updateModel(address _sender, uint256 _modelId)
+    function updateLastPlantedOfModel(address _sender, uint256 _modelId)
         external
         override
         onlyTreejerContract
@@ -367,6 +368,33 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
+    }
+
+    function updatePrice(uint256 _modelId, uint256 _price) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        modelData.price = _price;
+    }
+
+    function updateModelData(
+        uint256 _modelId,
+        uint8 _treeType,
+        uint8 _country
+    ) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        require(
+            modelData.lastFund == modelData.lastPlant &&
+                modelData.lastPlant == modelData.start - 1,
+            "MarketPlace:Tree Planted or Funded."
+        );
+
+        modelData.country = _country;
+        modelData.treeType = _treeType;
     }
 
     function checkOwnerAndLastPlant(address _sender, uint256 _modelId)

@@ -22,7 +22,7 @@ interface IMarketPlace {
 
     function setRegularSaleAddress(address _address) external;
 
-    function updateModel(address _sender, uint256 _modelMetaDataId)
+    function updateLastPlantedOfModel(address _sender, uint256 _modelMetaDataId)
         external
         returns (uint256);
 

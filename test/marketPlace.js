@@ -106,27 +106,9 @@ contract("marketPlace", (accounts) => {
 
   describe("deployment and set addresses", () => {
     before(async () => {
-      regularSaleInstance = await RegularSale.new({
-        from: deployerAccount,
-      });
+      marketPlaceInstance = await MarketPlace.new({ from: deployerAccount });
 
-      await regularSaleInstance.initialize(zeroAddress, web3.utils.toWei("7"), {
-        from: deployerAccount,
-      }).should.be.rejected;
-
-      await regularSaleInstance.initialize(
-        arInstance.address,
-        web3.utils.toWei("7"),
-        {
-          from: deployerAccount,
-        }
-      );
-
-      treeFactoryInstance = await TreeFactory.new({
-        from: deployerAccount,
-      });
-
-      await treeFactoryInstance.initialize(arInstance.address, {
+      await marketPlaceInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
 
@@ -145,43 +127,68 @@ contract("marketPlace", (accounts) => {
       await allocationInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundsInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundsInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      regularSaleInstance = await RegularSale.new({
+        from: deployerAccount,
+      });
+
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     //////////////////************************************ deploy successfully ***************************************
     it("deploys successfully", async () => {
-      const address = regularSaleInstance.address;
+      const address = marketPlaceInstance.address;
       assert.notEqual(address, 0x0);
       assert.notEqual(address, "");
       assert.notEqual(address, null);
       assert.notEqual(address, undefined);
+      //-------------- check accessRestriction in initialize
+      assert.equal(
+        await marketPlaceInstance.accessRestriction(),
+        arInstance.address,
+        "access restriction address is incorrect"
+      );
     });
 
-    it("set regularSale address and fail in invalid situation", async () => {
-      /////------------------set trust forwarder address
+    it("set marketPlace contract addresses and fail in invalid situation", async () => {
+      //////--------------- set daiToken address
+      //////--------------- set daiFund address
+      //////--------------- set allocation address
+      //////--------------- set treeFactory address
+      //////--------------- set attribute address
+      //////--------------- set planterFundContract address
 
-      await regularSaleInstance
-        .setTrustedForwarder(userAccount2, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await regularSaleInstance
-        .setTrustedForwarder(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      await regularSaleInstance.setTrustedForwarder(userAccount2, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        userAccount2,
-        await regularSaleInstance.trustedForwarder(),
-        "address set incorect"
-      );
-
-      /////------------------set tree factory address
+      /////------------------set regularSale address
 
       await regularSaleInstance
         .setTreeFactoryAddress(treeFactoryInstance.address, {
@@ -275,36 +282,6 @@ contract("marketPlace", (accounts) => {
         allocationInstance.address,
         await regularSaleInstance.allocation(),
         "allocation address set incorect"
-      );
-
-      ////---------------------------------set wethFund Address--------------------------------------------------------
-
-      wethFundInstance = await WethFund.new({
-        from: deployerAccount,
-      });
-
-      await wethFundInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
-      await regularSaleInstance
-        .setWethFundAddress(wethFundInstance.address, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await regularSaleInstance.setWethFundAddress(zeroAddress, {
-        from: deployerAccount,
-      }).should.be.rejected;
-
-      await regularSaleInstance.setWethFundAddress(wethFundInstance.address, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        wethFundInstance.address,
-        await regularSaleInstance.wethFund(),
-        "address set incorect"
       );
     });
   });

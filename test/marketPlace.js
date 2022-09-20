@@ -43,6 +43,7 @@ const {
   TreasuryManagerErrorMsg,
   TimeEnumes,
   erc20ErrorMsg,
+  MarketPlaceErrorMsg,
 } = require("./enumes");
 
 const FakeToken = artifacts.require("FakeToken");
@@ -355,25 +356,28 @@ contract("marketPlace", (accounts) => {
 
   describe("without financial section", () => {
     beforeEach(async () => {
-      regularSaleInstance = await RegularSale.new({
+      marketPlaceInstance = await MarketPlace.new({
         from: deployerAccount,
       });
 
-      await regularSaleInstance.initialize(
-        arInstance.address,
-        web3.utils.toWei("7"),
-        {
-          from: deployerAccount,
-        }
-      );
-
-      allocationInstance = await Allocation.new({
+      await marketPlaceInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
+    });
+    it.only("add model", async () => {
+      // uint8 _country,
+      // uint8 _species,
+      // uint256 _price,
+      // uint256 _count
+      const country = 1;
+      const species = 10;
+      const price = web3.utils.toWei("10");
+      const count = 50;
+      await marketPlaceInstance
+        .addModel(country, species, price, count)
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVAILD_PLANTER);
 
-      await allocationInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
+      // await marketPlaceInstance.addModel(country, species, price, 10002);
     });
   });
 

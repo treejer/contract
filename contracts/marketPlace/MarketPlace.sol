@@ -9,6 +9,7 @@ import "../gsn/RelayRecipient.sol";
 import "../treasury/IAllocation.sol";
 import "../tree/ITreeFactoryV2.sol";
 import "../tree/IAttribute.sol";
+import "../planter/IPlanter.sol";
 import "../treasury/IPlanterFund.sol";
 import "../regularSale/IRegularSaleV2.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
@@ -30,6 +31,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     IAttribute public attribute;
     IPlanterFund public planterFundContract;
     IRegularSaleV2 public regularSale;
+    IPlanter public planter;
 
     CountersUpgradeable.Counter public modelId;
 
@@ -190,6 +192,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         regularSale = candidateContract;
     }
 
+    /// @inheritdoc IMarketPlace
+    function setPlanterAddress(address _address) external override onlyAdmin {
+        IPlanter candidateContract = IPlanter(_address);
+        require(candidateContract.isPlanter());
+        planter = candidateContract;
+    }
+
     function deleteModel(uint256 _modelId) external {
         Model storage model = models[_modelId];
 
@@ -214,8 +223,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint8 _species,
         uint256 _price,
         uint256 _count
-    ) external onlyPlanter {
-        require(_count < 10001, "MarketPlace:invalid count");
+    ) external {
+        (uint8 planterType, , , , , , , ) = planter.planters(msg.sender);
+
+        require(planterType < 3, "MarketPlace:Invalid Planter");
+
+        require(_count > 0 && _count < 10001, "MarketPlace:Invalid count");
 
         modelId.increment();
         uint256 _modelId = modelId.current();

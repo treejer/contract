@@ -189,6 +189,11 @@ const TreeBoxErrorMsg = {
   INVALID_RECIPIENTS: "invalid recipients",
 };
 
+const MarketPlaceErrorMsg = {
+  INVALID_COUNT: "MarketPlace:Invalid count",
+  INVAILD_PLANTER: "MarketPlace:Invalid Planter",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -208,4 +213,5 @@ module.exports = {
   WethFundErrorMsg,
   SafeMathErrorMsg,
   TreeBoxErrorMsg,
+  MarketPlaceErrorMsg,
 };

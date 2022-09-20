@@ -15,8 +15,8 @@ import "./ITreeFactoryV2.sol";
 
 import "./../marketPlace/IMarketPlace.sol";
 
-/** @title TreeFactory Contract */
-contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
+/** @title TreeFactoryV2 Contract */
+contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;

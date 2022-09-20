@@ -189,6 +189,10 @@ const TreeBoxErrorMsg = {
   INVALID_RECIPIENTS: "invalid recipients",
 };
 
+const MarketPlaceErrorMsg = {
+  OWNER_INVALID: "MarketPlace:Owner of model is incorrect",
+};
+
 module.exports = {
   TimeEnumes,
   CommonErrorMsg,
@@ -208,4 +212,5 @@ module.exports = {
   WethFundErrorMsg,
   SafeMathErrorMsg,
   TreeBoxErrorMsg,
+  MarketPlaceErrorMsg,
 };

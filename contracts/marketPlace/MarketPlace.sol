@@ -356,13 +356,18 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     {
         Model storage modelData = models[_modelId];
 
-        require(modelData.planter == _sender, "owner of model is incorrect");
+        bool canPlant = planterContract.manageAssignedTreePermission(
+            _sender,
+            modelData.planter
+        );
+
+        require(canPlant, "MarketPlace:Permission denied");
 
         uint256 lastPlantTemp = modelData.lastPlant + 1;
 
         require(
             lastPlantTemp < modelData.start + modelData.count,
-            "All tree planted"
+            "MarketPlace:All tree planted"
         );
 
         modelData.lastPlant = lastPlantTemp;
@@ -397,19 +402,22 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.species = _species;
     }
 
-    function checkOwnerAndLastPlant(address _sender, uint256 _modelId)
-        external
-        view
-        override
-        onlyTreejerContract
-    {
-        Model storage modelData = models[_modelId];
+    // function checkOwnerAndLastPlant(address _sender, uint256 _modelId)
+    //     external
+    //     view
+    //     override
+    //     onlyTreejerContract
+    // {
+    //     Model storage modelData = models[_modelId];
 
-        require(modelData.planter == _sender, "owner of model is incorrect");
+    //     require(
+    //         modelData.planter == _sender,
+    //         "MarketPlace:Owner of model is incorrect"
+    //     );
 
-        require(
-            modelData.lastPlant + 1 < modelData.start + modelData.count,
-            "All tree planted"
-        );
-    }
+    //     require(
+    //         modelData.lastPlant + 1 < modelData.start + modelData.count,
+    //         "MarketPlace:All tree planted"
+    //     );
+    // }
 }

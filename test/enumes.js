@@ -190,6 +190,7 @@ const TreeBoxErrorMsg = {
 };
 
 const MarketPlaceErrorMsg = {
+  OWNER_INVALID: "MarketPlace:Owner of model is incorrect",
   INVALID_COUNT: "MarketPlace:Invalid count",
   INVAILD_PLANTER: "MarketPlace:Invalid Planter",
 };

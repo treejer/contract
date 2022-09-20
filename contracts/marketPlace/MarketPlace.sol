@@ -51,7 +51,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     struct Model {
         uint8 country;
-        uint8 treeType;
+        uint8 species;
         uint8 deactive;
         address planter;
         uint256 price;
@@ -211,7 +211,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     function addModel(
         uint8 _country,
-        uint8 _treeType,
+        uint8 _species,
         uint256 _price,
         uint256 _count
     ) external onlyPlanter {
@@ -223,7 +223,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         Model storage modelData = models[_modelId];
 
         modelData.country = _country;
-        modelData.treeType = _treeType;
+        modelData.species = _species;
         modelData.count = _count;
         modelData.price = _price;
         modelData.planter = msg.sender;
@@ -380,7 +380,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     function updateModelData(
         uint256 _modelId,
-        uint8 _treeType,
+        uint8 _species,
         uint8 _country
     ) external {
         Model storage modelData = models[_modelId];
@@ -394,7 +394,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         );
 
         modelData.country = _country;
-        modelData.treeType = _treeType;
+        modelData.species = _species;
     }
 
     function checkOwnerAndLastPlant(address _sender, uint256 _modelId)

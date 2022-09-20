@@ -230,7 +230,7 @@ interface ITreeFactoryV2 {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode,
-        uint256 _modelMetaDataId
+        uint256 _modelId
     ) external;
 
     function updateLastRegualarTreeId(uint256 _lastRegualarTreeId) external;

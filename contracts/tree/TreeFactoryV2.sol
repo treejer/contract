@@ -483,7 +483,7 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
         string calldata _treeSpecs,
         uint64 _birthDate,
         uint16 _countryCode,
-        uint256 _modelMetaDataId
+        uint256 _modelId
     ) external override ifNotPaused {
         require(planterContract.manageTreePermission(_msgSender()));
 
@@ -500,10 +500,10 @@ contract TreeFactory is Initializable, RelayRecipient, ITreeFactoryV2 {
 
         //------------------->CHANGED
 
-        if (_modelMetaDataId > 0) {
-            marketPlace.checkOwnerAndLastPlant(_msgSender(), _modelMetaDataId);
+        if (_modelId > 0) {
+            marketPlace.checkOwnerAndLastPlant(_msgSender(), _modelId);
 
-            tempTreesModel[_pendingRegularTreeId.current()] = _modelMetaDataId;
+            tempTreesModel[_pendingRegularTreeId.current()] = _modelId;
         }
 
         emit TreePlanted(_pendingRegularTreeId.current());

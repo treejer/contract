@@ -22,9 +22,11 @@ interface IMarketPlace {
 
     function setRegularSaleAddress(address _address) external;
 
+    function setPlanterAddress(address _address) external;
+
     function updateLastPlantedOfModel(address _sender, uint256 _modelId)
         external
         returns (uint256);
 
-    function checkOwnerAndLastPlant(address _sender, uint256 _modelId) external;
+    // function checkOwnerAndLastPlant(address _sender, uint256 _modelId) external;
 }

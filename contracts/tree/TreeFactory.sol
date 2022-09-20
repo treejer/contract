@@ -14,7 +14,7 @@ import "../planter/IPlanter.sol";
 import "./ITreeFactory.sol";
 
 /** @title TreeFactory Contract */
-contract TreeFactory is Initializable, RelayRecipient, ITreeFactory {
+contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;

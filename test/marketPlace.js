@@ -57,7 +57,7 @@ contract("marketPlace", (accounts) => {
 
   let treeTokenInstance;
   let attributeInstance;
-
+  let planterInstance;
   let allocationInstance;
   let daiFundInstance;
   let planterFundsInstnce;
@@ -68,9 +68,9 @@ contract("marketPlace", (accounts) => {
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
-  const userAccount1 = accounts[2];
-  const userAccount2 = accounts[3];
-  const userAccount3 = accounts[4];
+  const userAccount1 = accounts[2]; //individual planter
+  const userAccount2 = accounts[3]; //organization planter
+  const userAccount3 = accounts[4]; //member of organization planter
   const userAccount4 = accounts[5];
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7]; //not data manager or treejerContract
@@ -103,6 +103,10 @@ contract("marketPlace", (accounts) => {
       userAccount8,
       deployerAccount
     );
+
+    await Common.addPlanter(arInstance, userAccount1, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount2, deployerAccount);
+    await Common.addPlanter(arInstance, userAccount3, deployerAccount);
   });
 
   describe("deployment and set addresses", () => {
@@ -164,6 +168,14 @@ contract("marketPlace", (accounts) => {
           from: deployerAccount,
         }
       );
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
     });
 
     //////////////////************************************ deploy successfully ***************************************
@@ -351,6 +363,28 @@ contract("marketPlace", (accounts) => {
         await marketPlaceInstance.regularSale(),
         "allocation address set incorect"
       );
+
+      /////------------------set planter address
+
+      await marketPlaceInstance
+        .setPlanterAddress(planterInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await marketPlaceInstance.setPlanterAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
+      await marketPlaceInstance.setPlanterAddress(planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        planterInstance.address,
+        await marketPlaceInstance.planter(),
+        "allocation address set incorect"
+      );
     });
   });
 
@@ -364,15 +398,16 @@ contract("marketPlace", (accounts) => {
         from: deployerAccount,
       });
     });
-    it.only("add model", async () => {
-      // uint8 _country,
-      // uint8 _species,
-      // uint256 _price,
-      // uint256 _count
+    it("add model", async () => {
       const country = 1;
       const species = 10;
       const price = web3.utils.toWei("10");
       const count = 50;
+
+      await marketPlaceInstance
+        .addModel(country, species, price, count)
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVAILD_PLANTER);
+
       await marketPlaceInstance
         .addModel(country, species, price, count)
         .should.be.rejectedWith(MarketPlaceErrorMsg.INVAILD_PLANTER);

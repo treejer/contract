@@ -61,6 +61,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 start;
         uint256 lastFund;
         uint256 lastPlant;
+        uint256 lastReservePlant;
     }
 
     //⇒ modelId should start from number 1
@@ -361,11 +362,18 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
     }
 
-    function updateLastPlantedOfModel(address _sender, uint256 _modelId)
+    function updatePrice(uint256 _modelId, uint256 _price) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        modelData.price = _price;
+    }
+
+    function updateLastReservePlantedOfModel(address _sender, uint256 _modelId)
         external
         override
         onlyTreejerContract
-        returns (uint256)
     {
         Model storage modelData = models[_modelId];
 
@@ -376,24 +384,37 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         require(canPlant, "MarketPlace:Permission denied");
 
-        uint256 lastPlantTemp = modelData.lastPlant + 1;
+        uint256 lastReservePlantTemp = modelData.lastReservePlant + 1;
 
         require(
-            lastPlantTemp < modelData.start + modelData.count,
+            lastReservePlantTemp < modelData.start + modelData.count,
             "MarketPlace:All tree planted"
         );
+
+        modelData.lastReservePlant = lastReservePlantTemp;
+    }
+
+    function reduceLastReservePlantedOfModel(uint256 _modelId)
+        external
+        override
+        onlyTreejerContract
+    {
+        models[_modelId].lastReservePlant -= 1;
+    }
+
+    function updateLastPlantedOfModel(uint256 _modelId)
+        external
+        override
+        onlyTreejerContract
+        returns (uint256)
+    {
+        Model storage modelData = models[_modelId];
+
+        uint256 lastPlantTemp = modelData.lastPlant + 1;
 
         modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
-    }
-
-    function updatePrice(uint256 _modelId, uint256 _price) external {
-        Model storage modelData = models[_modelId];
-
-        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-
-        modelData.price = _price;
     }
 
     function updateModelData(
@@ -414,23 +435,4 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.country = _country;
         modelData.species = _species;
     }
-
-    // function checkOwnerAndLastPlant(address _sender, uint256 _modelId)
-    //     external
-    //     view
-    //     override
-    //     onlyTreejerContract
-    // {
-    //     Model storage modelData = models[_modelId];
-
-    //     require(
-    //         modelData.planter == _sender,
-    //         "MarketPlace:Owner of model is incorrect"
-    //     );
-
-    //     require(
-    //         modelData.lastPlant + 1 < modelData.start + modelData.count,
-    //         "MarketPlace:All tree planted"
-    //     );
-    // }
 }

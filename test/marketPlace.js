@@ -3,7 +3,7 @@
 const MarketPlace = artifacts.require("MarketPlace");
 
 const AccessRestriction = artifacts.require("AccessRestriction");
-const RegularSale = artifacts.require("RegularSaleV2");
+const RegularSale = artifacts.require("RegularSale");
 
 const TreeFactory = artifacts.require("TreeFactoryV2");
 const Attribute = artifacts.require("Attribute");
@@ -182,13 +182,76 @@ contract("marketPlace", (accounts) => {
 
     it("set marketPlace contract addresses and fail in invalid situation", async () => {
       //////--------------- set daiToken address
-      //////--------------- set daiFund address
-      //////--------------- set allocation address
-      //////--------------- set treeFactory address
-      //////--------------- set attribute address
-      //////--------------- set planterFundContract address
+      await marketPlaceInstance
+        .setDaiTokenAddress(daiInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      /////------------------set regularSale address
+      await marketPlaceInstance
+        .setDaiTokenAddress(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      await marketPlaceInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        daiInstance.address,
+        await marketPlaceInstance.daiToken(),
+        "dai token address set incorect"
+      );
+
+      //////--------------- set daiFund address
+
+      await marketPlaceInstance
+        .setDaiFundAddress(daiFundInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await marketPlaceInstance.setDaiFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
+      await marketPlaceInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
+
+      assert.equal(
+        daiFundInstance.address,
+        await marketPlaceInstance.daiFund(),
+        "dai funds address set incorect"
+      );
+
+      //////--------------- set allocation address
+
+      await marketPlaceInstance
+        .setAllocationAddress(allocationInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await marketPlaceInstance.setAllocationAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
+      await marketPlaceInstance.setAllocationAddress(
+        allocationInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        allocationInstance.address,
+        await marketPlaceInstance.allocation(),
+        "dai funds address set incorect"
+      );
+
+      //////--------------- set treeFactory address
 
       await regularSaleInstance
         .setTreeFactoryAddress(treeFactoryInstance.address, {
@@ -213,74 +276,78 @@ contract("marketPlace", (accounts) => {
         "address set incorect"
       );
 
-      ////---------------------------------set dai funds address--------------
+      //////--------------- set attribute address
 
-      await regularSaleInstance
-        .setDaiFundAddress(daiFundInstance.address, {
+      await marketPlaceInstance
+        .setAttributesAddress(attributeInstance.address, {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await regularSaleInstance.setDaiFundAddress(zeroAddress, {
+      await marketPlaceInstance.setAttributesAddress(zeroAddress, {
         from: deployerAccount,
       }).should.be.rejected;
 
-      await regularSaleInstance.setDaiFundAddress(daiFundInstance.address, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        daiFundInstance.address,
-        await regularSaleInstance.daiFund(),
-        "dai funds address set incorect"
-      );
-
-      ////---------------------------------Set dai token address--------------
-
-      await regularSaleInstance
-        .setDaiTokenAddress(daiInstance.address, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await regularSaleInstance
-        .setDaiTokenAddress(zeroAddress, {
-          from: deployerAccount,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-
-      await regularSaleInstance.setDaiTokenAddress(daiInstance.address, {
-        from: deployerAccount,
-      });
-
-      assert.equal(
-        daiInstance.address,
-        await regularSaleInstance.daiToken(),
-        "dai token address set incorect"
-      );
-
-      ////---------------------------------set Allocation Address--------------------------------------------------------
-
-      await regularSaleInstance
-        .setAllocationAddress(allocationInstance.address, {
-          from: userAccount1,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-
-      await regularSaleInstance.setAllocationAddress(zeroAddress, {
-        from: deployerAccount,
-      }).should.be.rejected;
-
-      await regularSaleInstance.setAllocationAddress(
-        allocationInstance.address,
+      await marketPlaceInstance.setAttributesAddress(
+        attributeInstance.address,
         {
           from: deployerAccount,
         }
       );
 
       assert.equal(
-        allocationInstance.address,
-        await regularSaleInstance.allocation(),
+        attributeInstance.address,
+        await marketPlaceInstance.attribute(),
+        "allocation address set incorect"
+      );
+
+      //////--------------- set planterFundContract address
+
+      await marketPlaceInstance
+        .setPlanterFundAddress(planterFundsInstnce.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await marketPlaceInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
+      await marketPlaceInstance.setPlanterFundAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        planterFundsInstnce.address,
+        await marketPlaceInstance.planterFundContract(),
+        "allocation address set incorect"
+      );
+
+      /////------------------set regularSale address
+
+      await marketPlaceInstance
+        .setRegularSaleAddress(regularSaleInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await marketPlaceInstance.setRegularSaleAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+
+      await marketPlaceInstance.setRegularSaleAddress(
+        regularSaleInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        regularSaleInstance.address,
+        await marketPlaceInstance.regularSale(),
         "allocation address set incorect"
       );
     });

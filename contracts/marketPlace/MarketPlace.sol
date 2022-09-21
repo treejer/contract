@@ -72,7 +72,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     uint256 public lastTreeAssigned;
 
-    event X(uint256 x);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());

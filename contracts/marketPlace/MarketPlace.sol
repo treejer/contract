@@ -72,6 +72,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     uint256 public lastTreeAssigned;
 
+    event X(uint256 x);
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -200,25 +201,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         planter = candidateContract;
     }
 
-    function deleteModel(uint256 _modelId) external {
-        Model storage model = models[_modelId];
-
-        require(model.planter == msg.sender, "MarketPlace:Access Denied");
-
-        require(
-            model.lastFund == model.lastPlant &&
-                model.lastPlant == model.start - 1,
-            "MarketPlace:Tree Planted or Funded"
-        );
-
-        if (_modelId == modelId.current()) {
-            modelId.decrement();
-            lastTreeAssigned -= model.count;
-        }
-
-        delete models[_modelId];
-    }
-
     function addModel(
         uint8 _country,
         uint8 _species,
@@ -227,7 +209,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     ) external {
         (uint8 planterType, , , , , , , ) = planter.planters(msg.sender);
 
-        require(planterType < 3, "MarketPlace:Invalid Planter");
+        require(
+            planterType == 1 || planterType == 2,
+            "MarketPlace:Invalid Planter"
+        );
 
         require(_count > 0 && _count < 10001, "MarketPlace:Invalid count");
 
@@ -246,6 +231,52 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.lastPlant = lastTreeAssigned - 1;
 
         lastTreeAssigned += _count;
+    }
+
+    function updateModelData(
+        uint256 _modelId,
+        uint8 _species,
+        uint8 _country
+    ) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        require(
+            modelData.lastFund == modelData.lastPlant &&
+                modelData.lastPlant == modelData.start - 1,
+            "MarketPlace:Tree Planted or Funded."
+        );
+
+        modelData.country = _country;
+        modelData.species = _species;
+    }
+
+    function updatePrice(uint256 _modelId, uint256 _price) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        modelData.price = _price;
+    }
+
+    function deleteModel(uint256 _modelId) external {
+        Model storage model = models[_modelId];
+
+        require(model.planter == msg.sender, "MarketPlace:Access Denied");
+
+        require(
+            model.lastFund == model.lastPlant &&
+                model.lastPlant == model.start - 1,
+            "MarketPlace:Tree Planted or Funded"
+        );
+
+        if (_modelId == modelId.current()) {
+            modelId.decrement();
+            lastTreeAssigned -= model.count;
+        }
+
+        delete models[_modelId];
     }
 
     function fundTree(
@@ -362,14 +393,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
     }
 
-    function updatePrice(uint256 _modelId, uint256 _price) external {
-        Model storage modelData = models[_modelId];
-
-        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-
-        modelData.price = _price;
-    }
-
     function updateLastReservePlantedOfModel(address _sender, uint256 _modelId)
         external
         override
@@ -415,24 +438,5 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
-    }
-
-    function updateModelData(
-        uint256 _modelId,
-        uint8 _species,
-        uint8 _country
-    ) external {
-        Model storage modelData = models[_modelId];
-
-        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-
-        require(
-            modelData.lastFund == modelData.lastPlant &&
-                modelData.lastPlant == modelData.start - 1,
-            "MarketPlace:Tree Planted or Funded."
-        );
-
-        modelData.country = _country;
-        modelData.species = _species;
     }
 }

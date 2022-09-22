@@ -191,8 +191,10 @@ const TreeBoxErrorMsg = {
 
 const MarketPlaceErrorMsg = {
   OWNER_INVALID: "MarketPlace:Owner of model is incorrect",
-  INVALID_COUNT: "MarketPlace:Invalid count",
-  INVAILD_PLANTER: "MarketPlace:Invalid Planter",
+  INVALID_COUNT: "MarketPlace:Invalid count.",
+  INVAILD_PLANTER: "MarketPlace:Invalid Planter.",
+  ACCESS_DENIED: "MarketPlace:Access Denied.",
+  TREE_PLANTER_OR_FUNDED: "MarketPlace:Tree Planted or Funded.",
 };
 
 module.exports = {

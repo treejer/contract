@@ -210,10 +210,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         require(
             planterType == 1 || planterType == 2,
-            "MarketPlace:Invalid Planter"
+            "MarketPlace:Invalid Planter."
         );
 
-        require(_count > 0 && _count < 10001, "MarketPlace:Invalid count");
+        require(_count > 0 && _count < 10001, "MarketPlace:Invalid count.");
 
         modelId.increment();
         uint256 _modelId = modelId.current();

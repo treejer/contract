@@ -11,6 +11,7 @@ const PlanterFund = artifacts.require("PlanterFund");
 const DaiFund = artifacts.require("DaiFund");
 const Allocation = artifacts.require("Allocation");
 const Dai = artifacts.require("Dai");
+const TestMarketPlace = artifacts.require("TestMarketPlace");
 
 const Tree = artifacts.require("Tree");
 const Planter = artifacts.require("Planter");
@@ -74,7 +75,7 @@ contract("marketPlace", (accounts) => {
   const userAccount5 = accounts[6];
   const userAccount6 = accounts[7]; //not data manager or treejerContract
   const userAccount7 = accounts[8];
-  const userAccount8 = accounts[9];
+  const treejerContract = accounts[9]; // treejerContract role
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -101,7 +102,7 @@ contract("marketPlace", (accounts) => {
 
     await Common.addTreejerContractRole(
       arInstance,
-      userAccount8,
+      treejerContract,
       deployerAccount
     );
 
@@ -434,7 +435,7 @@ contract("marketPlace", (accounts) => {
         from: deployerAccount,
       });
     });
-    it.only("add model", async () => {
+    it("add model", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -480,26 +481,26 @@ contract("marketPlace", (accounts) => {
 
       let model1 = await marketPlaceInstance.models(1);
 
-      assert.equal(Number(model1.country), country1, "count is incorrect");
-      assert.equal(Number(model1.species), species1, "count is incorrect");
-      assert.equal(Number(model1.deactive), 0, "count is incorrect");
+      assert.equal(Number(model1.country), country1, "country is incorrect");
+      assert.equal(Number(model1.species), species1, "species is incorrect");
+      assert.equal(Number(model1.deactive), 0, "deactive is incorrect");
       assert.equal(model1.planter, userAccount1, "planter is incorrect");
-      assert.equal(Number(model1.price), Number(price1), "count is incorrect");
+      assert.equal(Number(model1.price), Number(price1), "price is incorrect");
       assert.equal(Number(model1.count), count1, "count is incorrect");
       assert.equal(
         Number(model1.start),
         initialLastTreeAssigned,
-        "count is incorrect"
+        "start is incorrect"
       );
       assert.equal(
         Number(model1.lastFund),
         initialLastTreeAssigned - 1,
-        "count is incorrect"
+        "lastFunded is incorrect"
       );
       assert.equal(
         Number(model1.lastPlant),
         initialLastTreeAssigned - 1,
-        "count is incorrect"
+        "lastPlanted is incorrect"
       );
 
       //TODO://check this
@@ -523,26 +524,26 @@ contract("marketPlace", (accounts) => {
 
       let model2 = await marketPlaceInstance.models(2);
 
-      assert.equal(Number(model2.country), country2, "count is incorrect");
-      assert.equal(Number(model2.species), species2, "count is incorrect");
-      assert.equal(Number(model2.deactive), 0, "count is incorrect");
+      assert.equal(Number(model2.country), country2, "country is incorrect");
+      assert.equal(Number(model2.species), species2, "species is incorrect");
+      assert.equal(Number(model2.deactive), 0, "deactive is incorrect");
       assert.equal(model2.planter, userAccount2, "planter is incorrect");
-      assert.equal(Number(model2.price), Number(price2), "count is incorrect");
+      assert.equal(Number(model2.price), Number(price2), "price is incorrect");
       assert.equal(Number(model2.count), count2, "count is incorrect");
       assert.equal(
         Number(model2.start),
         initialLastTreeAssigned + count1,
-        "count is incorrect"
+        "start is incorrect"
       );
       assert.equal(
         Number(model2.lastFund),
         initialLastTreeAssigned + count1 - 1,
-        "count is incorrect"
+        "lastFunded is incorrect"
       );
       assert.equal(
         Number(model2.lastPlant),
         initialLastTreeAssigned + count1 - 1,
-        "count is incorrect"
+        "lastPlanted is incorrect"
       );
 
       //TODO://check this
@@ -558,6 +559,177 @@ contract("marketPlace", (accounts) => {
         Number(await marketPlaceInstance.lastTreeAssigned()),
         initialLastTreeAssigned + count1 + count2,
         "lastTreeAssigned is incorrect"
+      );
+    });
+    it("fail to updateModelData", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const country2 = 2;
+      const species2 = 20;
+
+      const modelId = 1;
+
+      const testMarketPlaceInstance = await TestMarketPlace.new({
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.setPlanterAddress(planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.addModel(
+        country1,
+        species1,
+        price1,
+        count1,
+        {
+          from: userAccount1,
+        }
+      );
+
+      await testMarketPlaceInstance
+        .updateModelData(modelId, species2, country2, { from: userAccount2 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await testMarketPlaceInstance.setLastFunded(1, 1);
+      /////----------- fail because lastPlanted != lastFunded
+      await testMarketPlaceInstance
+        .updateModelData(modelId, species2, country2, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
+
+      await testMarketPlaceInstance.setLastPlanted(1, 1);
+
+      /////----------- fail because lastPlanted increased
+      await testMarketPlaceInstance
+        .updateModelData(modelId, species2, country2, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
+    });
+
+    it("test updateModelData", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const country2 = 2;
+      const species2 = 20;
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      let modelBeforeUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBeforeUpdate.country),
+        country1,
+        "count is incorrect"
+      );
+      assert.equal(
+        Number(modelBeforeUpdate.species),
+        species1,
+        "species is incorrect"
+      );
+
+      await marketPlaceInstance.updateModelData(modelId, species2, country2, {
+        from: userAccount1,
+      });
+
+      let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterUpdate.country),
+        country2,
+        "count is incorrect"
+      );
+      assert.equal(
+        Number(modelAfterUpdate.species),
+        species2,
+        "species is incorrect"
+      );
+    });
+
+    it("test updatePrice", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const price2 = web3.utils.toWei("20");
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      let modelBeforeUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBeforeUpdate.price),
+        price1,
+        "price is incorrect"
+      );
+
+      await marketPlaceInstance
+        .updatePrice(modelId, price2, { from: userAccount2 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await marketPlaceInstance.updatePrice(modelId, price2, {
+        from: userAccount1,
+      });
+
+      let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterUpdate.price),
+        price2,
+        "price is incorrect"
+      );
+    });
+    it("test updateLastPlantedOfModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      let modelBeforeUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBeforeUpdate.lastPlant),
+        1000000000,
+        "lastPlant is incorrect"
+      );
+
+      await marketPlaceInstance
+        .updateLastPlantedOfModel(modelId, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await marketPlaceInstance.updateLastPlantedOfModel(modelId, {
+        from: treejerContract,
+      });
+
+      let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterUpdate.lastPlant),
+        1000000001,
+        "lastPlant is incorrect"
       );
     });
   });

@@ -763,20 +763,16 @@ contract("marketPlace", (accounts) => {
           from: userAccount1,
         }
       );
-
-      await testMarketPlaceInstance
-        .reduceLastReservePlantedOfModel(modelId, {
-          from: treejerContract,
-        })
-        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
-
-      await testMarketPlaceInstance.setLastReservePlant(1, 30);
+      let initialLastReservePlant = Number(
+        (await testMarketPlaceInstance.models(1)).lastReservePlant
+      );
+      await testMarketPlaceInstance.increaseLastReservePlant(1);
 
       let modelBefore = await testMarketPlaceInstance.models(modelId);
 
       assert.equal(
         Number(modelBefore.lastReservePlant),
-        30,
+        initialLastReservePlant + 1,
         "lastReservePlant is incorrect"
       );
 
@@ -792,7 +788,7 @@ contract("marketPlace", (accounts) => {
 
       assert.equal(
         Number(modelAfter.lastReservePlant),
-        29,
+        initialLastReservePlant,
         "lastReservePlant is incorrect"
       );
 

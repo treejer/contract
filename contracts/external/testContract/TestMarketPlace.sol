@@ -14,9 +14,9 @@ models[_modelId].lastFund=_value;
 function setLastPlanted(uint _modelId,uint _value) external {
 models[_modelId].lastPlant=_value;
 }
-function setLastReservePlant(uint _modelId,uint _value) external {
+function increaseLastReservePlant(uint _modelId) external {
 
-models[_modelId].lastReservePlant=_value;
+models[_modelId].lastReservePlant+=1;
 
 }
 

@@ -44,6 +44,7 @@ const {
   TimeEnumes,
   erc20ErrorMsg,
   MarketPlaceErrorMsg,
+  SafeMathErrorMsg,
 } = require("./enumes");
 
 const FakeToken = artifacts.require("FakeToken");
@@ -731,6 +732,75 @@ contract("marketPlace", (accounts) => {
         1000000001,
         "lastPlant is incorrect"
       );
+    });
+
+    it.only("test reduceLastReservePlantedOfModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      const testMarketPlaceInstance = await TestMarketPlace.new({
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.setPlanterAddress(planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.addModel(
+        country1,
+        species1,
+        price1,
+        count1,
+        {
+          from: userAccount1,
+        }
+      );
+
+      await testMarketPlaceInstance
+        .reduceLastReservePlantedOfModel(modelId, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(SafeMathErrorMsg.OVER_FLOW);
+
+      await testMarketPlaceInstance.setLastReservePlant(1, 30);
+
+      let modelBefore = await testMarketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBefore.lastReservePlant),
+        30,
+        "lastReservePlant is incorrect"
+      );
+
+      await testMarketPlaceInstance
+        .reduceLastReservePlantedOfModel(modelId, { from: userAccount2 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await testMarketPlaceInstance.reduceLastReservePlantedOfModel(modelId, {
+        from: treejerContract,
+      });
+
+      let modelAfter = await testMarketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfter.lastReservePlant),
+        29,
+        "lastReservePlant is incorrect"
+      );
+
+      // await testMarketPlaceInstance.setLastFunded(1, 1);
+      // /////----------- fail because lastPlanted != lastFunded
+      // await testMarketPlaceInstance
+      //   .updateModelData(modelId, species2, country2, { from: userAccount1 })
+      //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
   });
 

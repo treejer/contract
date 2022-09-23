@@ -37,6 +37,10 @@ Common.getNewAccountPublicKey = async () => {
   return account.address;
 };
 
+Common.getAccount = async () => {
+  return web3.eth.accounts.create();
+};
+
 Common.addTreejerContractRole = async (instance, account, adminAccount) => {
   await instance.grantRole(TREEJER_CONTRACT_ROLE, account, {
     from: adminAccount,

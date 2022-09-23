@@ -195,6 +195,8 @@ const MarketPlaceErrorMsg = {
   INVAILD_PLANTER: "MarketPlace:Invalid Planter.",
   ACCESS_DENIED: "MarketPlace:Access Denied.",
   TREE_PLANTER_OR_FUNDED: "MarketPlace:Tree Planted or Funded.",
+  PERMISSION_DENIED: "MarketPlace:Permission denied",
+  ALL_TREE_PLANTED: "MarketPlace:All tree planted",
 };
 
 module.exports = {

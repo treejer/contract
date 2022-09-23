@@ -228,6 +228,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.start = lastTreeAssigned;
         modelData.lastFund = lastTreeAssigned - 1;
         modelData.lastPlant = lastTreeAssigned - 1;
+        modelData.lastReservePlant = lastTreeAssigned - 1;
 
         lastTreeAssigned += _count;
     }

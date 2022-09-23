@@ -803,7 +803,7 @@ contract("marketPlace", (accounts) => {
       //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
 
-    it.only("test updateLastReservePlantedOfModel", async () => {
+    it("test updateLastReservePlantedOfModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");

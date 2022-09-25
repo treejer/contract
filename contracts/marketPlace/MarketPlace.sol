@@ -260,6 +260,12 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.price = _price;
     }
 
+    function deactiveModel(uint256 _modelId) external {
+        Model storage modelData = models[_modelId];
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+        modelData.deactive = 1;
+    }
+
     function deleteModel(uint256 _modelId) external {
         Model storage model = models[_modelId];
 
@@ -341,7 +347,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             for (uint256 j = 1; j <= _input[i].count; j++) {
                 success = attribute.createAttribute(tempTreeId + j, 1);
 
-                require(success, "Attribute not generated");
+                require(success, "MarketPlace:Attribute not generated.");
 
                 (
                     uint16 planterShare,
@@ -405,13 +411,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             modelData.planter
         );
 
-        require(canPlant, "MarketPlace:Permission denied");
+        require(canPlant, "MarketPlace:Permission denied.");
 
         uint256 lastReservePlantTemp = modelData.lastReservePlant + 1;
 
         require(
             lastReservePlantTemp < modelData.start + modelData.count,
-            "MarketPlace:All tree planted"
+            "MarketPlace:All tree planted."
         );
 
         modelData.lastReservePlant = lastReservePlantTemp;

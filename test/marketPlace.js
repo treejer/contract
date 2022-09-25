@@ -3,7 +3,7 @@
 const MarketPlace = artifacts.require("MarketPlace");
 
 const AccessRestriction = artifacts.require("AccessRestriction");
-const RegularSale = artifacts.require("RegularSale");
+const RegularSale = artifacts.require("RegularSaleV2");
 
 const TreeFactory = artifacts.require("TreeFactoryV2");
 const Attribute = artifacts.require("Attribute");
@@ -928,18 +928,61 @@ contract("marketPlace", (accounts) => {
   });
 
   describe("with financial section", () => {
-    beforeEach(async () => {
-      regularSaleInstance = await RegularSale.new({
+    before(async () => {
+      planterInstance = await Planter.new({
         from: deployerAccount,
       });
 
-      await regularSaleInstance.initialize(
-        arInstance.address,
-        web3.utils.toWei("7"),
-        {
-          from: deployerAccount,
-        }
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await planterInstance.join(1, 1, 1, 1, zeroAddress, zeroAddress, {
+        from: userAccount1,
+      });
+
+      await planterInstance.joinOrganization(
+        userAccount2,
+        1,
+        1,
+        1,
+        100,
+        zeroAddress,
+        { from: dataManager }
       );
+
+      await planterInstance.join(3, 1, 1, 1, zeroAddress, userAccount2, {
+        from: userAccount3,
+      });
+
+      await planterInstance.acceptPlanterByOrganization(userAccount3, true, {
+        from: userAccount2,
+      });
+    });
+    beforeEach(async () => {
+      marketPlaceInstance = await MarketPlace.new({
+        from: deployerAccount,
+      });
+
+      await marketPlaceInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      daiFundInstance = await DaiFund.new({
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      attributeInstance = await Attribute.new({
+        from: deployerAccount,
+      });
+
+      await attributeInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
 
       treeFactoryInstance = await TreeFactory.new({
         from: deployerAccount,
@@ -949,34 +992,11 @@ contract("marketPlace", (accounts) => {
         from: deployerAccount,
       });
 
-      planterInstance = await Planter.new({
-        from: deployerAccount,
-      });
-
-      await planterInstance.initialize(arInstance.address, {
-        from: deployerAccount,
-      });
-
-      await treeFactoryInstance.setPlanterContractAddress(
-        planterInstance.address,
-        {
-          from: deployerAccount,
-        }
-      );
-
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
       });
 
       await treeTokenInstance.initialize(arInstance.address, "", {
-        from: deployerAccount,
-      });
-
-      daiFundInstance = await DaiFund.new({
-        from: deployerAccount,
-      });
-
-      await daiFundInstance.initialize(arInstance.address, {
         from: deployerAccount,
       });
 
@@ -996,13 +1016,91 @@ contract("marketPlace", (accounts) => {
         from: deployerAccount,
       });
 
-      attributeInstance = await Attribute.new({
+      regularSaleInstance = await RegularSale.new({
         from: deployerAccount,
       });
 
-      await attributeInstance.initialize(arInstance.address, {
+      await regularSaleInstance.initialize(
+        arInstance.address,
+        web3.utils.toWei("7"),
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await marketPlaceInstance.setPlanterAddress(planterInstance.address, {
         from: deployerAccount,
       });
+
+      await marketPlaceInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+      await marketPlaceInstance.setDaiFundAddress(daiFundInstance.address, {
+        from: deployerAccount,
+      });
+
+      await marketPlaceInstance.setAllocationAddress(
+        allocationInstance.address,
+        { from: deployerAccount }
+      );
+
+      await marketPlaceInstance.setPlanterFundAddress(
+        planterFundsInstnce.address,
+        { from: deployerAccount }
+      );
+
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await marketPlaceInstance.setTreeFactoryAddress(
+        treeFactoryInstance.address,
+        { from: deployerAccount }
+      );
+      await marketPlaceInstance.setAttributesAddress(
+        attributeInstance.address,
+        { from: deployerAccount }
+      );
+
+      await marketPlaceInstance.setRegularSaleAddress(
+        regularSaleInstance.address,
+        { from: deployerAccount }
+      );
+
+      await attributeInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.setDaiTokenAddress(daiInstance.address, {
+        from: deployerAccount,
+      });
+
+      await daiFundInstance.setPlanterFundContractAddress(
+        planterFundsInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        attributeInstance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount,
+        { from: deployerAccount }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount,
+        { from: deployerAccount }
+      );
 
       await Common.prepareAttributeDex(
         UniswapV2Router02New,
@@ -1013,16 +1111,151 @@ contract("marketPlace", (accounts) => {
         deployerAccount
       );
 
-      await regularSaleInstance.setPlanterFundAddress(zeroAddress, {
-        from: deployerAccount,
-      }).should.be.rejected;
-
-      await regularSaleInstance.setPlanterFundAddress(
-        planterFundsInstnce.address,
+      await allocationInstance.addAllocationData(
+        4000,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        0,
+        0,
         {
-          from: deployerAccount,
+          from: dataManager,
         }
       );
+
+      await allocationInstance.assignAllocationToTree(1, 1000000, 0, {
+        from: dataManager,
+      });
+    });
+
+    // beforeEach(async () => {
+    //   marketPlaceInstance = await MarketPlace.new({ from: deployerAccount });
+
+    //   await marketPlaceInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   regularSaleInstance = await RegularSale.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await regularSaleInstance.initialize(
+    //     arInstance.address,
+    //     web3.utils.toWei("7"),
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
+
+    //   treeFactoryInstance = await TreeFactory.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await treeFactoryInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   planterInstance = await Planter.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await planterInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   await treeFactoryInstance.setPlanterContractAddress(
+    //     planterInstance.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
+
+    //   await planterInstance.join(1, 1, 1, 1, zeroAddress, zeroAddress, {
+    //     from: userAccount1,
+    //   });
+
+    //   daiFundInstance = await DaiFund.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await daiFundInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   allocationInstance = await Allocation.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await allocationInstance.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   planterFundsInstnce = await PlanterFund.new({
+    //     from: deployerAccount,
+    //   });
+
+    //   await planterFundsInstnce.initialize(arInstance.address, {
+    //     from: deployerAccount,
+    //   });
+
+    //   await regularSaleInstance.setPlanterFundAddress(zeroAddress, {
+    //     from: deployerAccount,
+    //   }).should.be.rejected;
+
+    //   await regularSaleInstance.setPlanterFundAddress(
+    //     planterFundsInstnce.address,
+    //     {
+    //       from: deployerAccount,
+    //     }
+    //   );
+    // });
+
+    it.only("fund tree", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+      const funder = userAccount5;
+      const recipient = userAccount6;
+      const referrer = userAccount7;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      await daiInstance.setMint(funder, web3.utils.toWei("20"));
+
+      await daiInstance.approve(
+        marketPlaceInstance.address,
+        web3.utils.toWei("20"),
+        { from: funder }
+      );
+
+      const input = [{ modelId: 1, count: 2 }];
+
+      await marketPlaceInstance
+        .fundTree(input, recipient, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_REFERRER);
+
+      await marketPlaceInstance
+        .fundTree([{ modelId: 1, count: 51 }], referrer, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
+
+      // await marketPlaceInstance.fundTree(input, userAccount5, userAccount6, {
+      //   from: userAccount5,
+      // });
+
+      // await treeTokenInstance.ownerOf(initialLastTreeAssigned);
+
+      // Input[] memory _input,
+      // address _referrer,
+      // address _recipient
     });
   });
 });

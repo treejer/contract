@@ -507,7 +507,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         uint16 _countryCode,
         uint256 _modelId
     ) external override ifNotPaused {
-        //---------------> TODO:check country code and lastPlant
+        marketPlace.updateLastReservePlantedOfModel(_msgSender(), _modelId);
 
         tempTrees[_pendingRegularTreeId.current()] = TempTree(
             _birthDate,
@@ -518,13 +518,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             _treeSpecs
         );
 
-        //------------------->CHANGED
-
-        if (_modelId > 0) {
-            marketPlace.updateLastReservePlantedOfModel(_msgSender(), _modelId);
-
-            tempTreesModel[_pendingRegularTreeId.current()] = _modelId;
-        }
+        tempTreesModel[_pendingRegularTreeId.current()] = _modelId;
 
         emit TreePlanted(_pendingRegularTreeId.current());
 
@@ -678,7 +672,3 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
 }
-
-
-
-A challenge for governance of all blockchain applications is transparency of code base of smart con-tracts. This can lead to voting behavior for updates in these applications with malicious intends. This was witnessed in “the DAO” incident with “proposal 59” where the hacker voted in favor of an update proposal that contained flaws that he would later exploit (Slacknation, 2016). There is limited knowl- edge about the governance challenges in the evolvement phase. Most DAOs are not live yet but are in the design/test phase. As they all differ in basic design the, implemented or designed, governance models should be researched in more detail.

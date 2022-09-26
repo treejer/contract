@@ -404,6 +404,11 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         override
         onlyTreejerContract
     {
+        require(
+            _modelId > 0 && _modelId <= modelId.current(),
+            "modelId is incorrect"
+        );
+
         Model storage modelData = models[_modelId];
 
         bool canPlant = planter.manageAssignedTreePermission(

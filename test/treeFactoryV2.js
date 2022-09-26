@@ -31,7 +31,7 @@ const Math = require("./math");
 const { should } = require("chai");
 
 contract("TreeFactoryV2", (accounts) => {
-  let TreeFactoryV2Instance;
+  let treeFactoryV2Instance;
   let treeTokenInstance;
 
   let arInstance;
@@ -75,15 +75,15 @@ contract("TreeFactoryV2", (accounts) => {
 
       await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
 
-      TreeFactoryV2Instance = await TreeFactoryV2.new({
+      treeFactoryV2Instance = await TreeFactoryV2.new({
         from: deployerAccount,
       });
 
-      await TreeFactoryV2Instance.initialize(zeroAddress, {
+      await treeFactoryV2Instance.initialize(zeroAddress, {
         from: deployerAccount,
       }).should.be.rejected;
 
-      await TreeFactoryV2Instance.initialize(arInstance.address, {
+      await treeFactoryV2Instance.initialize(arInstance.address, {
         from: deployerAccount,
       });
 
@@ -111,7 +111,7 @@ contract("TreeFactoryV2", (accounts) => {
         from: deployerAccount,
       });
 
-      await TreeFactoryV2Instance.setPlanterContractAddress(
+      await treeFactoryV2Instance.setPlanterContractAddress(
         planterInstance.address,
         {
           from: deployerAccount,
@@ -131,7 +131,7 @@ contract("TreeFactoryV2", (accounts) => {
         from: deployerAccount,
       });
 
-      await TreeFactoryV2Instance.setMarketPlaceAddress(
+      await treeFactoryV2Instance.setMarketPlaceAddress(
         marketPlaceInstance.address,
         {
           from: deployerAccount,
@@ -140,7 +140,7 @@ contract("TreeFactoryV2", (accounts) => {
     });
 
     it("check setMarketPlaceAddress function", async () => {
-      const address = TreeFactoryV2Instance.address;
+      const address = treeFactoryV2Instance.address;
 
       assert.notEqual(address, 0x0);
       assert.notEqual(address, "");
@@ -149,20 +149,19 @@ contract("TreeFactoryV2", (accounts) => {
 
       //------------------------->reject set marketPlace function
 
-      await TreeFactoryV2Instance.setMarketPlaceAddress(
-        marketPlaceInstance.address,
-        {
+      await treeFactoryV2Instance
+        .setMarketPlaceAddress(marketPlaceInstance.address, {
           from: userAccount3,
-        }
-      ).should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
 
-      await TreeFactoryV2Instance.setMarketPlaceAddress(userAccount3, {
+      await treeFactoryV2Instance.setMarketPlaceAddress(userAccount3, {
         from: deployerAccount,
       }).should.be.rejected;
 
       //------------------------->successfully set marketPlace function
 
-      await TreeFactoryV2Instance.setMarketPlaceAddress(
+      await treeFactoryV2Instance.setMarketPlaceAddress(
         marketPlaceInstance.address,
         {
           from: deployerAccount,
@@ -170,7 +169,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       assert.equal(
-        await TreeFactoryV2Instance.marketPlace(),
+        await treeFactoryV2Instance.marketPlace(),
         marketPlaceInstance.address,
         "address dosn't set correct"
       );
@@ -186,7 +185,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       await Common.addTreejerContractRole(
         arInstance,
-        TreeFactoryV2Instance.address,
+        treeFactoryV2Instance.address,
         deployerAccount
       );
 
@@ -218,7 +217,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //--------------- model not exist.
 
-      await TreeFactoryV2Instance.plantMarketPlaceTree(
+      await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -230,7 +229,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //--------------- model not exist.
 
-      await TreeFactoryV2Instance.plantMarketPlaceTree(
+      await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -252,17 +251,13 @@ contract("TreeFactoryV2", (accounts) => {
 
       //----------------------------------
 
-      await TreeFactoryV2Instance.plantMarketPlaceTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        1,
-        {
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
           from: planter2,
-        }
-      ).should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
 
-      await TreeFactoryV2Instance.plantMarketPlaceTree(
+      await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -273,14 +268,14 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it.only("plantMarketPlaceTree should be success (With Model)", async () => {
+    it("plantMarketPlaceTree should be success (With Model)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
 
       await Common.addTreejerContractRole(
         arInstance,
-        TreeFactoryV2Instance.address,
+        treeFactoryV2Instance.address,
         deployerAccount
       );
 
@@ -312,7 +307,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //-------------------------------------------
 
-      const eventTx = await TreeFactoryV2Instance.plantMarketPlaceTree(
+      const eventTx = await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
         countryCode,
@@ -324,7 +319,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      let result = await TreeFactoryV2Instance.tempTrees.call(0);
+      let result = await treeFactoryV2Instance.tempTrees.call(0);
 
       assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -363,12 +358,12 @@ contract("TreeFactoryV2", (accounts) => {
 
       //---------------------------------------------- test tempTreesModel
 
-      let tempTree = await TreeFactoryV2Instance.tempTreesModel.call(0);
+      let tempTree = await treeFactoryV2Instance.tempTreesModel.call(0);
 
       assert.equal(Number(tempTree), 1, "tempTree is not correct");
     });
 
-    it.only("plantMarketPlaceTree should be success (Planter of organization)", async () => {
+    it("plantMarketPlaceTree should be success (Planter of organization)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -377,6 +372,12 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addTreejerContractRole(
         arInstance,
         treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
         deployerAccount
       );
 
@@ -398,14 +399,33 @@ contract("TreeFactoryV2", (accounts) => {
         organizationAdmin
       );
 
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAdmin }
+      );
+
+      //-------------------------------------------
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+
       await planterInstance.acceptPlanterByOrganization(planter, true, {
         from: organizationAdmin,
       });
 
-      const eventTx = await treeFactoryV2Instance.plantMarketPlaceTree(
+      let eventTx = await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
         countryCode,
+        1,
         {
           from: planter,
         }
@@ -451,39 +471,156 @@ contract("TreeFactoryV2", (accounts) => {
       });
     });
 
-    // it("plantMarketPlaceTree should be rejected (organizationAdmin not accepted planter)", async () => {
-    //   const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
-    //   const countryCode = 2;
-    //   const planter = userAccount2;
-    //   const organizationAdmin = userAccount1;
+    it("plantMarketPlaceTree should be rejected (organizationAdmin not accepted planter)", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+      const organizationAdmin = userAccount1;
 
-    //   await Common.addTreejerContractRole(
-    //     arInstance,
-    //     treeFactoryInstance.address,
-    //     deployerAccount
-    //   );
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
 
-    //   await Common.addPlanter(arInstance, planter, deployerAccount);
-    //   await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
 
-    //   await Common.joinOrganizationPlanter(
-    //     planterInstance,
-    //     organizationAdmin,
-    //     zeroAddress,
-    //     dataManager
-    //   );
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
 
-    //   await Common.joinSimplePlanter(
-    //     planterInstance,
-    //     3,
-    //     planter,
-    //     zeroAddress,
-    //     organizationAdmin
-    //   );
+      await Common.joinOrganizationPlanter(
+        planterInstance,
+        organizationAdmin,
+        zeroAddress,
+        dataManager
+      );
 
-    //   await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
-    //     from: planter,
-    //   }).should.be.rejected;
-    // });
+      await Common.joinSimplePlanter(
+        planterInstance,
+        3,
+        planter,
+        zeroAddress,
+        organizationAdmin
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAdmin }
+      );
+
+      //-------------------------------------------
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+    });
+
+    it("test both organizationAdmin and individual planter", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+      const organizationAdmin = userAccount1;
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
+
+      await Common.joinOrganizationPlanter(
+        planterInstance,
+        organizationAdmin,
+        zeroAddress,
+        dataManager
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        1,
+        planter,
+        zeroAddress,
+        zeroAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: planter }
+      );
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAdmin }
+      );
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      await planterInstance.updatePlanterType(3, organizationAdmin, {
+        from: planter,
+      });
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: organizationAdmin,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        2,
+        {
+          from: organizationAdmin,
+        }
+      );
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 2, {
+          from: planter,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+    });
   });
 });

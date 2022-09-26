@@ -229,6 +229,12 @@ interface ITreeFactoryV2 {
     function plantTree(
         string calldata _treeSpecs,
         uint64 _birthDate,
+        uint16 _countryCode
+    ) external;
+
+    function plantMarketPlaceTree(
+        string calldata _treeSpecs,
+        uint64 _birthDate,
         uint16 _countryCode,
         uint256 _modelId
     ) external;

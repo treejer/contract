@@ -200,6 +200,72 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         planter = candidateContract;
     }
 
+    function addModel(
+        uint8 _country,
+        uint8 _species,
+        uint256 _price,
+        uint256 _count
+    ) external {
+        (uint8 planterType, , , , , , , ) = planter.planters(msg.sender);
+
+        require(
+            planterType == 1 || planterType == 2,
+            "MarketPlace:Invalid Planter."
+        );
+
+        require(_count > 0 && _count < 10001, "MarketPlace:Invalid count.");
+
+        modelId.increment();
+        uint256 _modelId = modelId.current();
+
+        Model storage modelData = models[_modelId];
+
+        modelData.country = _country;
+        modelData.species = _species;
+        modelData.count = _count;
+        modelData.price = _price;
+        modelData.planter = msg.sender;
+        modelData.start = lastTreeAssigned;
+        modelData.lastFund = lastTreeAssigned - 1;
+        modelData.lastPlant = lastTreeAssigned - 1;
+        modelData.lastReservePlant = lastTreeAssigned - 1;
+
+        lastTreeAssigned += _count;
+    }
+
+    function updateModelData(
+        uint256 _modelId,
+        uint8 _species,
+        uint8 _country
+    ) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        require(
+            modelData.lastFund == modelData.lastPlant &&
+                modelData.lastPlant == modelData.start - 1,
+            "MarketPlace:Tree Planted or Funded."
+        );
+
+        modelData.country = _country;
+        modelData.species = _species;
+    }
+
+    function updatePrice(uint256 _modelId, uint256 _price) external {
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        modelData.price = _price;
+    }
+
+    function deactiveModel(uint256 _modelId) external {
+        Model storage modelData = models[_modelId];
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+        modelData.deactive = 1;
+    }
+
     function deleteModel(uint256 _modelId) external {
         Model storage model = models[_modelId];
 
@@ -217,35 +283,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
 
         delete models[_modelId];
-    }
-
-    function addModel(
-        uint8 _country,
-        uint8 _species,
-        uint256 _price,
-        uint256 _count
-    ) external {
-        (uint8 planterType, , , , , , , ) = planter.planters(msg.sender);
-
-        require(planterType < 3, "MarketPlace:Invalid Planter");
-
-        require(_count > 0 && _count < 10001, "MarketPlace:Invalid count");
-
-        modelId.increment();
-        uint256 _modelId = modelId.current();
-
-        Model storage modelData = models[_modelId];
-
-        modelData.country = _country;
-        modelData.species = _species;
-        modelData.count = _count;
-        modelData.price = _price;
-        modelData.planter = msg.sender;
-        modelData.start = lastTreeAssigned;
-        modelData.lastFund = lastTreeAssigned - 1;
-        modelData.lastPlant = lastTreeAssigned - 1;
-
-        lastTreeAssigned += _count;
     }
 
     function fundTree(
@@ -310,7 +347,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             for (uint256 j = 1; j <= _input[i].count; j++) {
                 success = attribute.createAttribute(tempTreeId + j, 1);
 
-                require(success, "Attribute not generated");
+                require(success, "MarketPlace:Attribute not generated.");
 
                 (
                     uint16 planterShare,
@@ -362,14 +399,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         }
     }
 
-    function updatePrice(uint256 _modelId, uint256 _price) external {
-        Model storage modelData = models[_modelId];
-
-        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-
-        modelData.price = _price;
-    }
-
     function updateLastReservePlantedOfModel(address _sender, uint256 _modelId)
         external
         override
@@ -382,13 +411,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             modelData.planter
         );
 
-        require(canPlant, "MarketPlace:Permission denied");
+        require(canPlant, "MarketPlace:Permission denied.");
 
         uint256 lastReservePlantTemp = modelData.lastReservePlant + 1;
 
         require(
             lastReservePlantTemp < modelData.start + modelData.count,
-            "MarketPlace:All tree planted"
+            "MarketPlace:All tree planted."
         );
 
         modelData.lastReservePlant = lastReservePlantTemp;
@@ -415,24 +444,5 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
-    }
-
-    function updateModelData(
-        uint256 _modelId,
-        uint8 _species,
-        uint8 _country
-    ) external {
-        Model storage modelData = models[_modelId];
-
-        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-
-        require(
-            modelData.lastFund == modelData.lastPlant &&
-                modelData.lastPlant == modelData.start - 1,
-            "MarketPlace:Tree Planted or Funded."
-        );
-
-        modelData.country = _country;
-        modelData.species = _species;
     }
 }

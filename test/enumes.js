@@ -191,9 +191,23 @@ const TreeBoxErrorMsg = {
 
 const MarketPlaceErrorMsg = {
   OWNER_INVALID: "MarketPlace:Owner of model is incorrect",
+<<<<<<< HEAD
   INVALID_COUNT: "MarketPlace:Invalid count",
   INVAILD_PLANTER: "MarketPlace:Invalid Planter",
   PERMISSION_DENIED: "MarketPlace:Permission denied",
+=======
+  INVALID_COUNT: "MarketPlace:Invalid count.",
+  INVAILD_PLANTER: "MarketPlace:Invalid Planter.",
+  ACCESS_DENIED: "MarketPlace:Access Denied.",
+  TREE_PLANTER_OR_FUNDED: "MarketPlace:Tree Planted or Funded.",
+  PERMISSION_DENIED: "MarketPlace:Permission denied",
+  ALL_TREE_PLANTED: "MarketPlace:All tree planted",
+  INVALID_REFERRER: "MarketPlace:Invalid referrer.",
+  TOTAL_COUNT_EXCEEDED: "MarketPlace:total count exceeded 100.",
+  INSUFFICIENT_BALANCE: "MarketPlace:Insufficient balance.",
+  UNSUCCESSFUL_TRANSFER: "MarketPlace:Unsuccessful transfer.",
+  ATTRIBUTE_NOT_GENERATED: "MarketPlace:Attribute not generated.",
+>>>>>>> 6cd48a269af0ce5a47bf5521b6517efcc45c7ee7
 };
 
 module.exports = {

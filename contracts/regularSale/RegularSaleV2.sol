@@ -15,7 +15,7 @@ import "../treasury/IWethFund.sol";
 import "./IRegularSaleV2.sol";
 
 /** @title RegularSale contract */
-contract RegularSale is Initializable, RelayRecipient, IRegularSaleV2 {
+contract RegularSaleV2 is Initializable, RelayRecipient, IRegularSaleV2 {
     struct TotalBalances {
         uint256 planter;
         uint256 ambassador;

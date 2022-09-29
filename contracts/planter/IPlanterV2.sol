@@ -30,6 +30,8 @@ interface IPlanterV2 {
     /** @dev set {_address} to trusted forwarder */
     function setTrustedForwarder(address _address) external;
 
+    function setMarketPlaceAddress(address _address) external;
+
     /**
      * @dev based on {_planterType} a planter can join as individual planter or
      * member of an organization

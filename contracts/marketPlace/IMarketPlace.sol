@@ -6,6 +6,8 @@ pragma solidity ^0.8.6;
 interface IMarketPlace {
     function isMarketPlace() external view returns (bool);
 
+    function activeModelCount(address _planter) external view returns (uint256);
+
     function initialize(address _accessRestrictionAddress) external;
 
     function setDaiTokenAddress(address _address) external;

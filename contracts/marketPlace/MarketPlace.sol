@@ -68,6 +68,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     mapping(uint256 => Model) public models;
 
+    mapping(address => uint256) public override activeModelCount;
+
     //⇒ modelMetaDataId should start from number 1
 
     uint256 public lastTreeAssigned;
@@ -230,6 +232,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.lastPlant = lastTreeAssigned - 1;
         modelData.lastReservePlant = lastTreeAssigned - 1;
 
+        activeModelCount[msg.sender] += 1;
+
         lastTreeAssigned += _count;
     }
 
@@ -281,6 +285,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             modelId.decrement();
             lastTreeAssigned -= model.count;
         }
+
+        activeModelCount[msg.sender] -= 1;
 
         delete models[_modelId];
     }
@@ -445,6 +451,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         Model storage modelData = models[_modelId];
 
         uint256 lastPlantTemp = modelData.lastPlant + 1;
+
+        if (lastPlantTemp == modelData.start + modelData.count - 1) {
+            activeModelCount[modelData.planter] -= 1;
+        }
 
         modelData.lastPlant = lastPlantTemp;
 

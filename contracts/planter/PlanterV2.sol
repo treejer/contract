@@ -9,6 +9,8 @@ import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "./IPlanterV2.sol";
 
+import "./../marketPlace/IMarketPlace.sol";
+
 /** @title Planter contract */
 contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     using SafeCastUpgradeable for uint256;
@@ -42,6 +44,10 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     mapping(address => mapping(address => uint256))
         public
         override organizationMemberShare;
+
+    //----->CHANGED  Version 2 data
+
+    IMarketPlace public marketPlace;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -110,6 +116,20 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
         validAddress(_address)
     {
         trustedForwarder = _address;
+    }
+
+    //----------------------------------->CHANGED
+    /// @inheritdoc IPlanterV2
+    function setMarketPlaceAddress(address _address)
+        external
+        override
+        onlyAdmin
+    {
+        IMarketPlace candidateContract = IMarketPlace(_address);
+
+        require(candidateContract.isMarketPlace());
+
+        marketPlace = candidateContract;
     }
 
     /// @inheritdoc IPlanterV2
@@ -251,6 +271,7 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
         emit OrganizationJoined(_organization);
     }
 
+    //------------------>CHANGED
     /// @inheritdoc IPlanterV2
     function updatePlanterType(uint8 _planterType, address _organization)
         external
@@ -261,6 +282,11 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
         require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
         PlanterData storage planterData = planters[_msgSender()];
+
+        require(
+            marketPlace.activeModelCount(_msgSender()) == 0,
+            "Planter:planter has active market place model"
+        );
 
         require(
             planterData.status == 0 || planterData.status == 1,

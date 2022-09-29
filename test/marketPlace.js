@@ -1130,7 +1130,7 @@ contract("marketPlace", (accounts) => {
       });
     });
 
-    it.only("fund tree with referrer and with recipient", async () => {
+    it("fund tree with referrer and with recipient", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -1339,69 +1339,47 @@ contract("marketPlace", (accounts) => {
         Math.add(Number(modelBeforeFund.lastFund), input[0].count),
         "lastFund is incorrect"
       );
+
+      await daiInstance.resetAcc(planterFundsInstnce.address);
+      await daiInstance.resetAcc(daiFundInstance.address);
+      await daiInstance.resetAcc(funder);
     });
-    it("Should request trees successfully (recipient)", async () => {
+    it("Should request trees successfully (without recipient) (without referrer)", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
       const count1 = 50;
       const funder = userAccount5;
-      const recipient = userAccount6;
       const referrer = userAccount7;
       const amount = web3.utils.toWei("20");
-
+      const modelId = 1;
       await marketPlaceInstance.addModel(country1, species1, price1, count1, {
         from: userAccount1,
       });
 
       const input = [{ modelId: 1, count: 2 }];
 
-      await marketPlaceInstance
-        .fundTree(input, recipient, recipient, {
-          from: funder,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_REFERRER);
-
-      await marketPlaceInstance
-        .fundTree([{ modelId: 1, count: 51 }], referrer, recipient, {
-          from: funder,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
-
-      await marketPlaceInstance
-        .fundTree(input, referrer, recipient, {
-          from: funder,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.INSUFFICIENT_BALANCE);
-
       await daiInstance.setMint(funder, amount);
-
-      await marketPlaceInstance
-        .fundTree(input, referrer, recipient, {
-          from: funder,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.INVALID_APPROVE);
 
       await daiInstance.approve(marketPlaceInstance.address, amount, {
         from: funder,
       });
 
-      await marketPlaceInstance.fundTree(input, referrer, recipient, {
+      const modelBeforeFund = await marketPlaceInstance.models(modelId);
+
+      await marketPlaceInstance.fundTree(input, zeroAddress, zeroAddress, {
         from: funder,
       });
 
-      const daiFundBalanceAfter = await daiInstance.balanceOf(
-        daiFundInstance.address
-      );
-
-      const planterFundsBalanceAfter = await daiInstance.balanceOf(
-        planterFundsInstnce.address
-      );
-
+      ////-------------- check funder balance
       assert.equal(
         Number(await daiInstance.balanceOf(funder)),
         0,
         "funder balance is incorrect"
+      );
+      /////-------------- check daiFund balance
+      const daiFundBalanceAfter = await daiInstance.balanceOf(
+        daiFundInstance.address
       );
 
       assert.equal(
@@ -1410,16 +1388,23 @@ contract("marketPlace", (accounts) => {
         "daiFund balance not true"
       );
 
+      /////-------------- check planterFund balance
+      const planterFundsBalanceAfter = await daiInstance.balanceOf(
+        planterFundsInstnce.address
+      );
+
       assert.equal(
         Number(planterFundsBalanceAfter),
         Number(web3.utils.toWei("10.4")),
         "treeToPlanterProjectedEarnings balance not true"
       );
+
+      /////////// ------------------- check treeOwner and attributes
       let owner;
       let attributes;
       for (let i = 0; i < 2; i++) {
         owner = await treeTokenInstance.ownerOf(initialLastTreeAssigned + i);
-        assert.equal(owner, recipient, "owner of tree is incorrect");
+        assert.equal(owner, funder, "owner of tree is incorrect");
 
         //////////// check attributes
         attributes = await treeTokenInstance.attributes.call(
@@ -1483,7 +1468,32 @@ contract("marketPlace", (accounts) => {
         "reserve2 funds invalid"
       );
 
-      ////--------------------------check fund planter
+      ///---------------------check referrer balance
+      assert.equal(
+        Number(await regularSaleInstance.referrerCount(referrer)),
+        0,
+        "referrerCount is incorrect"
+      );
+
+      assert.equal(
+        await regularSaleInstance.referrerClaimableTreesDai.call(referrer),
+        0,
+        "referrerClaimableTreesDai is incorrect"
+      );
+
+      assert.equal(
+        Number(await regularSaleInstance.referrerCount(zeroAddress)),
+        0,
+        "referrerCount is incorrect"
+      );
+
+      assert.equal(
+        await regularSaleInstance.referrerClaimableTreesDai.call(zeroAddress),
+        0,
+        "referrerClaimableTreesDai is incorrect"
+      );
+
+      ////--------------------------check totalBalances planterFunds
 
       let planterTotalFund = await planterFundsInstnce.totalBalances.call();
 
@@ -1498,7 +1508,7 @@ contract("marketPlace", (accounts) => {
         Number(expected.referralFund),
         "totalFund ambassador funds invalid"
       );
-
+      //////---------------------- check projected earnings
       for (let i = 1000000001; i < 1000000003; i++) {
         let planterFunds =
           await planterFundsInstnce.treeToPlanterProjectedEarning.call(i);
@@ -1517,6 +1527,18 @@ contract("marketPlace", (accounts) => {
           "referralFund funds invalid"
         );
       }
+      //----------------------------- check lastFund model
+      let modelAfterFund = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterFund.lastFund),
+        Math.add(Number(modelBeforeFund.lastFund), input[0].count),
+        "lastFund is incorrect"
+      );
+
+      await daiInstance.resetAcc(planterFundsInstnce.address);
+      await daiInstance.resetAcc(daiFundInstance.address);
+      await daiInstance.resetAcc(funder);
     });
   });
 });

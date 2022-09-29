@@ -30,6 +30,8 @@ interface IMarketPlace {
         external
         returns (uint256);
 
+    function reduceLastPlantedOfModel(uint256 _modelId) external;
+
     function reduceLastReservePlantedOfModel(uint256 _modelId) external;
 
     function updateLastReservePlantedOfModel(address _sender, uint256 _modelId)

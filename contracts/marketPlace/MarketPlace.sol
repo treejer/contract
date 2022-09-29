@@ -452,12 +452,26 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         uint256 lastPlantTemp = modelData.lastPlant + 1;
 
-        if (lastPlantTemp == modelData.start + modelData.count - 1) {
-            activeModelCount[modelData.planter] -= 1;
-        }
-
         modelData.lastPlant = lastPlantTemp;
 
         return lastPlantTemp;
+    }
+
+    function reduceLastPlantedOfModel(uint256 _modelId) external override {
+        require(
+            _modelId > 0 && _modelId <= modelId.current(),
+            "MarketPlace:modelId is incorrect"
+        );
+
+        Model storage modelData = models[_modelId];
+
+        require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
+
+        if (
+            modelData.lastPlant == modelData.start + modelData.count - 1 &&
+            modelData.lastFund == modelData.start + modelData.count - 1
+        ) {
+            activeModelCount[modelData.planter] -= 1;
+        }
     }
 }

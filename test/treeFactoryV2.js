@@ -266,6 +266,36 @@ contract("TreeFactoryV2", (accounts) => {
           from: planter,
         }
       );
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
+        })
+        .should.rejectedWith(MarketPlaceErrorMsg.ALL_TREE_PLANTED);
+
+      await treeFactoryV2Instance.verifyTree(0, false, {
+        from: dataManager,
+      });
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      await treeFactoryV2Instance.verifyTree(1, true, {
+        from: dataManager,
+      });
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
+        })
+        .should.rejectedWith(MarketPlaceErrorMsg.ALL_TREE_PLANTED);
     });
 
     it("plantMarketPlaceTree should be success (With Model)", async () => {
@@ -350,6 +380,19 @@ contract("TreeFactoryV2", (accounts) => {
         planterPlantedCount,
         1,
         "planter PlantedCount address not true"
+      );
+
+      let model = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(model.lastPlant),
+        1000000000,
+        "result is not correct"
+      );
+      assert.equal(
+        Number(model.lastReservePlant),
+        1000000001,
+        "result is not correct"
       );
 
       truffleAssert.eventEmitted(eventTx, "TreePlanted", (ev) => {
@@ -621,6 +664,620 @@ contract("TreeFactoryV2", (accounts) => {
           from: planter,
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+    });
+
+    // //----------------------- verify tree
+
+    it("verifyTree should be success(Admin Verify)", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        1,
+        planter,
+        zeroAddress,
+        zeroAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: planter }
+      );
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      //-------------------------------------------
+
+      let marketPlanceTree = await treeFactoryV2Instance.tempTrees.call(0);
+
+      const eventTx = await treeFactoryV2Instance.verifyTree(0, true, {
+        from: dataManager,
+      });
+
+      let genTree = await treeFactoryV2Instance.trees.call(1000000001);
+
+      assert.equal(
+        Number(genTree.birthDate),
+        Number(marketPlanceTree.birthDate),
+        "birthDate not true update"
+      );
+
+      assert.equal(
+        Number(genTree.plantDate),
+        Number(marketPlanceTree.plantDate),
+        "plantDate not true update"
+      );
+
+      assert.equal(
+        genTree.treeSpecs,
+        marketPlanceTree.treeSpecs,
+        "treeSpecs not true update"
+      );
+
+      assert.equal(
+        Number(genTree.countryCode),
+        Number(marketPlanceTree.countryCode),
+        "countryCode not true update"
+      );
+
+      assert.equal(
+        genTree.planter,
+        marketPlanceTree.planter,
+        "planter not true update"
+      );
+
+      assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+      assert.equal(Number(genTree.saleType), 0, "saleType not true update");
+
+      let model = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(model.lastPlant),
+        1000000001,
+        "result is not correct"
+      );
+      assert.equal(
+        Number(model.lastReservePlant),
+        1000000001,
+        "result is not correct"
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        return ev.treeId == 1000000001 && Number(ev.tempTreeId) == 0;
+      });
+    });
+
+    it("2.verifyTree should be success", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+      const organizationAddress = userAccount1;
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
+
+      await Common.joinOrganizationPlanter(
+        planterInstance,
+        organizationAddress,
+        zeroAddress,
+        dataManager
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        3,
+        planter,
+        zeroAddress,
+        organizationAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAddress }
+      );
+
+      //---------------------------------------------
+
+      await planterInstance.acceptPlanterByOrganization(planter, true, {
+        from: organizationAddress,
+      });
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      //----------------------------------------
+
+      let regularTree = await treeFactoryV2Instance.tempTrees.call(0);
+
+      await Common.addVerifierRole(
+        arInstance,
+        organizationAddress,
+        deployerAccount
+      );
+
+      const eventTx = await treeFactoryV2Instance.verifyTree(0, true, {
+        from: organizationAddress,
+      });
+
+      let genTree = await treeFactoryV2Instance.trees.call(1000000001);
+
+      assert.equal(
+        Number(genTree.birthDate),
+        Number(regularTree.birthDate),
+        "birthDate not true update"
+      );
+
+      assert.equal(
+        Number(genTree.plantDate),
+        Number(regularTree.plantDate),
+        "plantDate not true update"
+      );
+
+      assert.equal(
+        genTree.treeSpecs,
+        regularTree.treeSpecs,
+        "treeSpecs not true update"
+      );
+
+      assert.equal(
+        Number(genTree.countryCode),
+        Number(regularTree.countryCode),
+        "countryCode not true update"
+      );
+
+      assert.equal(
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
+      );
+
+      assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+      assert.equal(Number(genTree.saleType), 0, "saleType not true update");
+
+      let model = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(model.lastPlant),
+        1000000001,
+        "result is not correct"
+      );
+      assert.equal(
+        Number(model.lastReservePlant),
+        1000000001,
+        "result is not correct"
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        return ev.treeId == 1000000001 && Number(ev.tempTreeId) == 0;
+      });
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      await treeFactoryV2Instance.verifyTree(1, true, {
+        from: dataManager,
+      });
+
+      let genTreeBefore2 = await treeFactoryV2Instance.trees.call(1000000002);
+
+      assert.equal(
+        Number(genTreeBefore2.treeStatus),
+        4,
+        "treeStatusBefore not true update"
+      );
+
+      assert.equal(
+        Number(genTreeBefore2.saleType),
+        0,
+        "saleTypeBefore not true update"
+      );
+
+      let model2 = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(model2.lastPlant),
+        1000000002,
+        "model2 lastPlant is not correct"
+      );
+      assert.equal(
+        Number(model2.lastReservePlant),
+        1000000002,
+        "model2 lastReservePlant is not correct"
+      );
+    });
+
+    it("3.verifyTree should be success(isVerified is false)", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+      const organizationAddress = userAccount1;
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
+
+      await Common.joinOrganizationPlanter(
+        planterInstance,
+        organizationAddress,
+        zeroAddress,
+        dataManager
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        3,
+        planter,
+        zeroAddress,
+        organizationAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAddress }
+      );
+
+      //---------------------------------------------
+
+      await planterInstance.acceptPlanterByOrganization(planter, true, {
+        from: organizationAddress,
+      });
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      //----------------------------------------
+
+      await Common.addVerifierRole(
+        arInstance,
+        organizationAddress,
+        deployerAccount
+      );
+
+      let modelBefore = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(modelBefore.lastPlant),
+        1000000000,
+        "result is not correct"
+      );
+      assert.equal(
+        Number(modelBefore.lastReservePlant),
+        1000000001,
+        "result is not correct"
+      );
+
+      const eventTx = await treeFactoryV2Instance.verifyTree(0, false, {
+        from: organizationAddress,
+      });
+
+      let genTree = await treeFactoryV2Instance.trees.call(1000000001);
+
+      assert.equal(genTree.treeSpecs, "", "treeSpecs not true update");
+
+      assert.equal(genTree.planter, zeroAddress, "planter not true update");
+
+      let model = await marketPlaceInstance.models(1);
+
+      assert.equal(
+        Number(model.lastPlant),
+        1000000000,
+        "result is not correct"
+      );
+      assert.equal(
+        Number(model.lastReservePlant),
+        1000000000,
+        "result is not correct"
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeRejected", (ev) => {
+        return ev.treeId == 0;
+      });
+    });
+
+    it("verifyTree should be success(tree has owner)", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+      const organizationAddress = userAccount6;
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
+
+      await Common.joinOrganizationPlanter(
+        planterInstance,
+        organizationAddress,
+        zeroAddress,
+        dataManager
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        3,
+        planter,
+        zeroAddress,
+        organizationAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: organizationAddress }
+      );
+
+      //---------------------------------------------
+
+      await planterInstance.acceptPlanterByOrganization(planter, true, {
+        from: organizationAddress,
+      });
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      let regularTree = await treeFactoryV2Instance.tempTrees.call(0);
+
+      // tree mint for userAccount4
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+      await treeTokenInstance.mint(userAccount4, 1000000001, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryV2Instance.verifyTree(0, true, {
+        from: dataManager,
+      });
+
+      let genTree = await treeFactoryV2Instance.trees.call(1000000001);
+
+      assert.equal(
+        Number(genTree.birthDate),
+        Number(regularTree.birthDate),
+        "birthDate not true update"
+      );
+
+      assert.equal(
+        Number(genTree.plantDate),
+        Number(regularTree.plantDate),
+        "plantDate not true update"
+      );
+
+      assert.equal(
+        genTree.treeSpecs,
+        regularTree.treeSpecs,
+        "treeSpecs not true update"
+      );
+
+      assert.equal(
+        Number(genTree.countryCode),
+        Number(regularTree.countryCode),
+        "countryCode not true update"
+      );
+
+      assert.equal(
+        genTree.planter,
+        regularTree.planter,
+        "planter not true update"
+      );
+
+      assert.equal(Number(genTree.treeStatus), 4, "treeStatus not true update");
+
+      assert.equal(Number(genTree.saleType), 0, "saleType not true update");
+    });
+
+    it("verifyTree should be reject", async () => {
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+      const planter = userAccount2;
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        marketPlaceInstance.address,
+        deployerAccount
+      );
+
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+
+      await Common.joinSimplePlanter(
+        planterInstance,
+        1,
+        planter,
+        zeroAddress,
+        zeroAddress
+      );
+
+      //------------------------- create model
+
+      await marketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        5000,
+        { from: planter }
+      );
+
+      //-------------------------------------------
+
+      const eventTx = await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      ////////// --------------- fail Regular Tree not exists
+      await treeFactoryV2Instance
+        .verifyTree(1, true, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.REGULAR_TREE_NOT_EXIST);
+
+      /////////// ------------ Other planter can't verify update
+      await treeFactoryV2Instance
+        .verifyTree(0, true, {
+          from: userAccount5,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
+
+      /////////------------   Planter of tree can't verify update
+      await treeFactoryV2Instance
+        .verifyTree(0, true, {
+          from: planter,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_VERIFIER_ROLE);
     });
   });
 });

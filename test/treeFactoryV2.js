@@ -5,7 +5,7 @@ const TreeFactoryV2 = artifacts.require("TreeFactoryV2");
 const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
 
-const Planter = artifacts.require("Planter");
+const PlanterV2 = artifacts.require("PlanterV2");
 const Dai = artifacts.require("Dai");
 const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
@@ -38,7 +38,7 @@ contract("TreeFactoryV2", (accounts) => {
 
   let marketPlaceInstance;
 
-  let planterInstance;
+  let planterV2Instance;
   let allocationInstance;
   let planterFundInstnce;
   let daiFundInstance;
@@ -103,16 +103,16 @@ contract("TreeFactoryV2", (accounts) => {
         from: deployerAccount,
       });
 
-      planterInstance = await Planter.new({
+      planterV2Instance = await PlanterV2.new({
         from: deployerAccount,
       });
 
-      await planterInstance.initialize(arInstance.address, {
+      await planterV2Instance.initialize(arInstance.address, {
         from: deployerAccount,
       });
 
       await treeFactoryV2Instance.setPlanterContractAddress(
-        planterInstance.address,
+        planterV2Instance.address,
         {
           from: deployerAccount,
         }
@@ -127,7 +127,7 @@ contract("TreeFactoryV2", (accounts) => {
         from: deployerAccount,
       });
 
-      await marketPlaceInstance.setPlanterAddress(planterInstance.address, {
+      await marketPlaceInstance.setPlanterAddress(planterV2Instance.address, {
         from: deployerAccount,
       });
 
@@ -175,6 +175,184 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
+    //------------------------> Test listTree
+
+    it("add tree succussfuly and fail in invalid situation", async () => {
+      let treeId = 1;
+
+      await treeFactoryV2Instance
+        .listTree(treeId, ipfsHash, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_DATA_MANAGER);
+
+      const eventTx = await treeFactoryV2Instance.listTree(treeId, ipfsHash, {
+        from: dataManager,
+      });
+
+      truffleAssert.eventEmitted(eventTx, "TreeListed", (ev) => {
+        return ev.treeId == treeId;
+      });
+
+      let result1 = await treeFactoryV2Instance.trees.call(treeId);
+
+      assert.equal(Number(result1.treeStatus), 2, "tree status is incorrect"); //updated
+
+      //////////// fail to add tree
+
+      await treeFactoryV2Instance
+        .listTree(treeId, ipfsHash, { from: dataManager })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
+
+      await treeFactoryV2Instance
+        .listTree(1000000001, ipfsHash, { from: dataManager })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
+
+      await treeFactoryV2Instance.listTree(1000000000, ipfsHash, {
+        from: dataManager,
+      });
+
+      let result2 = await treeFactoryV2Instance.trees.call(treeId);
+
+      assert.equal(Number(result2.treeStatus), 2, "tree status is incorrect"); //updated
+    });
+
+    it("manageSaleType should be fail because invalid access(just auction access for this function)", async () => {
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      let result1 = await treeFactoryV2Instance.manageSaleType.call(
+        1000000001,
+        1,
+        {
+          from: deployerAccount,
+        }
+      );
+      assert.equal(result1, 1, "result1 is not correct");
+
+      let result2 = await treeFactoryV2Instance.manageSaleType.call(
+        1000000000,
+        1,
+        {
+          from: deployerAccount,
+        }
+      );
+      assert.equal(result2, 0, "result2 is not correct");
+    });
+
+    ////////////////////------------------------------------ test manageSaleTypeBatch func  ----------------------------------------//
+
+    it("test manageSaleTypeBatch function", async () => {
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryV2Instance.address,
+        deployerAccount
+      );
+
+      await treeFactoryV2Instance
+        .manageSaleTypeBatch(102, 103, 2, { from: deployerAccount })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        deployerAccount,
+        deployerAccount
+      );
+
+      await treeFactoryV2Instance.setTreeTokenAddress(
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeFactoryV2Instance.mintAssignedTree(102, userAccount2, {
+        from: deployerAccount,
+      });
+
+      let result = await treeFactoryV2Instance.manageSaleTypeBatch.call(
+        102,
+        103,
+        2,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result, false, "result not true");
+
+      let result2 = await treeFactoryV2Instance.manageSaleTypeBatch(
+        103,
+        104,
+        2,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        Number((await treeFactoryV2Instance.trees.call(103)).saleType),
+        2,
+        "saleType not true"
+      );
+
+      let result3 = await treeFactoryV2Instance.manageSaleTypeBatch.call(
+        103,
+        104,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result3, false, "result3 not true");
+
+      await treeFactoryV2Instance.resetSaleTypeBatch(103, 104, 3, {
+        from: deployerAccount,
+      });
+
+      let result4 = await treeFactoryV2Instance.manageSaleTypeBatch.call(
+        1000000000,
+        1000000001,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result4, true, "result4 not true");
+
+      let result5 = await treeFactoryV2Instance.manageSaleTypeBatch.call(
+        1000000001,
+        1000000002,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result5, false, "result5 not true");
+
+      let result6 = await treeFactoryV2Instance.manageSaleTypeBatch.call(
+        1000000000,
+        1000000002,
+        3,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(result6, false, "result6 not true");
+    });
+
     // //--------------------------plantMarketPlaceTree test----------------------------------------------
 
     it("plantMarketPlaceTree should be reject (Model not exist and owner not true)", async () => {
@@ -200,7 +378,7 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, planter2, deployerAccount);
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter,
         zeroAddress,
@@ -208,7 +386,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter2,
         zeroAddress,
@@ -318,7 +496,7 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, planter, deployerAccount);
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter,
         zeroAddress,
@@ -373,12 +551,12 @@ contract("TreeFactoryV2", (accounts) => {
 
       assert.equal(result.planter, planter, "planter address not true");
 
-      let planterPlantedCount = (await planterInstance.planters.call(planter))
+      let planterPlantedCount = (await planterV2Instance.planters.call(planter))
         .plantedCount;
 
       assert.equal(
         planterPlantedCount,
-        1,
+        0,
         "planter PlantedCount address not true"
       );
 
@@ -428,14 +606,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAdmin,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         3,
         planter,
         zeroAddress,
@@ -460,7 +638,7 @@ contract("TreeFactoryV2", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
 
-      await planterInstance.acceptPlanterByOrganization(planter, true, {
+      await planterV2Instance.acceptPlanterByOrganization(planter, true, {
         from: organizationAdmin,
       });
 
@@ -500,12 +678,12 @@ contract("TreeFactoryV2", (accounts) => {
 
       assert.equal(result.planter, planter, "planter address not true");
 
-      let planterPlantedCount = (await planterInstance.planters.call(planter))
+      let planterPlantedCount = (await planterV2Instance.planters.call(planter))
         .plantedCount;
 
       assert.equal(
         planterPlantedCount,
-        1,
+        0,
         "planter PlantedCount address not true"
       );
 
@@ -536,14 +714,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAdmin,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         3,
         planter,
         zeroAddress,
@@ -591,14 +769,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAdmin, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAdmin,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter,
         zeroAddress,
@@ -633,7 +811,7 @@ contract("TreeFactoryV2", (accounts) => {
         }
       );
 
-      await planterInstance.updatePlanterType(3, organizationAdmin, {
+      await planterV2Instance.updatePlanterType(3, organizationAdmin, {
         from: planter,
       });
 
@@ -695,7 +873,7 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, planter, deployerAccount);
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter,
         zeroAddress,
@@ -813,14 +991,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAddress,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         3,
         planter,
         zeroAddress,
@@ -839,7 +1017,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //---------------------------------------------
 
-      await planterInstance.acceptPlanterByOrganization(planter, true, {
+      await planterV2Instance.acceptPlanterByOrganization(planter, true, {
         from: organizationAddress,
       });
 
@@ -991,14 +1169,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAddress,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         3,
         planter,
         zeroAddress,
@@ -1017,7 +1195,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //---------------------------------------------
 
-      await planterInstance.acceptPlanterByOrganization(planter, true, {
+      await planterV2Instance.acceptPlanterByOrganization(planter, true, {
         from: organizationAddress,
       });
 
@@ -1109,14 +1287,14 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
 
       await Common.joinOrganizationPlanter(
-        planterInstance,
+        planterV2Instance,
         organizationAddress,
         zeroAddress,
         dataManager
       );
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         3,
         planter,
         zeroAddress,
@@ -1135,7 +1313,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //---------------------------------------------
 
-      await planterInstance.acceptPlanterByOrganization(planter, true, {
+      await planterV2Instance.acceptPlanterByOrganization(planter, true, {
         from: organizationAddress,
       });
 
@@ -1229,7 +1407,7 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.addPlanter(arInstance, planter, deployerAccount);
 
       await Common.joinSimplePlanter(
-        planterInstance,
+        planterV2Instance,
         1,
         planter,
         zeroAddress,

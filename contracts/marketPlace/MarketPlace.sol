@@ -9,7 +9,7 @@ import "../gsn/RelayRecipient.sol";
 import "../treasury/IAllocation.sol";
 import "../tree/ITreeFactoryV2.sol";
 import "../tree/IAttribute.sol";
-import "../planter/IPlanter.sol";
+import "../planter/IPlanterV2.sol";
 import "../treasury/IPlanterFund.sol";
 import "../regularSale/IRegularSaleV2.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
@@ -31,7 +31,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     IAttribute public attribute;
     IPlanterFund public planterFundContract;
     IRegularSaleV2 public regularSale;
-    IPlanter public planter;
+    IPlanterV2 public planter;
 
     CountersUpgradeable.Counter public modelId;
 
@@ -195,7 +195,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
     /// @inheritdoc IMarketPlace
     function setPlanterAddress(address _address) external override onlyAdmin {
-        IPlanter candidateContract = IPlanter(_address);
+        IPlanterV2 candidateContract = IPlanterV2(_address);
         require(candidateContract.isPlanter());
         planter = candidateContract;
     }
@@ -411,7 +411,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         Model storage modelData = models[_modelId];
 
-        bool canPlant = planter.manageAssignedTreePermission(
+        bool canPlant = planter.manageMarketPlaceTreePermission(
             _sender,
             modelData.planter
         );

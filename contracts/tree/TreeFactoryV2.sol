@@ -210,6 +210,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         emit TreeUpdateIntervalChanged();
     }
 
+    //----------------------------------->CHANGED
     /// @inheritdoc ITreeFactoryV2
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
@@ -217,7 +218,10 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         ifNotPaused
         onlyDataManager
     {
-        require(trees[_treeId].treeStatus == 0, "Duplicate tree");
+        require(
+            _treeId < 1000000001 && trees[_treeId].treeStatus == 0,
+            "Duplicate tree"
+        );
 
         TreeData storage treeData = trees[_treeId];
 
@@ -393,6 +397,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         }
     }
 
+    //------------------>CHANGED
     /// @inheritdoc ITreeFactoryV2
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
@@ -400,7 +405,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         onlyTreejerContract
         returns (uint32)
     {
-        if (treeToken.exists(_treeId)) {
+        if (_treeId > 1000000000 || treeToken.exists(_treeId)) {
             return 1;
         }
 
@@ -456,12 +461,17 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         }
     }
 
+    //------------------>CHANGED
     /// @inheritdoc ITreeFactoryV2
     function manageSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
         uint32 _saleType
     ) external override onlyTreejerContract returns (bool) {
+        if (_startTreeId > 1000000000 || _endTreeId > 1000000001) {
+            return false;
+        }
+
         for (uint256 i = _startTreeId; i < _endTreeId; i++) {
             if (trees[i].saleType > 0 || treeToken.exists(i)) {
                 return false;
@@ -554,6 +564,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         require(tempTreeData.plantDate > 0, "Regular Tree not exists");
 
         if (_isVerified) {
+            //------->CHANGED
+
             uint256 tempLastRegularTreeId = 0;
 
             if (tempTreesModel[_tempTreeId] > 0) {
@@ -629,6 +641,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
         return tempLastFundedTreeId;
     }
+
+    //------->CHANGED
 
     /// @inheritdoc ITreeFactoryV2
     function mintTreeMarketPlace(

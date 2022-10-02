@@ -14,7 +14,7 @@ const Dai = artifacts.require("Dai");
 const TestMarketPlace = artifacts.require("TestMarketPlace");
 
 const Tree = artifacts.require("Tree");
-const Planter = artifacts.require("Planter");
+const Planter = artifacts.require("PlanterV2");
 const WethFund = artifacts.require("WethFund");
 
 const assert = require("chai").assert;
@@ -832,7 +832,7 @@ contract("marketPlace", (accounts) => {
       //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
 
-    it("test updateLastReservePlantedOfModel", async () => {
+    it.only("test updateLastReservePlantedOfModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -857,19 +857,6 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      //fail because marketPlace is not treejerContract
-      await marketPlaceInstance
-        .updateLastReservePlantedOfModel(userAccount1, 1, {
-          from: treejerContract,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        marketPlaceInstance.address,
-        deployerAccount
-      );
-
       // an account that is not planter
       await marketPlaceInstance
         .updateLastReservePlantedOfModel(dataManager, 1, {
@@ -885,6 +872,20 @@ contract("marketPlace", (accounts) => {
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
 
       const model1BeforeUpdate = await marketPlaceInstance.models(modelId1);
+
+      //////--------------------------- fail because of invalid model
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 0, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 100, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
       await marketPlaceInstance.updateLastReservePlantedOfModel(
         userAccount1,
         1,
@@ -952,11 +953,11 @@ contract("marketPlace", (accounts) => {
       );
 
       //planter reached maximum supplyCap
-      await marketPlaceInstance
-        .updateLastReservePlantedOfModel(userAccount3, 2, {
-          from: treejerContract,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+      // await marketPlaceInstance
+      //   .updateLastReservePlantedOfModel(userAccount3, 2, {
+      //     from: treejerContract,
+      //   })
+      //   .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
     });
   });
 

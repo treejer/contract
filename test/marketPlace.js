@@ -659,7 +659,39 @@ contract("marketPlace", (accounts) => {
         "species is incorrect"
       );
     });
+    it("test deactiveModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
 
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      const modelBeforeDeactivate = await marketPlaceInstance.models(modelId);
+
+      await marketPlaceInstance
+        .deactiveModel(modelId, { from: deployerAccount })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await marketPlaceInstance.deactiveModel(modelId, { from: userAccount1 });
+
+      const modelAfterDeactivate = await marketPlaceInstance.models(modelId);
+      assert.equal(
+        Number(modelBeforeDeactivate.deactive),
+        0,
+        "deactive value is incorrect"
+      );
+
+      assert.equal(
+        Number(modelAfterDeactivate.deactive),
+        1,
+        "deactive value is incorrect"
+      );
+    });
     it("test updatePrice", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -1130,7 +1162,7 @@ contract("marketPlace", (accounts) => {
         from: dataManager,
       });
     });
-    it.only("fail to fundTree", async () => {
+    it("fail to fundTree", async () => {
       const country = 1;
       const species = 10;
       const price = web3.utils.toWei("10");

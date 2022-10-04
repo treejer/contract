@@ -832,7 +832,7 @@ contract("marketPlace", (accounts) => {
       //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
 
-    it.only("test updateLastReservePlantedOfModel", async () => {
+    it("test updateLastReservePlantedOfModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -958,6 +958,189 @@ contract("marketPlace", (accounts) => {
       //     from: treejerContract,
       //   })
       //   .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+    });
+
+    it("test reduceLastPlantedOfModel", async () => {
+      let planterInstance2 = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance2.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      const testMarketPlaceInstance = await TestMarketPlace.new({
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.setPlanterAddress(
+        planterInstance2.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      let organizationAddress = userAccount4;
+      let planter = userAccount2;
+      let planter2 = userAccount3;
+
+      await Common.addPlanter(arInstance, organizationAddress, deployerAccount);
+      await Common.addPlanter(arInstance, planter, deployerAccount);
+      await Common.addPlanter(arInstance, planter2, deployerAccount);
+
+      //organizationAddress join
+      await Common.joinOrganizationPlanter(
+        planterInstance2,
+        organizationAddress,
+        zeroAddress,
+        dataManager
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance2,
+        1,
+        planter,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanter(
+        planterInstance2,
+        3,
+        planter2,
+        zeroAddress,
+        organizationAddress
+      );
+
+      await planterInstance2.acceptPlanterByOrganization(planter2, true, {
+        from: organizationAddress,
+      });
+
+      //------------------------- create model
+
+      await testMarketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        10,
+        { from: planter }
+      );
+
+      await testMarketPlaceInstance.addModel(
+        1,
+        2,
+        web3.utils.toWei("1", "Ether"),
+        100,
+        { from: organizationAddress }
+      );
+
+      //--------------------------------------------------
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(0, { from: planter })
+        .should.be.rejectedWith("MarketPlace:modelId is incorrect.");
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(3, { from: planter })
+        .should.be.rejectedWith("MarketPlace:modelId is incorrect.");
+
+      //------------------------------------------------
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, { from: planter })
+        .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
+
+      await testMarketPlaceInstance.setLastFunded(1, 1000000010);
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, { from: planter })
+        .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
+
+      await testMarketPlaceInstance.setLastPlanted(1, 1000000009);
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, { from: planter })
+        .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
+
+      await testMarketPlaceInstance.setLastPlanted(1, 1000000011);
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, { from: planter })
+        .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
+
+      await testMarketPlaceInstance.setLastPlanted(1, 1000000010);
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, {
+          from: planter2,
+        })
+        .should.be.rejectedWith("MarketPlace:Access Denied.");
+
+      assert.equal(
+        (await testMarketPlaceInstance.models(1)).deactive,
+        0,
+        "result is not correct"
+      );
+
+      await testMarketPlaceInstance.reduceLastPlantedOfModel(1, {
+        from: planter,
+      });
+
+      assert.equal(
+        (await testMarketPlaceInstance.models(1)).deactive,
+        2,
+        "result is not correct"
+      );
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(1, {
+          from: planter,
+        })
+        .should.be.rejectedWith("MarketPlace:Model before finished.");
+
+      assert.equal(
+        (await testMarketPlaceInstance.models(1)).deactive,
+        2,
+        "result is not correct"
+      );
+
+      ////--------------> model 2
+
+      assert.equal(
+        (await testMarketPlaceInstance.models(2)).deactive,
+        0,
+        "result is not correct"
+      );
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(2, {
+          from: planter,
+        })
+        .should.be.rejectedWith("MarketPlace:Access Denied.");
+
+      await testMarketPlaceInstance
+        .reduceLastPlantedOfModel(2, {
+          from: organizationAddress,
+        })
+        .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
+
+      await testMarketPlaceInstance.setLastFunded(2, 1000000110);
+
+      await testMarketPlaceInstance.setLastPlanted(2, 1000000110);
+
+      await testMarketPlaceInstance.reduceLastPlantedOfModel(2, {
+        from: organizationAddress,
+      });
+
+      assert.equal(
+        (await testMarketPlaceInstance.models(2)).deactive,
+        2,
+        "result is not correct"
+      );
     });
   });
 

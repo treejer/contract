@@ -3,6 +3,8 @@
 const AccessRestriction = artifacts.require("AccessRestriction");
 const PlanterV2 = artifacts.require("PlanterV2");
 
+var Dai = artifacts.require("Dai");
+
 const assert = require("chai").assert;
 require("chai").use(require("chai-as-promised")).should();
 
@@ -16,9 +18,17 @@ const {
   MarketPlaceErrorMsg,
 } = require("./enumes");
 
-const MarketPlace = artifacts.require("MarketPlace");
+const TestMarketPlace = artifacts.require("TestMarketPlace");
 
 const TreeFactoryV2 = artifacts.require("TreeFactoryV2");
+
+const Attribute = artifacts.require("Attribute");
+const PlanterFund = artifacts.require("PlanterFund");
+const DaiFund = artifacts.require("DaiFund");
+const Allocation = artifacts.require("Allocation");
+const Tree = artifacts.require("Tree");
+
+const RegularSale = artifacts.require("RegularSaleV2");
 
 const Math = require("./math");
 
@@ -46,10 +56,6 @@ contract("PlanterV2", (accounts) => {
   const userAccount8 = accounts[9];
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
-  // before(async () => {
-
-  // });
 
   beforeEach(async () => {
     arInstance = await AccessRestriction.new({
@@ -84,36 +90,39 @@ contract("PlanterV2", (accounts) => {
 
     ///-----------------------------deploy market place
 
-    marketPlaceInstance = await MarketPlace.new({
+    testMarketPlaceInstance = await TestMarketPlace.new({
       from: deployerAccount,
     });
 
-    await marketPlaceInstance.initialize(arInstance.address, {
+    await testMarketPlaceInstance.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
-    await marketPlaceInstance.setPlanterAddress(planterV2Instance.address, {
+    await testMarketPlaceInstance.setPlanterAddress(planterV2Instance.address, {
       from: deployerAccount,
     });
 
     await treeFactoryV2Instance.setMarketPlaceAddress(
-      marketPlaceInstance.address,
+      testMarketPlaceInstance.address,
       {
         from: deployerAccount,
       }
     );
 
-    await planterV2Instance.setMarketPlaceAddress(marketPlaceInstance.address, {
-      from: deployerAccount,
-    });
+    await planterV2Instance.setMarketPlaceAddress(
+      testMarketPlaceInstance.address,
+      {
+        from: deployerAccount,
+      }
+    );
   });
 
   it("check setMarketPlaceAddress function", async () => {
-    marketPlaceInstance2 = await MarketPlace.new({
+    testMarketPlaceInstance2 = await TestMarketPlace.new({
       from: deployerAccount,
     });
 
-    await marketPlaceInstance2.initialize(arInstance.address, {
+    await testMarketPlaceInstance2.initialize(arInstance.address, {
       from: deployerAccount,
     });
 
@@ -127,7 +136,7 @@ contract("PlanterV2", (accounts) => {
     //------------------------->reject set marketPlace function
 
     await planterV2Instance
-      .setMarketPlaceAddress(marketPlaceInstance.address, {
+      .setMarketPlaceAddress(testMarketPlaceInstance.address, {
         from: userAccount3,
       })
       .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
@@ -139,7 +148,7 @@ contract("PlanterV2", (accounts) => {
     //------------------------->successfully set marketPlace function
 
     await planterV2Instance.setMarketPlaceAddress(
-      marketPlaceInstance2.address,
+      testMarketPlaceInstance2.address,
       {
         from: deployerAccount,
       }
@@ -147,40 +156,12 @@ contract("PlanterV2", (accounts) => {
 
     assert.equal(
       await planterV2Instance.marketPlace(),
-      marketPlaceInstance2.address,
+      testMarketPlaceInstance2.address,
       "address dosn't set correct"
     );
   });
 
   it("updatePlanterType should be fail because planter has active market place model", async () => {
-    const country1 = 1;
-    const species1 = 10;
-    const price1 = web3.utils.toWei("10");
-    const count1 = 50;
-    const funder = userAccount5;
-    const recipient = userAccount6;
-    const referrer = userAccount7;
-    const amount = web3.utils.toWei("30");
-
-    const modelId = 1;
-    await marketPlaceInstance.addModel(country1, species1, price1, count1, {
-      from: userAccount1,
-    });
-
-    await regularSaleInstance.updateReferralTriggerCount(2, {
-      from: dataManager,
-    });
-
-    const input = [{ modelId: 3, count: 1 }];
-
-    await daiInstance.setMint(funder, amount);
-
-    await daiInstance.approve(marketPlaceInstance.address, amount, {
-      from: funder,
-    });
-
-    //-------------------------------------------------------------
-
     let organizationAddress = userAccount4;
     let planter = userAccount2;
     let planter2 = userAccount3;
@@ -197,7 +178,7 @@ contract("PlanterV2", (accounts) => {
 
     await Common.addTreejerContractRole(
       arInstance,
-      marketPlaceInstance.address,
+      testMarketPlaceInstance.address,
       deployerAccount
     );
 
@@ -231,7 +212,7 @@ contract("PlanterV2", (accounts) => {
 
     //------------------------- create model
 
-    await marketPlaceInstance.addModel(
+    await testMarketPlaceInstance.addModel(
       1,
       2,
       web3.utils.toWei("1", "Ether"),
@@ -239,7 +220,7 @@ contract("PlanterV2", (accounts) => {
       { from: planter }
     );
 
-    await marketPlaceInstance.addModel(
+    await testMarketPlaceInstance.addModel(
       1,
       2,
       web3.utils.toWei("1", "Ether"),
@@ -281,7 +262,7 @@ contract("PlanterV2", (accounts) => {
       from: planter2,
     });
 
-    await marketPlaceInstance.deleteModel(1, {
+    await testMarketPlaceInstance.deleteModel(1, {
       from: planter,
     });
 
@@ -293,7 +274,7 @@ contract("PlanterV2", (accounts) => {
       from: organizationAddress,
     });
 
-    await marketPlaceInstance.addModel(
+    await testMarketPlaceInstance.addModel(
       1,
       2,
       web3.utils.toWei("1", "Ether"),
@@ -305,26 +286,38 @@ contract("PlanterV2", (accounts) => {
       ipfsHash,
       birthDate,
       countryCode,
-      1,
+      3,
       {
         from: planter,
       }
     );
 
-    await marketPlaceInstance.reduceLastPlantedOfModel(3, {
+    await Common.addVerifierRole(arInstance, dataManager, deployerAccount);
+
+    await treeFactoryV2Instance.verifyTree(1, true, {
+      from: dataManager,
+    });
+
+    await testMarketPlaceInstance.reduceLastPlantedOfModel(3, {
       from: planter,
     });
 
-    let model = await marketPlaceInstance.models(3);
+    let model = await testMarketPlaceInstance.models(3);
 
-    assert.equal(model.deactive, 0, "result is not correct");
+    await testMarketPlaceInstance.setLastFunded(3, 1000000003);
 
-    await marketPlaceInstance.fundTree(input, zeroAddress, zeroAddress, {
-      from: funder,
-    });
-
-    await marketPlaceInstance.reduceLastPlantedOfModel(3, {
+    await testMarketPlaceInstance.reduceLastPlantedOfModel(3, {
       from: planter,
     });
+
+    let modelAfter = await testMarketPlaceInstance.models(3);
+
+    assert.equal(modelAfter.deactive, 2, "result is not correct");
+
+    await testMarketPlaceInstance
+      .reduceLastPlantedOfModel(3, {
+        from: planter,
+      })
+      .should.be.rejectedWith("MarketPlace:Model before finished.");
   });
 });

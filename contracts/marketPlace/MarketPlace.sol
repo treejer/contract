@@ -54,7 +54,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     struct Model {
         uint8 country;
         uint8 species;
-        uint8 deactive;
+        uint8 deactive; // 1-can't buy but can plan && 2-finish model(plant and found)
         address planter;
         uint256 price;
         uint256 count;
@@ -476,11 +476,14 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
 
+        require(modelData.deactive == 0, "MarketPlace:Model before finished.");
+
         if (
             modelData.lastPlant == modelData.start + modelData.count - 1 &&
             modelData.lastFund == modelData.start + modelData.count - 1
         ) {
             activeModelCount[modelData.planter] -= 1;
+            modelData.deactive = 2;
         }
     }
 }

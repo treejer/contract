@@ -122,6 +122,7 @@ const PlanterErrorMsg = {
   INVALID_PLANTER_STATUS: "Invalid planter status",
   INVALID_PAYMENT_PORTION: "Invalid share",
   ACCEPT_PLANTER_ACCESS_ERROR: "Request not exists",
+  PLANTER_HAS_MODEL: "Planter:planter has active market place model",
 };
 
 const RegularSaleErrors = {

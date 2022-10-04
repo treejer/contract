@@ -196,13 +196,14 @@ const MarketPlaceErrorMsg = {
   INVAILD_PLANTER: "MarketPlace:Invalid Planter.",
   ACCESS_DENIED: "MarketPlace:Access Denied.",
   TREE_PLANTER_OR_FUNDED: "MarketPlace:Tree Planted or Funded.",
-  PERMISSION_DENIED: "MarketPlace:Permission denied",
+  PERMISSION_DENIED: "MarketPlace:Permission denied.",
   ALL_TREE_PLANTED: "MarketPlace:All tree planted",
   INVALID_REFERRER: "MarketPlace:Invalid referrer.",
   TOTAL_COUNT_EXCEEDED: "MarketPlace:total count exceeded 100.",
   INSUFFICIENT_BALANCE: "MarketPlace:Insufficient balance.",
   UNSUCCESSFUL_TRANSFER: "MarketPlace:Unsuccessful transfer.",
   ATTRIBUTE_NOT_GENERATED: "MarketPlace:Attribute not generated.",
+  INCORRECT_MODELID: "MarketPlace:ModelId is incorrect.",
 };
 
 module.exports = {

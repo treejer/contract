@@ -14,7 +14,7 @@ const Dai = artifacts.require("Dai");
 const TestMarketPlace = artifacts.require("TestMarketPlace");
 
 const Tree = artifacts.require("Tree");
-const Planter = artifacts.require("Planter");
+const Planter = artifacts.require("PlanterV2");
 const WethFund = artifacts.require("WethFund");
 
 const assert = require("chai").assert;
@@ -46,6 +46,7 @@ const {
   MarketPlaceErrorMsg,
   SafeMathErrorMsg,
 } = require("./enumes");
+const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 const FakeToken = artifacts.require("FakeToken");
 const FakeAttribute = artifacts.require("FakeAttribute");
@@ -658,7 +659,39 @@ contract("marketPlace", (accounts) => {
         "species is incorrect"
       );
     });
+    it("test deactiveModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
 
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      const modelBeforeDeactivate = await marketPlaceInstance.models(modelId);
+
+      await marketPlaceInstance
+        .deactiveModel(modelId, { from: deployerAccount })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await marketPlaceInstance.deactiveModel(modelId, { from: userAccount1 });
+
+      const modelAfterDeactivate = await marketPlaceInstance.models(modelId);
+      assert.equal(
+        Number(modelBeforeDeactivate.deactive),
+        0,
+        "deactive value is incorrect"
+      );
+
+      assert.equal(
+        Number(modelAfterDeactivate.deactive),
+        1,
+        "deactive value is incorrect"
+      );
+    });
     it("test updatePrice", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -799,7 +832,7 @@ contract("marketPlace", (accounts) => {
       //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
 
-    it("test updateLastReservePlantedOfModel", async () => {
+    it.only("test updateLastReservePlantedOfModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -824,19 +857,6 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
 
-      //fail because marketPlace is not treejerContract
-      await marketPlaceInstance
-        .updateLastReservePlantedOfModel(userAccount1, 1, {
-          from: treejerContract,
-        })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
-
-      await Common.addTreejerContractRole(
-        arInstance,
-        marketPlaceInstance.address,
-        deployerAccount
-      );
-
       // an account that is not planter
       await marketPlaceInstance
         .updateLastReservePlantedOfModel(dataManager, 1, {
@@ -852,6 +872,20 @@ contract("marketPlace", (accounts) => {
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
 
       const model1BeforeUpdate = await marketPlaceInstance.models(modelId1);
+
+      //////--------------------------- fail because of invalid model
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 0, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 100, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
       await marketPlaceInstance.updateLastReservePlantedOfModel(
         userAccount1,
         1,
@@ -919,11 +953,11 @@ contract("marketPlace", (accounts) => {
       );
 
       //planter reached maximum supplyCap
-      await marketPlaceInstance
-        .updateLastReservePlantedOfModel(userAccount3, 2, {
-          from: treejerContract,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+      // await marketPlaceInstance
+      //   .updateLastReservePlantedOfModel(userAccount3, 2, {
+      //     from: treejerContract,
+      //   })
+      //   .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
     });
   });
 
@@ -1129,7 +1163,64 @@ contract("marketPlace", (accounts) => {
         from: dataManager,
       });
     });
+    it("fail to fundTree", async () => {
+      const country = 1;
+      const species = 10;
+      const price = web3.utils.toWei("10");
 
+      const funder = userAccount5;
+      const recipient = userAccount6;
+      const referrer = userAccount7;
+
+      await marketPlaceInstance.addModel(country, species, price, 1, {
+        from: userAccount1,
+      });
+      await marketPlaceInstance.addModel(country, species, price, 2, {
+        from: userAccount1,
+      });
+      await marketPlaceInstance.addModel(country, species, price, 3, {
+        from: userAccount1,
+      });
+      await marketPlaceInstance.addModel(country, species, price, 50, {
+        from: userAccount1,
+      });
+      await marketPlaceInstance.addModel(country, species, price, 50, {
+        from: userAccount1,
+      });
+
+      const input1 = [
+        { modelId: 1, count: 1 },
+        { modelId: 2, count: 3 },
+      ];
+
+      await marketPlaceInstance
+        .fundTree(input1, referrer, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
+
+      const input2 = [
+        { modelId: 1, count: 1 },
+        { modelId: 2, count: 1 },
+        { modelId: 3, count: 1 },
+        { modelId: 4, count: 49 },
+        { modelId: 5, count: 49 },
+      ];
+
+      await marketPlaceInstance
+        .fundTree(input2, referrer, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.TOTAL_COUNT_EXCEEDED);
+
+      await marketPlaceInstance.deactiveModel(2, { from: userAccount1 });
+
+      await marketPlaceInstance
+        .fundTree(input1, referrer, recipient, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
+    });
     it("fund tree with referrer and with recipient", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -1539,6 +1630,128 @@ contract("marketPlace", (accounts) => {
       await daiInstance.resetAcc(planterFundsInstnce.address);
       await daiInstance.resetAcc(daiFundInstance.address);
       await daiInstance.resetAcc(funder);
+    });
+
+    it("test fundTree with two model", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const country2 = 2;
+      const species2 = 20;
+      const price2 = web3.utils.toWei("20");
+      const count2 = 100;
+
+      const country3 = 3;
+      const species3 = 30;
+      const price3 = web3.utils.toWei("30");
+      const count3 = 150;
+
+      const funder = userAccount5;
+      const recipient = userAccount6;
+      const referrer = userAccount7;
+      const amount = web3.utils.toWei("70");
+      const amount1 = web3.utils.toWei("69");
+      const amount2 = web3.utils.toWei("1");
+
+      const modelId1 = 1;
+      const modelId3 = 3;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      await marketPlaceInstance.addModel(country2, species2, price2, count2, {
+        from: userAccount1,
+      });
+
+      await marketPlaceInstance.addModel(country3, species3, price3, count3, {
+        from: userAccount1,
+      });
+
+      const input = [
+        { modelId: 1, count: 1 },
+        { modelId: 3, count: 2 },
+      ];
+
+      await daiInstance.setMint(funder, amount1);
+
+      await daiInstance.approve(marketPlaceInstance.address, amount1, {
+        from: funder,
+      });
+
+      await marketPlaceInstance
+        .fundTree(input, referrer, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INSUFFICIENT_BALANCE);
+
+      await daiInstance.setMint(funder, amount2);
+
+      await marketPlaceInstance
+        .fundTree(input, referrer, recipient, {
+          from: funder,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_APPROVE);
+
+      await daiInstance.approve(marketPlaceInstance.address, amount, {
+        from: funder,
+      });
+
+      const model1BeforeFund = await marketPlaceInstance.models(modelId1);
+      const model3BeforeFund = await marketPlaceInstance.models(modelId3);
+
+      await marketPlaceInstance.fundTree(input, referrer, recipient, {
+        from: funder,
+      });
+
+      const model1AfterFund = await marketPlaceInstance.models(modelId1);
+      const model3AfterFund = await marketPlaceInstance.models(modelId3);
+
+      assert.equal(
+        Number(model1AfterFund.lastFund),
+        Math.add(Number(model1BeforeFund.lastFund), input[0].count),
+        "lastFund of model1 is incorrect"
+      );
+
+      assert.equal(
+        Number(model3AfterFund.lastFund),
+        Math.add(Number(model3BeforeFund.lastFund), input[1].count),
+        "lastFund of model3 is incorrect"
+      );
+
+      /////////// ------------------- check treeOwner and attributes
+      let owner;
+      let attributes;
+
+      for (let i = 1000000001; i < 1000000002; i++) {
+        owner = await treeTokenInstance.ownerOf(i);
+        assert.equal(owner, recipient, "owner of tree is incorrect");
+
+        //////////// check attributes
+        attributes = await treeTokenInstance.attributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
+      }
+
+      for (let i = 1000000151; i < 1000000153; i++) {
+        owner = await treeTokenInstance.ownerOf(i);
+        assert.equal(owner, recipient, "owner of tree is incorrect");
+
+        //////////// check attributes
+        attributes = await treeTokenInstance.attributes.call(i);
+
+        assert.equal(
+          Number(attributes.generationType),
+          1,
+          `generationType for tree ${i} is inccorect`
+        );
+      }
     });
   });
 });

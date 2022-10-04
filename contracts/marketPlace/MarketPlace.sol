@@ -412,7 +412,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     {
         require(
             _modelId > 0 && _modelId <= modelId.current(),
-            "modelId is incorrect"
+            "MarketPlace:ModelId is incorrect."
         );
 
         Model storage modelData = models[_modelId];

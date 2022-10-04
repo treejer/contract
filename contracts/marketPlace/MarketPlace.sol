@@ -98,6 +98,14 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         _;
     }
 
+    modifier validModelId(uint256 _modelId) {
+        require(
+            _modelId > 0 && _modelId <= modelId.current(),
+            "MarketPlace:ModelId is incorrect."
+        );
+        _;
+    }
+
     /// @inheritdoc IMarketPlace
     function initialize(address _accessRestrictionAddress)
         external
@@ -241,7 +249,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         uint256 _modelId,
         uint8 _species,
         uint8 _country
-    ) external {
+    ) external validModelId(_modelId) {
         Model storage modelData = models[_modelId];
 
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
@@ -256,7 +264,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.species = _species;
     }
 
-    function updatePrice(uint256 _modelId, uint256 _price) external {
+    function updatePrice(uint256 _modelId, uint256 _price)
+        external
+        validModelId(_modelId)
+    {
         Model storage modelData = models[_modelId];
 
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
@@ -264,13 +275,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.price = _price;
     }
 
-    function deactiveModel(uint256 _modelId) external {
+    function deactiveModel(uint256 _modelId) external validModelId(_modelId) {
         Model storage modelData = models[_modelId];
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
         modelData.deactive = 1;
     }
 
-    function deleteModel(uint256 _modelId) external {
+    function deleteModel(uint256 _modelId) external validModelId(_modelId) {
         Model storage model = models[_modelId];
 
         require(model.planter == msg.sender, "MarketPlace:Access Denied");
@@ -334,6 +345,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             address(daiFund),
             totalPrice
         );
+
         require(success, "MarketPlace:Unsuccessful transfer.");
 
         TotalBalances memory totalBalances;
@@ -409,12 +421,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         external
         override
         onlyTreejerContract
+        validModelId(_modelId)
     {
-        require(
-            _modelId > 0 && _modelId <= modelId.current(),
-            "MarketPlace:ModelId is incorrect."
-        );
-
         Model storage modelData = models[_modelId];
 
         bool canPlant = planter.manageMarketPlaceTreePermission(
@@ -438,6 +446,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         external
         override
         onlyTreejerContract
+        validModelId(_modelId)
     {
         models[_modelId].lastReservePlant -= 1;
     }
@@ -446,6 +455,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         external
         override
         onlyTreejerContract
+        validModelId(_modelId)
         returns (uint256)
     {
         Model storage modelData = models[_modelId];
@@ -457,12 +467,11 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         return lastPlantTemp;
     }
 
-    function reduceLastPlantedOfModel(uint256 _modelId) external override {
-        require(
-            _modelId > 0 && _modelId <= modelId.current(),
-            "MarketPlace:modelId is incorrect"
-        );
-
+    function reduceLastPlantedOfModel(uint256 _modelId)
+        external
+        override
+        validModelId(_modelId)
+    {
         Model storage modelData = models[_modelId];
 
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");

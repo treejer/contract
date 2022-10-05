@@ -298,11 +298,15 @@ contract("PlanterV2", (accounts) => {
       from: dataManager,
     });
 
-    await testMarketPlaceInstance.reduceLastPlantedOfModel(3, {
-      from: planter,
-    });
+    await testMarketPlaceInstance
+      .reduceLastPlantedOfModel(3, {
+        from: planter,
+      })
+      .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
 
     let model = await testMarketPlaceInstance.models(3);
+
+    assert.equal(model.deactive, 0, "result is not correct");
 
     await testMarketPlaceInstance.setLastFunded(3, 1000000003);
 

@@ -597,6 +597,14 @@ contract("marketPlace", (accounts) => {
       );
 
       await testMarketPlaceInstance
+        .updateModelData(0, species2, country2, { from: userAccount2 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await testMarketPlaceInstance
+        .updateModelData(101, species2, country2, { from: userAccount2 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await testMarketPlaceInstance
         .updateModelData(modelId, species2, country2, { from: userAccount2 })
         .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
 
@@ -659,39 +667,7 @@ contract("marketPlace", (accounts) => {
         "species is incorrect"
       );
     });
-    it("test deactiveModel", async () => {
-      const country1 = 1;
-      const species1 = 10;
-      const price1 = web3.utils.toWei("10");
-      const count1 = 50;
 
-      const modelId = 1;
-
-      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
-        from: userAccount1,
-      });
-
-      const modelBeforeDeactivate = await marketPlaceInstance.models(modelId);
-
-      await marketPlaceInstance
-        .deactiveModel(modelId, { from: deployerAccount })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
-
-      await marketPlaceInstance.deactiveModel(modelId, { from: userAccount1 });
-
-      const modelAfterDeactivate = await marketPlaceInstance.models(modelId);
-      assert.equal(
-        Number(modelBeforeDeactivate.deactive),
-        0,
-        "deactive value is incorrect"
-      );
-
-      assert.equal(
-        Number(modelAfterDeactivate.deactive),
-        1,
-        "deactive value is incorrect"
-      );
-    });
     it("test updatePrice", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -718,6 +694,18 @@ contract("marketPlace", (accounts) => {
         .updatePrice(modelId, price2, { from: userAccount2 })
         .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
 
+      await marketPlaceInstance
+        .updatePrice(0, price2, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .updatePrice(101, price2, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
       await marketPlaceInstance.updatePrice(modelId, price2, {
         from: userAccount1,
       });
@@ -730,7 +718,7 @@ contract("marketPlace", (accounts) => {
         "price is incorrect"
       );
     });
-    it("test updateLastPlantedOfModel", async () => {
+    it("test deactiveModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -742,32 +730,57 @@ contract("marketPlace", (accounts) => {
         from: userAccount1,
       });
 
-      let modelBeforeUpdate = await marketPlaceInstance.models(modelId);
-
-      assert.equal(
-        Number(modelBeforeUpdate.lastPlant),
-        1000000000,
-        "lastPlant is incorrect"
-      );
+      const modelBeforeDeactivate = await marketPlaceInstance.models(modelId);
 
       await marketPlaceInstance
-        .updateLastPlantedOfModel(modelId, { from: userAccount1 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+        .deactiveModel(0, 1, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
-      await marketPlaceInstance.updateLastPlantedOfModel(modelId, {
-        from: treejerContract,
+      await marketPlaceInstance
+        .deactiveModel(101, 1, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .deactiveModel(modelId, 1, { from: deployerAccount })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await marketPlaceInstance.deactiveModel(modelId, 1, {
+        from: userAccount1,
       });
 
-      let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+      const modelAfterDeactivate = await marketPlaceInstance.models(modelId);
+      assert.equal(
+        Number(modelBeforeDeactivate.deactive),
+        0,
+        "deactive value is incorrect"
+      );
 
       assert.equal(
-        Number(modelAfterUpdate.lastPlant),
-        1000000001,
-        "lastPlant is incorrect"
+        Number(modelAfterDeactivate.deactive),
+        1,
+        "deactive value is incorrect"
+      );
+
+      await marketPlaceInstance.deactiveModel(modelId, 0, {
+        from: userAccount1,
+      });
+
+      const modelAfterActivate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterActivate.deactive),
+        0,
+        "deactive value is incorrect"
+      );
+
+      assert.equal(
+        Number(modelAfterActivate.deactive),
+        0,
+        "deactive value is incorrect"
       );
     });
 
-    it("test reduceLastReservePlantedOfModel", async () => {
+    it("fail to deleteModel", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -796,40 +809,165 @@ contract("marketPlace", (accounts) => {
           from: userAccount1,
         }
       );
-      let initialLastReservePlant = Number(
-        (await testMarketPlaceInstance.models(1)).lastReservePlant
-      );
-      await testMarketPlaceInstance.increaseLastReservePlant(1);
-
-      let modelBefore = await testMarketPlaceInstance.models(modelId);
-
-      assert.equal(
-        Number(modelBefore.lastReservePlant),
-        initialLastReservePlant + 1,
-        "lastReservePlant is incorrect"
-      );
 
       await testMarketPlaceInstance
-        .reduceLastReservePlantedOfModel(modelId, { from: userAccount2 })
-        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+        .deleteModel(0, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
-      await testMarketPlaceInstance.reduceLastReservePlantedOfModel(modelId, {
-        from: treejerContract,
+      await testMarketPlaceInstance
+        .deleteModel(101, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await testMarketPlaceInstance
+        .deleteModel(modelId, { from: userAccount2 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await testMarketPlaceInstance.setLastFunded(1, 1);
+      /////----------- fail because lastPlanted != lastFunded
+      await testMarketPlaceInstance
+        .deleteModel(modelId, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
+
+      await testMarketPlaceInstance.setLastPlanted(1, 1);
+
+      /////----------- fail because lastPlanted increased
+      await testMarketPlaceInstance
+        .deleteModel(modelId, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
+    });
+
+    it.only("test deleteModel (no model exists after this model)", async () => {
+      let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
       });
 
-      let modelAfter = await testMarketPlaceInstance.models(modelId);
+      const lastTreeAssignedAfterModelAdded =
+        await marketPlaceInstance.lastTreeAssigned();
 
       assert.equal(
-        Number(modelAfter.lastReservePlant),
-        initialLastReservePlant,
-        "lastReservePlant is incorrect"
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(lastTreeAssigned), count1),
+        "lastTreeAssigned is incorrect"
       );
 
-      // await testMarketPlaceInstance.setLastFunded(1, 1);
-      // /////----------- fail because lastPlanted != lastFunded
-      // await testMarketPlaceInstance
-      //   .updateModelData(modelId, species2, country2, { from: userAccount1 })
-      //   .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        1,
+        "modelId is incorrect"
+      );
+
+      const model1BeforeDelete = await marketPlaceInstance.models(modelId);
+
+      const activeModelBeforeDelete =
+        await marketPlaceInstance.activeModelCount(userAccount1);
+      await marketPlaceInstance.deleteModel(modelId, {
+        from: userAccount1,
+      });
+      const model1AfterDelete = await marketPlaceInstance.models(modelId);
+      const activeModelAfterDelete = await marketPlaceInstance.activeModelCount(
+        userAccount1
+      );
+
+      assert.equal(
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(await marketPlaceInstance.lastTreeAssigned()), count1),
+        "lastTreeAssigned is incorrect"
+      );
+
+      assert.equal(
+        Number(activeModelBeforeDelete),
+        1,
+        "activeModel is incorrect"
+      );
+      assert.equal(
+        Number(activeModelAfterDelete),
+        0,
+        "activeModel is incorrect"
+      );
+
+      assert.equal(Number(model1BeforeDelete.count), count1, "model exist");
+      assert.equal(Number(model1AfterDelete.count), 0, "model not exist");
+
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        0,
+        "modelId is incorrect"
+      );
+    });
+
+    it.only("test deleteModel (model exist after model)", async () => {
+      let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      const lastTreeAssignedAfterModelAdded =
+        await marketPlaceInstance.lastTreeAssigned();
+
+      assert.equal(
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(lastTreeAssigned), count1),
+        "lastTreeAssigned is incorrect"
+      );
+
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        1,
+        "modelId is incorrect"
+      );
+
+      const model1BeforeDelete = await marketPlaceInstance.models(modelId);
+
+      const activeModelBeforeDelete =
+        await marketPlaceInstance.activeModelCount(userAccount1);
+      await marketPlaceInstance.deleteModel(modelId, {
+        from: userAccount1,
+      });
+      const model1AfterDelete = await marketPlaceInstance.models(modelId);
+      const activeModelAfterDelete = await marketPlaceInstance.activeModelCount(
+        userAccount1
+      );
+
+      assert.equal(
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(await marketPlaceInstance.lastTreeAssigned()), count1),
+        "lastTreeAssigned is incorrect"
+      );
+
+      assert.equal(
+        Number(activeModelBeforeDelete),
+        1,
+        "activeModel is incorrect"
+      );
+      assert.equal(
+        Number(activeModelAfterDelete),
+        0,
+        "activeModel is incorrect"
+      );
+
+      assert.equal(Number(model1BeforeDelete.count), count1, "model exist");
+      assert.equal(Number(model1AfterDelete.count), 0, "model not exist");
+
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        0,
+        "modelId is incorrect"
+      );
     });
 
     it("test updateLastReservePlantedOfModel", async () => {
@@ -856,6 +994,19 @@ contract("marketPlace", (accounts) => {
           from: userAccount1,
         })
         .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      //--------------------- fail because invalid model
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 0, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .updateLastReservePlantedOfModel(userAccount1, 101, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
       // an account that is not planter
       await marketPlaceInstance
@@ -951,13 +1102,126 @@ contract("marketPlace", (accounts) => {
         Number(model2BeforeUpdate.start),
         "lastReservePlant is incorrect"
       );
+    });
 
-      //planter reached maximum supplyCap
-      // await marketPlaceInstance
-      //   .updateLastReservePlantedOfModel(userAccount3, 2, {
-      //     from: treejerContract,
-      //   })
-      //   .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+    it("test reduceLastReservePlantedOfModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      const testMarketPlaceInstance = await TestMarketPlace.new({
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.setPlanterAddress(planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await testMarketPlaceInstance.addModel(
+        country1,
+        species1,
+        price1,
+        count1,
+        {
+          from: userAccount1,
+        }
+      );
+      let initialLastReservePlant = Number(
+        (await testMarketPlaceInstance.models(1)).lastReservePlant
+      );
+      await testMarketPlaceInstance.increaseLastReservePlant(1);
+
+      let modelBefore = await testMarketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBefore.lastReservePlant),
+        initialLastReservePlant + 1,
+        "lastReservePlant is incorrect"
+      );
+
+      await testMarketPlaceInstance
+        .reduceLastReservePlantedOfModel(modelId, { from: userAccount2 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await testMarketPlaceInstance
+        .reduceLastReservePlantedOfModel(0, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await testMarketPlaceInstance
+        .reduceLastReservePlantedOfModel(101, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await testMarketPlaceInstance.reduceLastReservePlantedOfModel(modelId, {
+        from: treejerContract,
+      });
+
+      let modelAfter = await testMarketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfter.lastReservePlant),
+        initialLastReservePlant,
+        "lastReservePlant is incorrect"
+      );
+    });
+
+    it("test updateLastPlantedOfModel", async () => {
+      const country1 = 1;
+      const species1 = 10;
+      const price1 = web3.utils.toWei("10");
+      const count1 = 50;
+
+      const modelId = 1;
+
+      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+        from: userAccount1,
+      });
+
+      let modelBeforeUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelBeforeUpdate.lastPlant),
+        1000000000,
+        "lastPlant is incorrect"
+      );
+
+      await marketPlaceInstance
+        .updateLastPlantedOfModel(modelId, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_TREEJER_CONTTRACT);
+
+      await marketPlaceInstance
+        .updateLastPlantedOfModel(0, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance
+        .updateLastPlantedOfModel(101, {
+          from: treejerContract,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
+
+      await marketPlaceInstance.updateLastPlantedOfModel(modelId, {
+        from: treejerContract,
+      });
+
+      let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      assert.equal(
+        Number(modelAfterUpdate.lastPlant),
+        1000000001,
+        "lastPlant is incorrect"
+      );
     });
   });
 

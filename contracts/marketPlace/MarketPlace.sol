@@ -275,10 +275,13 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         modelData.price = _price;
     }
 
-    function deactiveModel(uint256 _modelId) external validModelId(_modelId) {
+    function deactiveModel(uint256 _modelId, uint8 _status)
+        external
+        validModelId(_modelId)
+    {
         Model storage modelData = models[_modelId];
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
-        modelData.deactive = 1;
+        modelData.deactive = _status;
     }
 
     function deleteModel(uint256 _modelId) external validModelId(_modelId) {

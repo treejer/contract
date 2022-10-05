@@ -45,6 +45,7 @@ contract("TreeFactoryV2", (accounts) => {
   let daiInstance;
   let startTime;
   let endTime;
+  let planterInstance;
 
   const dataManager = accounts[0];
   const deployerAccount = accounts[1];
@@ -476,7 +477,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.rejectedWith(MarketPlaceErrorMsg.ALL_TREE_PLANTED);
     });
 
-    it("plantMarketPlaceTree should be success (With Model)", async () => {
+    it.only("plantMarketPlaceTree should be success (With Model)", async () => {
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -515,6 +516,18 @@ contract("TreeFactoryV2", (accounts) => {
 
       //-------------------------------------------
 
+      await planterV2Instance.updateSupplyCap(planter, 1);
+
+      await treeFactoryV2Instance.plantTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+
+        {
+          from: planter,
+        }
+      );
+
       const eventTx = await treeFactoryV2Instance.plantMarketPlaceTree(
         ipfsHash,
         birthDate,
@@ -525,9 +538,14 @@ contract("TreeFactoryV2", (accounts) => {
         }
       );
 
+      let planterSatus = (await planterV2Instance.planters.call(planter))
+        .status;
+
+      assert.equal(planterSatus, 2, "planterSatus is not correct");
+
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      let result = await treeFactoryV2Instance.tempTrees.call(0);
+      let result = await treeFactoryV2Instance.tempTrees.call(1);
 
       assert.equal(result.treeSpecs, ipfsHash, "incorrect treeSpecs");
 
@@ -556,7 +574,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       assert.equal(
         planterPlantedCount,
-        0,
+        1,
         "planter PlantedCount address not true"
       );
 
@@ -574,14 +592,30 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       truffleAssert.eventEmitted(eventTx, "TreePlanted", (ev) => {
-        return ev.treeId == 0;
+        return ev.treeId == 1;
       });
 
       //---------------------------------------------- test tempTreesModel
 
-      let tempTree = await treeFactoryV2Instance.tempTreesModel.call(0);
+      let tempTree = await treeFactoryV2Instance.tempTreesModel.call(1);
 
       assert.equal(Number(tempTree), 1, "tempTree is not correct");
+
+      //------------------------------------------------
+
+      await treeFactoryV2Instance.plantMarketPlaceTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        1,
+        {
+          from: planter,
+        }
+      );
+
+      await treeFactoryV2Instance.plantTree(ipfsHash, birthDate, countryCode, {
+        from: planter,
+      }).should.be.rejected;
     });
 
     it("plantMarketPlaceTree should be success (Planter of organization)", async () => {

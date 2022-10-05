@@ -399,7 +399,7 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
         PlanterData storage planterData = planters[_planter];
         if (planterData.planterType > 0) {
             if (
-                planterData.status == 1 &&
+                (planterData.status == 1 || planterData.status == 2) &&
                 (_planter == _assignedPlanterAddress ||
                     (planterData.planterType == 3 &&
                         memberOf[_planter] == _assignedPlanterAddress))

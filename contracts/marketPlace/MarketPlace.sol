@@ -226,9 +226,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         require(_count > 0 && _count < 10001, "MarketPlace:Invalid count.");
 
         modelId.increment();
-        uint256 _modelId = modelId.current();
 
-        Model storage modelData = models[_modelId];
+        Model storage modelData = models[modelId.current()];
 
         modelData.country = _country;
         modelData.species = _species;
@@ -279,6 +278,8 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         external
         validModelId(_modelId)
     {
+        require(_status == 0 || _status == 1, "MarketPlace:Status is invalid.");
+
         Model storage modelData = models[_modelId];
         require(modelData.planter == msg.sender, "MarketPlace:Access Denied.");
         modelData.deactive = _status;

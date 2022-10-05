@@ -905,14 +905,20 @@ contract("marketPlace", (accounts) => {
 
     it.only("test deleteModel (model exist after model)", async () => {
       let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
-      const country1 = 1;
-      const species1 = 10;
-      const price1 = web3.utils.toWei("10");
+
+      const country = 1;
+      const species = 10;
+      const price = web3.utils.toWei("10");
       const count1 = 50;
+      const count2 = 10;
 
       const modelId = 1;
 
-      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
+      await marketPlaceInstance.addModel(country, species, price, count1, {
+        from: userAccount1,
+      });
+
+      await marketPlaceInstance.addModel(country, species, price, count2, {
         from: userAccount1,
       });
 
@@ -921,42 +927,49 @@ contract("marketPlace", (accounts) => {
 
       assert.equal(
         Number(lastTreeAssignedAfterModelAdded),
-        Math.add(Number(lastTreeAssigned), count1),
+        Math.add(Number(lastTreeAssigned), count1, count2),
         "lastTreeAssigned is incorrect"
-      );
-
-      assert.equal(
-        Number(await marketPlaceInstance.modelId()),
-        1,
-        "modelId is incorrect"
       );
 
       const model1BeforeDelete = await marketPlaceInstance.models(modelId);
 
       const activeModelBeforeDelete =
         await marketPlaceInstance.activeModelCount(userAccount1);
+
       await marketPlaceInstance.deleteModel(modelId, {
         from: userAccount1,
       });
+
       const model1AfterDelete = await marketPlaceInstance.models(modelId);
+
       const activeModelAfterDelete = await marketPlaceInstance.activeModelCount(
         userAccount1
       );
 
       assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        2,
+        "modelId is incorrect"
+      );
+
+      assert.equal(
         Number(lastTreeAssignedAfterModelAdded),
-        Math.add(Number(await marketPlaceInstance.lastTreeAssigned()), count1),
+        Math.add(
+          Number(await marketPlaceInstance.lastTreeAssigned()),
+          count1,
+          count2
+        ),
         "lastTreeAssigned is incorrect"
       );
 
       assert.equal(
         Number(activeModelBeforeDelete),
-        1,
+        2,
         "activeModel is incorrect"
       );
       assert.equal(
         Number(activeModelAfterDelete),
-        0,
+        1,
         "activeModel is incorrect"
       );
 
@@ -965,7 +978,7 @@ contract("marketPlace", (accounts) => {
 
       assert.equal(
         Number(await marketPlaceInstance.modelId()),
-        0,
+        2,
         "modelId is incorrect"
       );
     });

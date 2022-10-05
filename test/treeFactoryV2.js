@@ -748,6 +748,13 @@ contract("TreeFactoryV2", (accounts) => {
     });
 
     it("test both organizationAdmin and individual planter", async () => {
+      await planterV2Instance.setMarketPlaceAddress(
+        marketPlaceInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
       const planter = userAccount2;
@@ -801,29 +808,25 @@ contract("TreeFactoryV2", (accounts) => {
         { from: organizationAdmin }
       );
 
-      await treeFactoryV2Instance.plantMarketPlaceTree(
-        ipfsHash,
-        birthDate,
-        countryCode,
-        1,
-        {
-          from: planter,
-        }
-      );
-
-      await planterV2Instance.updatePlanterType(3, organizationAdmin, {
-        from: planter,
-      });
-
-      await treeFactoryV2Instance
-        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
-          from: planter,
-        })
-        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
-
       await treeFactoryV2Instance
         .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
           from: organizationAdmin,
+        })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+
+      await planterV2Instance
+        .updatePlanterType(3, organizationAdmin, {
+          from: planter,
+        })
+        .should.be.rejectedWith(
+          "Planter:planter has active market place model"
+        );
+
+      await marketPlaceInstance.deleteModel(1, { from: planter });
+
+      await treeFactoryV2Instance
+        .plantMarketPlaceTree(ipfsHash, birthDate, countryCode, 1, {
+          from: planter,
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
 

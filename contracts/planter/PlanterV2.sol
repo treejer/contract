@@ -281,12 +281,12 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     {
         require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
-        PlanterData storage planterData = planters[_msgSender()];
-
         require(
             marketPlace.activeModelCount(_msgSender()) == 0,
             "Planter:planter has active market place model"
         );
+
+        PlanterData storage planterData = planters[_msgSender()];
 
         require(
             planterData.status == 0 || planterData.status == 1,

@@ -477,9 +477,21 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
 
+      assert.equal(
+        Number(await marketPlaceInstance.activeModelCount(userAccount1)),
+        0,
+        ""
+      );
+
       await marketPlaceInstance.addModel(country1, species1, price1, count1, {
         from: userAccount1,
       });
+
+      assert.equal(
+        Number(await marketPlaceInstance.activeModelCount(userAccount1)),
+        1,
+        ""
+      );
 
       let model1 = await marketPlaceInstance.models(1);
 
@@ -836,7 +848,7 @@ contract("marketPlace", (accounts) => {
         .should.be.rejectedWith(MarketPlaceErrorMsg.TREE_PLANTER_OR_FUNDED);
     });
 
-    it.only("test deleteModel (no model exists after this model)", async () => {
+    it("test deleteModel (no model exists after this model)", async () => {
       let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
       const country1 = 1;
       const species1 = 10;
@@ -903,7 +915,7 @@ contract("marketPlace", (accounts) => {
       );
     });
 
-    it.only("test deleteModel (model exist after model)", async () => {
+    it("test deleteModel (model exist after model)", async () => {
       let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
 
       const country = 1;
@@ -954,11 +966,7 @@ contract("marketPlace", (accounts) => {
 
       assert.equal(
         Number(lastTreeAssignedAfterModelAdded),
-        Math.add(
-          Number(await marketPlaceInstance.lastTreeAssigned()),
-          count1,
-          count2
-        ),
+        Math.add(Number(lastTreeAssigned), count1, count2),
         "lastTreeAssigned is incorrect"
       );
 
@@ -1319,11 +1327,11 @@ contract("marketPlace", (accounts) => {
 
       await testMarketPlaceInstance
         .reduceLastPlantedOfModel(0, { from: planter })
-        .should.be.rejectedWith("MarketPlace:modelId is incorrect.");
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
       await testMarketPlaceInstance
         .reduceLastPlantedOfModel(3, { from: planter })
-        .should.be.rejectedWith("MarketPlace:modelId is incorrect.");
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
       //------------------------------------------------
 
@@ -1673,7 +1681,7 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.TOTAL_COUNT_EXCEEDED);
 
-      await marketPlaceInstance.deactiveModel(2, { from: userAccount1 });
+      await marketPlaceInstance.deactiveModel(2, 1, { from: userAccount1 });
 
       await marketPlaceInstance
         .fundTree(input1, referrer, recipient, {

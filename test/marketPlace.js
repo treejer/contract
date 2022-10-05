@@ -437,6 +437,7 @@ contract("marketPlace", (accounts) => {
         from: deployerAccount,
       });
     });
+
     it("add model", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -575,6 +576,7 @@ contract("marketPlace", (accounts) => {
         "lastTreeAssigned is incorrect"
       );
     });
+
     it("fail to updateModelData", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -730,6 +732,7 @@ contract("marketPlace", (accounts) => {
         "price is incorrect"
       );
     });
+
     it("test deactiveModel", async () => {
       const country1 = 1;
       const species1 = 10;
@@ -915,7 +918,7 @@ contract("marketPlace", (accounts) => {
       );
     });
 
-    it("test deleteModel (model exist after model)", async () => {
+    it("test deleteModel (model exist after model delete model (1))", async () => {
       let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
 
       const country = 1;
@@ -989,6 +992,98 @@ contract("marketPlace", (accounts) => {
         2,
         "modelId is incorrect"
       );
+    });
+
+    it("test deleteModel (model exist after model delete model( 1 then 2))", async () => {
+      let lastTreeAssigned = await marketPlaceInstance.lastTreeAssigned();
+
+      const country = 1;
+      const species = 10;
+      const price = web3.utils.toWei("10");
+      const count1 = 50;
+      const count2 = 10;
+
+      const modelId1 = 1;
+      const modelId2 = 2;
+
+      await marketPlaceInstance.addModel(country, species, price, count1, {
+        from: userAccount1,
+      });
+
+      await marketPlaceInstance.addModel(country, species, price, count2, {
+        from: userAccount1,
+      });
+
+      const lastTreeAssignedAfterModelAdded =
+        await marketPlaceInstance.lastTreeAssigned();
+
+      assert.equal(
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(lastTreeAssigned), count1, count2),
+        "lastTreeAssigned is incorrect"
+      );
+
+      const model1BeforeDelete = await marketPlaceInstance.models(modelId1);
+      const model2BeforeDelete = await marketPlaceInstance.models(modelId2);
+
+      assert.equal(
+        Number(await marketPlaceInstance.activeModelCount(userAccount1)),
+        2,
+        "activeModel is incorrect"
+      );
+
+      await marketPlaceInstance.deleteModel(modelId1, {
+        from: userAccount1,
+      });
+
+      assert.equal(
+        Number(await marketPlaceInstance.activeModelCount(userAccount1)),
+        1,
+        "activeModel is incorrect"
+      );
+
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        2,
+        "modelId is incorrect"
+      );
+
+      assert.equal(
+        Number(lastTreeAssignedAfterModelAdded),
+        Math.add(Number(lastTreeAssigned), count1, count2),
+        "lastTreeAssigned is incorrect"
+      );
+
+      await marketPlaceInstance.deleteModel(modelId2, {
+        from: userAccount1,
+      });
+
+      const model1AfterDelete = await marketPlaceInstance.models(modelId1);
+      const model2AfterDelete = await marketPlaceInstance.models(modelId2);
+
+      assert.equal(
+        Number(await marketPlaceInstance.activeModelCount(userAccount1)),
+        0,
+        "activeModel is incorrect"
+      );
+
+      assert.equal(
+        Number(await marketPlaceInstance.modelId()),
+        1,
+        "modelId is incorrect"
+      );
+
+      assert.equal(
+        Number(await marketPlaceInstance.lastTreeAssigned()),
+        Math.add(Number(lastTreeAssigned), count1),
+        "lastTreeAssigned is incorrect"
+      );
+
+      assert.equal(Number(model1BeforeDelete.count), count1, "model exist");
+      assert.equal(Number(model1AfterDelete.count), 0, "model not exist");
+
+      assert.equal(Number(model2BeforeDelete.count), count2, "model exist");
+      assert.equal(Number(model2AfterDelete.count), 0, "model not exist");
     });
 
     it("test updateLastReservePlantedOfModel", async () => {

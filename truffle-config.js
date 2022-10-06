@@ -92,9 +92,11 @@ module.exports = {
           privateKeys,
           `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
         ),
-      network_id: "5", // eslint-disable-line camelcase
+      network_id: 5, // eslint-disable-line camelcase
       gas: 4465030,
       gasPrice: 10000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true,
     },
 
     // arbitrum: {

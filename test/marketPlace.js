@@ -499,7 +499,7 @@ contract("marketPlace", (accounts) => {
       assert.equal(Number(model1.country), country1, "country is incorrect");
       assert.equal(Number(model1.species), species1, "species is incorrect");
       assert.equal(Number(model1.deactive), 0, "deactive is incorrect");
-      assert.equal(model1.planter, userAccount1, "planter is incorrect");
+      assert.equal(model1.creator, userAccount1, "creator is incorrect");
       assert.equal(Number(model1.price), Number(price1), "price is incorrect");
       assert.equal(Number(model1.count), count1, "count is incorrect");
       assert.equal(
@@ -542,7 +542,7 @@ contract("marketPlace", (accounts) => {
       assert.equal(Number(model2.country), country2, "country is incorrect");
       assert.equal(Number(model2.species), species2, "species is incorrect");
       assert.equal(Number(model2.deactive), 0, "deactive is incorrect");
-      assert.equal(model2.planter, userAccount2, "planter is incorrect");
+      assert.equal(model2.creator, userAccount2, "creator is incorrect");
       assert.equal(Number(model2.price), Number(price2), "price is incorrect");
       assert.equal(Number(model2.count), count2, "count is incorrect");
       assert.equal(
@@ -758,6 +758,10 @@ contract("marketPlace", (accounts) => {
       await marketPlaceInstance
         .deactiveModel(modelId, 1, { from: deployerAccount })
         .should.be.rejectedWith(MarketPlaceErrorMsg.ACCESS_DENIED);
+
+      await marketPlaceInstance
+        .deactiveModel(modelId, 2, { from: userAccount1 })
+        .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_STATUS);
 
       await marketPlaceInstance.deactiveModel(modelId, 1, {
         from: userAccount1,
@@ -1341,7 +1345,7 @@ contract("marketPlace", (accounts) => {
       );
     });
 
-    it("test reduceLastPlantedOfModel", async () => {
+    it("test finishSaleModel", async () => {
       let planterInstance2 = await Planter.new({
         from: deployerAccount,
       });
@@ -1422,41 +1426,41 @@ contract("marketPlace", (accounts) => {
       //--------------------------------------------------
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(0, { from: planter })
+        .finishSaleModel(0, { from: planter })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(3, { from: planter })
+        .finishSaleModel(3, { from: planter })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
       //------------------------------------------------
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, { from: planter })
+        .finishSaleModel(1, { from: planter })
         .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
 
       await testMarketPlaceInstance.setLastFunded(1, 1000000010);
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, { from: planter })
+        .finishSaleModel(1, { from: planter })
         .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
 
       await testMarketPlaceInstance.setLastPlanted(1, 1000000009);
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, { from: planter })
+        .finishSaleModel(1, { from: planter })
         .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
 
       await testMarketPlaceInstance.setLastPlanted(1, 1000000011);
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, { from: planter })
+        .finishSaleModel(1, { from: planter })
         .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
 
       await testMarketPlaceInstance.setLastPlanted(1, 1000000010);
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, {
+        .finishSaleModel(1, {
           from: planter2,
         })
         .should.be.rejectedWith("MarketPlace:Access Denied.");
@@ -1467,7 +1471,7 @@ contract("marketPlace", (accounts) => {
         "result is not correct"
       );
 
-      await testMarketPlaceInstance.reduceLastPlantedOfModel(1, {
+      await testMarketPlaceInstance.finishSaleModel(1, {
         from: planter,
       });
 
@@ -1478,7 +1482,7 @@ contract("marketPlace", (accounts) => {
       );
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(1, {
+        .finishSaleModel(1, {
           from: planter,
         })
         .should.be.rejectedWith("MarketPlace:Model before finished.");
@@ -1498,13 +1502,13 @@ contract("marketPlace", (accounts) => {
       );
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(2, {
+        .finishSaleModel(2, {
           from: planter,
         })
         .should.be.rejectedWith("MarketPlace:Access Denied.");
 
       await testMarketPlaceInstance
-        .reduceLastPlantedOfModel(2, {
+        .finishSaleModel(2, {
           from: organizationAddress,
         })
         .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
@@ -1513,7 +1517,7 @@ contract("marketPlace", (accounts) => {
 
       await testMarketPlaceInstance.setLastPlanted(2, 1000000110);
 
-      await testMarketPlaceInstance.reduceLastPlantedOfModel(2, {
+      await testMarketPlaceInstance.finishSaleModel(2, {
         from: organizationAddress,
       });
 

@@ -299,7 +299,7 @@ contract("PlanterV2", (accounts) => {
     });
 
     await testMarketPlaceInstance
-      .reduceLastPlantedOfModel(3, {
+      .finishSaleModel(3, {
         from: planter,
       })
       .should.be.rejectedWith("MarketPlace:plant or fund not finished.");
@@ -310,7 +310,7 @@ contract("PlanterV2", (accounts) => {
 
     await testMarketPlaceInstance.setLastFunded(3, 1000000003);
 
-    await testMarketPlaceInstance.reduceLastPlantedOfModel(3, {
+    await testMarketPlaceInstance.finishSaleModel(3, {
       from: planter,
     });
 
@@ -319,7 +319,7 @@ contract("PlanterV2", (accounts) => {
     assert.equal(modelAfter.deactive, 2, "result is not correct");
 
     await testMarketPlaceInstance
-      .reduceLastPlantedOfModel(3, {
+      .finishSaleModel(3, {
         from: planter,
       })
       .should.be.rejectedWith("MarketPlace:Model before finished.");

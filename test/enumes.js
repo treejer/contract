@@ -204,6 +204,7 @@ const MarketPlaceErrorMsg = {
   UNSUCCESSFUL_TRANSFER: "MarketPlace:Unsuccessful transfer.",
   ATTRIBUTE_NOT_GENERATED: "MarketPlace:Attribute not generated.",
   INCORRECT_MODELID: "MarketPlace:ModelId is incorrect.",
+  INVALID_STATUS: "MarketPlace:Status is invalid.",
 };
 
 module.exports = {

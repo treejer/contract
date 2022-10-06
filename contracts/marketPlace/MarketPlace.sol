@@ -266,9 +266,10 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
             "MarketPlace:Tree Planted or Funded."
         );
 
-        emit ModelDataUpdated(_modelId, _species, _country);
         modelData.country = _country;
         modelData.species = _species;
+
+        emit ModelDataUpdated(_modelId, _species, _country);
     }
 
     function updatePrice(uint256 _modelId, uint256 _price)
@@ -279,9 +280,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         require(modelData.creator == msg.sender, "MarketPlace:Access Denied.");
 
-        emit PriceUpdated(_modelId, _price);
-
         modelData.price = _price;
+
+        emit PriceUpdated(_modelId, _price);
     }
 
     function deactiveModel(uint256 _modelId, uint8 _status)
@@ -293,8 +294,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         Model storage modelData = models[_modelId];
         require(modelData.creator == msg.sender, "MarketPlace:Access Denied.");
 
-        emit ModelDeactivated(_modelId, _status);
         modelData.deactive = _status;
+
+        emit ModelDeactivated(_modelId, _status);
     }
 
     function deleteModel(uint256 _modelId) external validModelId(_modelId) {
@@ -315,9 +317,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
 
         activeModelCount[msg.sender] -= 1;
 
-        emit ModelDeleted(_modelId);
-
         delete models[_modelId];
+
+        emit ModelDeleted(_modelId);
     }
 
     function fundTree(
@@ -474,11 +476,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         );
 
         modelData.lastReservePlant = lastReservePlantTemp;
-        emit LastReservePlantedOfModelUpdated(
-            _modelId,
-            _sender,
-            lastReservePlantTemp
-        );
     }
 
     function reduceLastReservePlantedOfModel(uint256 _modelId)
@@ -490,11 +487,6 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         Model storage modelData = models[_modelId];
 
         modelData.lastReservePlant -= 1;
-
-        emit LastReservePlantedOfModelReduced(
-            _modelId,
-            modelData.lastReservePlant
-        );
     }
 
     function updateLastPlantedOfModel(uint256 _modelId)

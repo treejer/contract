@@ -46,15 +46,7 @@ interface IMarketPlace {
         uint256 price
     );
 
-    event LastReservePlantedOfModelUpdated(
-        uint256 modelId,
-        address planter,
-        uint256 lastReservePlant
-    );
-    event LastReservePlantedOfModelReduced(
-        uint256 modelId,
-        uint256 lastReservePlant
-    );
+    //TODO: must delete
     event LastPlantedOfModelUpdated(uint256 modelId, uint256 lastPlant);
 
     event SaleModelFinished(uint256 modelId);

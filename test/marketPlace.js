@@ -449,9 +449,6 @@ contract("marketPlace", (accounts) => {
       const price2 = web3.utils.toWei("20");
       const count2 = 100;
 
-      // await marketPlaceInstance
-      //   .addModel(country, species, price, count)
-      //   .should.be.rejectedWith(MarketPlaceErrorMsg.INVAILD_PLANTER);
       //failed because member of organization planter
       await marketPlaceInstance
         .addModel(country1, species1, price1, count1, {
@@ -484,8 +481,28 @@ contract("marketPlace", (accounts) => {
         ""
       );
 
-      await marketPlaceInstance.addModel(country1, species1, price1, count1, {
-        from: userAccount1,
+      const eventTx = await marketPlaceInstance.addModel(
+        country1,
+        species1,
+        price1,
+        count1,
+        {
+          from: userAccount1,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx, "ModelAdded", (ev) => {
+        return (
+          Number(ev.country) == country1 &&
+          Number(ev.species) == species1 &&
+          Number(ev.price) == Number(price1) &&
+          Number(ev.count) == count1 &&
+          ev.creator == userAccount1 &&
+          Number(ev.start) == initialLastTreeAssigned &&
+          Number(ev.lastFund) == initialLastTreeAssigned - 1 &&
+          Number(ev.lastPlant) == initialLastTreeAssigned - 1 &&
+          Number(ev.lastReservePlant) == initialLastTreeAssigned - 1
+        );
       });
 
       assert.equal(
@@ -518,12 +535,11 @@ contract("marketPlace", (accounts) => {
         "lastPlanted is incorrect"
       );
 
-      //TODO://check this
-      // assert.equal(
-      //   Number(model1.lastReservePlant),
-      //   count1,
-      //   "count is incorrect"
-      // );
+      assert.equal(
+        Number(model1.lastReservePlant),
+        initialLastTreeAssigned - 1,
+        "lastReservePlant is incorrect"
+      );
 
       ///////------------------- check LastTreeAssigned
 
@@ -561,12 +577,11 @@ contract("marketPlace", (accounts) => {
         "lastPlanted is incorrect"
       );
 
-      //TODO://check this
-      // assert.equal(
-      //   Number(model2.lastReservePlant),
-      //   count2,
-      //   "count is incorrect"
-      // );
+      assert.equal(
+        Number(model2.lastReservePlant),
+        initialLastTreeAssigned + count1 - 1,
+        "lastReservePlant is incorrect"
+      );
 
       ///////------------------- check LastTreeAssigned
 
@@ -664,11 +679,24 @@ contract("marketPlace", (accounts) => {
         "species is incorrect"
       );
 
-      await marketPlaceInstance.updateModelData(modelId, species2, country2, {
-        from: userAccount1,
-      });
+      const eventTx = await marketPlaceInstance.updateModelData(
+        modelId,
+        species2,
+        country2,
+        {
+          from: userAccount1,
+        }
+      );
 
       let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      truffleAssert.eventEmitted(eventTx, "ModelDataUpdated", (ev) => {
+        return (
+          Number(ev.modelId) == modelId &&
+          Number(ev.species) == species2 &&
+          Number(ev.country) == country2
+        );
+      });
 
       assert.equal(
         Number(modelAfterUpdate.country),
@@ -720,11 +748,17 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
-      await marketPlaceInstance.updatePrice(modelId, price2, {
+      const eventTx = await marketPlaceInstance.updatePrice(modelId, price2, {
         from: userAccount1,
       });
 
       let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      truffleAssert.eventEmitted(eventTx, "PriceUpdated", (ev) => {
+        return (
+          Number(ev.modelId) == modelId && Number(ev.price) == Number(price2)
+        );
+      });
 
       assert.equal(
         Number(modelAfterUpdate.price),
@@ -763,11 +797,16 @@ contract("marketPlace", (accounts) => {
         .deactiveModel(modelId, 2, { from: userAccount1 })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_STATUS);
 
-      await marketPlaceInstance.deactiveModel(modelId, 1, {
+      const eventTx = await marketPlaceInstance.deactiveModel(modelId, 1, {
         from: userAccount1,
       });
 
       const modelAfterDeactivate = await marketPlaceInstance.models(modelId);
+
+      truffleAssert.eventEmitted(eventTx, "ModelDeactivated", (ev) => {
+        return Number(ev.modelId) == modelId && Number(ev.status) == 1;
+      });
+
       assert.equal(
         Number(modelBeforeDeactivate.deactive),
         0,
@@ -887,13 +926,19 @@ contract("marketPlace", (accounts) => {
 
       const activeModelBeforeDelete =
         await marketPlaceInstance.activeModelCount(userAccount1);
-      await marketPlaceInstance.deleteModel(modelId, {
+
+      const eventTx = await marketPlaceInstance.deleteModel(modelId, {
         from: userAccount1,
       });
+
       const model1AfterDelete = await marketPlaceInstance.models(modelId);
       const activeModelAfterDelete = await marketPlaceInstance.activeModelCount(
         userAccount1
       );
+
+      truffleAssert.eventEmitted(eventTx, "ModelDeleted", (ev) => {
+        return Number(ev.modelId) == modelId;
+      });
 
       assert.equal(
         Number(lastTreeAssignedAfterModelAdded),
@@ -1195,7 +1240,6 @@ contract("marketPlace", (accounts) => {
           from: treejerContract,
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
-        
 
       await planterInstance.updateSupplyCap(userAccount3, 1, {
         from: dataManager,
@@ -1332,11 +1376,20 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INCORRECT_MODELID);
 
-      await marketPlaceInstance.updateLastPlantedOfModel(modelId, {
-        from: treejerContract,
-      });
+      const eventTx = await marketPlaceInstance.updateLastPlantedOfModel(
+        modelId,
+        {
+          from: treejerContract,
+        }
+      );
 
       let modelAfterUpdate = await marketPlaceInstance.models(modelId);
+
+      truffleAssert.eventEmitted(eventTx, "LastPlantedOfModelUpdated", (ev) => {
+        return (
+          Number(ev.modelId) == modelId && Number(ev.lastPlant) == 1000000001
+        );
+      });
 
       assert.equal(
         Number(modelAfterUpdate.lastPlant),
@@ -1471,8 +1524,12 @@ contract("marketPlace", (accounts) => {
         "result is not correct"
       );
 
-      await testMarketPlaceInstance.finishSaleModel(1, {
+      const eventTx = await testMarketPlaceInstance.finishSaleModel(1, {
         from: planter,
+      });
+
+      truffleAssert.eventEmitted(eventTx, "SaleModelFinished", (ev) => {
+        return Number(ev.modelId == 1);
       });
 
       assert.equal(
@@ -1789,7 +1846,7 @@ contract("marketPlace", (accounts) => {
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.INVALID_COUNT);
     });
-    it("fund tree with referrer and with recipient", async () => {
+    it.only("fund tree with referrer and with recipient", async () => {
       const country1 = 1;
       const species1 = 10;
       const price1 = web3.utils.toWei("10");
@@ -1842,8 +1899,35 @@ contract("marketPlace", (accounts) => {
 
       const modelBeforeFund = await marketPlaceInstance.models(modelId);
 
-      await marketPlaceInstance.fundTree(input, referrer, recipient, {
-        from: funder,
+      const eventTx = await marketPlaceInstance.fundTree(
+        input,
+        referrer,
+        recipient,
+        {
+          from: funder,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx, "MarketPlaceMint", (ev) => {
+        return (
+          ev.recipient == recipient &&
+          Number(ev.modelId) == input[0].modelId &&
+          Number(ev.start) == Number(modelBeforeFund.lastFund) + 1 &&
+          Number(ev.count) == input[0].count &&
+          Number(ev.price) == Number(price1)
+        );
+      });
+
+      truffleAssert.eventEmitted(eventTx, "TreeFunded", (ev) => {
+        return (
+          ev.models[0]["modelId"] == input[0].modelId &&
+          ev.models[0]["count"] == input[0].count &&
+          ev.funder == funder &&
+          ev.recipient == recipient &&
+          ev.referrer == referrer &&
+          Number(ev.count) == input[0].count &&
+          Number(ev.amount) == Number(amount)
+        );
       });
 
       ////-------------- check funder balance

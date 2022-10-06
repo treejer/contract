@@ -1195,6 +1195,7 @@ contract("marketPlace", (accounts) => {
           from: treejerContract,
         })
         .should.be.rejectedWith(MarketPlaceErrorMsg.PERMISSION_DENIED);
+        
 
       await planterInstance.updateSupplyCap(userAccount3, 1, {
         from: dataManager,

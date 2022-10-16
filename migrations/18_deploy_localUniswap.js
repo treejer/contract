@@ -21,6 +21,8 @@ const WethFund = artifacts.require("WethFund.sol");
 const Tree = artifacts.require("Tree.sol");
 const Attribute = artifacts.require("Attribute.sol");
 const TreeFactory = artifacts.require("TreeFactoryV2.sol");
+const TreeBox = artifacts.require("TreeBox.sol");
+const MarketPlace = artifacts.require("MarketPlace.sol");
 
 //gsn
 
@@ -183,6 +185,8 @@ module.exports = async function (deployer, network, accounts) {
   const treeAddress = Tree.address;
   const attributeAddress = Attribute.address;
   const treeFactoryAddress = TreeFactory.address;
+  const treeBoxAddress = TreeBox.address;
+  const marketPlaceAddress = MarketPlace.address;
 
   console.log(`
   CONTRACT_AR_ADDRESS=${accessRestrictionAddress}
@@ -199,5 +203,7 @@ module.exports = async function (deployer, network, accounts) {
   CONTRACT_TREE_ADDRESS=${treeAddress}
   CONTRACT_TREE_ATTRIBUTE_ADDRESS=${attributeAddress}
   CONTRACT_TREE_FACTORY_ADDRESS=${treeFactoryAddress}
+  CONTRACT_TREE_BOX_ADDRESS=${treeBoxAddress}
+  CONTRACT_MARKET_PLACE_ADDRESS=${marketPlaceAddress}
   `);
 };

@@ -10,6 +10,7 @@ interface IMarketPlace {
     }
 
     event ModelAdded(
+        uint256 modelId,
         uint8 country,
         uint8 species,
         uint256 price,

@@ -237,6 +237,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         activeModelCount[msg.sender] += 1;
 
         emit ModelAdded(
+            modelId.current(),
             _country,
             _species,
             _price,

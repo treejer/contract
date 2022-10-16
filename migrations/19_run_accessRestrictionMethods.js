@@ -11,6 +11,7 @@ const WethFund = artifacts.require("WethFund.sol");
 const DaiFund = artifacts.require("DaiFund.sol");
 const Attribute = artifacts.require("Attribute.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
+const MarketPlace = artifacts.require("MarketPlace");
 
 const TREEJER_CONTRACT_ROLE = web3.utils.soliditySha3("TREEJER_CONTRACT_ROLE");
 const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
@@ -26,7 +27,7 @@ module.exports = async function (deployer, network, accounts) {
   const wethFundAddress = WethFund.address;
   const attributeAddress = Attribute.address;
   const planterFundAddress = PlanterFund.address;
-
+  const marketPlaceAddress = MarketPlace.address;
   console.log("Call AccessRestriction Methods...");
   await AccessRestriction.deployed().then(async (instance) => {
     await instance.grantRole(DATA_MANAGER_ROLE, accounts[0]);
@@ -40,5 +41,6 @@ module.exports = async function (deployer, network, accounts) {
     await instance.grantRole(TREEJER_CONTRACT_ROLE, wethFundAddress);
     await instance.grantRole(TREEJER_CONTRACT_ROLE, attributeAddress);
     await instance.grantRole(TREEJER_CONTRACT_ROLE, planterFundAddress);
+    await instance.grantRole(TREEJER_CONTRACT_ROLE, marketPlaceAddress);
   });
 };

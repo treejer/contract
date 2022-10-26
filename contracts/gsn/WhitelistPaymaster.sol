@@ -125,4 +125,13 @@ contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
     {
         return "2.2.0+treejer.whitelist.ipaymaster";
     }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        return interfaceId == type(IPaymaster).interfaceId;
+    }
 }

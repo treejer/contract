@@ -8,6 +8,7 @@ module.exports = async function (deployer, network, accounts) {
   console.log("Call Fund Paymaster Methods...");
 
   let paymasterAddress = WhitelistPaymaster.address;
+  console.log("paymasterAddress = ", paymasterAddress);
 
   if (!isLocal) {
     await web3.eth.sendTransaction(

@@ -3,7 +3,7 @@ require("dotenv").config();
 const Auction = artifacts.require("Auction.sol");
 const HonoraryTree = artifacts.require("HonoraryTree.sol");
 const IncrementalSale = artifacts.require("IncrementalSale.sol");
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
+const WhitelistPaymasterV3 = artifacts.require("WhitelistPaymasterV3.sol");
 const Planter = artifacts.require("PlanterV2.sol");
 const RegularSale = artifacts.require("RegularSaleV2.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
@@ -35,7 +35,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   console.log("Call WhitelistPaymaster Methods...");
-  await WhitelistPaymaster.deployed().then(async (instance) => {
+  await WhitelistPaymasterV3.deployed().then(async (instance) => {
     await instance.addFunderWhitelistTarget(honoraryTreeAddress);
     await instance.addPlanterWhitelistTarget(planterAddress);
     await instance.addFunderWhitelistTarget(regularSaleAddress);

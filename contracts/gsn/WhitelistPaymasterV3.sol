@@ -9,7 +9,7 @@ import "@opengsn/contracts/src/BasePaymaster.sol";
 
 import "./IWhitelistPaymaster.sol";
 
-contract WhitelistPaymaster is BasePaymaster, IWhitelistPaymaster {
+contract WhitelistPaymasterV3 is BasePaymaster, IWhitelistPaymaster {
     mapping(address => bool) public override funderTargetWhitelist;
     mapping(address => bool) public override planterTargetWhitelist;
 

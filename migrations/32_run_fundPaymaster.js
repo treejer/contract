@@ -1,13 +1,13 @@
 require("dotenv").config();
 
-const WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
+const WhitelistPaymasterV3 = artifacts.require("WhitelistPaymasterV3.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
   console.log("Call Fund Paymaster Methods...");
 
-  let paymasterAddress = WhitelistPaymaster.address;
+  let paymasterAddress = WhitelistPaymasterV3.address;
   console.log("paymasterAddress = ", paymasterAddress);
 
   if (!isLocal) {

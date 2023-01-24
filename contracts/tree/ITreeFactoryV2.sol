@@ -122,6 +122,11 @@ interface ITreeFactoryV2 {
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs) external;
 
+    function listTreeBatch(
+        uint256[] calldata _treeIds,
+        string[] calldata _treeSpecs
+    ) external;
+
     function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
         external;
 
@@ -133,6 +138,11 @@ interface ITreeFactoryV2 {
      * @param _planter assignee planter
      */
     function assignTree(uint256 _treeId, address _planter) external;
+
+    function assignTreeBatch(
+        uint256[] calldata _treeIds,
+        address[] calldata _planters
+    ) external;
 
     /**
      * @dev planter with permission to plant, can plant its assigned tree

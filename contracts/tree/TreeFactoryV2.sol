@@ -208,6 +208,26 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         emit TreeListed(_treeId);
     }
 
+    /// @inheritdoc ITreeFactoryV2
+    function listTreeBatch(
+        uint256[] calldata _treeIds,
+        string[] calldata _treeSpecs
+    ) external override ifNotPaused onlyDataManager {
+        require(_treeIds.length == _treeSpecs.length, "invalid inputs");
+
+        for (uint256 i = 0; i < _treeIds.length; i++) {
+            require(trees[_treeIds[i]].treeStatus == 0, "Duplicate tree");
+
+            TreeData storage treeData = trees[_treeIds[i]];
+
+            treeData.treeStatus = 2;
+            treeData.treeSpecs = _treeSpecs[i];
+
+            emit TreeListed(_treeIds[i]);
+        }
+    }
+
+    /// @inheritdoc ITreeFactoryV2
     function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
         external
         override
@@ -239,6 +259,29 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         treeData.planter = _planter;
 
         emit TreeAssigned(_treeId);
+    }
+
+    /// @inheritdoc ITreeFactoryV2
+    function assignTreeBatch(
+        uint256[] calldata _treeIds,
+        address[] calldata _planters
+    ) external override ifNotPaused onlyDataManager {
+        require(_treeIds.length == _planters.length, "invalid inputs");
+
+        for (uint256 i = 0; i < _treeIds.length; i++) {
+            TreeData storage treeData = trees[_treeIds[i]];
+
+            require(treeData.treeStatus == 2, "Invalid tree");
+
+            require(
+                planterContract.canAssignTree(_planters[i]),
+                "Not allowed planter"
+            );
+
+            treeData.planter = _planters[i];
+
+            emit TreeAssigned(_treeIds[i]);
+        }
     }
 
     /// @inheritdoc ITreeFactoryV2

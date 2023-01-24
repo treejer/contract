@@ -332,8 +332,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
                     bytes32 hashStruct = keccak256(
                         abi.encode(
                             keccak256(
-                                "plantTree(string sender,uint64 _birthDate,uint16 _countryCode)"
+                                "plantAssignTree(uint256 _treeId,string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
                             ),
+                            dataSign._treeId,
                             dataSign._treeSpecs,
                             dataSign._birthDate,
                             dataSign._countryCode
@@ -669,7 +670,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
                     bytes32 hashStruct = keccak256(
                         abi.encode(
                             keccak256(
-                                "plantTree(string sender,uint64 _birthDate,uint16 _countryCode)"
+                                "plantTree(string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
                             ),
                             dataSign._treeSpecs,
                             dataSign._birthDate,

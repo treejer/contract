@@ -10,8 +10,10 @@ import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
-import "../planter/IPlanter.sol";
+import "../planter/IPlanterV2.sol";
 import "./ITreeFactoryV2.sol";
+
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 /** @title TreeFactory Contract */
 contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
@@ -54,7 +56,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     IAccessRestriction public accessRestriction;
     ITree public treeToken;
     IPlanterFund public planterFund;
-    IPlanter public planterContract;
+    IPlanterV2 public planterContract;
 
     /** NOTE mapping of treeId to TreeData Struct */
     mapping(uint256 => TreeData) public override trees;
@@ -161,7 +163,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         override
         onlyAdmin
     {
-        IPlanter candidateContract = IPlanter(_address);
+        IPlanterV2 candidateContract = IPlanterV2(_address);
 
         require(candidateContract.isPlanter());
 
@@ -299,6 +301,87 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             planterContract.reducePlantedCount(treeData.planter);
 
             emit AssignedTreeRejected(_treeId);
+        }
+    }
+
+    //ssssssssssss
+
+    struct DataSign1 {
+        uint256 _treeId;
+        string _treeSpecs;
+        uint64 _birthDate;
+        uint16 _countryCode;
+        bytes signature;
+    }
+
+    struct VeriftTreeData1 {
+        address planter;
+        DataSign1[] data;
+    }
+
+    function verifyAssignedTreeSignatureBatch(
+        VeriftTreeData1[] calldata _newAssignTree
+    ) external {
+        bytes32 eip712DomainHash = _buildDomainSeparator();
+
+        unchecked {
+            for (uint256 i = 0; i < _newAssignTree.length; i++) {
+                for (uint256 j = 0; j < _newAssignTree[i].data.length; j++) {
+                    DataSign1 memory dataSign = _newAssignTree[i].data[j];
+
+                    bytes32 hashStruct = keccak256(
+                        abi.encode(
+                            keccak256(
+                                "plantTree(string sender,uint64 _birthDate,uint16 _countryCode)"
+                            ),
+                            dataSign._treeSpecs,
+                            dataSign._birthDate,
+                            dataSign._countryCode
+                        )
+                    );
+
+                    bytes32 hash = ECDSAUpgradeable.toTypedDataHash(
+                        eip712DomainHash,
+                        hashStruct
+                    );
+
+                    address signer = ECDSAUpgradeable.recover(
+                        hash,
+                        dataSign.signature
+                    );
+
+                    require(
+                        signer == _newAssignTree[i].planter,
+                        "MyFunction: invalid signature"
+                    );
+
+                    //-------------------------->update tree data
+
+                    TreeData storage treeData = trees[dataSign._treeId];
+
+                    require(treeData.treeStatus == 2, "Invalid tree status");
+
+                    bool canPlant = planterContract
+                        .manageAssignedTreePermission(signer, treeData.planter);
+
+                    require(canPlant, "Permission denied");
+
+                    if (signer != treeData.planter) {
+                        treeData.planter = signer;
+                    }
+
+                    TreeUpdate storage treeUpdateData = treeUpdates[
+                        dataSign._treeId
+                    ];
+
+                    treeData.countryCode = dataSign._countryCode;
+                    treeData.birthDate = dataSign._birthDate;
+                    treeData.plantDate = block.timestamp.toUint64();
+                    treeData.treeStatus = 4;
+
+                    treeData.treeSpecs = dataSign._treeSpecs;
+                }
+            }
         }
     }
 
@@ -565,9 +648,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         string _treeSpecs;
         uint64 _birthDate;
         uint16 _countryCode;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
+        bytes signature;
     }
 
     struct VeriftTreeData {
@@ -657,26 +738,27 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         delete tempTrees[_tempTreeId];
     }
 
+    function _buildDomainSeparator() private view returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256(bytes("plantTree_treejer")),
+                    keccak256(bytes("1")),
+                    block.chainid,
+                    address(this)
+                )
+            );
+    }
+
     function verifyTreeSignatureBatch(VeriftTreeData[] calldata _newTree)
         external
+        ifNotPaused
+        onlyVerifier
     {
-        uint256 chainId;
-
-        assembly {
-            chainId := chainid()
-        }
-
-        bytes32 eip712DomainHash = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes("plantTree_treejer")),
-                keccak256(bytes("1")),
-                chainId,
-                address(this)
-            )
-        );
+        bytes32 eip712DomainHash = _buildDomainSeparator();
 
         unchecked {
             for (uint256 i = 0; i < _newTree.length; i++) {
@@ -698,27 +780,20 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         )
                     );
 
-                    bytes32 hash = keccak256(
-                        abi.encodePacked(
-                            "\x19\x01",
-                            eip712DomainHash,
-                            hashStruct
-                        )
+                    bytes32 hash = ECDSAUpgradeable.toTypedDataHash(
+                        eip712DomainHash,
+                        hashStruct
                     );
 
-                    address signer = ecrecover(
+                    address signer = ECDSAUpgradeable.recover(
                         hash,
-                        dataSign.v,
-                        dataSign.r,
-                        dataSign.s
+                        dataSign.signature
                     );
 
                     require(
                         signer == _newTree[i].planter,
                         "MyFunction: invalid signature"
                     );
-
-                    require(signer != address(0), "ECDSA: invalid signature");
 
                     //-------------------------->update tree data
 
@@ -735,7 +810,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     TreeData storage treeData = trees[lastRegualarTreeId];
 
-                    treeData.plantDate = dataSign._birthDate;
+                    treeData.plantDate = block.timestamp.toUint64();
                     treeData.countryCode = uint16(dataSign._countryCode);
                     treeData.birthDate = dataSign._birthDate;
                     treeData.treeSpecs = dataSign._treeSpecs;

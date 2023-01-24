@@ -3,7 +3,19 @@
 pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
-interface ITreeFactory {
+interface ITreeFactoryV2 {
+    struct UpdateSignature {
+        uint256 treeId;
+        string treeSpecs;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+    struct VerifyUpdateData {
+        address planter;
+        UpdateSignature[] updateData;
+    }
+
     /**
      * @dev emitted when a tree list
      * @param treeId id of tree to list
@@ -263,6 +275,10 @@ interface ITreeFactory {
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
+
+    function verifyUpdateBatchWithSignature(
+        VerifyUpdateData[] calldata _verifyUpdateData
+    ) external;
 
     /**
      * @dev initialize AccessRestriction contract,lastRegualarTreeId,treeUpdateInterval

@@ -11,10 +11,10 @@ import "../gsn/RelayRecipient.sol";
 import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanter.sol";
-import "./ITreeFactory.sol";
+import "./ITreeFactoryV2.sol";
 
 /** @title TreeFactory Contract */
-contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
+contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
@@ -114,7 +114,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         _;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function initialize(address _accessRestrictionAddress)
         external
         override
@@ -132,7 +132,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         treeUpdateInterval = 604800;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function setTrustedForwarder(address _address)
         external
         override
@@ -142,7 +142,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         trustedForwarder = _address;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function setPlanterFundAddress(address _address)
         external
         override
@@ -155,7 +155,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         planterFund = candidateContract;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function setPlanterContractAddress(address _address)
         external
         override
@@ -168,7 +168,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         planterContract = candidateContract;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function setTreeTokenAddress(address _address) external override onlyAdmin {
         ITree candidateContract = ITree(_address);
 
@@ -177,7 +177,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         treeToken = candidateContract;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function setUpdateInterval(uint256 _seconds)
         external
         override
@@ -189,7 +189,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit TreeUpdateIntervalChanged();
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function listTree(uint256 _treeId, string calldata _treeSpecs)
         external
         override
@@ -221,7 +221,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit TreeStatusBatchReset();
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function assignTree(uint256 _treeId, address _planter)
         external
         override
@@ -239,7 +239,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit TreeAssigned(_treeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function plantAssignedTree(
         uint256 _treeId,
         string calldata _treeSpecs,
@@ -274,7 +274,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit AssignedTreePlanted(_treeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function verifyAssignedTree(uint256 _treeId, bool _isVerified)
         external
         override
@@ -302,7 +302,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function updateTree(uint256 _treeId, string memory _treeSpecs)
         external
         override
@@ -329,7 +329,110 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit TreeUpdated(_treeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    function verifyUpdateBatchWithSignature(
+        VerifyUpdateData[] calldata _verifyUpdateData
+    ) external override {
+        uint256 chainId;
+
+        assembly {
+            chainId := chainid()
+        }
+
+        bytes32 eip712DomainHash = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256(bytes("updateTree_treejer")),
+                keccak256(bytes("1")),
+                chainId,
+                address(this)
+            )
+        );
+
+        unchecked {
+            for (uint256 i = 0; i < _verifyUpdateData.length; i++) {
+                VerifyUpdateData memory verifyUpdateData = _verifyUpdateData[i];
+                for (
+                    uint256 j = 0;
+                    j < verifyUpdateData.updateData.length;
+                    j++
+                ) {
+                    UpdateSignature memory updateData = verifyUpdateData
+                        .updateData[j];
+
+                    TreeData storage treeData = trees[updateData.treeId];
+
+                    require(
+                        treeData.planter == verifyUpdateData.planter,
+                        "Not owned tree"
+                    );
+
+                    require(treeData.treeStatus > 3, "Tree not planted");
+
+                    require(
+                        block.timestamp >=
+                            treeData.plantDate +
+                                ((treeData.treeStatus * 3600) +
+                                    treeUpdateInterval),
+                        "Early update"
+                    );
+
+                    bytes32 hashStruct = keccak256(
+                        abi.encode(
+                            keccak256(
+                                "updateTree(string sender,string treeSpecs)"
+                            ),
+                            updateData.treeSpecs
+                        )
+                    );
+
+                    bytes32 hash = keccak256(
+                        abi.encodePacked(
+                            "\x19\x01",
+                            eip712DomainHash,
+                            hashStruct
+                        )
+                    );
+
+                    address signer = ecrecover(
+                        hash,
+                        updateData.v,
+                        updateData.r,
+                        updateData.s
+                    );
+
+                    require(signer != address(0), "ECDSA: invalid signature");
+
+                    require(
+                        signer == verifyUpdateData.planter,
+                        "MyFunction: invalid signature"
+                    );
+
+                    uint32 age = ((block.timestamp - treeData.plantDate) / 3600)
+                        .toUint32();
+
+                    if (age > treeData.treeStatus) {
+                        treeData.treeStatus = age;
+                    }
+
+                    treeData.treeSpecs = updateData.treeSpecs;
+
+                    if (treeToken.exists(updateData.treeId)) {
+                        planterFund.updatePlanterTotalClaimed(
+                            updateData.treeId,
+                            treeData.planter,
+                            treeData.treeStatus
+                        );
+                    }
+
+                    emit TreeUpdatedVerified(updateData.treeId);
+                }
+            }
+        }
+    }
+
+    /// @inheritdoc ITreeFactoryV2
     function verifyUpdate(uint256 _treeId, bool _isVerified)
         external
         override
@@ -372,7 +475,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function manageSaleType(uint256 _treeId, uint32 _saleType)
         external
         override
@@ -397,7 +500,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         return currentSaleType;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function mintAssignedTree(uint256 _treeId, address _funder)
         external
         override
@@ -407,7 +510,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         treeToken.mint(_funder, _treeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function resetSaleType(uint256 _treeId)
         external
         override
@@ -416,7 +519,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         trees[_treeId].saleType = 0;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function resetSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -435,7 +538,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function manageSaleTypeBatch(
         uint256 _startTreeId,
         uint256 _endTreeId,
@@ -472,7 +575,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         DataSign[] data;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function plantTree(
         string calldata _treeSpecs,
         uint64 _birthDate,
@@ -494,7 +597,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         _pendingRegularTreeId.increment();
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function updateLastRegualarTreeId(uint256 _lastRegualarTreeId)
         external
         override
@@ -511,7 +614,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function verifyTree(uint256 _tempTreeId, bool _isVerified)
         external
         override
@@ -647,7 +750,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         }
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function mintTree(uint256 _lastFundedTreeId, address _funder)
         external
         override
@@ -678,7 +781,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         return tempLastFundedTreeId;
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function mintTreeById(uint256 _treeId, address _funder)
         external
         override
@@ -696,7 +799,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactory {
         treeToken.mint(_funder, _treeId);
     }
 
-    /// @inheritdoc ITreeFactory
+    /// @inheritdoc ITreeFactoryV2
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external
         override

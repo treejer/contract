@@ -65,6 +65,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     /** NOTE mapping of treeId to TempTree struct */
     mapping(uint256 => TempTree) public override tempTrees;
 
+    //------- data for v2
+    bytes32 private immutable _DOMAIN_SEPARATOR;
+
+    bytes32 public constant PLANT_ASSIGN_TREE_TYPE_HASH =
+        keccak256(
+            "plantTree(string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
+        );
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -132,6 +140,18 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         accessRestriction = candidateContract;
         lastRegualarTreeId = 10000;
         treeUpdateInterval = 604800;
+
+        _DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256(bytes("Treejer Protocol")),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(this)
+            )
+        );
     }
 
     /// @inheritdoc ITreeFactoryV2
@@ -347,30 +367,17 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         }
     }
 
-    //ssssssssssss
-
-    struct DataSign1 {
-        uint256 _treeId;
-        string _treeSpecs;
-        uint64 _birthDate;
-        uint16 _countryCode;
-        bytes signature;
-    }
-
-    struct VeriftTreeData1 {
-        address planter;
-        DataSign1[] data;
-    }
-
     function verifyAssignedTreeSignatureBatch(
-        VeriftTreeData1[] calldata _newAssignTree
+        VerifyAssignedTreeSignature[] calldata _newAssignTree
     ) external {
         bytes32 eip712DomainHash = _buildDomainSeparator();
 
         unchecked {
             for (uint256 i = 0; i < _newAssignTree.length; i++) {
                 for (uint256 j = 0; j < _newAssignTree[i].data.length; j++) {
-                    DataSign1 memory dataSign = _newAssignTree[i].data[j];
+                    PlantAssignedTreeSignature memory dataSign = _newAssignTree[
+                        i
+                    ].data[j];
 
                     bytes32 hashStruct = keccak256(
                         abi.encode(

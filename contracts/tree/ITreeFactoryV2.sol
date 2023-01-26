@@ -16,6 +16,21 @@ interface ITreeFactoryV2 {
         UpdateSignature[] updateData;
     }
 
+    struct PlantAssignedTreeSignature {
+        uint256 _treeId;
+        string _treeSpecs;
+        uint64 _birthDate;
+        uint16 _countryCode;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct VerifyAssignedTreeSignature {
+        address planter;
+        PlantAssignedTreeSignature[] data;
+    }
+
     /**
      * @dev emitted when a tree list
      * @param treeId id of tree to list

@@ -930,4 +930,15 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
         emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
+
+    function _toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
+        private
+        pure
+        returns (bytes32)
+    {
+        return
+            keccak256(
+                abi.encodePacked("\x19\x01", domainSeparator, structHash)
+            );
+    }
 }

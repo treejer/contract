@@ -66,11 +66,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     mapping(uint256 => TempTree) public override tempTrees;
 
     //------- data for v2
-    bytes32 private immutable _DOMAIN_SEPARATOR;
-
     bytes32 public constant PLANT_ASSIGN_TREE_TYPE_HASH =
         keccak256(
-            "plantTree(string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
+            "plantAssignTree(uint256 _treeId,string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
         );
 
     /** NOTE modifier to check msg.sender has admin role */
@@ -140,18 +138,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         accessRestriction = candidateContract;
         lastRegualarTreeId = 10000;
         treeUpdateInterval = 604800;
-
-        _DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes("Treejer Protocol")),
-                keccak256(bytes("1")),
-                block.chainid,
-                address(this)
-            )
-        );
     }
 
     /// @inheritdoc ITreeFactoryV2
@@ -370,7 +356,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     function verifyAssignedTreeSignatureBatch(
         VerifyAssignedTreeSignature[] calldata _newAssignTree
     ) external {
-        bytes32 eip712DomainHash = _buildDomainSeparator();
+        bytes32 domainSeperator = _buildDomainSeparator();
 
         unchecked {
             for (uint256 i = 0; i < _newAssignTree.length; i++) {
@@ -381,9 +367,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     bytes32 hashStruct = keccak256(
                         abi.encode(
-                            keccak256(
-                                "plantAssignTree(uint256 _treeId,string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
-                            ),
+                            PLANT_ASSIGN_TREE_TYPE_HASH,
                             dataSign._treeId,
                             dataSign._treeSpecs,
                             dataSign._birthDate,
@@ -391,14 +375,16 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         )
                     );
 
-                    bytes32 hash = ECDSAUpgradeable.toTypedDataHash(
-                        eip712DomainHash,
+                    bytes32 hash = _toTypedDataHash(
+                        domainSeperator,
                         hashStruct
                     );
 
-                    address signer = ECDSAUpgradeable.recover(
+                    address signer = ecrecover(
                         hash,
-                        dataSign.signature
+                        dataSign.v,
+                        dataSign.r,
+                        dataSign.s
                     );
 
                     require(
@@ -938,14 +924,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
 
-    function _toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
+    function _toTypedDataHash(bytes32 domainSeperator, bytes32 structHash)
         private
         pure
         returns (bytes32)
     {
         return
             keccak256(
-                abi.encodePacked("\x19\x01", domainSeparator, structHash)
+                abi.encodePacked("\x19\x01", domainSeperator, structHash)
             );
     }
 }

@@ -305,6 +305,11 @@ interface ITreeFactoryV2 {
         VerifyUpdateData[] calldata _verifyUpdateData
     ) external;
 
+    function verifyUpdateWithSignature(
+        address _planter,
+        UpdateSignature calldata _updateData
+    ) external;
+
     /**
      * @dev initialize AccessRestriction contract,lastRegualarTreeId,treeUpdateInterval
      * and set true for isTreeFactory

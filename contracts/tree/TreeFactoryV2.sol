@@ -71,6 +71,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             "plantAssignTree(uint256 _treeId,string _treeSpecs,uint64 _birthDate,uint16 _countryCode)"
         );
 
+    bytes32 public constant VERIFY_UPDATE_TYPE_HASH =
+        keccak256("updateTree(uint256 treeId, string treeSpecs)");
+
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
         accessRestriction.ifAdmin(_msgSender());
@@ -451,24 +454,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
     function verifyUpdateBatchWithSignature(
         VerifyUpdateData[] calldata _verifyUpdateData
-    ) external override {
-        uint256 chainId;
-
-        assembly {
-            chainId := chainid()
-        }
-
-        bytes32 eip712DomainHash = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes("updateTree_treejer")),
-                keccak256(bytes("1")),
-                chainId,
-                address(this)
-            )
-        );
+    ) external override ifNotPaused onlyVerifier {
+        bytes32 domainSeperator = _buildDomainSeparator();
 
         unchecked {
             for (uint256 i = 0; i < _verifyUpdateData.length; i++) {
@@ -500,19 +487,15 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     bytes32 hashStruct = keccak256(
                         abi.encode(
-                            keccak256(
-                                "updateTree(string sender,string treeSpecs)"
-                            ),
+                            VERIFY_UPDATE_TYPE_HASH,
+                            updateData.treeId,
                             updateData.treeSpecs
                         )
                     );
 
-                    bytes32 hash = keccak256(
-                        abi.encodePacked(
-                            "\x19\x01",
-                            eip712DomainHash,
-                            hashStruct
-                        )
+                    bytes32 hash = _toTypedDataHash(
+                        domainSeperator,
+                        hashStruct
                     );
 
                     address signer = ecrecover(
@@ -550,6 +533,65 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                 }
             }
         }
+    }
+
+    function verifyUpdateWithSignature(
+        address _planter,
+        UpdateSignature calldata _updateData
+    ) external override ifNotPaused onlyVerifier {
+        bytes32 domainSeperator = _buildDomainSeparator();
+
+        TreeData storage treeData = trees[_updateData.treeId];
+
+        require(treeData.planter == _planter, "Not owned tree");
+
+        require(treeData.treeStatus > 3, "Tree not planted");
+
+        require(
+            block.timestamp >=
+                treeData.plantDate +
+                    ((treeData.treeStatus * 3600) + treeUpdateInterval),
+            "Early update"
+        );
+
+        bytes32 hashStruct = keccak256(
+            abi.encode(
+                VERIFY_UPDATE_TYPE_HASH,
+                _updateData.treeId,
+                _updateData.treeSpecs
+            )
+        );
+
+        bytes32 hash = _toTypedDataHash(domainSeperator, hashStruct);
+
+        address signer = ecrecover(
+            hash,
+            _updateData.v,
+            _updateData.r,
+            _updateData.s
+        );
+
+        require(signer != address(0), "ECDSA: invalid signature");
+
+        require(signer == _planter, "MyFunction: invalid signature");
+
+        uint32 age = ((block.timestamp - treeData.plantDate) / 3600).toUint32();
+
+        if (age > treeData.treeStatus) {
+            treeData.treeStatus = age;
+        }
+
+        treeData.treeSpecs = _updateData.treeSpecs;
+
+        if (treeToken.exists(_updateData.treeId)) {
+            planterFund.updatePlanterTotalClaimed(
+                _updateData.treeId,
+                treeData.planter,
+                treeData.treeStatus
+            );
+        }
+
+        emit TreeUpdatedVerified(_updateData.treeId);
     }
 
     /// @inheritdoc ITreeFactoryV2

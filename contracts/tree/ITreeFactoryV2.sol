@@ -4,6 +4,35 @@ pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
 interface ITreeFactoryV2 {
+    struct PlantAssignedTreeSignature {
+        uint256 treeId;
+        string treeSpecs;
+        uint64 birthDate;
+        uint16 countryCode;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct VerifyAssignedTreeSignature {
+        address planter;
+        PlantAssignedTreeSignature[] data;
+    }
+
+    struct PlantTreeSignature {
+        string treeSpecs;
+        uint64 birthDate;
+        uint16 countryCode;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct VerifyTreeSignature {
+        address planter;
+        PlantTreeSignature[] data;
+    }
+
     struct UpdateSignature {
         uint256 treeId;
         string treeSpecs;
@@ -14,21 +43,6 @@ interface ITreeFactoryV2 {
     struct VerifyUpdateData {
         address planter;
         UpdateSignature[] updateData;
-    }
-
-    struct PlantAssignedTreeSignature {
-        uint256 _treeId;
-        string _treeSpecs;
-        uint64 _birthDate;
-        uint16 _countryCode;
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    struct VerifyAssignedTreeSignature {
-        address planter;
-        PlantAssignedTreeSignature[] data;
     }
 
     /**

@@ -7,7 +7,7 @@ const WhitelistPaymaster = artifacts.require("WhitelistPaymaster.sol");
 const Planter = artifacts.require("Planter.sol");
 const RegularSale = artifacts.require("RegularSale.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -18,7 +18,7 @@ module.exports = async function (deployer, network, accounts) {
   const planterAddress = Planter.address;
   const regularSaleAddress = RegularSale.address;
   const planterFundAddress = PlanterFund.address;
-  const treeFactoryAddress = TreeFactory.address;
+  const treeFactoryAddress = TreeFactoryV2.address;
 
   //gsn
   let trustedForwarder;

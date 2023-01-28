@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const Tree = artifacts.require("Tree.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Planter = artifacts.require("Planter.sol");
 
@@ -18,7 +18,7 @@ module.exports = async function (deployer, network, accounts) {
     : eval(`process.env.GSN_FORWARDER_${network.toUpperCase()}`);
 
   console.log("Call Tree Factory Methods...");
-  await TreeFactory.deployed().then(async (instance) => {
+  await TreeFactoryV2.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
     await instance.setPlanterFundAddress(planterFundAddress);
     await instance.setPlanterContractAddress(planterAddress);

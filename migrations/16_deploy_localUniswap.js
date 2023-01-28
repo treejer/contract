@@ -20,7 +20,7 @@ const PlanterFund = artifacts.require("PlanterFund.sol");
 const WethFund = artifacts.require("WethFund.sol");
 const Tree = artifacts.require("Tree.sol");
 const Attribute = artifacts.require("Attribute.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 
 //gsn
 
@@ -182,7 +182,7 @@ module.exports = async function (deployer, network, accounts) {
   const wethFundAddress = WethFund.address;
   const treeAddress = Tree.address;
   const attributeAddress = Attribute.address;
-  const treeFactoryAddress = TreeFactory.address;
+  const treeFactoryAddress = TreeFactoryV2.address;
 
   console.log(`
   CONTRACT_AR_ADDRESS=${accessRestrictionAddress}

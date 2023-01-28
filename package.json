@@ -58,5 +58,8 @@
     "ERC20"
   ],
   "author": "amir@treejer.com",
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "truffle-contract-size": "^2.0.1"
+  }
 }

@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const Auction = artifacts.require("Auction.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 const Allocation = artifacts.require("Allocation.sol");
 const WethFund = artifacts.require("WethFund.sol");
 const Weth = artifacts.require("Weth.sol");
@@ -10,7 +10,7 @@ const RegularSale = artifacts.require("RegularSale.sol");
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
-  const treeFactoryAddress = TreeFactory.address;
+  const treeFactoryAddress = TreeFactoryV2.address;
   const allocationAddress = Allocation.address;
   const wethFundAddress = WethFund.address;
   const regularSaleAddress = RegularSale.address;

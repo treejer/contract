@@ -2,14 +2,14 @@ require("dotenv").config();
 
 const HonoraryTree = artifacts.require("HonoraryTree.sol");
 const Attribute = artifacts.require("Attribute.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 const PlanterFund = artifacts.require("PlanterFund.sol");
 const Dai = artifacts.require("Dai.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
-  const treeFactoryAddress = TreeFactory.address;
+  const treeFactoryAddress = TreeFactoryV2.address;
   const planterFundsAddress = PlanterFund.address;
   const attributeAddress = Attribute.address;
   let daiTokenAddress;

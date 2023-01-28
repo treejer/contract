@@ -45,8 +45,8 @@ module.exports = {
       host: "127.0.0.1", // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
       network_id: "*", // Any network (default: none)
-      gas: 20000000,
-      gasPrice: 1e9,
+      gas: 3e7,
+      gasPrice: 20e9,
     },
 
     // Another network with more advanced options...
@@ -137,7 +137,7 @@ module.exports = {
       // gasPrice: 100000000000,
     },
   },
-  plugins: ["solidity-coverage"],
+  plugins: ["solidity-coverage", "truffle-contract-size"],
   mocha: {
     timeout: 0,
     // reporter: "eth-gas-reporter",
@@ -161,7 +161,7 @@ module.exports = {
         // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
-          runs: 9999,
+          runs: 2e6,
         },
       },
     },

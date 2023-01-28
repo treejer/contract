@@ -1,6 +1,6 @@
 require("dotenv").config();
 const RegularSale = artifacts.require("RegularSale.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 const DaiFund = artifacts.require("DaiFund.sol");
 const Dai = artifacts.require("Dai.sol");
 const Allocation = artifacts.require("Allocation.sol");
@@ -12,7 +12,7 @@ module.exports = async function (deployer, network, accounts) {
 
   const referralTreePaymentToPlanter = web3.utils.toWei("5.5");
   const referralTreePaymentToAmbassador = web3.utils.toWei("0.5");
-  const treeFactoryAddress = TreeFactory.address;
+  const treeFactoryAddress = TreeFactoryV2.address;
   const daiFundAddress = DaiFund.address;
   const allocationAddress = Allocation.address;
   const wethFundAddress = WethFund.address;

@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const AccessRestriction = artifacts.require("AccessRestriction.sol");
 const Auction = artifacts.require("Auction.sol");
-const TreeFactory = artifacts.require("TreeFactory.sol");
+const TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
 const Planter = artifacts.require("Planter.sol");
 const RegularSale = artifacts.require("RegularSale.sol");
 const IncrementalSale = artifacts.require("IncrementalSale.sol");
@@ -17,7 +17,7 @@ const DATA_MANAGER_ROLE = web3.utils.soliditySha3("DATA_MANAGER_ROLE");
 
 module.exports = async function (deployer, network, accounts) {
   let auctionAddress = Auction.address;
-  let treeFactoryAddress = TreeFactory.address;
+  let treeFactoryAddress = TreeFactoryV2.address;
   let planterAddress = Planter.address;
   let regularSaleAddress = RegularSale.address;
   let incrementalSaleAddress = IncrementalSale.address;

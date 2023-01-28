@@ -5,6 +5,7 @@ pragma solidity ^0.8.6;
 /** @title TreeFactory interfce */
 interface ITreeFactoryV2 {
     struct PlantAssignedTreeSignature {
+        uint256 nonce;
         uint256 treeId;
         string treeSpecs;
         uint64 birthDate;
@@ -20,6 +21,7 @@ interface ITreeFactoryV2 {
     }
 
     struct PlantTreeSignature {
+        uint256 nonce;
         string treeSpecs;
         uint64 birthDate;
         uint16 countryCode;
@@ -34,6 +36,7 @@ interface ITreeFactoryV2 {
     }
 
     struct UpdateSignature {
+        uint256 nonce;
         uint256 treeId;
         string treeSpecs;
         uint8 v;

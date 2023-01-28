@@ -68,16 +68,18 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     //------- data for v2
     bytes32 public constant PLANT_ASSIGN_TREE_TYPE_HASH =
         keccak256(
-            "plantAssignTree(uint256 treeId,string treeSpecs,uint64 birthDate,uint16 countryCode)"
+            "plantAssignTree(uint256 nonce,uint256 treeId,string treeSpecs,uint64 birthDate,uint16 countryCode)"
         );
 
     bytes32 public constant PLANT_TREE_TYPE_HASH =
         keccak256(
-            "plantTree(string treeSpecs,uint64 birthDate,uint16 countryCode)"
+            "plantTree(uint256 nonce,string treeSpecs,uint64 birthDate,uint16 countryCode)"
         );
 
     bytes32 public constant VERIFY_UPDATE_TYPE_HASH =
-        keccak256("updateTree(uint256 treeId, string treeSpecs)");
+        keccak256("updateTree(uint256 nonce,uint256 treeId, string treeSpecs)");
+
+    mapping(address => uint256) public plantersNonce; // =======> address planter => nonce
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -371,6 +373,10 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                 VerifyAssignedTreeSignature
                     memory verifyAssignedTreeData = _newAssignTree[i];
 
+                uint256 planterNonce = plantersNonce[
+                    verifyAssignedTreeData.planter
+                ];
+
                 for (
                     uint256 j = 0;
                     j < verifyAssignedTreeData.data.length;
@@ -380,9 +386,17 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         memory plantAssignedTreeData = verifyAssignedTreeData
                             .data[j];
 
+                    require(
+                        planterNonce < plantAssignedTreeData.nonce,
+                        "planter nonce is incorrect"
+                    );
+
+                    planterNonce = plantAssignedTreeData.nonce;
+
                     bytes32 hashStruct = keccak256(
                         abi.encode(
                             PLANT_ASSIGN_TREE_TYPE_HASH,
+                            plantAssignedTreeData.nonce,
                             plantAssignedTreeData.treeId,
                             plantAssignedTreeData.treeSpecs,
                             plantAssignedTreeData.birthDate,
@@ -435,11 +449,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     treeData.treeSpecs = plantAssignedTreeData.treeSpecs;
                 }
+
+                plantersNonce[verifyAssignedTreeData.planter] = planterNonce;
             }
         }
     }
 
     function verifyAssignedTreeWithSignature(
+        uint256 nonce,
         address _planter,
         uint256 _treeId,
         string memory _treeSpecs,
@@ -451,9 +468,12 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     ) external ifNotPaused onlyVerifier {
         bytes32 domainSeperator = _buildDomainSeparator();
 
+        require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
+
         bytes32 hashStruct = keccak256(
             abi.encode(
                 PLANT_ASSIGN_TREE_TYPE_HASH,
+                nonce,
                 _treeId,
                 _treeSpecs,
                 _birthDate,
@@ -492,6 +512,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         treeData.treeStatus = 4;
 
         treeData.treeSpecs = _treeSpecs;
+
+        plantersNonce[_planter] = nonce;
     }
 
     /// @inheritdoc ITreeFactoryV2
@@ -529,6 +551,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         unchecked {
             for (uint256 i = 0; i < _verifyUpdateData.length; i++) {
                 VerifyUpdateData memory verifyUpdateData = _verifyUpdateData[i];
+
+                uint256 planterNonce = plantersNonce[verifyUpdateData.planter];
+
                 for (
                     uint256 j = 0;
                     j < verifyUpdateData.updateData.length;
@@ -536,6 +561,13 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                 ) {
                     UpdateSignature memory updateData = verifyUpdateData
                         .updateData[j];
+
+                    require(
+                        planterNonce < updateData.nonce,
+                        "planter nonce is incorrect"
+                    );
+
+                    planterNonce = updateData.nonce;
 
                     TreeData storage treeData = trees[updateData.treeId];
 
@@ -600,6 +632,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     emit TreeUpdatedVerified(updateData.treeId);
                 }
+
+                plantersNonce[verifyUpdateData.planter] = planterNonce;
             }
         }
     }
@@ -611,6 +645,11 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         bytes32 domainSeperator = _buildDomainSeparator();
 
         TreeData storage treeData = trees[_updateData.treeId];
+
+        require(
+            plantersNonce[_planter] < _updateData.nonce,
+            "planter nonce is incorrect"
+        );
 
         require(treeData.planter == _planter, "Not owned tree");
 
@@ -626,6 +665,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         bytes32 hashStruct = keccak256(
             abi.encode(
                 VERIFY_UPDATE_TYPE_HASH,
+                _updateData.nonce,
                 _updateData.treeId,
                 _updateData.treeSpecs
             )
@@ -659,6 +699,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                 treeData.treeStatus
             );
         }
+
+        plantersNonce[_planter] = _updateData.nonce;
 
         emit TreeUpdatedVerified(_updateData.treeId);
     }
@@ -907,13 +949,25 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                     )
                 );
 
+                uint256 planterNonce = plantersNonce[
+                    verifyTreeSignature.planter
+                ];
+
                 for (uint256 j = 0; j < verifyTreeSignature.data.length; j++) {
                     PlantTreeSignature
                         memory plantTreeData = verifyTreeSignature.data[j];
 
+                    require(
+                        planterNonce < plantTreeData.nonce,
+                        "planter nonce is incorrect"
+                    );
+
+                    planterNonce = plantTreeData.nonce;
+
                     bytes32 hashStruct = keccak256(
                         abi.encode(
                             PLANT_TREE_TYPE_HASH,
+                            plantTreeData.nonce,
                             plantTreeData.treeSpecs,
                             plantTreeData.birthDate,
                             plantTreeData.countryCode
@@ -961,6 +1015,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     tempLastRegularTreeId += 1;
                 }
+
+                plantersNonce[verifyTreeSignature.planter] = planterNonce;
             }
         }
 
@@ -968,6 +1024,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     }
 
     function verifyTreeWithSignature(
+        uint256 nonce,
         address _planter,
         string memory _treeSpecs,
         uint64 _birthDate,
@@ -979,6 +1036,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         bytes32 eip712DomainHash = _buildDomainSeparator();
 
         require(planterContract.manageTreePermission(_planter));
+
+        require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
 
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -1024,6 +1083,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         tempLastRegularTreeId += 1;
 
         lastRegualarTreeId = tempLastRegularTreeId;
+
+        plantersNonce[_planter] = nonce;
     }
 
     /// @inheritdoc ITreeFactoryV2

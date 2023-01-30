@@ -7,7 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../access/IAccessRestriction.sol";
-import "../gsn/RelayRecipient.sol";
+import "../gsn/RelayRecipientV2.sol";
 import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanterV2.sol";
@@ -16,7 +16,7 @@ import "./ITreeFactoryV2.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 /** @title TreeFactory Contract */
-contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
+contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeCastUpgradeable for uint256;
     using SafeCastUpgradeable for uint32;
@@ -84,19 +84,19 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
-        accessRestriction.ifAdmin(_msgSender());
+        accessRestriction.ifAdmin(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has data manager role */
     modifier onlyDataManager() {
-        accessRestriction.ifDataManager(_msgSender());
+        accessRestriction.ifDataManager(msg.sender);
         _;
     }
 
     /** NOTE modifier to check msg.sender has verifier role */
     modifier onlyVerifier() {
-        accessRestriction.ifVerifier(_msgSender());
+        accessRestriction.ifVerifier(msg.sender);
         _;
     }
 
@@ -108,13 +108,13 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
     /** NOTE modifier to check msg.sender has script role */
     modifier onlyScript() {
-        accessRestriction.ifScript(_msgSender());
+        accessRestriction.ifScript(msg.sender);
         _;
     }
 
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
-        accessRestriction.ifTreejerContract(_msgSender());
+        accessRestriction.ifTreejerContract(msg.sender);
         _;
     }
 
@@ -157,9 +157,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         onlyAdmin
         validAddress(_address)
     {
-        if (_selector == 0) {
-            trustedForwarder = _address;
-        } else if (_selector == 1) {
+        if (_selector == 1) {
             IPlanterFund candidateContract = IPlanterFund(_address);
 
             require(candidateContract.isPlanterFund());
@@ -300,7 +298,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         memory plantAssignedTreeData = verifyAssignedTreeData
                             .data[j];
 
-                    test(
+                    _checkSigner(
                         domainSeparator,
                         keccak256(
                             abi.encode(
@@ -321,11 +319,11 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                     );
 
                     require(
-                        planterNonce <= plantAssignedTreeData.nonce,
+                        planterNonce < plantAssignedTreeData.nonce,
                         "planter nonce is incorrect"
                     );
 
-                    planterNonce = plantAssignedTreeData.nonce + 1;
+                    planterNonce = plantAssignedTreeData.nonce;
 
                     //-------------------------->update tree data
 
@@ -354,7 +352,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         bytes32 _s
     ) external ifNotPaused onlyVerifier {
         require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
-        test(
+
+        _checkSigner(
             _buildDomainSeparator(),
             keccak256(
                 abi.encode(
@@ -479,7 +478,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     planterNonce = updateData.nonce;
 
-                    test(
+                    _checkSigner(
                         domainSeparator,
                         keccak256(
                             abi.encode(
@@ -515,7 +514,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             plantersNonce[_planter] < _updateData.nonce,
             "planter nonce is incorrect"
         );
-        test(
+
+        _checkSigner(
             _buildDomainSeparator(),
             keccak256(
                 abi.encode(
@@ -676,7 +676,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
 
                     planterNonce = plantTreeData.nonce;
 
-                    test(
+                    _checkSigner(
                         domainSeparator,
                         keccak256(
                             abi.encode(
@@ -757,7 +757,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
         bytes32 domainSeparator = _buildDomainSeparator();
 
-        test(
+        _checkSigner(
             domainSeparator,
             keccak256(
                 abi.encode(
@@ -878,14 +878,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             );
     }
 
-    function test(
+    function _checkSigner(
         bytes32 _domainSeparator,
         bytes32 _hashStruct,
         address _planter,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) private {
+    ) private pure {
         bytes32 hash = _toTypedDataHash(_domainSeparator, _hashStruct);
 
         address signer = ecrecover(hash, _v, _r, _s);

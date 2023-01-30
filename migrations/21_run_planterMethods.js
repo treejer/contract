@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const Planter = artifacts.require("Planter.sol");
+const PlanterV2 = artifacts.require("PlanterV2.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
@@ -16,8 +16,19 @@ module.exports = async function (deployer, network, accounts) {
     );
   }
 
-  console.log("Call Planter Methods...");
-  await Planter.deployed().then(async (instance) => {
+  console.log("Call PlanterV2 Methods...");
+  await PlanterV2.deployed().then(async (instance) => {
     await instance.setTrustedForwarder(trustedForwarder);
+
+    // for testing remove later
+    await instance.join(
+      1,
+      1,
+      1,
+      1,
+      "0x0000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000",
+      { from: accounts[1] }
+    );
   });
 };

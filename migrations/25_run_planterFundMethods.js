@@ -1,13 +1,13 @@
 require("dotenv").config();
 
 const PlanterFund = artifacts.require("PlanterFund.sol");
-const Planter = artifacts.require("Planter.sol");
+const PlanterV2 = artifacts.require("PlanterV2.sol");
 const Dai = artifacts.require("Dai.sol");
 
 module.exports = async function (deployer, network, accounts) {
   const isLocal = network === "development";
 
-  let planterAddress = Planter.address;
+  let planterAddress = PlanterV2.address;
   let daiTokenAddress;
   let trustedForwarder;
 

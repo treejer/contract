@@ -12,6 +12,7 @@ import "../tree/ITree.sol";
 import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanterV2.sol";
 import "./ITreeFactoryV2.sol";
+import "./TreeFactoryLib.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
@@ -278,6 +279,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     function verifyAssignedTreeBatchWithSignature(
         VerifyAssignedTreeSignature[] calldata _newAssignTree
     ) external ifNotPaused onlyVerifier {
+        bytes32 domainSeparator = _buildDomainSeparator();
+
         unchecked {
             for (uint256 i = 0; i < _newAssignTree.length; i++) {
                 VerifyAssignedTreeSignature
@@ -293,6 +296,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                             .data[j];
 
                     test(
+                        domainSeparator,
                         keccak256(
                             abi.encode(
                                 PLANT_ASSIGN_TREE_TYPE_HASH,
@@ -333,6 +337,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         bytes32 _s
     ) external ifNotPaused onlyVerifier {
         test(
+            _buildDomainSeparator(),
             keccak256(
                 abi.encode(
                     PLANT_ASSIGN_TREE_TYPE_HASH,
@@ -431,6 +436,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     function verifyUpdateBatchWithSignature(
         VerifyUpdateData[] calldata _verifyUpdateData
     ) external override ifNotPaused onlyVerifier {
+        bytes32 domainSeparator = _buildDomainSeparator();
         unchecked {
             for (uint256 i = 0; i < _verifyUpdateData.length; i++) {
                 VerifyUpdateData memory verifyUpdateData = _verifyUpdateData[i];
@@ -443,6 +449,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         .updateData[j];
 
                     test(
+                        domainSeparator,
                         keccak256(
                             abi.encode(
                                 VERIFY_UPDATE_TYPE_HASH,
@@ -471,6 +478,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         UpdateSignature calldata _updateData
     ) external override ifNotPaused onlyVerifier {
         test(
+            _buildDomainSeparator(),
             keccak256(
                 abi.encode(
                     VERIFY_UPDATE_TYPE_HASH,
@@ -594,25 +602,12 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
     }
 
-    function _buildDomainSeparator() private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
-                    keccak256(bytes("Treejer Protocol")),
-                    keccak256(bytes("1")),
-                    block.chainid,
-                    address(this)
-                )
-            );
-    }
-
     function verifyTreeBatchWithSignature(
         VerifyTreeSignature[] calldata _newTree
     ) external ifNotPaused onlyVerifier {
         uint256 tempLastRegularTreeId = lastRegualarTreeId + 1;
+
+        bytes32 domainSeparator = _buildDomainSeparator();
 
         unchecked {
             for (uint256 i = 0; i < _newTree.length; i++) {
@@ -630,6 +625,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         memory plantTreeData = verifyTreeSignature.data[j];
 
                     test(
+                        domainSeparator,
                         keccak256(
                             abi.encode(
                                 PLANT_TREE_TYPE_HASH,
@@ -644,7 +640,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                         plantTreeData.s
                     );
 
-                    uint256 tempLastRegularTreeId = _verifyTreeData(
+                    tempLastRegularTreeId = _verifyTreeData(
                         tempLastRegularTreeId,
                         plantTreeData.countryCode,
                         plantTreeData.birthDate,
@@ -702,7 +698,10 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
     ) external ifNotPaused onlyVerifier {
         require(planterContract.manageTreePermission(_planter));
 
+        bytes32 domainSeparator = _buildDomainSeparator();
+
         test(
+            domainSeparator,
             keccak256(
                 abi.encode(
                     PLANT_TREE_TYPE_HASH,
@@ -805,14 +804,30 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
             );
     }
 
+    function _buildDomainSeparator() private view returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
+                    keccak256(bytes("Treejer Protocol")),
+                    keccak256(bytes("1")),
+                    block.chainid,
+                    address(this)
+                )
+            );
+    }
+
     function test(
+        bytes32 _domainSeparator,
         bytes32 _hashStruct,
         address _planter,
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) internal {
-        bytes32 hash = _toTypedDataHash(_buildDomainSeparator(), _hashStruct);
+    ) private {
+        bytes32 hash = _toTypedDataHash(_domainSeparator, _hashStruct);
 
         address signer = ecrecover(hash, _v, _r, _s);
 

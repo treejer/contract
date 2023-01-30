@@ -138,14 +138,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
         override
         initializer
     {
-        // IAccessRestriction candidateContract = IAccessRestriction(
-        //     _accessRestrictionAddress
-        // );
+        IAccessRestriction candidateContract = IAccessRestriction(
+            _accessRestrictionAddress
+        );
 
-        // require(candidateContract.isAccessRestriction());
+        require(candidateContract.isAccessRestriction());
 
         isTreeFactory = true;
-        // accessRestriction = candidateContract;
+        accessRestriction = candidateContract;
         lastRegualarTreeId = 10000;
         treeUpdateInterval = 604800;
     }
@@ -301,7 +301,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipient, ITreeFactoryV2 {
                             abi.encode(
                                 PLANT_ASSIGN_TREE_TYPE_HASH,
                                 plantAssignedTreeData.treeId,
-                                plantAssignedTreeData.treeSpecs,
+                                keccak256(
+                                    bytes(plantAssignedTreeData.treeSpecs)
+                                ),
                                 plantAssignedTreeData.birthDate,
                                 plantAssignedTreeData.countryCode
                             )

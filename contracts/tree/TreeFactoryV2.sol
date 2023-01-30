@@ -508,36 +508,29 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
     function verifyUpdateWithSignature(
         address _planter,
-        UpdateSignature calldata _updateData
-    ) external override ifNotPaused onlyVerifier {
-        require(
-            plantersNonce[_planter] < _updateData.nonce,
-            "planter nonce is incorrect"
-        );
+        uint256 _nonce,
+        uint256 _treeId,
+        string memory _treeSpecs,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external ifNotPaused onlyVerifier {
+        require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
 
         _checkSigner(
             _buildDomainSeparator(),
             keccak256(
-                abi.encode(
-                    VERIFY_UPDATE_TYPE_HASH,
-                    _updateData.nonce,
-                    _updateData.treeId,
-                    _updateData.treeSpecs
-                )
+                abi.encode(VERIFY_UPDATE_TYPE_HASH, _nonce, _treeId, _treeSpecs)
             ),
             _planter,
-            _updateData.v,
-            _updateData.r,
-            _updateData.s
+            _v,
+            _r,
+            _s
         );
 
-        _setVerifyUpdateData(
-            _updateData.treeId,
-            _planter,
-            _updateData.treeSpecs
-        );
+        _setVerifyUpdateData(_treeId, _planter, _treeSpecs);
 
-        plantersNonce[_planter] = _updateData.nonce;
+        plantersNonce[_planter] = _nonce;
     }
 
     /// @inheritdoc ITreeFactoryV2

@@ -360,7 +360,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                     PLANT_ASSIGN_TREE_TYPE_HASH,
                     nonce,
                     _treeId,
-                    _treeSpecs,
+                    keccak256(bytes(_treeSpecs)),
                     _birthDate,
                     _countryCode
                 )

@@ -20,6 +20,9 @@ Common.TREEBOX_SCRIPT = TREEBOX_SCRIPT;
 
 const Math = require("./math");
 
+const { getMessage } = require("eip-712");
+const { ecsign } = require("ethereumjs-util");
+
 Common.sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -177,6 +180,31 @@ Common.joinSimplePlanter = async (
     invitedBy,
     organizationAddress,
     { from: planterAddress }
+  );
+  return tx;
+};
+
+Common.joinSimplePlanterByAdmin = async (
+  adminAddress,
+  planterInstance,
+  planterType,
+  planterAddress,
+  invitedBy,
+  organizationAddress
+) => {
+  const longitude = 1;
+  const latitude = 2;
+  const countryCode = 10;
+
+  const tx = await planterInstance.joinByAdmin(
+    planterAddress,
+    planterType,
+    longitude,
+    latitude,
+    countryCode,
+    invitedBy,
+    organizationAddress,
+    { from: adminAddress }
   );
   return tx;
 };
@@ -470,6 +498,58 @@ Common.plantTreeSuccessOrganization = async (
   await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
     from: planter,
   });
+};
+
+Common.createMsgWithSig = async (
+  treeFactoryInstance,
+  account,
+  nonce,
+  treeId,
+  ipfsHash,
+  birthDate,
+  countryCode
+) => {
+  const msgParams = {
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      plantAssignTree: [
+        { name: "nonce", type: "uint256" },
+        { name: "treeId", type: "uint256" },
+        { name: "treeSpecs", type: "string" },
+        { name: "birthDate", type: "uint64" },
+        { name: "countryCode", type: "uint16" },
+      ],
+    },
+    //make sure to replace verifyingContract with address of deployed contract
+    primaryType: "plantAssignTree",
+    domain: {
+      name: "Treejer Protocol",
+      version: "1",
+      chainId: 1337,
+      verifyingContract: treeFactoryInstance.address,
+    },
+    message: {
+      nonce: nonce,
+      treeId: treeId,
+      treeSpecs: ipfsHash,
+      birthDate: birthDate,
+      countryCode: countryCode,
+    },
+  };
+
+  const message = getMessage(msgParams, true);
+
+  const { r, s, v } = ecsign(
+    Buffer.from(message),
+    Buffer.from(account.privateKey.split("0x")[1], "hex")
+  );
+
+  return { r, s, v };
 };
 
 Common.prepareAttributeDex = async (

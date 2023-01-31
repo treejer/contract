@@ -60,6 +60,10 @@
   "author": "amir@treejer.com",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "@metamask/eth-sig-util": "^5.0.2",
+    "eip-712": "^1.0.0",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.1.5",
     "truffle-contract-size": "^2.0.1"
   }
 }

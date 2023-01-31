@@ -3,7 +3,7 @@ const TreeFactory = artifacts.require("TreeFactoryV2");
 const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
 
-const Planter = artifacts.require("Planter");
+const Planter = artifacts.require("PlanterV2");
 const Dai = artifacts.require("Dai");
 const Allocation = artifacts.require("Allocation");
 const PlanterFund = artifacts.require("PlanterFund");
@@ -96,6 +96,10 @@ contract("TreeFactoryV2", (accounts) => {
       //--------> setPlanterContractAddress
 
       await treeFactoryInstance.setData(2, planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setData(3, treeTokenInstance.address, {
         from: deployerAccount,
       });
     });
@@ -301,7 +305,7 @@ contract("TreeFactoryV2", (accounts) => {
       let inputs = [];
 
       for (let i = 0; i < 10; i++) {
-        let sign = await Common.createMsgWithSig(
+        let sign = await Common.createMsgWithSigPlantTree(
           treeFactoryInstance,
           account,
           i + 1,
@@ -321,52 +325,58 @@ contract("TreeFactoryV2", (accounts) => {
         ];
       }
 
-      let inputs2 = [];
+      //   let inputs2 = [];
 
-      for (let i = 10; i < 20; i++) {
-        let sign = await Common.createMsgWithSig(
-          treeFactoryInstance,
-          account2,
-          i + 1,
-          ipfsHashs[i],
-          birthDate,
-          countryCode
-        );
+      //   for (let i = 10; i < 20; i++) {
+      //     let sign = await Common.createMsgWithSigPlantTree(
+      //       treeFactoryInstance,
+      //       account2,
+      //       i + 1,
+      //       ipfsHashs[i],
+      //       birthDate,
+      //       countryCode
+      //     );
 
-        inputs2[i - 10] = [
-          i + 1,
-          ipfsHashs[i],
-          birthDate,
-          countryCode,
-          sign.v,
-          sign.r,
-          sign.s,
-        ];
-      }
+      //     inputs2[i - 10] = [
+      //       i + 1,
+      //       ipfsHashs[i],
+      //       birthDate,
+      //       countryCode,
+      //       sign.v,
+      //       sign.r,
+      //       sign.s,
+      //     ];
+      //   }
 
       const input = [
         [account.address, inputs],
-        [account2.address, inputs2],
+        // [account2.address, inputs2],
       ];
 
-      let tx = await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(
-        input,
-        { from: dataManager }
+      //   let tx = await treeFactoryInstance.verifyTreeBatchWithSignature(input, {
+      //     from: dataManager,
+      //   });
+
+      let sign = await Common.createMsgWithSigPlantTree(
+        treeFactoryInstance,
+        account,
+        1,
+        ipfsHashs[0],
+        birthDate,
+        countryCode
       );
 
-      //   let tx = await treeFactoryInstance.verifyAssignedTreeWithSignature(
-      //     1,
-      //     account.address,
-      //     treeId,
-      //     ipfsHash,
-      //     birthDate,
-      //     countryCode,
-      //     v,
-      //     r,
-      //     s,
-
-      //     { from: dataManager }
-      //   );
+      let tx = await treeFactoryInstance.verifyTreeWithSignature(
+        1,
+        account.address,
+        ipfsHashs[0],
+        birthDate,
+        countryCode,
+        sign.v,
+        sign.r,
+        sign.s,
+        { from: dataManager }
+      );
 
       console.log("tx", tx);
     });

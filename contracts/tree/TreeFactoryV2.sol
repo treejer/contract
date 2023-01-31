@@ -651,7 +651,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                     planterContract.manageTreePermissionBatch(
                         verifyTreeSignature.planter,
                         verifyTreeSignature.data.length.toUint32()
-                    )
+                    ),
+                    "Permission denied"
                 );
 
                 uint256 planterNonce = plantersNonce[
@@ -675,7 +676,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                             abi.encode(
                                 PLANT_TREE_TYPE_HASH,
                                 plantTreeData.nonce,
-                                plantTreeData.treeSpecs,
+                                keccak256(bytes(plantTreeData.treeSpecs)),
                                 plantTreeData.birthDate,
                                 plantTreeData.countryCode
                             )
@@ -756,7 +757,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                 abi.encode(
                     PLANT_TREE_TYPE_HASH,
                     nonce,
-                    _treeSpecs,
+                    keccak256(bytes(_treeSpecs)),
                     _birthDate,
                     _countryCode
                 )

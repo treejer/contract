@@ -100,7 +100,7 @@ contract("TreeFactoryV2", (accounts) => {
       });
     });
 
-    it.only("Verify assign tree", async () => {
+    it("Verify assign tree", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -189,8 +189,7 @@ contract("TreeFactoryV2", (accounts) => {
           treeIds[i],
           ipfsHashs[i],
           birthDate,
-          countryCode,
-          "plantAssignTree"
+          countryCode
         );
 
         inputs[i] = [
@@ -215,8 +214,7 @@ contract("TreeFactoryV2", (accounts) => {
           treeIds[i],
           ipfsHashs[i],
           birthDate,
-          countryCode,
-          "plantAssignTree"
+          countryCode
         );
 
         inputs2[i - 10] = [
@@ -307,7 +305,6 @@ contract("TreeFactoryV2", (accounts) => {
           treeFactoryInstance,
           account,
           i + 1,
-          treeIds[i],
           ipfsHashs[i],
           birthDate,
           countryCode
@@ -315,7 +312,6 @@ contract("TreeFactoryV2", (accounts) => {
 
         inputs[i] = [
           i + 1,
-          treeIds[i],
           ipfsHashs[i],
           birthDate,
           countryCode,
@@ -332,7 +328,6 @@ contract("TreeFactoryV2", (accounts) => {
           treeFactoryInstance,
           account2,
           i + 1,
-          treeIds[i],
           ipfsHashs[i],
           birthDate,
           countryCode
@@ -340,7 +335,6 @@ contract("TreeFactoryV2", (accounts) => {
 
         inputs2[i - 10] = [
           i + 1,
-          treeIds[i],
           ipfsHashs[i],
           birthDate,
           countryCode,

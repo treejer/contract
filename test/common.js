@@ -507,7 +507,8 @@ Common.createMsgWithSig = async (
   treeId,
   ipfsHash,
   birthDate,
-  countryCode
+  countryCode,
+  funcName
 ) => {
   const msgParams = {
     types: {
@@ -517,7 +518,7 @@ Common.createMsgWithSig = async (
         { name: "chainId", type: "uint256" },
         { name: "verifyingContract", type: "address" },
       ],
-      plantAssignTree: [
+      [funcName]: [
         { name: "nonce", type: "uint256" },
         { name: "treeId", type: "uint256" },
         { name: "treeSpecs", type: "string" },
@@ -526,7 +527,7 @@ Common.createMsgWithSig = async (
       ],
     },
     //make sure to replace verifyingContract with address of deployed contract
-    primaryType: "plantAssignTree",
+    primaryType: funcName,
     domain: {
       name: "Treejer Protocol",
       version: "1",

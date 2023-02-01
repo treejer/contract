@@ -552,6 +552,55 @@ Common.createMsgWithSig = async (
   return { r, s, v };
 };
 
+Common.createMsgWithSigPlantTree = async (
+  treeFactoryInstance,
+  account,
+  nonce,
+  ipfsHash,
+  birthDate,
+  countryCode
+) => {
+  const msgParams = {
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      plantTree: [
+        { name: "nonce", type: "uint256" },
+        { name: "treeSpecs", type: "string" },
+        { name: "birthDate", type: "uint64" },
+        { name: "countryCode", type: "uint16" },
+      ],
+    },
+    //make sure to replace verifyingContract with address of deployed contract
+    primaryType: "plantTree",
+    domain: {
+      name: "Treejer Protocol",
+      version: "1",
+      chainId: 1337,
+      verifyingContract: treeFactoryInstance.address,
+    },
+    message: {
+      nonce: nonce,
+      treeSpecs: ipfsHash,
+      birthDate: birthDate,
+      countryCode: countryCode,
+    },
+  };
+
+  const message = getMessage(msgParams, true);
+
+  const { r, s, v } = ecsign(
+    Buffer.from(message),
+    Buffer.from(account.privateKey.split("0x")[1], "hex")
+  );
+
+  return { r, s, v };
+};
+
 Common.createUpdateTreeMsgWithSig = async (
   treeFactoryInstance,
   account,

@@ -78,7 +78,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         );
 
     bytes32 public constant VERIFY_UPDATE_TYPE_HASH =
-        keccak256("updateTree(uint256 nonce,uint256 treeId, string treeSpecs)");
+        keccak256("updateTree(uint256 nonce,uint256 treeId,string treeSpecs)");
 
     mapping(address => uint256) public plantersNonce; // =======> address planter => nonce
 
@@ -157,19 +157,19 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         onlyAdmin
         validAddress(_address)
     {
-        if (_selector == 1) {
+        if (_selector == 0) {
             IPlanterFund candidateContract = IPlanterFund(_address);
 
             require(candidateContract.isPlanterFund());
 
             planterFund = candidateContract;
-        } else if (_selector == 2) {
+        } else if (_selector == 1) {
             IPlanterV2 candidateContract = IPlanterV2(_address);
 
             require(candidateContract.isPlanter());
 
             planterContract = candidateContract;
-        } else if (_selector == 3) {
+        } else if (_selector == 2) {
             ITree candidateContract = ITree(_address);
 
             require(candidateContract.isTree());
@@ -485,7 +485,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                                 VERIFY_UPDATE_TYPE_HASH,
                                 updateData.nonce,
                                 updateData.treeId,
-                                updateData.treeSpecs
+                                keccak256(bytes(updateData.treeSpecs))
                             )
                         ),
                         verifyUpdateData.planter,
@@ -520,7 +520,12 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         _checkSigner(
             _buildDomainSeparator(),
             keccak256(
-                abi.encode(VERIFY_UPDATE_TYPE_HASH, _nonce, _treeId, _treeSpecs)
+                abi.encode(
+                    VERIFY_UPDATE_TYPE_HASH,
+                    _nonce,
+                    _treeId,
+                    keccak256(bytes(_treeSpecs))
+                )
             ),
             _planter,
             _v,

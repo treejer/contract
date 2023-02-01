@@ -15,16 +15,11 @@ const { signTypedData } = require("@metamask/eth-sig-util");
 const truffleAssert = require("truffle-assertions");
 const Common = require("./common");
 
-const {
-  TimeEnumes,
-  CommonErrorMsg,
-  TreeFactoryErrorMsg,
-  AuctionErrorMsg,
-  TreasuryManagerErrorMsg,
-} = require("./enumes");
+const { TimeEnumes } = require("./enumes");
 
 const Math = require("./math");
 const { should } = require("chai");
+const { time } = require("@openzeppelin/test-helpers");
 
 contract("TreeFactoryV2", (accounts) => {
   let treeFactoryInstance;
@@ -77,6 +72,14 @@ contract("TreeFactoryV2", (accounts) => {
         from: deployerAccount,
       });
 
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
       treeTokenInstance = await Tree.new({
         from: deployerAccount,
       });
@@ -95,12 +98,20 @@ contract("TreeFactoryV2", (accounts) => {
 
       //--------> setPlanterContractAddress
 
-      await treeFactoryInstance.setData(2, planterInstance.address, {
+      await treeFactoryInstance.setData(0, planterFundInstnce.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setData(1, planterInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setData(2, treeTokenInstance.address, {
         from: deployerAccount,
       });
     });
 
-    it.only("Verify assign tree", async () => {
+    it("Verify assign tree", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -254,6 +265,245 @@ contract("TreeFactoryV2", (accounts) => {
       //   );
 
       console.log("tx", tx);
+    });
+
+    it.only("verify update batch", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      const totalPlantingCount = 20;
+
+      let treeIds = [];
+      let ipfsHashs = [];
+
+      let updateIpfsHashes = [];
+
+      for (let i = 0; i < totalPlantingCount; i++) {
+        treeIds[i] = i + 1;
+      }
+
+      for (let i = 0; i < totalPlantingCount; i++) {
+        ipfsHashs[i] = "some ipfs " + i + " hash here";
+      }
+
+      for (let i = 0; i < totalPlantingCount; i++) {
+        updateIpfsHashes[i] =
+          "some ipfs " + (totalPlantingCount + i) + " hash here";
+      }
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashs, {
+        from: dataManager,
+      });
+      await treeFactoryInstance.assignTreeBatch(
+        treeIds,
+        [
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+          account.address,
+        ],
+        {
+          from: dataManager,
+        }
+      );
+
+      //-------------- ceate message for sign
+
+      let inputs = [];
+
+      for (let i = 0; i < totalPlantingCount; i++) {
+        let sign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        inputs[i] = [
+          i + 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+      }
+
+      // let inputs2 = [];
+
+      // for (let i = totalPlantingCount / 2; i < totalPlantingCount; i++) {
+      //   let sign = await Common.createMsgWithSig(
+      //     treeFactoryInstance,
+      //     account2,
+      //     i + 1,
+      //     treeIds[i],
+      //     ipfsHashs[i],
+      //     birthDate,
+      //     countryCode
+      //   );
+
+      //   inputs2[i - 10] = [
+      //     i + 1,
+      //     treeIds[i],
+      //     ipfsHashs[i],
+      //     birthDate,
+      //     countryCode,
+      //     sign.v,
+      //     sign.r,
+      //     sign.s,
+      //   ];
+      // }
+
+      const input = [
+        [account.address, inputs],
+        // [account2.address, inputs2],
+      ];
+
+      let tx = await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(
+        input,
+        { from: dataManager }
+      );
+
+      await Common.travelTime(TimeEnumes.days, 60);
+
+      let verifyUpdateInputs1 = [];
+
+      for (let i = 0; i < totalPlantingCount; i++) {
+        let sign = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account,
+          totalPlantingCount + i + 1,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        verifyUpdateInputs1[i] = [
+          totalPlantingCount + i + 1,
+          treeIds[i],
+          updateIpfsHashes[i],
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+      }
+
+      // let verifyUpdateInputs2 = [];
+
+      // for (let i = totalPlantingCount / 2; i < totalPlantingCount; i++) {
+      //   let sign = await Common.createUpdateTreeMsgWithSig(
+      //     treeFactoryInstance,
+      //     account2,
+      //     totalPlantingCount + i + 1,
+      //     treeIds[i],
+      //     updateIpfsHashes[i]
+      //   );
+
+      //   verifyUpdateInputs2[i - 10] = [
+      //     totalPlantingCount + i + 1,
+      //     treeIds[i],
+      //     updateIpfsHashes[i],
+      //     sign.v,
+      //     sign.r,
+      //     sign.s,
+      //   ];
+      // }
+
+      const verifyUpdateInput = [
+        [account.address, verifyUpdateInputs1],
+        // [account2.address, verifyUpdateInputs2],
+      ];
+
+      // let updateSign = await Common.createUpdateTreeMsgWithSig(
+      //   treeFactoryInstance,
+      //   account,
+      //   2,
+      //   treeId,
+      //   ipfsHash
+      // );
+
+      // let verifyUpdateInput = [
+      //   [
+      //     account.address,
+      //     [[2, treeId, ipfsHash, updateSign.v, updateSign.r, updateSign.s]],
+      //   ],
+      // ];
+
+      // address _planter,
+      // uint256 _nonce,
+      // uint256 _treeId,
+      // string memory _treeSpecs,
+      // uint8 _v,
+      // bytes32 _r,
+      // bytes32 _s
+
+      const tt = await treeFactoryInstance.verifyUpdateWithSignature(
+        account.address,
+        verifyUpdateInputs1[0][0],
+        verifyUpdateInputs1[0][1],
+        verifyUpdateInputs1[0][2],
+        verifyUpdateInputs1[0][3],
+        verifyUpdateInputs1[0][4],
+        verifyUpdateInputs1[0][5],
+        { from: dataManager }
+      );
+
+      // const tt = await treeFactoryInstance.verifyUpdateBatchWithSignature(
+      //   verifyUpdateInput,
+      //   { from: dataManager }
+      // );
+
+      console.log("tt", tt);
     });
   });
 });

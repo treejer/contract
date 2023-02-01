@@ -1,7 +1,7 @@
 // const { accounts, contract, web3 } = require("@openzeppelin/test-environment");
 
 const AccessRestriction = artifacts.require("AccessRestriction");
-const TreeFactory = artifacts.require("TreeFactoryV2");
+const TreeFactory = artifacts.require("TreeFactory");
 const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
 
@@ -62,7 +62,7 @@ contract("TreeFactory", (accounts) => {
   const ipfsHash = "some ipfs hash here";
   const updateIpfsHash1 = "some update ipfs hash here";
 
-  describe.only("deploy and set addresses", () => {
+  describe("deploy and set addresses", () => {
     beforeEach(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,
@@ -112,78 +112,75 @@ contract("TreeFactory", (accounts) => {
         from: deployerAccount,
       });
 
-      // await treeFactoryInstance.setPlanterContractAddress(
-      //   planterInstance.address,
-      //   {
-      //     from: deployerAccount,
-      //   }
-      // );
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     it("deploys successfully and check addresses", async () => {
-      // const address = treeFactoryInstance.address;
-      // assert.notEqual(address, 0x0);
-      // assert.notEqual(address, "");
-      // assert.notEqual(address, null);
-      // assert.notEqual(address, undefined);
+      const address = treeFactoryInstance.address;
+      assert.notEqual(address, 0x0);
+      assert.notEqual(address, "");
+      assert.notEqual(address, null);
+      assert.notEqual(address, undefined);
       console.log("planterFundInstnce.address", planterFundInstnce.address);
       // ///////////////---------------------------------set trust forwarder address--------------------------------------------------------
-      await treeFactoryInstance.setData(1, planterFundInstnce.address, {
+      await treeFactoryInstance
+        .setTrustedForwarder(zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+      await treeFactoryInstance.setTrustedForwarder(userAccount2, {
         from: deployerAccount,
       });
-      // await treeFactoryInstance
-      //   .setTrustedForwarder(zeroAddress, {
-      //     from: deployerAccount,
-      //   })
-      //   .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
-      // await treeFactoryInstance.setTrustedForwarder(userAccount2, {
-      //   from: deployerAccount,
-      // });
-      // assert.equal(
-      //   userAccount2,
-      //   await treeFactoryInstance.trustedForwarder(),
-      //   "address set incorrect"
-      // );
-      // /////////////------------------------------------ setPlanterFund address ----------------------------------------//
-      // await treeFactoryInstance.setPlanterFundAddress(zeroAddress, {
-      //   from: deployerAccount,
-      // }).should.be.rejected;
-      // await treeFactoryInstance.setPlanterFundAddress(
-      //   planterFundInstnce.address,
-      //   {
-      //     from: deployerAccount,
-      //   }
-      // );
-      // await treeFactoryInstance
-      //   .setPlanterFundAddress(planterFundInstnce.address, {
-      //     from: userAccount1,
-      //   })
-      //   .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-      // ////////////------------------------------------ set planter address ----------------------------------------//
-      // await treeFactoryInstance.setPlanterContractAddress(zeroAddress, {
-      //   from: deployerAccount,
-      // }).should.be.rejected;
-      // await treeFactoryInstance.setPlanterContractAddress(
-      //   planterInstance.address,
-      //   {
-      //     from: deployerAccount,
-      //   }
-      // );
-      // await treeFactoryInstance
-      //   .setPlanterContractAddress(planterInstance.address, {
-      //     from: userAccount1,
-      //   })
-      //   .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
-      // ////////////////////------------------------------------ tree token address ----------------------------------------//
-      // await treeFactoryInstance.setTreeTokenAddress(zeroAddress, {
-      //   from: deployerAccount,
-      // }).should.be.rejected;
-      // await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
-      //   from: deployerAccount,
-      // });
-      // await treeFactoryInstance
-      //   .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
-      //   .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      assert.equal(
+        userAccount2,
+        await treeFactoryInstance.trustedForwarder(),
+        "address set incorrect"
+      );
+      /////////////------------------------------------ setPlanterFund address ----------------------------------------//
+      await treeFactoryInstance.setPlanterFundAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+      await treeFactoryInstance.setPlanterFundAddress(
+        planterFundInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+      await treeFactoryInstance
+        .setPlanterFundAddress(planterFundInstnce.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      ////////////------------------------------------ set planter address ----------------------------------------//
+      await treeFactoryInstance.setPlanterContractAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+      await treeFactoryInstance.setPlanterContractAddress(
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+      await treeFactoryInstance
+        .setPlanterContractAddress(planterInstance.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+      ////////////////////------------------------------------ tree token address ----------------------------------------//
+      await treeFactoryInstance.setTreeTokenAddress(zeroAddress, {
+        from: deployerAccount,
+      }).should.be.rejected;
+      await treeFactoryInstance.setTreeTokenAddress(treeTokenInstance.address, {
+        from: deployerAccount,
+      });
+      await treeFactoryInstance
+        .setTreeTokenAddress(treeTokenInstance.address, { from: userAccount1 })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
     });
   });
 
@@ -2336,7 +2333,7 @@ contract("TreeFactory", (accounts) => {
       });
     });
 
-    it("Should update tree work successfully", async () => {
+    it.only("Should update tree work successfully", async () => {
       const treeId = 1;
       const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
       const countryCode = 2;
@@ -2392,13 +2389,16 @@ contract("TreeFactory", (accounts) => {
         "TreeUpdateIntervalChanged"
       );
 
-      await treeFactoryInstance.updateTree(treeId, ipfsHash, {
+      let xx = await treeFactoryInstance.updateTree(treeId, ipfsHash, {
         from: userAccount2,
       });
 
-      await treeFactoryInstance.verifyUpdate(treeId, true, {
+      let yy = await treeFactoryInstance.verifyUpdate(treeId, true, {
         from: dataManager,
       });
+
+      console.log("xxx", xx);
+      console.log("yy", yy);
 
       const treeUpdateIntervalTx2 = await treeFactoryInstance.setUpdateInterval(
         4 * 24 * 60 * 60,
@@ -5586,17 +5586,25 @@ contract("TreeFactory", (accounts) => {
         return ev.treeId == 10001 && Number(ev.tempTreeId) == 0;
       });
 
-      await treeFactoryInstance.plantTree(ipfsHash, birthDate, countryCode, {
-        from: planter,
-      });
+      const xx = await treeFactoryInstance.plantTree(
+        ipfsHash,
+        birthDate,
+        countryCode,
+        {
+          from: planter,
+        }
+      );
 
       await treeFactoryInstance.updateLastRegualarTreeId(1500000, {
         from: dataManager,
       });
 
-      await treeFactoryInstance.verifyTree(1, true, {
+      const yy = await treeFactoryInstance.verifyTree(1, true, {
         from: dataManager,
       });
+
+      console.log("xx", xx);
+      console.log("yy", yy);
 
       let genTreeBefore2 = await treeFactoryInstance.trees.call(1500001);
 

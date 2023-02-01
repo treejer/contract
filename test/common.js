@@ -552,6 +552,52 @@ Common.createMsgWithSig = async (
   return { r, s, v };
 };
 
+Common.createUpdateTreeMsgWithSig = async (
+  treeFactoryInstance,
+  account,
+  nonce,
+  treeId,
+  ipfsHash
+) => {
+  const msgParams = {
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      updateTree: [
+        { name: "nonce", type: "uint256" },
+        { name: "treeId", type: "uint256" },
+        { name: "treeSpecs", type: "string" },
+      ],
+    },
+
+    primaryType: "updateTree",
+    domain: {
+      name: "Treejer Protocol",
+      version: "1",
+      chainId: 1337,
+      verifyingContract: treeFactoryInstance.address,
+    },
+    message: {
+      nonce: nonce,
+      treeId: treeId,
+      treeSpecs: ipfsHash,
+    },
+  };
+
+  const message = getMessage(msgParams, true);
+
+  const { r, s, v } = ecsign(
+    Buffer.from(message),
+    Buffer.from(account.privateKey.split("0x")[1], "hex")
+  );
+
+  return { r, s, v };
+};
+
 Common.prepareAttributeDex = async (
   UniswapV2Router02New,
   Factory,

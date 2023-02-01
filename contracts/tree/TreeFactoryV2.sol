@@ -639,7 +639,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     function verifyTreeBatchWithSignature(
         VerifyTreeSignature[] calldata _newTree
     ) external ifNotPaused onlyVerifier {
-        uint256 tempLastRegularTreeId = lastRegualarTreeId + 1;
+        uint256 tempLastRegularTreeId = lastRegualarTreeId;
 
         bytes32 domainSeparator = _buildDomainSeparator();
 
@@ -688,14 +688,12 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                     );
 
                     tempLastRegularTreeId = _verifyTreeData(
-                        tempLastRegularTreeId,
+                        tempLastRegularTreeId + 1,
                         plantTreeData.countryCode,
                         plantTreeData.birthDate,
                         plantTreeData.treeSpecs,
                         verifyTreeSignature.planter
                     );
-
-                    tempLastRegularTreeId += 1;
                 }
 
                 plantersNonce[verifyTreeSignature.planter] = planterNonce;
@@ -712,15 +710,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         string memory _treeSpecs,
         address _planter
     ) private returns (uint256) {
-        uint256 tempLastRegularTreeId = _tempLastRegularTreeId;
         while (
-            !(trees[tempLastRegularTreeId].treeStatus == 0 &&
-                trees[tempLastRegularTreeId].saleType == 0)
+            !(trees[_tempLastRegularTreeId].treeStatus == 0 &&
+                trees[_tempLastRegularTreeId].saleType == 0)
         ) {
-            tempLastRegularTreeId = tempLastRegularTreeId + 1;
+            _tempLastRegularTreeId += 1;
         }
 
-        TreeData storage treeData = trees[tempLastRegularTreeId];
+        TreeData storage treeData = trees[_tempLastRegularTreeId];
 
         treeData.plantDate = block.timestamp.toUint64();
         treeData.countryCode = uint16(_countryCode);
@@ -729,11 +726,11 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         treeData.planter = _planter;
         treeData.treeStatus = 4;
 
-        if (!treeToken.exists(tempLastRegularTreeId)) {
+        if (!treeToken.exists(_tempLastRegularTreeId)) {
             treeData.saleType = 4;
         }
 
-        return tempLastRegularTreeId;
+        return _tempLastRegularTreeId;
     }
 
     function verifyTreeWithSignature(
@@ -779,9 +776,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         );
 
         plantersNonce[_planter] = nonce;
-        // tempLastRegularTreeId += 1;//extra
-
-        // lastRegualarTreeId = tempLastRegularTreeId;//extra
     }
 
     /// @inheritdoc ITreeFactoryV2

@@ -151,7 +151,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         treeUpdateInterval = 604800;
     }
 
-    function setData(uint8 _selector, address _address)
+    function setContractAddresses(uint8 _selector, address _address)
         external
         override
         onlyAdmin

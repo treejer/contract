@@ -2,7 +2,7 @@ const AccessRestriction = artifacts.require("AccessRestriction");
 const TreeFactory = artifacts.require("TreeFactoryV2");
 const Tree = artifacts.require("Tree");
 const Auction = artifacts.require("Auction");
-
+const TestPlanter = artifacts.require("TestPlanter");
 const Planter = artifacts.require("PlanterV2");
 const Dai = artifacts.require("Dai");
 const Allocation = artifacts.require("Allocation");
@@ -55,7 +55,265 @@ contract("TreeFactoryV2", (accounts) => {
   const ipfsHash = "some ipfs hash here";
   const updateIpfsHash1 = "some update ipfs hash here";
 
-  describe("add tree,assign and plant tree,verify plant", () => {
+  describe("set contract addresses", () => {
+    beforeEach(async () => {
+      arInstance = await AccessRestriction.new({
+        from: deployerAccount,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      treeTokenInstance = await Tree.new({
+        from: deployerAccount,
+      });
+
+      await treeTokenInstance.initialize(arInstance.address, "", {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterFundInstnce = await PlanterFund.new({
+        from: deployerAccount,
+      });
+
+      await planterFundInstnce.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+    });
+
+    it("should set contract address", async () => {
+      //--------> fail to set address
+
+      await treeFactoryInstance
+        .setContractAddresses(0, planterFundInstnce.address, {
+          from: userAccount1,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.CHECK_ADMIN);
+
+      await treeFactoryInstance
+        .setContractAddresses(0, zeroAddress, {
+          from: deployerAccount,
+        })
+        .should.be.rejectedWith(CommonErrorMsg.INVALID_ADDRESS);
+
+      //--------> set contract address
+
+      await treeFactoryInstance.setContractAddresses(
+        0,
+        planterFundInstnce.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeFactoryInstance.setContractAddresses(
+        1,
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      await treeFactoryInstance.setContractAddresses(
+        2,
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      assert.equal(
+        planterFundInstnce.address,
+        await treeFactoryInstance.planterFund(),
+        "planterFund contract address is incorrect"
+      );
+      assert.equal(
+        planterInstance.address,
+        await treeFactoryInstance.planterContract(),
+        "planter contract address is incorrect"
+      );
+      assert.equal(
+        treeTokenInstance.address,
+        await treeFactoryInstance.treeToken(),
+        "tree contract address is incorrect"
+      );
+    });
+  });
+
+  describe("list tree and assign tree batch", () => {
+    beforeEach(async () => {
+      arInstance = await AccessRestriction.new({
+        from: deployerAccount,
+      });
+
+      await arInstance.initialize(deployerAccount, {
+        from: deployerAccount,
+      });
+
+      await Common.addDataManager(arInstance, dataManager, deployerAccount);
+
+      treeFactoryInstance = await TreeFactory.new({
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      planterInstance = await Planter.new({
+        from: deployerAccount,
+      });
+
+      await planterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+    });
+
+    it("should list tree batch", async () => {
+      const treeIds = [1, 2, 3, 4, 5];
+      const invalidTreeIds = [1, 2, 3, 4, 1];
+      const treeSpecs = ["speecs1", "speecs2", "speecs3", "speecs4", "speecs5"];
+
+      await treeFactoryInstance
+        .listTreeBatch([1, 2, 3], ["speecs1", "speecs1"])
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_INPUTS);
+
+      await treeFactoryInstance
+        .listTreeBatch(invalidTreeIds, treeSpecs)
+        .should.be.rejectedWith(TreeFactoryErrorMsg.DUPLICATE_TREE);
+
+      const eventTx = await treeFactoryInstance.listTreeBatch(
+        treeIds,
+        treeSpecs
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeListed", (ev) => {
+        for (let index = 0; index < treeIds.length; index++) {
+          return Number(ev.treeId) == treeIds[index];
+        }
+      });
+
+      for (let i = 0; i < treeIds.length; i++) {
+        const treeData = await treeFactoryInstance.trees.call(treeIds[i]);
+
+        assert.equal(
+          Number(treeData.treeStatus),
+          2,
+          "tree status is incorrect"
+        );
+        assert.equal(treeData.treeSpecs, treeSpecs[i], "incorrect ipfs hash");
+      }
+    });
+
+    it("should assign tree batch", async () => {
+      const testPlanterInstance = await TestPlanter.new({
+        from: deployerAccount,
+      });
+
+      await testPlanterInstance.initialize(arInstance.address, {
+        from: deployerAccount,
+      });
+
+      await treeFactoryInstance.setContractAddresses(
+        1,
+        testPlanterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
+
+      //----fail invalid length
+      const treeIds = [1, 2, 3];
+      const invalidTreeIds = [1, 2, 5];
+      const treeSpecs = ["speecs1", "speecs2", "speecs3"];
+      const planters = [userAccount1, userAccount2, userAccount3];
+      //userAccount4 has invalid status (2)
+      const invalidPlanters = [userAccount1, userAccount2, userAccount4];
+
+      await treeFactoryInstance.listTreeBatch(treeIds, treeSpecs);
+
+      for (let i = 0; i < planters.length; i++) {
+        await Common.addPlanter(arInstance, planters[i], deployerAccount);
+
+        await Common.joinSimplePlanter(
+          testPlanterInstance,
+          1,
+          planters[i],
+          zeroAddress,
+          zeroAddress
+        );
+      }
+      await Common.addPlanter(arInstance, userAccount4, deployerAccount);
+
+      await Common.joinSimplePlanter(
+        testPlanterInstance,
+        1,
+        userAccount4,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await testPlanterInstance.setPlanterStatus(userAccount4, 2);
+
+      await treeFactoryInstance
+        .assignTreeBatch([1, 2, 3], [userAccount1, userAccount2])
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_INPUTS);
+
+      await treeFactoryInstance
+        .assignTreeBatch(invalidTreeIds, planters)
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_TREE_TO_ASSIGN);
+
+      //fail not allowed planter
+
+      await treeFactoryInstance
+        .assignTreeBatch(treeIds, invalidPlanters)
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.CANT_ASSIGN_TREE_TO_PLANTER
+        );
+
+      // seccuseefull assignment
+
+      const eventTx = await treeFactoryInstance.assignTreeBatch(
+        treeIds,
+        planters
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeAssigned", (ev) => {
+        for (let index = 0; index < treeIds.length; index++) {
+          return Number(ev.treeId) == treeIds[index];
+        }
+      });
+
+      for (let i = 0; i < treeIds.length; i++) {
+        assert.equal(
+          (await treeFactoryInstance.trees.call(treeIds[i])).planter,
+          planters[i],
+          "invalid planter id in add tree"
+        );
+      }
+    });
+  });
+
+  describe("verification wih signature", () => {
     beforeEach(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,
@@ -95,13 +353,21 @@ contract("TreeFactoryV2", (accounts) => {
 
       //--------> setPlanterContractAddress
 
-      await treeFactoryInstance.setData(1, planterInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setContractAddresses(
+        1,
+        planterInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
 
-      await treeFactoryInstance.setData(2, treeTokenInstance.address, {
-        from: deployerAccount,
-      });
+      await treeFactoryInstance.setContractAddresses(
+        2,
+        treeTokenInstance.address,
+        {
+          from: deployerAccount,
+        }
+      );
     });
 
     it("Verify assign tree", async () => {

@@ -128,7 +128,7 @@ interface ITreeFactoryV2 {
 
     event TreeStatusBatchReset();
 
-    function setData(uint8 _selector, address _address) external;
+    function setContractAddresses(uint8 _selector, address _address) external;
 
     /** @dev admin set the minimum time to send next update request
      * NOTE emit an {TreeUpdateIntervalChanged} event

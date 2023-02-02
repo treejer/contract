@@ -370,6 +370,137 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
+    it.only("verifyAssignedTreeBatchWithSignature", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      let treeIds = [];
+      let ipfsHashs = [];
+      let planters = [];
+
+      for (let i = 0; i < 5; i++) {
+        treeIds[i] = i + 1;
+        ipfsHashs[i] = "some ipfs " + i + " hash here";
+        planters[i] = account;
+      }
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashs, {
+        from: dataManager,
+      });
+      await treeFactoryInstance.assignTreeBatch(treeIds, planters, {
+        from: dataManager,
+      });
+
+      //-------------- ceate message for sign
+
+      let inputs = [];
+
+      let inputsWithInvalidNonce = [];
+      let inputsIncludingNotSignedValues = [];
+
+      for (let i = 0; i < 5; i++) {
+        let sign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 1, //nonce
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        inputsWithInvalidNonce[i] = [
+          i == 4 ? i + 100 : i + 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+
+        inputsIncludingNotSignedValues[i] = [
+          i + 1,
+          treeIds[i],
+          i == 2 ? "invalid ipfs hash" : ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+
+        inputs[i] = [
+          i + 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+      }
+
+      const invalidInput1 = [[account.address, inputsWithInvalidNonce]];
+      const invalidInput2 = [[account.address, inputsIncludingNotSignedValues]];
+      const invalidInput3 = [[account2.address, inputs]];
+
+      const input = [[account.address, inputs]];
+
+      let tx = await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(
+        input,
+        { from: dataManager }
+      );
+
+      //   let tx = await treeFactoryInstance.verifyAssignedTreeWithSignature(
+      //     1,
+      //     account.address,
+      //     treeId,
+      //     ipfsHash,
+      //     birthDate,
+      //     countryCode,
+      //     v,
+      //     r,
+      //     s,
+
+      //     { from: dataManager }
+      //   );
+
+      console.log("tx", tx);
+    });
+
     it("Verify assign tree", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();

@@ -212,19 +212,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
-    function _setTreeListingData(uint256 _treeId, string calldata _treeSpecs)
-        private
-    {
-        TreeData storage treeData = trees[_treeId];
-
-        require(treeData.treeStatus == 0, "Duplicate tree");
-
-        treeData.treeStatus = 2;
-        treeData.treeSpecs = _treeSpecs;
-
-        emit TreeListed(_treeId);
-    }
-
     /// @inheritdoc ITreeFactoryV2
     function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
         external
@@ -261,18 +248,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         for (uint256 i = 0; i < _treeIds.length; i++) {
             _setAssignTreeData(_treeIds[i], _planters[i]);
         }
-    }
-
-    function _setAssignTreeData(uint256 _treeId, address _planter) private {
-        TreeData storage treeData = trees[_treeId];
-
-        require(treeData.treeStatus == 2, "Invalid tree");
-
-        require(planterContract.canAssignTree(_planter), "Not allowed planter");
-
-        treeData.planter = _planter;
-
-        emit TreeAssigned(_treeId);
     }
 
     function verifyAssignedTreeBatchWithSignature(
@@ -380,77 +355,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         );
 
         plantersNonce[_planter] = nonce;
-    }
-
-    function _setVerifyAssignedTreeData(
-        uint256 _treeId,
-        address _planter,
-        string memory _treeSpecs,
-        uint64 _birthDate,
-        uint16 _countryCode
-    ) private {
-        //-------------------------->update tree data
-
-        TreeData storage treeData = trees[_treeId];
-
-        require(treeData.treeStatus == 2, "Invalid tree status");
-
-        //----------> check can plant
-        require(
-            planterContract.manageAssignedTreePermission(
-                _planter,
-                treeData.planter
-            ),
-            "Permission denied"
-        );
-
-        if (_planter != treeData.planter) {
-            treeData.planter = _planter;
-        }
-
-        treeData.countryCode = _countryCode;
-        treeData.birthDate = _birthDate;
-        treeData.plantDate = block.timestamp.toUint64();
-        treeData.treeStatus = 4;
-
-        treeData.treeSpecs = _treeSpecs;
-    }
-
-    function _setVerifyUpdateData(
-        uint256 _treeId,
-        address _planter,
-        string memory _treeSpecs
-    ) private {
-        TreeData storage treeData = trees[_treeId];
-
-        require(treeData.planter == _planter, "Not owned tree");
-
-        require(treeData.treeStatus > 3, "Tree not planted");
-
-        require(
-            block.timestamp >=
-                treeData.plantDate +
-                    ((treeData.treeStatus * 3600) + treeUpdateInterval),
-            "Early update"
-        );
-
-        uint32 age = ((block.timestamp - treeData.plantDate) / 3600).toUint32();
-
-        if (age > treeData.treeStatus) {
-            treeData.treeStatus = age;
-        }
-
-        treeData.treeSpecs = _treeSpecs;
-
-        if (treeToken.exists(_treeId)) {
-            planterFund.updatePlanterTotalClaimed(
-                _treeId,
-                treeData.planter,
-                treeData.treeStatus
-            );
-        }
-
-        emit TreeUpdatedVerified(_treeId);
     }
 
     function verifyUpdateBatchWithSignature(
@@ -708,36 +612,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         lastRegualarTreeId = tempLastRegularTreeId;
     }
 
-    function _verifyTreeData(
-        uint256 _tempLastRegularTreeId,
-        uint16 _countryCode,
-        uint64 _birthDate,
-        string memory _treeSpecs,
-        address _planter
-    ) private returns (uint256) {
-        while (
-            !(trees[_tempLastRegularTreeId].treeStatus == 0 &&
-                trees[_tempLastRegularTreeId].saleType == 0)
-        ) {
-            _tempLastRegularTreeId += 1;
-        }
-
-        TreeData storage treeData = trees[_tempLastRegularTreeId];
-
-        treeData.plantDate = block.timestamp.toUint64();
-        treeData.countryCode = uint16(_countryCode);
-        treeData.birthDate = _birthDate;
-        treeData.treeSpecs = _treeSpecs;
-        treeData.planter = _planter;
-        treeData.treeStatus = 4;
-
-        if (!treeToken.exists(_tempLastRegularTreeId)) {
-            treeData.saleType = 4;
-        }
-
-        return _tempLastRegularTreeId;
-    }
-
     function verifyTreeWithSignature(
         uint256 nonce,
         address _planter,
@@ -856,6 +730,21 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             );
     }
 
+    function _checkSigner(
+        bytes32 _domainSeparator,
+        bytes32 _hashStruct,
+        address _planter,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) private pure {
+        bytes32 hash = _toTypedDataHash(_domainSeparator, _hashStruct);
+
+        address signer = ecrecover(hash, _v, _r, _s);
+
+        require(signer == _planter, "MyFunction: invalid signature");
+    }
+
     function _buildDomainSeparator() private view returns (bytes32) {
         return
             keccak256(
@@ -871,18 +760,129 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             );
     }
 
-    function _checkSigner(
-        bytes32 _domainSeparator,
-        bytes32 _hashStruct,
+    function _setTreeListingData(uint256 _treeId, string calldata _treeSpecs)
+        private
+    {
+        TreeData storage treeData = trees[_treeId];
+
+        require(treeData.treeStatus == 0, "Duplicate tree");
+
+        treeData.treeStatus = 2;
+        treeData.treeSpecs = _treeSpecs;
+
+        emit TreeListed(_treeId);
+    }
+
+    function _setAssignTreeData(uint256 _treeId, address _planter) private {
+        TreeData storage treeData = trees[_treeId];
+
+        require(treeData.treeStatus == 2, "Invalid tree");
+
+        require(planterContract.canAssignTree(_planter), "Not allowed planter");
+
+        treeData.planter = _planter;
+
+        emit TreeAssigned(_treeId);
+    }
+
+    function _setVerifyAssignedTreeData(
+        uint256 _treeId,
         address _planter,
-        uint8 _v,
-        bytes32 _r,
-        bytes32 _s
-    ) private pure {
-        bytes32 hash = _toTypedDataHash(_domainSeparator, _hashStruct);
+        string memory _treeSpecs,
+        uint64 _birthDate,
+        uint16 _countryCode
+    ) private {
+        //-------------------------->update tree data
 
-        address signer = ecrecover(hash, _v, _r, _s);
+        TreeData storage treeData = trees[_treeId];
 
-        require(signer == _planter, "MyFunction: invalid signature");
+        require(treeData.treeStatus == 2, "Invalid tree status");
+
+        //----------> check can plant
+        require(
+            planterContract.manageAssignedTreePermission(
+                _planter,
+                treeData.planter
+            ),
+            "Permission denied"
+        );
+
+        if (_planter != treeData.planter) {
+            treeData.planter = _planter;
+        }
+
+        treeData.countryCode = _countryCode;
+        treeData.birthDate = _birthDate;
+        treeData.plantDate = block.timestamp.toUint64();
+        treeData.treeStatus = 4;
+
+        treeData.treeSpecs = _treeSpecs;
+    }
+
+    function _setVerifyUpdateData(
+        uint256 _treeId,
+        address _planter,
+        string memory _treeSpecs
+    ) private {
+        TreeData storage treeData = trees[_treeId];
+
+        require(treeData.planter == _planter, "Not owned tree");
+
+        require(treeData.treeStatus > 3, "Tree not planted");
+
+        require(
+            block.timestamp >=
+                treeData.plantDate +
+                    ((treeData.treeStatus * 3600) + treeUpdateInterval),
+            "Early update"
+        );
+
+        uint32 age = ((block.timestamp - treeData.plantDate) / 3600).toUint32();
+
+        if (age > treeData.treeStatus) {
+            treeData.treeStatus = age;
+        }
+
+        treeData.treeSpecs = _treeSpecs;
+
+        if (treeToken.exists(_treeId)) {
+            planterFund.updatePlanterTotalClaimed(
+                _treeId,
+                treeData.planter,
+                treeData.treeStatus
+            );
+        }
+
+        emit TreeUpdatedVerified(_treeId);
+    }
+
+    function _verifyTreeData(
+        uint256 _tempLastRegularTreeId,
+        uint16 _countryCode,
+        uint64 _birthDate,
+        string memory _treeSpecs,
+        address _planter
+    ) private returns (uint256) {
+        while (
+            !(trees[_tempLastRegularTreeId].treeStatus == 0 &&
+                trees[_tempLastRegularTreeId].saleType == 0)
+        ) {
+            _tempLastRegularTreeId += 1;
+        }
+
+        TreeData storage treeData = trees[_tempLastRegularTreeId];
+
+        treeData.plantDate = block.timestamp.toUint64();
+        treeData.countryCode = uint16(_countryCode);
+        treeData.birthDate = _birthDate;
+        treeData.treeSpecs = _treeSpecs;
+        treeData.planter = _planter;
+        treeData.treeStatus = 4;
+
+        if (!treeToken.exists(_tempLastRegularTreeId)) {
+            treeData.saleType = 4;
+        }
+
+        return _tempLastRegularTreeId;
     }
 }

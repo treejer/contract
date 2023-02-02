@@ -742,7 +742,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
         address signer = ecrecover(hash, _v, _r, _s);
 
-        require(signer == _planter, "MyFunction: invalid signature");
+        require(signer == _planter, "TreeFactory: invalid signature");
     }
 
     function _buildDomainSeparator() private view returns (bytes32) {

@@ -313,7 +313,7 @@ contract("TreeFactoryV2", (accounts) => {
     });
   });
 
-  describe("verification wih signature", () => {
+  describe.only("verification wih signature", () => {
     beforeEach(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,
@@ -370,16 +370,18 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyAssignedTreeBatchWithSignature", async () => {
+    it("verifyAssignedTreeBatchWithSignature with one planter", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
       let treeIds = [];
       let ipfsHashs = [];
       let planters = [];
+      let invalidTreeIds = [];
 
       for (let i = 0; i < 5; i++) {
         treeIds[i] = i + 1;
+        invalidTreeIds[i] = i == 2 ? i + 100 : i + 1;
         ipfsHashs[i] = "some ipfs " + i + " hash here";
         planters[i] = account.address;
       }
@@ -427,12 +429,45 @@ contract("TreeFactoryV2", (accounts) => {
 
       let inputsWithInvalidNonce = [];
       let inputsIncludingNotSignedValues = [];
+      let inputsIncludingInvalidTreeId = [];
+      let inputsWithInvalidPlanter = [];
+      let inputsWithIncorrectNonce = [];
 
       for (let i = 0; i < 5; i++) {
         let sign = await Common.createMsgWithSig(
           treeFactoryInstance,
           account,
           i + 1, //nonce
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        let sign2 = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 1, //nonce
+          invalidTreeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        let sign3 = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account2,
+          i + 1, //nonce
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        let sign4 = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i == 2 ? i : i + 3, //nonce
           treeIds[i],
           ipfsHashs[i],
           birthDate,
@@ -471,34 +506,565 @@ contract("TreeFactoryV2", (accounts) => {
           sign.r,
           sign.s,
         ];
+
+        inputsWithIncorrectNonce[i] = [
+          i == 2 ? i : i + 3,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign4.v,
+          sign4.r,
+          sign4.s,
+        ];
+
+        inputsIncludingInvalidTreeId[i] = [
+          i + 1,
+          invalidTreeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign2.v,
+          sign2.r,
+          sign2.s,
+        ];
+
+        inputsWithInvalidPlanter[i] = [
+          i + 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode,
+          sign3.v,
+          sign3.r,
+          sign3.s,
+        ];
       }
 
       const invalidInput1 = [[account.address, inputsWithInvalidNonce]];
       const invalidInput2 = [[account.address, inputsIncludingNotSignedValues]];
       const invalidInput3 = [[account2.address, inputs]];
+      const invalidInput4 = [[account.address, inputsIncludingInvalidTreeId]];
+      const invalidInput5 = [[account2.address, inputsWithInvalidPlanter]];
+
+      const invalidInput6 = [[account.address, inputsWithIncorrectNonce]];
 
       const input = [[account.address, inputs]];
 
-      let tx = await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(
-        input,
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput1, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput2, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput3, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput4, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        );
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput5, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput6, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INCORRECT_PLANTER_NONCE);
+
+      const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+        from: dataManager,
+      });
+
+      for (let i = 0; i < 5; i++) {
+        let treeData = await treeFactoryInstance.trees(treeIds[i]);
+
+        assert.equal(
+          Number(treeData.planter),
+          account.address,
+          "planter is incorrect"
+        );
+
+        assert.equal(
+          Number(treeData.treeStatus),
+          4,
+          "tree status is incorrect"
+        );
+
+        assert.equal(
+          Number(treeData.countryCode),
+          inputs[i][4],
+          "countryCode is incorrect"
+        );
+        assert.equal(
+          Number(treeData.birthDate),
+          inputs[i][3],
+          "birthDate is incorrect"
+        );
+
+        assert.isTrue(
+          Number(treeData.plantDate) < Number(plantDate) + 10 &&
+            Number(treeData.plantDate) > Number(plantDate) - 10,
+          "plantDate is incorrect"
+        );
+
+        assert.equal(
+          treeData.treeSpecs,
+          inputs[i][2],
+          "treeSpecs is incorrect"
+        );
+      }
+    });
+
+    it("verifyAssignedTreeBatchWithSignature with multiple planter", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      let treeIds = [];
+      let ipfsHashs = [];
+      let planters = [];
+      let invalidTreeIds = [];
+
+      for (let i = 0; i < 5; i++) {
+        treeIds[i] = i + 1;
+        ipfsHashs[i] = "some ipfs " + i + " hash here";
+        planters[i] = i < 2 ? account.address : account2.address;
+      }
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashs, {
+        from: dataManager,
+      });
+      await treeFactoryInstance.assignTreeBatch(treeIds, planters, {
+        from: dataManager,
+      });
+
+      //-------------- ceate message for sign
+
+      let inputsForAccount1 = [];
+      let inputsForAccount2 = [];
+      let invalidInputsForAccount1 = [];
+      let invalidInputsForAccount2 = [];
+
+      for (let i = 0; i < 5; i++) {
+        let sign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          i < 2 ? account : account2,
+          i < 2 ? i + 1 : i - 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        let invalidPlantingSign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          i < 2 ? account2 : account,
+          i < 2 ? i + 1 : i - 1,
+          treeIds[i],
+          ipfsHashs[i],
+          birthDate,
+          countryCode
+        );
+
+        if (i < 2) {
+          inputsForAccount1[i] = [
+            i + 1,
+            treeIds[i],
+            ipfsHashs[i],
+            birthDate,
+            countryCode,
+            sign.v,
+            sign.r,
+            sign.s,
+          ];
+
+          invalidInputsForAccount2[i] = [
+            i + 1,
+            treeIds[i],
+            ipfsHashs[i],
+            birthDate,
+            countryCode,
+            invalidPlantingSign.v,
+            invalidPlantingSign.r,
+            invalidPlantingSign.s,
+          ];
+        } else {
+          inputsForAccount2[i - 2] = [
+            i - 1,
+            treeIds[i],
+            ipfsHashs[i],
+            birthDate,
+            countryCode,
+            sign.v,
+            sign.r,
+            sign.s,
+          ];
+
+          invalidInputsForAccount1[i - 2] = [
+            i - 1,
+            treeIds[i],
+            ipfsHashs[i],
+            birthDate,
+            countryCode,
+            invalidPlantingSign.v,
+            invalidPlantingSign.r,
+            invalidPlantingSign.s,
+          ];
+        }
+      }
+
+      const input = [
+        [account.address, inputsForAccount1],
+        [account2.address, inputsForAccount2],
+      ];
+
+      const invalidInput = [
+        [account.address, invalidInputsForAccount1],
+        [account2.address, invalidInputsForAccount2],
+      ];
+
+      await treeFactoryInstance
+        .verifyAssignedTreeBatchWithSignature(invalidInput, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
+      const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+        from: dataManager,
+      });
+
+      for (let i = 0; i < 5; i++) {
+        let treeData = await treeFactoryInstance.trees(treeIds[i]);
+
+        assert.equal(
+          Number(treeData.planter),
+          i < 2 ? account.address : account2.address,
+          "planter is incorrect"
+        );
+
+        assert.equal(
+          Number(treeData.treeStatus),
+          4,
+          "tree status is incorrect"
+        );
+
+        assert.equal(
+          Number(treeData.countryCode),
+          i < 2 ? inputsForAccount1[i][4] : inputsForAccount2[i - 2][4],
+          "countryCode is incorrect"
+        );
+        assert.equal(
+          Number(treeData.birthDate),
+          i < 2 ? inputsForAccount1[i][3] : inputsForAccount2[i - 2][3],
+          "birthDate is incorrect"
+        );
+
+        assert.isTrue(
+          Number(treeData.plantDate) < Number(plantDate) + 10 &&
+            Number(treeData.plantDate) > Number(plantDate) - 10,
+          "plantDate is incorrect"
+        );
+
+        assert.equal(
+          treeData.treeSpecs,
+          i < 2 ? inputsForAccount1[i][2] : inputsForAccount2[i - 2][2],
+          "treeSpecs is incorrect"
+        );
+      }
+    });
+
+    it("verifyAssignedTreeWithSignature", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      let treeId = 1;
+      let treeId2 = 2;
+      let invalidTreeId = 100;
+      let ipfsHash = "ipfsHash";
+      let invalidIpfsHash = "invalid ipfsHash";
+      let nonce1 = 1;
+      let nonce2 = 2;
+      let invalidNonce = 100;
+      const treeIds = [1, 2, 3];
+
+      const ipfsHashes = ["ipfs hash 1", "ipfs hash 2", "ipfs hash 3"];
+      const planters = [account.address, account.address, account2.address];
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashes, {
+        from: dataManager,
+      });
+      await treeFactoryInstance.assignTreeBatch(treeIds, planters, {
+        from: dataManager,
+      });
+
+      //-------------- ceate message for sign
+
+      let inputs = [];
+
+      let sign = await Common.createMsgWithSig(
+        treeFactoryInstance,
+        account,
+        nonce1, //nonce
+        treeIds[0],
+        ipfsHashes[0],
+        birthDate,
+        countryCode
+      );
+
+      let notListedTreeSign = await Common.createMsgWithSig(
+        treeFactoryInstance,
+        account,
+        nonce1, //nonce
+        invalidTreeId,
+        ipfsHashes[0],
+        birthDate,
+        countryCode
+      );
+
+      let invalidPlanterSign = await Common.createMsgWithSig(
+        treeFactoryInstance,
+        account2,
+        nonce1, //nonce
+        treeIds[0],
+        ipfsHashes[0],
+        birthDate,
+        countryCode
+      );
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce2,
+          account.address,
+          treeIds[0],
+          ipfsHashes[0],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce1,
+          account.address,
+          treeIds[0],
+          invalidIpfsHash,
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce1,
+          account2.address,
+          treeIds[0],
+          ipfsHashes[0],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce1,
+          account.address,
+          invalidTreeId,
+          ipfsHashes[0],
+          birthDate,
+          countryCode,
+          notListedTreeSign.v,
+          notListedTreeSign.r,
+          notListedTreeSign.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.INVALID_TREE_STATUS_IN_VERIFY_PLANT
+        );
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce1,
+          account2.address,
+          treeIds[0],
+          ipfsHashes[0],
+          birthDate,
+          countryCode,
+          invalidPlanterSign.v,
+          invalidPlanterSign.r,
+          invalidPlanterSign.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
+
+      const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
+
+      await treeFactoryInstance.verifyAssignedTreeWithSignature(
+        nonce1,
+        account.address,
+        treeIds[0],
+        ipfsHashes[0],
+        birthDate,
+        countryCode,
+        sign.v,
+        sign.r,
+        sign.s,
+
         { from: dataManager }
       );
 
-      //   let tx = await treeFactoryInstance.verifyAssignedTreeWithSignature(
-      //     1,
-      //     account.address,
-      //     treeId,
-      //     ipfsHash,
-      //     birthDate,
-      //     countryCode,
-      //     v,
-      //     r,
-      //     s,
+      let treeData = await treeFactoryInstance.trees(treeIds[0]);
 
-      //     { from: dataManager }
-      //   );
+      assert.equal(
+        Number(treeData.planter),
+        account.address,
+        "planter is incorrect"
+      );
 
-      console.log("tx", tx);
+      assert.equal(Number(treeData.treeStatus), 4, "tree status is incorrect");
+
+      assert.equal(
+        Number(treeData.countryCode),
+        countryCode,
+        "countryCode is incorrect"
+      );
+      assert.equal(
+        Number(treeData.birthDate),
+        birthDate,
+        "birthDate is incorrect"
+      );
+
+      assert.isTrue(
+        Number(treeData.plantDate) < Number(plantDate) + 10 &&
+          Number(treeData.plantDate) > Number(plantDate) - 10,
+        "plantDate is incorrect"
+      );
+
+      assert.equal(treeData.treeSpecs, ipfsHashes[0], "treeSpecs is incorrect");
+
+      //must be signed with nonce 2 but signed with nonce 1
+      let signWithInccorectNonce = await Common.createMsgWithSig(
+        treeFactoryInstance,
+        account,
+        nonce1, //nonce
+        treeIds[1],
+        ipfsHashes[1],
+        birthDate,
+        countryCode
+      );
+
+      await treeFactoryInstance
+        .verifyAssignedTreeWithSignature(
+          nonce1,
+          account.address,
+          treeIds[1],
+          ipfsHashes[1],
+          birthDate,
+          countryCode,
+          signWithInccorectNonce.v,
+          signWithInccorectNonce.r,
+          signWithInccorectNonce.s,
+
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INCORRECT_PLANTER_NONCE);
+
+      return;
     });
 
     it("Verify assign tree", async () => {
@@ -1742,7 +2308,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       input = [
         [
@@ -1767,7 +2333,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       input = [
         [
@@ -1792,7 +2358,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       //-----------------------------> reject wrong nonce
 
@@ -1800,7 +2366,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       //--------------
 
@@ -1827,7 +2393,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       //--------------------
 
@@ -1837,7 +2403,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       sign = await Common.createMsgWithSigPlantTree(
         treeFactoryInstance,
@@ -1871,7 +2437,7 @@ contract("TreeFactoryV2", (accounts) => {
         .verifyTreeBatchWithSignature(input, {
           from: dataManager,
         })
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
     });
 
     it("verifyTreeWithSignature must be successfull", async () => {
@@ -2388,7 +2954,7 @@ contract("TreeFactoryV2", (accounts) => {
           sign.s,
           { from: dataManager }
         )
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
         .verifyTreeWithSignature(
@@ -2402,7 +2968,7 @@ contract("TreeFactoryV2", (accounts) => {
           sign.s,
           { from: dataManager }
         )
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
       //-----------------------------> reject wrong nonce
 
       await treeFactoryInstance
@@ -2417,7 +2983,7 @@ contract("TreeFactoryV2", (accounts) => {
           sign.s,
           { from: dataManager }
         )
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       //-----------------------------> reject planter nonce
 
@@ -2442,7 +3008,7 @@ contract("TreeFactoryV2", (accounts) => {
           sign.s,
           { from: dataManager }
         )
-        .should.be.rejectedWith("MyFunction: invalid signature");
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
     });
   });
 });

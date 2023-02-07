@@ -89,6 +89,8 @@ const TreeFactoryErrorMsg = {
   TREE_HAS_PENDING_UPDATE: "Pending update exists",
   INVALID_SET_LAST_REGULAR_TREE_INPUT: "Invalid lastRegualarTreeId",
   INVALID_INPUTS: "invalid inputs",
+  INVALID_SIGNATURE: "TreeFactory: invalid signature",
+  INCORRECT_PLANTER_NONCE: "planter nonce is incorrect",
 };
 const TreasuryManagerErrorMsg = {
   INSUFFICIENT_AMOUNT: "Invalid amount",

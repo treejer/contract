@@ -1546,6 +1546,14 @@ contract("TreeFactoryV2", (accounts) => {
         [account2.address, invalidInputsForVerifyUpdateAccount2],
       ];
 
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(invalidVerifyInput, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
+        );
+
       await treeFactoryInstance.verifyUpdateBatchWithSignature(verifyInput, {
         from: dataManager,
       });

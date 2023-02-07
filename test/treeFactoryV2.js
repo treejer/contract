@@ -1067,6 +1067,490 @@ contract("TreeFactoryV2", (accounts) => {
       return;
     });
 
+    it("verifyUpdateBatchWithSignature with one planter (no token minted)", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      let treeIds = [];
+      let ipfsHashes = [];
+      let planters = [];
+      let invalidTreeIds = [];
+      let updateIpfsHashes = [];
+      const invalidTreeId = 105;
+
+      for (let i = 0; i < 5; i++) {
+        treeIds[i] = i + 1;
+        invalidTreeIds[i] = i == 2 ? invalidTreeId : i + 1;
+        ipfsHashes[i] = "some ipfs " + i + " hash here";
+        updateIpfsHashes[i] = "some ipfs " + (i + 5) + " hash here";
+        planters[i] = account.address;
+      }
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashes, {
+        from: dataManager,
+      });
+
+      await treeFactoryInstance.listTree(invalidTreeId, "ipfsHashes", {
+        from: dataManager,
+      });
+
+      await treeFactoryInstance.assignTreeBatch(treeIds, planters, {
+        from: dataManager,
+      });
+
+      await treeFactoryInstance.assignTree(invalidTreeId, account.address, {
+        from: dataManager,
+      });
+
+      let inputs = [];
+
+      for (let i = 0; i < 5; i++) {
+        let sign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 1, //nonce
+          treeIds[i],
+          ipfsHashes[i],
+          birthDate,
+          countryCode
+        );
+
+        inputs[i] = [
+          i + 1,
+          treeIds[i],
+          ipfsHashes[i],
+          birthDate,
+          countryCode,
+          sign.v,
+          sign.r,
+          sign.s,
+        ];
+      }
+
+      const input = [[account.address, inputs]];
+
+      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+        from: dataManager,
+      });
+
+      let verifyUpdateInputs1 = [];
+      let verifyUpdateInputsWithIncorrectNonceAsInput = [];
+      let verifyUpdateInputsWithIncorrectNonceAsInput2 = [];
+      let verifyUpdateInputsWithInvalidNonce = [];
+      let verifyUpdateInputsWithNotSignedValues = [];
+      let verifyUpdateInputsWithIncorrectPlanter = [];
+      let verifyUpdateInputsWithInvalidTreeIds = [];
+
+      for (let i = 0; i < 5; i++) {
+        let validSign = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 6,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        let signWithIncorrectNonce = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i == 2 ? i + 100 : i + 6,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        let signWithInvalidNonce = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i == 2 ? i : i + 6,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        let signWithInvalidPlanter = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account2,
+          i + 6,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        let signWithInvalidTreeIds = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          account,
+          i + 6,
+          invalidTreeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        verifyUpdateInputs1[i] = [
+          i + 6,
+          treeIds[i],
+          updateIpfsHashes[i],
+          validSign.v,
+          validSign.r,
+          validSign.s,
+        ];
+
+        verifyUpdateInputsWithIncorrectNonceAsInput[i] = [
+          i == 2 ? i + 100 : i + 6,
+          treeIds[i],
+          updateIpfsHashes[i],
+          validSign.v,
+          validSign.r,
+          validSign.s,
+        ];
+
+        verifyUpdateInputsWithIncorrectNonceAsInput2[i] = [
+          i + 6,
+          treeIds[i],
+          updateIpfsHashes[i],
+          signWithIncorrectNonce.v,
+          signWithIncorrectNonce.r,
+          signWithIncorrectNonce.s,
+        ];
+
+        verifyUpdateInputsWithInvalidNonce[i] = [
+          i == 2 ? i : i + 6,
+          treeIds[i],
+          updateIpfsHashes[i],
+          signWithInvalidNonce.v,
+          signWithInvalidNonce.r,
+          signWithInvalidNonce.s,
+        ];
+
+        verifyUpdateInputsWithNotSignedValues[i] = [
+          i + 6,
+          treeIds[i],
+          i == 2 ? "some invalid hash" : updateIpfsHashes[i],
+          validSign.v,
+          validSign.r,
+          validSign.s,
+        ];
+
+        verifyUpdateInputsWithIncorrectPlanter[i] = [
+          i + 6,
+          treeIds[i],
+          updateIpfsHashes[i],
+          signWithInvalidPlanter.v,
+          signWithInvalidPlanter.r,
+          signWithInvalidPlanter.s,
+        ];
+
+        verifyUpdateInputsWithInvalidTreeIds[i] = [
+          i + 6,
+          invalidTreeIds[i],
+          updateIpfsHashes[i],
+          signWithInvalidTreeIds.v,
+          signWithInvalidTreeIds.r,
+          signWithInvalidTreeIds.s,
+        ];
+      }
+
+      const verifyUpdateInput = [[account.address, verifyUpdateInputs1]];
+
+      const verifyUpdateDataWithIncorrectNonceAsInput = [
+        [account.address, verifyUpdateInputsWithIncorrectNonceAsInput],
+      ];
+
+      const verifyUpdateDataWithIncorrectNonceAsInput2 = [
+        [account.address, verifyUpdateInputsWithIncorrectNonceAsInput2],
+      ];
+
+      const verifyUpdateDataWithInvalidNonce = [
+        [account.address, verifyUpdateInputsWithInvalidNonce],
+      ];
+
+      const verifyUpdateDataWithNotSignedValues = [
+        [account.address, verifyUpdateInputsWithNotSignedValues],
+      ];
+
+      const verifyUpdateDataWithIncorrectPlanter = [
+        [account2.address, verifyUpdateInputsWithIncorrectPlanter],
+      ];
+
+      const verifyUpdateDataWithInvalidTreeIds = [
+        [account.address, verifyUpdateInputsWithInvalidTreeIds],
+      ];
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(verifyUpdateInput, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
+
+      await Common.travelTime(TimeEnumes.days, 60);
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(
+          verifyUpdateDataWithIncorrectNonceAsInput,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(
+          verifyUpdateDataWithIncorrectNonceAsInput2,
+          { from: dataManager }
+        )
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(verifyUpdateDataWithInvalidNonce, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INCORRECT_PLANTER_NONCE);
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(verifyUpdateDataWithNotSignedValues, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(verifyUpdateDataWithIncorrectPlanter, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(
+          TreeFactoryErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
+        );
+
+      await treeFactoryInstance
+        .verifyUpdateBatchWithSignature(verifyUpdateDataWithInvalidTreeIds, {
+          from: dataManager,
+        })
+        .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
+
+      await treeFactoryInstance.verifyUpdateBatchWithSignature(
+        verifyUpdateInput,
+        { from: dataManager }
+      );
+
+      for (let i = 0; i < 5; i++) {
+        const treeData = await treeFactoryInstance.trees(i + 1);
+
+        assert.equal(
+          1440,
+          Number(treeData.treeStatus),
+          "treeStatus is incorrect"
+        );
+
+        assert.equal(
+          treeData.treeSpecs,
+          updateIpfsHashes[i],
+          "incorrect update ipfs"
+        );
+      }
+    });
+    it.only("verifyUpdateBatchWithSignature with multiple planter (no token minted)", async () => {
+      let account = await web3.eth.accounts.create();
+      let account2 = await web3.eth.accounts.create();
+
+      let treeIds = [];
+      let ipfsHashes = [];
+      let updateIpfsHashes = [];
+      let planters = [];
+
+      for (let i = 0; i < 5; i++) {
+        treeIds[i] = i + 1;
+        ipfsHashes[i] = "some ipfs " + i + " hash here";
+        updateIpfsHashes[i] = "some ipfs " + (i + 5) + " hash here";
+        planters[i] = i < 2 ? account.address : account2.address;
+      }
+
+      const birthDate = parseInt(Math.divide(new Date().getTime(), 1000));
+      const countryCode = 2;
+
+      await Common.addPlanter(arInstance, account.address, deployerAccount);
+      await Common.addPlanter(arInstance, account2.address, deployerAccount);
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.joinSimplePlanterByAdmin(
+        dataManager,
+        planterInstance,
+        1,
+        account2.address,
+        zeroAddress,
+        zeroAddress
+      );
+
+      await Common.addTreejerContractRole(
+        arInstance,
+        treeFactoryInstance.address,
+        deployerAccount
+      );
+      //////////////////// verify type 1 by admin
+      await treeFactoryInstance.listTreeBatch(treeIds, ipfsHashes, {
+        from: dataManager,
+      });
+      await treeFactoryInstance.assignTreeBatch(treeIds, planters, {
+        from: dataManager,
+      });
+
+      let inputs = [];
+      let inputsForAccount1 = [];
+      let inputsForAccount2 = [];
+
+      for (let i = 0; i < 5; i++) {
+        let sign = await Common.createMsgWithSig(
+          treeFactoryInstance,
+          i < 2 ? account : account2,
+          i < 2 ? i + 1 : i - 1,
+          treeIds[i],
+          ipfsHashes[i],
+          birthDate,
+          countryCode
+        );
+
+        if (i < 2) {
+          inputsForAccount1[i] = [
+            i + 1,
+            treeIds[i],
+            ipfsHashes[i],
+            birthDate,
+            countryCode,
+            sign.v,
+            sign.r,
+            sign.s,
+          ];
+        } else {
+          inputsForAccount2[i - 2] = [
+            i - 1,
+            treeIds[i],
+            ipfsHashes[i],
+            birthDate,
+            countryCode,
+            sign.v,
+            sign.r,
+            sign.s,
+          ];
+        }
+      }
+
+      const input = [
+        [account.address, inputsForAccount1],
+        [account2.address, inputsForAccount2],
+      ];
+
+      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+        from: dataManager,
+      });
+
+      let inputsForVerifyUpdateAccount1 = [];
+      let inputsForVerifyUpdateAccount2 = [];
+      let invalidInputsForVerifyUpdateAccount1 = [];
+      let invalidInputsForVerifyUpdateAccount2 = [];
+
+      for (let i = 0; i < 5; i++) {
+        let validSign = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          i < 2 ? account : account2,
+          i < 2 ? i + 3 : i + 2,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        let invalidSign = await Common.createUpdateTreeMsgWithSig(
+          treeFactoryInstance,
+          i < 2 ? account2 : account,
+          i < 2 ? i + 4 : i + 1,
+          treeIds[i],
+          updateIpfsHashes[i]
+        );
+
+        if (i < 2) {
+          inputsForVerifyUpdateAccount1[i] = [
+            i + 3,
+            treeIds[i],
+            updateIpfsHashes[i],
+            validSign.v,
+            validSign.r,
+            validSign.s,
+          ];
+
+          invalidInputsForVerifyUpdateAccount2[i] = [
+            i + 4,
+            treeIds[i],
+            updateIpfsHashes[i],
+            invalidSign.v,
+            invalidSign.r,
+            invalidSign.s,
+          ];
+        } else {
+          inputsForVerifyUpdateAccount2[i] = [
+            i + 2,
+            treeIds[i],
+            updateIpfsHashes[i],
+            validSign.v,
+            validSign.r,
+            validSign.s,
+          ];
+
+          invalidInputsForVerifyUpdateAccount1[i] = [
+            i + 1,
+            treeIds[i],
+            updateIpfsHashes[i],
+            invalidSign.v,
+            invalidSign.r,
+            invalidSign.s,
+          ];
+        }
+      }
+
+      await Common.travelTime(TimeEnumes.days, 60);
+
+      const verifyInput = [
+        [account.address, inputsForVerifyUpdateAccount1],
+        [account2.address, inputsForVerifyUpdateAccount2],
+      ];
+
+      const invalidVerifyInput = [
+        [account.address, invalidInputsForVerifyUpdateAccount1],
+        [account2.address, invalidInputsForVerifyUpdateAccount2],
+      ];
+
+      await treeFactoryInstance.verifyUpdateBatchWithSignature(verifyInput, {
+        from: dataManager,
+      });
+    });
+
     it("Verify assign tree", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();

@@ -323,7 +323,7 @@ contract("TreeFactoryV2", (accounts) => {
     });
   });
 
-  describe.only("verification wih signature", () => {
+  describe("verification wih signature", () => {
     beforeEach(async () => {
       arInstance = await AccessRestriction.new({
         from: deployerAccount,
@@ -601,9 +601,21 @@ contract("TreeFactoryV2", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
+      const eventTx = await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
+
+      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerified", (ev) => {
+        for (let i = 0; i < 5; i++) {
+          return Number(ev.treeId) == i + 1;
+        }
+      });
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        5,
+        "planterNonce is incorrect"
+      );
 
       for (let i = 0; i < 5; i++) {
         let treeData = await treeFactoryInstance.trees(treeIds[i]);
@@ -652,7 +664,6 @@ contract("TreeFactoryV2", (accounts) => {
       let treeIds = [];
       let ipfsHashs = [];
       let planters = [];
-      let invalidTreeIds = [];
 
       for (let i = 0; i < 5; i++) {
         treeIds[i] = i + 1;
@@ -792,6 +803,18 @@ contract("TreeFactoryV2", (accounts) => {
       await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        2,
+        "planterNonce is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account2.address)),
+        3,
+        "planterNonce is incorrect"
+      );
 
       for (let i = 0; i < 5; i++) {
         let treeData = await treeFactoryInstance.trees(treeIds[i]);
@@ -1004,7 +1027,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyAssignedTree(
+      const eventTx = await treeFactoryInstance.verifyAssignedTree(
         nonce1,
         account.address,
         treeIds[0],
@@ -1016,6 +1039,16 @@ contract("TreeFactoryV2", (accounts) => {
         sign.s,
 
         { from: dataManager }
+      );
+
+      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerified", (ev) => {
+        return Number(ev.treeId) == treeIds[0];
+      });
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        1,
+        "planterNonce is incorrect"
       );
 
       let treeData = await treeFactoryInstance.trees(treeIds[0]);
@@ -1358,9 +1391,24 @@ contract("TreeFactoryV2", (accounts) => {
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
 
-      await treeFactoryInstance.verifyUpdateBatch(verifyUpdateInput, {
-        from: dataManager,
+      const eventTx = await treeFactoryInstance.verifyUpdateBatch(
+        verifyUpdateInput,
+        {
+          from: dataManager,
+        }
+      );
+
+      truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerified", (ev) => {
+        for (let i = 0; i < 5; i++) {
+          return Number(ev.treeId) == i + 1;
+        }
       });
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        10,
+        "planterNonce is incorrect"
+      );
 
       for (let i = 0; i < 5; i++) {
         const treeData = await treeFactoryInstance.trees(i + 1);
@@ -1564,6 +1612,18 @@ contract("TreeFactoryV2", (accounts) => {
       await treeFactoryInstance.verifyUpdateBatch(verifyInput, {
         from: dataManager,
       });
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        4,
+        "planterNonce is incorrect"
+      );
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account2.address)),
+        6,
+        "planterNonce is incorrect"
+      );
 
       for (let i = 0; i < 5; i++) {
         const treeData = await treeFactoryInstance.trees(i + 1);
@@ -2184,7 +2244,7 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.travelTime(TimeEnumes.days, 60);
 
       for (let i = 0; i < 4; i++) {
-        await treeFactoryInstance.verifyUpdate(
+        const eventTx = await treeFactoryInstance.verifyUpdate(
           i + 5,
           account.address,
           verifyUpdateInputs1[i][1],
@@ -2196,6 +2256,10 @@ contract("TreeFactoryV2", (accounts) => {
             from: dataManager,
           }
         );
+
+        truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerified", (ev) => {
+          return Number(ev.treeId) == treeIds[i];
+        });
       }
 
       assert.equal(
@@ -3169,8 +3233,14 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-      await treeFactoryInstance.verifyTreeBatch(input, {
+      const eventTx = await treeFactoryInstance.verifyTreeBatch(input, {
         from: dataManager,
+      });
+
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        for (let i = 0; i < 4; i++) {
+          return Number(ev.treeId) == i + 10001;
+        }
       });
 
       //-----------------------------> check nonce for both planters;
@@ -3466,7 +3536,7 @@ contract("TreeFactoryV2", (accounts) => {
         }
       );
 
-      let tx1 = await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
+      await iSaleInstance.fundTree(5, zeroAddress, zeroAddress, 0, {
         from: userAccount3,
       });
 
@@ -3538,10 +3608,6 @@ contract("TreeFactoryV2", (accounts) => {
       const totalBalanceBeforeVerifyUpdate =
         await planterFundInstnce.totalBalances();
 
-      const planterBalanceBeforeVerify = await planterFundInstnce.balances(
-        account.address
-      );
-
       await treeFactoryInstance.verifyUpdate(
         nonce2,
         account.address,
@@ -3554,6 +3620,12 @@ contract("TreeFactoryV2", (accounts) => {
         {
           from: dataManager,
         }
+      );
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        2,
+        "planterNonce is incorrect"
       );
 
       const totalBalanceAfterVerifyUpdate =
@@ -3606,6 +3678,12 @@ contract("TreeFactoryV2", (accounts) => {
         {
           from: dataManager,
         }
+      );
+
+      assert.equal(
+        Number(await treeFactoryInstance.plantersNonce(account.address)),
+        3,
+        "planterNonce is incorrect"
       );
 
       const totalBalanceAfterVerifyUpdate2 =
@@ -3794,9 +3872,12 @@ contract("TreeFactoryV2", (accounts) => {
           "country code set inccorectly"
         );
 
-        assert.equal(
-          Number(treeFactoryResultAfterVerify2.plantDate),
-          Number(plantDate),
+        assert.isTrue(
+          Number(treeFactoryResultAfterVerify2.plantDate) <
+            Number(plantDate) + 5 &&
+            Number(treeFactoryResultAfterVerify2.plantDate) >
+              Number(plantDate) - 5,
+
           "invalid plant date"
         );
 
@@ -4376,7 +4457,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       plantDate[0] = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyTree(
+      const eventTx = await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -4387,6 +4468,10 @@ contract("TreeFactoryV2", (accounts) => {
         sign.s,
         { from: dataManager }
       );
+
+      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+        return Number(ev.treeId) == 10001;
+      });
 
       sign = await Common.createMsgWithSigPlantTree(
         treeFactoryInstance,

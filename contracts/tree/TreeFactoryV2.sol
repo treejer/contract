@@ -142,6 +142,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         treeUpdateInterval = 604800;
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function setContractAddresses(uint8 _selector, address _address)
         external
         override
@@ -241,6 +242,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyAssignedTreeBatch(
         VerifyAssignedTreeData[] calldata _verifyAssignedTreeData
     ) external override ifNotPaused onlyVerifier {
@@ -306,6 +308,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyAssignedTree(
         uint256 _nonce,
         address _planter,
@@ -348,6 +351,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         plantersNonce[_planter] = _nonce;
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
         external
         override
@@ -405,6 +409,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyUpdate(
         uint256 _nonce,
         address _planter,
@@ -540,6 +545,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
         external
         override
@@ -607,6 +613,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         lastRegualarTreeId = tempLastRegularTreeId;
     }
 
+    /// @inheritdoc ITreeFactoryV2
     function verifyTree(
         uint256 _nonce,
         address _planter,
@@ -638,8 +645,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             _r,
             _s
         );
-
-        //-------------------------->update tree data
 
         lastRegualarTreeId = _setVerifyTreeData(
             lastRegualarTreeId + 1,

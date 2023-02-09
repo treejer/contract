@@ -718,6 +718,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
 
+    /**
+     * @dev Returns an Ethereum Signed Typed Data, created from a
+     * `domainSeparator` and a `structHash`. This produces hash corresponding
+     * to the one signed with the
+     * https://eips.ethereum.org/EIPS/eip-712[`eth_signTypedData`]
+     * JSON-RPC method as part of EIP-712.
+     *
+     */
     function _toTypedDataHash(bytes32 _domainSeperator, bytes32 _structHash)
         private
         pure
@@ -729,6 +737,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             );
     }
 
+    /**
+     * @dev check if the given planter is the signer of given signature or not
+     */
     function _checkSigner(
         bytes32 _domainSeparator,
         bytes32 _hashStruct,
@@ -744,6 +755,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         require(signer == _planter, "TreeFactory: invalid signature");
     }
 
+    /**
+     * @dev return domain separator
+     */
     function _buildDomainSeparator() private view returns (bytes32) {
         return
             keccak256(
@@ -759,6 +773,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             );
     }
 
+    /**
+     * @dev set data for listing tree
+     */
     function _setTreeListingData(uint256 _treeId, string calldata _treeSpecs)
         private
     {
@@ -772,6 +789,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeListed(_treeId);
     }
 
+    /**
+     * @dev assign planter for a tree
+     */
     function _setAssigningTreeData(uint256 _treeId, address _planter) private {
         TreeData storage treeData = trees[_treeId];
 
@@ -784,6 +804,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeAssigned(_treeId);
     }
 
+    /**
+     * @dev check planting permission and set data for verified tree
+     */
     function _setVerifyAssignedTreeData(
         uint256 _treeId,
         address _planter,
@@ -791,8 +814,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         uint64 _birthDate,
         uint16 _countryCode
     ) private {
-        //-------------------------->update tree data
-
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 2, "Invalid tree status");
@@ -820,6 +841,13 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit AssignedTreeVerified(_treeId);
     }
 
+    /**
+     * @dev check permissions and set data for verified tree
+     * and based on the current time of verifing and plant date, age of tree
+     * calculated and set as the treeStatus and if a token exist for
+     * that tree (minted before) planter of tree funded
+     * based on calculated tree status
+     */
     function _setVerifyUpdateData(
         uint256 _treeId,
         address _planter,
@@ -856,6 +884,10 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
         emit TreeUpdatedVerified(_treeId);
     }
+
+    /**
+     * @dev verifying plant of regular tree and find an available treeId and set data for it
+     */
 
     function _setVerifyTreeData(
         uint256 _tempLastRegularTreeId,

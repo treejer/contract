@@ -380,7 +380,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyAssignedTreeBatchWithSignature with one planter", async () => {
+    it("verifyAssignedTreeBatch with one planter", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -562,25 +562,25 @@ contract("TreeFactoryV2", (accounts) => {
       const input = [[account.address, inputs]];
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput1, {
+        .verifyAssignedTreeBatch(invalidInput1, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput2, {
+        .verifyAssignedTreeBatch(invalidInput2, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput3, {
+        .verifyAssignedTreeBatch(invalidInput3, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput4, {
+        .verifyAssignedTreeBatch(invalidInput4, {
           from: dataManager,
         })
         .should.be.rejectedWith(
@@ -588,20 +588,20 @@ contract("TreeFactoryV2", (accounts) => {
         );
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput5, {
+        .verifyAssignedTreeBatch(invalidInput5, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput6, {
+        .verifyAssignedTreeBatch(invalidInput6, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INCORRECT_PLANTER_NONCE);
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
 
@@ -645,7 +645,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyAssignedTreeBatchWithSignature with multiple planter", async () => {
+    it("verifyAssignedTreeBatch with multiple planter", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -783,13 +783,13 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyAssignedTreeBatchWithSignature(invalidInput, {
+        .verifyAssignedTreeBatch(invalidInput, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.PLANTING_PERMISSION_DENIED);
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
 
@@ -833,7 +833,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyAssignedTreeWithSignature", async () => {
+    it("verifyAssignedTree", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -921,7 +921,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce2,
           account.address,
           treeIds[0],
@@ -937,7 +937,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce1,
           account.address,
           treeIds[0],
@@ -953,7 +953,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce1,
           account2.address,
           treeIds[0],
@@ -969,7 +969,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce1,
           account.address,
           invalidTreeId,
@@ -987,7 +987,7 @@ contract("TreeFactoryV2", (accounts) => {
         );
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce1,
           account2.address,
           treeIds[0],
@@ -1004,7 +1004,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyAssignedTreeWithSignature(
+      await treeFactoryInstance.verifyAssignedTree(
         nonce1,
         account.address,
         treeIds[0],
@@ -1059,7 +1059,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyAssignedTreeWithSignature(
+        .verifyAssignedTree(
           nonce1,
           account.address,
           treeIds[1],
@@ -1077,7 +1077,7 @@ contract("TreeFactoryV2", (accounts) => {
       return;
     });
 
-    it("verifyUpdateBatchWithSignature with one planter (no token minted)", async () => {
+    it("verifyUpdateBatch with one planter (no token minted)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -1169,7 +1169,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       const input = [[account.address, inputs]];
 
-      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
 
@@ -1313,7 +1313,7 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(verifyUpdateInput, {
+        .verifyUpdateBatch(verifyUpdateInput, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.UPDATE_TIME_NOT_REACH);
@@ -1321,33 +1321,31 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.travelTime(TimeEnumes.days, 60);
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(
-          verifyUpdateDataWithIncorrectNonceAsInput,
-          { from: dataManager }
-        )
+        .verifyUpdateBatch(verifyUpdateDataWithIncorrectNonceAsInput, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(
-          verifyUpdateDataWithIncorrectNonceAsInput2,
-          { from: dataManager }
-        )
+        .verifyUpdateBatch(verifyUpdateDataWithIncorrectNonceAsInput2, {
+          from: dataManager,
+        })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(verifyUpdateDataWithInvalidNonce, {
+        .verifyUpdateBatch(verifyUpdateDataWithInvalidNonce, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INCORRECT_PLANTER_NONCE);
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(verifyUpdateDataWithNotSignedValues, {
+        .verifyUpdateBatch(verifyUpdateDataWithNotSignedValues, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(verifyUpdateDataWithIncorrectPlanter, {
+        .verifyUpdateBatch(verifyUpdateDataWithIncorrectPlanter, {
           from: dataManager,
         })
         .should.be.rejectedWith(
@@ -1355,15 +1353,14 @@ contract("TreeFactoryV2", (accounts) => {
         );
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(verifyUpdateDataWithInvalidTreeIds, {
+        .verifyUpdateBatch(verifyUpdateDataWithInvalidTreeIds, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
 
-      await treeFactoryInstance.verifyUpdateBatchWithSignature(
-        verifyUpdateInput,
-        { from: dataManager }
-      );
+      await treeFactoryInstance.verifyUpdateBatch(verifyUpdateInput, {
+        from: dataManager,
+      });
 
       for (let i = 0; i < 5; i++) {
         const treeData = await treeFactoryInstance.trees(i + 1);
@@ -1381,7 +1378,7 @@ contract("TreeFactoryV2", (accounts) => {
         );
       }
     });
-    it("verifyUpdateBatchWithSignature with multiple planter (no token minted)", async () => {
+    it("verifyUpdateBatch with multiple planter (no token minted)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -1479,7 +1476,7 @@ contract("TreeFactoryV2", (accounts) => {
         [account2.address, inputsForAccount2],
       ];
 
-      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
 
@@ -1557,14 +1554,14 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateBatchWithSignature(invalidVerifyInput, {
+        .verifyUpdateBatch(invalidVerifyInput, {
           from: dataManager,
         })
         .should.be.rejectedWith(
           TreeFactoryErrorMsg.ONLY_PLANTER_OF_TREE_CAN_SEND_UPDATE
         );
 
-      await treeFactoryInstance.verifyUpdateBatchWithSignature(verifyInput, {
+      await treeFactoryInstance.verifyUpdateBatch(verifyInput, {
         from: dataManager,
       });
 
@@ -1585,7 +1582,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyUpdateBatchWithSignature with one planter (token minted)", async () => {
+    it("verifyUpdateBatch with one planter (token minted)", async () => {
       const treeTokenInstance = await Tree.new({
         from: deployerAccount,
       });
@@ -1865,7 +1862,7 @@ contract("TreeFactoryV2", (accounts) => {
         ];
       }
       const input = [[account.address, inputs]];
-      await treeFactoryInstance.verifyAssignedTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyAssignedTreeBatch(input, {
         from: dataManager,
       });
 
@@ -1910,12 +1907,9 @@ contract("TreeFactoryV2", (accounts) => {
           await planterFundInstnce.treeToPlanterTotalClaimed(i + 101);
       }
 
-      await treeFactoryInstance.verifyUpdateBatchWithSignature(
-        verifyUpdateInput,
-        {
-          from: dataManager,
-        }
-      );
+      await treeFactoryInstance.verifyUpdateBatch(verifyUpdateInput, {
+        from: dataManager,
+      });
 
       for (let i = 0; i < 5; i++) {
         assert.equal(
@@ -1982,12 +1976,9 @@ contract("TreeFactoryV2", (accounts) => {
 
       await Common.travelTime(TimeEnumes.days, 60);
 
-      await treeFactoryInstance.verifyUpdateBatchWithSignature(
-        verifyUpdateInput2,
-        {
-          from: dataManager,
-        }
-      );
+      await treeFactoryInstance.verifyUpdateBatch(verifyUpdateInput2, {
+        from: dataManager,
+      });
 
       for (let i = 0; i < 5; i++) {
         assert.equal(
@@ -2029,9 +2020,9 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    //--------------------------------> verifyUpdateWithSignature test
+    //--------------------------------> verifyUpdate test
 
-    it("verifyUpdateWithSignature must be successfull (no token minted)", async () => {
+    it("verifyUpdate must be successfull (no token minted)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -2092,7 +2083,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[0]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -2113,7 +2104,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[1]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -2134,7 +2125,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[2]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         3,
         account.address,
         ipfsHashs[2],
@@ -2155,7 +2146,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[3]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         4,
         account.address,
         ipfsHashs[3],
@@ -2193,9 +2184,9 @@ contract("TreeFactoryV2", (accounts) => {
       await Common.travelTime(TimeEnumes.days, 60);
 
       for (let i = 0; i < 4; i++) {
-        await treeFactoryInstance.verifyUpdateWithSignature(
-          account.address,
+        await treeFactoryInstance.verifyUpdate(
           i + 5,
+          account.address,
           verifyUpdateInputs1[i][1],
           verifyUpdateInputs1[i][2],
           verifyUpdateInputs1[i][3],
@@ -2230,7 +2221,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyUpdateWithSignature must be reject IncorrectNonce (no token minted)", async () => {
+    it("verifyUpdate must be reject IncorrectNonce (no token minted)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -2291,7 +2282,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[0]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -2312,7 +2303,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[1]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -2333,7 +2324,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[2]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         3,
         account.address,
         ipfsHashs[2],
@@ -2354,7 +2345,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[3]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         4,
         account.address,
         ipfsHashs[3],
@@ -2388,9 +2379,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           0,
+          account.address,
           verifyUpdateInputsIncorrectNonce2[1],
           verifyUpdateInputsIncorrectNonce2[2],
           verifyUpdateInputsIncorrectNonce2[3],
@@ -2420,9 +2411,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           4,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2451,9 +2442,9 @@ contract("TreeFactoryV2", (accounts) => {
         validSign1.s,
       ];
 
-      await treeFactoryInstance.verifyUpdateWithSignature(
-        account.address,
+      await treeFactoryInstance.verifyUpdate(
         5,
+        account.address,
         verifyUpdateInputsIncorrectNonce1[1],
         verifyUpdateInputsIncorrectNonce1[2],
         verifyUpdateInputsIncorrectNonce1[3],
@@ -2481,9 +2472,9 @@ contract("TreeFactoryV2", (accounts) => {
         validSign1.s,
       ];
 
-      await treeFactoryInstance.verifyUpdateWithSignature(
-        account.address,
+      await treeFactoryInstance.verifyUpdate(
         7,
+        account.address,
         verifyUpdateInputsIncorrectNonce1[1],
         verifyUpdateInputsIncorrectNonce1[2],
         verifyUpdateInputsIncorrectNonce1[3],
@@ -2512,9 +2503,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           6,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2533,7 +2524,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyUpdateWithSignature must be reject permission (one planter && no token minted)", async () => {
+    it("verifyUpdate must be reject permission (one planter && no token minted)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -2594,7 +2585,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[0]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -2615,7 +2606,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[1]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -2636,7 +2627,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[2]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         3,
         account.address,
         ipfsHashs[2],
@@ -2657,7 +2648,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[3]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         4,
         account.address,
         ipfsHashs[3],
@@ -2689,9 +2680,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2723,9 +2714,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2765,9 +2756,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2780,7 +2771,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.TREE_NOT_PLANTED);
     });
 
-    it("verifyUpdateWithSignature must be reject signature (no token minted)", async () => {
+    it("verifyUpdate must be reject signature (no token minted)", async () => {
       //-----------------------------> reject wrong ipfhashes
       //-----------------------------> reject wrong nonce
 
@@ -2844,7 +2835,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[0]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -2865,7 +2856,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[1]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -2886,7 +2877,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[2]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         3,
         account.address,
         ipfsHashs[2],
@@ -2907,7 +2898,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode[3]
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         4,
         account.address,
         ipfsHashs[3],
@@ -2941,9 +2932,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -2973,9 +2964,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
+        .verifyUpdate(
+          5,
           account2.address,
-          5,
           verifyUpdateInputsIncorrectNonce1[1],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -3005,9 +2996,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           verifyUpdateInputsIncorrectNonce1[1],
           updateIpfsHashes[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -3037,9 +3028,9 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       await treeFactoryInstance
-        .verifyUpdateWithSignature(
-          account.address,
+        .verifyUpdate(
           5,
+          account.address,
           treeIds[0],
           verifyUpdateInputsIncorrectNonce1[2],
           verifyUpdateInputsIncorrectNonce1[3],
@@ -3068,9 +3059,9 @@ contract("TreeFactoryV2", (accounts) => {
         validSign1.s,
       ];
 
-      await treeFactoryInstance.verifyUpdateWithSignature(
-        account.address,
+      await treeFactoryInstance.verifyUpdate(
         5,
+        account.address,
         verifyUpdateInputsIncorrectNonce1[1],
         verifyUpdateInputsIncorrectNonce1[2],
         verifyUpdateInputsIncorrectNonce1[3],
@@ -3082,9 +3073,9 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    //--------------------------------> verifyTreeBatchWithSignature test
+    //--------------------------------> verifyTreeBatch test
 
-    it("verifyTreeBatchWithSignature must be successfull (2 planter , 2 treeId per planter)", async () => {
+    it("verifyTreeBatch must be successfull (2 planter , 2 treeId per planter)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -3178,7 +3169,7 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-      await treeFactoryInstance.verifyTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyTreeBatch(input, {
         from: dataManager,
       });
 
@@ -3520,7 +3511,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode
       );
 
-      await treeFactoryInstance.verifyAssignedTreeWithSignature(
+      await treeFactoryInstance.verifyAssignedTree(
         nonce1,
         account.address,
         treeId,
@@ -3551,9 +3542,9 @@ contract("TreeFactoryV2", (accounts) => {
         account.address
       );
 
-      await treeFactoryInstance.verifyUpdateWithSignature(
-        account.address,
+      await treeFactoryInstance.verifyUpdate(
         nonce2,
+        account.address,
         treeId,
         updateIpfsHash,
         validSign.v,
@@ -3603,9 +3594,9 @@ contract("TreeFactoryV2", (accounts) => {
 
       await Common.travelTime(TimeEnumes.days, 60);
 
-      await treeFactoryInstance.verifyUpdateWithSignature(
-        account.address,
+      await treeFactoryInstance.verifyUpdate(
         nonce3,
+        account.address,
         treeId,
         updateIpfsHash,
         validSign2.v,
@@ -3644,7 +3635,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyTreeBatchWithSignature mint 10001 && 10004 && 10006 && 10007 (2 planter , 2 treeId per planter)", async () => {
+    it("verifyTreeBatch mint 10001 && 10004 && 10006 && 10007 (2 planter , 2 treeId per planter)", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -3743,7 +3734,7 @@ contract("TreeFactoryV2", (accounts) => {
       ];
 
       const plantDate = await Common.timeInitial(TimeEnumes.seconds, 0);
-      await treeFactoryInstance.verifyTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyTreeBatch(input, {
         from: dataManager,
       });
 
@@ -3823,7 +3814,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyTreeBatchWithSignature reject because of Permission denied", async () => {
+    it("verifyTreeBatch reject because of Permission denied", async () => {
       let account = await web3.eth.accounts.create();
 
       let ipfsHashs = [];
@@ -3889,7 +3880,7 @@ contract("TreeFactoryV2", (accounts) => {
       await planterInstance.updateSupplyCap(account.address, 2);
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("Permission denied");
@@ -3897,19 +3888,19 @@ contract("TreeFactoryV2", (accounts) => {
       await planterInstance.updateSupplyCap(account.address, 3);
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("Permission denied");
 
       await planterInstance.updateSupplyCap(account.address, 4);
 
-      await treeFactoryInstance.verifyTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyTreeBatch(input, {
         from: dataManager,
       });
     });
 
-    it("verifyTreeBatchWithSignature reject because of nonce incorrect", async () => {
+    it("verifyTreeBatch reject because of nonce incorrect", async () => {
       let account = await web3.eth.accounts.create();
 
       let ipfsHashs = [];
@@ -3970,7 +3961,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("planter nonce is incorrect");
@@ -4002,7 +3993,7 @@ contract("TreeFactoryV2", (accounts) => {
       input = [[account.address, inputs]];
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("planter nonce is incorrect");
@@ -4032,7 +4023,7 @@ contract("TreeFactoryV2", (accounts) => {
       input = [[account.address, inputs]];
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("planter nonce is incorrect");
@@ -4062,7 +4053,7 @@ contract("TreeFactoryV2", (accounts) => {
       input = [[account.address, inputs]];
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("planter nonce is incorrect");
@@ -4092,7 +4083,7 @@ contract("TreeFactoryV2", (accounts) => {
       input = [[account.address, inputs]];
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith("planter nonce is incorrect");
@@ -4121,7 +4112,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       input = [[account.address, inputs]];
 
-      await treeFactoryInstance.verifyTreeBatchWithSignature(input, {
+      await treeFactoryInstance.verifyTreeBatch(input, {
         from: dataManager,
       });
 
@@ -4132,7 +4123,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyTreeBatchWithSignature reject because of check signature", async () => {
+    it("verifyTreeBatch reject because of check signature", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -4193,7 +4184,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4218,7 +4209,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject wrong nonce
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4243,7 +4234,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4251,7 +4242,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject wrong nonce
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4278,7 +4269,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4288,7 +4279,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject planter nonce
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
@@ -4322,15 +4313,15 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeBatchWithSignature(input, {
+        .verifyTreeBatch(input, {
           from: dataManager,
         })
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
     });
 
-    //--------------------------------> verifyTreeWithSignature test
+    //--------------------------------> verifyTree test
 
-    it("verifyTreeWithSignature must be successfull", async () => {
+    it("verifyTree must be successfull", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -4385,7 +4376,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       plantDate[0] = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -4408,7 +4399,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       plantDate[1] = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -4431,7 +4422,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       plantDate[2] = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account2.address,
         ipfsHashs[2],
@@ -4454,7 +4445,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       plantDate[3] = await Common.timeInitial(TimeEnumes.seconds, 0);
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account2.address,
         ipfsHashs[3],
@@ -4542,7 +4533,7 @@ contract("TreeFactoryV2", (accounts) => {
       }
     });
 
-    it("verifyTreeWithSignature reject because of Permission denied", async () => {
+    it("verifyTree reject because of Permission denied", async () => {
       let account = await web3.eth.accounts.create();
 
       let ipfsHashs = [];
@@ -4588,7 +4579,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       await planterInstance.updateSupplyCap(account.address, 1);
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -4611,7 +4602,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -4624,7 +4615,7 @@ contract("TreeFactoryV2", (accounts) => {
       ).should.be.rejected;
     });
 
-    it("verifyTreeWithSignature reject because of nonce incorrect", async () => {
+    it("verifyTree reject because of nonce incorrect", async () => {
       let account = await web3.eth.accounts.create();
 
       let ipfsHashs = [];
@@ -4667,7 +4658,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           0,
           account.address,
           ipfsHashs[0],
@@ -4691,7 +4682,7 @@ contract("TreeFactoryV2", (accounts) => {
 
       //-----------------------------> reject
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         1,
         account.address,
         ipfsHashs[0],
@@ -4704,7 +4695,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           1,
           account.address,
           ipfsHashs[0],
@@ -4726,7 +4717,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         2,
         account.address,
         ipfsHashs[1],
@@ -4748,7 +4739,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           1,
           account.address,
           ipfsHashs[2],
@@ -4770,7 +4761,7 @@ contract("TreeFactoryV2", (accounts) => {
         countryCode
       );
 
-      await treeFactoryInstance.verifyTreeWithSignature(
+      await treeFactoryInstance.verifyTree(
         6,
         account.address,
         ipfsHashs[2],
@@ -4789,7 +4780,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
     });
 
-    it("verifyTreeWithSignature reject because of check signature", async () => {
+    it("verifyTree reject because of check signature", async () => {
       let account = await web3.eth.accounts.create();
       let account2 = await web3.eth.accounts.create();
 
@@ -4833,7 +4824,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject wrong ipfhashes and countryCode
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           1,
           account.address,
           ipfsHashs[0],
@@ -4847,7 +4838,7 @@ contract("TreeFactoryV2", (accounts) => {
         .should.be.rejectedWith(TreeFactoryErrorMsg.INVALID_SIGNATURE);
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           1,
           account.address,
           ipfsHashs[1],
@@ -4862,7 +4853,7 @@ contract("TreeFactoryV2", (accounts) => {
       //-----------------------------> reject wrong nonce
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           2,
           account.address,
           ipfsHashs[1],
@@ -4887,7 +4878,7 @@ contract("TreeFactoryV2", (accounts) => {
       );
 
       await treeFactoryInstance
-        .verifyTreeWithSignature(
+        .verifyTree(
           1,
           account.address,
           ipfsHashs[0],

@@ -13,8 +13,6 @@ import "../treasury/IPlanterFund.sol";
 import "../planter/IPlanterV2.sol";
 import "./ITreeFactoryV2.sol";
 
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-
 /** @title TreeFactory Contract */
 contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -235,7 +233,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         ifNotPaused
         onlyDataManager
     {
-        _setAssignTreeData(_treeId, _planter);
+        _setAssigningTreeData(_treeId, _planter);
     }
 
     /// @inheritdoc ITreeFactoryV2
@@ -246,19 +244,19 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         require(_treeIds.length == _planters.length, "invalid inputs");
 
         for (uint256 i = 0; i < _treeIds.length; i++) {
-            _setAssignTreeData(_treeIds[i], _planters[i]);
+            _setAssigningTreeData(_treeIds[i], _planters[i]);
         }
     }
 
-    function verifyAssignedTreeBatchWithSignature(
-        VerifyAssignedTreeSignature[] calldata _newAssignTree
+    function verifyAssignedTreeBatch(
+        VerifyAssignedTreeData[] calldata _verifyAssignedTreeData
     ) external ifNotPaused onlyVerifier {
         bytes32 domainSeparator = _buildDomainSeparator();
 
         unchecked {
-            for (uint256 i = 0; i < _newAssignTree.length; i++) {
-                VerifyAssignedTreeSignature
-                    memory verifyAssignedTreeData = _newAssignTree[i];
+            for (uint256 i = 0; i < _verifyAssignedTreeData.length; i++) {
+                VerifyAssignedTreeData
+                    memory verifyAssignedTreeData = _verifyAssignedTreeData[i];
 
                 uint256 planterNonce = plantersNonce[
                     verifyAssignedTreeData.planter
@@ -269,7 +267,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                     j < verifyAssignedTreeData.data.length;
                     j++
                 ) {
-                    PlantAssignedTreeSignature
+                    PlantAssignedTreeData
                         memory plantAssignedTreeData = verifyAssignedTreeData
                             .data[j];
 
@@ -315,8 +313,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
-    function verifyAssignedTreeWithSignature(
-        uint256 nonce,
+    function verifyAssignedTree(
+        uint256 _nonce,
         address _planter,
         uint256 _treeId,
         string memory _treeSpecs,
@@ -326,14 +324,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         bytes32 _r,
         bytes32 _s
     ) external ifNotPaused onlyVerifier {
-        require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
+        require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
 
         _checkSigner(
             _buildDomainSeparator(),
             keccak256(
                 abi.encode(
                     PLANT_ASSIGN_TREE_TYPE_HASH,
-                    nonce,
+                    _nonce,
                     _treeId,
                     keccak256(bytes(_treeSpecs)),
                     _birthDate,
@@ -354,12 +352,15 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             _countryCode
         );
 
-        plantersNonce[_planter] = nonce;
+        plantersNonce[_planter] = _nonce;
     }
 
-    function verifyUpdateBatchWithSignature(
-        VerifyUpdateData[] calldata _verifyUpdateData
-    ) external override ifNotPaused onlyVerifier {
+    function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
+        external
+        override
+        ifNotPaused
+        onlyVerifier
+    {
         bytes32 domainSeparator = _buildDomainSeparator();
         unchecked {
             for (uint256 i = 0; i < _verifyUpdateData.length; i++) {
@@ -372,8 +373,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                     j < verifyUpdateData.updateData.length;
                     j++
                 ) {
-                    UpdateSignature memory updateData = verifyUpdateData
-                        .updateData[j];
+                    UpdateData memory updateData = verifyUpdateData.updateData[
+                        j
+                    ];
 
                     require(
                         planterNonce < updateData.nonce,
@@ -410,9 +412,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         }
     }
 
-    function verifyUpdateWithSignature(
-        address _planter,
+    function verifyUpdate(
         uint256 _nonce,
+        address _planter,
         uint256 _treeId,
         string memory _treeSpecs,
         uint8 _v,
@@ -545,32 +547,31 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit LastRegualarTreeIdUpdated(_lastRegualarTreeId);
     }
 
-    function verifyTreeBatchWithSignature(
-        VerifyTreeSignature[] calldata _newTree
-    ) external ifNotPaused onlyVerifier {
+    function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
+        external
+        ifNotPaused
+        onlyVerifier
+    {
         uint256 tempLastRegularTreeId = lastRegualarTreeId;
 
         bytes32 domainSeparator = _buildDomainSeparator();
 
         unchecked {
-            for (uint256 i = 0; i < _newTree.length; i++) {
-                VerifyTreeSignature memory verifyTreeSignature = _newTree[i];
+            for (uint256 i = 0; i < _verifyTreeData.length; i++) {
+                VerifyTreeData memory verifyTreeData = _verifyTreeData[i];
 
                 require(
                     planterContract.manageTreePermissionBatch(
-                        verifyTreeSignature.planter,
-                        verifyTreeSignature.data.length.toUint32()
+                        verifyTreeData.planter,
+                        verifyTreeData.data.length.toUint32()
                     ),
                     "Permission denied"
                 );
 
-                uint256 planterNonce = plantersNonce[
-                    verifyTreeSignature.planter
-                ];
+                uint256 planterNonce = plantersNonce[verifyTreeData.planter];
 
-                for (uint256 j = 0; j < verifyTreeSignature.data.length; j++) {
-                    PlantTreeSignature
-                        memory plantTreeData = verifyTreeSignature.data[j];
+                for (uint256 j = 0; j < verifyTreeData.data.length; j++) {
+                    PlantTreeData memory plantTreeData = verifyTreeData.data[j];
 
                     require(
                         planterNonce < plantTreeData.nonce,
@@ -590,30 +591,30 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
                                 plantTreeData.countryCode
                             )
                         ),
-                        verifyTreeSignature.planter,
+                        verifyTreeData.planter,
                         plantTreeData.v,
                         plantTreeData.r,
                         plantTreeData.s
                     );
 
-                    tempLastRegularTreeId = _verifyTreeData(
+                    tempLastRegularTreeId = _setVerifyTreeData(
                         tempLastRegularTreeId + 1,
                         plantTreeData.countryCode,
                         plantTreeData.birthDate,
                         plantTreeData.treeSpecs,
-                        verifyTreeSignature.planter
+                        verifyTreeData.planter
                     );
                 }
 
-                plantersNonce[verifyTreeSignature.planter] = planterNonce;
+                plantersNonce[verifyTreeData.planter] = planterNonce;
             }
         }
 
         lastRegualarTreeId = tempLastRegularTreeId;
     }
 
-    function verifyTreeWithSignature(
-        uint256 nonce,
+    function verifyTree(
+        uint256 _nonce,
         address _planter,
         string memory _treeSpecs,
         uint64 _birthDate,
@@ -624,7 +625,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     ) external ifNotPaused onlyVerifier {
         require(planterContract.manageTreePermission(_planter));
 
-        require(plantersNonce[_planter] < nonce, "planter nonce is incorrect");
+        require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
         bytes32 domainSeparator = _buildDomainSeparator();
 
         _checkSigner(
@@ -632,7 +633,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             keccak256(
                 abi.encode(
                     PLANT_TREE_TYPE_HASH,
-                    nonce,
+                    _nonce,
                     keccak256(bytes(_treeSpecs)),
                     _birthDate,
                     _countryCode
@@ -646,7 +647,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
         //-------------------------->update tree data
 
-        lastRegualarTreeId = _verifyTreeData(
+        lastRegualarTreeId = _setVerifyTreeData(
             lastRegualarTreeId + 1,
             _countryCode,
             _birthDate,
@@ -654,7 +655,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
             _planter
         );
 
-        plantersNonce[_planter] = nonce;
+        plantersNonce[_planter] = _nonce;
     }
 
     /// @inheritdoc ITreeFactoryV2
@@ -719,14 +720,14 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeSpecsUpdated(_treeId, _treeSpecs);
     }
 
-    function _toTypedDataHash(bytes32 domainSeperator, bytes32 structHash)
+    function _toTypedDataHash(bytes32 _domainSeperator, bytes32 _structHash)
         private
         pure
         returns (bytes32)
     {
         return
             keccak256(
-                abi.encodePacked("\x19\x01", domainSeperator, structHash)
+                abi.encodePacked("\x19\x01", _domainSeperator, _structHash)
             );
     }
 
@@ -773,7 +774,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeListed(_treeId);
     }
 
-    function _setAssignTreeData(uint256 _treeId, address _planter) private {
+    function _setAssigningTreeData(uint256 _treeId, address _planter) private {
         TreeData storage treeData = trees[_treeId];
 
         require(treeData.treeStatus == 2, "Invalid tree");
@@ -817,6 +818,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         treeData.treeStatus = 4;
 
         treeData.treeSpecs = _treeSpecs;
+
+        emit AssignedTreeVerified(_treeId);
     }
 
     function _setVerifyUpdateData(
@@ -856,7 +859,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         emit TreeUpdatedVerified(_treeId);
     }
 
-    function _verifyTreeData(
+    function _setVerifyTreeData(
         uint256 _tempLastRegularTreeId,
         uint16 _countryCode,
         uint64 _birthDate,
@@ -882,6 +885,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         if (!treeToken.exists(_tempLastRegularTreeId)) {
             treeData.saleType = 4;
         }
+
+        emit TreeVerified(_tempLastRegularTreeId);
 
         return _tempLastRegularTreeId;
     }

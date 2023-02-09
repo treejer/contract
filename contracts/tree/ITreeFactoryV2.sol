@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
 interface ITreeFactoryV2 {
-    struct PlantAssignedTreeSignature {
+    struct PlantAssignedTreeData {
         uint256 nonce;
         uint256 treeId;
         string treeSpecs;
@@ -15,12 +15,12 @@ interface ITreeFactoryV2 {
         bytes32 s;
     }
 
-    struct VerifyAssignedTreeSignature {
+    struct VerifyAssignedTreeData {
         address planter;
-        PlantAssignedTreeSignature[] data;
+        PlantAssignedTreeData[] data;
     }
 
-    struct PlantTreeSignature {
+    struct PlantTreeData {
         uint256 nonce;
         string treeSpecs;
         uint64 birthDate;
@@ -30,12 +30,12 @@ interface ITreeFactoryV2 {
         bytes32 s;
     }
 
-    struct VerifyTreeSignature {
+    struct VerifyTreeData {
         address planter;
-        PlantTreeSignature[] data;
+        PlantTreeData[] data;
     }
 
-    struct UpdateSignature {
+    struct UpdateData {
         uint256 nonce;
         uint256 treeId;
         string treeSpecs;
@@ -45,7 +45,7 @@ interface ITreeFactoryV2 {
     }
     struct VerifyUpdateData {
         address planter;
-        UpdateSignature[] updateData;
+        UpdateData[] updateData;
     }
 
     /**
@@ -61,28 +61,10 @@ interface ITreeFactoryV2 {
     event TreeAssigned(uint256 treeId);
 
     /**
-     * @dev emitted when  assigned tree planted
-     * @param treeId id of tree that planted
-     */
-    event AssignedTreePlanted(uint256 treeId);
-
-    /**
      * @dev emitted when planting of assigned tree verified
      * @param treeId id of tree that verified
      */
     event AssignedTreeVerified(uint256 treeId);
-
-    /**
-     * @dev emitted when planting of assigned tree rejected
-     * @param treeId id of tree that rejected
-     */
-    event AssignedTreeRejected(uint256 treeId);
-
-    /**
-     * @dev emitted when planter send update request to tree
-     * @param treeId id of tree that update request sent for
-     */
-    event TreeUpdated(uint256 treeId);
 
     /**
      * @dev emitted when update request for tree verified
@@ -91,29 +73,10 @@ interface ITreeFactoryV2 {
     event TreeUpdatedVerified(uint256 treeId);
 
     /**
-     * @dev emitted when update request for tree rejected
-     * @param treeId id of tree that update request rejected
-     */
-    event TreeUpdateRejected(uint256 treeId);
-
-    /**
-     * @dev emitted when regular tree planted
-     * @param treeId id of regular tree id that planted
-     */
-    event TreePlanted(uint256 treeId);
-
-    /**
      * @dev emitted when planting for regular tree verified
      * @param treeId id of tree that verified
-     * @param tempTreeId id of tempTree
      */
-    event TreeVerified(uint256 treeId, uint256 tempTreeId);
-
-    /**
-     * @dev emitted when planting for regular tree rejected
-     * @param treeId id of tree that rejected
-     */
-    event TreeRejected(uint256 treeId);
+    event TreeVerified(uint256 treeId);
 
     /** @dev emitted when new treeUpdateInterval set */
     event TreeUpdateIntervalChanged();
@@ -244,13 +207,12 @@ interface ITreeFactoryV2 {
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
 
-    function verifyUpdateBatchWithSignature(
-        VerifyUpdateData[] calldata _verifyUpdateData
-    ) external;
+    function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
+        external;
 
-    // function verifyUpdateWithSignature(
+    // function verifyUpdate(
     //     address _planter,
-    //     UpdateSignature calldata _updateData
+    //     UpdateData calldata _updateData
     // ) external;
 
     /**

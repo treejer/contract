@@ -87,10 +87,21 @@ interface ITreeFactoryV2 {
      */
     event TreeSpecsUpdated(uint256 treeId, string treeSpecs);
 
+    /**
+     * @dev emitted when lastRegualarTreeId updated
+     * @param lastRegualarTreeId new value for lastRegualarTreeId
+     */
     event LastRegualarTreeIdUpdated(uint256 lastRegualarTreeId);
 
+    /**
+     * @dev emitted when treeStatus reset
+     */
     event TreeStatusBatchReset();
 
+    /** @dev admin set new address for given contract
+     * @param _selector contract selector
+     * @param _address new address for contract
+     */
     function setContractAddresses(uint8 _selector, address _address) external;
 
     /** @dev admin set the minimum time to send next update request
@@ -101,38 +112,73 @@ interface ITreeFactoryV2 {
 
     /**
      * @dev admin list tree
-     * NOTE emited a {TreeListed} event
+     * NOTE emit a {TreeListed} event
      * @param _treeId id of tree to list
      * @param _treeSpecs tree specs
      */
     function listTree(uint256 _treeId, string calldata _treeSpecs) external;
 
+    /**
+     * @dev admin list batch of trees
+     * NOTE emit {TreeListed} event
+     * @param _treeIds list of tree ids
+     * @param _treeSpecs list of tree specs
+     */
     function listTreeBatch(
         uint256[] calldata _treeIds,
         string[] calldata _treeSpecs
     ) external;
 
+    /**
+     * @dev admin reset treeStatus of a given range to 0
+     * NOTE emit {TreeStatusBatchReset} event
+     * @param _startTreeId start treeId
+     * @param _endTreeId end treeId
+     */
     function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
         external;
 
     /**
      * @dev admin assign an existing tree to planter
      * NOTE tree must be not planted
-     * NOTE emited a {TreeAssigned} event
+     * NOTE emit a {TreeAssigned} event
      * @param _treeId id of tree to assign
      * @param _planter assignee planter
      */
     function assignTree(uint256 _treeId, address _planter) external;
 
+    /**
+     * @dev admin assign batch of existing trees to planters
+     * NOTE tree must be not planted
+     * NOTE emit a {TreeAssigned} event
+     * @param _treeIds id of trees to assign
+     * @param _planters assignee planters
+     */
     function assignTreeBatch(
         uint256[] calldata _treeIds,
         address[] calldata _planters
     ) external;
 
+    /**
+     * @dev allowed verifier can verify batch of plant for assigned trees using signature.
+     * @param _verifyAssignedTreeData array of verifyAssignedTree data including signature{v,r,s} and planting data
+     */
     function verifyAssignedTreeBatch(
         VerifyAssignedTreeData[] calldata _verifyAssignedTreeData
     ) external;
 
+    /**
+     * @dev allowed verifier can verify plant for assigned tree using signature.
+     * @param _nonce nonce value that signature created with
+     * @param _planter address of planter
+     * @param _treeId id of tree to verify
+     * @param _treeSpecs treeSpecs data
+     * @param _birthDate birthDate of tree
+     * @param _countryCode countryCode of tree
+     * @param _v signature data
+     * @param _r signature data
+     * @param _s signature data
+     */
     function verifyAssignedTree(
         uint256 _nonce,
         address _planter,
@@ -145,9 +191,31 @@ interface ITreeFactoryV2 {
         bytes32 _s
     ) external;
 
+    /**
+     * @dev allowed verifier can verify batch of updates for trees using signature.
+     * NOTE based on the current time of verifing and plant date, age of tree
+     * calculated and set as the treeStatus
+     * NOTE if a token exist for that tree (minted before) planter of tree funded
+     * based on calculated tree status
+     * @param _verifyUpdateData array of verifyAssignedTree data including signature{v,r,s} and planting data
+     */
     function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
         external;
 
+    /**
+     * @dev allowed verifier can verify update for a tree using signature.
+     * NOTE based on the current time of verifing and plant date, age of tree
+     * calculated and set as the treeStatus
+     * NOTE if a token exist for that tree (minted before) planter of tree funded
+     * based on calculated tree status
+     * @param _nonce nonce value that signature created with
+     * @param _planter address of planter
+     * @param _treeId id of tree to verify update
+     * @param _treeSpecs treeSpecs data
+     * @param _v signature data
+     * @param _r signature data
+     * @param _s signature data
+     */
     function verifyUpdate(
         uint256 _nonce,
         address _planter,
@@ -208,10 +276,31 @@ interface ITreeFactoryV2 {
         uint32 _saleType
     ) external returns (bool);
 
+    /**
+     * @dev admin set new value for lastRegualarTreeId
+     * NOTE emit a {LastRegualarTreeIdUpdated} event
+     * @param _lastRegualarTreeId new value of lastRegualarTreeId
+     */
     function updateLastRegualarTreeId(uint256 _lastRegualarTreeId) external;
 
+    /**
+     * @dev allowed verifier can verify batch of plants for regular trees using signature.
+     * @param _verifyTreeData array of verifyTree data including signature{v,r,s} and planting data
+     */
     function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
         external;
+
+    /**
+     * @dev allowed verifier can verify plant for regular tree using signature.
+     * @param _nonce nonce value that signature created with
+     * @param _planter address of planter
+     * @param _treeSpecs treeSpecs data
+     * @param _birthDate birthDate of tree
+     * @param _countryCode countryCode of tree
+     * @param _v signature data
+     * @param _r signature data
+     * @param _s signature data
+     */
 
     function verifyTree(
         uint256 _nonce,
@@ -292,7 +381,7 @@ interface ITreeFactoryV2 {
         );
 
     /** return TreeUpdate data
-     8 @param _treeId id of tree to get data
+     * @param _treeId id of tree to get data
      * @return updateSpecs
      * @return updateStatus
      */
@@ -322,6 +411,10 @@ interface ITreeFactoryV2 {
             string memory
         );
 
+    /** return planters nonce
+     * @param _planter address of planter
+     * @return nonce
+     */
     function plantersNonce(address _planter)
         external
         view

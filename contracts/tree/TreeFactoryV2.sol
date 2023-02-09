@@ -44,6 +44,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         string treeSpecs;
     }
 
+    /** @notice deprecated */
     CountersUpgradeable.Counter private _pendingRegularTreeId;
 
     /** NOTE {isTreeFactory} set inside the initialize to {true} */
@@ -58,9 +59,9 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
     /** NOTE mapping of treeId to TreeData Struct */
     mapping(uint256 => TreeData) public override trees;
-    /** NOTE mapping of treeId to TreeUpdate struct */
+    /** @notice deprecated */
     mapping(uint256 => TreeUpdate) public override treeUpdates;
-    /** NOTE mapping of treeId to TempTree struct */
+    /** @notice deprecated */
     mapping(uint256 => TempTree) public override tempTrees;
 
     //------- data for v2
@@ -78,7 +79,8 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     bytes32 public constant VERIFY_UPDATE_TYPE_HASH =
         keccak256("updateTree(uint256 nonce,uint256 treeId,string treeSpecs)");
 
-    mapping(address => uint256) public plantersNonce; // =======> address planter => nonce
+    /** NOTE mapping of planterAddress to nonce */
+    mapping(address => uint256) public override plantersNonce;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -113,15 +115,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
     /** NOTE modifier for check msg.sender has TreejerContract role */
     modifier onlyTreejerContract() {
         accessRestriction.ifTreejerContract(msg.sender);
-        _;
-    }
-
-    /** NOTE modifier for check tree has not pending update */
-    modifier notHavePendingUpdate(uint256 _treeId) {
-        require(
-            treeUpdates[_treeId].updateStatus != 1,
-            "Pending update exists"
-        );
         _;
     }
 
@@ -250,7 +243,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
     function verifyAssignedTreeBatch(
         VerifyAssignedTreeData[] calldata _verifyAssignedTreeData
-    ) external ifNotPaused onlyVerifier {
+    ) external override ifNotPaused onlyVerifier {
         bytes32 domainSeparator = _buildDomainSeparator();
 
         unchecked {
@@ -323,7 +316,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external ifNotPaused onlyVerifier {
+    ) external override ifNotPaused onlyVerifier {
         require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
 
         _checkSigner(
@@ -420,7 +413,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external ifNotPaused onlyVerifier {
+    ) external override ifNotPaused onlyVerifier {
         require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
 
         _checkSigner(
@@ -549,6 +542,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
 
     function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
         external
+        override
         ifNotPaused
         onlyVerifier
     {
@@ -622,7 +616,7 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         uint8 _v,
         bytes32 _r,
         bytes32 _s
-    ) external ifNotPaused onlyVerifier {
+    ) external override ifNotPaused onlyVerifier {
         require(planterContract.manageTreePermission(_planter));
 
         require(plantersNonce[_planter] < _nonce, "planter nonce is incorrect");
@@ -713,7 +707,6 @@ contract TreeFactoryV2 is Initializable, RelayRecipientV2, ITreeFactoryV2 {
         override
         ifNotPaused
         onlyScript
-        notHavePendingUpdate(_treeId)
     {
         trees[_treeId].treeSpecs = _treeSpecs;
 

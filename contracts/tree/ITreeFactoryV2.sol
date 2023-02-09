@@ -129,6 +129,35 @@ interface ITreeFactoryV2 {
         address[] calldata _planters
     ) external;
 
+    function verifyAssignedTreeBatch(
+        VerifyAssignedTreeData[] calldata _verifyAssignedTreeData
+    ) external;
+
+    function verifyAssignedTree(
+        uint256 _nonce,
+        address _planter,
+        uint256 _treeId,
+        string memory _treeSpecs,
+        uint64 _birthDate,
+        uint16 _countryCode,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external;
+
+    function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
+        external;
+
+    function verifyUpdate(
+        uint256 _nonce,
+        address _planter,
+        uint256 _treeId,
+        string memory _treeSpecs,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external;
+
     /**
      * @dev check if a tree is free to take part in sale and set {_saleType}
      * to saleType of tree when tree is not in use
@@ -181,6 +210,20 @@ interface ITreeFactoryV2 {
 
     function updateLastRegualarTreeId(uint256 _lastRegualarTreeId) external;
 
+    function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
+        external;
+
+    function verifyTree(
+        uint256 _nonce,
+        address _planter,
+        string memory _treeSpecs,
+        uint64 _birthDate,
+        uint16 _countryCode,
+        uint8 _v,
+        bytes32 _r,
+        bytes32 _s
+    ) external;
+
     /**
      * @dev mint a tree to funder of tree
      * @param _lastFundedTreeId The last tree funded in the regular sale
@@ -206,14 +249,6 @@ interface ITreeFactoryV2 {
      */
     function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
         external;
-
-    function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
-        external;
-
-    // function verifyUpdate(
-    //     address _planter,
-    //     UpdateData calldata _updateData
-    // ) external;
 
     /**
      * @dev initialize AccessRestriction contract,lastRegualarTreeId,treeUpdateInterval
@@ -286,4 +321,9 @@ interface ITreeFactoryV2 {
             address,
             string memory
         );
+
+    function plantersNonce(address _planter)
+        external
+        view
+        returns (uint256 nonce);
 }

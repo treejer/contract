@@ -3,7 +3,7 @@
 pragma solidity ^0.8.6;
 
 /** @title TreeFactory interfce */
-interface ITreeFactoryV2 {
+interface ITreeFactoryV3 {
     struct PlantAssignedTreeData {
         uint256 nonce;
         uint256 treeId;

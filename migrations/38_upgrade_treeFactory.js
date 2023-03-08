@@ -1,5 +1,4 @@
-var TreeFactory = artifacts.require("TreeFactory.sol");
-var TreeFactoryV2 = artifacts.require("TreeFactoryV2.sol");
+var TreeFactoryV3 = artifacts.require("TreeFactoryV3.sol");
 
 const {
   upgradeProxy,
@@ -7,10 +6,10 @@ const {
 } = require("@openzeppelin/truffle-upgrades");
 
 module.exports = async function (deployer) {
-  const treeFactory = "await TreeFactory.deployed()";
+  const treeFactory = "0xad113f88922F2d865705c9Ef0Db9275518b6C50F";
 
   // upgrade direct
-  await upgradeProxy(treeFactory.address, TreeFactoryV2, {
+  await upgradeProxy(treeFactory, TreeFactoryV3, {
     deployer,
   });
 };

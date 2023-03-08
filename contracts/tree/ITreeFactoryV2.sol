@@ -74,9 +74,10 @@ interface ITreeFactoryV2 {
 
     /**
      * @dev emitted when planting for regular tree verified
-     * @param treeId id of tree that verified
+     * @param planter address of planter
+     * @param nonce planter nonce
      */
-    event TreeVerified(uint256 treeId);
+    event TreeVerified(address planter, uint nonce);
 
     /** @dev emitted when new treeUpdateInterval set */
     event TreeUpdateIntervalChanged();
@@ -135,8 +136,10 @@ interface ITreeFactoryV2 {
      * @param _startTreeId start treeId
      * @param _endTreeId end treeId
      */
-    function resetTreeStatusBatch(uint256 _startTreeId, uint256 _endTreeId)
-        external;
+    function resetTreeStatusBatch(
+        uint256 _startTreeId,
+        uint256 _endTreeId
+    ) external;
 
     /**
      * @dev admin assign an existing tree to planter
@@ -199,8 +202,9 @@ interface ITreeFactoryV2 {
      * based on calculated tree status
      * @param _verifyUpdateData array of verifyAssignedTree data including signature{v,r,s} and planting data
      */
-    function verifyUpdateBatch(VerifyUpdateData[] calldata _verifyUpdateData)
-        external;
+    function verifyUpdateBatch(
+        VerifyUpdateData[] calldata _verifyUpdateData
+    ) external;
 
     /**
      * @dev allowed verifier can verify update for a tree using signature.
@@ -233,9 +237,10 @@ interface ITreeFactoryV2 {
      * @param _saleType saleType for tree
      * @return 0 if a tree ready for a sale and 1 if a tree is in use or minted before
      */
-    function manageSaleType(uint256 _treeId, uint32 _saleType)
-        external
-        returns (uint32);
+    function manageSaleType(
+        uint256 _treeId,
+        uint32 _saleType
+    ) external returns (uint32);
 
     /**
      * @dev mint a tree to funder and set saleType to 0
@@ -287,8 +292,9 @@ interface ITreeFactoryV2 {
      * @dev allowed verifier can verify batch of plants for regular trees using signature.
      * @param _verifyTreeData array of verifyTree data including signature{v,r,s} and planting data
      */
-    function verifyTreeBatch(VerifyTreeData[] calldata _verifyTreeData)
-        external;
+    function verifyTreeBatch(
+        VerifyTreeData[] calldata _verifyTreeData
+    ) external;
 
     /**
      * @dev allowed verifier can verify plant for regular tree using signature.
@@ -319,9 +325,10 @@ interface ITreeFactoryV2 {
      * @param _funder funder of a new tree sold in Regular
      * @return the last tree funded after update
      */
-    function mintTree(uint256 _lastFundedTreeId, address _funder)
-        external
-        returns (uint256);
+    function mintTree(
+        uint256 _lastFundedTreeId,
+        address _funder
+    ) external returns (uint256);
 
     /**
      * @dev mint an already planted tree with id to funder
@@ -336,8 +343,10 @@ interface ITreeFactoryV2 {
      * @param _treeId id of tree to update treeSpecs
      * @param _treeSpecs new tree specs
      */
-    function updateTreeSpecs(uint64 _treeId, string calldata _treeSpecs)
-        external;
+    function updateTreeSpecs(
+        uint64 _treeId,
+        string calldata _treeSpecs
+    ) external;
 
     /**
      * @dev initialize AccessRestriction contract,lastRegualarTreeId,treeUpdateInterval
@@ -366,7 +375,9 @@ interface ITreeFactoryV2 {
      * @return birthDate
      * @return treeSpecs
      */
-    function trees(uint256 _treeId)
+    function trees(
+        uint256 _treeId
+    )
         external
         view
         returns (
@@ -385,10 +396,9 @@ interface ITreeFactoryV2 {
      * @return updateSpecs
      * @return updateStatus
      */
-    function treeUpdates(uint256 _treeId)
-        external
-        view
-        returns (string memory, uint64);
+    function treeUpdates(
+        uint256 _treeId
+    ) external view returns (string memory, uint64);
 
     /** return TempTree data
      * @param _tempTreeId id of tempTree to get data
@@ -399,24 +409,18 @@ interface ITreeFactoryV2 {
      * @return planter
      * @return treeSpecs
      */
-    function tempTrees(uint256 _tempTreeId)
+    function tempTrees(
+        uint256 _tempTreeId
+    )
         external
         view
-        returns (
-            uint64,
-            uint64,
-            uint64,
-            uint64,
-            address,
-            string memory
-        );
+        returns (uint64, uint64, uint64, uint64, address, string memory);
 
     /** return planters nonce
      * @param _planter address of planter
      * @return nonce
      */
-    function plantersNonce(address _planter)
-        external
-        view
-        returns (uint256 nonce);
+    function plantersNonce(
+        address _planter
+    ) external view returns (uint256 nonce);
 }

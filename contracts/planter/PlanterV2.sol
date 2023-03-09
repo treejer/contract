@@ -9,6 +9,8 @@ import "../access/IAccessRestriction.sol";
 import "../gsn/RelayRecipient.sol";
 import "./IPlanterV2.sol";
 
+import "./../marketPlace/IMarketPlace.sol";
+
 /** @title PlanterV2 contract */
 contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     using SafeCastUpgradeable for uint256;
@@ -42,6 +44,8 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     mapping(address => mapping(address => uint256))
         public
         override organizationMemberShare;
+
+    IMarketPlace public marketPlace;
 
     /** NOTE modifier to check msg.sender has admin role */
     modifier onlyAdmin() {
@@ -89,11 +93,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function initialize(address _accessRestrictionAddress)
-        external
-        override
-        initializer
-    {
+    function initialize(
+        address _accessRestrictionAddress
+    ) external override initializer {
         IAccessRestriction candidateContract = IAccessRestriction(
             _accessRestrictionAddress
         );
@@ -103,12 +105,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function setTrustedForwarder(address _address)
-        external
-        override
-        onlyAdmin
-        validAddress(_address)
-    {
+    function setTrustedForwarder(
+        address _address
+    ) external override onlyAdmin validAddress(_address) {
         trustedForwarder = _address;
     }
 
@@ -252,12 +251,10 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function updatePlanterType(uint8 _planterType, address _organization)
-        external
-        override
-        ifNotPaused
-        existPlanter(_msgSender())
-    {
+    function updatePlanterType(
+        uint8 _planterType,
+        address _organization
+    ) external override ifNotPaused existPlanter(_msgSender()) {
         require(_planterType == 1 || _planterType == 3, "Invalid planterType");
 
         PlanterData storage planterData = planters[_msgSender()];
@@ -294,12 +291,10 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function acceptPlanterByOrganization(address _planter, bool _acceptance)
-        external
-        override
-        ifNotPaused
-        onlyOrganization
-    {
+    function acceptPlanterByOrganization(
+        address _planter,
+        bool _acceptance
+    ) external override ifNotPaused onlyOrganization {
         require(
             memberOf[_planter] == _msgSender() &&
                 planters[_planter].status == 0,
@@ -322,13 +317,10 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function updateSupplyCap(address _planter, uint32 _supplyCap)
-        external
-        override
-        ifNotPaused
-        onlyDataManager
-        existPlanter(_planter)
-    {
+    function updateSupplyCap(
+        address _planter,
+        uint32 _supplyCap
+    ) external override ifNotPaused onlyDataManager existPlanter(_planter) {
         PlanterData storage planterData = planters[_planter];
         require(_supplyCap > planterData.plantedCount, "Invalid supplyCap");
         planterData.supplyCap = _supplyCap;
@@ -380,12 +372,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function reducePlantedCount(address _planter)
-        external
-        override
-        existPlanter(_planter)
-        onlyTreejerContract
-    {
+    function reducePlantedCount(
+        address _planter
+    ) external override existPlanter(_planter) onlyTreejerContract {
         PlanterData storage planterData = planters[_planter];
 
         planterData.plantedCount -= 1;
@@ -396,7 +385,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function manageTreePermission(address _planter)
+    function manageTreePermission(
+        address _planter
+    )
         external
         override
         existPlanter(_planter)
@@ -419,7 +410,10 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     //---------------------------------CHANGED
 
     /// @inheritdoc IPlanterV2
-    function manageTreePermissionBatch(address _planter, uint32 _count)
+    function manageTreePermissionBatch(
+        address _planter,
+        uint32 _count
+    )
         external
         override
         existPlanter(_planter)
@@ -443,17 +437,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function getOrganizationMemberData(address _planter)
-        external
-        view
-        override
-        returns (
-            bool,
-            address,
-            address,
-            uint256
-        )
-    {
+    function getOrganizationMemberData(
+        address _planter
+    ) external view override returns (bool, address, address, uint256) {
         PlanterData storage planterData = planters[_planter];
         if (planterData.status == 4 || planterData.planterType == 0) {
             return (false, address(0), address(0), 0);
@@ -476,12 +462,9 @@ contract PlanterV2 is Initializable, RelayRecipient, IPlanterV2 {
     }
 
     /// @inheritdoc IPlanterV2
-    function canAssignTree(address _planter)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function canAssignTree(
+        address _planter
+    ) external view override returns (bool) {
         PlanterData storage planterData = planters[_planter];
 
         return planterData.status == 1 || planterData.planterType == 2;

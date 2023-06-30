@@ -64,20 +64,20 @@ interface ITreeFactoryV3 {
      * @dev emitted when planting of assigned tree verified
      * @param treeId id of tree that verified
      */
-    event AssignedTreeVerified(uint256 treeId);
+    event AssignedTreeVerifiedWithSign(uint256 treeId);
 
     /**
      * @dev emitted when update request for tree verified
      * @param treeId id of tree that update request verified
      */
-    event TreeUpdatedVerified(uint256 treeId);
+    event TreeUpdatedVerifiedWithSign(uint256 treeId);
 
     /**
      * @dev emitted when planting for regular tree verified
      * @param planter address of planter
      * @param nonce planter nonce
      */
-    event TreeVerified(address planter, uint nonce);
+    event TreeVerifiedWithSign(uint256 treeId,address planter, uint256 nonce);
 
     /** @dev emitted when new treeUpdateInterval set */
     event TreeUpdateIntervalChanged();

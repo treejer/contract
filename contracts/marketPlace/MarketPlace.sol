@@ -11,7 +11,7 @@ import "../tree/ITreeFactoryV2.sol";
 import "../tree/IAttribute.sol";
 import "../planter/IPlanterV2.sol";
 import "../treasury/IPlanterFund.sol";
-import "../regularSale/IRegularSaleV2.sol";
+// import "../regularSale/IRegularSaleV2.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -31,7 +31,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
     ITreeFactoryV2 public treeFactory;
     IAttribute public attribute;
     IPlanterFund public planterFundContract;
-    IRegularSaleV2 public regularSale;
+    address public regularSale;
     IPlanterV2 public planter;
 
     CountersUpgradeable.Counter public modelId;
@@ -204,9 +204,9 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         override
         onlyAdmin
     {
-        IRegularSaleV2 candidateContract = IRegularSaleV2(_address);
-        require(candidateContract.isRegularSale());
-        regularSale = candidateContract;
+        // IRegularSaleV2 candidateContract = IRegularSaleV2(_address);
+        // require(candidateContract.isRegularSale());
+        // regularSale = candidateContract;
     }
 
     /// @inheritdoc IMarketPlace
@@ -461,7 +461,7 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         );
 
         if (_referrer != address(0)) {
-            regularSale.updateReferrerClaimableTreesDai(_referrer, totalCount);
+            // regularSale.updateReferrerClaimableTreesDai(_referrer, totalCount);
         }
 
         emit TreeFunded(
@@ -480,23 +480,23 @@ contract MarketPlace is Initializable, RelayRecipient, IMarketPlace {
         onlyTreejerContract
         validModelId(_modelId)
     {
-        Model storage modelData = models[_modelId];
+        // Model storage modelData = models[_modelId];
 
-        bool canPlant = planter.manageMarketPlaceTreePermission(
-            _sender,
-            modelData.creator
-        );
+        // bool canPlant = planter.manageMarketPlaceTreePermission(
+        //     _sender,
+        //     modelData.creator
+        // );
 
-        require(canPlant, "MarketPlace:Permission denied.");
+        // require(canPlant, "MarketPlace:Permission denied.");
 
-        uint256 lastReservePlantTemp = modelData.lastReservePlant + 1;
+        // uint256 lastReservePlantTemp = modelData.lastReservePlant + 1;
 
-        require(
-            lastReservePlantTemp < modelData.start + modelData.count,
-            "MarketPlace:All tree planted."
-        );
+        // require(
+        //     lastReservePlantTemp < modelData.start + modelData.count,
+        //     "MarketPlace:All tree planted."
+        // );
 
-        modelData.lastReservePlant = lastReservePlantTemp;
+        // modelData.lastReservePlant = lastReservePlantTemp;
     }
 
     function reduceLastReservePlantedOfModel(uint256 _modelId)

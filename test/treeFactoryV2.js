@@ -605,7 +605,7 @@ contract("TreeFactoryV2", (accounts) => {
         from: dataManager,
       });
 
-      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerified", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerifiedWithSign", (ev) => {
         for (let i = 0; i < 5; i++) {
           return Number(ev.treeId) == i + 1;
         }
@@ -1041,7 +1041,7 @@ contract("TreeFactoryV2", (accounts) => {
         { from: dataManager }
       );
 
-      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerified", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "AssignedTreeVerifiedWithSign", (ev) => {
         return Number(ev.treeId) == treeIds[0];
       });
 
@@ -1398,7 +1398,7 @@ contract("TreeFactoryV2", (accounts) => {
         }
       );
 
-      truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerified", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerifiedWithSign", (ev) => {
         for (let i = 0; i < 5; i++) {
           return Number(ev.treeId) == i + 1;
         }
@@ -2257,7 +2257,7 @@ contract("TreeFactoryV2", (accounts) => {
           }
         );
 
-        truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerified", (ev) => {
+        truffleAssert.eventEmitted(eventTx, "TreeUpdatedVerifiedWithSign", (ev) => {
           return Number(ev.treeId) == treeIds[i];
         });
       }
@@ -3237,13 +3237,13 @@ contract("TreeFactoryV2", (accounts) => {
         from: dataManager,
       });
 
-      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
+      truffleAssert.eventEmitted(eventTx, "TreeVerifiedWithSign", (ev) => {
         for (let i = 0; i < 4; i++) {
           if (i < 2) {
-            return Number(ev.nonce) == i + 1 && ev.planter == account.address;
+            return Number(ev.treeId) == i + 1 && Number(ev.nonce) == i + 1 && ev.planter == account.address;
           } else {
             return (
-              Number(ev.nonce) == i - 2 + 1 && ev.planter == account2.address
+              Number(ev.treeId) == i + 1 && Number(ev.nonce) == i - 2 + 1 && ev.planter == account2.address
             );
           }
         }
@@ -4475,8 +4475,8 @@ contract("TreeFactoryV2", (accounts) => {
         { from: dataManager }
       );
 
-      truffleAssert.eventEmitted(eventTx, "TreeVerified", (ev) => {
-        return Number(ev.nonce) == 1 && ev.planter == account.address;
+      truffleAssert.eventEmitted(eventTx, "TreeVerifiedWithSign", (ev) => {
+        return Number(ev.treeId) == 100001 && Number(ev.nonce) == 1 && ev.planter == account.address;
       });
 
       sign = await Common.createMsgWithSigPlantTree(

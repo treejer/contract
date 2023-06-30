@@ -814,7 +814,7 @@ contract TreeFactoryV3 is Initializable, RelayRecipientV2, ITreeFactoryV3 {
 
         treeData.treeSpecs = _treeSpecs;
 
-        emit AssignedTreeVerified(_treeId);
+        emit AssignedTreeVerifiedWithSign(_treeId);
     }
 
     /**
@@ -858,7 +858,7 @@ contract TreeFactoryV3 is Initializable, RelayRecipientV2, ITreeFactoryV3 {
             );
         }
 
-        emit TreeUpdatedVerified(_treeId);
+        emit TreeUpdatedVerifiedWithSign(_treeId);
     }
 
     /**
@@ -893,7 +893,7 @@ contract TreeFactoryV3 is Initializable, RelayRecipientV2, ITreeFactoryV3 {
             treeData.saleType = 4;
         }
 
-        emit TreeVerified(_planter, _nonce);
+        emit TreeVerifiedWithSign(_tempLastRegularTreeId,_planter, _nonce);
 
         return _tempLastRegularTreeId;
     }
